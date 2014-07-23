@@ -45,8 +45,7 @@ import weka.core.SingleIndex;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start --> 
- * HotSpot learns a set of rules (displayed in a
+ * <!-- globalinfo-start --> HotSpot learns a set of rules (displayed in a
  * tree-like structure) that maximize/minimize a target variable/value of
  * interest. With a nominal target, one might want to look for segments of the
  * data where there is a high probability of a minority value occuring (given
@@ -54,14 +53,13 @@ import weka.core.Utils;
  * interested in finding segments where this is higher on average than in the
  * whole data set. For example, in a health insurance scenario, find which
  * health insurance groups are at the highest risk (have the highest claim
- * ratio), or, which groups have the highest average insurance payout. This algorithm
- * is similar in spirit to the PRIM bump hunting algorithm described by Friedman
- * and Fisher (1999).
+ * ratio), or, which groups have the highest average insurance payout. This
+ * algorithm is similar in spirit to the PRIM bump hunting algorithm described
+ * by Friedman and Fisher (1999).
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -106,7 +104,7 @@ import weka.core.Utils;
  *  hash table stats)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
@@ -184,6 +182,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
 
   /** True if a set of rules is to be output instead of a tree structure */
   protected boolean m_outputRules = false;
+
+  /** Whether capabilities checking should be disabled */
+  protected boolean m_doNotCheckCapabilities;
 
   /**
    * Constructor
@@ -349,14 +350,16 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
 
     if (inst.attribute(m_target).isNumeric()) {
       if (m_supportCount > m_numInstances) {
-        m_errorMessage = "Error: support set to more instances than there are in the data!";
+        m_errorMessage =
+          "Error: support set to more instances than there are in the data!";
         return;
       }
       m_globalTarget = inst.meanOrMode(m_target);
       m_numNonMissingTarget = inst.numInstances()
         - inst.attributeStats(m_target).missingCount;
     } else {
-      double[] probs = new double[inst.attributeStats(m_target).nominalCounts.length];
+      double[] probs =
+        new double[inst.attributeStats(m_target).nominalCounts.length];
       for (int i = 0; i < probs.length; i++) {
         probs[i] = inst.attributeStats(m_target).nominalCounts[i];
       }
@@ -448,8 +451,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
     buff
       .append("" + m_supportCount + " instances ("
         + Utils.doubleToString((m_support * 100.0), 2)
-        + "% of " + 
-        (m_header.attribute(m_target).isNominal() ? "target value " : "") + "total population)");
+        + "% of " +
+        (m_header.attribute(m_target).isNominal() ? "target value " : "")
+        + "total population)");
     buff.append("\nMaximum branching factor: " + m_maxBranchingFactor);
     buff.append("\nMaximum rule length: "
       + (m_maxRuleLength < 0 ? "unbounded" : "" + m_maxRuleLength));
@@ -630,7 +634,8 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
 
       m_insts = insts;
       m_targetValue = targetValue;
-      PriorityQueue<HotTestDetails> splitQueue = new PriorityQueue<HotTestDetails>();
+      PriorityQueue<HotTestDetails> splitQueue =
+        new PriorityQueue<HotTestDetails>();
 
       // Consider each attribute
       for (int i = 0; i < m_insts.numAttributes(); i++) {
@@ -647,7 +652,8 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
         int queueSize = splitQueue.size();
 
         // count how many of the potential children are unique
-        ArrayList<HotTestDetails> newCandidates = new ArrayList<HotTestDetails>();
+        ArrayList<HotTestDetails> newCandidates =
+          new ArrayList<HotTestDetails>();
         ArrayList<HotSpotHashKey> keyList = new ArrayList<HotSpotHashKey>();
 
         for (int i = 0; i < queueSize; i++) {
@@ -675,8 +681,10 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
           }
         }
 
-        m_children = new HotNode[(newCandidates.size() < m_maxBranchingFactor) ? newCandidates
-          .size() : m_maxBranchingFactor];
+        m_children =
+          new HotNode[(newCandidates.size() < m_maxBranchingFactor) ? newCandidates
+            .size()
+            : m_maxBranchingFactor];
         // save the details of the tests at this node
         m_testDetails = new HotTestDetails[m_children.length];
         for (int i = 0; i < m_children.length; i++) {
@@ -737,7 +745,8 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
      * @param attIndex the index of the attribute
      * @param pq the priority queue of candidtate splits
      */
-    private void evaluateNumeric(int attIndex, PriorityQueue<HotTestDetails> pq) {
+    private void
+      evaluateNumeric(int attIndex, PriorityQueue<HotTestDetails> pq) {
       Instances tempInsts = m_insts;
       tempInsts.sort(attIndex);
 
@@ -750,9 +759,10 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
       for (int i = tempInsts.numInstances() - 1; i >= 0; i--) {
         if (!tempInsts.instance(i).isMissing(attIndex)) {
           if (!tempInsts.instance(i).isMissing(m_target)) {
-            targetRight += (tempInsts.attribute(m_target).isNumeric()) ? (tempInsts
-              .instance(i).value(m_target)) : ((tempInsts.instance(i).value(
-              m_target) == m_targetIndex) ? 1 : 0);
+            targetRight +=
+              (tempInsts.attribute(m_target).isNumeric()) ? (tempInsts
+                .instance(i).value(m_target)) : ((tempInsts.instance(i).value(
+                m_target) == m_targetIndex) ? 1 : 0);
           }
         } else {
           numMissing++;
@@ -810,8 +820,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
         // evaluate split
         if (tempInsts.attribute(m_target).isNominal()) {
           if (targetLeft >= m_supportCount) {
-            double delta = (m_minimize) ? (bestMerit - (targetLeft / leftCount))
-              : ((targetLeft / leftCount) - bestMerit);
+            double delta =
+              (m_minimize) ? (bestMerit - (targetLeft / leftCount))
+                : ((targetLeft / leftCount) - bestMerit);
             // if (targetLeft / leftCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetLeft / leftCount;
@@ -833,8 +844,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
           }
 
           if (targetRight >= m_supportCount) {
-            double delta = (m_minimize) ? (bestMerit - (targetRight / rightCount))
-              : ((targetRight / rightCount) - bestMerit);
+            double delta =
+              (m_minimize) ? (bestMerit - (targetRight / rightCount))
+                : ((targetRight / rightCount) - bestMerit);
             // if (targetRight / rightCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetRight / rightCount;
@@ -856,8 +868,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
           }
         } else {
           if (leftCount >= m_supportCount) {
-            double delta = (m_minimize) ? (bestMerit - (targetLeft / leftCount))
-              : ((targetLeft / leftCount) - bestMerit);
+            double delta =
+              (m_minimize) ? (bestMerit - (targetLeft / leftCount))
+                : ((targetLeft / leftCount) - bestMerit);
             // if (targetLeft / leftCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetLeft / leftCount;
@@ -879,8 +892,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
           }
 
           if (rightCount >= m_supportCount) {
-            double delta = (m_minimize) ? (bestMerit - (targetRight / rightCount))
-              : ((targetRight / rightCount) - bestMerit);
+            double delta =
+              (m_minimize) ? (bestMerit - (targetRight / rightCount))
+                : ((targetRight / rightCount) - bestMerit);
             // if (targetRight / rightCount > bestMerit) {
             if (delta > 0) {
               bestMerit = targetRight / rightCount;
@@ -927,7 +941,8 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
      * @param attIndex the index of the attribute
      * @param pq the priority queue of candidtate splits
      */
-    private void evaluateNominal(int attIndex, PriorityQueue<HotTestDetails> pq) {
+    private void
+      evaluateNominal(int attIndex, PriorityQueue<HotTestDetails> pq) {
       int[] counts = m_insts.attributeStats(attIndex).nominalCounts;
       boolean ok = false;
       // only consider attribute values that result in subsets that meet/exceed
@@ -945,16 +960,18 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
 
         for (int i = 0; i < m_insts.numInstances(); i++) {
           Instance temp = m_insts.instance(i);
-          boolean missingAtt = (temp.isMissing(attIndex) || (getTreatZeroAsMissing() ? (int) temp
-            .value(attIndex) == 0 : false));
+          boolean missingAtt =
+            (temp.isMissing(attIndex) || (getTreatZeroAsMissing() ? (int) temp
+              .value(attIndex) == 0 : false));
           // if (!temp.isMissing(attIndex) && !temp.isMissing(m_target)) {
           if (!missingAtt && !temp.isMissing(m_target)) {
             int attVal = (int) temp.value(attIndex);
             if (m_insts.attribute(m_target).isNumeric()) {
               subsetMerit[attVal] += temp.value(m_target);
             } else {
-              subsetMerit[attVal] += ((int) temp.value(m_target) == m_targetIndex) ? 1.0
-                : 0;
+              subsetMerit[attVal] +=
+                ((int) temp.value(m_target) == m_targetIndex) ? 1.0
+                  : 0;
             }
           }
         }
@@ -976,8 +993,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
               - m_targetValue;
 
             if (delta / m_targetValue >= m_minImprovement) {
-              double support = (m_insts.attribute(m_target).isNominal()) ? subsetMerit[i]
-                : counts[i];
+              double support =
+                (m_insts.attribute(m_target).isNominal()) ? subsetMerit[i]
+                  : counts[i];
 
               HotTestDetails newD = new HotTestDetails(attIndex, i, false,
                 (int) support, counts[i], merit);
@@ -1064,8 +1082,9 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
     private void addTestToRule(List<Item> currentPremise, int i)
       throws Exception {
       if (m_header.attribute(m_testDetails[i].m_splitAttIndex).isNumeric()) {
-        NumericItem.Comparison comp = (m_testDetails[i].m_lessThan) ? NumericItem.Comparison.LESS_THAN_OR_EQUAL_TO
-          : NumericItem.Comparison.GREATER_THAN;
+        NumericItem.Comparison comp =
+          (m_testDetails[i].m_lessThan) ? NumericItem.Comparison.LESS_THAN_OR_EQUAL_TO
+            : NumericItem.Comparison.GREATER_THAN;
 
         NumericItem newItem = new NumericItem(
           m_header.attribute(m_testDetails[i].m_splitAttIndex),
@@ -1121,9 +1140,11 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
           m_totalTransactions = totalTransactions;
           m_averageTarget = averageTarget;
         } else {
-          m_delegateForDiscreteTarget = new DefaultAssociationRule(premise,
-            consequence, DefaultAssociationRule.METRIC_TYPE.CONFIDENCE,
-            premiseSupport, consequenceSupport, totalSupport, totalTransactions);
+          m_delegateForDiscreteTarget =
+            new DefaultAssociationRule(premise,
+              consequence, DefaultAssociationRule.METRIC_TYPE.CONFIDENCE,
+              premiseSupport, consequenceSupport, totalSupport,
+              totalTransactions);
         }
       }
 
@@ -1576,6 +1597,37 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String doNotCheckCapabilitiesTipText() {
+    return "If set, associator capabilities are not checked before associator is built"
+      + " (Use with caution to reduce runtime).";
+  }
+
+  /**
+   * Set whether capabilities checking is turned off.
+   * 
+   * @param doNotCheck true if capabilities checking is turned off.
+   */
+  @Override
+  public void setDoNotCheckCapabilities(boolean doNotCheck) {
+    m_doNotCheckCapabilities = doNotCheck;
+  }
+
+  /**
+   * Get whether capabilities checking is turned off.
+   * 
+   * @return true if capabilities checking is turned off.
+   */
+  @Override
+  public boolean getDoNotCheckCapabilities() {
+    return m_doNotCheckCapabilities;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -1639,8 +1691,7 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -1685,7 +1736,7 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
    *  hash table stats)
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -1840,7 +1891,8 @@ public class HotSpot implements Associator, OptionHandler, RevisionHandler,
    */
   @Override
   public String[] getRuleMetricNames() {
-    String[] metricNames = new String[DefaultAssociationRule.TAGS_SELECTION.length + 1];
+    String[] metricNames =
+      new String[DefaultAssociationRule.TAGS_SELECTION.length + 1];
     metricNames[0] = "AverageTarget";
 
     for (int i = 0; i < DefaultAssociationRule.TAGS_SELECTION.length; i++) {
