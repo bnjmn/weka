@@ -34,6 +34,7 @@ import java.util.Vector;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -110,7 +111,8 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class HotSpot implements Associator, OptionHandler, RevisionHandler,
-  CapabilitiesHandler, Drawable, AssociationRulesProducer, Serializable {
+  CapabilitiesHandler, CapabilitiesIgnorer, Drawable, AssociationRulesProducer,
+  Serializable {
 
   static final long serialVersionUID = 42972325096347677L;
 
