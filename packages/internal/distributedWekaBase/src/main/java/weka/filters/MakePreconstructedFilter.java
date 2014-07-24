@@ -31,6 +31,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.gui.beans.KFIgnore;
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -39,6 +40,7 @@ import distributed.core.DistributedJobConfig;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFIgnore
 public class MakePreconstructedFilter extends Filter implements
   PreconstructedFilter, StreamableFilter, Serializable {
 

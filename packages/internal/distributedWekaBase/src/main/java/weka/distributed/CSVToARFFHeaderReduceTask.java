@@ -41,8 +41,11 @@ import weka.core.stats.NumericStats;
 import weka.core.stats.QuantileCalculator;
 import weka.core.stats.Stats;
 import weka.core.stats.StringStats;
+import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+
+import com.clearspring.analytics.stream.quantile.TDigest;
 
 /**
  * Reduce task for ARFF header and summary attribute creation.
@@ -56,6 +59,100 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
    * For serialization
    */
   private static final long serialVersionUID = -2626548935034818537L;
+
+  /**
+   * Performs aggregation over a list of header and quantile data holder
+   * objects. Produces a final aggregated heaer with quantile and histogram data
+   * + normal stats for numeric attributes.
+   * 
+   * @param toAggregate the list of header and quantile data holders to
+   *          aggregate over
+   * @return a final aggregated header with normal stats plus quantiles and
+   *         histograms for numeric attributes
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public Instances aggregateHeadersAndQuartiles(
+    List<HeaderAndQuantileDataHolder> toAggregate)
+    throws DistributedWekaException {
+
+    // do the headers first
+    List<Instances> headerList = new ArrayList<Instances>();
+    for (HeaderAndQuantileDataHolder h : toAggregate) {
+      headerList.add(h.getHeader());
+    }
+
+    Instances aggregatedHeader = aggregate(headerList);
+    ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
+
+    Instances noSummary = stripSummaryAtts(aggregatedHeader);
+
+    // add in the normal attributes first
+    for (int i = 0; i < noSummary.numAttributes(); i++) {
+      newAtts.add((Attribute) noSummary.attribute(i).copy());
+    }
+
+    // now do the quantile estimators (if any) attribute by attribute
+    for (int i = 0; i < noSummary.numAttributes(); i++) {
+      if (noSummary.attribute(i).isNumeric()) {
+        String name = noSummary.attribute(i).name();
+        List<TDigest> toMerge = new ArrayList<TDigest>();
+
+        // now loop over the quantile estimators for this attribute
+        for (HeaderAndQuantileDataHolder h : toAggregate) {
+          try {
+            TDigest decoded = h.getQuantileEstimator(name);
+
+            if (decoded != null) {
+              toMerge.add(decoded);
+            } else {
+              System.err
+                .println("[CSVReducer] Partial quantile estimator for attribute '"
+                  + name + "' is null!");
+            }
+          } catch (DistributedWekaException ex) {
+            // just report to sys error here because there
+            // may be data splits with all missing values or something
+            System.err
+              .println("[CSVReducer] No partial quantile estimator for attribute '"
+                + name + "'");
+          }
+        }
+
+        Attribute summary =
+          (Attribute) aggregatedHeader.attribute(
+            CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+              + noSummary.attribute(i).name()).copy();
+        if (toMerge.size() > 0) {
+          TDigest mergedForAtt =
+            TDigest.merge(toMerge.get(0).compression(), toMerge);
+
+          NumericStats newStats = NumericStats.attributeToStats(summary);
+          newStats.setQuantileEstimator(mergedForAtt);
+          newStats.computeQuartilesAndHistogram();
+
+          // add the updated attribute with quantiles and histogram
+          newAtts.add(newStats.makeAttribute());
+        } else {
+          newAtts.add(summary);
+        }
+      } else {
+        // get this summary attribute unchanged
+        Attribute summary =
+          (Attribute) aggregatedHeader.attribute(
+            CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+              + noSummary.attribute(i).name()).copy();
+
+        if (summary != null) {
+          newAtts.add(summary);
+        }
+      }
+    }
+
+    Instances newHeader =
+      new Instances(aggregatedHeader.relationName(), newAtts, 0);
+
+    return newHeader;
+  }
 
   /**
    * Aggregates a list of Instances (headers) into a final Instances object.

@@ -405,7 +405,7 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
 
       CSVToARFFHeaderMapTask arffTask = new CSVToARFFHeaderMapTask();
       arffTask.setOptions(args);
-      arffTask.setComputeSummaryStats(true);
+      // arffTask.setComputeSummaryStats(true);
       for (int i = 0; i < orig.numInstances(); i++) {
         arffTask.processRow(orig.instance(i).toString(), attNames);
       }
@@ -427,7 +427,8 @@ public class CorrelationMatrixMapTask implements Serializable, OptionHandler {
 
       double[][] matrix = corrTask.getMatrix();
 
-      CorrelationMatrixRowReduceTask reduce = new CorrelationMatrixRowReduceTask();
+      CorrelationMatrixRowReduceTask reduce =
+        new CorrelationMatrixRowReduceTask();
       for (int i = 0; i < matrix.length; i++) {
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);

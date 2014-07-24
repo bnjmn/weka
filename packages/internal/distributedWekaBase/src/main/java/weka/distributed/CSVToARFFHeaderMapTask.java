@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -51,6 +52,8 @@ import weka.core.stats.NumericStats;
 import weka.core.stats.Stats;
 import weka.core.stats.StringStats;
 import au.com.bytecode.opencsv.CSVParser;
+
+import com.clearspring.analytics.stream.quantile.TDigest;
 
 /**
  * A map task that processes incoming lines in CSV format and builds up header
@@ -101,6 +104,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * if not supplied by the user
    */
   protected List<String> m_attributeNames = new ArrayList<String>();
+
+  public static final int MAX_PARSING_ERRORS = 50;
 
   /** The formatting string to use to parse dates */
   protected String m_dateFormat = "yyyy-MM-dd'T'HH:mm:ss";
@@ -153,6 +158,14 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * numeric attributes
    */
   protected boolean m_treatZeroAsMissing;
+
+  /** Whether to perform quantile estimation too */
+  protected boolean m_estimateQuantiles = false;
+
+  /** The compression level for the TDigest quantile estimator */
+  protected double m_quantileCompression = NumericStats.Q_COMPRESSION;
+
+  protected int m_parsingErrors;
 
   @Override
   public Enumeration<Option> listOptions() {
@@ -209,9 +222,19 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       + "\tSpecify as a comma separated list (e.g. \",'" + " (default: \",')",
       "E", 1, "-E <enclosures>"));
 
-    result.add(new Option(
-      "\tDon't compute summary statistics for numeric attributes",
-      "no-summary-stats", 0, "-no-summary-stats"));
+    result
+      .add(new Option(
+        "\tInclude quartile estimates (and histograms) in summary attributes.\n\t"
+          + "Note that this adds quite a bit to computation time",
+        "compute-quartiles", 0, "-compute-quartiles"));
+
+    result
+      .add(new Option(
+        "\tThe compression level to use when computing estimated quantiles.\n\t"
+          + "Higher values result in less compression and more accurate estimates\n\t"
+          + "at the expense of time and space (default="
+          + NumericStats.Q_COMPRESSION + ").",
+        "compression", 1, "-compression <number>"));
 
     return result.elements();
   }
@@ -259,12 +282,21 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     tmpStr = Utils.getOption("E", options);
     if (tmpStr.length() > 0) {
+      if (tmpStr.charAt(0) == '\\' && tmpStr.length() > 1) {
+        tmpStr = "" + tmpStr.charAt(1);
+      }
       setEnclosureCharacters(tmpStr);
     }
 
     setTreatZerosAsMissing(Utils.getFlag("treat-zeros-as-missing", options));
 
-    setComputeSummaryStats(!Utils.getFlag("no-summary-stats", options)); //$NON-NLS-1$
+    setComputeQuartilesAsPartOfSummaryStats(Utils.getFlag(
+      "compute-quartiles", options)); //$NON-NLS-1$
+
+    tmpStr = Utils.getOption("compression", options);
+    if (tmpStr.length() > 0) {
+      setCompressionLevelForQuartileEstimation(Double.parseDouble(tmpStr));
+    }
 
     while (true) {
       tmpStr = Utils.getOption('L', options);
@@ -310,14 +342,21 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     result.add(getMissingValue());
 
     result.add("-E");
-    result.add(getEnclosureCharacters());
+    String encl = getEnclosureCharacters();
+    if (encl.charAt(0) == '"') {
+      encl = "\\\"";
+    }
+    result.add(encl);
 
     result.add("-F");
     result.add(getFieldSeparator());
 
-    if (!getComputeSummaryStats()) {
-      result.add("-no-summary-stats");
+    if (getComputeQuartilesAsPartOfSummaryStats()) {
+      result.add("-compute-quartiles");
     }
+
+    result.add("-compression");
+    result.add("" + getCompressionLevelForQuartileEstimation());
 
     if (getTreatZerosAsMissing()) {
       result.add("-treat-zeros-as-missing");
@@ -359,21 +398,23 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Whether to compute summary stats for numeric attributes
+   * Set the compression level to use in the TDigest quantile estimators
    * 
-   * @param c true if summary stats are to be computed
+   * @param compression the compression level (smaller values give higher
+   *          compression and less accurate estimates).
    */
-  public void setComputeSummaryStats(boolean c) {
-    m_computeSummaryStats = c;
+  public void setCompressionLevelForQuartileEstimation(double compression) {
+    m_quantileCompression = compression;
   }
 
   /**
-   * Whether to compute summary stats for numeric attributes
+   * Get the compression level to use in the TDigest quantile estimators
    * 
-   * @return true if summary stats are to be computed
+   * @return the compression level (smaller values give higher compression and
+   *         less accurate estimates).
    */
-  public boolean getComputeSummaryStats() {
-    return m_computeSummaryStats;
+  public double getCompressionLevelForQuartileEstimation() {
+    return m_quantileCompression;
   }
 
   /**
@@ -382,9 +423,39 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String computeSummaryStatsTipText() {
-    return "Compute summary stats (count, sum, sum squared, "
-      + "min, max mean and standard deviation) for numeric attributes.";
+  public String compressionLevelForQuartileEstimationTipText() {
+    return "Level of compression to use when computing estimated quantiles "
+      + "(smaller is more compression). Less compression gives more accurate "
+      + "estimates at the expense of time and space.";
+  }
+
+  /**
+   * Set whether to include estimated quartiles in the profiling stats
+   * 
+   * @param c true if quartiles are to be estimated
+   */
+  public void setComputeQuartilesAsPartOfSummaryStats(boolean c) {
+    m_estimateQuantiles = c;
+  }
+
+  /**
+   * Get whether to include estimated quartiles in the profiling stats
+   * 
+   * @return true if quartiles are to be estimated
+   */
+  public boolean getComputeQuartilesAsPartOfSummaryStats() {
+    return m_estimateQuantiles;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String computeQuartilesAsPartOfSummaryStatsTipText() {
+    return "Include estimated quartiles and histograms in summary statistics (note "
+      + "that this increases run time).";
   }
 
   /**
@@ -704,8 +775,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param attNames the names of the attributes to use
    */
   public void initParserOnly(List<String> attNames) {
+    char encl = m_Enclosures.charAt(0);
+    if (encl == '\\' && m_Enclosures.length() == 2) {
+      encl = m_Enclosures.charAt(1);
+    }
     m_parser =
-      new CSVParser(m_FieldSeparator.charAt(0), m_Enclosures.charAt(0), '\\');
+      new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
 
     m_attributeNames = attNames;
     if (attNames != null) {
@@ -749,9 +824,14 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       m_formatter = new SimpleDateFormat(m_dateFormat);
 
+      char encl = m_Enclosures.charAt(0);
+      if (encl == '\\' && m_Enclosures.length() == 2) {
+        encl = m_Enclosures.charAt(1);
+      }
+
       // tokenize the first line
       m_parser =
-        new CSVParser(m_FieldSeparator.charAt(0), m_Enclosures.charAt(0), '\\');
+        new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
 
       fields = m_parser.parseLine(row);
 
@@ -773,7 +853,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     // process the row
     if (fields == null) {
-      fields = m_parser.parseLine(row);
+      try {
+        fields = m_parser.parseLine(row);
+      } catch (IOException e) {
+        m_parsingErrors++;
+        if (m_parsingErrors > MAX_PARSING_ERRORS) {
+          throw e;
+        }
+        System.err.println("CSV parsing error: " + e.getMessage()
+          + "\n\nFor line:\n" + row);
+        return;
+      }
 
       if (fields.length != m_attributeNames.size()) {
         throw new IOException("Expected " + m_attributeNames.size()
@@ -795,7 +885,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-                value, null, false, false, m_treatZeroAsMissing);
+                value, null, false, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
             }
           } catch (NumberFormatException ex) {
 
@@ -816,13 +907,15 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
               if (m_computeSummaryStats) {
                 updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  toAdd, true, false, m_treatZeroAsMissing);
+                  toAdd, true, false, m_treatZeroAsMissing,
+                  m_estimateQuantiles, m_quantileCompression);
               }
             } else {
               m_attributeTypes[i] = TYPE.STRING;
               if (m_computeSummaryStats) {
                 updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  fields[i], false, true, m_treatZeroAsMissing);
+                  fields[i], false, true, m_treatZeroAsMissing,
+                  m_estimateQuantiles, m_quantileCompression);
               }
             }
           }
@@ -836,7 +929,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           }
           if (m_computeSummaryStats) {
             updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-              d.getTime(), null, false, false, m_treatZeroAsMissing);
+              d.getTime(), null, false, false, m_treatZeroAsMissing,
+              m_estimateQuantiles, m_quantileCompression);
           }
 
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
@@ -849,19 +943,22 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                toUpdate, true, false, m_treatZeroAsMissing);
+                toUpdate, true, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
             }
           } else {
             m_nominalVals.get(i).add(fields[i]);
             if (m_computeSummaryStats) {
               updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                fields[i], true, false, m_treatZeroAsMissing);
+                fields[i], true, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
             }
           }
         } else if (m_attributeTypes[i] == TYPE.STRING) {
           if (m_computeSummaryStats) {
             updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-              fields[i], false, true, m_treatZeroAsMissing);
+              fields[i], false, true, m_treatZeroAsMissing,
+              m_estimateQuantiles, m_quantileCompression);
           }
         }
       } else {
@@ -870,7 +967,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
             Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
             m_attributeTypes[i] == TYPE.STRING,
-            m_treatZeroAsMissing);
+            m_treatZeroAsMissing, m_estimateQuantiles, m_quantileCompression);
         }
       }
     }
@@ -888,22 +985,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param isString true if the attribute is a string attribute
    * @param treatZeroAsMissing treats zero as missing value for numeric
    *          attributes
+   * @param estimateQuantiles true if we should estimate quantiles too
+   * @param quantileCompression the compression level to use in the TDigest
+   *          estimators
    */
   public static void updateSummaryStats(Map<String, Stats> summaryStats,
     String attName, double value, String nominalLabel, boolean isNominal,
     boolean isString,
-    boolean treatZeroAsMissing) {
+    boolean treatZeroAsMissing, boolean estimateQuantiles,
+    double quantileCompression) {
     Stats s = summaryStats.get(attName);
 
     if (!isNominal && !isString) {
       // numeric attribute
       if (s == null) {
-        s = new NumericStats(attName);
+        s = new NumericStats(attName, quantileCompression);
         summaryStats.put(attName, s);
       }
 
       NumericStats ns = (NumericStats) s;
-      ns.update(value, 1.0, treatZeroAsMissing);
+      ns.update(value, 1.0, treatZeroAsMissing, estimateQuantiles);
       // if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0))
       // {
       // ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
@@ -941,7 +1042,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       if (s instanceof NumericStats) {
         double missing =
-          ((NumericStats) s).getStats()[ArffSummaryNumericMetric.MISSING.ordinal()];
+          ((NumericStats) s).getStats()[ArffSummaryNumericMetric.MISSING
+            .ordinal()];
 
         // need to replace this with NominalStats and transfer over the missing
         // count
@@ -952,17 +1054,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       NominalStats ns = (NominalStats) s;
       ns.add(nominalLabel, 1.0);
-//      if (Utils.isMissingValue(value) && nominalLabel == null) {
-//        ns.add(nominalLabel, 1.0);
-//      } else {
-//
-//        NominalStats.Count c = ns.m_counts.get(nominalLabel);
-//        if (c == null) {
-//          c = new NominalStats.Count();
-//          ns.m_counts.put(nominalLabel, c);
-//        }
-//        c.m_count += value;
-//      }
+      // if (Utils.isMissingValue(value) && nominalLabel == null) {
+      // ns.add(nominalLabel, 1.0);
+      // } else {
+      //
+      // NominalStats.Count c = ns.m_counts.get(nominalLabel);
+      // if (c == null) {
+      // c = new NominalStats.Count();
+      // ns.m_counts.put(nominalLabel, c);
+      // }
+      // c.m_count += value;
+      // }
     } else if (isString) {
       if (s == null) {
         s = new StringStats(attName);
@@ -984,6 +1086,40 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   public Instances getHeader() {
 
     return makeStructure();
+  }
+
+  /**
+   * Get the header information and the encoded quantile estimators
+   * 
+   * @return a holder instance containing both the header information and
+   *         encoded quantile estimators
+   * @throws DistributedWekaException if we are not computing summary statistics
+   *           or we are computing statistics but not quantiles
+   */
+  public HeaderAndQuantileDataHolder getHeaderAndQuantileEstimators()
+    throws DistributedWekaException {
+    if (!m_computeSummaryStats) {
+      throw new DistributedWekaException("No summary stats computed!");
+    }
+
+    if (!m_estimateQuantiles) {
+      throw new DistributedWekaException("No quantile information computed!");
+    }
+
+    Map<String, TDigest> quantileMap = new HashMap<String, TDigest>();
+    for (int i = 0; i < m_attributeTypes.length; i++) {
+      if (m_attributeTypes[i] == TYPE.NUMERIC
+        || m_attributeTypes[i] == TYPE.DATE) {
+        NumericStats ns =
+          (NumericStats) m_summaryStats.get(m_attributeNames.get(i));
+
+        quantileMap.put(m_attributeNames.get(i), ns.getQuantileEstimator());
+      }
+    }
+
+    HeaderAndQuantileDataHolder holder =
+      new HeaderAndQuantileDataHolder(getHeader(), quantileMap);
+    return holder;
   }
 
   /**
@@ -1197,7 +1333,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
     }
 
-    if (m_computeSummaryStats) {
+    if (m_computeSummaryStats && m_summaryStats.size() > 0) {
       for (int i = 0; i < m_attributeTypes.length; i++) {
         if (m_attributeTypes[i] == TYPE.NUMERIC
           || m_attributeTypes[i] == TYPE.DATE) {
@@ -1348,15 +1484,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   public static void main(String[] args) {
     try {
       CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-      // task.setOptions(args);
-      task.setComputeSummaryStats(false);
-
-      Instances i = task.getHeader(10, null);
-      System.err.println(i);
 
       task = new CSVToARFFHeaderMapTask();
       task.setOptions(args);
-      task.setComputeSummaryStats(true);
+      // task.setComputeSummaryStats(true);
 
       BufferedReader br = new BufferedReader(new FileReader(args[0]));
       String line = br.readLine();
@@ -1383,6 +1514,83 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     } catch (Exception ex) {
       ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Container class for a Instances header with basic summary stats and a map
+   * of TDigest quantile estimators for numeric attributes
+   * 
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   * @version $Revision$
+   */
+  public static class HeaderAndQuantileDataHolder implements Serializable {
+
+    /** For serialization */
+    private static final long serialVersionUID = -5741832014478935587L;
+
+    protected Instances m_header;
+    protected Map<String, byte[]> m_encodedQuantileEstimators;
+
+    /**
+     * Constructor
+     * 
+     * @param header the header with summary attributes
+     * @param quantileEstimators a map of TDigest quantile estimators keyed by
+     *          attribute name
+     */
+    public HeaderAndQuantileDataHolder(Instances header,
+      Map<String, TDigest> quantileEstimators) {
+
+      m_header = header;
+
+      if (quantileEstimators != null && quantileEstimators.size() > 0) {
+        m_encodedQuantileEstimators =
+          new HashMap<String, byte[]>(quantileEstimators.size());
+        for (Map.Entry<String, TDigest> q : quantileEstimators.entrySet()) {
+          ByteBuffer buff = ByteBuffer.allocate(q.getValue().byteSize());
+          q.getValue().asSmallBytes(buff);
+          m_encodedQuantileEstimators.put(q.getKey(), buff.array());
+        }
+      }
+    }
+
+    /**
+     * Get the header
+     * 
+     * @return the header
+     */
+    public Instances getHeader() {
+      return m_header;
+    }
+
+    /**
+     * Return a decoded TDigest quantile estimator
+     * 
+     * @param attributeName the name of the attribute to get the estimator for
+     * @return the decoded estimator
+     * @throws DistributedWekaException if there are no quantile estimators or
+     *           the named one is not in the map
+     */
+    public TDigest getQuantileEstimator(String attributeName)
+      throws DistributedWekaException {
+      if (m_encodedQuantileEstimators == null
+        || m_encodedQuantileEstimators.size() == 0) {
+        throw new DistributedWekaException("No quantile estimators!");
+      }
+
+      byte[] encoded = m_encodedQuantileEstimators.get(attributeName);
+
+      if (encoded == null) {
+        throw new DistributedWekaException(
+          "Can't find a quantile estimator for attribute '" + attributeName
+            + "'");
+      }
+
+      ByteBuffer buff = ByteBuffer.wrap(encoded);
+      TDigest returnVal = TDigest.fromBytes(buff);
+
+      return returnVal;
     }
   }
 }

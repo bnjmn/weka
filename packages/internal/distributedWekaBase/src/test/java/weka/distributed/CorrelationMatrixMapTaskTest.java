@@ -197,7 +197,6 @@ public class CorrelationMatrixMapTaskTest {
 
     CSVToARFFHeaderMapTask arffTask = new CSVToARFFHeaderMapTask();
     arffTask.setOptions(args);
-    arffTask.setComputeSummaryStats(true);
     for (int i = 0; i < orig.numInstances(); i++) {
       arffTask.processRow(orig.instance(i).toString(), attNames);
     }

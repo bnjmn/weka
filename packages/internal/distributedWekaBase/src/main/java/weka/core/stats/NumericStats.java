@@ -24,10 +24,13 @@ package weka.core.stats;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import weka.core.Attribute;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
+
+import com.clearspring.analytics.stream.quantile.TDigest;
 
 /**
  * Class for computing numeric stats
@@ -37,12 +40,24 @@ import weka.distributed.CSVToARFFHeaderMapTask;
  */
 public class NumericStats extends Stats implements Serializable {
 
+  /** Default compression for TDigest quantile estimators */
+  public static final double Q_COMPRESSION = 50.0;
+
   /** For serialization */
   private static final long serialVersionUID = 5328158049841703129L;
 
   /** Holds the actual stats values */
   protected double[] m_stats =
     new double[ArffSummaryNumericMetric.values().length];
+
+  /** For quantiles/histograms (if we are estimating them) */
+  protected TDigest m_quantileEstimator;
+
+  /**
+   * The compression level to use (bigger = less compression/more accuracy/more
+   * space/more time)
+   */
+  protected double m_quantileCompression = Q_COMPRESSION;
 
   /** Labels for a histogram */
   List<String> m_binLabels;
@@ -69,14 +84,30 @@ public class NumericStats extends Stats implements Serializable {
   }
 
   /**
+   * Construct a new NumericStats
+   * 
+   * @param attributeName the name of the attribute that these statistics are
+   *          for
+   * @param quantileCompression the degree of compression for quantile
+   *          estimation (bigger = less compression)
+   */
+  public NumericStats(String attributeName, double quantileCompression) {
+    this(attributeName);
+
+    m_quantileCompression = quantileCompression;
+  }
+
+  /**
    * Update the incremental aggregateable portions of this NumericStats with the
    * supplied value
    * 
    * @param value the value to update with
    * @param weight the weight to use
    * @param treatZeroAsMissing true if zeros count as missing
+   * @param updateQuantiles true if we should update our quantile estimator
    */
-  public void update(double value, double weight, boolean treatZeroAsMissing) {
+  public void update(double value, double weight, boolean treatZeroAsMissing,
+    boolean updateQuantiles) {
     if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0)) {
       m_stats[ArffSummaryNumericMetric.MISSING.ordinal()] += weight;
     } else {
@@ -91,6 +122,14 @@ public class NumericStats extends Stats implements Serializable {
         m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
       } else if (value > m_stats[ArffSummaryNumericMetric.MAX.ordinal()]) {
         m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
+      }
+
+      if (updateQuantiles) {
+        if (m_quantileEstimator == null) {
+          m_quantileEstimator =
+            new TDigest(m_quantileCompression, new Random(1));
+        }
+        m_quantileEstimator.add(value, (int) (weight < 1 ? 1 : weight));
       }
     }
   }
@@ -112,6 +151,24 @@ public class NumericStats extends Stats implements Serializable {
    */
   public void setStats(double[] stats) {
     m_stats = stats;
+  }
+
+  /**
+   * Get the quantile estimator in use (if any)
+   * 
+   * @return the quantile estmator
+   */
+  public TDigest getQuantileEstimator() {
+    return m_quantileEstimator;
+  }
+
+  /**
+   * Set the quantile estimator to use
+   * 
+   * @param estimator the estimator to use
+   */
+  public void setQuantileEstimator(TDigest estimator) {
+    m_quantileEstimator = estimator;
   }
 
   /**
@@ -189,7 +246,8 @@ public class NumericStats extends Stats implements Serializable {
   }
 
   /**
-   * Convert a summary meta attribute into a NumericStats object
+   * Convert a summary meta attribute into a NumericStats object (does not
+   * recover the internal TDigest quantile estimator)
    * 
    * @param a the summary meta attribute to convert
    * @return a NumericStats instance
@@ -279,5 +337,76 @@ public class NumericStats extends Stats implements Serializable {
 
     m_stats[ArffSummaryNumericMetric.MEAN.ordinal()] = mean;
     m_stats[ArffSummaryNumericMetric.STDDEV.ordinal()] = stdDev;
+  }
+
+  /**
+   * Computes derived stats and computes quartiles and histogram data from our
+   * quantile estimator. If quartiles are not being estimated then the result is
+   * just to call computeDerived().
+   */
+  public void computeQuartilesAndHistogram() {
+    computeDerived();
+
+    if (m_quantileEstimator == null) {
+      return;
+    }
+
+    m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+      m_quantileEstimator.quantile(0.25);
+    m_stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] =
+      m_quantileEstimator.quantile(0.5);
+    m_stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+      m_quantileEstimator.quantile(0.75);
+
+    double min = m_stats[ArffSummaryNumericMetric.MIN.ordinal()];
+    double count = m_stats[ArffSummaryNumericMetric.COUNT.ordinal()];
+    NumericAttributeBinData binData =
+      new NumericAttributeBinData(m_attributeName, count, min,
+        m_stats[ArffSummaryNumericMetric.MAX.ordinal()],
+        m_stats[ArffSummaryNumericMetric.STDDEV.ordinal()],
+        m_stats[ArffSummaryNumericMetric.MISSING.ordinal()], -1);
+
+    // heuristic based on count & std. dev
+    int numBins = binData.getNumBins();
+
+    // Check against compression (another hokey heuristic)
+    numBins = Math.min(numBins, (int) m_quantileCompression * 2 / 10);
+    if (numBins != binData.getNumBins()) {
+      binData =
+        new NumericAttributeBinData(m_attributeName, count, min,
+          m_stats[ArffSummaryNumericMetric.MAX.ordinal()],
+          m_stats[ArffSummaryNumericMetric.STDDEV.ordinal()],
+          m_stats[ArffSummaryNumericMetric.MISSING.ordinal()], numBins);
+    }
+
+    double binWidth = binData.getBinWidth();
+    double prev = 0;
+
+    for (int i = 0; i < numBins; i++) {
+      double lower = min + (i * binWidth);
+      double upper = min + ((i + 1) * binWidth);
+      double midVal = lower + ((upper - lower) / 2.0);
+      double cdf = m_quantileEstimator.cdf(upper);
+
+      boolean ok = !Double.isInfinite(cdf) && !Double.isNaN(cdf);
+
+      double freq = ok ? cdf : 0;
+      if (i > 0 && ok) {
+        freq = cdf - prev;
+      }
+      if (freq < 0) {
+        freq = 0;
+      }
+      freq *= count;
+
+      binData.addValue(midVal, freq);
+
+      if (ok) {
+        prev = cdf;
+      }
+    }
+
+    m_binLabels = binData.getBinLabels();
+    m_binFreqs = binData.getBinFreqs();
   }
 }

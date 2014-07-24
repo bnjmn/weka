@@ -42,6 +42,7 @@ import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
+import weka.gui.beans.KFIgnore;
 
 /**
  * A FilteredClassifier that implements Aggregateable. Requires the base
@@ -55,6 +56,7 @@ import weka.filters.PreconstructedFilter;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFIgnore
 public class AggregateableFilteredClassifier extends SingleClassifierEnhancer
   implements Serializable, Aggregateable<AggregateableFilteredClassifier> {
 

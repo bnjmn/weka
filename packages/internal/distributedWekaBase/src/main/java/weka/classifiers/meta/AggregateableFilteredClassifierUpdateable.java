@@ -25,6 +25,7 @@ import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
+import weka.gui.beans.KFIgnore;
 
 /**
  * An extension of AggregateableFilteredClassifier that implements
@@ -34,6 +35,7 @@ import weka.core.Instance;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFIgnore
 public class AggregateableFilteredClassifierUpdateable extends
   AggregateableFilteredClassifier implements UpdateableClassifier {
 

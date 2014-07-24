@@ -45,7 +45,12 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       PropertyDescriptor p1;
       ArrayList<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 
-      p1 = new PropertyDescriptor("computeSummaryStats",
+      p1 = new PropertyDescriptor("computeQuartilesAsPartOfSummaryStats",
+        CSVToARFFHeaderMapTask.class);
+      // p1.setPropertyEditorClass(weka.gui.beans.FileEnvironmentField.class);
+      pds.add(p1);
+
+      p1 = new PropertyDescriptor("compressionLevelForQuartileEstimation",
         CSVToARFFHeaderMapTask.class);
       // p1.setPropertyEditorClass(weka.gui.beans.FileEnvironmentField.class);
       pds.add(p1);

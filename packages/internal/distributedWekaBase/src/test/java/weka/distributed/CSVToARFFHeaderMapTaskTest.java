@@ -40,6 +40,7 @@ import weka.core.stats.NumericAttributeBinData;
 import weka.core.stats.NumericStats;
 import weka.core.stats.QuantileCalculator;
 import weka.core.stats.StringStats;
+import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 
 /**
  * Tests the CSVToARFFHeaderMapTask and the CSVToARFFHeaderReduceTask.
@@ -63,7 +64,6 @@ public class CSVToARFFHeaderMapTaskTest {
 
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
     // task.setOptions(args);
-    task.setComputeSummaryStats(false);
 
     Instances i = task.getHeader(10, null);
     for (int j = 0; j < i.numAttributes(); j++) {
@@ -71,38 +71,37 @@ public class CSVToARFFHeaderMapTaskTest {
     }
   }
 
-  @Test
-  public void testProcessCSVNoSummaryAtts() throws Exception {
-    CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(false);
-
-    BufferedReader br = new BufferedReader(new StringReader(IRIS));
-
-    String line = br.readLine();
-    String[] names = line.split(",");
-    List<String> attNames = new ArrayList<String>();
-    for (String s : names) {
-      attNames.add(s);
-    }
-
-    while ((line = br.readLine()) != null) {
-      task.processRow(line, attNames);
-    }
-
-    br.close();
-
-    Instances header = task.getHeader();
-
-    assertEquals(5, header.numAttributes());
-    assertTrue(header.attribute(4).isNominal());
-    assertEquals(3, header.attribute(4).numValues());
-  }
+  // @Test
+  // public void testProcessCSVNoSummaryAtts() throws Exception {
+  // CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
+  // task.setComputeSummaryStats(false);
+  //
+  // BufferedReader br = new BufferedReader(new StringReader(IRIS));
+  //
+  // String line = br.readLine();
+  // String[] names = line.split(",");
+  // List<String> attNames = new ArrayList<String>();
+  // for (String s : names) {
+  // attNames.add(s);
+  // }
+  //
+  // while ((line = br.readLine()) != null) {
+  // task.processRow(line, attNames);
+  // }
+  //
+  // br.close();
+  //
+  // Instances header = task.getHeader();
+  //
+  // assertEquals(5, header.numAttributes());
+  // assertTrue(header.attribute(4).isNominal());
+  // assertEquals(3, header.attribute(4).numValues());
+  // }
 
   @Test
   public void testProcessCSVSummaryAttributesWithStringAttribute()
     throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(true);
     task.setStringAttributes("last");
 
     BufferedReader br = new BufferedReader(new StringReader(IRIS));
@@ -161,7 +160,6 @@ public class CSVToARFFHeaderMapTaskTest {
   @Test
   public void testProcessCSVSummaryAttributes() throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(true);
 
     BufferedReader br = new BufferedReader(new StringReader(IRIS));
 
@@ -231,9 +229,142 @@ public class CSVToARFFHeaderMapTaskTest {
   }
 
   @Test
-  public void testProcessCSVSummaryAttributesPlusQuartiles() throws Exception {
+  public void testProcessCSVSummaryAttributesPlusTDigestQuartiles()
+    throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(true);
+    task.setComputeQuartilesAsPartOfSummaryStats(true);
+    task.setCompressionLevelForQuartileEstimation(75);
+
+    BufferedReader br = new BufferedReader(new StringReader(IRIS));
+
+    String line = br.readLine();
+    String[] names = line.split(",");
+    List<String> attNames = new ArrayList<String>();
+    for (String s : names) {
+      attNames.add(s);
+    }
+
+    while ((line = br.readLine()) != null) {
+      task.processRow(line, attNames);
+    }
+
+    br.close();
+
+    HeaderAndQuantileDataHolder holder = task.getHeaderAndQuantileEstimators();
+    List<HeaderAndQuantileDataHolder> holderList =
+      new ArrayList<HeaderAndQuantileDataHolder>();
+    holderList.add(holder);
+
+    // reduce to compute derived metrics
+    CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
+
+    Instances finalHeader = arffReduce.aggregateHeadersAndQuartiles(holderList);
+
+    // System.err.println(finalHeader);
+
+    // test a few quartiles
+    Attribute sepallengthSummary =
+      finalHeader
+        .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+          + "sepallength");
+    double median =
+      ArffSummaryNumericMetric.MEDIAN
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(5.80000021, median, 0.0001);
+
+    double lowerQuartile =
+      ArffSummaryNumericMetric.FIRSTQUARTILE
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(5.10000020, lowerQuartile, 0.0001);
+
+    double upperQuartile =
+      ArffSummaryNumericMetric.THIRDQUARTILE
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(6.40000022, upperQuartile, 0.0001);
+  }
+
+  @Test
+  public void testProcessWithTDigestQuartilesTwoMapTasks() throws Exception {
+    CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
+    task.setComputeQuartilesAsPartOfSummaryStats(true);
+
+    CSVToARFFHeaderMapTask task2 = new CSVToARFFHeaderMapTask();
+    task2.setComputeQuartilesAsPartOfSummaryStats(true);
+
+    BufferedReader br = new BufferedReader(new StringReader(IRIS));
+
+    String line = br.readLine();
+    String[] names = line.split(",");
+    List<String> attNames = new ArrayList<String>();
+    for (String s : names) {
+      attNames.add(s);
+    }
+
+    int count = 0;
+    while ((line = br.readLine()) != null) {
+      if (count % 2 == 0) {
+        task.processRow(line, attNames);
+      } else {
+        task2.processRow(line, attNames);
+      }
+
+      count++;
+    }
+
+    br.close();
+
+    assertEquals(10, task.getHeader().numAttributes());
+    assertEquals(10, task2.getHeader().numAttributes());
+    assertTrue(task.getHeader().attribute(4).isNominal());
+    assertTrue(task2.getHeader().attribute(4).isNominal());
+
+    for (int i = 5; i < task.getHeader().numAttributes(); i++) {
+      assertTrue(task.getHeader().attribute(i).name()
+        .startsWith("arff_summary_"));
+      assertTrue(task2.getHeader().attribute(i).name()
+        .startsWith("arff_summary_"));
+    }
+
+    // reduce to compute derived metrics
+    CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
+
+    HeaderAndQuantileDataHolder holder = task.getHeaderAndQuantileEstimators();
+    HeaderAndQuantileDataHolder holder2 =
+      task2.getHeaderAndQuantileEstimators();
+    List<HeaderAndQuantileDataHolder> holderList =
+      new ArrayList<HeaderAndQuantileDataHolder>();
+    holderList.add(holder);
+    holderList.add(holder2);
+
+    Instances finalHeader = arffReduce.aggregateHeadersAndQuartiles(holderList);
+
+    // System.err.println(finalHeader);
+
+    // test a few quartiles
+    Attribute sepallengthSummary =
+      finalHeader
+        .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+          + "sepallength");
+    double median =
+      ArffSummaryNumericMetric.MEDIAN
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(5.80000021, median, 0.0001);
+
+    double lowerQuartile =
+      ArffSummaryNumericMetric.FIRSTQUARTILE
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(5.10000020, lowerQuartile, 0.0001);
+
+    double upperQuartile =
+      ArffSummaryNumericMetric.THIRDQUARTILE
+        .valueFromAttribute(sepallengthSummary);
+    assertEquals(6.40000022, upperQuartile, 0.0001);
+  }
+
+  @Test
+  public void testProcessCSVSummaryAttributesPlusPSquaredQuartiles()
+    throws Exception {
+    CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
 
     BufferedReader br = new BufferedReader(new StringReader(IRIS));
 
@@ -271,7 +402,7 @@ public class CSVToARFFHeaderMapTaskTest {
           header.attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
             + headerNoSummary.attribute(i).name());
         histMaps.put(i, new NumericAttributeBinData(headerNoSummary
-          .attribute(i).name(), summary));
+          .attribute(i).name(), summary, -1));
       }
     }
 
@@ -317,10 +448,8 @@ public class CSVToARFFHeaderMapTaskTest {
   @Test
   public void testProcessCSVSummaryAttributesTwoMapTasks() throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(true);
 
     CSVToARFFHeaderMapTask task2 = new CSVToARFFHeaderMapTask();
-    task2.setComputeSummaryStats(true);
 
     BufferedReader br = new BufferedReader(new StringReader(IRIS));
 
@@ -394,7 +523,6 @@ public class CSVToARFFHeaderMapTaskTest {
   @Test
   public void testNumericStatsWithHistograms() throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-    task.setComputeSummaryStats(true);
 
     BufferedReader br = new BufferedReader(new StringReader(IRIS));
 
@@ -451,12 +579,13 @@ public class CSVToARFFHeaderMapTaskTest {
       CSVToARFFHeaderMapTaskTest t = new CSVToARFFHeaderMapTaskTest();
 
       t.testGetHeaderWithoutProcessing();
-      t.testProcessCSVNoSummaryAtts();
       t.testProcessCSVSummaryAttributes();
       t.testProcessCSVSummaryAttributesTwoMapTasks();
-      t.testProcessCSVSummaryAttributesPlusQuartiles();
+      t.testProcessCSVSummaryAttributesPlusPSquaredQuartiles();
       t.testNumericStatsWithHistograms();
       t.testProcessCSVSummaryAttributesWithStringAttribute();
+      t.testProcessCSVSummaryAttributesPlusTDigestQuartiles();
+      t.testProcessWithTDigestQuartilesTwoMapTasks();
     } catch (Exception ex) {
       ex.printStackTrace();
     }

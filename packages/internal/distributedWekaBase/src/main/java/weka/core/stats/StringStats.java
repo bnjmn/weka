@@ -122,13 +122,13 @@ public class StringStats extends Stats implements Serializable {
   public void update(String value, double weight) {
     if (DistributedJobConfig.isEmpty(value)) {
       m_missingCount += weight;
-      m_stringLengthStats.update(Utils.missingValue(), weight, false);
-      m_wordStats.update(Utils.missingValue(), weight, false);
+      m_stringLengthStats.update(Utils.missingValue(), weight, false, false);
+      m_wordStats.update(Utils.missingValue(), weight, false, false);
     } else {
-      m_stringLengthStats.update(value.length(), weight, false);
+      m_stringLengthStats.update(value.length(), weight, false, false);
 
       m_tokenizer.tokenize(value);
-      m_wordStats.update(m_tokenizer.countTokens(), weight, false);
+      m_wordStats.update(m_tokenizer.countTokens(), weight, false, false);
     }
   }
 

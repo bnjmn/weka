@@ -53,6 +53,7 @@ import weka.distributed.CorrelationMatrixRowReduceTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
 import weka.filters.StreamableFilter;
+import weka.gui.beans.KFIgnore;
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -117,6 +118,7 @@ import distributed.core.DistributedJobConfig;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@KFIgnore
 public class PreConstructedPCA extends Filter implements StreamableFilter,
   Serializable, PreconstructedFilter, OptionHandler, CommandlineRunnable {
 
@@ -276,7 +278,8 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
    * @throws Exception if a problem occurs
    */
   public PreConstructedPCA(Instances header, Matrix matrix,
-    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance) throws Exception {
+    List<NumericStats> stats, boolean keepClassIfSet, boolean isCovariance)
+    throws Exception {
     m_matrix = matrix;
     m_header = header;
     m_stats = stats;
@@ -1345,14 +1348,16 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
         attNames.add(orig.attribute(i).name());
       }
 
-      weka.distributed.CSVToARFFHeaderMapTask arffTask = new weka.distributed.CSVToARFFHeaderMapTask();
+      weka.distributed.CSVToARFFHeaderMapTask arffTask =
+        new weka.distributed.CSVToARFFHeaderMapTask();
       arffTask.setOptions(args);
-      arffTask.setComputeSummaryStats(true);
+      // arffTask.setComputeSummaryStats(true);
       for (int i = 0; i < orig.numInstances(); i++) {
         arffTask.processRow(orig.instance(i).toString(), attNames);
       }
       Instances withSummary = arffTask.getHeader();
-      weka.distributed.CSVToARFFHeaderReduceTask arffReduce = new weka.distributed.CSVToARFFHeaderReduceTask();
+      weka.distributed.CSVToARFFHeaderReduceTask arffReduce =
+        new weka.distributed.CSVToARFFHeaderReduceTask();
       List<Instances> instList = new ArrayList<Instances>();
       instList.add(withSummary);
       withSummary = arffReduce.aggregate(instList);
@@ -1360,7 +1365,8 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
       System.err.println(withSummary);
       withSummary.setClassIndex(orig.classIndex());
 
-      weka.distributed.CorrelationMatrixMapTask corrTask = new weka.distributed.CorrelationMatrixMapTask();
+      weka.distributed.CorrelationMatrixMapTask corrTask =
+        new weka.distributed.CorrelationMatrixMapTask();
       corrTask.setup(withSummary);
 
       for (int i = 0; i < orig.numInstances(); i++) {
@@ -1368,7 +1374,8 @@ public class PreConstructedPCA extends Filter implements StreamableFilter,
       }
 
       double[][] matrix = corrTask.getMatrix();
-      CorrelationMatrixRowReduceTask reduce = new CorrelationMatrixRowReduceTask();
+      CorrelationMatrixRowReduceTask reduce =
+        new CorrelationMatrixRowReduceTask();
       for (int i = 0; i < matrix.length; i++) {
         List<double[]> toAgg = new ArrayList<double[]>();
         toAgg.add(matrix[i]);
