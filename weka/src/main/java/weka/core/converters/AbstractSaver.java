@@ -27,6 +27,7 @@ import java.io.OutputStream;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -37,7 +38,8 @@ import weka.core.Instances;
  * @author Stefan Mutter (mutter@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class AbstractSaver implements Saver, CapabilitiesHandler {
+public abstract class AbstractSaver implements Saver, CapabilitiesHandler,
+                                               CapabilitiesIgnorer {
 
   /** ID to avoid warning */
   private static final long serialVersionUID = -27467499727819258L;

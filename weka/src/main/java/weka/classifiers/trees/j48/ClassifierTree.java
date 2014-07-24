@@ -25,6 +25,8 @@ import java.io.Serializable;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -39,7 +41,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class ClassifierTree implements Drawable, Serializable,
-  RevisionHandler {
+  CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8722249377542734193L;
@@ -102,12 +104,28 @@ public class ClassifierTree implements Drawable, Serializable,
   }
 
   /**
+   * Returns default capabilities of the classifier tree.
+   * 
+   * @return the capabilities of this classifier tree
+   */
+  @Override
+  public Capabilities getCapabilities() {
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
+
+    return result;
+  }
+
+  /**
    * Method for building a classifier tree.
    * 
    * @param data the data to build the tree from
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
+
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);

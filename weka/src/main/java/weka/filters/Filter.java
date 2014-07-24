@@ -32,6 +32,7 @@ import java.util.Vector;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -79,7 +80,8 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @version $Revision$
  */
 public abstract class Filter implements Serializable, CapabilitiesHandler,
-                                        RevisionHandler, OptionHandler {
+                                        RevisionHandler, OptionHandler,
+                                        CapabilitiesIgnorer {
 
   /** for serialization */
   private static final long serialVersionUID = -8835063755891851218L;

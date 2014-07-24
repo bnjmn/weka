@@ -30,7 +30,6 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
 import weka.core.DistanceFunction;
 import weka.core.Drawable;
 import weka.core.EuclideanDistance;
@@ -90,7 +89,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class HierarchicalClusterer extends AbstractClusterer implements
-  OptionHandler, CapabilitiesHandler, Drawable {
+  OptionHandler, Drawable {
   private static final long serialVersionUID = 1L;
 
   /**

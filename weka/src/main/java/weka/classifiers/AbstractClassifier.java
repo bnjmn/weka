@@ -28,6 +28,7 @@ import java.util.Vector;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instance;
 import weka.core.Option;
 import weka.core.OptionHandler;
@@ -46,7 +47,9 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class AbstractClassifier implements Classifier, Cloneable,
-  Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler {
+                                                    Serializable, OptionHandler, 
+                                                    CapabilitiesHandler, RevisionHandler,
+                                                    CapabilitiesIgnorer {
 
   /** for serialization */
   private static final long serialVersionUID = 6502780192411755341L;

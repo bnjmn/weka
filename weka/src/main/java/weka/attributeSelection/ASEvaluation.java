@@ -26,6 +26,7 @@ import java.io.Serializable;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
@@ -39,7 +40,8 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class ASEvaluation
-  implements Serializable, CapabilitiesHandler, RevisionHandler {
+  implements Serializable, CapabilitiesHandler, 
+             CapabilitiesIgnorer, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 2091705669885950849L;

@@ -31,6 +31,7 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -91,7 +92,8 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class Estimator implements Cloneable, Serializable,
-  OptionHandler, CapabilitiesHandler, RevisionHandler {
+                                           OptionHandler, CapabilitiesHandler, 
+                                           CapabilitiesIgnorer, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -5902411487362274342L;

@@ -45,7 +45,6 @@ import weka.classifiers.trees.ht.SplitNode;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -160,8 +159,7 @@ import weka.core.WeightedInstancesHandler;
  */
 public class HoeffdingTree extends AbstractClassifier implements
     UpdateableClassifier, WeightedInstancesHandler, OptionHandler,
-    CapabilitiesHandler, RevisionHandler, TechnicalInformationHandler,
-    Drawable, Serializable {
+    RevisionHandler, TechnicalInformationHandler, Drawable, Serializable {
 
   /**
    * For serialization

@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -43,7 +44,9 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class AbstractClusterer implements Clusterer, Cloneable,
-  Serializable, CapabilitiesHandler, RevisionHandler, OptionHandler {
+                                                   Serializable, CapabilitiesHandler, 
+                                                   RevisionHandler, OptionHandler,
+                                                   CapabilitiesIgnorer {
 
   /** for serialization */
   private static final long serialVersionUID = -6099962589663877632L;

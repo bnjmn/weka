@@ -265,7 +265,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     m_Dependencies = new HashSet<Capability>();
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -298,6 +298,20 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   }
 
   /**
+   * Does owner implement CapabilitiesIgnorer and does it not
+   * want capability checking to be performed?
+   */
+  public boolean doNotCheckCapabilities() {
+   
+    // Do we actually want to check capabilities?
+    if ((getOwner() != null) && (getOwner() instanceof CapabilitiesIgnorer)) {
+      return ((CapabilitiesIgnorer)getOwner()).getDoNotCheckCapabilities();
+    } else {
+      return false;
+    }
+  }
+
+  /**
    * Creates and returns a copy of this object.
    * 
    * @return a clone of this object
@@ -320,7 +334,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void assign(Capabilities c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -351,7 +365,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void and(Capabilities c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -385,7 +399,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void or(Capabilities c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -419,7 +433,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean supports(Capabilities c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return true;
     }
 
@@ -449,7 +463,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean supportsMaybe(Capabilities c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return true;
     }
 
@@ -539,7 +553,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enable(Capability c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -573,7 +587,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableDependency(Capability c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
  
@@ -602,7 +616,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableAllClasses() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -622,7 +636,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableAllClassDependencies() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -642,7 +656,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableAllAttributes() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -662,7 +676,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableAllAttributeDependencies() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -679,7 +693,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void enableAll() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -704,7 +718,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disable(Capability c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -741,7 +755,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableDependency(Capability c) {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -774,7 +788,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableAllClasses() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -794,7 +808,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableAllClassDependencies() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -814,7 +828,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableAllAttributes() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -834,7 +848,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableAllAttributeDependencies() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -851,7 +865,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public void disableAll() {
 
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return;
     }
 
@@ -940,7 +954,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean handles(Capability c) {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return true;
     }
 
@@ -957,7 +971,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean hasDependency(Capability c) {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return false;
     }
 
@@ -972,7 +986,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean hasDependencies() {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return false;
     }
 
@@ -987,7 +1001,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public Exception getFailReason() {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return null;
     }
 
@@ -1042,7 +1056,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean test(Attribute att, boolean isClass) {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return true;
     }
 
@@ -1214,7 +1228,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   public boolean test(Instances data, int fromIndex, int toIndex) {
     
     // Do we actually want to check capabilities?
-    if ((getOwner() != null) && getOwner().getDoNotCheckCapabilities()) {
+    if (doNotCheckCapabilities()) {
       return true;
     }
 

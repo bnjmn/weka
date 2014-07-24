@@ -37,16 +37,4 @@ public interface CapabilitiesHandler {
    * @see               Capabilities
    */
   public Capabilities getCapabilities();
-
-  /** 
-   * Returns true if we do not actually want to check
-   * capabilities to conserver runtime.
-   */
-    public boolean getDoNotCheckCapabilities();
-
-  /** 
-   * If argument is true, capabilities are not actually
-   * checked to improve runtime.
-   */
-    public void setDoNotCheckCapabilities(boolean flag);
 }
