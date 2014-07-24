@@ -285,7 +285,7 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
    * 
    * @return tip text for this property
    */
-  public String minTrainingFraction() {
+  public String minTrainingFractionTipText() {
     return "The fraction of training instances below which a model learned "
       + "by a map task will be discarded from the aggregation. This is "
       + "a percentage of the total number of instances seen by the map "
@@ -806,11 +806,6 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       m_arffHeaderJob.setEnvironment(m_env);
       m_arffHeaderJob.setLog(getLog());
       m_arffHeaderJob.setStatusMessagePrefix(m_statusMessagePrefix);
-      boolean computeQuartiles = m_arffHeaderJob.getGenerateCharts();
-      if (getCreateRandomizedDataChunks() && computeQuartiles) {
-        // randomize job will do the quartiles - no need to do them here!
-        m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
-      }
 
       if (!m_arffHeaderJob.runJob()) {
         statusMessage("Unable to continue - creating the ARFF header failed!");
@@ -1020,12 +1015,6 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       try {
         setJobStatus(JobStatus.RUNNING);
 
-        if (getCreateRandomizedDataChunks()
-          && m_arffHeaderJob.getIncludeQuartilesInSummaryAttributes()) {
-          // turn off quartile generation in the arff header job as
-          // the randomized data chunk job will compute them (if necessary)
-          m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
-        }
         if (!initializeAndRunArffJob()) {
           return false;
         }

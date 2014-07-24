@@ -138,7 +138,8 @@ public class WekaFoldBasedClassifierHadoopMapper extends
         // updateable
         WekaClassifierMapTask tempTask = new WekaClassifierMapTask();
         tempTask.setOptions(taskOptsCopy.clone());
-        m_isUpdateableClassifier = (tempTask.getClassifier() instanceof UpdateableClassifier);
+        m_isUpdateableClassifier =
+          (tempTask.getClassifier() instanceof UpdateableClassifier);
         m_forceBatchForUpdateable = tempTask
           .getForceBatchLearningForUpdateableClassifiers();
 
@@ -234,8 +235,9 @@ public class WekaFoldBasedClassifierHadoopMapper extends
       for (int i = 0; i < m_totalFolds; i++) {
         m_tasks[i].finalizeTask();
 
-        System.err.println("Model after continued training on fold " + (i + 1)
-          + ":\n" + m_tasks[i].getClassifier().toString());
+        // System.err.println("Model after continued training on fold " + (i +
+        // 1)
+        // + ":\n" + m_tasks[i].getClassifier().toString());
 
         byte[] bytes = classifierToBytes(m_tasks[i].getClassifier(),
           m_tasks[i].getNumTrainingInstances());

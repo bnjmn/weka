@@ -42,6 +42,8 @@ import org.apache.hadoop.mapreduce.Mapper;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
+import weka.distributed.DistributedWekaException;
 
 /**
  * Mapper implementation for the ArffHeaderHadoop job
@@ -56,7 +58,8 @@ public class CSVToArffHeaderHadoopMapper extends
    * The key in the Configuration that the options for this task are associated
    * with
    */
-  public static String CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS = "*weka.distributed.csv_to_arff_header_map_task_opts";
+  public static String CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS =
+    "*weka.distributed.csv_to_arff_header_map_task_opts";
 
   /** The underlying general Weka CSV map task */
   protected CSVToARFFHeaderMapTask m_task;
@@ -75,6 +78,9 @@ public class CSVToArffHeaderHadoopMapper extends
    * more tricky to establish)
    */
   protected IOException m_fatalMappingError;
+
+  /** Whether to estimate quantiles or not */
+  protected boolean m_estimateQuantiles;
 
   /**
    * Read attribute names (one per line) from the supplied Reader
@@ -163,6 +169,8 @@ public class CSVToArffHeaderHadoopMapper extends
 
         // pass on remaining options to map task
         m_task.setOptions(options);
+
+        m_estimateQuantiles = m_task.getComputeQuartilesAsPartOfSummaryStats();
       } catch (Exception e) {
         throw new IOException(e);
       }
@@ -189,7 +197,17 @@ public class CSVToArffHeaderHadoopMapper extends
       throw m_fatalMappingError;
     }
 
-    Instances header = m_task.getHeader();
+    HeaderAndQuantileDataHolder holder = null;
+    Instances header = null;
+    if (!m_estimateQuantiles) {
+      header = m_task.getHeader();
+    } else {
+      try {
+        holder = m_task.getHeaderAndQuantileEstimators();
+      } catch (DistributedWekaException ex) {
+        throw new IOException(ex);
+      }
+    }
 
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
     OutputStream os = ostream;
@@ -197,7 +215,7 @@ public class CSVToArffHeaderHadoopMapper extends
 
     p = new ObjectOutputStream(new BufferedOutputStream(
       new GZIPOutputStream(os)));
-    p.writeObject(header);
+    p.writeObject(header != null ? header : holder);
     p.flush();
     p.close();
 

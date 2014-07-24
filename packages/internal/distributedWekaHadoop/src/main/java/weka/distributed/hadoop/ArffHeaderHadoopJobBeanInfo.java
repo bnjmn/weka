@@ -72,11 +72,6 @@ public class ArffHeaderHadoopJobBeanInfo extends HadoopJobBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 =
-        new PropertyDescriptor("includeQuartilesInSummaryAttributes",
-          ArffHeaderHadoopJob.class);
-      pds.add(p1);
-
       p1 = new PropertyDescriptor("generateCharts", ArffHeaderHadoopJob.class);
       pds.add(p1);
 

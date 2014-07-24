@@ -24,11 +24,8 @@ package weka.distributed.hadoop;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -170,13 +167,10 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
           + "specified by the -output-path option. (default is a "
           + "randomly generated name)", "header-file-name", 1,
         "-header-file-name <name>"));
-    result.add(new Option(
-      "\tInclude quartile estimates in the summary attributes. Note that\n\t"
-        + "this requires a second pass over the data.", "quartiles", 0,
-      "-quartiles"));
+
     result.add(new Option(
       "\tGenerate summary charts as png files. Note that\n\t"
-        + "has option no affect if quartiles have not been computed", "charts",
+        + "has option no affect if quartiles are not being computed", "charts",
       0, "-charts"));
 
     CSVToARFFHeaderMapTask tempTask = new CSVToARFFHeaderMapTask();
@@ -214,7 +208,6 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
     String outputName = Utils.getOption("header-file-name", options);
     setOutputHeaderFileName(outputName);
 
-    setIncludeQuartilesInSummaryAttributes(Utils.getFlag("quartiles", options));
     setGenerateCharts(Utils.getFlag("charts", options));
 
     super.setOptions(options);
@@ -257,10 +250,6 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       options.add(getOutputHeaderFileName());
     }
 
-    if (getIncludeQuartilesInSummaryAttributes()) {
-      options.add("-quartiles");
-    }
-
     if (getGenerateCharts()) {
       options.add("-charts");
     }
@@ -293,9 +282,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       options.add(getOutputHeaderFileName());
     }
 
-    if (getIncludeQuartilesInSummaryAttributes()) {
-      options.add("-quartiles");
-    }
+    // if (getIncludeQuartilesInSummaryAttributes()) {
+    // options.add("-quartiles");
+    // }
 
     if (getGenerateCharts()) {
       options.add("-charts");
@@ -468,39 +457,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
    * 
    * @return the tip text for this property
    */
-  public String includeQuartilesInSummaryAttributesTipText() {
-    return "Include quartile estimates in the summary attributes "
-      + "(warning - requires as second pass over the data)";
-  }
-
-  /**
-   * Set whether to include quartile estimates in the summary attributes
-   * 
-   * @param q true if quartile estimates are to be included in the summary
-   *          attributes
-   */
-  public void setIncludeQuartilesInSummaryAttributes(boolean q) {
-    m_includeQuartilesInSummaryAtts = q;
-  }
-
-  /**
-   * Get whether to include quartile estimates in the summary attributes
-   * 
-   * @return true if quartile estimates are to be included in the summary
-   *         attributes
-   */
-  public boolean getIncludeQuartilesInSummaryAttributes() {
-    return m_includeQuartilesInSummaryAtts;
-  }
-
-  /**
-   * Tip text for this property
-   * 
-   * @return the tip text for this property
-   */
   public String generateChartsTipText() {
-    return "Generate summary chart png files - has no affect if quantiles have not been"
-      + " computed yet.";
+    return "Generate summary chart png files - has no affect if quantiles are not been"
+      + " computed.";
   }
 
   /**
@@ -569,29 +528,6 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
   }
 
   /**
-   * Runs the quartile job if necessary (i.e. the user has requested it, the
-   * existing header does not already contain quartiles and the data does
-   * contain numeric attributes)
-   * 
-   * @return true if the quartile job runs successfully or is not needed at all
-   * @throws DistributedWekaException if a problem occurs
-   */
-  protected boolean runQuartileJobIfNecessary() throws DistributedWekaException {
-
-    if (!m_includeQuartilesInSummaryAtts) {
-      return true;
-    }
-
-    if (CSVToARFFHeaderReduceTask
-      .headerContainsNumericAttributes(getFinalHeader())
-      && !CSVToARFFHeaderReduceTask.headerContainsQuartiles(getFinalHeader())) {
-      return initializeAndRunQuartileJob();
-    }
-
-    return true;
-  }
-
-  /**
    * Generates png summary attribute charts if necessary
    * 
    * @param outputPath the output path in HDFS
@@ -612,9 +548,7 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
             .headerContainsQuartiles(getFinalHeader()));
 
       if (generate) {
-        // generate any charts (if necessary). Depending on how the user has
-        // been running jobs, charts may have already been generated in the
-        // reduce task of the randomize data chunk job.
+        // generate any charts (if necessary).
         Configuration conf = new Configuration();
         m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
         CSVToArffHeaderHadoopReducer.writeAttributeChartsIfNecessary(
@@ -706,35 +640,6 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
     }
   }
 
-  protected boolean initializeAndRunQuartileJob()
-    throws DistributedWekaException {
-    if (m_env == null) {
-      m_env = Environment.getSystemWide();
-    }
-
-    RandomizedDataChunkHadoopJob quartileJob =
-      new RandomizedDataChunkHadoopJob();
-    try {
-      quartileJob.setOptions(getOptions());
-      quartileJob.m_arffHeaderJob = this;
-    } catch (Exception ex) {
-      throw new DistributedWekaException(ex);
-    }
-
-    quartileJob.setComputeQuartilesOnly(true);
-    quartileJob.setEnvironment(m_env);
-    quartileJob.setLog(getLog());
-    quartileJob.setStatusMessagePrefix(m_statusMessagePrefix);
-
-    if (!quartileJob.runJob()) {
-      statusMessage("Quartile estimation job failed!");
-      logMessage("Quartile estimation job failed!");
-      return false;
-    }
-
-    return true;
-  }
-
   @Override
   public boolean runJob() throws DistributedWekaException {
     boolean success = true;
@@ -748,12 +653,12 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
         try {
           handleExistingHeaderFile();
 
-          success = runQuartileJobIfNecessary();
-          if (success) {
-            Configuration conf = new Configuration();
-            m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
-            getFinalHeaderFromHDFS(conf, getAggregatedHeaderPath());
-          }
+          // success = runQuartileJobIfNecessary();
+          // if (success) {
+          // Configuration conf = new Configuration();
+          // m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+          // getFinalHeaderFromHDFS(conf, getAggregatedHeaderPath());
+          // }
 
           // See if charts need to be generated (i.e. there are no
           // png files already in the output directory)
@@ -803,75 +708,12 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       m_mrConfig.setUserSuppliedProperty(
         CSVToArffHeaderHadoopReducer.CSV_TO_ARFF_HEADER_WRITE_PATH, outputPath);
 
-      // Now lets check to see whether this job needs to run at all - i.e.
-      // if the header can be produced immediately (no nominal values need to
-      // be determined) then we can just write ARFF header directly to the
-      // output location in HDFS and quit
       CSVToARFFHeaderMapTask tempMapTask = new CSVToARFFHeaderMapTask();
       if (!DistributedJobConfig.isEmpty(getCsvToArffTaskOptions())) {
         String[] tempOpts = Utils.splitOptions(getCsvToArffTaskOptions());
         tempMapTask.setOptions(tempOpts);
       }
-      boolean haveAttributeNames = false;
-      List<String> tempAttNames = null;
-      if (!DistributedJobConfig.isEmpty(getAttributeNames())) {
-        tempAttNames = new ArrayList<String>();
-        String[] n = environmentSubstitute(getAttributeNames()).split(",");
-        for (String nn : n) {
-          nn = nn.trim();
-          if (nn.length() > 0) {
-            tempAttNames.add(nn);
-          }
-        }
-        haveAttributeNames = true;
-      } else if (!DistributedJobConfig.isEmpty(getAttributeNamesFile())) {
-        // handle names file - bail out if there are no atts or names file
-        String namesFile = environmentSubstitute(getAttributeNamesFile());
-        if (namesFile.startsWith("hdfs://")) {
-          namesFile = namesFile.replace("hdfs://", "");
 
-          // strip the host and port (if provided)
-          namesFile = namesFile.substring(namesFile.indexOf("/"));
-          String pathS = HDFSUtils.resolvePath(namesFile, m_env);
-          Configuration tempConf = new Configuration();
-          m_mrConfig.getHDFSConfig().configureForHadoop(tempConf, m_env);
-          FileSystem fs = FileSystem.get(tempConf);
-          Path path = new Path(pathS);
-          InputStream is = fs.open(path);
-          InputStreamReader isr = new InputStreamReader(is);
-          BufferedReader br = new BufferedReader(isr);
-          // this closes the stream for us
-          tempAttNames = CSVToArffHeaderHadoopMapper.readNames(br);
-        } else {
-          // local file
-          URI uri = new URI(namesFile);
-          File path = new File(uri.getPath());
-          BufferedReader br = new BufferedReader(new FileReader(path));
-          tempAttNames = CSVToArffHeaderHadoopMapper.readNames(br);
-        }
-        haveAttributeNames = true;
-      }
-
-      // can't generate header immediately if we have to compute summary
-      // stats
-      if (haveAttributeNames && !tempMapTask.getComputeSummaryStats()) {
-        if (tempMapTask.headerAvailableImmediately(tempAttNames.size(),
-          tempAttNames, new StringBuffer())) {
-          Instances finalHeader =
-            tempMapTask.getHeader(tempAttNames.size(), tempAttNames);
-          m_finalHeader = finalHeader;
-
-          Configuration tempConf = new Configuration();
-          m_mrConfig.getHDFSConfig().configureForHadoop(tempConf, m_env);
-          CSVToArffHeaderHadoopReducer.writeHeaderToDestination(finalHeader,
-            outputPath, tempConf);
-
-          // done!
-          return true;
-        }
-      }
-
-      // Otherwise, go ahead with the job...
       Configuration conf = new Configuration();
 
       // Options to the map task and the underlying general Weka map
@@ -918,20 +760,18 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
       logMessage("Submitting job: " + getJobName());
 
       success = runJob(job);
-      boolean genCharts = getGenerateCharts();
-      if (success) {
-        // get the intermediate header (i.e. everything except quartile
-        // summaries)
-        getFinalHeaderFromHDFS(conf, outputPath);
-        success = runQuartileJobIfNecessary();
-
-        // restore the state of generate charts because we
-        // passed a reference to ourself to the randomize job
-        // (so it would not execute the ARFF job again) and
-        // the randomize job will have called
-        // setGenerateCharts(false) on us.
-        setGenerateCharts(genCharts);
-      }
+      // boolean genCharts = getGenerateCharts();
+      // if (success) {
+      // getFinalHeaderFromHDFS(conf, outputPath);
+      // // success = runQuartileJobIfNecessary();
+      //
+      // // restore the state of generate charts because we
+      // // passed a reference to ourself to the randomize job
+      // // (so it would not execute the ARFF job again) and
+      // // the randomize job will have called
+      // // setGenerateCharts(false) on us.
+      // // setGenerateCharts(genCharts);
+      // }
 
       if (success) {
         getFinalHeaderFromHDFS(conf, outputPath);

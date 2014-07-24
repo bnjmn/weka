@@ -45,8 +45,10 @@ import org.apache.hadoop.mapreduce.Reducer;
 import weka.core.Attribute;
 import weka.core.ChartUtils;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.core.stats.NumericAttributeBinData;
 import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import distributed.core.DistributedJobConfig;
@@ -79,9 +81,26 @@ public class CSVToArffHeaderHadoopReducer extends
   /** The underlying general Weka CSV reduce task */
   protected CSVToARFFHeaderReduceTask m_task = null;
 
+  /** Whether quantiles are being estimated */
+  protected boolean m_estimateQuantiles;
+
   @Override
   public void setup(Context context) throws IOException {
     m_task = new CSVToARFFHeaderReduceTask();
+
+    Configuration conf = context.getConfiguration();
+    String taskOpts =
+      conf.get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
+    if (taskOpts != null && taskOpts.length() > 0) {
+      try {
+        String[] options = Utils.splitOptions(taskOpts);
+
+        m_estimateQuantiles = Utils.getFlag("compute-quartiles", options);
+
+      } catch (Exception ex) {
+        throw new IOException(ex);
+      }
+    }
   }
 
   @Override
@@ -95,14 +114,20 @@ public class CSVToArffHeaderHadoopReducer extends
     }
 
     List<Instances> headersToAgg = new ArrayList<Instances>();
+    List<HeaderAndQuantileDataHolder> holdersToAgg =
+      new ArrayList<HeaderAndQuantileDataHolder>();
 
     int counter = 0;
     try {
       for (BytesWritable b : values) {
         byte[] bytes = b.getBytes();
-
-        Instances aHeader = deserialize(bytes);
-        headersToAgg.add(aHeader);
+        if (m_estimateQuantiles) {
+          HeaderAndQuantileDataHolder holder = deserializeHolder(bytes);
+          holdersToAgg.add(holder);
+        } else {
+          Instances aHeader = deserializeHeader(bytes);
+          headersToAgg.add(aHeader);
+        }
         counter++;
       }
     } catch (Exception ex) {
@@ -110,7 +135,9 @@ public class CSVToArffHeaderHadoopReducer extends
     }
 
     try {
-      Instances aggregated = m_task.aggregate(headersToAgg);
+      Instances aggregated =
+        m_estimateQuantiles ? m_task.aggregateHeadersAndQuartiles(holdersToAgg)
+          : m_task.aggregate(headersToAgg);
       writeHeaderToDestination(aggregated, outputDestination, conf);
 
       Text outkey = new Text();
@@ -226,7 +253,7 @@ public class CSVToArffHeaderHadoopReducer extends
               .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
                 + a.name());
           NumericAttributeBinData binData =
-            new NumericAttributeBinData(a.name(), summary);
+            new NumericAttributeBinData(a.name(), summary, -1);
 
           numericBinStats.put(i, binData);
         }
@@ -331,7 +358,7 @@ public class CSVToArffHeaderHadoopReducer extends
    * @throws IOException if a problem occurs
    * @throws ClassNotFoundException if a class can't be loaded
    */
-  protected Instances deserialize(byte[] bytes) throws IOException,
+  protected Instances deserializeHeader(byte[] bytes) throws IOException,
     ClassNotFoundException {
     ByteArrayInputStream istream = new ByteArrayInputStream(bytes);
     ObjectInputStream p = null;
@@ -353,5 +380,31 @@ public class CSVToArffHeaderHadoopReducer extends
     }
 
     return (Instances) toReturn;
+  }
+
+  protected HeaderAndQuantileDataHolder deserializeHolder(byte[] bytes)
+    throws IOException, ClassNotFoundException {
+
+    ByteArrayInputStream istream = new ByteArrayInputStream(bytes);
+    ObjectInputStream p = null;
+    Object toReturn = null;
+    try {
+      p =
+        new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(
+          istream)));
+
+      toReturn = p.readObject();
+
+      if (!(toReturn instanceof HeaderAndQuantileDataHolder)) {
+        throw new IOException(
+          "Object deserialized was not an HeaderAndQuantileDataHolder object!");
+      }
+    } finally {
+      if (p != null) {
+        p.close();
+      }
+    }
+
+    return (HeaderAndQuantileDataHolder) toReturn;
   }
 }

@@ -23,7 +23,6 @@ package weka.distributed.hadoop;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
@@ -33,15 +32,10 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 import org.apache.hadoop.mapreduce.lib.output.MultipleOutputs;
 
-import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Utils;
-import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NumericAttributeBinData;
-import weka.core.stats.QuantileCalculator;
-import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
-import weka.distributed.DistributedWekaException;
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -72,32 +66,8 @@ public class RandomizedDataChunkHadoopReducer extends
   /** The header with summary attributes */
   protected Instances m_trainingHeaderWithSummary;
 
-  /** For calculating quartiles */
-  protected QuantileCalculator m_quartiles;
-
-  /** Used when computing quartiles (sub task for updating summary attributes) */
-  protected CSVToARFFHeaderMapTask m_rowHelper;
-
-  /**
-   * Full path to the header - used when we write back the header updated with
-   * quartiles
-   */
-  protected String m_arffHeaderFullPath = "";
-
   /** The total number of data chunks */
   protected int m_numberOfDataChunks;
-
-  /** Whether we should compute quartiles/histograms */
-  protected boolean m_computeQuartiles;
-
-  /**
-   * Whether we should generate charts (only applies when quartiles are being
-   * generated)
-   */
-  protected boolean m_generateCharts;
-
-  /** Only compute quartiles - don't write data chunks */
-  protected boolean m_computeQuartilesOnly;
 
   /**
    * Used to build histograms for numeric attributes (sub task for producing
@@ -157,13 +127,6 @@ public class RandomizedDataChunkHadoopReducer extends
           CSVToARFFHeaderReduceTask
             .stripSummaryAtts(m_trainingHeaderWithSummary);
 
-        m_arffHeaderFullPath =
-          Utils.getOption("arff-header-full-path", taskOpts);
-
-        m_computeQuartiles = Utils.getFlag("compute-quartiles", taskOpts);
-        m_computeQuartilesOnly = Utils.getFlag("quartiles-only", taskOpts);
-        m_generateCharts = Utils.getFlag("charts", taskOpts);
-
         try {
           m_numberOfDataChunks = Integer.parseInt(taskOptsS);
           // m_instanceBuffer = new ArrayList<String>(m_numberOfDataChunks);
@@ -171,82 +134,9 @@ public class RandomizedDataChunkHadoopReducer extends
           throw new Exception(e);
         }
 
-        // scan for numeric atts and whether quartiles have been
-        // computed yet
-        m_computeQuartiles =
-          (m_computeQuartiles || m_computeQuartilesOnly)
-            && !DistributedJobConfig.isEmpty(m_arffHeaderFullPath);
-        if (m_computeQuartiles) {
-          for (int i = 0; i < m_trainingHeader.numAttributes(); i++) {
-            if (m_trainingHeader.attribute(i).isNumeric()) {
-              Attribute summary =
-                m_trainingHeaderWithSummary
-                  .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-                    + m_trainingHeader.attribute(i).name());
-
-              if (summary != null) {
-                if (!Utils
-                  .isMissingValue(ArffSummaryNumericMetric.FIRSTQUARTILE
-                    .valueFromAttribute(summary))) {
-                  m_computeQuartiles = false;
-                  break;
-                }
-              }
-            }
-          }
-        }
-
-        if (m_computeQuartiles) {
-          m_quartiles =
-            new QuantileCalculator(m_trainingHeader, new double[] { 0.25, 0.5,
-              0.75 });
-
-          m_numericHistogramData =
-            new HashMap<Integer, NumericAttributeBinData>();
-
-          // setup numeric att bin classes
-          for (int i = 0; i < m_trainingHeader.numAttributes(); i++) {
-            if (m_trainingHeader.attribute(i).isNumeric()) {
-              Attribute summary =
-                m_trainingHeaderWithSummary
-                  .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-                    + m_trainingHeader.attribute(i).name());
-
-              if (summary == null) {
-                throw new DistributedWekaException(
-                  "Can't find summary attribute for att: "
-                    + m_trainingHeader.attribute(i).name());
-              }
-
-              m_numericHistogramData.put(i, new NumericAttributeBinData(
-                m_trainingHeader.attribute(i).name(), summary));
-            }
-          }
-          m_quartiles.setHistogramMap(m_numericHistogramData);
-        }
-
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
           true);
 
-        if (m_computeQuartiles) {
-          // set up a row helper. Simply for parsing CSV values so that we can
-          // do quantile updates
-          m_rowHelper = new CSVToARFFHeaderMapTask();
-          // taskOptsS =
-          // conf.get(WekaClassifierHadoopMapper.CLASSIFIER_MAP_TASK_OPTIONS);
-          String csvOptsS =
-            conf
-              .get(CSVToArffHeaderHadoopMapper.CSV_TO_ARFF_HEADER_MAP_TASK_OPTIONS);
-          if (!DistributedJobConfig.isEmpty(csvOptsS)) {
-            String[] csvOpts = Utils.splitOptions(csvOptsS);
-            m_rowHelper.setOptions(csvOpts);
-          }
-          // WekaClassifierHadoopMapper.setClassIndex(taskOpts,
-          // m_trainingHeader,
-          // true);
-          m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
-            .instanceHeaderToAttributeNameList(m_trainingHeader));
-        }
       } else {
         throw new Exception(
           "Can't continue without the name of the ARFF header file!");
@@ -278,38 +168,23 @@ public class RandomizedDataChunkHadoopReducer extends
       String[] parts = row.split("@:@");
       String inst = parts[0];
 
-      if (m_quartiles != null) {
-        // do quartile updates
-        String[] parsed = m_rowHelper.parseRowOnly(inst);
-        try {
-          m_quartiles.update(parsed, m_rowHelper.getMissingValue());
-        } catch (Exception ex) {
-          throw new IOException(ex);
-        }
+      int classVal = Integer.parseInt(parts[1]);
+
+      int chunk = m_countsPerClass[classVal] % m_numberOfDataChunks;
+      String name = "chunk" + chunk;
+      m_outVal.set(inst);
+      m_mos.write(name, null, m_outVal);
+
+      // add to the minority class buffers. If we've seen
+      // at least m_numberOfDataChunks instances for this class then
+      // each data chunk will have at least one instance of this class
+      if (m_countsPerClass[classVal] < m_numberOfDataChunks) {
+        m_classInstancesBuffer.get(classVal).add(inst);
       }
-      // } else if (m_numericHistogramData != null) {
-      // String[] parsed = m_rowHelper.parseRowOnly(inst);
-      // updateHistogramData(parsed, m_rowHelper.getMissingValue());
-      // }
 
-      if (!m_computeQuartilesOnly) {
-        int classVal = Integer.parseInt(parts[1]);
-
-        int chunk = m_countsPerClass[classVal] % m_numberOfDataChunks;
-        String name = "chunk" + chunk;
-        m_outVal.set(inst);
-        m_mos.write(name, null, m_outVal);
-
-        // add to the minority class buffers. If we've seen
-        // at least m_numberOfDataChunks instances for this class then
-        // each data chunk will have at least one instance of this class
-        if (m_countsPerClass[classVal] < m_numberOfDataChunks) {
-          m_classInstancesBuffer.get(classVal).add(inst);
-        }
-
-        m_countsPerClass[classVal]++;
-      }
+      m_countsPerClass[classVal]++;
     }
+
   }
 
   protected void randomize(Iterable<Text> values) throws InterruptedException,
@@ -319,29 +194,11 @@ public class RandomizedDataChunkHadoopReducer extends
     // key out evenly over the output files
 
     for (Text t : values) {
-      if (m_quartiles != null) {
-        // do quartile updates
-        String row = t.toString();
-        String[] parsed = m_rowHelper.parseRowOnly(row);
-        try {
-          m_quartiles.update(parsed, m_rowHelper.getMissingValue());
-        } catch (Exception ex) {
-          throw new IOException(ex);
-        }
-      }
-      // } else if (m_numericHistogramData != null) {
-      // String row = t.toString();
-      // String[] parsed = m_rowHelper.parseRowOnly(row);
-      // updateHistogramData(parsed, m_rowHelper.getMissingValue());
-      // }
+      int chunk = m_countsPerClass[0] % m_numberOfDataChunks;
+      String name = "chunk" + chunk;
+      m_mos.write(name, null, t);
 
-      if (!m_computeQuartilesOnly) {
-        int chunk = m_countsPerClass[0] % m_numberOfDataChunks;
-        String name = "chunk" + chunk;
-        m_mos.write(name, null, t);
-
-        m_countsPerClass[0]++;
-      }
+      m_countsPerClass[0]++;
     }
   }
 
@@ -361,74 +218,25 @@ public class RandomizedDataChunkHadoopReducer extends
     // in order to ensure that each class is represented in each data
     // chunk
 
-    if (!m_computeQuartilesOnly) {
-      for (int i = 0; i < m_countsPerClass.length; i++) {
+    for (int i = 0; i < m_countsPerClass.length; i++) {
 
-        // make sure we skip empty classes by checking for > 0
-        if (m_countsPerClass[i] > 0
-          && m_countsPerClass[i] < m_numberOfDataChunks) {
-          while (m_countsPerClass[i] < m_numberOfDataChunks) {
+      // make sure we skip empty classes by checking for > 0
+      if (m_countsPerClass[i] > 0
+        && m_countsPerClass[i] < m_numberOfDataChunks) {
+        while (m_countsPerClass[i] < m_numberOfDataChunks) {
 
-            // choose randomly from the instances we've seen for class index i
-            int instIndex =
-              m_random.nextInt(m_classInstancesBuffer.get(i).size());
-            m_outVal.set(m_classInstancesBuffer.get(i).get(instIndex));
-            String name = "chunk" + m_countsPerClass[i];
-            m_mos.write(name, null, m_outVal);
+          // choose randomly from the instances we've seen for class index i
+          int instIndex =
+            m_random.nextInt(m_classInstancesBuffer.get(i).size());
+          m_outVal.set(m_classInstancesBuffer.get(i).get(instIndex));
+          String name = "chunk" + m_countsPerClass[i];
+          m_mos.write(name, null, m_outVal);
 
-            m_countsPerClass[i]++;
-          }
-        }
-      }
-
-      m_mos.close();
-    }
-
-    // any quantile computation piggybacked on this run?
-    if (m_quartiles != null) {
-      try {
-        Instances updatedHeader =
-          CSVToARFFHeaderReduceTask
-            .updateSummaryAttsWithQuartilesAndHistograms(
-              m_trainingHeaderWithSummary, m_quartiles, m_numericHistogramData);
-
-        CSVToArffHeaderHadoopReducer.writeHeaderToDestination(updatedHeader,
-          m_arffHeaderFullPath, context.getConfiguration());
-
-        m_trainingHeaderWithSummary = updatedHeader;
-      } catch (DistributedWekaException e) {
-        throw new IOException(e);
-      }
-    }
-
-    // charts
-    if (m_generateCharts) {
-      Configuration conf = context.getConfiguration();
-      String outputPath =
-        m_arffHeaderFullPath
-          .substring(0, m_arffHeaderFullPath.lastIndexOf("/"));
-      if (m_numericHistogramData != null) {
-        CSVToArffHeaderHadoopReducer
-          .writeAttributeChartsIfNecessary(m_trainingHeaderWithSummary,
-            m_numericHistogramData, outputPath, conf);
-      } else {
-        try {
-          boolean containsNumeric =
-            CSVToARFFHeaderReduceTask
-              .headerContainsNumericAttributes(m_trainingHeaderWithSummary);
-          boolean generate =
-            !containsNumeric
-              || (containsNumeric && CSVToARFFHeaderReduceTask
-                .headerContainsQuartiles(m_trainingHeaderWithSummary));
-
-          if (generate) {
-            CSVToArffHeaderHadoopReducer.writeAttributeChartsIfNecessary(
-              m_trainingHeaderWithSummary, outputPath, conf);
-          }
-        } catch (DistributedWekaException e) {
-          throw new IOException(e);
+          m_countsPerClass[i]++;
         }
       }
     }
+
+    m_mos.close();
   }
 }

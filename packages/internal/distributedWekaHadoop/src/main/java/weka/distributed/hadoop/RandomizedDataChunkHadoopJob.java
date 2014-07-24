@@ -102,9 +102,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
    */
   protected boolean m_cleanOutputDir;
 
-  /** True if we should just compute quartiles and not write chunk files */
-  protected boolean m_computeQuartilesOnly;
-
   public RandomizedDataChunkHadoopJob() {
     super("Randomly shuffled (and stratified) data chunk job",
       "Create a set of input files where the rows are randomly "
@@ -300,10 +297,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
     return m_cleanOutputDir;
   }
 
-  protected void setComputeQuartilesOnly(boolean q) {
-    m_computeQuartilesOnly = q;
-  }
-
   @Override
   public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
@@ -493,50 +486,28 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
         this.getClass().getClassLoader());
 
       try {
-
-        if (m_computeQuartilesOnly) {
-          m_cleanOutputDir = false;
-        } else {
-          if (!m_cleanOutputDir) {
-            // check to see if there are files in the output directory. If so,
-            // assume that we don't need to run;
-            String outputDir = m_mrConfig.getOutputPath() + OUTPUT_SUBDIR;
-            Configuration conf = new Configuration();
-            m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
-            FileSystem fs = FileSystem.get(conf);
-            Path p = new Path(outputDir + "/chunk0-r-00000");
-            if (fs.exists(p)) {
-              if (m_log != null) {
-                statusMessage("Output directory is populated with chunk files - no need to execute");
-                logMessage("Output directory is populated with chunk files - no need to execute");
-              } else {
-                System.err
-                  .println("Output directory is populated with chunk files - no need to execute");
-              }
-              return true;
+        if (!m_cleanOutputDir) {
+          // check to see if there are files in the output directory. If so,
+          // assume that we don't need to run;
+          String outputDir = m_mrConfig.getOutputPath() + OUTPUT_SUBDIR;
+          Configuration conf = new Configuration();
+          m_mrConfig.getHDFSConfig().configureForHadoop(conf, m_env);
+          FileSystem fs = FileSystem.get(conf);
+          Path p = new Path(outputDir + "/chunk0-r-00000");
+          if (fs.exists(p)) {
+            if (m_log != null) {
+              statusMessage("Output directory is populated with chunk files - no need to execute");
+              logMessage("Output directory is populated with chunk files - no need to execute");
+            } else {
+              System.err
+                .println("Output directory is populated with chunk files - no need to execute");
             }
+            return true;
           }
-        }
-
-        if (m_computeQuartilesOnly) {
-          logMessage("Executing compute quartiles job...");
-          statusMessage("Executing compute quartiles job...");
-        } else {
-          logMessage("Executing randomize data chunk job...");
-          statusMessage("Executing randomize data chunk job...");
         }
 
         setJobStatus(JobStatus.RUNNING);
 
-        // make sure that our ARFF job doesn't generate quartiles
-        // as we'll be doing that
-        // Add this to the randomize task options so that
-        // we can disable generation of quartiles/histograms (plus
-        // charts - this will be a second disable option) if desired
-        boolean computeQuartiles =
-          m_arffHeaderJob.getIncludeQuartilesInSummaryAttributes();
-        boolean generateCharts = m_arffHeaderJob.getGenerateCharts();
-        m_arffHeaderJob.setIncludeQuartilesInSummaryAttributes(false);
         m_arffHeaderJob.setGenerateCharts(false);
         if (!initializeAndRunArffJob()) {
           return false;
@@ -603,8 +574,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
         List<String> randomizeMapOptions = new ArrayList<String>();
         randomizeMapOptions.add("-arff-header");
         randomizeMapOptions.add(fileNameOnly);
-        randomizeMapOptions.add("-arff-header-full-path");
-        randomizeMapOptions.add(pathToHeader);
 
         if (!DistributedJobConfig.isEmpty(getClassAttribute())) {
           randomizeMapOptions.add("-class");
@@ -614,22 +583,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
         if (!DistributedJobConfig.isEmpty(getRandomSeed())) {
           randomizeMapOptions.add("-seed");
           randomizeMapOptions.add(environmentSubstitute(getRandomSeed()));
-        }
-
-        // Special option passed to us when ARFF job is primary job
-        // and user has opted to compute quartiles. In this case
-        // we turn off the output of chunks and just produce
-        // quartiles/histograms
-        if (m_computeQuartilesOnly) {
-          randomizeMapOptions.add("-quartiles-only");
-        }
-
-        if (computeQuartiles && !m_computeQuartilesOnly) {
-          randomizeMapOptions.add("-compute-quartiles");
-        }
-
-        if (generateCharts) {
-          randomizeMapOptions.add("-charts");
         }
 
         m_mrConfig
@@ -644,10 +597,6 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           environmentSubstitute(getCSVMapTaskOptions()));
 
         int numChunks = 0;
-        if (m_computeQuartilesOnly) {
-          // use 10 mappers for randomization in this case
-          setNumRandomizedDataChunks("10");
-        }
         if (DistributedJobConfig.isEmpty(getNumRandomizedDataChunks())
           && DistributedJobConfig
             .isEmpty(getNumInstancesPerRandomizedDataChunk())) {
@@ -715,31 +664,23 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           job =
             m_mrConfig
               .configureForHadoop(
-                m_computeQuartilesOnly ? "Compute quartiles for numeric attributes job"
-                  : "Create randomly shuffled input data chunk job - num chunks: "
-                    + numChunks, conf, m_env);
+                "Create randomly shuffled input data chunk job - num chunks: "
+                  + numChunks, conf, m_env);
         } catch (ClassNotFoundException e) {
           throw new DistributedWekaException(e);
         }
 
-        if (!m_computeQuartilesOnly) {
-          // setup multiple outputs
-          for (int i = 0; i < numChunks; i++) {
-            MultipleOutputs.addNamedOutput(job, "chunk" + i,
-              TextOutputFormat.class, Text.class, Text.class);
-          }
+        // setup multiple outputs
+        for (int i = 0; i < numChunks; i++) {
+          MultipleOutputs.addNamedOutput(job, "chunk" + i,
+            TextOutputFormat.class, Text.class, Text.class);
         }
 
-        if (m_computeQuartilesOnly) {
-          setJobName("Compute quartiles for numeric attributes job");
-        }
         // run the job!
         m_mrConfig.deleteOutputDirectory(job, m_env);
 
-        statusMessage(m_computeQuartilesOnly ? "Submitting compute quartiles job"
-          : "Submitting randomized data chunk job ");
-        logMessage(m_computeQuartilesOnly ? "Submitting compute quartiles job"
-          : "Submitting randomized data chunk job ");
+        statusMessage("Submitting randomized data chunk job ");
+        logMessage("Submitting randomized data chunk job ");
 
         success = runJob(job);
 
