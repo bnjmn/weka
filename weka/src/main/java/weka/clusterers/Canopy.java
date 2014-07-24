@@ -1412,7 +1412,7 @@ public class Canopy extends RandomizableClusterer implements
     }
 
     // now construct a new Canopy encapsulating the final set of canopies
-    System.err.println(finalCanopies);
+    // System.err.println(finalCanopies);
     Canopy finalC = new Canopy();
     finalC.setCanopies(finalCanopies);
     finalC.setMissingValuesReplacer(missingValuesReplacer);
