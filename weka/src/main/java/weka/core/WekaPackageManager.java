@@ -416,7 +416,8 @@ public class WekaPackageManager {
    * @param level logging level
    * @param message message to write
    */
-  protected static void log(weka.core.logging.Logger.Level level, String message) {
+  protected static void
+    log(weka.core.logging.Logger.Level level, String message) {
     try {
       File logFile =
         new File(WEKA_HOME.toString() + File.separator + "weka.log");
@@ -761,6 +762,20 @@ public class WekaPackageManager {
             for (PrintStream p : progress) {
               p.println("[Weka] Can't load " + toLoad.getName() + " because "
                 + d.getTarget() + " can't be loaded.");
+            }
+            return false;
+          }
+
+          // check that the version of installed dependency is OK
+          Package installedD =
+            getInstalledPackageInfo(d.getTarget().getPackage().getName());
+          if (!d.getTarget().checkConstraint(installedD)) {
+            for (PrintStream p : progress) {
+              p.println("[Weka] Can't load " + toLoad.getName()
+                + " because the installed "
+                + d.getTarget().getPackage().getName()
+                + " is not compatible (requires: "
+                + d.getTarget() + ")");
             }
             return false;
           }
