@@ -213,7 +213,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       } catch (Exception ex) {
         ex.printStackTrace();
       }
-      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForClassifierJob(jobTitle, m_job);
     } else if (m_job instanceof weka.distributed.hadoop.WekaClassifierEvaluationHadoopJob) {
       m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
@@ -222,7 +222,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       } catch (Exception ex) {
         ex.printStackTrace();
       }
-      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForEvaluationJob(jobTitle, m_job);
     } else if (m_job instanceof weka.distributed.hadoop.CorrelationMatrixHadoopJob) {
       m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
@@ -231,7 +231,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       } catch (Exception ex) {
         ex.printStackTrace();
       }
-      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForCorrelationMatrixJob(jobTitle, m_job);
     } else if (m_job instanceof weka.distributed.hadoop.WekaScoringHadoopJob) {
       m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
@@ -240,7 +240,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       } catch (Exception ex) {
         ex.printStackTrace();
       }
-      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForScoringJob(jobTitle, m_job);
     } else if (m_job instanceof weka.distributed.hadoop.RandomizedDataChunkHadoopJob) {
       m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
@@ -249,7 +249,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       } catch (Exception ex) {
         ex.printStackTrace();
       }
-      addTabForArffHeaderJob("ARFF header creation", m_tempArffJob);
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForRandomizedDataChunkJob("Random shuffle options", m_job);
     }
 
