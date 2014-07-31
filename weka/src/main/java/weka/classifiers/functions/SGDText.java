@@ -1260,8 +1260,9 @@ public class SGDText extends RandomizableClassifier implements
       } else {
         multiplier = 1.0 - (m_learningRate * m_lambda) / m_numInstances;
       }
-      for (Count c : m_dictionary.values()) {
-        c.m_weight *= multiplier;
+
+      for (Map.Entry<String, Count> c : m_dictionary.entrySet()) {
+        c.getValue().m_weight *= multiplier;
       }
 
       // Only need to do the following if the loss is non-zero
