@@ -91,6 +91,12 @@ import weka.core.tokenizers.WordTokenizer;
  *  If periodic pruning is turned on then this is also used to determine which
  *  words to remove from the dictionary (default = 3).</pre>
  * 
+ * <pre> -min-coeff &lt;double&gt;
+ *  Minimum absolute value of coefficients in the model.
+ *  If periodic pruning is turned on then this
+ *  is also used to prune words from the dictionary
+ *  (default = 0.001</pre>
+ * 
  * <pre> -normalize
  *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
  * 
@@ -162,9 +168,14 @@ public class SGDText extends RandomizableClassifier implements
 
   /**
    * Only consider dictionary words (features) that occur at least this many
-   * times
+   * times.
    */
   protected double m_minWordP = 3;
+
+  /**
+   * Prune terms from the model that have a coefficient smaller than this.
+   */
+  protected double m_minAbsCoefficient = 0.001;
 
   /** Use word frequencies rather than bag-of-words if true */
   protected boolean m_wordFrequencies = false;
@@ -513,6 +524,43 @@ public class SGDText extends RandomizableClassifier implements
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
+  public String minAbsoluteCoefficientValueTipText() {
+    return "The minimum absolute magnitude for model coefficients. Terms "
+      + "with weights smaller than this value are ignored. If periodic "
+      + "pruning is turned on then this is also used to determine if a "
+      + "word should be removed from the dictionary.";
+  }
+
+  /**
+   * Set the minimum absolute magnitude for model coefficients. Terms with
+   * weights smaller than this value are ignored. If periodic pruning is turned
+   * on then this is also used to determine if a word should be removed from the
+   * dictionary
+   * 
+   * @param minCoeff the minimum absolute value of a model coefficient
+   */
+  public void setMinAbsoluteCoefficientValue(double minCoeff) {
+    m_minAbsCoefficient = minCoeff;
+  }
+
+  /**
+   * Get the minimum absolute magnitude for model coefficients. Terms with
+   * weights smaller than this value are ignored. If periodic pruning is turned
+   * on this then is also used to determine if a word should be removed from the
+   * dictionary
+   * 
+   * @return the minimum absolute value of a model coefficient
+   */
+  public double getMinAbsoluteCoefficientValue() {
+    return m_minAbsCoefficient;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
   public String normalizeDocLengthTipText() {
     return "If true then document length is normalized according "
       + "to the settings for norm and lnorm";
@@ -772,6 +820,12 @@ public class SGDText extends RandomizableClassifier implements
       + "is turned on then this is also used to determine which\n\t"
       + "words to remove from the dictionary (default = 3).", "M", 1,
       "-M <double>"));
+
+    newVector.add(new Option("\tMinimum absolute value of coefficients " +
+      "in the model.\n\tIf periodic pruning is turned on then this\n\t"
+      + "is also used to prune words from the dictionary\n\t"
+      + "(default = 0.001", "min-coeff", 1, "-min-coeff <double>"));
+
     newVector.addElement(new Option(
       "\tNormalize document length (use in conjunction with -norm and "
         + "-lnorm)", "normalize", 0, "-normalize"));
@@ -832,6 +886,12 @@ public class SGDText extends RandomizableClassifier implements
    *  Minimum word frequency. Words with less than this frequence are ignored.
    *  If periodic pruning is turned on then this is also used to determine which
    *  words to remove from the dictionary (default = 3).</pre>
+   * 
+   * <pre> -min-coeff &lt;double&gt;
+   *  Minimum absolute value of coefficients in the model.
+   *  If periodic pruning is turned on then this
+   *  is also used to prune words from the dictionary
+   *  (default = 0.001</pre>
    * 
    * <pre> -normalize
    *  Normalize document length (use in conjunction with -norm and -lnorm)</pre>
@@ -908,6 +968,11 @@ public class SGDText extends RandomizableClassifier implements
     String minFreq = Utils.getOption("M", options);
     if (minFreq.length() > 0) {
       setMinWordFrequency(Double.parseDouble(minFreq));
+    }
+
+    String minCoeff = Utils.getOption("min-coeff", options);
+    if (minCoeff.length() > 0) {
+      setMinAbsoluteCoefficientValue(Double.parseDouble(minCoeff));
     }
 
     setNormalizeDocLength(Utils.getFlag("normalize", options));
@@ -1010,6 +1075,9 @@ public class SGDText extends RandomizableClassifier implements
     options.add("" + getPeriodicPruning());
     options.add("-M");
     options.add("" + getMinWordFrequency());
+
+    options.add("-min-coeff");
+    options.add("" + getMinAbsoluteCoefficientValue());
 
     if (getNormalizeDocLength()) {
       options.add("-normalize");
@@ -1278,7 +1346,8 @@ public class SGDText extends RandomizableClassifier implements
       .iterator();
     while (entries.hasNext()) {
       Map.Entry<String, Count> entry = entries.next();
-      if (entry.getValue().m_count < m_minWordP) {
+      if (entry.getValue().m_count < m_minWordP
+        || Math.abs(entry.getValue().m_weight) < m_minAbsCoefficient) {
         entries.remove();
       }
     }
@@ -1353,7 +1422,8 @@ public class SGDText extends RandomizableClassifier implements
 
       Count weight = m_dictionary.get(word);
 
-      if (weight != null && weight.m_count >= m_minWordP) {
+      if (weight != null && weight.m_count >= m_minWordP
+        && Math.abs(weight.m_weight) >= m_minAbsCoefficient) {
         result += freq * weight.m_weight;
       }
     }
@@ -1381,7 +1451,8 @@ public class SGDText extends RandomizableClassifier implements
       .iterator();
     while (entries.hasNext()) {
       Map.Entry<String, Count> entry = entries.next();
-      if (entry.getValue().m_count >= m_minWordP) {
+      if (entry.getValue().m_count >= m_minWordP
+        && Math.abs(entry.getValue().m_weight) >= m_minAbsCoefficient) {
         dictSize++;
       }
     }
@@ -1395,7 +1466,8 @@ public class SGDText extends RandomizableClassifier implements
     while (entries.hasNext()) {
       Map.Entry<String, Count> entry = entries.next();
 
-      if (entry.getValue().m_count >= m_minWordP) {
+      if (entry.getValue().m_count >= m_minWordP
+        && Math.abs(entry.getValue().m_weight) >= m_minAbsCoefficient) {
         if (printed > 0) {
           buff.append(" + ");
         } else {
@@ -1439,7 +1511,8 @@ public class SGDText extends RandomizableClassifier implements
         .iterator();
       while (entries.hasNext()) {
         Map.Entry<String, Count> entry = entries.next();
-        if (entry.getValue().m_count >= m_minWordP) {
+        if (entry.getValue().m_count >= m_minWordP
+          && Math.abs(entry.getValue().m_weight) >= m_minAbsCoefficient) {
           size++;
         }
       }
