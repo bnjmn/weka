@@ -213,11 +213,11 @@
     <!-- Delete the ${build} and ${dist} directory trees -->
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
+    <delete dir="${doc}"/>
   </target>
 
   <target name="superclean" depends="clean" description="Clean plus removes source trees! and doc directories">
   <!-- WARNING, this deletes the source and doc directories -->
     <delete dir="${src}"/>
-    <delete dir="${doc}"/>
   </target>
 </project>
