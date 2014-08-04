@@ -279,8 +279,8 @@ public class PredictiveApriori extends AbstractAssociator implements
 
     if (m_classIndex == -1) {
       m_instances.setClassIndex(m_instances.numAttributes() - 1);
-    } else if (m_classIndex < m_instances.numAttributes() && m_classIndex >= 0) {
-      m_instances.setClassIndex(m_classIndex);
+    } else if (m_classIndex <= m_instances.numAttributes() && m_classIndex > 0) {
+      m_instances.setClassIndex(m_classIndex - 1);
     } else {
       throw new Exception("Invalid class index.");
     }
@@ -512,7 +512,13 @@ public class PredictiveApriori extends AbstractAssociator implements
 
     String classIndexString = Utils.getOption('c', options);
     if (classIndexString.length() != 0) {
-      m_classIndex = Integer.parseInt(classIndexString);
+      if (classIndexString.equals("first")) {
+        m_classIndex = 1;
+      } else if (classIndexString.equals("last")) {
+        m_classIndex = -1;
+      } else {
+        m_classIndex = Integer.parseInt(classIndexString);
+      }
     }
 
     m_car = Utils.getFlag('A', options);
