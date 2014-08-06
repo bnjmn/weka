@@ -49,6 +49,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.rules.ZeroR;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -800,6 +801,10 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       m_ie.setStatus(status);
       m_ie.setClassifier(m_Classifier);
       m_ie.setCurrentInstance(m_incrementalEvent.getInstance());
+      if (status == InstanceEvent.BATCH_FINISHED
+        && m_Classifier instanceof UpdateableBatchProcessor) {
+        ((UpdateableBatchProcessor) m_Classifier).batchFinished();
+      }
 
       notifyIncrementalClassifierListeners(m_ie);
 
@@ -1638,7 +1643,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
    * 
    * @param cl a <code>BatchClassifierListener</code> value
    */
-  public synchronized void addBatchClassifierListener(BatchClassifierListener cl) {
+  public synchronized void
+    addBatchClassifierListener(BatchClassifierListener cl) {
     m_batchClassifierListeners.addElement(cl);
   }
 
@@ -1780,7 +1786,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
    * @param cl a ConfigurationListener.
    */
   @Override
-  public synchronized void removeConfigurationListener(ConfigurationListener cl) {
+  public synchronized void
+    removeConfigurationListener(ConfigurationListener cl) {
 
   }
 
@@ -2259,7 +2266,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     }
 
     if ((m_executorPool == null || (m_executorPool.getQueue().size() == 0 && m_executorPool
-      .getActiveCount() == 0)) && m_Classifier != null) {
+      .getActiveCount() == 0))
+      && m_Classifier != null) {
       newVector.addElement("Save model");
     }
 
@@ -2444,7 +2452,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       + "|"
       + ((m_ClassifierTemplate instanceof OptionHandler && Utils.joinOptions(
         ((OptionHandler) m_ClassifierTemplate).getOptions()).length() > 0) ? Utils
-        .joinOptions(((OptionHandler) m_ClassifierTemplate).getOptions()) + "|"
+        .joinOptions(((OptionHandler) m_ClassifierTemplate).getOptions())
+        + "|"
         : "");
   }
 
