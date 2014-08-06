@@ -52,6 +52,7 @@ import weka.classifiers.ConditionalDensityEstimator;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.IntervalEstimator;
 import weka.classifiers.Sourcable;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.PlainText;
@@ -1478,6 +1479,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         trainingEvaluation.updatePriors(trainInst);
         testingEvaluation.updatePriors(trainInst);
         ((UpdateableClassifier) classifier).updateClassifier(trainInst);
+      }
+      if (classifier instanceof UpdateableBatchProcessor) {
+        ((UpdateableBatchProcessor) classifier).batchFinished();
       }
       trainTimeElapsed = System.currentTimeMillis() - trainTimeStart;
     } else if (objectInputFileName.length() == 0) {

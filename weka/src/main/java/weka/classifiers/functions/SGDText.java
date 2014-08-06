@@ -32,6 +32,7 @@ import java.util.Random;
 import java.util.Vector;
 
 import weka.classifiers.RandomizableClassifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Aggregateable;
 import weka.core.Attribute;
@@ -138,7 +139,8 @@ import weka.core.tokenizers.WordTokenizer;
  * 
  */
 public class SGDText extends RandomizableClassifier implements
-  UpdateableClassifier, WeightedInstancesHandler, Aggregateable<SGDText> {
+  UpdateableClassifier, UpdateableBatchProcessor, 
+  WeightedInstancesHandler, Aggregateable<SGDText> {
 
   /** For serialization */
   private static final long serialVersionUID = 7200171484002029584L;
@@ -1183,6 +1185,7 @@ public class SGDText extends RandomizableClassifier implements
     if (data.numInstances() > 0) {
       data.randomize(new Random(getSeed()));
       train(data);
+      pruneDictionary(true);
     }
   }
 
@@ -1334,12 +1337,12 @@ public class SGDText extends RandomizableClassifier implements
     }
 
     if (updateDictionary) {
-      pruneDictionary();
+      pruneDictionary(false);
     }
   }
 
-  protected void pruneDictionary() {
-    if (m_periodicP <= 0 || m_t % m_periodicP > 0) {
+  protected void pruneDictionary(boolean force) {
+    if ((m_periodicP <= 0 || m_t % m_periodicP > 0) && !force) {
       return;
     }
 
@@ -1597,6 +1600,8 @@ public class SGDText extends RandomizableClassifier implements
       throw new Exception("Unable to finalize aggregation - "
         + "haven't seen any models to aggregate");
     }
+    
+    pruneDictionary(true);
 
     Iterator<Map.Entry<String, SGDText.Count>> entries = m_dictionary
       .entrySet().iterator();
@@ -1611,6 +1616,11 @@ public class SGDText extends RandomizableClassifier implements
 
     // aggregation complete
     m_numModels = 0;
+  }
+  
+  @Override
+  public void batchFinished() throws Exception {
+    pruneDictionary(true);
   }
 
   /**

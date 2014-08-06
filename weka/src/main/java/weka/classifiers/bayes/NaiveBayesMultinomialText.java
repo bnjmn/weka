@@ -33,6 +33,7 @@ import java.util.Set;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Aggregateable;
 import weka.core.Capabilities;
@@ -109,7 +110,7 @@ import weka.core.tokenizers.WordTokenizer;
  * 
  */
 public class NaiveBayesMultinomialText extends AbstractClassifier implements
-  UpdateableClassifier, WeightedInstancesHandler,
+  UpdateableClassifier, UpdateableBatchProcessor, WeightedInstancesHandler,
   Aggregateable<NaiveBayesMultinomialText> {
 
   /** For serialization */
@@ -259,6 +260,10 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     for (int i = 0; i < data.numInstances(); i++) {
       updateClassifier(data.instance(i));
+    }
+    
+    if (data.numInstances() > 0) {
+      pruneDictionary(true);
     }
   }
 
@@ -1211,6 +1216,11 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
     pruneDictionary(true);
   }
+  
+  @Override
+  public void batchFinished() throws Exception {
+    pruneDictionary(true);
+  }
 
   /**
    * Main method for testing this class.
@@ -1220,6 +1230,5 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
   public static void main(String[] args) {
     runClassifier(new NaiveBayesMultinomialText(), args);
   }
-
 }
 
