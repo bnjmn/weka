@@ -1097,6 +1097,11 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       result.append(m_data.classAttribute().value(i)).append("\t")
         .append(Double.toString(m_probOfClass[i])).append("\n");
     }
+    
+    if (master.size() > 150000) {
+      result.append("\nFrequency table ommitted due to size\n");
+      return result.toString();
+    }
 
     result.append("\nThe frequency of a word given the class\n");
     result.append("-----------------------------------------\n");
