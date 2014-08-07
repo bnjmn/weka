@@ -49,7 +49,8 @@ import weka.core.xml.XStream;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
  */
-@KFStep(category = "DataSinks", toolTipText = "Save a batch or incremental model to file")
+@KFStep(category = "DataSinks",
+  toolTipText = "Save a batch or incremental model to file")
 public class SerializedModelSaver extends JPanel implements BeanCommon,
   Visible, BatchClassifierListener, IncrementalClassifierListener,
   BatchClustererListener, EnvironmentHandler, Serializable {
@@ -79,6 +80,15 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    * The prefix for the file name (model + training set info will be appended)
    */
   private String m_filenamePrefix = "";
+
+  /** Counter for use when processing incremental classifier events */
+  protected transient int m_counter;
+
+  /**
+   * How often to save an incremental classifier (<= 0 means only at the end of
+   * the stream)
+   */
+  protected int m_incrementalSaveSchedule = 0;
 
   /**
    * The directory to hold the saved model(s)
@@ -362,8 +372,11 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    */
   @Override
   public void acceptClassifier(final IncrementalClassifierEvent ce) {
-    if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED) {
-      // Only save model when the end of the stream is reached
+    if (ce.getStatus() == IncrementalClassifierEvent.BATCH_FINISHED ||
+      (m_incrementalSaveSchedule > 0
+        && (m_counter % m_incrementalSaveSchedule == 0) && m_counter > 0)) {
+      // Only save model when the end of the stream is reached or according
+      // to our save schedule (if set)
       Instances header = ce.getStructure();
       String titleString = ce.getClassifier().getClass().getName();
       titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
@@ -411,7 +424,10 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       fileName = tempFile.getAbsolutePath() + File.separator + fileName;
 
       saveModel(fileName, header, ce.getClassifier());
+    } else if (ce.getStatus() == IncrementalClassifierEvent.NEW_BATCH) {
+      m_counter = 0;
     }
+    m_counter++;
   }
 
   /**
@@ -492,6 +508,9 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       // default to binary if validation fails
       m_fileFormat = s_fileFormatsAvailable.get(0);
     }
+
+    m_logger.logMessage("[SerializedModelSaver] " + statusMessagePrefix()
+      + " Saving model " + model.getClass().getName());
     try {
       switch (m_fileFormat.getID()) {
       case KOMLV:
@@ -656,6 +675,26 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
    */
   public void setPrefix(String p) {
     m_filenamePrefix = p;
+  }
+
+  /**
+   * Set how often to save incremental models. <= 0 means only at the end of the
+   * stream
+   * 
+   * @param s how often to save (after every s instances)
+   */
+  public void setIncrementalSaveSchedule(int s) {
+    m_incrementalSaveSchedule = s;
+  }
+
+  /**
+   * Get how often to save incremental models. <= 0 means only at the end of the
+   * stream
+   * 
+   * @return how often to save (after every s instances)
+   */
+  public int getIncrementalSaveSchedule() {
+    return m_incrementalSaveSchedule;
   }
 
   /**
