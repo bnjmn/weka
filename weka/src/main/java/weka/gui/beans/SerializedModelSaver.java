@@ -35,6 +35,7 @@ import java.util.Vector;
 
 import javax.swing.JPanel;
 
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instances;
@@ -509,6 +510,20 @@ public class SerializedModelSaver extends JPanel implements BeanCommon,
       m_fileFormat = s_fileFormatsAvailable.get(0);
     }
 
+    if (model instanceof UpdateableBatchProcessor) {
+      // make sure model cleans up before saving
+      try {
+        ((UpdateableBatchProcessor) model).batchFinished();
+      } catch (Exception ex) {
+        System.err.println("[SerializedModelSaver] Problem saving model");
+        if (m_logger != null) {
+          m_logger.logMessage("[SerializedModelSaver] " + statusMessagePrefix()
+            + " Problem saving model. Reason: " + ex.getMessage());
+          m_logger.statusMessage(statusMessagePrefix()
+            + "ERROR (See log for details)");
+        }
+      }
+    }
     m_logger.logMessage("[SerializedModelSaver] " + statusMessagePrefix()
       + " Saving model " + model.getClass().getName());
     try {
