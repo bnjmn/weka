@@ -75,6 +75,12 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
   protected transient ArffReader m_ArffReader = null;
 
   /**
+   *  Whether the values of string attributes should be retained in
+   *  memory when reading incrementally
+   */
+  protected boolean m_retainStringVals;
+
+  /**
    * Reads data from an ARFF file, either in incremental or batch mode.
    * <p/>
    * 
@@ -128,7 +134,11 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
 
     protected boolean m_batchMode = true;
 
-    protected boolean m_retainStringValues = true;
+    /**
+     * Whether the values for string attributes will accumulate in the header
+     * when reading incrementally
+     */
+    protected boolean m_retainStringValues = false;
 
     /** Field separator (single character string) to use instead of the defaults */
     protected String m_fieldSeparator;
@@ -145,6 +155,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @see #getData()
      */
     public ArffReader(Reader reader) throws IOException {
+      m_retainStringValues = true;
+      m_batchMode = true;
       m_Tokenizer = new StreamTokenizer(reader);
       initTokenizer();
 
@@ -155,7 +167,6 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       while ((inst = readInstance(m_Data)) != null) {
         m_Data.add(inst);
       }
-      ;
 
       compactify();
     }
@@ -170,8 +181,9 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * 
      * @param reader the reader to use
      * @param capacity the capacity of the new dataset
+     * @param batch true if reading in batch mode
      * @throws IOException if something goes wrong
-     * @throws IllegalArgumentException if capacity is negative
+     * @throws IOException if a problem occurs
      * @see #getStructure()
      * @see #readInstance(Instances)
      */
@@ -181,8 +193,6 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       m_batchMode = batch;
       if (batch) {
         m_retainStringValues = true;
-      } else {
-        m_retainStringValues = false;
       }
 
       if (capacity < 0) {
@@ -219,7 +229,6 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       while ((inst = readInstance(m_Data)) != null) {
         m_Data.add(inst);
       }
-      ;
 
       compactify();
     }
@@ -255,8 +264,7 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
      * @param template the template header
      * @param lines the lines read so far
      * @param capacity the capacity of the new dataset
-     * @param batch true if the values of string attributes should be collected
-     *          in the header
+     * @param batch true if the data is going to be read in batch mode
      * @param fieldSepAndEnclosures an optional array of Strings containing the
      *          field separator and enclosures to use instead of the defaults.
      *          The first entry in the array is expected to be the single
@@ -271,8 +279,6 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       m_batchMode = batch;
       if (batch) {
         m_retainStringValues = true;
-      } else {
-        m_retainStringValues = false;
       }
 
       if (fieldSepAndEnclosures != null && fieldSepAndEnclosures.length > 0) {
@@ -953,7 +959,6 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
     protected void readTillEOL() throws IOException {
       while (m_Tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
       }
-      ;
 
       m_Tokenizer.pushBack();
     }
@@ -977,6 +982,28 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
     }
 
     /**
+     * Set whether to retain the values of string attributes in memory (in the
+     * header) when reading incrementally.
+     * 
+     * @param retain true if string values are to be retained in memory when
+     *          reading incrementally
+     */
+    public void setRetainStringValues(boolean retain) {
+      m_retainStringValues = retain;
+    }
+
+    /**
+     * Get whether to retain the values of string attributes in memory (in the
+     * header) when reading incrementally.
+     * 
+     * @return true if string values are to be retained in memory when reading
+     *         incrementally
+     */
+    public boolean getRetainStringValues() {
+      return m_retainStringValues;
+    }
+
+    /**
      * Returns the revision string.
      * 
      * @return the revision
@@ -996,6 +1023,40 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
   public String globalInfo() {
     return "Reads a source that is in arff (attribute relation file format) "
       + "format. ";
+  }
+
+  /**
+   * Tool tip text for this property
+   * 
+   * @return the tool tip for this property
+   */
+  public String retainStringValsTipText() {
+    return "If true then the values of string attributes are "
+      + "retained in memory when reading incrementally. Leave this "
+      + "set to false when using incremental classifiers in the "
+      + "Knowledge Flow.";
+  }
+
+  /**
+   * Set whether to retain the values of string attributes in memory (in the
+   * header) when reading incrementally.
+   * 
+   * @param retain true if string values are to be retained in memory when
+   *          reading incrementally
+   */
+  public void setRetainStringVals(boolean retain) {
+    m_retainStringVals = retain;
+  }
+
+  /**
+   * Get whether to retain the values of string attributes in memory (in the
+   * header) when reading incrementally.
+   * 
+   * @return true if string values are to be retained in memory when reading
+   *         incrementally
+   */
+  public boolean getRetainStringVals() {
+    return m_retainStringVals;
   }
 
   /**
@@ -1142,6 +1203,7 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       try {
         m_ArffReader =
           new ArffReader(m_sourceReader, 1, (getRetrieval() == BATCH));
+        m_ArffReader.setRetainStringValues(getRetainStringVals());
         m_structure = m_ArffReader.getStructure();
       } catch (Exception ex) {
         throw new IOException("Unable to determine structure as arff (Reason: "
