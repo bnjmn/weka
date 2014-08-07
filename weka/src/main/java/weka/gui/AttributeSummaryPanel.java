@@ -229,6 +229,9 @@ public class AttributeSummaryPanel extends JPanel {
     m_StatsTable.setModel(new DefaultTableModel());
 
     m_allEqualWeights = true;
+    if (m_Instances.numInstances() == 0) {
+      return;
+    }
     double w = m_Instances.instance(0).weight();
     for (int i = 1; i < m_Instances.numInstances(); i++) {
       if (m_Instances.instance(i).weight() != w) {

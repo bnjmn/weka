@@ -21,10 +21,7 @@
 
 package weka.core;
 
-import java.io.IOException;
 import java.io.Serializable;
-import java.io.StreamTokenizer;
-import java.io.StringReader;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -145,62 +142,38 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public final static String DUMMY_STRING_VAL = "*WEKA*DUMMY*STRING*FOR*STRING*ATTRIBUTES*";
 
   /** Strings longer than this will be stored compressed. */
-  private static final int STRING_COMPRESS_THRESHOLD = 200;
+  protected static final int STRING_COMPRESS_THRESHOLD = 200;
 
   /** The attribute's name. */
-  private final/* @ spec_public non_null @ */String m_Name;
+  protected final/* @ spec_public non_null @ */String m_Name;
 
   /** The attribute's type. */
-  private/* @ spec_public @ */int m_Type;
+  protected/* @ spec_public @ */int m_Type;
   /*
    * @ invariant m_Type == NUMERIC || m_Type == DATE || m_Type == STRING ||
    * m_Type == NOMINAL || m_Type == RELATIONAL;
    */
 
   /** The attribute's values (if nominal or string). */
-  private/* @ spec_public @ */ArrayList<Object> m_Values;
+  protected/* @ spec_public @ */ArrayList<Object> m_Values;
 
   /** Mapping of values to indices (if nominal or string). */
-  private Hashtable<Object, Integer> m_Hashtable;
+  protected Hashtable<Object, Integer> m_Hashtable;
 
   /** The header information for a relation-valued attribute. */
-  private Instances m_Header;
+  protected Instances m_Header;
 
   /** Date format specification for date attributes */
-  private SimpleDateFormat m_DateFormat;
+  protected SimpleDateFormat m_DateFormat;
 
   /** The attribute's index. */
-  private/* @ spec_public @ */int m_Index;
-
-  /** The attribute's metadata. */
-  private ProtectedProperties m_Metadata;
-
-  /** The attribute's ordering. */
-  private int m_Ordering;
-
-  /** Whether the attribute is regular. */
-  private boolean m_IsRegular;
-
-  /** Whether the attribute is averagable. */
-  private boolean m_IsAveragable;
-
-  /** Whether the attribute has a zeropoint. */
-  private boolean m_HasZeropoint;
+  protected/* @ spec_public @ */int m_Index;
 
   /** The attribute's weight. */
-  private double m_Weight;
+  protected double m_Weight;
 
-  /** The attribute's lower numeric bound. */
-  private double m_LowerBound;
-
-  /** Whether the lower bound is open. */
-  private boolean m_LowerBoundIsOpen;
-
-  /** The attribute's upper numeric bound. */
-  private double m_UpperBound;
-
-  /** Whether the upper bound is open */
-  private boolean m_UpperBoundIsOpen;
+  /** The meta data for the attribute. */
+  protected AttributeMetaInfo m_AttributeMetaInfo;
 
   /**
    * Constructor for a numeric attribute.
@@ -211,7 +184,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   // @ ensures m_Name == attributeName;
   public Attribute(String attributeName) {
 
-    this(attributeName, new ProtectedProperties(new Properties()));
+    this(attributeName, (ProtectedProperties)null);
   }
 
   /**
@@ -231,7 +204,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     m_Hashtable = null;
     m_Header = null;
     m_Type = NUMERIC;
-    setMetadata(metadata);
+    if (metadata != null) {
+      m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
+    }
   }
 
   /**
@@ -246,7 +221,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   // @ ensures m_Name == attributeName;
   public Attribute(String attributeName, String dateFormat) {
 
-    this(attributeName, dateFormat, new ProtectedProperties(new Properties()));
+    this(attributeName, dateFormat, (ProtectedProperties)null);
   }
 
   /**
@@ -276,7 +251,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
       m_DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
     }
     m_DateFormat.setLenient(false);
-    setMetadata(metadata);
+    if (metadata != null) {
+      m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
+    }
   }
 
   /**
@@ -292,8 +269,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   // @ ensures m_Name == attributeName;
   public Attribute(String attributeName, List<String> attributeValues) {
 
-    this(attributeName, attributeValues, new ProtectedProperties(
-      new Properties()));
+    this(attributeName, attributeValues, (ProtectedProperties)null);
   }
 
   /**
@@ -353,7 +329,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
       }
       m_Type = NOMINAL;
     }
-    setMetadata(metadata);
+    if (metadata != null) {
+      m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
+    }
   }
 
   /**
@@ -364,7 +342,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public Attribute(String attributeName, Instances header) {
 
-    this(attributeName, header, new ProtectedProperties(new Properties()));
+    this(attributeName, header, (ProtectedProperties)null);
   }
 
   /**
@@ -387,7 +365,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     m_Hashtable = new Hashtable<Object, Integer>();
     m_Header = header;
     m_Type = RELATIONAL;
-    setMetadata(metadata);
+    if (metadata != null) {
+      m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
+    }
   }
 
   /**
@@ -399,17 +379,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   @Override
   public/* @ pure non_null @ */Object copy() {
 
-    Attribute copy = new Attribute(m_Name);
-
-    copy.m_Index = m_Index;
-    copy.m_Type = m_Type;
-    copy.m_Values = m_Values;
-    copy.m_Hashtable = m_Hashtable;
-    copy.m_DateFormat = m_DateFormat;
-    copy.m_Header = m_Header;
-    copy.setMetadata(m_Metadata);
-
-    return copy;
+    return copy(m_Name);
   }
 
   /**
@@ -1063,7 +1033,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     copy.m_Values = m_Values;
     copy.m_Hashtable = m_Hashtable;
     copy.m_Header = m_Header;
-    copy.setMetadata(m_Metadata);
+    copy.m_Weight = m_Weight;
+    copy.m_AttributeMetaInfo = m_AttributeMetaInfo;
 
     return copy;
   }
@@ -1243,13 +1214,17 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   }
 
   /**
-   * Returns the properties supplied for this attribute.
+   * Returns the properties supplied for this attribute. Returns null
+   * if there is no meta data for this attribute.
    * 
    * @return metadata for this attribute
    */
   public final/* @ pure @ */ProtectedProperties getMetadata() {
 
-    return m_Metadata;
+    if (m_AttributeMetaInfo == null) {
+      return null;
+    }
+    return m_AttributeMetaInfo.m_Metadata;
   }
 
   /**
@@ -1263,7 +1238,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */int ordering() {
 
-    return m_Ordering;
+    if (m_AttributeMetaInfo == null) {
+      return ORDERING_ORDERED;
+    }
+    return m_AttributeMetaInfo.m_Ordering;
   }
 
   /**
@@ -1273,7 +1251,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */boolean isRegular() {
 
-    return m_IsRegular;
+    if (m_AttributeMetaInfo == null) {
+      return true;
+    }
+    return m_AttributeMetaInfo.m_IsRegular;
   }
 
   /**
@@ -1283,7 +1264,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */boolean isAveragable() {
 
-    return m_IsAveragable;
+    if (m_AttributeMetaInfo == null) {
+      return true;
+    }
+    return m_AttributeMetaInfo.m_IsAveragable;
   }
 
   /**
@@ -1294,7 +1278,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */boolean hasZeropoint() {
 
-    return m_HasZeropoint;
+    if (m_AttributeMetaInfo == null) {
+      return true;
+    }
+    return m_AttributeMetaInfo.m_HasZeropoint;
   }
 
   /**
@@ -1308,28 +1295,14 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   }
 
   /**
-   * Sets the new attribute's weight
+   * Sets the new attribute's weight. Does not modify the weight info stored in the
+   * attribute's meta data object!
    * 
    * @param value the new weight
    */
   public void setWeight(double value) {
-    Properties props;
-    Enumeration<?> names;
-    String name;
 
     m_Weight = value;
-
-    // generate new metadata object
-    props = new Properties();
-    names = m_Metadata.propertyNames();
-    while (names.hasMoreElements()) {
-      name = (String) names.nextElement();
-      if (!name.equals("weight")) {
-        props.setProperty(name, m_Metadata.getProperty(name));
-      }
-    }
-    props.setProperty("weight", "" + m_Weight);
-    m_Metadata = new ProtectedProperties(props);
   }
 
   /**
@@ -1339,7 +1312,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */double getLowerNumericBound() {
 
-    return m_LowerBound;
+    if (m_AttributeMetaInfo == null) {
+      return -Double.MAX_VALUE;
+    }
+    return m_AttributeMetaInfo.m_LowerBound;
   }
 
   /**
@@ -1349,7 +1325,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */boolean lowerNumericBoundIsOpen() {
 
-    return m_LowerBoundIsOpen;
+    if (m_AttributeMetaInfo == null) {
+      return true;
+    }
+    return m_AttributeMetaInfo.m_LowerBoundIsOpen;
   }
 
   /**
@@ -1359,7 +1338,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */double getUpperNumericBound() {
 
-    return m_UpperBound;
+    if (m_AttributeMetaInfo == null) {
+      return Double.MAX_VALUE;
+    }
+    return m_AttributeMetaInfo.m_UpperBound;
   }
 
   /**
@@ -1369,7 +1351,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final/* @ pure @ */boolean upperNumericBoundIsOpen() {
 
-    return m_UpperBoundIsOpen;
+    if (m_AttributeMetaInfo == null) {
+      return true;
+    }
+    return m_AttributeMetaInfo.m_UpperBoundIsOpen;
   }
 
   /**
@@ -1391,259 +1376,30 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
         return false;
       }
     } else {
+      if (m_AttributeMetaInfo == null) {
+        return true;
+      }
       // do numeric bounds check
-      if (m_LowerBoundIsOpen) {
-        if (value <= m_LowerBound) {
+      if (m_AttributeMetaInfo.m_LowerBoundIsOpen) {
+        if (value <= m_AttributeMetaInfo.m_LowerBound) {
           return false;
         }
       } else {
-        if (value < m_LowerBound) {
+        if (value < m_AttributeMetaInfo.m_LowerBound) {
           return false;
         }
       }
-      if (m_UpperBoundIsOpen) {
-        if (value >= m_UpperBound) {
+      if (m_AttributeMetaInfo.m_UpperBoundIsOpen) {
+        if (value >= m_AttributeMetaInfo.m_UpperBound) {
           return false;
         }
       } else {
-        if (value > m_UpperBound) {
+        if (value > m_AttributeMetaInfo.m_UpperBound) {
           return false;
         }
       }
     }
     return true;
-  }
-
-  /**
-   * Sets the metadata for the attribute. Processes the strings stored in the
-   * metadata of the attribute so that the properties can be set up for the
-   * easy-access metadata methods. Any strings sought that are omitted will
-   * cause default values to be set.
-   * 
-   * The following properties are recognised: ordering, averageable, zeropoint,
-   * regular, weight, and range.
-   * 
-   * All other properties can be queried and handled appropriately by classes
-   * calling the getMetadata() method.
-   * 
-   * @param metadata the metadata
-   * @throws IllegalArgumentException if the properties are not consistent
-   */
-  // @ requires metadata != null;
-  private void setMetadata(ProtectedProperties metadata) {
-
-    m_Metadata = metadata;
-
-    if (m_Type == DATE) {
-      m_Ordering = ORDERING_ORDERED;
-      m_IsRegular = true;
-      m_IsAveragable = false;
-      m_HasZeropoint = false;
-    } else {
-
-      // get ordering
-      String orderString = m_Metadata.getProperty("ordering", "");
-
-      // numeric ordered attributes are averagable and zeropoint by default
-      String def;
-      if (m_Type == NUMERIC && orderString.compareTo("modulo") != 0
-        && orderString.compareTo("symbolic") != 0) {
-        def = "true";
-      } else {
-        def = "false";
-      }
-
-      // determine boolean states
-      m_IsAveragable = (m_Metadata.getProperty("averageable", def).compareTo(
-        "true") == 0);
-      m_HasZeropoint = (m_Metadata.getProperty("zeropoint", def).compareTo(
-        "true") == 0);
-      // averagable or zeropoint implies regular
-      if (m_IsAveragable || m_HasZeropoint) {
-        def = "true";
-      }
-      m_IsRegular = (m_Metadata.getProperty("regular", def).compareTo("true") == 0);
-
-      // determine ordering
-      if (orderString.compareTo("symbolic") == 0) {
-        m_Ordering = ORDERING_SYMBOLIC;
-      } else if (orderString.compareTo("ordered") == 0) {
-        m_Ordering = ORDERING_ORDERED;
-      } else if (orderString.compareTo("modulo") == 0) {
-        m_Ordering = ORDERING_MODULO;
-      } else {
-        if (m_Type == NUMERIC || m_IsAveragable || m_HasZeropoint) {
-          m_Ordering = ORDERING_ORDERED;
-        } else {
-          m_Ordering = ORDERING_SYMBOLIC;
-        }
-      }
-    }
-
-    // consistency checks
-    if (m_IsAveragable && !m_IsRegular) {
-      throw new IllegalArgumentException("An averagable attribute must be"
-        + " regular");
-    }
-    if (m_HasZeropoint && !m_IsRegular) {
-      throw new IllegalArgumentException("A zeropoint attribute must be"
-        + " regular");
-    }
-    if (m_IsRegular && m_Ordering == ORDERING_SYMBOLIC) {
-      throw new IllegalArgumentException("A symbolic attribute cannot be"
-        + " regular");
-    }
-    if (m_IsAveragable && m_Ordering != ORDERING_ORDERED) {
-      throw new IllegalArgumentException("An averagable attribute must be"
-        + " ordered");
-    }
-    if (m_HasZeropoint && m_Ordering != ORDERING_ORDERED) {
-      throw new IllegalArgumentException("A zeropoint attribute must be"
-        + " ordered");
-    }
-
-    // determine weight
-    m_Weight = 1.0;
-    String weightString = m_Metadata.getProperty("weight");
-    if (weightString != null) {
-      try {
-        m_Weight = Double.valueOf(weightString).doubleValue();
-      } catch (NumberFormatException e) {
-        // Check if value is really a number
-        throw new IllegalArgumentException("Not a valid attribute weight: '"
-          + weightString + "'");
-      }
-    }
-
-    // determine numeric range
-    if (m_Type == NUMERIC) {
-      setNumericRange(m_Metadata.getProperty("range"));
-    }
-  }
-
-  /**
-   * Sets the numeric range based on a string. If the string is null the range
-   * will default to [-inf,+inf]. A square brace represents a closed interval, a
-   * curved brace represents an open interval, and 'inf' represents infinity.
-   * Examples of valid range strings: "[-inf,20)","(-13.5,-5.2)","(5,inf]"
-   * 
-   * @param rangeString the string to parse as the attribute's numeric range
-   * @throws IllegalArgumentException if the range is not valid
-   */
-  // @ requires rangeString != null;
-  private void setNumericRange(String rangeString) {
-    // set defaults
-    m_LowerBound = Double.NEGATIVE_INFINITY;
-    m_LowerBoundIsOpen = false;
-    m_UpperBound = Double.POSITIVE_INFINITY;
-    m_UpperBoundIsOpen = false;
-
-    if (rangeString == null) {
-      return;
-    }
-
-    // set up a tokenzier to parse the string
-    StreamTokenizer tokenizer = new StreamTokenizer(new StringReader(
-      rangeString));
-    tokenizer.resetSyntax();
-    tokenizer.whitespaceChars(0, ' ');
-    tokenizer.wordChars(' ' + 1, '\u00FF');
-    tokenizer.ordinaryChar('[');
-    tokenizer.ordinaryChar('(');
-    tokenizer.ordinaryChar(',');
-    tokenizer.ordinaryChar(']');
-    tokenizer.ordinaryChar(')');
-
-    try {
-
-      // get opening brace
-      tokenizer.nextToken();
-
-      if (tokenizer.ttype == '[') {
-        m_LowerBoundIsOpen = false;
-      } else if (tokenizer.ttype == '(') {
-        m_LowerBoundIsOpen = true;
-      } else {
-        throw new IllegalArgumentException("Expected opening brace on range,"
-          + " found: " + tokenizer.toString());
-      }
-
-      // get lower bound
-      tokenizer.nextToken();
-      if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-        throw new IllegalArgumentException("Expected lower bound in range,"
-          + " found: " + tokenizer.toString());
-      }
-      if (tokenizer.sval.compareToIgnoreCase("-inf") == 0) {
-        m_LowerBound = Double.NEGATIVE_INFINITY;
-      } else if (tokenizer.sval.compareToIgnoreCase("+inf") == 0) {
-        m_LowerBound = Double.POSITIVE_INFINITY;
-      } else if (tokenizer.sval.compareToIgnoreCase("inf") == 0) {
-        m_LowerBound = Double.NEGATIVE_INFINITY;
-      } else {
-        try {
-          m_LowerBound = Double.valueOf(tokenizer.sval).doubleValue();
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Expected lower bound in range,"
-            + " found: '" + tokenizer.sval + "'");
-        }
-      }
-
-      // get separating comma
-      if (tokenizer.nextToken() != ',') {
-        throw new IllegalArgumentException("Expected comma in range,"
-          + " found: " + tokenizer.toString());
-      }
-
-      // get upper bound
-      tokenizer.nextToken();
-      if (tokenizer.ttype != StreamTokenizer.TT_WORD) {
-        throw new IllegalArgumentException("Expected upper bound in range,"
-          + " found: " + tokenizer.toString());
-      }
-      if (tokenizer.sval.compareToIgnoreCase("-inf") == 0) {
-        m_UpperBound = Double.NEGATIVE_INFINITY;
-      } else if (tokenizer.sval.compareToIgnoreCase("+inf") == 0) {
-        m_UpperBound = Double.POSITIVE_INFINITY;
-      } else if (tokenizer.sval.compareToIgnoreCase("inf") == 0) {
-        m_UpperBound = Double.POSITIVE_INFINITY;
-      } else {
-        try {
-          m_UpperBound = Double.valueOf(tokenizer.sval).doubleValue();
-        } catch (NumberFormatException e) {
-          throw new IllegalArgumentException("Expected upper bound in range,"
-            + " found: '" + tokenizer.sval + "'");
-        }
-      }
-
-      // get closing brace
-      tokenizer.nextToken();
-
-      if (tokenizer.ttype == ']') {
-        m_UpperBoundIsOpen = false;
-      } else if (tokenizer.ttype == ')') {
-        m_UpperBoundIsOpen = true;
-      } else {
-        throw new IllegalArgumentException("Expected closing brace on range,"
-          + " found: " + tokenizer.toString());
-      }
-
-      // check for rubbish on end
-      if (tokenizer.nextToken() != StreamTokenizer.TT_EOF) {
-        throw new IllegalArgumentException("Expected end of range string,"
-          + " found: " + tokenizer.toString());
-      }
-
-    } catch (IOException e) {
-      throw new IllegalArgumentException("IOException reading attribute range"
-        + " string: " + e.getMessage());
-    }
-
-    if (m_UpperBound < m_LowerBound) {
-      throw new IllegalArgumentException("Upper bound (" + m_UpperBound
-        + ") on numeric range is" + " less than lower bound (" + m_LowerBound
-        + ")!");
-    }
   }
 
   /**
