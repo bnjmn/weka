@@ -23,7 +23,6 @@ package weka.core;
 
 import java.io.Serializable;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -154,17 +153,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    * m_Type == NOMINAL || m_Type == RELATIONAL;
    */
 
-  /** The attribute's values (if nominal or string). */
-  protected/* @ spec_public @ */ArrayList<Object> m_Values;
-
-  /** Mapping of values to indices (if nominal or string). */
-  protected Hashtable<Object, Integer> m_Hashtable;
-
-  /** The header information for a relation-valued attribute. */
-  protected Instances m_Header;
-
-  /** Date format specification for date attributes */
-  protected SimpleDateFormat m_DateFormat;
+  /** The attribute info (null for numeric attributes) */
+  protected AttributeInfo m_AttributeInfo;
 
   /** The attribute's index. */
   protected/* @ spec_public @ */int m_Index;
@@ -200,10 +190,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
 
     m_Name = attributeName;
     m_Index = -1;
-    m_Values = null;
-    m_Hashtable = null;
-    m_Header = null;
-    m_Type = NUMERIC;
+    m_AttributeInfo = null;
     if (metadata != null) {
       m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
     }
@@ -241,16 +228,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
 
     m_Name = attributeName;
     m_Index = -1;
-    m_Values = null;
-    m_Hashtable = null;
-    m_Header = null;
     m_Type = DATE;
-    if (dateFormat != null) {
-      m_DateFormat = new SimpleDateFormat(dateFormat);
-    } else {
-      m_DateFormat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
-    }
-    m_DateFormat.setLenient(false);
+    m_AttributeInfo = new DateAttributeInfo(dateFormat);
     if (metadata != null) {
       m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
     }
@@ -296,37 +275,14 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
 
     m_Name = attributeName;
     m_Index = -1;
+    m_AttributeInfo = new NominalAttributeInfo(attributeValues, attributeName);
     if (attributeValues == null) {
-      m_Values = new ArrayList<Object>();
-      m_Hashtable = new Hashtable<Object, Integer>();
-      m_Header = null;
       m_Type = STRING;
 
       // Make sure there is at least one value so that string attribute
       // values are always represented when output as part of a sparse instance.
       addStringValue(DUMMY_STRING_VAL);
     } else {
-      m_Values = new ArrayList<Object>(attributeValues.size());
-      m_Hashtable = new Hashtable<Object, Integer>(attributeValues.size());
-      m_Header = null;
-      for (int i = 0; i < attributeValues.size(); i++) {
-        Object store = attributeValues.get(i);
-        if (((String) store).length() > STRING_COMPRESS_THRESHOLD) {
-          try {
-            store = new SerializedObject(attributeValues.get(i), true);
-          } catch (Exception ex) {
-            System.err.println("Couldn't compress nominal attribute value -"
-              + " storing uncompressed.");
-          }
-        }
-        if (m_Hashtable.containsKey(store)) {
-          throw new IllegalArgumentException("A nominal attribute ("
-            + attributeName + ") cannot" + " have duplicate labels (" + store
-            + ").");
-        }
-        m_Values.add(store);
-        m_Hashtable.put(store, new Integer(i));
-      }
       m_Type = NOMINAL;
     }
     if (metadata != null) {
@@ -361,10 +317,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     }
     m_Name = attributeName;
     m_Index = -1;
-    m_Values = new ArrayList<Object>();
-    m_Hashtable = new Hashtable<Object, Integer>();
-    m_Header = header;
     m_Type = RELATIONAL;
+    m_AttributeInfo = new RelationalAttributeInfo(header);
     if (metadata != null) {
       m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
     }
@@ -391,7 +345,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public final/* @ pure @ */Enumeration<Object> enumerateValues() {
 
     if (isNominal() || isString()) {
-      final Enumeration<Object> ee = new WekaEnumeration<Object>(m_Values);
+      final Enumeration<Object> ee = 
+        new WekaEnumeration<Object>(((NominalAttributeInfo)m_AttributeInfo).m_Values);
       return new Enumeration<Object>() {
         @Override
         public boolean hasMoreElements() {
@@ -445,15 +400,18 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     }
 
     if (isNominal() && att.isNominal()) {
-      if (m_Values.size() != att.m_Values.size()) {
-        return "Different number of labels: " + m_Values.size() + " != "
-          + att.m_Values.size();
+      if (((NominalAttributeInfo)m_AttributeInfo).m_Values.size() != 
+          ((NominalAttributeInfo)att.m_AttributeInfo).m_Values.size()) {
+        return "Different number of labels: " + ((NominalAttributeInfo)m_AttributeInfo).m_Values.size() + " != "
+          + ((NominalAttributeInfo)att.m_AttributeInfo).m_Values.size();
       }
 
-      for (int i = 0; i < m_Values.size(); i++) {
-        if (!m_Values.get(i).equals(att.m_Values.get(i))) {
+      for (int i = 0; i < ((NominalAttributeInfo)m_AttributeInfo).m_Values.size(); i++) {
+        if (!((NominalAttributeInfo)m_AttributeInfo).m_Values.get(i).
+            equals(((NominalAttributeInfo)att.m_AttributeInfo).m_Values.get(i))) {
           return "Labels differ at position " + (i + 1) + ": "
-            + m_Values.get(i) + " != " + att.m_Values.get(i);
+            + ((NominalAttributeInfo)m_AttributeInfo).m_Values.get(i) + " != " + 
+            ((NominalAttributeInfo)att.m_AttributeInfo).m_Values.get(i);
         }
       }
 
@@ -461,7 +419,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     }
 
     if (isRelationValued() && att.isRelationValued()) {
-      return m_Header.equalHeadersMsg(att.m_Header);
+      return ((RelationalAttributeInfo)m_AttributeInfo).m_Header.equalHeadersMsg(((RelationalAttributeInfo)att.m_AttributeInfo).m_Header);
     }
 
     if ((type() != att.type())) {
@@ -598,7 +556,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
           + " searching uncompressed.");
       }
     }
-    Integer val = m_Hashtable.get(store);
+    Integer val = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.get(store);
     if (val == null) {
       return -1;
     } else {
@@ -683,7 +641,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isNominal() && !isString() && !isRelationValued()) {
       return 0;
     } else {
-      return m_Values.size();
+      return ((NominalAttributeInfo)m_AttributeInfo).m_Values.size();
     }
   }
 
@@ -720,11 +678,11 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
       break;
     case DATE:
       text.append(ARFF_ATTRIBUTE_DATE).append(" ")
-        .append(Utils.quote(m_DateFormat.toPattern()));
+        .append(Utils.quote(((DateAttributeInfo)m_AttributeInfo).m_DateFormat.toPattern()));
       break;
     case RELATIONAL:
       text.append(ARFF_ATTRIBUTE_RELATIONAL).append("\n");
-      Enumeration<Attribute> enm = m_Header.enumerateAttributes();
+      Enumeration<Attribute> enm = ((RelationalAttributeInfo)m_AttributeInfo).m_Header.enumerateAttributes();
       while (enm.hasMoreElements()) {
         text.append(enm.nextElement()).append("\n");
       }
@@ -757,7 +715,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   public final String getDateFormat() {
     if (isDate()) {
-      return m_DateFormat.toPattern();
+      return ((DateAttributeInfo)m_AttributeInfo).m_DateFormat.toPattern();
     } else {
       return "";
     }
@@ -775,7 +733,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isNominal() && !isString()) {
       return "";
     } else {
-      Object val = m_Values.get(valIndex);
+      Object val = ((NominalAttributeInfo)m_AttributeInfo).m_Values.get(valIndex);
 
       // If we're storing strings compressed, uncompress it.
       if (val instanceof SerializedObject) {
@@ -796,7 +754,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isRelationValued()) {
       return null;
     } else {
-      return m_Header;
+      return ((RelationalAttributeInfo)m_AttributeInfo).m_Header;
     }
   }
 
@@ -812,7 +770,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isRelationValued()) {
       return null;
     } else {
-      return (Instances) m_Values.get(valIndex);
+      return (Instances) ((RelationalAttributeInfo)m_AttributeInfo).m_Values.get(valIndex);
     }
   }
 
@@ -914,13 +872,13 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
           + " storing uncompressed.");
       }
     }
-    Integer index = m_Hashtable.get(store);
+    Integer index = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.get(store);
     if (index != null) {
       return index.intValue();
     } else {
-      int intIndex = m_Values.size();
-      m_Values.add(store);
-      m_Hashtable.put(store, new Integer(intIndex));
+      int intIndex = ((NominalAttributeInfo)m_AttributeInfo).m_Values.size();
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.add(store);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.put(store, new Integer(intIndex));
       return intIndex;
     }
   }
@@ -936,8 +894,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
       return;
     }
 
-    m_Hashtable.clear();
-    m_Values.clear();
+    ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.clear();
+    ((NominalAttributeInfo)m_AttributeInfo).m_Values.clear();
     addStringValue(value);
   }
 
@@ -961,14 +919,14 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isString()) {
       return -1;
     }
-    Object store = src.m_Values.get(index);
-    Integer oldIndex = m_Hashtable.get(store);
+    Object store = ((NominalAttributeInfo)src.m_AttributeInfo).m_Values.get(index);
+    Integer oldIndex = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.get(store);
     if (oldIndex != null) {
       return oldIndex.intValue();
     } else {
-      int intIndex = m_Values.size();
-      m_Values.add(store);
-      m_Hashtable.put(store, new Integer(intIndex));
+      int intIndex = ((NominalAttributeInfo)m_AttributeInfo).m_Values.size();
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.add(store);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.put(store, new Integer(intIndex));
       return intIndex;
     }
   }
@@ -985,17 +943,17 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (!isRelationValued()) {
       return -1;
     }
-    if (!m_Header.equalHeaders(value)) {
+    if (!((RelationalAttributeInfo)m_AttributeInfo).m_Header.equalHeaders(value)) {
       throw new IllegalArgumentException("Incompatible value for "
-        + "relation-valued attribute.\n" + m_Header.equalHeadersMsg(value));
+        + "relation-valued attribute.\n" + ((RelationalAttributeInfo)m_AttributeInfo).m_Header.equalHeadersMsg(value));
     }
-    Integer index = m_Hashtable.get(value);
+    Integer index = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.get(value);
     if (index != null) {
       return index.intValue();
     } else {
-      int intIndex = m_Values.size();
-      m_Values.add(value);
-      m_Hashtable.put(value, new Integer(intIndex));
+      int intIndex = ((NominalAttributeInfo)m_AttributeInfo).m_Values.size();
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.add(value);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.put(value, new Integer(intIndex));
       return intIndex;
     }
   }
@@ -1008,8 +966,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    */
   final void addValue(String value) {
 
-    m_Values = Utils.cast(m_Values.clone());
-    m_Hashtable = Utils.cast(m_Hashtable.clone());
+    ((NominalAttributeInfo)m_AttributeInfo).m_Values = 
+      Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Values.clone());
+    ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable = 
+      Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.clone());
     forceAddValue(value);
   }
 
@@ -1028,12 +988,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     Attribute copy = new Attribute(newName);
 
     copy.m_Index = m_Index;
-    copy.m_DateFormat = m_DateFormat;
     copy.m_Type = m_Type;
-    copy.m_Values = m_Values;
-    copy.m_Hashtable = m_Hashtable;
-    copy.m_Header = m_Header;
-    copy.m_Weight = m_Weight;
+    copy.m_AttributeInfo = m_AttributeInfo;
     copy.m_AttributeMetaInfo = m_AttributeMetaInfo;
 
     return copy;
@@ -1055,15 +1011,16 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
       throw new IllegalArgumentException("Can only remove value of "
         + "nominal, string or relation-" + " valued attribute!");
     } else {
-      m_Values = Utils.cast(m_Values.clone());
-      m_Values.remove(index);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values = 
+        Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Values.clone());
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.remove(index);
       if (!isRelationValued()) {
         Hashtable<Object, Integer> hash = new Hashtable<Object, Integer>(
-          m_Hashtable.size());
-        Enumeration<Object> enu = m_Hashtable.keys();
+          ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.size());
+        Enumeration<Object> enu = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.keys();
         while (enu.hasMoreElements()) {
           Object string = enu.nextElement();
-          Integer valIndexObject = m_Hashtable.get(string);
+          Integer valIndexObject = ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.get(string);
           int valIndex = valIndexObject.intValue();
           if (valIndex > index) {
             hash.put(string, new Integer(valIndex - 1));
@@ -1071,7 +1028,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
             hash.put(string, valIndexObject);
           }
         }
-        m_Hashtable = hash;
+        ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable = hash;
       }
     }
   }
@@ -1094,8 +1051,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
           + " storing uncompressed.");
       }
     }
-    m_Values.add(store);
-    m_Hashtable.put(store, new Integer(m_Values.size() - 1));
+    ((NominalAttributeInfo)m_AttributeInfo).m_Values.add(store);
+    ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.
+      put(store, new Integer(((NominalAttributeInfo)m_AttributeInfo).m_Values.size() - 1));
   }
 
   /**
@@ -1127,8 +1085,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     switch (m_Type) {
     case NOMINAL:
     case STRING:
-      m_Values = Utils.cast(m_Values.clone());
-      m_Hashtable = Utils.cast(m_Hashtable.clone());
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values = 
+        Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Values.clone());
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable = 
+        Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.clone());
       Object store = string;
       if (string.length() > STRING_COMPRESS_THRESHOLD) {
         try {
@@ -1138,9 +1098,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
             + " storing uncompressed.");
         }
       }
-      m_Hashtable.remove(m_Values.get(index));
-      m_Values.set(index, store);
-      m_Hashtable.put(store, new Integer(index));
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.
+        remove(((NominalAttributeInfo)m_AttributeInfo).m_Values.get(index));
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.set(index, store);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.put(store, new Integer(index));
       break;
     default:
       throw new IllegalArgumentException("Can only set values for nominal"
@@ -1159,12 +1120,13 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   final void setValue(int index, Instances data) {
 
     if (isRelationValued()) {
-      if (!data.equalHeaders(m_Header)) {
+      if (!data.equalHeaders(((RelationalAttributeInfo)m_AttributeInfo).m_Header)) {
         throw new IllegalArgumentException("Can't set relational value. "
-          + "Headers not compatible.\n" + data.equalHeadersMsg(m_Header));
+          + "Headers not compatible.\n" + data.equalHeadersMsg(((RelationalAttributeInfo)m_AttributeInfo).m_Header));
       }
-      m_Values = Utils.cast(m_Values.clone());
-      m_Values.set(index, data);
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values = 
+        Utils.cast(((NominalAttributeInfo)m_AttributeInfo).m_Values.clone());
+      ((NominalAttributeInfo)m_AttributeInfo).m_Values.set(index, data);
     } else {
       throw new IllegalArgumentException("Can only set value for"
         + " relation-valued attributes!");
@@ -1183,7 +1145,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public/* @pure@ */String formatDate(double date) {
     switch (m_Type) {
     case DATE:
-      return m_DateFormat.format(new Date((long) date));
+      return ((DateAttributeInfo)m_AttributeInfo).m_DateFormat.format(new Date((long) date));
     default:
       throw new IllegalArgumentException("Can only format date values for date"
         + " attributes!");
@@ -1203,7 +1165,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public double parseDate(String string) throws ParseException {
     switch (m_Type) {
     case DATE:
-      long time = m_DateFormat.parse(string).getTime();
+      long time = ((DateAttributeInfo)m_AttributeInfo).m_DateFormat.parse(string).getTime();
       // TODO put in a safety check here if we can't store the value in a
       // double.
       return time;
@@ -1372,7 +1334,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     if (m_Type != NUMERIC) {
       // do label range check
       int intVal = (int) value;
-      if (intVal < 0 || intVal >= m_Hashtable.size()) {
+      if (intVal < 0 || intVal >= ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.size()) {
         return false;
       }
     } else {
