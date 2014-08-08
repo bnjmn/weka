@@ -157,10 +157,10 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   protected AttributeInfo m_AttributeInfo;
 
   /** The attribute's index. */
-  protected/* @ spec_public @ */int m_Index;
+  protected/* @ spec_public @ */int m_Index = -1;
 
   /** The attribute's weight. */
-  protected double m_Weight;
+  protected double m_Weight = 1.0;
 
   /** The meta data for the attribute. */
   protected AttributeMetaInfo m_AttributeMetaInfo;
@@ -189,8 +189,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public Attribute(String attributeName, ProtectedProperties metadata) {
 
     m_Name = attributeName;
-    m_Index = -1;
-    m_AttributeInfo = null;
     if (metadata != null) {
       m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
     }
@@ -227,7 +225,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     ProtectedProperties metadata) {
 
     m_Name = attributeName;
-    m_Index = -1;
     m_Type = DATE;
     m_AttributeInfo = new DateAttributeInfo(dateFormat);
     if (metadata != null) {
@@ -274,7 +271,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     ProtectedProperties metadata) {
 
     m_Name = attributeName;
-    m_Index = -1;
     m_AttributeInfo = new NominalAttributeInfo(attributeValues, attributeName);
     if (attributeValues == null) {
       m_Type = STRING;
@@ -316,7 +312,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
         + "attribute should not contain " + "any instances");
     }
     m_Name = attributeName;
-    m_Index = -1;
     m_Type = RELATIONAL;
     m_AttributeInfo = new RelationalAttributeInfo(header);
     if (metadata != null) {
