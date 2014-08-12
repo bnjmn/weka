@@ -882,7 +882,8 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    * Clear the map and list of values and set them to contain just the supplied
    * value
    * 
-   * @param value the current (and only) value of this String attribute
+   * @param value the current (and only) value of this String attribute. If null
+   * then just the map is cleared.
    */
   public void setStringValue(String value) {
     if (!isString()) {
@@ -891,7 +892,9 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
 
     ((NominalAttributeInfo)m_AttributeInfo).m_Hashtable.clear();
     ((NominalAttributeInfo)m_AttributeInfo).m_Values.clear();
-    addStringValue(value);
+    if (value != null) {
+      addStringValue(value);
+    }
   }
 
   /**
