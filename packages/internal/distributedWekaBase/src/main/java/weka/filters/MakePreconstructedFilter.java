@@ -53,6 +53,12 @@ public class MakePreconstructedFilter extends Filter implements
   /** Whether this preconstructed filter has been reset */
   protected boolean m_isReset = true;
 
+  /** True if we've done a check for string atts in the output format */
+  protected boolean m_stringsChecked;
+
+  /** True if the output format contains string atts */
+  protected boolean m_hasStringAtts;
+
   public MakePreconstructedFilter() {
     super();
   }
@@ -66,6 +72,7 @@ public class MakePreconstructedFilter extends Filter implements
    * 
    * @return an enumeration of options
    */
+  @Override
   public Enumeration listOptions() {
     Vector<Option> result = new Vector<Option>();
 
@@ -81,6 +88,7 @@ public class MakePreconstructedFilter extends Filter implements
    * @param options the options
    * @throws Exception if a problem occurs
    */
+  @Override
   public void setOptions(String[] options) throws Exception {
     String filterSpec = Utils.getOption("filter", options);
 
@@ -162,7 +170,12 @@ public class MakePreconstructedFilter extends Filter implements
 
   @Override
   public Instances getOutputFormat() {
-    return getBaseFilter().getOutputFormat();
+    Instances outFormat = m_delegate.getOutputFormat();
+    if (!m_stringsChecked) {
+      m_hasStringAtts = outFormat.checkForStringAttributes();
+      m_stringsChecked = true;
+    }
+    return outFormat;
   }
 
   @Override
@@ -172,7 +185,18 @@ public class MakePreconstructedFilter extends Filter implements
 
   @Override
   public Instance output() {
-    return m_delegate.output();
+    Instance outInst = m_delegate.output();
+    if (m_hasStringAtts && outInst != null) {
+      for (int i = 0; i < outInst.dataset().numAttributes(); i++) {
+        if (outInst.dataset().attribute(i).isString() && !outInst.isMissing(i)) {
+          String val = outInst.stringValue(i);
+          outInst.attribute(i).setStringValue(val);
+          outInst.setValue(i, 0);
+        }
+      }
+    }
+
+    return outInst;
   }
 
   @Override
