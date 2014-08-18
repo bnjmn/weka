@@ -30,6 +30,7 @@ import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.meta.AggregateableFilteredClassifier;
 import weka.classifiers.meta.AggregateableFilteredClassifierUpdateable;
@@ -946,9 +947,32 @@ public class WekaClassifierMapTask implements OptionHandler,
    * @throws DistributedWekaException if something goes wrong
    */
   public void finalizeTask() throws DistributedWekaException {
+
+    System.gc();
+    Runtime currR = Runtime.getRuntime();
+    long freeM = currR.freeMemory();
+    long totalM = currR.totalMemory();
+    long maxM = currR.maxMemory();
+    System.err
+      .println("[ClassifierMapTask] Memory (free/total/max.) in bytes: "
+        + String.format("%,d", freeM) + " / "
+        + String.format("%,d", totalM) + " / "
+        + String.format("%,d", maxM));
+
     if (m_classifier instanceof UpdateableClassifier
       && !m_forceBatchForUpdateable) {
-      // nothing to do
+
+      if (m_classifier instanceof UpdateableBatchProcessor) {
+        try {
+          System.err
+            .println("Calling batch finished on updateable classifier...");
+          ((UpdateableBatchProcessor) m_classifier).batchFinished();
+        } catch (Exception ex) {
+          throw new DistributedWekaException(ex);
+        }
+      }
+
+      // nothing else to do
       return;
     }
 
