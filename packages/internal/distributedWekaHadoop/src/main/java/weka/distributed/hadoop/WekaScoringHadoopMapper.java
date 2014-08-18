@@ -193,6 +193,9 @@ public class WekaScoringHadoopMapper extends
           && !attRange.equals("first-last")) {
           m_colsToOutput = new Range();
           m_colsToOutput.setRanges(attRange);
+
+          m_colsToOutput.setUpper(m_scoringDataHeader.numAttributes() - 1);
+          m_selectedIndices = m_colsToOutput.getSelection();
         }
       } else {
         throw new IOException(
@@ -260,11 +263,6 @@ public class WekaScoringHadoopMapper extends
           "Parsed a row that contains a different number of values than "
             + "there are attributes in the ARFF header for the incoming data: "
             + row);
-      }
-
-      if (!m_rangeInitialized && m_colsToOutput != null) {
-        m_colsToOutput.setUpper(parsed.length);
-        m_selectedIndices = m_colsToOutput.getSelection();
       }
 
       try {
