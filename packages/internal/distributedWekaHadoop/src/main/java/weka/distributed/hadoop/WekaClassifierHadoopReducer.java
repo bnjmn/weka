@@ -54,20 +54,41 @@ public class WekaClassifierHadoopReducer extends
    * The key in the Configuration that the write path for the model is
    * associated with
    */
-  public static final String CLASSIFIER_WRITE_PATH = "*weka.distributed.weka_classifier_write_path";
+  public static final String CLASSIFIER_WRITE_PATH =
+    "*weka.distributed.weka_classifier_write_path";
 
   /**
    * The key in the configuration that the minimum training fraction is
    * associated with
    */
-  public static final String MIN_TRAINING_FRACTION = "*weka.distributed.weka_classifier_min_training_fraction";
+  public static final String MIN_TRAINING_FRACTION =
+    "*weka.distributed.weka_classifier_min_training_fraction";
 
   /** The underlying general Weka classifier reduce task */
   protected WekaClassifierReduceTask m_task = null;
 
+  /**
+   * The in the configuration to check for in order to prevent textual output of
+   * the aggregated model
+   */
+  public static final String SUPPRESS_CLASSIFIER_TEXT_OUT =
+    "weka.classifier.reducer.suppressTextOut";
+
+  /**
+   * If true, then the textual output of the aggregated classifier is not
+   * written out. Use property weka.classifier.reducer.suppressTextOut=true.
+   */
+  protected boolean m_suppressAggregatedClassifierTextualOutput;
+
   @Override
   public void setup(Context context) throws IOException {
     m_task = new WekaClassifierReduceTask();
+    String suppress =
+      context.getConfiguration().get(SUPPRESS_CLASSIFIER_TEXT_OUT);
+    if (!DistributedJobConfig.isEmpty(suppress)) {
+      m_suppressAggregatedClassifierTextualOutput =
+        suppress.toLowerCase().equals("true");
+    }
   }
 
   @Override
@@ -118,6 +139,20 @@ public class WekaClassifierHadoopReducer extends
     try {
       Classifier aggregated = m_task.aggregate(classifiersToAgg,
         numTrainingInstancesPerClassifier, forceVote);
+
+      int numAggregated = classifiersToAgg.size();
+      classifiersToAgg = null; // save memory
+      System.gc();
+      Runtime currR = Runtime.getRuntime();
+      long freeM = currR.freeMemory();
+      long totalM = currR.totalMemory();
+      long maxM = currR.maxMemory();
+      System.err
+        .println("[WekaClassifierHadoopReducer] Memory (free/total/max.) in bytes: "
+          + String.format("%,d", freeM) + " / "
+          + String.format("%,d", totalM) + " / "
+          + String.format("%,d", maxM));
+
       writeClassifierToDestination(aggregated, outputDestination, conf);
 
       Text outkey = new Text();
@@ -135,14 +170,16 @@ public class WekaClassifierHadoopReducer extends
           + "% of amount of data (" + m_task.getDiscarded().get(0)
           + " instances) that the others had\n");
       }
-      outVal.set("Number of classifiers aggregated: " + classifiersToAgg.size()
+      outVal.set("Number of classifiers aggregated: " + numAggregated
         + ". Final classifier is a " + aggregated.getClass().getName() + "\n"
         + buff.toString());
       context.write(outkey, outVal);
 
-      outkey.set("Aggregated model:\n");
-      outVal.set(aggregated.toString());
-      context.write(outkey, outVal);
+      if (!m_suppressAggregatedClassifierTextualOutput) {
+        outkey.set("Aggregated model:\n");
+        outVal.set(aggregated.toString());
+        context.write(outkey, outVal);
+      }
     } catch (Exception ex) {
       throw new IOException(ex);
     }

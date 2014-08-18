@@ -113,6 +113,19 @@ public class WekaFoldBasedClassifierHadoopReducer extends
         numTrainingInstancesPerClassifier, forceVote);
       writeClassifierToDestination(aggregated, outputDestination, conf);
 
+      int numAggregated = classifiersToAgg.size();
+      classifiersToAgg = null;
+      System.gc();
+      Runtime currR = Runtime.getRuntime();
+      long freeM = currR.freeMemory();
+      long totalM = currR.totalMemory();
+      long maxM = currR.maxMemory();
+      System.err
+        .println("[WekaClassifierHadoopReducer] Memory (free/total/max.) in bytes: "
+          + String.format("%,d", freeM) + " / "
+          + String.format("%,d", totalM) + " / "
+          + String.format("%,d", maxM));
+
       Text outkey = new Text();
       outkey.set("Summary for fold number " + fold + ":\n");
       Text outVal = new Text();
@@ -128,14 +141,16 @@ public class WekaFoldBasedClassifierHadoopReducer extends
           + "% of amount of data (" + m_task.getDiscarded().get(0)
           + " instances) that the others had\n");
       }
-      outVal.set("Number of classifiers aggregated: " + classifiersToAgg.size()
+      outVal.set("Number of classifiers aggregated: " + numAggregated
         + ". Final classifier is a " + aggregated.getClass().getName() + "\n"
         + buff.toString());
       context.write(outkey, outVal);
 
-      outkey.set("Aggregated model for fold number " + fold + ":\n");
-      outVal.set(aggregated.toString());
-      context.write(outkey, outVal);
+      if (!m_suppressAggregatedClassifierTextualOutput) {
+        outkey.set("Aggregated model for fold number " + fold + ":\n");
+        outVal.set(aggregated.toString());
+        context.write(outkey, outVal);
+      }
     } catch (Exception ex) {
       throw new IOException(ex);
     }
