@@ -175,13 +175,13 @@ public class CorrelationMatrixMapTaskTest {
     + "29, 4, 20, 2.0, 1,  8,   7.91,  7.91\n"
     + "36, 4, 20, 2.0, 1,  8,  15.58, 15.58\n";
 
-  protected static Instances getIris() throws IOException {
+  public static Instances getIris() throws IOException {
     Instances iris = new Instances(new BufferedReader(new StringReader(IRIS)));
 
     return iris;
   }
 
-  protected static Instances getBolts() throws IOException {
+  public static Instances getBolts() throws IOException {
     Instances bolts =
       new Instances(new BufferedReader(new StringReader(BOLTS)));
 
