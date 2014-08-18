@@ -22,13 +22,13 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Instance;
 import weka.core.RevisionUtils;
 
 /**
- <!-- globalinfo-start --> 
- * Class for running an arbitrary classifier on data
+ * <!-- globalinfo-start --> Class for running an arbitrary classifier on data
  * that has been passed through an arbitrary filter. Like the classifier, the
  * structure of the filter is based exclusively on the training data and test
  * instances will be processed by the filter without changing their structure.<br/>
@@ -36,10 +36,9 @@ import weka.core.RevisionUtils;
  * (i.e., they have to implement the weka.classifiers.UpdateableClassifier
  * interface).
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -81,14 +80,14 @@ import weka.core.RevisionUtils;
  *  Display model in old format (good when there are many classes)
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  * @see UpdateableClassifier
  */
 public class FilteredClassifierUpdateable extends FilteredClassifier implements
-  UpdateableClassifier {
+  UpdateableClassifier, UpdateableBatchProcessor {
 
   /** for serialization. */
   private static final long serialVersionUID = -423438402311145048L;
@@ -134,11 +133,12 @@ public class FilteredClassifierUpdateable extends FilteredClassifier implements
    */
   @Override
   public void setClassifier(Classifier value) {
-    if (!(value instanceof UpdateableClassifier))
+    if (!(value instanceof UpdateableClassifier)) {
       throw new IllegalArgumentException("Classifier must be derived from "
         + UpdateableClassifier.class.getName() + "!");
-    else
+    } else {
       super.setClassifier(value);
+    }
   }
 
   /**
@@ -150,11 +150,13 @@ public class FilteredClassifierUpdateable extends FilteredClassifier implements
    */
   @Override
   public void updateClassifier(Instance instance) throws Exception {
-    if (m_Filter.numPendingOutput() > 0)
+    if (m_Filter.numPendingOutput() > 0) {
       throw new Exception("Filter output queue not empty!");
+    }
     if (!m_Filter.input(instance)) {
-      if (m_Filter.numPendingOutput() > 0)
+      if (m_Filter.numPendingOutput() > 0) {
         throw new Exception("Filter output queue not empty!");
+      }
 
       // nothing to train on if the filter does not make an instance available
       return;
@@ -185,5 +187,12 @@ public class FilteredClassifierUpdateable extends FilteredClassifier implements
    */
   public static void main(String[] args) {
     runClassifier(new FilteredClassifierUpdateable(), args);
+  }
+
+  @Override
+  public void batchFinished() throws Exception {
+    if (getClassifier() instanceof UpdateableBatchProcessor) {
+      ((UpdateableBatchProcessor) getClassifier()).batchFinished();
+    }
   }
 }
