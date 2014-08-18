@@ -72,7 +72,6 @@ public class MakePreconstructedFilter extends Filter implements
    * 
    * @return an enumeration of options
    */
-  @Override
   public Enumeration listOptions() {
     Vector<Option> result = new Vector<Option>();
 
@@ -88,7 +87,6 @@ public class MakePreconstructedFilter extends Filter implements
    * @param options the options
    * @throws Exception if a problem occurs
    */
-  @Override
   public void setOptions(String[] options) throws Exception {
     String filterSpec = Utils.getOption("filter", options);
 
