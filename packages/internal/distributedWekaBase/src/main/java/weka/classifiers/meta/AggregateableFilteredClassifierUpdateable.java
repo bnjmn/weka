@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.bayes.NaiveBayesUpdateable;
 import weka.core.Instance;
@@ -37,7 +38,8 @@ import weka.gui.beans.KFIgnore;
  */
 @KFIgnore
 public class AggregateableFilteredClassifierUpdateable extends
-  AggregateableFilteredClassifier implements UpdateableClassifier {
+  AggregateableFilteredClassifier implements UpdateableClassifier,
+  UpdateableBatchProcessor {
 
   /** For serialization */
   private static final long serialVersionUID = -852585046360926783L;
@@ -96,5 +98,12 @@ public class AggregateableFilteredClassifierUpdateable extends
       .append(m_filteredInstances.toString()).append(m_Classifier.toString());
 
     return b.toString();
+  }
+
+  @Override
+  public void batchFinished() throws Exception {
+    if (getClassifier() instanceof UpdateableBatchProcessor) {
+      ((UpdateableBatchProcessor) getClassifier()).batchFinished();
+    }
   }
 }
