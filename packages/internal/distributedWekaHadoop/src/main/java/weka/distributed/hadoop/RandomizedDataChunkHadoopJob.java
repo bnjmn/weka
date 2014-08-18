@@ -96,6 +96,12 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
   protected String m_randomSeed = "1";
 
   /**
+   * If true then we won't default to setting the last attribute as the class if
+   * it isn't already set
+   */
+  protected boolean m_dontDefaultToLastAttIfClassNotSet;
+
+  /**
    * True if the output directory should be deleted first (doing so will force
    * this job to run in the case where there are already chunk files present in
    * the output directory)
@@ -150,6 +156,30 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
   public String numRandomizedDataChunksTipText() {
     return "The number of randomly shuffled data chunks to create. Use in "
       + "conjunction with createRandomizedDataChunks";
+  }
+
+  /**
+   * Non-command line option to allow clients to turn off the default behavior
+   * of defaulting to setting the last attribute as the class if not explicitly
+   * specified.
+   * 
+   * @param d true if the class is not to be set to the last attribute if the
+   *          user has not specifically specified a class
+   */
+  public void setDontDefaultToLastAttIfClassNotSpecified(boolean d) {
+    m_dontDefaultToLastAttIfClassNotSet = d;
+  }
+
+  /**
+   * Non-command line option to allow clients to turn off the default behavior
+   * of defaulting to setting the last attribute as the class if not explicitly
+   * specified.
+   * 
+   * @return true if the class is not to be set to the last attribute if the
+   *         user has not specifically specified a class
+   */
+  public boolean getDontDefaultToLastAttIfClassNotSpecified() {
+    return m_dontDefaultToLastAttIfClassNotSet;
   }
 
   /**
@@ -519,7 +549,7 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
           CSVToARFFHeaderReduceTask.stripSummaryAtts(header);
         try {
           WekaClassifierHadoopMapper.setClassIndex(getClassAttribute(),
-            headerNoSummary, true);
+            headerNoSummary, !m_dontDefaultToLastAttIfClassNotSet);
         } catch (Exception e) {
           throw new DistributedWekaException(e);
         }
@@ -583,6 +613,10 @@ public class RandomizedDataChunkHadoopJob extends HadoopJob implements
         if (!DistributedJobConfig.isEmpty(getRandomSeed())) {
           randomizeMapOptions.add("-seed");
           randomizeMapOptions.add(environmentSubstitute(getRandomSeed()));
+        }
+
+        if (m_dontDefaultToLastAttIfClassNotSet) {
+          randomizeMapOptions.add("-dont-default-class-to-last");
         }
 
         m_mrConfig

@@ -135,7 +135,7 @@ public class RandomizedDataChunkHadoopReducer extends
         }
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
-          true);
+          !Utils.getFlag("dont-default-class-to-last", taskOpts));
 
       } else {
         throw new Exception(
@@ -168,6 +168,10 @@ public class RandomizedDataChunkHadoopReducer extends
       String[] parts = row.split("@:@");
       String inst = parts[0];
 
+      if (parts.length != 2) {
+        throw new IOException("There should be two main parts to this row: "
+          + row);
+      }
       int classVal = Integer.parseInt(parts[1]);
 
       int chunk = m_countsPerClass[classVal] % m_numberOfDataChunks;
@@ -205,7 +209,8 @@ public class RandomizedDataChunkHadoopReducer extends
   @Override
   public void reduce(Text key, Iterable<Text> values, Context context)
     throws IOException, InterruptedException {
-    if (m_trainingHeader.classAttribute().isNumeric()) {
+    if (m_trainingHeader.classIndex() < 0
+      || m_trainingHeader.classAttribute().isNumeric()) {
       randomize(values);
     } else {
       randomizeAndStratify(values);

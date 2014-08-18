@@ -104,7 +104,7 @@ public class RandomizedDataChunkHadoopMapper extends
             .loadTrainingHeader(arffHeaderFileName));
 
         WekaClassifierHadoopMapper.setClassIndex(taskOpts, m_trainingHeader,
-          true);
+          !Utils.getFlag("dont-default-class-to-last", taskOpts));
 
         m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
           .instanceHeaderToAttributeNameList(m_trainingHeader));
@@ -214,6 +214,10 @@ public class RandomizedDataChunkHadoopMapper extends
           double classValIndex = getClassValueIndexFromRow(parsed);
           if (!Utils.isMissingValue(classValIndex)) {
             m_outValue.set(row + "@:@" + (int) classValIndex);
+          } else {
+            // don't output if the class is missing
+            // System.err.println("Missing class value in row: " + row);
+            return;
           }
         } catch (Exception ex) {
           throw new IOException(ex);
