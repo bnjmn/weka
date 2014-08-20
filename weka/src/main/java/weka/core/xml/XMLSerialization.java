@@ -185,7 +185,8 @@ public class XMLSerialization implements RevisionHandler {
   /**
    * List of fully qualified property names to suppress any warning messages for
    */
-  public final static List<String> SUPPRESS_PROPERTY_WARNINGS = new ArrayList<String>();
+  public final static List<String> SUPPRESS_PROPERTY_WARNINGS =
+    new ArrayList<String>();
 
   /** the XMLDocument that performs the transformation to and fro XML */
   protected XMLDocument m_Document = null;
@@ -1421,7 +1422,12 @@ public class XMLSerialization implements RevisionHandler {
       methodArgs[0] = tmpResult;
     }
 
-    method.invoke(result, methodArgs);
+    try {
+      method.invoke(result, methodArgs);
+    } catch (Exception ex) {
+      System.err.println("Warning: error invoking method: " + methodName + " ("
+        + ex.getCause().getMessage() + ")");
+    }
 
     return result;
   }
