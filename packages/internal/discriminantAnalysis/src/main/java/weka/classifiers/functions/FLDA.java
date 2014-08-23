@@ -40,9 +40,25 @@ import java.util.Collections;
 
 /**
  * <!-- globalinfo-start -->
+ * Builds Fisher's Linear Discriminant function. The threshold is selected so that the separator is half-way between centroids. The class must be binary and all other attributes must be numeric. Missing values are not permitted. Constant attributes are removed using RemoveUseless. No standardization or normalization of attributes is performed.
+ * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> 
+ * <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -R
+ *  The ridge parameter.
+ *  (default is 1e-6)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
  * <!-- options-end -->
  * 
  * @version $Revision: 10382 $
@@ -303,8 +319,22 @@ public class FLDA extends AbstractClassifier {
   /**
    * Parses a given list of options. <p/>
    *
-   <!-- options-start -->
-   <!-- options-end -->
+   * <!-- options-start -->
+   * Valid options are: <p/>
+   * 
+   * <pre> -R
+   *  The ridge parameter.
+   *  (default is 1e-6)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <!-- options-end -->
    *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -357,3 +387,4 @@ public class FLDA extends AbstractClassifier {
     runClassifier(new FLDA(), argv);
   }
 }
+
