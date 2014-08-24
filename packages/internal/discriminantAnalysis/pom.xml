@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>discriminantAnalysis</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>discriminantAnalysis</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/discriminantAnalysis</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/discriminantAnalysis</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/discriminantAnalysis</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/discriminantAnalysis-1.0.0</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/discriminantAnalysis-1.0.0</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/discriminantAnalysis-1.0.0</url>
   </scm>
 
   <profiles>
