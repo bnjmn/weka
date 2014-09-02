@@ -38,12 +38,15 @@ import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
 
 /**
- * <!-- globalinfo-start --> Learns a simple linear regression model. Picks the
- * attribute that results in the lowest squared error. Can only deal with numeric attributes.
+ <!-- globalinfo-start --> 
+ * Learns a simple linear regression model. Picks the
+ * attribute that results in the lowest squared error. Can only deal with
+ * numeric attributes.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -63,7 +66,7 @@ import weka.core.WeightedInstancesHandler;
  *  (use with caution).
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
@@ -155,7 +158,8 @@ public class SimpleLinearRegression extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -175,7 +179,7 @@ public class SimpleLinearRegression extends AbstractClassifier implements
    *  (use with caution).
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -293,6 +297,23 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     // can classifier handle the data?
     getCapabilities().testWithFail(insts);
 
+    if (m_outputAdditionalStats) {
+      // check that the instances weights are all 1
+      // because the RegressionAnalysis class does
+      // not handle weights
+      boolean ok = true;
+      for (int i = 0; i < insts.numInstances(); i++) {
+        if (insts.instance(i).weight() != 1) {
+          ok = false;
+          break;
+        }
+      }
+      if (!ok) {
+        throw new Exception(
+          "Can only compute additional statistics on unweighted data");
+      }
+    }
+
     // Compute sums and counts
     double[] sum = new double[insts.numAttributes()];
     double[] count = new double[insts.numAttributes()];
@@ -309,7 +330,8 @@ public class SimpleLinearRegression extends AbstractClassifier implements
             count[i] += inst.weight();
           } else {
             classSumForMissing[i] += inst.classValue() * inst.weight();
-            classSumSquaredForMissing[i] += inst.classValue() * inst.classValue() * inst.weight();
+            classSumSquaredForMissing[i] +=
+              inst.classValue() * inst.classValue() * inst.weight();
           }
         }
         classCount += inst.weight();
@@ -327,7 +349,8 @@ public class SimpleLinearRegression extends AbstractClassifier implements
           mean[i] = sum[i] / count[i];
         }
         if (classCount - count[i] > 0) {
-          classMeanForMissing[i] = classSumForMissing[i] / (classCount - count[i]);
+          classMeanForMissing[i] =
+            classSumForMissing[i] / (classCount - count[i]);
         }
         if (count[i] > 0) {
           classMeanForKnown[i] = (classSum - classSumForMissing[i]) / count[i];
@@ -373,7 +396,7 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     for (int i = 0; i < insts.numAttributes(); i++) {
 
       // Do we have missing values for this attribute?
-      double sseForMissing = classSumSquaredForMissing[i] - 
+      double sseForMissing = classSumSquaredForMissing[i] -
         (classSumForMissing[i] * classMeanForMissing[i]);
 
       // Should we skip this attribute?
@@ -521,8 +544,9 @@ public class SimpleLinearRegression extends AbstractClassifier implements
       } else {
         text.append(" - " + Utils.doubleToString((-m_intercept), 2));
       }
-      text.append("\n\nPredicting " + Utils.doubleToString(m_classMeanForMissing, 2) + 
-                  " if attribute value is missing.");
+      text.append("\n\nPredicting "
+        + Utils.doubleToString(m_classMeanForMissing, 2) +
+        " if attribute value is missing.");
 
       if (m_outputAdditionalStats) {
         // put regression analysis here
