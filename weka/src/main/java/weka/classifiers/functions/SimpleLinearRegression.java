@@ -39,8 +39,7 @@ import weka.core.WeightedInstancesHandler;
 
 /**
  * <!-- globalinfo-start --> Learns a simple linear regression model. Picks the
- * attribute that results in the lowest squared error. Missing values are not
- * allowed. Can only deal with numeric attributes.
+ * attribute that results in the lowest squared error. Can only deal with numeric attributes.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -87,6 +86,9 @@ public class SimpleLinearRegression extends AbstractClassifier implements
   /** The intercept */
   private double m_intercept;
 
+  /** The class mean for missing values */
+  private double m_classMeanForMissing;
+
   /**
    * Whether to output additional statistics such as std. dev. of coefficients
    * and t-stats
@@ -129,26 +131,7 @@ public class SimpleLinearRegression extends AbstractClassifier implements
   public String globalInfo() {
     return "Learns a simple linear regression model. "
       + "Picks the attribute that results in the lowest squared error. "
-      + "Missing values are not allowed. Can only deal with numeric attributes.";
-  }
-
-  /**
-   * Default constructor.
-   */
-  public SimpleLinearRegression() {
-
-  }
-
-  /**
-   * Construct a simple linear regression model based on the given info.
-   */
-  public SimpleLinearRegression(Instances data, int attIndex, double slope,
-    double intercept) {
-
-    m_attributeIndex = attIndex;
-    m_slope = slope;
-    m_intercept = intercept;
-    m_attribute = data.attribute(attIndex);
+      + "Can only deal with numeric attributes.";
   }
 
   /**
@@ -256,26 +239,6 @@ public class SimpleLinearRegression extends AbstractClassifier implements
   }
 
   /**
-   * Takes the given simple linear regression model and adds it to this one.
-   * Does nothing if the given model is based on a different attribute. Assumes
-   * the given model has been initialized.
-   */
-  public void addModel(SimpleLinearRegression slr) throws Exception {
-
-    if (m_attribute == null || slr.m_attributeIndex == m_attributeIndex) {
-      m_attributeIndex = slr.m_attributeIndex;
-      m_attribute = slr.m_attribute;
-      m_slope += slr.m_slope;
-      m_intercept += slr.m_intercept;
-    } else {
-      throw new Exception("Could not add models. " + m_attributeIndex + " "
-        + slr.m_attributeIndex + " " + m_attribute + " " + slr.m_attribute
-        + " " + m_slope + " " + slr.m_slope + " " + m_intercept + " "
-        + slr.m_intercept);
-    }
-  }
-
-  /**
    * Generate a prediction for the supplied instance.
    * 
    * @param inst the instance to predict.
@@ -288,10 +251,10 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     if (m_attribute == null) {
       return m_intercept;
     } else {
-      if (inst.isMissing(m_attribute.index())) {
-        throw new Exception("SimpleLinearRegression: No missing values!");
+      if (inst.isMissing(m_attributeIndex)) {
+        return m_classMeanForMissing;
       }
-      return m_intercept + m_slope * inst.value(m_attribute.index());
+      return m_intercept + m_slope * inst.value(m_attributeIndex);
     }
   }
 
@@ -308,6 +271,7 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     // attributes
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
+    result.enable(Capability.MISSING_VALUES);
 
     // class
     result.enable(Capability.NUMERIC_CLASS);
@@ -315,34 +279,6 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     result.enable(Capability.MISSING_CLASS_VALUES);
 
     return result;
-  }
-
-  /**
-   * Computes the attribute means.
-   */
-  protected double[] computeMeans(Instances insts) {
-
-    // We can assume that all the attributes are numeric and that
-    // we don't have any missing attribute values (excluding the class)
-    double[] means = new double[insts.numAttributes()];
-    double[] counts = new double[insts.numAttributes()];
-    for (int j = 0; j < insts.numInstances(); j++) {
-      Instance inst = insts.instance(j);
-      if (!inst.classIsMissing()) {
-        for (int i = 0; i < insts.numAttributes(); i++) {
-          means[i] += inst.weight() * inst.value(i);
-          counts[i] += inst.weight();
-        }
-      }
-    }
-    for (int i = 0; i < insts.numAttributes(); i++) {
-      if (counts[i] > 0) {
-        means[i] /= counts[i];
-      } else {
-        means[i] = 0.0;
-      }
-    }
-    return means;
   }
 
   /**
@@ -357,11 +293,53 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     // can classifier handle the data?
     getCapabilities().testWithFail(insts);
 
-    // Compute relevant statistics
-    double[] means = computeMeans(insts);
+    // Compute sums and counts
+    double[] sum = new double[insts.numAttributes()];
+    double[] count = new double[insts.numAttributes()];
+    double[] classSumForMissing = new double[insts.numAttributes()];
+    double[] classSumSquaredForMissing = new double[insts.numAttributes()];
+    double classCount = 0;
+    double classSum = 0;
+    for (int j = 0; j < insts.numInstances(); j++) {
+      Instance inst = insts.instance(j);
+      if (!inst.classIsMissing()) {
+        for (int i = 0; i < insts.numAttributes(); i++) {
+          if (!inst.isMissing(i)) {
+            sum[i] += inst.weight() * inst.value(i);
+            count[i] += inst.weight();
+          } else {
+            classSumForMissing[i] += inst.classValue() * inst.weight();
+            classSumSquaredForMissing[i] += inst.classValue() * inst.classValue() * inst.weight();
+          }
+        }
+        classCount += inst.weight();
+        classSum += inst.weight() * inst.classValue();
+      }
+    }
+
+    // Compute means
+    double[] mean = new double[insts.numAttributes()];
+    double[] classMeanForMissing = new double[insts.numAttributes()];
+    double[] classMeanForKnown = new double[insts.numAttributes()];
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (i != insts.classIndex()) {
+        if (count[i] > 0) {
+          mean[i] = sum[i] / count[i];
+        }
+        if (classCount - count[i] > 0) {
+          classMeanForMissing[i] = classSumForMissing[i] / (classCount - count[i]);
+        }
+        if (count[i] > 0) {
+          classMeanForKnown[i] = (classSum - classSumForMissing[i]) / count[i];
+        }
+      }
+    }
+    sum = null;
+    count = null;
+
     double[] slopes = new double[insts.numAttributes()];
     double[] sumWeightedDiffsSquared = new double[insts.numAttributes()];
-    int classIndex = insts.classIndex();
+    double[] sumWeightedClassDiffsSquared = new double[insts.numAttributes()];
 
     // For all instances
     for (int j = 0; j < insts.numInstances(); j++) {
@@ -369,19 +347,18 @@ public class SimpleLinearRegression extends AbstractClassifier implements
 
       // Only need to do something if the class isn't missing
       if (!inst.classIsMissing()) {
-        double yDiff = inst.value(classIndex) - means[classIndex];
-        double weightedYDiff = inst.weight() * yDiff;
 
         // For all attributes
         for (int i = 0; i < insts.numAttributes(); i++) {
-          double diff = inst.value(i) - means[i];
-          double weightedDiff = inst.weight() * diff;
-
-          // Doesn't mater if we compute this for the class
-          slopes[i] += weightedYDiff * diff;
-
-          // We need this for the class as well
-          sumWeightedDiffsSquared[i] += weightedDiff * diff;
+          if (!inst.isMissing(i) && (i != insts.classIndex())) {
+            double yDiff = inst.classValue() - classMeanForKnown[i];
+            double weightedYDiff = inst.weight() * yDiff;
+            double diff = inst.value(i) - mean[i];
+            double weightedDiff = inst.weight() * diff;
+            slopes[i] += weightedYDiff * diff;
+            sumWeightedDiffsSquared[i] += weightedDiff * diff;
+            sumWeightedClassDiffsSquared[i] += weightedYDiff * yDiff;
+          }
         }
       }
     }
@@ -392,20 +369,28 @@ public class SimpleLinearRegression extends AbstractClassifier implements
     int chosen = -1;
     double chosenSlope = Double.NaN;
     double chosenIntercept = Double.NaN;
+    double chosenMeanForMissing = Double.NaN;
     for (int i = 0; i < insts.numAttributes(); i++) {
 
+      // Do we have missing values for this attribute?
+      double sseForMissing = classSumSquaredForMissing[i] - 
+        (classSumForMissing[i] * classMeanForMissing[i]);
+
       // Should we skip this attribute?
-      if ((i == classIndex) || (sumWeightedDiffsSquared[i] == 0)) {
+      if ((i == insts.classIndex()) || (sumWeightedDiffsSquared[i] == 0)) {
         continue;
       }
 
       // Compute final slope and intercept
       double numerator = slopes[i];
       slopes[i] /= sumWeightedDiffsSquared[i];
-      double intercept = means[classIndex] - slopes[i] * means[i];
+      double intercept = classMeanForKnown[i] - slopes[i] * mean[i];
 
       // Compute sum of squared errors
-      double sse = sumWeightedDiffsSquared[classIndex] - slopes[i] * numerator;
+      double sse = sumWeightedClassDiffsSquared[i] - slopes[i] * numerator;
+
+      // Add component due to missing value prediction
+      sse += sseForMissing;
 
       // Check whether this is the best attribute
       if (sse < minSSE) {
@@ -413,6 +398,7 @@ public class SimpleLinearRegression extends AbstractClassifier implements
         chosen = i;
         chosenSlope = slopes[i];
         chosenIntercept = intercept;
+        chosenMeanForMissing = classMeanForMissing[i];
       }
     }
 
@@ -424,14 +410,27 @@ public class SimpleLinearRegression extends AbstractClassifier implements
       m_attribute = null;
       m_attributeIndex = 0;
       m_slope = 0;
-      m_intercept = means[classIndex];
+      m_intercept = classSum / classCount;
+      m_classMeanForMissing = 0;
     } else {
       m_attribute = insts.attribute(chosen);
       m_attributeIndex = chosen;
       m_slope = chosenSlope;
       m_intercept = chosenIntercept;
+      m_classMeanForMissing = chosenMeanForMissing;
 
       if (m_outputAdditionalStats) {
+
+        // Reduce data so that stats are correct
+        Instances newInsts = new Instances(insts, insts.numInstances());
+        for (int i = 0; i < insts.numInstances(); i++) {
+          Instance inst = insts.instance(i);
+          if (!inst.classIsMissing() && !inst.isMissing(m_attributeIndex)) {
+            newInsts.add(inst);
+          }
+        }
+        insts = newInsts;
+
         // do regression analysis
         m_df = insts.numInstances() - 2;
         double[] stdErrors = RegressionAnalysis.calculateStdErrorOfCoef(insts,
@@ -522,6 +521,8 @@ public class SimpleLinearRegression extends AbstractClassifier implements
       } else {
         text.append(" - " + Utils.doubleToString((-m_intercept), 2));
       }
+      text.append("\n\nPredicting " + Utils.doubleToString(m_classMeanForMissing, 2) + 
+                  " if attribute value is missing.");
 
       if (m_outputAdditionalStats) {
         // put regression analysis here
