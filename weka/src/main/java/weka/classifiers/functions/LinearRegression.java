@@ -44,13 +44,15 @@ import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- * <!-- globalinfo-start --> Class for using linear regression for prediction.
+ <!-- globalinfo-start --> 
+ * Class for using linear regression for prediction.
  * Uses the Akaike criterion for model selection, and is able to deal with
  * weighted instances.
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start --> 
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -92,7 +94,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *  (use with caution).
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
@@ -240,6 +242,23 @@ public class LinearRegression extends AbstractClassifier implements
     if (!m_checksTurnedOff) {
       // can classifier handle the data?
       getCapabilities().testWithFail(data);
+
+      if (m_outputAdditionalStats) {
+        // check that the instances weights are all 1
+        // because the RegressionAnalysis class does
+        // not handle weights
+        boolean ok = true;
+        for (int i = 0; i < data.numInstances(); i++) {
+          if (data.instance(i).weight() != 1) {
+            ok = false;
+            break;
+          }
+        }
+        if (!ok) {
+          throw new Exception(
+            "Can only compute additional statistics on unweighted data");
+        }
+      }
 
       // remove instances with missing class
       data = new Instances(data);
@@ -476,7 +495,8 @@ public class LinearRegression extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
+   <!-- options-start --> 
+   * Valid options are:
    * <p/>
    * 
    * <pre>
@@ -518,7 +538,7 @@ public class LinearRegression extends AbstractClassifier implements
    *  (use with caution).
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
