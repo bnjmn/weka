@@ -62,11 +62,12 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-@KFStep(category = "Tools", toolTipText = "Sort instances in ascending or descending order")
+@KFStep(category = "Tools",
+  toolTipText = "Sort instances in ascending or descending order")
 public class Sorter extends JPanel implements BeanCommon, Visible,
-    Serializable, DataSource, DataSourceListener, TrainingSetListener,
-    TestSetListener, InstanceListener, EventConstraints, StructureProducer,
-    EnvironmentHandler {
+  Serializable, DataSource, DataSourceListener, TrainingSetListener,
+  TestSetListener, InstanceListener, EventConstraints, StructureProducer,
+  EnvironmentHandler {
 
   /** For serialization */
   private static final long serialVersionUID = 4978227384322482115L;
@@ -128,13 +129,15 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
    * Default visual for data sources
    */
   protected BeanVisual m_visual = new BeanVisual("Sorter", BeanVisual.ICON_PATH
-      + "Sorter.gif", BeanVisual.ICON_PATH + "Sorter_animated.gif");
+    + "Sorter.gif", BeanVisual.ICON_PATH + "Sorter_animated.gif");
 
   /** Downstream steps listening to batch data events */
-  protected ArrayList<DataSourceListener> m_dataListeners = new ArrayList<DataSourceListener>();
+  protected ArrayList<DataSourceListener> m_dataListeners =
+    new ArrayList<DataSourceListener>();
 
   /** Downstream steps listening to instance events */
-  protected ArrayList<InstanceListener> m_instanceListeners = new ArrayList<InstanceListener>();
+  protected ArrayList<InstanceListener> m_instanceListeners =
+    new ArrayList<InstanceListener>();
 
   /**
    * Inner class that holds instances and the index of the temp file that holds
@@ -228,7 +231,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
       StringBuffer res = new StringBuffer();
 
       res.append("Attribute: " + m_attributeNameOrIndex + " - sort "
-          + (m_descending ? "descending" : "ascending"));
+        + (m_descending ? "descending" : "ascending"));
 
       return res.toString();
     }
@@ -271,8 +274,8 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
             m_attribute = structure.attribute(index);
           } catch (NumberFormatException n) {
             throw new IllegalArgumentException("Unable to locate attribute "
-                + attNameI + " as either a named attribute or as a valid "
-                + "attribute index");
+              + attNameI + " as either a named attribute or as a valid "
+              + "attribute index");
           }
         }
       }
@@ -283,7 +286,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
 
       // both missing is equal
       if (o1.m_instance.isMissing(m_attribute)
-          && o2.m_instance.isMissing(m_attribute)) {
+        && o2.m_instance.isMissing(m_attribute)) {
         return 0;
       }
 
@@ -317,7 +320,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
         cmp = val1.compareTo(val2);
       } else {
         throw new IllegalArgumentException("Can't sort according to "
-            + "relation-valued attribute values!");
+          + "relation-valued attribute values!");
       }
 
       if (m_descending) {
@@ -347,13 +350,13 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
    */
   public String globalInfo() {
     return "Sorts incoming instances in ascending or descending order "
-        + "according to the values of user specified attributes. Instances "
-        + "can be sorted according to multiple attributes (defined in order). "
-        + "Handles data sets larger than can be fit into main memory via "
-        + "instance connections and specifying the in-memory buffer size. Implements "
-        + "a merge-sort by writing the sorted in-memory buffer to a file when full "
-        + "and then interleaving instances from the disk based file(s) when the "
-        + "incoming stream has finished.";
+      + "according to the values of user specified attributes. Instances "
+      + "can be sorted according to multiple attributes (defined in order). "
+      + "Handles data sets larger than can be fit into main memory via "
+      + "instance connections and specifying the in-memory buffer size. Implements "
+      + "a merge-sort by writing the sorted in-memory buffer to a file when full "
+      + "and then interleaving instances from the disk based file(s) when the "
+      + "incoming stream has finished.";
   }
 
   /**
@@ -438,11 +441,17 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
         init(new Instances(e.getStructure(), 0));
       } catch (IllegalArgumentException ex) {
         if (m_log != null) {
-          String message = "ERROR: There is a problem with the incoming instance structure";
+          String message =
+            "ERROR: There is a problem with the incoming instance structure";
 
-          m_log.statusMessage(message + " - see log for details");
-          m_log.logMessage(statusMessagePrefix() + message + " :"
-              + ex.getMessage());
+          // m_log.statusMessage(statusMessagePrefix() + message
+          // + " - see log for details");
+          // m_log.logMessage(statusMessagePrefix() + message + " :"
+          // + ex.getMessage());
+
+          stopWithErrorMessage(message, ex);
+          // m_busy = false;
+          return;
         }
       }
 
@@ -466,9 +475,9 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
       if (m_streamCounter == 0) {
         if (m_log != null) {
           m_log.statusMessage(statusMessagePrefix()
-              + "Starting streaming sort...");
+            + "Starting streaming sort...");
           m_log.logMessage("[Sorter] " + statusMessagePrefix()
-              + " Using streaming buffer size: " + m_bufferSizeI);
+            + " Using streaming buffer size: " + m_bufferSizeI);
         }
       }
 
@@ -483,7 +492,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
     }
 
     if (e.getInstance() == null
-        || e.getStatus() == InstanceEvent.BATCH_FINISHED) {
+      || e.getStatus() == InstanceEvent.BATCH_FINISHED) {
       emitBufferedInstances();
       // thread will set busy to false and report done status when
       // complete
@@ -494,14 +503,14 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
         sortBuffer(true);
       } catch (Exception ex) {
         String msg = statusMessagePrefix()
-            + "ERROR: unable to write to temp file.";
-        if (m_log != null) {
-          m_log.statusMessage(msg);
-          m_log.logMessage("[" + getCustomName() + "] " + msg);
-        }
-        stop();
+          + "ERROR: unable to write to temp file.";
+        // if (m_log != null) {
+        // m_log.statusMessage(msg);
+        // m_log.logMessage("[" + getCustomName() + "] " + msg);
+        // }
+        stopWithErrorMessage(msg, ex);
 
-        ex.printStackTrace();
+        // ex.printStackTrace();
         m_busy = false;
         return;
       }
@@ -534,14 +543,14 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
               return;
             }
             String msg = statusMessagePrefix()
-                + "Emitting in memory buffer....";
+              + "Emitting in memory buffer....";
             if (m_log != null) {
               m_log.statusMessage(msg);
               m_log.logMessage("[" + getCustomName() + "] " + msg);
             }
 
             Instances newHeader = new Instances(
-                m_incrementalBuffer.get(0).m_instance.dataset(), 0);
+              m_incrementalBuffer.get(0).m_instance.dataset(), 0);
             m_ie.setStructure(newHeader);
             notifyInstanceListeners(m_ie);
             for (int i = 0; i < m_incrementalBuffer.size(); i++) {
@@ -551,14 +560,14 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
               if (m_stringAttIndexes != null) {
                 for (String attName : m_stringAttIndexes.keySet()) {
                   boolean setValToZero = (newHeader.attribute(attName)
-                      .numValues() > 0);
+                    .numValues() > 0);
 
                   String valToSetInHeader = currentH.m_stringVals.get(attName);
                   newHeader.attribute(attName).setStringValue(valToSetInHeader);
 
                   if (setValToZero) {
                     currentH.m_instance.setValue(newHeader.attribute(attName),
-                        0);
+                      0);
                   }
                 }
               }
@@ -586,7 +595,8 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
           }
         }
 
-        List<ObjectInputStream> inputStreams = new ArrayList<ObjectInputStream>();
+        List<ObjectInputStream> inputStreams =
+          new ArrayList<ObjectInputStream>();
         // for the interleaving part of the merge sort
         List<InstanceHolder> merger = new ArrayList<InstanceHolder>();
 
@@ -656,7 +666,8 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
 
           if (m_stringAttIndexes != null) {
             for (String attName : m_stringAttIndexes.keySet()) {
-              boolean setValToZero = (tempHeader.attribute(attName).numValues() > 1);
+              boolean setValToZero =
+                (tempHeader.attribute(attName).numValues() > 1);
               String valToSetInHeader = holder.m_stringVals.get(attName);
               tempHeader.attribute(attName).setStringValue(valToSetInHeader);
 
@@ -677,7 +688,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
 
           if (mergeCount % m_bufferSizeI == 0 && m_log != null) {
             String msg = statusMessagePrefix() + "Merged " + mergeCount
-                + " instances";
+              + " instances";
             if (m_log != null) {
               m_log.statusMessage(msg);
             }
@@ -729,7 +740,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
           if (nextH != null) {
             // find the correct position (i.e. interleave) for this new Instance
             int index = Collections.binarySearch(merger, nextH,
-                m_sortComparator);
+              m_sortComparator);
 
             if (index < 0) {
               merger.add(index * -1 - 1, nextH);
@@ -816,7 +827,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
       ObjectOutputStream oos = new ObjectOutputStream(bos);
 
       msg = statusMessagePrefix() + "Writing buffer to temp file "
-          + m_bufferFiles.size() + "...";
+        + m_bufferFiles.size() + "...";
       if (m_log != null) {
         m_log.statusMessage(msg);
         m_log.logMessage("[" + getCustomName() + "] " + msg);
@@ -972,12 +983,14 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
       init(new Instances(e.getDataSet(), 0));
     } catch (IllegalArgumentException ex) {
       if (m_log != null) {
-        String message = "ERROR: There is a problem with the incoming instance structure";
+        String message =
+          "ERROR: There is a problem with the incoming instance structure";
 
-        m_log.statusMessage(message + " - see log for details");
-        m_log.logMessage(statusMessagePrefix() + message + " :"
-            + ex.getMessage());
-        stop();
+        // m_log.statusMessage(statusMessagePrefix() + message
+        // + " - see log for details");
+        // m_log.logMessage(statusMessagePrefix() + message + " :"
+        // + ex.getMessage());
+        stopWithErrorMessage(message, ex);
         m_busy = false;
         return;
       }
@@ -1050,7 +1063,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
   @Override
   public void useDefaultVisual() {
     m_visual.loadIcons(BeanVisual.ICON_PATH + "Sorter.gif",
-        BeanVisual.ICON_PATH + "Sorter_animated.gif");
+      BeanVisual.ICON_PATH + "Sorter_animated.gif");
     m_visual.setText("Sorter");
   }
 
@@ -1114,6 +1127,23 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
   }
 
   /**
+   * Stops the step (and upstream ones) and then prints an error message and
+   * optional exception message
+   * 
+   * @param error the error message to print
+   * @param ex the optional exception
+   */
+  protected void stopWithErrorMessage(String error, Exception ex) {
+    stop();
+    if (m_log != null) {
+      m_log.statusMessage(statusMessagePrefix() + error
+        + " - see log for details");
+      m_log.logMessage(statusMessagePrefix() + error
+        + (ex != null ? " " + ex.getMessage() : ""));
+    }
+  }
+
+  /**
    * Returns true if. at this time, the bean is busy with some (i.e. perhaps a
    * worker thread is performing some calculation).
    * 
@@ -1156,7 +1186,7 @@ public class Sorter extends JPanel implements BeanCommon, Visible,
   @Override
   public boolean connectionAllowed(String eventName) {
     if (!eventName.equals("instance") && !eventName.equals("dataSet")
-        && !eventName.equals("trainingSet") && !eventName.equals("testSet")) {
+      && !eventName.equals("trainingSet") && !eventName.equals("testSet")) {
       return false;
     }
 
