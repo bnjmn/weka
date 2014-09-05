@@ -493,10 +493,10 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
           hasNominal = true;
         } else if (instanceInfo.attribute(i).isString()) {
           hasString = true;
-        } else if (instanceInfo.attribute(i).isNumeric()) {
-          hasNumeric = true;
         } else if (instanceInfo.attribute(i).isDate()) {
           hasDate = true;
+        } else if (instanceInfo.attribute(i).isNumeric()) {
+          hasNumeric = true;
         }
       }
     }
@@ -515,24 +515,25 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
       }
     }
 
-    if (hasNumeric
-      && (m_numericConstant == null || m_numericConstant.length() == 0)) {
-      if (m_resolvedNominalStringConstant != null
-        && m_resolvedNominalStringConstant.length() > 0) {
-        // use the supplied nominal constant as numeric replacement
-        // value (if we can parse it as a number)
-        try {
-          Double.parseDouble(m_resolvedNominalStringConstant);
-          m_resolvedNumericConstant = m_resolvedNominalStringConstant;
-        } catch (NumberFormatException e) {
-          throw new Exception(
-            "Data contains numeric attributes and no numeric "
-              + "constant has been supplied. Unable to parse nominal "
-              + "constant as a number either.");
+    if (hasNumeric) {
+      if (m_numericConstant == null || m_numericConstant.length() == 0) {
+        if (m_resolvedNominalStringConstant != null
+          && m_resolvedNominalStringConstant.length() > 0) {
+          // use the supplied nominal constant as numeric replacement
+          // value (if we can parse it as a number)
+          try {
+            Double.parseDouble(m_resolvedNominalStringConstant);
+            m_resolvedNumericConstant = m_resolvedNominalStringConstant;
+          } catch (NumberFormatException e) {
+            throw new Exception(
+              "Data contains numeric attributes and no numeric "
+                + "constant has been supplied. Unable to parse nominal "
+                + "constant as a number either.");
+          }
+        } else {
+          throw new Exception("Data contains numeric attributes and no "
+            + "replacement constant has been supplied");
         }
-      } else {
-        throw new Exception("Data contains numeric attributes and no "
-          + "replacement constant has been supplied");
       }
 
       try {
@@ -620,7 +621,9 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
     for (int i = 0; i < inst.numAttributes(); i++) {
       if (inst.isMissing(i) && m_selectedRange.isInRange(i)) {
         if (i != inst.classIndex()) {
-          if (inst.attribute(i).isNumeric()) {
+          if (inst.attribute(i).isDate()) {
+            vals[i] = m_dateConstVal;
+          } else if (inst.attribute(i).isNumeric()) {
             vals[i] = m_numericConstVal;
           } else if (inst.attribute(i).isNominal()) {
             // vals[i] = inst.attribute(i).numValues();
@@ -644,8 +647,6 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
               vals[i] = outputFormatPeek().attribute(i).addStringValue(
                 m_resolvedNominalStringConstant);
             }
-          } else if (inst.attribute(i).isDate()) {
-            vals[i] = m_dateConstVal;
           } else {
             vals[i] = inst.value(i);
           }
