@@ -44,11 +44,10 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start --> 
- * Reads a source that is in arff (attribute relation
+ * <!-- globalinfo-start --> Reads a source that is in arff (attribute relation
  * file format) format.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
@@ -75,8 +74,8 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
   protected transient ArffReader m_ArffReader = null;
 
   /**
-   *  Whether the values of string attributes should be retained in
-   *  memory when reading incrementally
+   * Whether the values of string attributes should be retained in memory when
+   * reading incrementally
    */
   protected boolean m_retainStringVals;
 
@@ -1248,9 +1247,11 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
 
       // Instances readIn = new Instances(m_structure);
 
-      // close the stream
     } finally {
-      m_sourceReader.close();
+      if (m_sourceReader != null) {
+        // close the stream
+        m_sourceReader.close();
+      }
     }
 
     return insts;
