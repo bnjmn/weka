@@ -27,6 +27,7 @@ import java.util.Vector;
 
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.IterativeClassifier;
+import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Drawable;
@@ -37,6 +38,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.Filter;
 
 /**
@@ -106,7 +108,7 @@ import weka.filters.Filter;
  */
 public class FilteredClassifier 
   extends SingleClassifierEnhancer 
-  implements Drawable, PartitionGenerator, IterativeClassifier {
+  implements Drawable, PartitionGenerator, IterativeClassifier,  BatchPredictor {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -578,6 +580,61 @@ public class FilteredClassifier
       return unclassified;
     } else {
       return m_Classifier.distributionForInstance(newInstance);
+    }
+  }
+
+  /**
+   * Set the batch size to use. Gets passed through to the base learner
+   * if it implements BatchPrecitor. Otherwise it is just ignored.
+   *
+   * @param size the batch size to use
+   */
+  public void setBatchSize(String size) {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      ((BatchPredictor)getClassifier()).setBatchSize(size);
+    }
+  }
+
+  /**
+   * Gets the preferred batch size from the
+   * base learner if it implements BatchPredictor. 
+   * Returns 1 as the preferred batch size otherwise.
+   *
+   * @return the batch size to use
+   */
+  public String getBatchSize() {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      return ((BatchPredictor)getClassifier()).getBatchSize();
+    } else {
+      return "1";
+    }
+  }
+
+  /**
+   * Batch scoring method. Calls the appropriate method for the base learner
+   * if it implements BatchPredictor. Otherwise it simply calls the
+   * distributionForInstance() method repeatedly.
+   * 
+   * @param insts the instances to get predictions for
+   * @return an array of probability distributions, one for each instance
+   * @throws Exception if a problem occurs
+   */
+  public double[][] distributionsForInstances(Instances insts) throws Exception {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      Instances filteredInsts = Filter.useFilter(insts, m_Filter);
+      if (filteredInsts.numInstances() != insts.numInstances()) {
+        throw new WekaException("FilteredClassifier: filter has returned more/less instances than required.");
+      }
+      return ((BatchPredictor)getClassifier()).distributionsForInstances(filteredInsts);
+    } else {
+      double[][] result = new double[insts.numInstances()][insts.numClasses()];
+      for (int i = 0; i < insts.numInstances(); i++) {
+        result[i] = distributionForInstance(insts.instance(i));
+      }
+      return result;
     }
   }
 
