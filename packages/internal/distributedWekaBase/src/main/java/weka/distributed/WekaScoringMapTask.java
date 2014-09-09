@@ -57,9 +57,14 @@ public class WekaScoringMapTask implements Serializable {
   /** Model to use */
   protected ScoringModel m_model;
 
+  /** For storing instances for batch prediction */
   protected Instances m_batchScoringData;
 
+  /** Default batch size */
   protected int m_batchSize = 1000;
+
+  /** True if the model header contains string attributes */
+  protected boolean m_isUsingStringAttributes;
 
   /**
    * Holds the names of any model attributes that are missing or have a type
@@ -387,6 +392,7 @@ public class WekaScoringMapTask implements Serializable {
         "Can't continue without a header for the model and incoming data");
     }
     try {
+      m_isUsingStringAttributes = modelHeader.checkForStringAttributes();
       m_model = ScoringModel.createScorer(model);
 
       if (modelHeader != null) {
@@ -585,5 +591,14 @@ public class WekaScoringMapTask implements Serializable {
    */
   public boolean isBatchPredictor() {
     return m_model == null ? false : m_model.isBatchPredicor();
+  }
+
+  /**
+   * Returns true if model is using string attributes
+   * 
+   * @return true if model is using string attributes
+   */
+  public boolean modelIsUsingStringAttributes() {
+    return m_isUsingStringAttributes;
   }
 }
