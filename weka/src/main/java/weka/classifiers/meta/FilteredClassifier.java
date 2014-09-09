@@ -582,6 +582,15 @@ public class FilteredClassifier
       return m_Classifier.distributionForInstance(newInstance);
     }
   }
+  
+  /**
+   * Tool tip text for this property
+   * 
+   * @return the tool tip for this property
+   */
+  public String batchSizeTipText() {
+    return "Batch size to use if base learner is a BatchPredictor";
+  }
 
   /**
    * Set the batch size to use. Gets passed through to the base learner
