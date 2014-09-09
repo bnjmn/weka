@@ -273,7 +273,7 @@ public class WekaScoringHadoopMapper extends
           WekaClassifierHadoopMapper.makeInstance(m_rowHelper,
             m_scoringDataHeader, true, false, parsed);
 
-        if (m_task.isBatchPredictor()) {
+        if (m_task.isBatchPredictor() && !m_task.modelIsUsingStringAttributes()) {
           if (m_colsToOutput == null) {
             m_parsedBatch.add(row);
           } else {
