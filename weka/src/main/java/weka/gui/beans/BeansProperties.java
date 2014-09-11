@@ -55,7 +55,8 @@ public class BeansProperties implements Serializable {
   protected static final String PROPERTY_FILE = "weka/gui/beans/Beans.props";
 
   /** Location of the property file listing available templates */
-  protected static final String TEMPLATE_PROPERTY_FILE = "weka/gui/beans/templates/templates.props";
+  protected static final String TEMPLATE_PROPERTY_FILE =
+    "weka/gui/beans/templates/templates.props";
 
   /** The paths to template resources */
   protected static List<String> TEMPLATE_PATHS;
@@ -66,18 +67,32 @@ public class BeansProperties implements Serializable {
   protected static Properties BEAN_PROPERTIES;
 
   /** Contains the plugin components properties */
-  protected static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES = new ArrayList<Properties>();
+  protected static ArrayList<Properties> BEAN_PLUGINS_PROPERTIES =
+    new ArrayList<Properties>();
 
   /**
    * Contains the user's selection of available perspectives to be visible in
    * the perspectives toolbar
    */
-  protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE = "weka/gui/beans/VisiblePerspectives.props";
+  protected static String VISIBLE_PERSPECTIVES_PROPERTIES_FILE =
+    "weka/gui/beans/VisiblePerspectives.props";
 
   /** Those perspectives that the user has opted to have visible in the toolbar */
   protected static SortedSet<String> VISIBLE_PERSPECTIVES;
 
   private static boolean s_pluginManagerIntialized = false;
+
+  /** Default metastore for configurations etc. */
+  protected static KFMetaStore s_kfMetaStore = new XMLFileBasedKFMetaStore();
+
+  /**
+   * Get the metastore
+   * 
+   * @return the metastore
+   */
+  public static KFMetaStore getMetaStore() {
+    return s_kfMetaStore;
+  }
 
   public static void addToPluginBeanProps(File beanPropsFile) throws Exception {
     Properties tempP = new Properties();
@@ -104,7 +119,8 @@ public class BeansProperties implements Serializable {
   public static synchronized void loadProperties() {
     if (BEAN_PROPERTIES == null) {
       weka.core.WekaPackageManager.loadPackages(false);
-      System.err.println("[KnowledgeFlow] Loading properties and plugins...");
+      weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+        "[KnowledgeFlow] Loading properties and plugins...");
       /** Loads the configuration property file */
       // static {
       // Allow a properties file in the current directory to override
@@ -128,7 +144,8 @@ public class BeansProperties implements Serializable {
       if (VISIBLE_PERSPECTIVES == null) {
         // set up built-in perspectives
         Properties pp = new Properties();
-        pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives",
+        pp.setProperty(
+          "weka.gui.beans.KnowledgeFlow.Perspectives",
           "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer,"
             + "weka.gui.beans.SQLViewerPerspective");
         BEAN_PLUGINS_PROPERTIES.add(pp);
@@ -145,12 +162,15 @@ public class BeansProperties implements Serializable {
             if (listedPerspectives != null && listedPerspectives.length() > 0) {
               // split up the list of user selected perspectives and populate
               // VISIBLE_PERSPECTIVES
-              StringTokenizer st = new StringTokenizer(listedPerspectives, ", ");
+              StringTokenizer st =
+                new StringTokenizer(listedPerspectives, ", ");
 
               while (st.hasMoreTokens()) {
                 String perspectiveName = st.nextToken().trim();
-                System.err.println("Adding perspective " + perspectiveName
-                  + " to visible list");
+                weka.core.logging.Logger.log(
+                  weka.core.logging.Logger.Level.INFO, "Adding perspective "
+                    + perspectiveName
+                    + " to visible list");
                 VISIBLE_PERSPECTIVES.add(perspectiveName);
               }
             }
@@ -175,8 +195,8 @@ public class BeansProperties implements Serializable {
         String descriptions = templateProps
           .getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
         if (paths == null || paths.length() == 0) {
-          System.err
-            .println("[KnowledgeFlow] WARNING: no templates found in classpath");
+          weka.core.logging.Logger.log(weka.core.logging.Logger.Level.WARNING,
+            "[KnowledgeFlow] WARNING: no templates found in classpath");
         } else {
           String[] templates = paths.split(",");
           String[] desc = descriptions.split(",");
@@ -215,14 +235,18 @@ public class BeansProperties implements Serializable {
                 String name = ((OffscreenChartRenderer) p).rendererName();
                 PluginManager.addPlugin(
                   "weka.gui.beans.OffscreenChartRenderer", name, renderer);
-                System.err
-                  .println("[KnowledgeFlow] registering chart rendering "
+                weka.core.logging.Logger.log(
+                  weka.core.logging.Logger.Level.INFO,
+                  "[KnowledgeFlow] registering chart rendering "
                     + "plugin: " + renderer);
               }
             } catch (Exception ex) {
 
-              System.err.println("[KnowledgeFlow] WARNING: "
-                + "unable to instantiate chart renderer \"" + renderer + "\"");
+              weka.core.logging.Logger
+                .log(weka.core.logging.Logger.Level.WARNING,
+                  "[KnowledgeFlow] WARNING: "
+                    + "unable to instantiate chart renderer \"" + renderer
+                    + "\"");
               ex.printStackTrace();
 
             }

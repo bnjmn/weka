@@ -576,8 +576,9 @@ public class WekaPackageManager {
    * Process a package's GUIEditors.props file
    * 
    * @param propsFile the properties file to process
+   * @param verbose true to output more info
    */
-  protected static void processGUIEditorsProps(File propsFile) {
+  protected static void processGUIEditorsProps(File propsFile, boolean verbose) {
     GenericObjectEditor.registerEditors();
     try {
       Properties editorProps = new Properties();
@@ -591,7 +592,9 @@ public class WekaPackageManager {
       while (enm.hasMoreElements()) {
         String name = enm.nextElement().toString();
         String value = editorProps.getProperty(name, "");
-        System.err.println("Registering " + name + " " + value);
+        if (verbose) {
+          System.err.println("Registering " + name + " " + value);
+        }
         GenericObjectEditor.registerEditor(name, value);
       }
 
@@ -662,7 +665,7 @@ public class WekaPackageManager {
         && content.getPath().endsWith("GUIEditors.props")
         && !avoidTriggeringFullClassDiscovery) {
         // Editor for a particular component
-        processGUIEditorsProps(content);
+        processGUIEditorsProps(content, verbose);
       } else if (content.isFile()
         && content.getPath().endsWith("GenericPropertiesCreator.props")
         && !avoidTriggeringFullClassDiscovery) {
@@ -1145,7 +1148,9 @@ public class WekaPackageManager {
     // the GUIs (this is not necessary when executing stuff from
     // the command line)
     if (refreshGOEProperties) {
-      System.err.println("Refreshing GOE props...");
+      if (verbose) {
+        System.err.println("Refreshing GOE props...");
+      }
       refreshGOEProperties();
     }
   }
