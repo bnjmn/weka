@@ -29,7 +29,7 @@ import java.util.Set;
  * simple storage place that can be used, as an example, for storing named
  * configuration settings (e.g. reusable database connections). The metastore is
  * publically available to clients (including KF steps) via
- * KnowledgeFlowApp.getMetaStore().
+ * BeansProperties.getMetaStore().
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
