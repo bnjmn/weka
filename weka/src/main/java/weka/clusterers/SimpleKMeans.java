@@ -56,8 +56,7 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
 /**
- <!-- globalinfo-start --> 
- * Cluster data using the k means algorithm. Can use
+ * <!-- globalinfo-start --> Cluster data using the k means algorithm. Can use
  * either the Euclidean distance (default) or the Manhattan distance. If the
  * Manhattan distance is used, then centroids are computed as the component-wise
  * median rather than mean. For more information see:<br/>
@@ -66,10 +65,9 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * In: Proceedings of the eighteenth annual ACM-SIAM symposium on Discrete
  * algorithms, 1027-1035, 2007.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start --> 
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
  * 
  * <pre>
  * &#64;inproceedings{Arthur2007,
@@ -81,10 +79,9 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * }
  * </pre>
  * <p/>
- <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -197,7 +194,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *  (use with caution).
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -1106,7 +1103,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     if (updateErrors) {
       if (m_DistanceFunction instanceof EuclideanDistance) {
         // Euclidean distance to Squared Euclidean distance
-        minDist *= minDist;
+        minDist *= minDist * instance.weight();
       }
       m_squaredErrors[bestCluster] += minDist;
     }
@@ -1178,10 +1175,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
           + "of candidate canopies consuming memory. (default = 100)",
         "-max-candidates", 1, "-max-candidates <num>"));
 
-    result.addElement(new Option(
-      "\tHow often to prune low density canopies when using canopy clustering. \n\t"
-        + "(default = every 10,000 training instances)", "periodic-pruning", 1,
-      "-periodic-pruning <num>"));
+    result
+      .addElement(new Option(
+        "\tHow often to prune low density canopies when using canopy clustering. \n\t"
+          + "(default = every 10,000 training instances)", "periodic-pruning",
+        1,
+        "-periodic-pruning <num>"));
 
     result
       .addElement(new Option(
@@ -1710,8 +1709,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start --> 
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -1824,7 +1822,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    *  (use with caution).
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
