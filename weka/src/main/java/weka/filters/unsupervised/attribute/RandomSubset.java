@@ -38,34 +38,35 @@ import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
- * <!-- globalinfo-start --> Chooses a random subset of attributes, either an
- * absolute number or a percentage. The class is always included in the output
- * (as the last attribute).
+ <!-- globalinfo-start -->
+ * Chooses a random subset of attributes, either an absolute number or a percentage. The class is always included in the output (as the last attribute).
  * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -D
- *  Turns on output of debugging information.
- * </pre>
- * 
- * <pre>
- * -N &lt;double&gt;
+ * <pre> -N &lt;double&gt;
  *  The number of attributes to randomly select.
  *  If &lt; 1 then percentage, &gt;= 1 absolute number.
- *  (default: 0.5)
- * </pre>
+ *  (default: 0.5)</pre>
  * 
- * <pre>
- * -S &lt;int&gt;
+ * <pre> -V
+ *  Invert selection - i.e. randomly remove rather than select.</pre>
+ * 
+ * <pre> -S &lt;int&gt;
  *  The seed value.
- *  (default: 1)
- * </pre>
+ *  (default: 1)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -86,6 +87,9 @@ public class RandomSubset extends SimpleStreamFilter {
 
   /** The indices of the attributes that got selected. */
   protected int[] m_Indices = null;
+
+  /** Whether to randomly remove rather than select */
+  protected boolean m_invertSelection;
 
   /**
    * Returns a string describing this filter.
@@ -115,6 +119,10 @@ public class RandomSubset extends SimpleStreamFilter {
         + "\tIf < 1 then percentage, >= 1 absolute number.\n"
         + "\t(default: 0.5)", "N", 1, "-N <double>"));
 
+    result.addElement(new Option(
+      "\tInvert selection - i.e. randomly remove rather than select.", "V", 0,
+      "-V"));
+
     result.addElement(new Option("\tThe seed value.\n" + "\t(default: 1)", "S",
       1, "-S <int>"));
 
@@ -136,6 +144,10 @@ public class RandomSubset extends SimpleStreamFilter {
     result.add("-N");
     result.add("" + m_NumAttributes);
 
+    if (getInvertSelection()) {
+      result.add("-V");
+    }
+
     result.add("-S");
     result.add("" + m_Seed);
 
@@ -148,28 +160,30 @@ public class RandomSubset extends SimpleStreamFilter {
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -D
-   *  Turns on output of debugging information.
-   * </pre>
-   * 
-   * <pre>
-   * -N &lt;double&gt;
+   * <pre> -N &lt;double&gt;
    *  The number of attributes to randomly select.
    *  If &lt; 1 then percentage, &gt;= 1 absolute number.
-   *  (default: 0.5)
-   * </pre>
+   *  (default: 0.5)</pre>
    * 
-   * <pre>
-   * -S &lt;int&gt;
+   * <pre> -V
+   *  Invert selection - i.e. randomly remove rather than select.</pre>
+   * 
+   * <pre> -S &lt;int&gt;
    *  The seed value.
-   *  (default: 1)
-   * </pre>
+   *  (default: 1)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -output-debug-info
+   *  If set, filter is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, filter capabilities are not checked before filter is built
+   *  (use with caution).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -184,6 +198,8 @@ public class RandomSubset extends SimpleStreamFilter {
     } else {
       setNumAttributes(0.5);
     }
+
+    setInvertSelection(Utils.getFlag('V', options));
 
     tmpStr = Utils.getOption("S", options);
     if (tmpStr.length() != 0) {
@@ -221,6 +237,36 @@ public class RandomSubset extends SimpleStreamFilter {
    */
   public void setNumAttributes(double value) {
     m_NumAttributes = value;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   * 
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String invertSelectionTipText() {
+    return "Randomly remove rather than select attributes.";
+  }
+
+  /**
+   * Set whether to invert the selection - i.e. randomly remove rather than
+   * select attributes.
+   * 
+   * @param inv true if the selection should be inverted
+   */
+  public void setInvertSelection(boolean inv) {
+    m_invertSelection = inv;
+  }
+
+  /**
+   * Get whether to invert the selection - i.e. randomly remove rather than
+   * select attributes.
+   * 
+   * @return true if the selection should be inverted
+   */
+  public boolean getInvertSelection() {
+    return m_invertSelection;
   }
 
   /**
@@ -330,6 +376,11 @@ public class RandomSubset extends SimpleStreamFilter {
       subset.add(indices.get(index));
       indices.remove(index);
     }
+
+    if (m_invertSelection) {
+      subset = indices;
+    }
+
     Collections.sort(subset);
     if (inputFormat.classIndex() > -1) {
       subset.add(inputFormat.classIndex());
@@ -400,3 +451,4 @@ public class RandomSubset extends SimpleStreamFilter {
     runFilter(new RandomSubset(), args);
   }
 }
+
