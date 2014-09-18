@@ -25,12 +25,16 @@ import java.util.ArrayList;
 import java.util.List;
 
 import weka.core.Attribute;
+import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.SelectedTag;
+import weka.core.Utils;
 import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NominalStats;
+import weka.core.stats.NumericStats;
 import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.distributed.KMeansReduceTask;
 
@@ -154,5 +158,62 @@ public class ClusterUtils {
     }
 
     return finalStartPointsForRuns;
+  }
+
+  /**
+   * Compute priming data for a distance function (i.e. data that can be used to
+   * intialize the mins and maxes of numeric variables for normalization
+   * purposes).
+   * 
+   * @param headerWithSummary header with summary attributes
+   * @return a two-instance data set containing min and maxes for all numeric
+   *         attributes. Nominal attributes will have missing values
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static Instances getPrimingDataForDistanceFunction(
+    Instances headerWithSummary) throws DistributedWekaException {
+
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+
+    ArrayList<Attribute> atts = new ArrayList<Attribute>();
+    double[] mins = new double[headerNoSummary.numAttributes()];
+    double[] maxes = new double[headerNoSummary.numAttributes()];
+
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      Attribute orig = headerNoSummary.attribute(i);
+      Attribute summary =
+        headerWithSummary
+          .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+            + orig.name());
+
+      atts.add((Attribute) orig.copy());
+
+      if (orig.isNumeric()) {
+
+        // number of non-missing values
+        double count =
+          NumericStats.attributeToStats(summary).getStats()[ArffSummaryNumericMetric.COUNT
+            .ordinal()];
+        if (count > 2) {
+          mins[i] =
+            NumericStats.attributeToStats(summary).getStats()[ArffSummaryNumericMetric.MIN
+              .ordinal()];
+          maxes[i] =
+            NumericStats.attributeToStats(summary).getStats()[ArffSummaryNumericMetric.MAX
+              .ordinal()];
+        }
+      } else if (orig.isNominal()) {
+        // doesn't matter for non numeric attributes
+        mins[i] = Utils.missingValue();
+        maxes[i] = Utils.missingValue();
+      }
+    }
+
+    Instances dummy = new Instances("Dummy", atts, 0);
+    dummy.add(new DenseInstance(1.0, mins));
+    dummy.add(new DenseInstance(1.0, maxes));
+
+    return dummy;
   }
 }

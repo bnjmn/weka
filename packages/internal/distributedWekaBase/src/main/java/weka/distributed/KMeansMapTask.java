@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import weka.classifiers.rules.DecisionTableHashKey;
+import weka.clusterers.ClusterUtils;
 import weka.clusterers.PreconstructedKMeans;
 import weka.core.Attribute;
 import weka.core.EuclideanDistance;
@@ -143,7 +144,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
     m_transformedHeaderNoSummary =
       CSVToARFFHeaderReduceTask.stripSummaryAtts(m_headerWithSummary);
     Instances dummyDistancePrimer =
-      CanopyReduceTask.getPrimingDataForDistanceFunction(m_headerWithSummary);
+      ClusterUtils.getPrimingDataForDistanceFunction(m_headerWithSummary);
 
     // deal with filters
     if (!m_dontReplaceMissing) {
