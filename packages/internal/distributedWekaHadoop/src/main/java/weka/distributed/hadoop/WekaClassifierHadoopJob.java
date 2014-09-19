@@ -1077,6 +1077,19 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
   }
 
   @Override
+  public void stopJob() {
+    super.stopJob();
+
+    if (m_arffHeaderJob != null) {
+      m_arffHeaderJob.stopJob();
+    }
+
+    if (m_randomizeJob != null) {
+      m_randomizeJob.stopJob();
+    }
+  }
+
+  @Override
   public Instances getTrainingHeader() {
     if (m_arffHeaderJob != null) {
       Instances result = m_arffHeaderJob.getFinalHeader();
