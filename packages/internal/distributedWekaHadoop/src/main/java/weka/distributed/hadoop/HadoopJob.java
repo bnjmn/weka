@@ -30,6 +30,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.mapred.TaskCompletionEvent;
 import org.apache.hadoop.mapreduce.Job;
@@ -147,6 +149,12 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   /** interval (seconds) between status updates for the running job */
   protected String m_loggingInterval = "10";
 
+  /** Output debugging info */
+  protected boolean m_debug;
+
+  /** Hadoop logging */
+  protected Log m_hadoopLog = LogFactory.getLog(HadoopJob.class);
+
   @Override
   public Enumeration<Option> listOptions() {
     Vector<Option> options = new Vector<Option>();
@@ -161,6 +169,8 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     options.addElement(new Option(
       "\tLogging interval in seconds (default = 15).", "logging-interval", 1,
       "-logging-interval <seconds>"));
+    options
+      .addElement(new Option("\tOutput debug info.", "debug", 0, "-debug"));
 
     while (confOpts.hasMoreElements()) {
       options.addElement(confOpts.nextElement());
@@ -183,6 +193,8 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
 
     String logInt = Utils.getOption("logging-interval", options);
     setLoggingInterval(logInt);
+
+    setDebug(Utils.getFlag("debug", options));
   }
 
   /**
@@ -207,6 +219,10 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     if (!DistributedJobConfig.isEmpty(getLoggingInterval())) {
       options.add("-logging-interval");
       options.add(getLoggingInterval());
+    }
+
+    if (getDebug()) {
+      options.add("-debug");
     }
 
     return options.toArray(new String[options.size()]);
@@ -255,6 +271,35 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
    */
   public MapReduceJobConfig getMapReduceJobConfig() {
     return m_mrConfig;
+  }
+
+  /**
+   * Tip text for this property
+   * 
+   * @return the tip text for this property
+   */
+  public String deubgTipText() {
+    return "Output debugging info to the log";
+  }
+
+  /**
+   * Set whether to output debug info. Some jobs may output more info to the log
+   * if this is turned on
+   * 
+   * @param debug true if debug info is to be output
+   */
+  public void setDebug(boolean debug) {
+    m_debug = debug;
+  }
+
+  /**
+   * Get whether to output debug info. Some jobs may output more info to the log
+   * if this is turned on
+   * 
+   * @return true if debug info is to be output
+   */
+  public boolean getDebug() {
+    return m_debug;
   }
 
   /**
@@ -601,12 +646,13 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   protected int logTaskMessages(Job job, int startIndex) throws IOException {
     TaskCompletionEvent[] tcEvents = job.getTaskCompletionEvents(startIndex);
 
-    StringBuilder taskMessages = new StringBuilder();
+    // StringBuilder taskMessages = new StringBuilder();
     for (TaskCompletionEvent tcEvent : tcEvents) {
-      taskMessages.append(tcEvent.toString()).append("\n");
+      logMessage(tcEvent.toString());
+      // taskMessages.append(tcEvent.toString()).append("\n");
     }
 
-    logMessage(taskMessages.toString());
+    // logMessage(taskMessages.toString());
 
     return tcEvents.length;
   }
@@ -649,5 +695,41 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
    */
   public static int getReduceNumber(String taskID) {
     return getMapReduceNumber(taskID, "_r");
+  }
+
+  /**
+   * Log a debug message
+   * 
+   * @param message the message to log
+   */
+  protected void logDebug(String message) {
+    if (getDebug()) {
+      logMessage(message);
+    }
+  }
+
+  /**
+   * Log a message
+   * 
+   * @param message the message to log
+   */
+  @Override
+  protected void logMessage(String message) {
+    if (m_log != null) {
+      m_log.logMessage(m_statusMessagePrefix + message);
+    }
+    m_hadoopLog.info(message);
+  }
+
+  /**
+   * Send a message to the status
+   * 
+   * @param message the message to status
+   */
+  @Override
+  protected void statusMessage(String message) {
+    if (m_log != null) {
+      m_log.statusMessage(m_statusMessagePrefix + message);
+    }
   }
 }
