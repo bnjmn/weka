@@ -113,6 +113,11 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     super.resetOptions();
 
     m_delegate.resetOptions();
+
+    if (m_delegate instanceof CSVSaver) {
+      // make sure that no header no header row is used
+      ((CSVSaver) m_delegate).setNoHeaderRow(true);
+    }
   }
 
   /**
