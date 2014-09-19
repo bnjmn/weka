@@ -33,8 +33,8 @@ import java.util.ArrayList;
 public class WekaClassifierHadoopJobBeanInfo extends HadoopJobBeanInfo {
 
   /**
-   * Get an array of PropertyDescriptors for the ArffHeaderHadoopJob's public
-   * properties.
+   * Get an array of PropertyDescriptors for the WekaClassifierHadoopJob's
+   * public properties.
    * 
    * @return an array of PropertyDescriptors
    */
