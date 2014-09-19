@@ -24,10 +24,14 @@ package weka.classifiers.meta;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
+import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.IteratedSingleClassifierEnhancer;
+import weka.classifiers.IterativeClassifier;
 import weka.classifiers.rules.ZeroR;
+
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -105,24 +109,35 @@ public class AdditiveRegression
   implements OptionHandler,
 	     AdditionalMeasureProducer,
 	     WeightedInstancesHandler,
-	     TechnicalInformationHandler {
+	     TechnicalInformationHandler,
+             IterativeClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -2368937577670527151L;
+
+  /** ArrayList for storing the generated base classifiers. 
+   Note: we are hiding the variable from IteratedSingleClassifierEnhancer*/
+  protected ArrayList<Classifier> m_Classifiers;
   
   /**
    * Shrinkage (Learning rate). Default = no shrinkage.
    */
   protected double m_shrinkage = 1.0;
 
-  /** The number of successfully generated base classifiers. */
-  protected int m_NumIterationsPerformed;
-
   /** The model for the mean */
   protected ZeroR m_zeroR;
 
   /** whether we have suitable data or nor (if not, ZeroR model is used) */
   protected boolean m_SuitableData = true;
+
+  /** The working data */
+  protected Instances m_Data;
+
+  /** The sum of squared errors */
+  protected double m_SSE;
+
+  /** The improvement in squared error */
+  protected double m_Diff;
   
   /**
    * Returns a string describing this attribute evaluator
@@ -319,30 +334,41 @@ public class AdditiveRegression
   }
 
   /**
-   * Build the classifier on the supplied data
-   *
-   * @param data the training data
-   * @throws Exception if the classifier could not be built successfully
+   * Method used to build the classifier.
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    super.buildClassifier(data);
+    // Initialize classifier
+    initializeClassifier(data);
+
+    // For the given number of iterations
+    while (next()) {};
+
+    // Clean up
+    done();
+  }
+
+  /**
+   * Initialize classifier.
+   *
+   * @param data the training data
+   * @throws Exception if the classifier could not be initialized successfully
+   */
+  public void initializeClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    Instances newData = new Instances(data);
-    newData.deleteWithMissingClass();
+    m_Data = new Instances(data);
+    m_Data.deleteWithMissingClass();
 
-    double sum = 0;
-    double temp_sum = 0;
     // Add the model for the mean first
     m_zeroR = new ZeroR();
-    m_zeroR.buildClassifier(newData);
+    m_zeroR.buildClassifier(m_Data);
     
     // only class? -> use only ZeroR model
-    if (newData.numAttributes() == 1) {
+    if (m_Data.numAttributes() == 1) {
       System.err.println(
 	  "Cannot build model (only class attribute present in data!), "
 	  + "using ZeroR model instead!");
@@ -352,36 +378,59 @@ public class AdditiveRegression
     else {
       m_SuitableData = true;
     }
-    
-    newData = residualReplace(newData, m_zeroR, false);
-    for (int i = 0; i < newData.numInstances(); i++) {
-      sum += newData.instance(i).weight() *
-	newData.instance(i).classValue() * newData.instance(i).classValue();
+   
+    // Initialize list of classifiers and data
+    m_Classifiers = new ArrayList<Classifier>(m_NumIterations);
+    m_Data = residualReplace(m_Data, m_zeroR, false);
+
+    // Calculate sum of squared errors
+    m_SSE = 0;
+    m_Diff = Double.MAX_VALUE;
+    for (int i = 0; i < m_Data.numInstances(); i++) {
+      m_SSE += m_Data.instance(i).weight() *
+	m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
     }
     if (m_Debug) {
       System.err.println("Sum of squared residuals "
-			 +"(predicting the mean) : " + sum);
+			 +"(predicting the mean) : " + m_SSE);
     }
+  }
 
-    m_NumIterationsPerformed = 0;
-    do {
-      temp_sum = sum;
+  /**
+   * Perform another iteration.
+   */
+  public boolean next() throws Exception {
+    
+    if ((m_Classifiers.size() >= m_NumIterations) || (!m_SuitableData) ||
+        (m_Diff <= Utils.SMALL)) {
+      return false;
+    }
+    
+    // Build the classifier
+    m_Classifiers.add(AbstractClassifier.makeCopy(m_Classifier));
+    m_Classifiers.get(m_Classifiers.size() - 1).buildClassifier(m_Data);
+    
+    m_Data = residualReplace(m_Data, m_Classifiers.get(m_Classifiers.size() - 1), true);
+    double sum = 0;
+    for (int i = 0; i < m_Data.numInstances(); i++) {
+      sum += m_Data.instance(i).weight() *
+        m_Data.instance(i).classValue() * m_Data.instance(i).classValue();
+    }
+    if (m_Debug) {
+      System.err.println("Sum of squared residuals : " + sum);
+    }
+    m_Diff = m_SSE - sum;
+    m_SSE = sum;
 
-      // Build the classifier
-      m_Classifiers[m_NumIterationsPerformed].buildClassifier(newData);
+    return true;
+  }
 
-      newData = residualReplace(newData, m_Classifiers[m_NumIterationsPerformed], true);
-      sum = 0;
-      for (int i = 0; i < newData.numInstances(); i++) {
-	sum += newData.instance(i).weight() *
-	  newData.instance(i).classValue() * newData.instance(i).classValue();
-      }
-      if (m_Debug) {
-	System.err.println("Sum of squared residuals : "+sum);
-      }
-      m_NumIterationsPerformed++;
-    } while (((temp_sum - sum) > Utils.SMALL) && 
-	     (m_NumIterationsPerformed < m_Classifiers.length));
+  /**
+   * Clean up.
+   */
+  public void done() {
+    
+    m_Data = null;
   }
 
   /**
@@ -400,8 +449,8 @@ public class AdditiveRegression
       return prediction;
     }
     
-    for (int i = 0; i < m_NumIterationsPerformed; i++) {
-      double toAdd = m_Classifiers[i].classifyInstance(inst);
+    for (Classifier classifier : m_Classifiers) {
+      double toAdd = classifier.classifyInstance(inst);
       if (Utils.isMissingValue(toAdd)) {
         throw new UnassignedClassException("AdditiveRegression: base learner predicted missing value.");
       }
@@ -473,7 +522,7 @@ public class AdditiveRegression
    * models)
    */
   public double measureNumIterations() {
-    return m_NumIterationsPerformed;
+    return m_Classifiers.size();
   }
 
   /**
@@ -505,11 +554,11 @@ public class AdditiveRegression
     text.append("Base classifier " 
 		+ getClassifier().getClass().getName()
 		+ "\n\n");
-    text.append("" + m_NumIterationsPerformed + " models generated.\n");
+    text.append("" + m_Classifiers.size() + " models generated.\n");
 
-    for (int i = 0; i < m_NumIterationsPerformed; i++) {
+    for (int i = 0; i < m_Classifiers.size(); i++) {
       text.append("\nModel number " + i + "\n\n" +
-		  m_Classifiers[i] + "\n");
+		  m_Classifiers.get(i) + "\n");
     }
 
     return text.toString();
