@@ -43,6 +43,7 @@ import weka.core.EnvironmentHandler;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CorrelationMatrixMapTask;
+import weka.distributed.KMeansMapTask;
 import weka.distributed.WekaClassifierMapTask;
 import weka.distributed.hadoop.ArffHeaderHadoopJob;
 import weka.distributed.hadoop.HadoopJob;
@@ -98,6 +99,9 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
 
   /** Correlation map task for editing the correlation job */
   protected CorrelationMatrixMapTask m_correlationMapTask;
+
+  /** KMeans map task for editing the KMeans job */
+  protected KMeansMapTask m_kMeansMapTask;
 
   /** Additionally for evaluaton job */
   protected weka.distributed.hadoop.WekaClassifierHadoopJob m_tempClassifierJob;
@@ -251,6 +255,15 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       }
       addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
       addTabForRandomizedDataChunkJob("Random shuffle options", m_job);
+    } else if (m_job instanceof weka.distributed.hadoop.KMeansClustererHadoopJob) {
+      m_tempArffJob = new weka.distributed.hadoop.ArffHeaderHadoopJob();
+      try {
+        m_tempArffJob.setOptions(Utils.splitOptions(m_optionsOrig));
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+      addTabForArffHeaderJob("ARFF header/CSV parsing", m_tempArffJob);
+      addTabForKMeansJob(jobTitle, m_job);
     }
 
     add(m_configTabs, BorderLayout.CENTER);
@@ -288,6 +301,41 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     // JScrollPane scroller = new JScrollPane(jobHolder);
 
     m_configTabs.addTab(tabTitle, jobHolder);
+  }
+
+  /**
+   * Adds a tab for editing a k-means job
+   * 
+   * @param tabTitle the title for the tab
+   * @param kmeansJob the k-means job to edit
+   */
+  protected void addTabForKMeansJob(String tabTitle, HadoopJob kmeansJob) {
+    JPanel jobHolder = new JPanel();
+
+    jobHolder.setLayout(new BorderLayout());
+
+    PropertySheetPanel clustererJobEditor = new PropertySheetPanel();
+    clustererJobEditor.setEnvironment(m_env);
+    clustererJobEditor.setTarget(kmeansJob);
+    jobHolder.add(clustererJobEditor, BorderLayout.NORTH);
+
+    // if (hideAbout) {
+    // classifierJobEditor.getAboutPanel().setVisible(false);
+    // }
+
+    m_kMeansMapTask = new KMeansMapTask();
+    try {
+      m_kMeansMapTask.setOptions(Utils.splitOptions(m_optionsOrig));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    PropertySheetPanel clustererTaskEditor = new PropertySheetPanel();
+    clustererTaskEditor.setEnvironment(m_env);
+    clustererTaskEditor.setTarget(m_kMeansMapTask);
+    jobHolder.add(clustererTaskEditor, BorderLayout.CENTER);
+
+    JScrollPane scroller = new JScrollPane(jobHolder);
+    m_configTabs.addTab(tabTitle, scroller);
   }
 
   /**
@@ -345,7 +393,7 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     jobHolder.setLayout(new BorderLayout());
     PropertySheetPanel randomizeJobEditor = new PropertySheetPanel();
     randomizeJobEditor.setEnvironment(m_env);
-    ;
+
     randomizeJobEditor.setTarget(randomizeJob);
     jobHolder.add(randomizeJobEditor, BorderLayout.NORTH);
 
@@ -471,6 +519,8 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
       okCorrelationJob();
     } else if (m_job instanceof weka.distributed.hadoop.RandomizedDataChunkHadoopJob) {
       okRandomizeJob();
+    } else if (m_job instanceof weka.distributed.hadoop.KMeansClustererHadoopJob) {
+      okKMeansJob();
     } else {
       okScoringJob();
     }
@@ -533,6 +583,29 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     String[] arffJobOpts = arffJob.getJobOptionsOnly();
 
     for (String s : arffJobOpts) {
+      opts.add(s);
+    }
+  }
+
+  /**
+   * Add options from the k-means job only to the supplied list
+   * 
+   * @param opts the list of options to add to
+   * @param kMeansJob the classifier job to grab options from
+   */
+  protected void addKMeansJobOptionsOnly(List<String> opts,
+    weka.distributed.hadoop.KMeansClustererHadoopJob kMeansJob) {
+    String[] clustererOpts = kMeansJob.getJobOptionsOnly();
+
+    for (String s : clustererOpts) {
+      opts.add(s);
+    }
+  }
+
+  protected void addKMeansMapTaskOpts(List<String> opts) {
+    String[] clustererMapOpts = m_kMeansMapTask.getOptions();
+
+    for (String s : clustererMapOpts) {
       opts.add(s);
     }
   }
@@ -690,6 +763,21 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
     addClassifierJobOptionsOnly(opts,
       (weka.distributed.hadoop.WekaClassifierHadoopJob) m_job);
     addClassifierMapTaskOpts(opts);
+
+    applyOptionsToJob(opts);
+  }
+
+  /**
+   * Actions to apply to the k-means job when closing under the "OK" condition
+   */
+  protected void okKMeansJob() {
+    List<String> opts = getBaseConfig(m_job);
+    addArffJobOptionsOnly(opts, m_tempArffJob);
+    addArffMapTaskOpts(opts);
+
+    addKMeansJobOptionsOnly(opts,
+      (weka.distributed.hadoop.KMeansClustererHadoopJob) m_job);
+    addKMeansMapTaskOpts(opts);
 
     applyOptionsToJob(opts);
   }

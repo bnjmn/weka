@@ -55,6 +55,9 @@ public class HadoopJobBeanInfo extends SimpleBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
+      p1 = new PropertyDescriptor("debug", HadoopJob.class);
+      pds.add(p1);
+
       return pds;
     } catch (Exception ex) {
       ex.printStackTrace();
