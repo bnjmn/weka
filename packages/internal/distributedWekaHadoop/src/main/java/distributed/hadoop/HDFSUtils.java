@@ -21,8 +21,10 @@
 
 package distributed.hadoop;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -30,6 +32,7 @@ import java.util.List;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.filecache.DistributedCache;
+import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 
@@ -59,14 +62,16 @@ public class HDFSUtils {
    * the job classpath in the Configuration file to use ':' rather than ';' as
    * separators.
    */
-  public static final String WINDOWS_ACCESSING_HADOOP_ON_LINUX_SYS_PROP = "HADOOP_ON_LINUX";
+  public static final String WINDOWS_ACCESSING_HADOOP_ON_LINUX_SYS_PROP =
+    "HADOOP_ON_LINUX";
 
   /**
    * Staging location for non library files to be distributed to the nodes by
    * the distributed cache
    */
-  public static final String WEKA_TEMP_DISTRIBUTED_CACHE_FILES = WEKA_LIBRARIES_LOCATION
-    + "tmpDistributedCache/";
+  public static final String WEKA_TEMP_DISTRIBUTED_CACHE_FILES =
+    WEKA_LIBRARIES_LOCATION
+      + "tmpDistributedCache/";
 
   /**
    * Utility method to resolve all environment variables in a given path
@@ -359,6 +364,46 @@ public class HDFSUtils {
   public static void deleteFile(HDFSConfig hdfsConfig, Configuration conf,
     String path, Environment env) throws IOException {
     deleteDirectory(hdfsConfig, conf, path, env);
+  }
+
+  /**
+   * Serializes the given object into a file in the staging area in HDFS and
+   * then adds that file to the distributed cache for the configuration
+   * 
+   * @param toSerialize the object to serialize
+   * @param hdfsConfig the hdfs configuration to use
+   * @param conf the job configuration to configure
+   * @param fileNameInCache the file name only for the serialized object in the
+   *          cache
+   * @param env environment variables
+   * @throws IOException if a problem occurs
+   */
+  public static void serializeObjectToDistributedCache(Object toSerialize,
+    HDFSConfig hdfsConfig, Configuration conf, String fileNameInCache,
+    Environment env) throws IOException {
+
+    createTmpDistributedCacheDirIfNecessary(hdfsConfig);
+    hdfsConfig.configureForHadoop(conf, env);
+
+    String path = WEKA_TEMP_DISTRIBUTED_CACHE_FILES + fileNameInCache;
+    path = resolvePath(path, env);
+    Path stage = new Path(path);
+
+    FileSystem fs = FileSystem.get(conf);
+
+    // delete any existing file
+    fs.delete(stage, true);
+    FSDataOutputStream os = fs.create(stage);
+    BufferedOutputStream br = new BufferedOutputStream(os);
+    ObjectOutputStream oos = new ObjectOutputStream(br);
+    try {
+      oos.writeObject(toSerialize);
+    } finally {
+      oos.flush();
+      oos.close();
+    }
+
+    addFileToDistributedCache(hdfsConfig, conf, path, env);
   }
 
   /**
