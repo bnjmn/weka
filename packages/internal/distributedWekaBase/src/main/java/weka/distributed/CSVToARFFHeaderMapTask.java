@@ -55,6 +55,8 @@ import au.com.bytecode.opencsv.CSVParser;
 
 import com.clearspring.analytics.stream.quantile.TDigest;
 
+import distributed.core.DistributedJobConfig;
+
 /**
  * A map task that processes incoming lines in CSV format and builds up header
  * information. Can be configured with information on which columns to force to
@@ -98,6 +100,24 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /** A range of columns to force to be of type Date */
   protected Range m_forceDate = new Range();
+
+  /**
+   * User supplied ranges to force to be string (passed to Range objects at init
+   * time)
+   */
+  protected String m_stringRange = "";
+
+  /**
+   * User supplied ranges to force to be nominal (passed to Range objects at
+   * init time)
+   */
+  protected String m_nominalRange = "";
+
+  /**
+   * User supplied ranges to force to be date (passed to Range objects at init
+   * time)
+   */
+  protected String m_dateRange = "";
 
   /**
    * Holds the names of the incoming columns/attributes. Names will be generated
@@ -492,7 +512,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param value the range
    */
   public void setStringAttributes(String value) {
-    m_forceString.setRanges(value);
+    m_stringRange = value;
+    // m_forceString.setRanges(value);
   }
 
   /**
@@ -501,7 +522,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @return the range
    */
   public String getStringAttributes() {
-    return m_forceString.getRanges();
+    return m_stringRange;
+    // return m_forceString.getRanges();
   }
 
   /**
@@ -521,7 +543,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param value the range
    */
   public void setNominalAttributes(String value) {
-    m_forceNominal.setRanges(value);
+    m_nominalRange = value;
+    // m_forceNominal.setRanges(value);
   }
 
   /**
@@ -530,7 +553,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @return the range
    */
   public String getNominalAttributes() {
-    return m_forceNominal.getRanges();
+    return m_nominalRange;
+    // return m_forceNominal.getRanges();
   }
 
   /**
@@ -580,7 +604,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @param value the range
    */
   public void setDateAttributes(String value) {
-    m_forceDate.setRanges(value);
+    m_dateRange = value;
+    // m_forceDate.setRanges(value);
   }
 
   /**
@@ -589,7 +614,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * @return the range.
    */
   public String getDateAttributes() {
-    return m_forceDate.getRanges();
+    return m_dateRange;
+    // return m_forceDate.getRanges();
   }
 
   /**
@@ -1188,6 +1214,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   private void processRanges(int numFields, TYPE defaultType) {
     m_attributeTypes = new TYPE[numFields];
+
+    if (!DistributedJobConfig.isEmpty(getStringAttributes())) {
+      m_forceString.setRanges(getStringAttributes());
+    }
+
+    if (!DistributedJobConfig.isEmpty(getNominalAttributes())) {
+      m_forceNominal.setRanges(getNominalAttributes());
+    }
+
+    if (!DistributedJobConfig.isEmpty(getDateAttributes())) {
+      m_forceDate.setRanges(getDateAttributes());
+    }
 
     m_forceString.setUpper(numFields - 1);
     m_forceNominal.setUpper(numFields - 1);
