@@ -29,17 +29,39 @@ import weka.classifiers.rules.DecisionTableHashKey;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.NormalizableDistance;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformation.Field;
+import weka.core.TechnicalInformation.Type;
+import weka.core.TechnicalInformationHandler;
 import weka.core.WeightedReservoirSample;
 
 /**
- * Class for managing a current sketch of centers for KMeans along with a
- * reservoir sample use over iterations to update the sketch. Used in the
- * implementation of the k-means|| initialization method.
+ <!-- globalinfo-start -->
+ * Class for managing a sketch of centres for k-means, along with a weighted reservoir sample that is used over iterations to update the sketch. Used in the implementation of the k-means|| initialization method. For more information, see<br/>
+ * <br/>
+ * Bahman Bahmani, Benjamin Moseley, Andrea Vattani, Ravi Kumar, Sergei Vassilvitskii (2012). Scalable k-means++. Proceedings of the VLDB Endowment.:622-633.
+ * <p/>
+ <!-- globalinfo-end -->
  * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Bahmani2012,
+ *    author = {Bahman Bahmani and Benjamin Moseley and Andrea Vattani and Ravi Kumar and Sergei Vassilvitskii},
+ *    journal = {Proceedings of the VLDB Endowment},
+ *    pages = {622-633},
+ *    title = {Scalable k-means++},
+ *    year = {2012}
+ * }
+ * </pre>
+ * <p/>
+ <!-- technical-bibtex-end -->
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class CentroidSketch implements Serializable {
+public class CentroidSketch implements TechnicalInformationHandler,
+  Serializable {
 
   /**
    * For serialization
@@ -64,7 +86,7 @@ public class CentroidSketch implements Serializable {
 
   /** The seed for random number generation */
   protected int m_seed = 1;
-
+  
   /**
    * Constructor.
    * 
@@ -83,6 +105,18 @@ public class CentroidSketch implements Serializable {
     m_size = size;
 
     m_weightedCenterSample = new WeightedReservoirSample(m_size, m_seed);
+  }
+
+  /**
+   * Overview information for this class
+   * 
+   * @return overview help information
+   */
+  public String globalInfo() {
+    return "Class for managing a sketch of centres for k-means, along with a weighted reservoir "
+      + "sample that is used over iterations to update the sketch. Used in the implementation "
+      + "of the k-means|| initialization method. For more information, see\n\n"
+      + getTechnicalInformation().toString();
   }
 
   /**
@@ -225,4 +259,22 @@ public class CentroidSketch implements Serializable {
 
     resetReservoir();
   }
+
+  @Override
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation result;
+
+    result = new TechnicalInformation(Type.ARTICLE);
+    result
+      .setValue(
+        Field.AUTHOR,
+        "Bahman Bahmani and Benjamin Moseley and Andrea Vattani and Ravi Kumar and Sergei Vassilvitskii");
+    result.setValue(Field.TITLE, "Scalable k-means++");
+    result.setValue(Field.JOURNAL, "Proceedings of the VLDB Endowment");
+    result.setValue(Field.YEAR, "2012");
+    result.setValue(Field.PAGES, "622-633");
+
+    return result;
+  }
 }
+
