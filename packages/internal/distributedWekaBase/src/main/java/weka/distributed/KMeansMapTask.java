@@ -382,7 +382,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    *         explorer/experimenter gui
    */
   public String dontReplaceMissingValuesTipText() {
-    return "Replace missing values globally with mean/mode.";
+    return "Don't replace missing values globally with mean/mode.";
   }
 
   /**
