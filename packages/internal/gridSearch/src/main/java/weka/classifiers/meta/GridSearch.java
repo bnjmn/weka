@@ -35,11 +35,12 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import weka.filters.Filter;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.functions.LinearRegression;
+import weka.classifiers.functions.SMOreg;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -58,52 +59,26 @@ import weka.core.Summarizable;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WekaException;
-import weka.filters.AllFilter;
-import weka.filters.Filter;
-import weka.filters.supervised.attribute.PLSFilter;
-import weka.filters.unsupervised.attribute.MathExpression;
-import weka.filters.unsupervised.attribute.NumericCleaner;
 import weka.filters.unsupervised.instance.Resample;
 
 /**
- * <!-- globalinfo-start --> Performs a grid search of parameter pairs for the a
- * classifier (Y-axis, default is LinearRegression with the "Ridge" parameter)
- * and the PLSFilter (X-axis, "# of Components") and chooses the best pair found
- * for the actual predicting.<br/>
+ * <!-- globalinfo-start -->
+ * Performs a grid search of parameter pairs for a classifier  and chooses the best pair found for the actual predicting.<br/>
  * <br/>
- * The initial grid is worked on with 2-fold CV to determine the values of the
- * parameter pairs for the selected type of evaluation (e.g., accuracy). The
- * best point in the grid is then taken and a 10-fold CV is performed with the
- * adjacent parameter pairs. If a better pair is found, then this will act as
- * new center and another 10-fold CV will be performed (kind of hill-climbing).
- * This process is repeated until no better pair is found or the best pair is on
- * the border of the grid.<br/>
- * In case the best pair is on the border, one can let GridSearch automatically
- * extend the grid and continue the search. Check out the properties
- * 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option
- * '-max-grid-extensions &lt;num&gt;').<br/>
+ * The initial grid is worked on with 2-fold CV to determine the values of the parameter pairs for the selected type of evaluation (e.g., accuracy). The best point in the grid is then taken and a 10-fold CV is performed with the adjacent parameter pairs. If a better pair is found, then this will act as new center and another 10-fold CV will be performed (kind of hill-climbing). This process is repeated until no better pair is found or the best pair is on the border of the grid.<br/>
+ * In case the best pair is on the border, one can let GridSearch automatically extend the grid and continue the search. Check out the properties 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option '-max-grid-extensions &lt;num&gt;').<br/>
  * <br/>
- * GridSearch can handle doubles, integers (values are just cast to int) and
- * booleans (0 is false, otherwise true). float, char and long are supported as
- * well.<br/>
+ * GridSearch can handle doubles, integers (values are just cast to int) and booleans (0 is false, otherwise true). float, char and long are supported as well.<br/>
  * <br/>
- * The best filter/classifier setup can be accessed after the buildClassifier
- * call via the getBestFilter/getBestClassifier methods.<br/>
- * Note on the implementation: after the data has been passed through the
- * filter, a default NumericCleaner filter is applied to the data in order to
- * avoid numbers that are getting too small and might produce NaNs in other
- * schemes.<br/>
- * <br/>
- * Note: with -num-slots/numExecutionSlots you can specify how many setups are
- * evaluated in parallel, taking advantage of multi-cpu/core architectures.
+ * The best classifier setup can be accessed after the buildClassifier call via the getBestClassifier methods.<br/>
+ * Note: with -num-slots/numExecutionSlots you can specify how many setups are evaluated in parallel, taking advantage of multi-cpu/core architectures.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|KAP|WAUC&gt;
+ * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
  *  Determines the parameter used for evaluation:
  *  CC = Correlation coefficient
  *  RMSE = Root mean squared error
@@ -114,41 +89,29 @@ import weka.filters.unsupervised.instance.Resample;
  *  ACC = Accuracy
  *  WAUC = Weighted AUC
  *  KAP = Kappa
- *  (default: CC)
- * </pre>
+ *  (default: CC)</pre>
  * 
- * <pre>
- * -y-property &lt;option&gt;
+ * <pre> -y-property &lt;option&gt;
  *  The Y option to test (without leading dash).
- *  (default: classifier.ridge)
- * </pre>
+ *  (default: kernel.gamma)</pre>
  * 
- * <pre>
- * -y-min &lt;num&gt;
+ * <pre> -y-min &lt;num&gt;
  *  The minimum for Y.
- *  (default: -10)
- * </pre>
+ *  (default: -3)</pre>
  * 
- * <pre>
- * -y-max &lt;num&gt;
+ * <pre> -y-max &lt;num&gt;
  *  The maximum for Y.
- *  (default: +5)
- * </pre>
+ *  (default: +3)</pre>
  * 
- * <pre>
- * -y-step &lt;num&gt;
+ * <pre> -y-step &lt;num&gt;
  *  The step size for Y.
- *  (default: 1)
- * </pre>
+ *  (default: 1)</pre>
  * 
- * <pre>
- * -y-base &lt;num&gt;
+ * <pre> -y-base &lt;num&gt;
  *  The base for Y.
- *  (default: 10)
- * </pre>
+ *  (default: 10)</pre>
  * 
- * <pre>
- * -y-expression &lt;expr&gt;
+ * <pre> -y-expression &lt;expr&gt;
  *  The expression for Y.
  *  Available parameters:
  *   BASE
@@ -157,48 +120,29 @@ import weka.filters.unsupervised.instance.Resample;
  *   STEP
  *   I - the current iteration value
  *   (from 'FROM' to 'TO' with stepsize 'STEP')
- *  (default: 'pow(BASE,I)')
- * </pre>
+ *  (default: 'pow(BASE,I)')</pre>
  * 
- * <pre>
- * -filter &lt;filter specification&gt;
- *  The filter to use (on X axis). Full classname of filter to include, 
- *  followed by scheme options.
- *  (default: weka.filters.supervised.attribute.PLSFilter)
- * </pre>
- * 
- * <pre>
- * -x-property &lt;option&gt;
+ * <pre> -x-property &lt;option&gt;
  *  The X option to test (without leading dash).
- *  (default: filter.numComponents)
- * </pre>
+ *  (default: C)</pre>
  * 
- * <pre>
- * -x-min &lt;num&gt;
+ * <pre> -x-min &lt;num&gt;
  *  The minimum for X.
- *  (default: +5)
- * </pre>
+ *  (default: -3)</pre>
  * 
- * <pre>
- * -x-max &lt;num&gt;
+ * <pre> -x-max &lt;num&gt;
  *  The maximum for X.
- *  (default: +20)
- * </pre>
+ *  (default: 3)</pre>
  * 
- * <pre>
- * -x-step &lt;num&gt;
+ * <pre> -x-step &lt;num&gt;
  *  The step size for X.
- *  (default: 1)
- * </pre>
+ *  (default: 1)</pre>
  * 
- * <pre>
- * -x-base &lt;num&gt;
+ * <pre> -x-base &lt;num&gt;
  *  The base for X.
- *  (default: 10)
- * </pre>
+ *  (default: 10)</pre>
  * 
- * <pre>
- * -x-expression &lt;expr&gt;
+ * <pre> -x-expression &lt;expr&gt;
  *  The expression for the X value.
  *  Available parameters:
  *   BASE
@@ -207,127 +151,120 @@ import weka.filters.unsupervised.instance.Resample;
  *   STEP
  *   I - the current iteration value
  *   (from 'FROM' to 'TO' with stepsize 'STEP')
- *  (default: 'pow(BASE,I)')
- * </pre>
+ *  (default: 'pow(BASE,I)')</pre>
  * 
- * <pre>
- * -extend-grid
+ * <pre> -extend-grid
  *  Whether the grid can be extended.
- *  (default: no)
- * </pre>
+ *  (default: no)</pre>
  * 
- * <pre>
- * -max-grid-extensions &lt;num&gt;
+ * <pre> -max-grid-extensions &lt;num&gt;
  *  The maximum number of grid extensions (-1 is unlimited).
- *  (default: 3)
- * </pre>
+ *  (default: 3)</pre>
  * 
- * <pre>
- * -sample-size &lt;num&gt;
+ * <pre> -sample-size &lt;num&gt;
  *  The size (in percent) of the sample to search the inital grid with.
- *  (default: 100)
- * </pre>
+ *  (default: 100)</pre>
  * 
- * <pre>
- * -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
+ * <pre> -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
  *  The type of traversal for the grid.
- *  (default: COLUMN-WISE)
- * </pre>
+ *  (default: COLUMN-WISE)</pre>
  * 
- * <pre>
- * -log-file &lt;filename&gt;
+ * <pre> -log-file &lt;filename&gt;
  *  The log file to log the messages to.
- *  (default: none)
- * </pre>
+ *  (default: none)</pre>
  * 
- * <pre>
- * -num-slots &lt;num&gt;
+ * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)
- * </pre>
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)
- * </pre>
+ *  (default 1)</pre>
  * 
- * <pre>
- * -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console
- * </pre>
- * 
- * <pre>
- * -W
+ * <pre> -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.LinearRegression)
+ *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.functions.SMOreg:
  * </pre>
  * 
- * <pre>
- * Options specific to classifier weka.classifiers.functions.LinearRegression:
+ * <pre> -C &lt;double&gt;
+ *  The complexity constant C.
+ *  (default 1)</pre>
+ * 
+ * <pre> -N
+ *  Whether to 0=normalize/1=standardize/2=neither.
+ *  (default 0=normalize)</pre>
+ * 
+ * <pre> -I &lt;classname and parameters&gt;
+ *  Optimizer class used for solving quadratic optimization problem
+ *  (default weka.classifiers.functions.supportVector.RegSMOImproved)</pre>
+ * 
+ * <pre> -K &lt;classname and parameters&gt;
+ *  The Kernel to use.
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to optimizer ('-I') weka.classifiers.functions.supportVector.RegSMOImproved:
  * </pre>
  * 
- * <pre>
- * -D
- *  Produce debugging output.
- *  (default no debugging output)
+ * <pre> -T &lt;double&gt;
+ *  The tolerance parameter for checking the stopping criterion.
+ *  (default 0.001)</pre>
+ * 
+ * <pre> -V
+ *  Use variant 1 of the algorithm when true, otherwise use variant 2.
+ *  (default true)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *  The epsilon for round-off error.
+ *  (default 1.0e-12)</pre>
+ * 
+ * <pre> -L &lt;double&gt;
+ *  The epsilon parameter in epsilon-insensitive loss function.
+ *  (default 1.0e-3)</pre>
+ * 
+ * <pre> -W &lt;double&gt;
+ *  The random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> 
+ * Options specific to kernel ('-K') weka.classifiers.functions.supportVector.RBFKernel:
  * </pre>
  * 
- * <pre>
- * -S &lt;number of selection method&gt;
- *  Set the attribute selection method to use. 1 = None, 2 = Greedy.
- *  (default 0 = M5' method)
- * </pre>
+ * <pre> -G &lt;num&gt;
+ *  The Gamma parameter.
+ *  (default: 0.01)</pre>
  * 
- * <pre>
- * -C
- *  Do not try to eliminate colinear attributes.
- * </pre>
+ * <pre> -C &lt;num&gt;
+ *  The size of the cache (a prime number), 0 for full cache and 
+ *  -1 to turn it off.
+ *  (default: 250007)</pre>
  * 
- * <pre>
- * -R &lt;double&gt;
- *  Set ridge parameter (default 1.0e-8).
- * </pre>
+ * <pre> -output-debug-info
+ *  Enables debugging output (if available) to be printed.
+ *  (default: off)</pre>
  * 
- * <pre>
- * Options specific to filter weka.filters.supervised.attribute.PLSFilter ('-filter'):
- * </pre>
- * 
- * <pre>
- * -D
- *  Turns on output of debugging information.
- * </pre>
- * 
- * <pre>
- * -C &lt;num&gt;
- *  The number of components to compute.
- *  (default: 20)
- * </pre>
- * 
- * <pre>
- * -U
- *  Updates the class attribute as well.
- *  (default: off)
- * </pre>
- * 
- * <pre>
- * -M
- *  Turns replacing of missing values on.
- *  (default: off)
- * </pre>
- * 
- * <pre>
- * -A &lt;SIMPLS|PLS1&gt;
- *  The algorithm to use.
- *  (default: PLS1)
- * </pre>
- * 
- * <pre>
- * -P &lt;none|center|standardize&gt;
- *  The type of preprocessing that is applied to the data.
- *  (default: center)
- * </pre>
+ * <pre> -no-checks
+ *  Turns off all checks - use with caution!
+ *  (default: checks on)</pre>
  * 
  * <!-- options-end -->
  * 
@@ -385,9 +322,6 @@ import weka.filters.unsupervised.instance.Resample;
  * @author Geoff Holmes (geoff at cs dot waikato dot ac dot nz)
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
- * @see PLSFilter
- * @see LinearRegression
- * @see NumericCleaner
  */
 public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   AdditionalMeasureProducer, Summarizable {
@@ -1501,7 +1435,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       result.append("set xrange [" + getGrid().getMinX() + ":"
         + getGrid().getMaxX() + "]\n");
       result.append("set xlabel 'x ("
-        + m_Owner.getFilter().getClass().getName() + ": "
+        + m_Owner.getClassifier().getClass().getName() + ": "
         + m_Owner.getXProperty() + ")'\n");
       result.append("set yrange [" + getGrid().getMinY() + ":"
         + getGrid().getMaxY() + "]\n");
@@ -1771,7 +1705,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     }
 
     /**
-     * returns a fully configures object (a copy of the provided one).
+     * returns a fully configured object (a copy of the provided one).
      * 
      * @param original the object to create a copy from and set the parameters
      * @param valueX the current iteration value for X
@@ -1786,28 +1720,12 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       result = new SerializedObject(original).getObject();
 
       if (original instanceof Classifier) {
-        if (m_X_Property.startsWith(PREFIX_CLASSIFIER)) {
-          setValue(result, m_X_Property.substring(PREFIX_CLASSIFIER.length()),
-            valueX);
-        }
+        setValue(result, m_X_Property, valueX);
 
-        if (m_Y_Property.startsWith(PREFIX_CLASSIFIER)) {
-          setValue(result, m_Y_Property.substring(PREFIX_CLASSIFIER.length()),
-            valueY);
-        }
-      } else if (original instanceof Filter) {
-        if (m_X_Property.startsWith(PREFIX_FILTER)) {
-          setValue(result, m_X_Property.substring(PREFIX_FILTER.length()),
-            valueX);
-        }
-
-        if (m_Y_Property.startsWith(PREFIX_FILTER)) {
-          setValue(result, m_Y_Property.substring(PREFIX_FILTER.length()),
-            valueY);
-        }
+        setValue(result, m_Y_Property, valueY);
       } else {
         throw new IllegalArgumentException(
-          "Object must be either classifier or filter!");
+          "Object must be a classifier!");
       }
 
       return result;
@@ -1837,9 +1755,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     /** the classifier to use. */
     protected Classifier m_Classifier;
-
-    /** the filter to use. */
-    protected Filter m_Filter;
 
     /** the data to use for training. */
     protected Instances m_Data;
@@ -1871,7 +1786,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       m_Owner = owner;
       m_Generator = generator;
       m_Classifier = m_Owner.getClassifier();
-      m_Filter = m_Owner.getFilter();
       m_Data = inst;
       m_Values = values;
       m_Folds = folds;
@@ -1885,30 +1799,17 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     public void run() {
       Evaluation eval;
       Classifier classifier;
-      Filter filter;
       Performance performance;
       double x;
       double y;
       Instances data;
 
       classifier = null;
-      filter = null;
       x = m_Generator.evaluate(m_Values.getX(), true);
       y = m_Generator.evaluate(m_Values.getY(), false);
       try {
 
-        // data pass through filter
-        if (!m_Filter.getClass().equals(AllFilter.class)) {
-          filter = (Filter) m_Generator.setup(m_Filter, x, y);
-          filter.setInputFormat(m_Data);
-          data = Filter.useFilter(m_Data, filter);
-          // make sure that the numbers don't get too small - otherwise NaNs!
-          Filter cleaner = new NumericCleaner();
-          cleaner.setInputFormat(data);
-          data = Filter.useFilter(data, cleaner);
-        } else {
-          data = m_Data;
-        }
+        data = m_Data;
 
         // setup classifier
         classifier = (Classifier) m_Generator.setup(m_Classifier, x, y);
@@ -1932,8 +1833,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
           System.err
             .println("Encountered exception while evaluating classifier, skipping!");
           System.err.println("- Values....: " + m_Values);
-          System.err.println("- Filter....: "
-            + ((filter != null) ? Utils.toCommandLine(filter) : "-no setup-"));
           System.err.println("- Classifier: "
             + ((classifier != null) ? Utils.toCommandLine(classifier)
               : "-no setup-"));
@@ -2000,18 +1899,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     new Tag(TRAVERSAL_BY_ROW, "row-wise", "row-wise"),
     new Tag(TRAVERSAL_BY_COLUMN, "column-wise", "column-wise") };
 
-  /** the prefix to indicate that the option is for the classifier. */
-  public final static String PREFIX_CLASSIFIER = "classifier.";
-
-  /** the prefix to indicate that the option is for the filter. */
-  public final static String PREFIX_FILTER = "filter.";
-
-  /** the Filter. */
-  protected Filter m_Filter;
-
-  /** the Filter with the best setup. */
-  protected Filter m_BestFilter;
-
   /** the Classifier with the best setup. */
   protected Classifier m_BestClassifier;
 
@@ -2022,16 +1909,15 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   protected int m_Evaluation = EVALUATION_CC;
 
   /**
-   * the Y option to work on (without leading dash, preceding 'classifier.'
-   * means to set the option for the classifier 'filter.' for the filter).
+   * the Y option to work on (without leading dash).
    */
-  protected String m_Y_Property = PREFIX_CLASSIFIER + "ridge";
+  protected String m_Y_Property = "kernel.gamma";
 
   /** the minimum of Y. */
-  protected double m_Y_Min = -10;
+  protected double m_Y_Min = -3;
 
   /** the maximum of Y. */
-  protected double m_Y_Max = +5;
+  protected double m_Y_Max = +3;
 
   /** the step size of Y. */
   protected double m_Y_Step = 1;
@@ -2055,16 +1941,15 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   protected String m_Y_Expression = "pow(BASE,I)";
 
   /**
-   * the X option to work on (without leading dash, preceding 'classifier.'
-   * means to set the option for the classifier 'filter.' for the filter).
+   * the X option to work on (without leading dash)
    */
-  protected String m_X_Property = PREFIX_FILTER + "numComponents";
+  protected String m_X_Property = "C";
 
   /** the minimum of X. */
-  protected double m_X_Min = +5;
+  protected double m_X_Min = -3;
 
   /** the maximum of X. */
-  protected double m_X_Max = +20;
+  protected double m_X_Max = 3;
 
   /** the step size of X. */
   protected double m_X_Step = 1;
@@ -2085,7 +1970,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * @see MathematicalExpression
    * @see MathExpression
    */
-  protected String m_X_Expression = "I";
+  protected String m_X_Expression = "pow(BASE,I)";
 
   /** whether the grid can be extended. */
   protected boolean m_GridIsExtendable = false;
@@ -2151,26 +2036,12 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     super();
 
     // classifier
-    m_Classifier = new LinearRegression();
-    ((LinearRegression) m_Classifier)
-      .setAttributeSelectionMethod(new SelectedTag(
-        LinearRegression.SELECTION_NONE, LinearRegression.TAGS_SELECTION));
-    ((LinearRegression) m_Classifier).setEliminateColinearAttributes(false);
-
-    // filter
-    m_Filter = new PLSFilter();
-    PLSFilter filter = new PLSFilter();
-    filter.setPreprocessing(new SelectedTag(
-      PLSFilter.PREPROCESSING_STANDARDIZE, PLSFilter.TAGS_PREPROCESSING));
-    filter.setReplaceMissing(true);
+    m_Classifier = new SMOreg();
+    ((SMOreg) m_Classifier)
+      .setKernel(new weka.classifiers.functions.supportVector.RBFKernel());
 
     try {
       m_BestClassifier = AbstractClassifier.makeCopy(m_Classifier);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    try {
-      m_BestFilter = Filter.makeCopy(filter);
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -2183,9 +2054,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *         gui
    */
   public String globalInfo() {
-    return "Performs a grid search of parameter pairs for the a classifier "
-      + "(Y-axis, default is LinearRegression with the \"Ridge\" parameter) "
-      + "and the PLSFilter (X-axis, \"# of Components\") and chooses the best "
+    return "Performs a grid search of parameter pairs for a classifier  and chooses the best "
       + "pair found for the actual predicting.\n\n"
       + "The initial grid is worked on with 2-fold CV to determine the values "
       + "of the parameter pairs for the selected type of evaluation (e.g., "
@@ -2201,15 +2070,27 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       + "GridSearch can handle doubles, integers (values are just cast to int) "
       + "and booleans (0 is false, otherwise true). float, char and long are "
       + "supported as well.\n\n"
-      + "The best filter/classifier setup can be accessed after the buildClassifier "
-      + "call via the getBestFilter/getBestClassifier methods.\n"
-      + "Note on the implementation: after the data has been passed through "
-      + "the filter, a default NumericCleaner filter is applied to the data in "
-      + "order to avoid numbers that are getting too small and might produce "
-      + "NaNs in other schemes.\n\n"
+      + "The best classifier setup can be accessed after the buildClassifier "
+      + "call via the getBestClassifier methods.\n"
       + "Note: with -num-slots/numExecutionSlots you can specify how many "
       + "setups are evaluated in parallel, taking advantage of multi-cpu/core "
       + "architectures.";
+  }
+
+  /**
+   * Gets the classifier specification string, which contains the class name of
+   * the classifier and any options to the classifier.
+   * 
+   * @return the classifier string.
+   */
+  protected String getClassifierSpec() {
+
+    Classifier c = getClassifier();
+    if (c instanceof OptionHandler) {
+      return c.getClass().getName() + " "
+        + Utils.joinOptions(((OptionHandler) c).getOptions());
+    }
+    return c.getClass().getName();
   }
 
   /**
@@ -2219,7 +2100,19 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   @Override
   protected String defaultClassifierString() {
-    return LinearRegression.class.getName();
+    return "weka.classifiers.functions.SMOreg";
+  }
+
+  /**
+   * String array with default classifier options.
+   * 
+   * @return string array with default classifier options
+   */
+  @Override
+  protected String[] defaultClassifierOptions() {
+
+    String[] opts = {"-K", "weka.classifiers.functions.supportVector.RBFKernel"};
+    return opts;
   }
 
   /**
@@ -2245,13 +2138,13 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     result
       .addElement(new Option("\tThe Y option to test (without leading dash).\n"
-        + "\t(default: " + PREFIX_CLASSIFIER + "ridge)", "y-property", 1,
+        + "\t(default: kernel.gamma)", "y-property", 1,
         "-y-property <option>"));
 
-    result.addElement(new Option("\tThe minimum for Y.\n" + "\t(default: -10)",
+    result.addElement(new Option("\tThe minimum for Y.\n" + "\t(default: -3)",
       "y-min", 1, "-y-min <num>"));
 
-    result.addElement(new Option("\tThe maximum for Y.\n" + "\t(default: +5)",
+    result.addElement(new Option("\tThe maximum for Y.\n" + "\t(default: +3)",
       "y-max", 1, "-y-max <num>"));
 
     result.addElement(new Option("\tThe step size for Y.\n" + "\t(default: 1)",
@@ -2269,20 +2162,14 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
         "-y-expression <expr>"));
 
     result.addElement(new Option(
-      "\tThe filter to use (on X axis). Full classname of filter to include, \n"
-        + "\tfollowed by scheme options.\n"
-        + "\t(default: weka.filters.supervised.attribute.PLSFilter)", "filter",
-      1, "-filter <filter specification>"));
-
-    result.addElement(new Option(
       "\tThe X option to test (without leading dash).\n" + "\t(default: "
-        + PREFIX_FILTER + "numComponents)", "x-property", 1,
+        + "C)", "x-property", 1,
       "-x-property <option>"));
 
-    result.addElement(new Option("\tThe minimum for X.\n" + "\t(default: +5)",
+    result.addElement(new Option("\tThe minimum for X.\n" + "\t(default: -3)",
       "x-min", 1, "-x-min <num>"));
 
-    result.addElement(new Option("\tThe maximum for X.\n" + "\t(default: +20)",
+    result.addElement(new Option("\tThe maximum for X.\n" + "\t(default: 3)",
       "x-max", 1, "-x-max <num>"));
 
     result.addElement(new Option("\tThe step size for X.\n" + "\t(default: 1)",
@@ -2324,14 +2211,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     result.addAll(Collections.list(super.listOptions()));
 
-    if (getFilter() instanceof OptionHandler) {
-      result.addElement(new Option("", "", 0, "\nOptions specific to filter "
-        + getFilter().getClass().getName() + " ('-filter'):"));
-
-      result.addAll(Collections.list(((OptionHandler) getFilter())
-        .listOptions()));
-    }
-
     return result.elements();
   }
 
@@ -2365,9 +2244,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     result.add("-y-expression");
     result.add("" + getYExpression());
-
-    result.add("-filter");
-    result.add(Utils.toCommandLine(getFilter()));
 
     result.add("-x-property");
     result.add("" + getXProperty());
@@ -2414,11 +2290,10 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * Parses the options for this object.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   * <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
+   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
    *  Determines the parameter used for evaluation:
    *  CC = Correlation coefficient
    *  RMSE = Root mean squared error
@@ -2429,41 +2304,29 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *  ACC = Accuracy
    *  WAUC = Weighted AUC
    *  KAP = Kappa
-   *  (default: CC)
-   * </pre>
+   *  (default: CC)</pre>
    * 
-   * <pre>
-   * -y-property &lt;option&gt;
+   * <pre> -y-property &lt;option&gt;
    *  The Y option to test (without leading dash).
-   *  (default: classifier.ridge)
-   * </pre>
+   *  (default: kernel.gamma)</pre>
    * 
-   * <pre>
-   * -y-min &lt;num&gt;
+   * <pre> -y-min &lt;num&gt;
    *  The minimum for Y.
-   *  (default: -10)
-   * </pre>
+   *  (default: -3)</pre>
    * 
-   * <pre>
-   * -y-max &lt;num&gt;
+   * <pre> -y-max &lt;num&gt;
    *  The maximum for Y.
-   *  (default: +5)
-   * </pre>
+   *  (default: +3)</pre>
    * 
-   * <pre>
-   * -y-step &lt;num&gt;
+   * <pre> -y-step &lt;num&gt;
    *  The step size for Y.
-   *  (default: 1)
-   * </pre>
+   *  (default: 1)</pre>
    * 
-   * <pre>
-   * -y-base &lt;num&gt;
+   * <pre> -y-base &lt;num&gt;
    *  The base for Y.
-   *  (default: 10)
-   * </pre>
+   *  (default: 10)</pre>
    * 
-   * <pre>
-   * -y-expression &lt;expr&gt;
+   * <pre> -y-expression &lt;expr&gt;
    *  The expression for Y.
    *  Available parameters:
    *   BASE
@@ -2472,48 +2335,29 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *   STEP
    *   I - the current iteration value
    *   (from 'FROM' to 'TO' with stepsize 'STEP')
-   *  (default: 'pow(BASE,I)')
-   * </pre>
+   *  (default: 'pow(BASE,I)')</pre>
    * 
-   * <pre>
-   * -filter &lt;filter specification&gt;
-   *  The filter to use (on X axis). Full classname of filter to include, 
-   *  followed by scheme options.
-   *  (default: weka.filters.supervised.attribute.PLSFilter)
-   * </pre>
-   * 
-   * <pre>
-   * -x-property &lt;option&gt;
+   * <pre> -x-property &lt;option&gt;
    *  The X option to test (without leading dash).
-   *  (default: filter.numComponents)
-   * </pre>
+   *  (default: C)</pre>
    * 
-   * <pre>
-   * -x-min &lt;num&gt;
+   * <pre> -x-min &lt;num&gt;
    *  The minimum for X.
-   *  (default: +5)
-   * </pre>
+   *  (default: -3)</pre>
    * 
-   * <pre>
-   * -x-max &lt;num&gt;
+   * <pre> -x-max &lt;num&gt;
    *  The maximum for X.
-   *  (default: +20)
-   * </pre>
+   *  (default: 3)</pre>
    * 
-   * <pre>
-   * -x-step &lt;num&gt;
+   * <pre> -x-step &lt;num&gt;
    *  The step size for X.
-   *  (default: 1)
-   * </pre>
+   *  (default: 1)</pre>
    * 
-   * <pre>
-   * -x-base &lt;num&gt;
+   * <pre> -x-base &lt;num&gt;
    *  The base for X.
-   *  (default: 10)
-   * </pre>
+   *  (default: 10)</pre>
    * 
-   * <pre>
-   * -x-expression &lt;expr&gt;
+   * <pre> -x-expression &lt;expr&gt;
    *  The expression for the X value.
    *  Available parameters:
    *   BASE
@@ -2522,127 +2366,120 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *   STEP
    *   I - the current iteration value
    *   (from 'FROM' to 'TO' with stepsize 'STEP')
-   *  (default: 'pow(BASE,I)')
-   * </pre>
+   *  (default: 'pow(BASE,I)')</pre>
    * 
-   * <pre>
-   * -extend-grid
+   * <pre> -extend-grid
    *  Whether the grid can be extended.
-   *  (default: no)
-   * </pre>
+   *  (default: no)</pre>
    * 
-   * <pre>
-   * -max-grid-extensions &lt;num&gt;
+   * <pre> -max-grid-extensions &lt;num&gt;
    *  The maximum number of grid extensions (-1 is unlimited).
-   *  (default: 3)
-   * </pre>
+   *  (default: 3)</pre>
    * 
-   * <pre>
-   * -sample-size &lt;num&gt;
+   * <pre> -sample-size &lt;num&gt;
    *  The size (in percent) of the sample to search the inital grid with.
-   *  (default: 100)
-   * </pre>
+   *  (default: 100)</pre>
    * 
-   * <pre>
-   * -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
+   * <pre> -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
    *  The type of traversal for the grid.
-   *  (default: COLUMN-WISE)
-   * </pre>
+   *  (default: COLUMN-WISE)</pre>
    * 
-   * <pre>
-   * -log-file &lt;filename&gt;
+   * <pre> -log-file &lt;filename&gt;
    *  The log file to log the messages to.
-   *  (default: none)
-   * </pre>
+   *  (default: none)</pre>
    * 
-   * <pre>
-   * -num-slots &lt;num&gt;
+   * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)
-   * </pre>
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)
-   * </pre>
+   *  (default 1)</pre>
    * 
-   * <pre>
-   * -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console
-   * </pre>
-   * 
-   * <pre>
-   * -W
+   * <pre> -W
    *  Full name of base classifier.
-   *  (default: weka.classifiers.functions.LinearRegression)
+   *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <pre> 
+   * Options specific to classifier weka.classifiers.functions.SMOreg:
    * </pre>
    * 
-   * <pre>
-   * Options specific to classifier weka.classifiers.functions.LinearRegression:
+   * <pre> -C &lt;double&gt;
+   *  The complexity constant C.
+   *  (default 1)</pre>
+   * 
+   * <pre> -N
+   *  Whether to 0=normalize/1=standardize/2=neither.
+   *  (default 0=normalize)</pre>
+   * 
+   * <pre> -I &lt;classname and parameters&gt;
+   *  Optimizer class used for solving quadratic optimization problem
+   *  (default weka.classifiers.functions.supportVector.RegSMOImproved)</pre>
+   * 
+   * <pre> -K &lt;classname and parameters&gt;
+   *  The Kernel to use.
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <pre> 
+   * Options specific to optimizer ('-I') weka.classifiers.functions.supportVector.RegSMOImproved:
    * </pre>
    * 
-   * <pre>
-   * -D
-   *  Produce debugging output.
-   *  (default no debugging output)
+   * <pre> -T &lt;double&gt;
+   *  The tolerance parameter for checking the stopping criterion.
+   *  (default 0.001)</pre>
+   * 
+   * <pre> -V
+   *  Use variant 1 of the algorithm when true, otherwise use variant 2.
+   *  (default true)</pre>
+   * 
+   * <pre> -P &lt;double&gt;
+   *  The epsilon for round-off error.
+   *  (default 1.0e-12)</pre>
+   * 
+   * <pre> -L &lt;double&gt;
+   *  The epsilon parameter in epsilon-insensitive loss function.
+   *  (default 1.0e-3)</pre>
+   * 
+   * <pre> -W &lt;double&gt;
+   *  The random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> 
+   * Options specific to kernel ('-K') weka.classifiers.functions.supportVector.RBFKernel:
    * </pre>
    * 
-   * <pre>
-   * -S &lt;number of selection method&gt;
-   *  Set the attribute selection method to use. 1 = None, 2 = Greedy.
-   *  (default 0 = M5' method)
-   * </pre>
+   * <pre> -G &lt;num&gt;
+   *  The Gamma parameter.
+   *  (default: 0.01)</pre>
    * 
-   * <pre>
-   * -C
-   *  Do not try to eliminate colinear attributes.
-   * </pre>
+   * <pre> -C &lt;num&gt;
+   *  The size of the cache (a prime number), 0 for full cache and 
+   *  -1 to turn it off.
+   *  (default: 250007)</pre>
    * 
-   * <pre>
-   * -R &lt;double&gt;
-   *  Set ridge parameter (default 1.0e-8).
-   * </pre>
+   * <pre> -output-debug-info
+   *  Enables debugging output (if available) to be printed.
+   *  (default: off)</pre>
    * 
-   * <pre>
-   * Options specific to filter weka.filters.supervised.attribute.PLSFilter ('-filter'):
-   * </pre>
-   * 
-   * <pre>
-   * -D
-   *  Turns on output of debugging information.
-   * </pre>
-   * 
-   * <pre>
-   * -C &lt;num&gt;
-   *  The number of components to compute.
-   *  (default: 20)
-   * </pre>
-   * 
-   * <pre>
-   * -U
-   *  Updates the class attribute as well.
-   *  (default: off)
-   * </pre>
-   * 
-   * <pre>
-   * -M
-   *  Turns replacing of missing values on.
-   *  (default: off)
-   * </pre>
-   * 
-   * <pre>
-   * -A &lt;SIMPLS|PLS1&gt;
-   *  The algorithm to use.
-   *  (default: PLS1)
-   * </pre>
-   * 
-   * <pre>
-   * -P &lt;none|center|standardize&gt;
-   *  The type of preprocessing that is applied to the data.
-   *  (default: center)
-   * </pre>
+   * <pre> -no-checks
+   *  Turns off all checks - use with caution!
+   *  (default: checks on)</pre>
    * 
    * <!-- options-end -->
    * 
@@ -2665,21 +2502,21 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     if (tmpStr.length() != 0) {
       setYProperty(tmpStr);
     } else {
-      setYProperty(PREFIX_CLASSIFIER + "ridge");
+      setYProperty("kernel.gamma");
     }
 
     tmpStr = Utils.getOption("y-min", options);
     if (tmpStr.length() != 0) {
       setYMin(Double.parseDouble(tmpStr));
     } else {
-      setYMin(-10);
+      setYMin(-3);
     }
 
     tmpStr = Utils.getOption("y-max", options);
     if (tmpStr.length() != 0) {
       setYMax(Double.parseDouble(tmpStr));
     } else {
-      setYMax(10);
+      setYMax(3);
     }
 
     tmpStr = Utils.getOption("y-step", options);
@@ -2703,33 +2540,25 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       setYExpression("pow(BASE,I)");
     }
 
-    tmpStr = Utils.getOption("filter", options);
-    tmpOptions = Utils.splitOptions(tmpStr);
-    if (tmpOptions.length != 0) {
-      tmpStr = tmpOptions[0];
-      tmpOptions[0] = "";
-      setFilter((Filter) Utils.forName(Filter.class, tmpStr, tmpOptions));
-    }
-
     tmpStr = Utils.getOption("x-property", options);
     if (tmpStr.length() != 0) {
       setXProperty(tmpStr);
     } else {
-      setXProperty(PREFIX_FILTER + "filters[0].kernel.gamma");
+      setXProperty("C");
     }
 
     tmpStr = Utils.getOption("x-min", options);
     if (tmpStr.length() != 0) {
       setXMin(Double.parseDouble(tmpStr));
     } else {
-      setXMin(-10);
+      setXMin(-3);
     }
 
     tmpStr = Utils.getOption("x-max", options);
     if (tmpStr.length() != 0) {
       setXMax(Double.parseDouble(tmpStr));
     } else {
-      setXMax(10);
+      setXMax(3);
     }
 
     tmpStr = Utils.getOption("x-step", options);
@@ -2836,40 +2665,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     } catch (Exception e) {
       e.printStackTrace();
     }
-  }
-
-  /**
-   * Returns the tip text for this property.
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String filterTipText() {
-    return "The filter to be used (only used for setup).";
-  }
-
-  /**
-   * Set the kernel filter (only used for setup).
-   * 
-   * @param value the kernel filter.
-   */
-  public void setFilter(Filter value) {
-    m_Filter = value;
-
-    try {
-      m_BestFilter = Filter.makeCopy(m_Filter);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-  /**
-   * Get the kernel filter.
-   * 
-   * @return the kernel filter
-   */
-  public Filter getFilter() {
-    return m_Filter;
   }
 
   /**
@@ -3078,11 +2873,11 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *         explorer/experimenter gui
    */
   public String XPropertyTipText() {
-    return "The X property to test (normally the filter).";
+    return "The X property to test.";
   }
 
   /**
-   * Get the X property to test (normally the filter).
+   * Get the X property to test.
    * 
    * @return Value of the X property.
    */
@@ -3441,15 +3236,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   }
 
   /**
-   * returns the best filter setup.
-   * 
-   * @return the best filter setup
-   */
-  public Filter getBestFilter() {
-    return m_BestFilter;
-  }
-
-  /**
    * returns the best Classifier setup.
    * 
    * @return the best Classifier setup
@@ -3527,11 +3313,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     Iterator<Capability> iter;
     Capability capab;
 
-    if (getFilter() == null) {
-      result = super.getCapabilities();
-    } else {
-      result = getFilter().getCapabilities();
-    }
+    result = super.getCapabilities();
 
     // only nominal and numeric classes allowed
     classes = result.getClassCapabilities();
@@ -3957,17 +3739,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     m_Generator = new SetupGenerator(this);
     m_Exception = null;
 
-    if (getXProperty().startsWith(PREFIX_FILTER)) {
-      strX = m_Filter.getClass().getName();
-    } else {
-      strX = m_Classifier.getClass().getName();
-    }
-
-    if (getYProperty().startsWith(PREFIX_CLASSIFIER)) {
-      strY = m_Classifier.getClass().getName();
-    } else {
-      strY = m_Filter.getClass().getName();
-    }
+    strX = m_Classifier.getClass().getName();
+    strY = m_Classifier.getClass().getName();
 
     m_Grid = new Grid(getXMin(), getXMax(), getXStep(),
       strX + ", property " + getXProperty() + ", expr. " + getXExpression()
@@ -3985,17 +3758,14 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     // setup best configurations
     x = m_Generator.evaluate(m_Values.getX(), true);
     y = m_Generator.evaluate(m_Values.getY(), false);
-    m_BestFilter = (Filter) m_Generator.setup(getFilter(), x, y);
     m_BestClassifier = (Classifier) m_Generator.setup(getClassifier(), x, y);
-
-    // process data
-    m_Filter = (Filter) m_Generator.setup(getFilter(), x, y);
-    m_Filter.setInputFormat(m_Data);
-    Instances transformed = Filter.useFilter(m_Data, m_Filter);
 
     // train classifier
     m_Classifier = (Classifier) m_Generator.setup(getClassifier(), x, y);
-    m_Classifier.buildClassifier(transformed);
+    m_Classifier.buildClassifier(m_Data);
+
+    // Don't need data anymore in this class
+    m_Data = null;
   }
 
   /**
@@ -4007,12 +3777,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
-    // transform instance
-    m_Filter.input(instance);
-    m_Filter.batchFinished();
-    Instance transformed = m_Filter.output();
 
-    return m_Classifier.distributionForInstance(transformed);
+    return m_Classifier.distributionForInstance(instance);
   }
 
   /**
@@ -4029,8 +3795,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     if (m_Values == null) {
       result = "No search performed yet.";
     } else {
-      result = this.getClass().getName() + ":\n" + "Filter: "
-        + Utils.toCommandLine(getFilter()) + "\n" + "Classifier: "
+      result = this.getClass().getName() + ":\n" + "Classifier: "
         + Utils.toCommandLine(getClassifier()) + "\n\n" + "X property: "
         + getXProperty() + "\n" + "Y property: " + getYProperty() + "\n\n"
         + "Evaluation: " + getEvaluation().getSelectedTag().getReadable()
@@ -4058,8 +3823,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   public String toSummaryString() {
     String result;
 
-    result = "Best filter: " + Utils.toCommandLine(getBestFilter()) + "\n"
-      + "Best classifier: " + Utils.toCommandLine(getBestClassifier());
+    result = "Best classifier: " + Utils.toCommandLine(getBestClassifier());
 
     return result;
   }
@@ -4083,3 +3847,4 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     runClassifier(new GridSearch(), args);
   }
 }
+
