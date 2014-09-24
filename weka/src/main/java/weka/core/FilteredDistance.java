@@ -257,10 +257,10 @@ public class FilteredDistance implements DistanceFunction, OptionHandler, Serial
       result.add("-V");
     }
 
-    result.add("F");
+    result.add("-F");
     result.add("" + getFilterSpec());
 
-    result.add("D");
+    result.add("-D");
     result.add("" + getDistanceSpec());
 
     return result.toArray(new String[result.size()]);
