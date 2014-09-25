@@ -1,0 +1,23 @@
+# Default settings for GridSearch
+
+classifier=weka.classifiers.functions.SMOreg -K weka.classifiers.functions.supportVector.RBFKernel
+yProperty=kernel.gamma
+yMin=-3
+yMax=3
+yStep=1
+yBase=10
+yExpression=pow(BASE,I)
+xProperty=C
+xMin=-3
+xMax=3
+xStep=1
+xBase=10
+xExpression=pow(BASE,I)
+gridIsExtendable=false
+maxGridExtensions=3
+sampleSizePercent=100
+# 0 = traversal by row
+traversal=0
+# 0 = correlation coefficient
+evaluation=0
+numSlots=1
