@@ -401,7 +401,7 @@ public class AdditiveRegression
    */
   public boolean next() throws Exception {
     
-    if ((m_Classifiers.size() >= m_NumIterations) || (!m_SuitableData) ||
+    if ((!m_SuitableData) || (m_Classifiers.size() >= m_NumIterations)  ||
         (m_Diff <= Utils.SMALL)) {
       return false;
     }
