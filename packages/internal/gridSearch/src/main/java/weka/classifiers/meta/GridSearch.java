@@ -29,18 +29,17 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Properties;
 import java.util.Random;
 import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import weka.filters.Filter;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.functions.SMOreg;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -59,26 +58,42 @@ import weka.core.Summarizable;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WekaException;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.MathExpression;
 import weka.filters.unsupervised.instance.Resample;
 
 /**
- * <!-- globalinfo-start -->
- * Performs a grid search of parameter pairs for a classifier  and chooses the best pair found for the actual predicting.<br/>
+ * <!-- globalinfo-start --> Performs a grid search of parameter pairs for a
+ * classifier and chooses the best pair found for the actual predicting.<br/>
  * <br/>
- * The initial grid is worked on with 2-fold CV to determine the values of the parameter pairs for the selected type of evaluation (e.g., accuracy). The best point in the grid is then taken and a 10-fold CV is performed with the adjacent parameter pairs. If a better pair is found, then this will act as new center and another 10-fold CV will be performed (kind of hill-climbing). This process is repeated until no better pair is found or the best pair is on the border of the grid.<br/>
- * In case the best pair is on the border, one can let GridSearch automatically extend the grid and continue the search. Check out the properties 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option '-max-grid-extensions &lt;num&gt;').<br/>
+ * The initial grid is worked on with 2-fold CV to determine the values of the
+ * parameter pairs for the selected type of evaluation (e.g., accuracy). The
+ * best point in the grid is then taken and a 10-fold CV is performed with the
+ * adjacent parameter pairs. If a better pair is found, then this will act as
+ * new center and another 10-fold CV will be performed (kind of hill-climbing).
+ * This process is repeated until no better pair is found or the best pair is on
+ * the border of the grid.<br/>
+ * In case the best pair is on the border, one can let GridSearch automatically
+ * extend the grid and continue the search. Check out the properties
+ * 'gridIsExtendable' (option '-extend-grid') and 'maxGridExtensions' (option
+ * '-max-grid-extensions &lt;num&gt;').<br/>
  * <br/>
- * GridSearch can handle doubles, integers (values are just cast to int) and booleans (0 is false, otherwise true). float, char and long are supported as well.<br/>
+ * GridSearch can handle doubles, integers (values are just cast to int) and
+ * booleans (0 is false, otherwise true). float, char and long are supported as
+ * well.<br/>
  * <br/>
- * The best classifier setup can be accessed after the buildClassifier call via the getBestClassifier methods.<br/>
- * Note: with -num-slots/numExecutionSlots you can specify how many setups are evaluated in parallel, taking advantage of multi-cpu/core architectures.
+ * The best classifier setup can be accessed after the buildClassifier call via
+ * the getBestClassifier methods.<br/>
+ * Note: with -num-slots/numExecutionSlots you can specify how many setups are
+ * evaluated in parallel, taking advantage of multi-cpu/core architectures.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
+ * <pre>
+ * -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
  *  Determines the parameter used for evaluation:
  *  CC = Correlation coefficient
  *  RMSE = Root mean squared error
@@ -89,29 +104,41 @@ import weka.filters.unsupervised.instance.Resample;
  *  ACC = Accuracy
  *  WAUC = Weighted AUC
  *  KAP = Kappa
- *  (default: CC)</pre>
+ *  (default: CC)
+ * </pre>
  * 
- * <pre> -y-property &lt;option&gt;
+ * <pre>
+ * -y-property &lt;option&gt;
  *  The Y option to test (without leading dash).
- *  (default: kernel.gamma)</pre>
+ *  (default: kernel.gamma)
+ * </pre>
  * 
- * <pre> -y-min &lt;num&gt;
+ * <pre>
+ * -y-min &lt;num&gt;
  *  The minimum for Y.
- *  (default: -3)</pre>
+ *  (default: -3)
+ * </pre>
  * 
- * <pre> -y-max &lt;num&gt;
+ * <pre>
+ * -y-max &lt;num&gt;
  *  The maximum for Y.
- *  (default: +3)</pre>
+ *  (default: +3)
+ * </pre>
  * 
- * <pre> -y-step &lt;num&gt;
+ * <pre>
+ * -y-step &lt;num&gt;
  *  The step size for Y.
- *  (default: 1)</pre>
+ *  (default: 1)
+ * </pre>
  * 
- * <pre> -y-base &lt;num&gt;
+ * <pre>
+ * -y-base &lt;num&gt;
  *  The base for Y.
- *  (default: 10)</pre>
+ *  (default: 10)
+ * </pre>
  * 
- * <pre> -y-expression &lt;expr&gt;
+ * <pre>
+ * -y-expression &lt;expr&gt;
  *  The expression for Y.
  *  Available parameters:
  *   BASE
@@ -120,29 +147,41 @@ import weka.filters.unsupervised.instance.Resample;
  *   STEP
  *   I - the current iteration value
  *   (from 'FROM' to 'TO' with stepsize 'STEP')
- *  (default: 'pow(BASE,I)')</pre>
+ *  (default: 'pow(BASE,I)')
+ * </pre>
  * 
- * <pre> -x-property &lt;option&gt;
+ * <pre>
+ * -x-property &lt;option&gt;
  *  The X option to test (without leading dash).
- *  (default: C)</pre>
+ *  (default: C)
+ * </pre>
  * 
- * <pre> -x-min &lt;num&gt;
+ * <pre>
+ * -x-min &lt;num&gt;
  *  The minimum for X.
- *  (default: -3)</pre>
+ *  (default: -3)
+ * </pre>
  * 
- * <pre> -x-max &lt;num&gt;
+ * <pre>
+ * -x-max &lt;num&gt;
  *  The maximum for X.
- *  (default: 3)</pre>
+ *  (default: 3)
+ * </pre>
  * 
- * <pre> -x-step &lt;num&gt;
+ * <pre>
+ * -x-step &lt;num&gt;
  *  The step size for X.
- *  (default: 1)</pre>
+ *  (default: 1)
+ * </pre>
  * 
- * <pre> -x-base &lt;num&gt;
+ * <pre>
+ * -x-base &lt;num&gt;
  *  The base for X.
- *  (default: 10)</pre>
+ *  (default: 10)
+ * </pre>
  * 
- * <pre> -x-expression &lt;expr&gt;
+ * <pre>
+ * -x-expression &lt;expr&gt;
  *  The expression for the X value.
  *  Available parameters:
  *   BASE
@@ -151,120 +190,171 @@ import weka.filters.unsupervised.instance.Resample;
  *   STEP
  *   I - the current iteration value
  *   (from 'FROM' to 'TO' with stepsize 'STEP')
- *  (default: 'pow(BASE,I)')</pre>
+ *  (default: 'pow(BASE,I)')
+ * </pre>
  * 
- * <pre> -extend-grid
+ * <pre>
+ * -extend-grid
  *  Whether the grid can be extended.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- * <pre> -max-grid-extensions &lt;num&gt;
+ * <pre>
+ * -max-grid-extensions &lt;num&gt;
  *  The maximum number of grid extensions (-1 is unlimited).
- *  (default: 3)</pre>
+ *  (default: 3)
+ * </pre>
  * 
- * <pre> -sample-size &lt;num&gt;
+ * <pre>
+ * -sample-size &lt;num&gt;
  *  The size (in percent) of the sample to search the inital grid with.
- *  (default: 100)</pre>
+ *  (default: 100)
+ * </pre>
  * 
- * <pre> -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
+ * <pre>
+ * -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
  *  The type of traversal for the grid.
- *  (default: COLUMN-WISE)</pre>
+ *  (default: COLUMN-WISE)
+ * </pre>
  * 
- * <pre> -log-file &lt;filename&gt;
+ * <pre>
+ * -log-file &lt;filename&gt;
  *  The log file to log the messages to.
- *  (default: none)</pre>
+ *  (default: none)
+ * </pre>
  * 
- * <pre> -num-slots &lt;num&gt;
+ * <pre>
+ * -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)</pre>
+ *  (default 1 - i.e. no parallelism)
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -W
+ * <pre>
+ * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)</pre>
+ *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -do-not-check-capabilities
+ * <pre>
+ * -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  (use with caution).
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to classifier weka.classifiers.functions.SMOreg:
  * </pre>
  * 
- * <pre> -C &lt;double&gt;
+ * <pre>
+ * -C &lt;double&gt;
  *  The complexity constant C.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -N
+ * <pre>
+ * -N
  *  Whether to 0=normalize/1=standardize/2=neither.
- *  (default 0=normalize)</pre>
+ *  (default 0=normalize)
+ * </pre>
  * 
- * <pre> -I &lt;classname and parameters&gt;
+ * <pre>
+ * -I &lt;classname and parameters&gt;
  *  Optimizer class used for solving quadratic optimization problem
- *  (default weka.classifiers.functions.supportVector.RegSMOImproved)</pre>
+ *  (default weka.classifiers.functions.supportVector.RegSMOImproved)
+ * </pre>
  * 
- * <pre> -K &lt;classname and parameters&gt;
+ * <pre>
+ * -K &lt;classname and parameters&gt;
  *  The Kernel to use.
- *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ *  (default: weka.classifiers.functions.supportVector.PolyKernel)
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -do-not-check-capabilities
+ * <pre>
+ * -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  (use with caution).
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to optimizer ('-I') weka.classifiers.functions.supportVector.RegSMOImproved:
  * </pre>
  * 
- * <pre> -T &lt;double&gt;
+ * <pre>
+ * -T &lt;double&gt;
  *  The tolerance parameter for checking the stopping criterion.
- *  (default 0.001)</pre>
+ *  (default 0.001)
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Use variant 1 of the algorithm when true, otherwise use variant 2.
- *  (default true)</pre>
+ *  (default true)
+ * </pre>
  * 
- * <pre> -P &lt;double&gt;
+ * <pre>
+ * -P &lt;double&gt;
  *  The epsilon for round-off error.
- *  (default 1.0e-12)</pre>
+ *  (default 1.0e-12)
+ * </pre>
  * 
- * <pre> -L &lt;double&gt;
+ * <pre>
+ * -L &lt;double&gt;
  *  The epsilon parameter in epsilon-insensitive loss function.
- *  (default 1.0e-3)</pre>
+ *  (default 1.0e-3)
+ * </pre>
  * 
- * <pre> -W &lt;double&gt;
+ * <pre>
+ * -W &lt;double&gt;
  *  The random number seed.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> 
+ * <pre>
  * Options specific to kernel ('-K') weka.classifiers.functions.supportVector.RBFKernel:
  * </pre>
  * 
- * <pre> -G &lt;num&gt;
+ * <pre>
+ * -G &lt;num&gt;
  *  The Gamma parameter.
- *  (default: 0.01)</pre>
+ *  (default: 0.01)
+ * </pre>
  * 
- * <pre> -C &lt;num&gt;
+ * <pre>
+ * -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
  *  -1 to turn it off.
- *  (default: 250007)</pre>
+ *  (default: 250007)
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  Enables debugging output (if available) to be printed.
- *  (default: off)</pre>
+ *  (default: off)
+ * </pre>
  * 
- * <pre> -no-checks
+ * <pre>
+ * -no-checks
  *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
+ *  (default: checks on)
+ * </pre>
  * 
  * <!-- options-end -->
  * 
@@ -965,7 +1055,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
      * @param evaluation the evaluation to extract the performance measures from
      * @throws Exception if retrieving of measures fails
      */
-    public Performance(PointDouble values, Evaluation evaluation) throws Exception {
+    public Performance(PointDouble values, Evaluation evaluation)
+      throws Exception {
       super();
 
       m_Values = values;
@@ -1476,7 +1567,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     private static final long serialVersionUID = 5838863230451530252L;
 
     /** the cache for points in the grid that got calculated. */
-    protected Hashtable<String, Performance> m_Cache = new Hashtable<String, Performance>();
+    protected Hashtable<String, Performance> m_Cache =
+      new Hashtable<String, Performance>();
 
     /**
      * returns the ID string for a cache item.
@@ -1879,13 +1971,15 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   /** evaluation via: weighted AUC */
   public static final int EVALUATION_WAUC = 8;
   /** evaluation. */
-  public static final Tag[] TAGS_EVALUATION = {
+  public static final Tag[] TAGS_EVALUATION =
+  {
     new Tag(EVALUATION_CC, "CC", "Correlation coefficient"),
     new Tag(EVALUATION_RMSE, "RMSE", "Root mean squared error"),
     new Tag(EVALUATION_RRSE, "RRSE", "Root relative squared error"),
     new Tag(EVALUATION_MAE, "MAE", "Mean absolute error"),
     new Tag(EVALUATION_RAE, "RAE", "Root absolute error"),
-    new Tag(EVALUATION_COMBINED, "COMB", "Combined = (1-abs(CC)) + RRSE + RAE"),
+    new Tag(EVALUATION_COMBINED, "COMB",
+      "Combined = (1-abs(CC)) + RRSE + RAE"),
     new Tag(EVALUATION_ACC, "ACC", "Accuracy"),
     new Tag(EVALUATION_WAUC, "WAUC", "Weighted AUC"),
     new Tag(EVALUATION_KAPPA, "KAP", "Kappa") };
@@ -2035,13 +2129,115 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   public GridSearch() {
     super();
 
-    // classifier
-    m_Classifier = new SMOreg();
-    ((SMOreg) m_Classifier)
-      .setKernel(new weka.classifiers.functions.supportVector.RBFKernel());
+    defaultsFromProps();
 
     try {
       m_BestClassifier = AbstractClassifier.makeCopy(m_Classifier);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+
+  /**
+   * Set defaults for all options from a properties file. A default properties
+   * file is included in the gridSearch jar file
+   * (weka/classifiers/meta/GridSearch.props) - this can be copied, altered and
+   * placed into ${WEKA_HOME}/props
+   */
+  protected void defaultsFromProps() {
+    try {
+      Properties defaults =
+        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
+      if (defaults != null) {
+        String classifierSpec = defaults.getProperty("classifier");
+        if (classifierSpec != null && classifierSpec.length() > 0) {
+          String[] spec = Utils.splitOptions(classifierSpec);
+          String classifier = spec[0];
+          spec[0] = "";
+          boolean ok = true;
+          try {
+            Classifier result = AbstractClassifier.forName(classifier, spec);
+            setClassifier(result);
+
+            // continue with the remaining defaults
+            String yProp = defaults.getProperty("yProperty", "");
+            String yMin = defaults.getProperty("yMin", "");
+            String yMax = defaults.getProperty("yMax", "");
+            String yStep = defaults.getProperty("yStep", "");
+            String yBase = defaults.getProperty("yBase", "");
+            String yExpression = defaults.getProperty("yExpression", "");
+            if (yProp.length() > 0 && yMin.length() > 0 && yMax.length() > 0
+              && yStep.length() > 0 && yBase.length() > 0
+              && yExpression.length() > 0) {
+              setYProperty(yProp);
+              setYMin(Double.parseDouble(yMin));
+              setYMax(Double.parseDouble(yMax));
+              setYStep(Double.parseDouble(yStep));
+              setYBase(Double.parseDouble(yBase));
+              setYExpression(yExpression);
+            } else {
+              ok = false;
+            }
+
+            String xProp = defaults.getProperty("xProperty", "");
+            String xMin = defaults.getProperty("xMin", "");
+            String xMax = defaults.getProperty("xMax", "");
+            String xStep = defaults.getProperty("xStep", "");
+            String xBase = defaults.getProperty("xBase", "");
+            String xExpression = defaults.getProperty("xExpression", "");
+            if (xProp.length() > 0 && xMin.length() > 0 && xMax.length() > 0
+              && xStep.length() > 0 && xBase.length() > 0
+              && xExpression.length() > 0) {
+              setXProperty(xProp);
+              setXMin(Double.parseDouble(xMin));
+              setXMax(Double.parseDouble(xMax));
+              setXStep(Double.parseDouble(xStep));
+              setXBase(Double.parseDouble(xBase));
+              setXExpression(xExpression);
+            } else {
+              ok = false;
+            }
+
+            // optionals
+            String gridExtend =
+              defaults.getProperty("gridIsExtendable", "false");
+            setGridIsExtendable(Boolean.parseBoolean(gridExtend));
+            String maxExtensions =
+              defaults.getProperty("maxGridExtensions", "3");
+            setMaxGridExtensions(Integer.parseInt(maxExtensions));
+            String sampleSizePerc =
+              defaults.getProperty("sampleSizePercent", "100");
+            setSampleSizePercent(Integer.parseInt(sampleSizePerc));
+            String traversal = defaults.getProperty("traversal", "0");
+            m_Traversal = Integer.parseInt(traversal);
+            String eval = defaults.getProperty("evaluation", "0");
+            m_Evaluation = Integer.parseInt(eval);
+            String numSlots = defaults.getProperty("numSlots", "1");
+            setNumExecutionSlots(Integer.parseInt(numSlots));
+          } catch (Exception ex) {
+            // continue with the default of GaussianProcesses
+            ok = false;
+          }
+
+          if (!ok) {
+            // setup GaussianProcesses
+            setClassifier(new weka.classifiers.functions.GaussianProcesses());
+            setYProperty("kernel.exponent");
+            setYMin(1);
+            setYMax(5);
+            setYStep(1);
+            setYBase(10);
+            setYExpression("I");
+
+            setXProperty("noise");
+            setXMin(0.2);
+            setXMax(2);
+            setXStep(0.2);
+            setXBase(10);
+            setXExpression("I");
+          }
+        }
+      }
     } catch (Exception e) {
       e.printStackTrace();
     }
@@ -2083,6 +2279,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * 
    * @return the classifier string.
    */
+  @Override
   protected String getClassifierSpec() {
 
     Classifier c = getClassifier();
@@ -2100,7 +2297,21 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   @Override
   protected String defaultClassifierString() {
-    return "weka.classifiers.functions.SMOreg";
+    try {
+      Properties defaults =
+        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
+      String classifierSpec = defaults.getProperty("classifier");
+      if (classifierSpec != null && classifierSpec.length() > 0) {
+        String[] parts = classifierSpec.split(" ");
+        if (parts.length > 0) {
+          return parts[0].trim();
+        }
+      }
+    } catch (Exception ex) {
+      // don't complain here
+    }
+
+    return "weka.classifiers.functions.GaussianProcesses";
   }
 
   /**
@@ -2110,8 +2321,23 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   @Override
   protected String[] defaultClassifierOptions() {
+    try {
+      Properties defaults =
+        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
+      String classifierSpec = defaults.getProperty("classifier");
+      if (classifierSpec != null && classifierSpec.length() > 0) {
+        String[] parts = classifierSpec.split(" ");
+        if (parts.length > 1) {
+          return Utils.splitOptions(parts[1]);
+        }
+      }
+    } catch (Exception ex) {
+      // don't complain here
+    }
 
-    String[] opts = {"-K", "weka.classifiers.functions.supportVector.RBFKernel"};
+    String[] opts =
+    // { "-K", "weka.classifiers.functions.supportVector.RBFKernel" };
+      {};
     return opts;
   }
 
@@ -2290,10 +2516,11 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * Parses the options for this object.
    * <p/>
    * 
-   * <!-- options-start -->
-   * Valid options are: <p/>
+   * <!-- options-start --> Valid options are:
+   * <p/>
    * 
-   * <pre> -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
+   * <pre>
+   * -E &lt;CC|RMSE|RRSE|MAE|RAE|COMB|ACC|WAUC|KAP&gt;
    *  Determines the parameter used for evaluation:
    *  CC = Correlation coefficient
    *  RMSE = Root mean squared error
@@ -2304,29 +2531,41 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *  ACC = Accuracy
    *  WAUC = Weighted AUC
    *  KAP = Kappa
-   *  (default: CC)</pre>
+   *  (default: CC)
+   * </pre>
    * 
-   * <pre> -y-property &lt;option&gt;
+   * <pre>
+   * -y-property &lt;option&gt;
    *  The Y option to test (without leading dash).
-   *  (default: kernel.gamma)</pre>
+   *  (default: kernel.gamma)
+   * </pre>
    * 
-   * <pre> -y-min &lt;num&gt;
+   * <pre>
+   * -y-min &lt;num&gt;
    *  The minimum for Y.
-   *  (default: -3)</pre>
+   *  (default: -3)
+   * </pre>
    * 
-   * <pre> -y-max &lt;num&gt;
+   * <pre>
+   * -y-max &lt;num&gt;
    *  The maximum for Y.
-   *  (default: +3)</pre>
+   *  (default: +3)
+   * </pre>
    * 
-   * <pre> -y-step &lt;num&gt;
+   * <pre>
+   * -y-step &lt;num&gt;
    *  The step size for Y.
-   *  (default: 1)</pre>
+   *  (default: 1)
+   * </pre>
    * 
-   * <pre> -y-base &lt;num&gt;
+   * <pre>
+   * -y-base &lt;num&gt;
    *  The base for Y.
-   *  (default: 10)</pre>
+   *  (default: 10)
+   * </pre>
    * 
-   * <pre> -y-expression &lt;expr&gt;
+   * <pre>
+   * -y-expression &lt;expr&gt;
    *  The expression for Y.
    *  Available parameters:
    *   BASE
@@ -2335,29 +2574,41 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *   STEP
    *   I - the current iteration value
    *   (from 'FROM' to 'TO' with stepsize 'STEP')
-   *  (default: 'pow(BASE,I)')</pre>
+   *  (default: 'pow(BASE,I)')
+   * </pre>
    * 
-   * <pre> -x-property &lt;option&gt;
+   * <pre>
+   * -x-property &lt;option&gt;
    *  The X option to test (without leading dash).
-   *  (default: C)</pre>
+   *  (default: C)
+   * </pre>
    * 
-   * <pre> -x-min &lt;num&gt;
+   * <pre>
+   * -x-min &lt;num&gt;
    *  The minimum for X.
-   *  (default: -3)</pre>
+   *  (default: -3)
+   * </pre>
    * 
-   * <pre> -x-max &lt;num&gt;
+   * <pre>
+   * -x-max &lt;num&gt;
    *  The maximum for X.
-   *  (default: 3)</pre>
+   *  (default: 3)
+   * </pre>
    * 
-   * <pre> -x-step &lt;num&gt;
+   * <pre>
+   * -x-step &lt;num&gt;
    *  The step size for X.
-   *  (default: 1)</pre>
+   *  (default: 1)
+   * </pre>
    * 
-   * <pre> -x-base &lt;num&gt;
+   * <pre>
+   * -x-base &lt;num&gt;
    *  The base for X.
-   *  (default: 10)</pre>
+   *  (default: 10)
+   * </pre>
    * 
-   * <pre> -x-expression &lt;expr&gt;
+   * <pre>
+   * -x-expression &lt;expr&gt;
    *  The expression for the X value.
    *  Available parameters:
    *   BASE
@@ -2366,120 +2617,171 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *   STEP
    *   I - the current iteration value
    *   (from 'FROM' to 'TO' with stepsize 'STEP')
-   *  (default: 'pow(BASE,I)')</pre>
+   *  (default: 'pow(BASE,I)')
+   * </pre>
    * 
-   * <pre> -extend-grid
+   * <pre>
+   * -extend-grid
    *  Whether the grid can be extended.
-   *  (default: no)</pre>
+   *  (default: no)
+   * </pre>
    * 
-   * <pre> -max-grid-extensions &lt;num&gt;
+   * <pre>
+   * -max-grid-extensions &lt;num&gt;
    *  The maximum number of grid extensions (-1 is unlimited).
-   *  (default: 3)</pre>
+   *  (default: 3)
+   * </pre>
    * 
-   * <pre> -sample-size &lt;num&gt;
+   * <pre>
+   * -sample-size &lt;num&gt;
    *  The size (in percent) of the sample to search the inital grid with.
-   *  (default: 100)</pre>
+   *  (default: 100)
+   * </pre>
    * 
-   * <pre> -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
+   * <pre>
+   * -traversal &lt;ROW-WISE|COLUMN-WISE&gt;
    *  The type of traversal for the grid.
-   *  (default: COLUMN-WISE)</pre>
+   *  (default: COLUMN-WISE)
+   * </pre>
    * 
-   * <pre> -log-file &lt;filename&gt;
+   * <pre>
+   * -log-file &lt;filename&gt;
    *  The log file to log the messages to.
-   *  (default: none)</pre>
+   *  (default: none)
+   * </pre>
    * 
-   * <pre> -num-slots &lt;num&gt;
+   * <pre>
+   * -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)</pre>
+   *  (default 1 - i.e. no parallelism)
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -W
+   * <pre>
+   * -W
    *  Full name of base classifier.
-   *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)</pre>
+   *  (default: weka.classifiers.functions.SMOreg with options -K weka.classifiers.functions.supportVector.RBFKernel)
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -do-not-check-capabilities
+   * <pre>
+   * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  (use with caution).
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to classifier weka.classifiers.functions.SMOreg:
    * </pre>
    * 
-   * <pre> -C &lt;double&gt;
+   * <pre>
+   * -C &lt;double&gt;
    *  The complexity constant C.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -N
+   * <pre>
+   * -N
    *  Whether to 0=normalize/1=standardize/2=neither.
-   *  (default 0=normalize)</pre>
+   *  (default 0=normalize)
+   * </pre>
    * 
-   * <pre> -I &lt;classname and parameters&gt;
+   * <pre>
+   * -I &lt;classname and parameters&gt;
    *  Optimizer class used for solving quadratic optimization problem
-   *  (default weka.classifiers.functions.supportVector.RegSMOImproved)</pre>
+   *  (default weka.classifiers.functions.supportVector.RegSMOImproved)
+   * </pre>
    * 
-   * <pre> -K &lt;classname and parameters&gt;
+   * <pre>
+   * -K &lt;classname and parameters&gt;
    *  The Kernel to use.
-   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   *  (default: weka.classifiers.functions.supportVector.PolyKernel)
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -do-not-check-capabilities
+   * <pre>
+   * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  (use with caution).
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to optimizer ('-I') weka.classifiers.functions.supportVector.RegSMOImproved:
    * </pre>
    * 
-   * <pre> -T &lt;double&gt;
+   * <pre>
+   * -T &lt;double&gt;
    *  The tolerance parameter for checking the stopping criterion.
-   *  (default 0.001)</pre>
+   *  (default 0.001)
+   * </pre>
    * 
-   * <pre> -V
+   * <pre>
+   * -V
    *  Use variant 1 of the algorithm when true, otherwise use variant 2.
-   *  (default true)</pre>
+   *  (default true)
+   * </pre>
    * 
-   * <pre> -P &lt;double&gt;
+   * <pre>
+   * -P &lt;double&gt;
    *  The epsilon for round-off error.
-   *  (default 1.0e-12)</pre>
+   *  (default 1.0e-12)
+   * </pre>
    * 
-   * <pre> -L &lt;double&gt;
+   * <pre>
+   * -L &lt;double&gt;
    *  The epsilon parameter in epsilon-insensitive loss function.
-   *  (default 1.0e-3)</pre>
+   *  (default 1.0e-3)
+   * </pre>
    * 
-   * <pre> -W &lt;double&gt;
+   * <pre>
+   * -W &lt;double&gt;
    *  The random number seed.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> 
+   * <pre>
    * Options specific to kernel ('-K') weka.classifiers.functions.supportVector.RBFKernel:
    * </pre>
    * 
-   * <pre> -G &lt;num&gt;
+   * <pre>
+   * -G &lt;num&gt;
    *  The Gamma parameter.
-   *  (default: 0.01)</pre>
+   *  (default: 0.01)
+   * </pre>
    * 
-   * <pre> -C &lt;num&gt;
+   * <pre>
+   * -C &lt;num&gt;
    *  The size of the cache (a prime number), 0 for full cache and 
    *  -1 to turn it off.
-   *  (default: 250007)</pre>
+   *  (default: 250007)
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  Enables debugging output (if available) to be printed.
-   *  (default: off)</pre>
+   *  (default: off)
+   * </pre>
    * 
-   * <pre> -no-checks
+   * <pre>
+   * -no-checks
    *  Turns off all checks - use with caution!
-   *  (default: checks on)</pre>
+   *  (default: checks on)
+   * </pre>
    * 
    * <!-- options-end -->
    * 
@@ -3847,4 +4149,3 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     runClassifier(new GridSearch(), args);
   }
 }
-
