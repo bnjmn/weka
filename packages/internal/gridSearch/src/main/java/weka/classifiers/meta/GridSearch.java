@@ -2123,6 +2123,22 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   /** for storing an exception that happened in one of the worker threads. */
   protected transient Exception m_Exception;
 
+  /** The properties file containing default settings */
+  protected static final String PROPERTY_FILE =
+    "weka/classifiers/meta/GridSearch.props";
+
+  /** The properties object holding the loaded defaults */
+  protected static Properties GRID_SEARCH_PROPS;
+
+  static {
+    try {
+      GRID_SEARCH_PROPS =
+        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
   /**
    * the default constructor.
    */
@@ -2146,10 +2162,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   protected void defaultsFromProps() {
     try {
-      Properties defaults =
-        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
-      if (defaults != null) {
-        String classifierSpec = defaults.getProperty("classifier");
+      if (GRID_SEARCH_PROPS != null) {
+        String classifierSpec = GRID_SEARCH_PROPS.getProperty("classifier");
         if (classifierSpec != null && classifierSpec.length() > 0) {
           String[] spec = Utils.splitOptions(classifierSpec);
           String classifier = spec[0];
@@ -2160,12 +2174,13 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
             setClassifier(result);
 
             // continue with the remaining defaults
-            String yProp = defaults.getProperty("yProperty", "");
-            String yMin = defaults.getProperty("yMin", "");
-            String yMax = defaults.getProperty("yMax", "");
-            String yStep = defaults.getProperty("yStep", "");
-            String yBase = defaults.getProperty("yBase", "");
-            String yExpression = defaults.getProperty("yExpression", "");
+            String yProp = GRID_SEARCH_PROPS.getProperty("yProperty", "");
+            String yMin = GRID_SEARCH_PROPS.getProperty("yMin", "");
+            String yMax = GRID_SEARCH_PROPS.getProperty("yMax", "");
+            String yStep = GRID_SEARCH_PROPS.getProperty("yStep", "");
+            String yBase = GRID_SEARCH_PROPS.getProperty("yBase", "");
+            String yExpression =
+              GRID_SEARCH_PROPS.getProperty("yExpression", "");
             if (yProp.length() > 0 && yMin.length() > 0 && yMax.length() > 0
               && yStep.length() > 0 && yBase.length() > 0
               && yExpression.length() > 0) {
@@ -2179,12 +2194,13 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
               ok = false;
             }
 
-            String xProp = defaults.getProperty("xProperty", "");
-            String xMin = defaults.getProperty("xMin", "");
-            String xMax = defaults.getProperty("xMax", "");
-            String xStep = defaults.getProperty("xStep", "");
-            String xBase = defaults.getProperty("xBase", "");
-            String xExpression = defaults.getProperty("xExpression", "");
+            String xProp = GRID_SEARCH_PROPS.getProperty("xProperty", "");
+            String xMin = GRID_SEARCH_PROPS.getProperty("xMin", "");
+            String xMax = GRID_SEARCH_PROPS.getProperty("xMax", "");
+            String xStep = GRID_SEARCH_PROPS.getProperty("xStep", "");
+            String xBase = GRID_SEARCH_PROPS.getProperty("xBase", "");
+            String xExpression =
+              GRID_SEARCH_PROPS.getProperty("xExpression", "");
             if (xProp.length() > 0 && xMin.length() > 0 && xMax.length() > 0
               && xStep.length() > 0 && xBase.length() > 0
               && xExpression.length() > 0) {
@@ -2200,19 +2216,19 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
             // optionals
             String gridExtend =
-              defaults.getProperty("gridIsExtendable", "false");
+              GRID_SEARCH_PROPS.getProperty("gridIsExtendable", "false");
             setGridIsExtendable(Boolean.parseBoolean(gridExtend));
             String maxExtensions =
-              defaults.getProperty("maxGridExtensions", "3");
+              GRID_SEARCH_PROPS.getProperty("maxGridExtensions", "3");
             setMaxGridExtensions(Integer.parseInt(maxExtensions));
             String sampleSizePerc =
-              defaults.getProperty("sampleSizePercent", "100");
+              GRID_SEARCH_PROPS.getProperty("sampleSizePercent", "100");
             setSampleSizePercent(Integer.parseInt(sampleSizePerc));
-            String traversal = defaults.getProperty("traversal", "0");
+            String traversal = GRID_SEARCH_PROPS.getProperty("traversal", "0");
             m_Traversal = Integer.parseInt(traversal);
-            String eval = defaults.getProperty("evaluation", "0");
+            String eval = GRID_SEARCH_PROPS.getProperty("evaluation", "0");
             m_Evaluation = Integer.parseInt(eval);
-            String numSlots = defaults.getProperty("numSlots", "1");
+            String numSlots = GRID_SEARCH_PROPS.getProperty("numSlots", "1");
             setNumExecutionSlots(Integer.parseInt(numSlots));
           } catch (Exception ex) {
             // continue with the default of GaussianProcesses
@@ -2298,13 +2314,13 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   @Override
   protected String defaultClassifierString() {
     try {
-      Properties defaults =
-        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
-      String classifierSpec = defaults.getProperty("classifier");
-      if (classifierSpec != null && classifierSpec.length() > 0) {
-        String[] parts = classifierSpec.split(" ");
-        if (parts.length > 0) {
-          return parts[0].trim();
+      if (GRID_SEARCH_PROPS != null) {
+        String classifierSpec = GRID_SEARCH_PROPS.getProperty("classifier");
+        if (classifierSpec != null && classifierSpec.length() > 0) {
+          String[] parts = classifierSpec.split(" ");
+          if (parts.length > 0) {
+            return parts[0].trim();
+          }
         }
       }
     } catch (Exception ex) {
@@ -2322,13 +2338,16 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   @Override
   protected String[] defaultClassifierOptions() {
     try {
-      Properties defaults =
-        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
-      String classifierSpec = defaults.getProperty("classifier");
-      if (classifierSpec != null && classifierSpec.length() > 0) {
-        String[] parts = classifierSpec.split(" ");
-        if (parts.length > 1) {
-          return Utils.splitOptions(parts[1]);
+      if (GRID_SEARCH_PROPS != null) {
+        String classifierSpec = GRID_SEARCH_PROPS.getProperty("classifier");
+        if (classifierSpec != null && classifierSpec.length() > 0) {
+
+          String[] parts = Utils.splitOptions(classifierSpec);
+          if (parts.length > 1) {
+            // return Utils.splitOptions(parts[1]);
+            parts[0] = "";
+            return parts;
+          }
         }
       }
     } catch (Exception ex) {
