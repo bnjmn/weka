@@ -532,6 +532,10 @@ public class AdditiveRegression
    */
   public String toString() {
     StringBuffer text = new StringBuffer();
+    
+    if (m_zeroR == null) {
+      return "Classifier hasn't been built yet!";
+    }
 
     // only ZeroR model?
     if (!m_SuitableData) {
@@ -541,10 +545,6 @@ public class AdditiveRegression
       buf.append("Warning: No model could be built, hence ZeroR model is used:\n\n");
       buf.append(m_zeroR.toString());
       return buf.toString();
-    }
-    
-    if (m_NumIterations == 0) {
-      return "Classifier hasn't been built yet!";
     }
 
     text.append("Additive Regression\n\n");
