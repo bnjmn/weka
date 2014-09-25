@@ -56,7 +56,12 @@ public class GridSearchTest
     result.setEvaluation(new SelectedTag(GridSearch.EVALUATION_ACC, GridSearch.TAGS_EVALUATION));
     
     // classifier
-    result.setClassifier(new weka.classifiers.trees.J48());
+    weka.classifiers.trees.J48 j48 = new weka.classifiers.trees.J48();
+    weka.classifiers.meta.FilteredClassifier fc = new weka.classifiers.meta.FilteredClassifier();
+    fc.setClassifier(j48);
+    weka.filters.unsupervised.attribute.Discretize df = new weka.filters.unsupervised.attribute.Discretize();
+    fc.setFilter(df);
+    result.setClassifier(fc);
     result.setYProperty("classifier.confidenceFactor");
     result.setYMin(0.2);
     result.setYMax(0.4);
@@ -64,7 +69,7 @@ public class GridSearchTest
     result.setYExpression("I");
     
     // filter
-    result.setFilter(new weka.filters.unsupervised.attribute.Discretize());
+    //    result.setFilter(new weka.filters.unsupervised.attribute.Discretize());
     result.setXProperty("filter.bins");
     result.setXMin(2);
     result.setXMax(10);
