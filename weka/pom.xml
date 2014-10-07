@@ -207,6 +207,7 @@
             <redirectTestOutputToFile>true</redirectTestOutputToFile>
             <systemPropertyVariables>
               <weka.test.Regression.root>src/test/resources/wekarefs</weka.test.Regression.root>
+	      <user.timezone>Pacific/Auckland</user.timezone>
             </systemPropertyVariables>
           </configuration>
         </plugin>
