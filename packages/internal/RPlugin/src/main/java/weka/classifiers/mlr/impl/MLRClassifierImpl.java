@@ -27,6 +27,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Arrays;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPGenericVector;
@@ -201,54 +202,79 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       String output = eng.getConsoleBuffer(this);
 
-      if (output.indexOf("Numerics:") >= 0) {
-        boolean numerics = output
-          .substring(output.indexOf("Numerics:") + 9, output.length()).trim()
-          .toLowerCase().startsWith("true");
+      // Are we working with MLR 2?
+      if (output.indexOf("Properties:") >= 0) {
 
-        if (numerics) {
+        // Get list of properties
+        List<String> props = Arrays.asList(output.replaceFirst("(.|\\s)*Properties: ", "").
+                                           replaceFirst("\\s(.|\\s)*", "").split(","));
+        if (props.contains("numerics")) {
           result.enable(Capability.NUMERIC_ATTRIBUTES);
-        }
-      }
-
-      if (output.indexOf("Factors:") >= 0) {
-        boolean factors = output
-          .substring(output.indexOf("Factors:") + 8, output.length()).trim()
-          .toLowerCase().startsWith("true");
-
-        if (factors) {
+        }          
+        if (props.contains("factors")) {
           result.enable(Capability.NOMINAL_ATTRIBUTES);
         }
-      }
-
-      if (!m_dontReplaceMissingValues) {
-        result.enable(Capability.MISSING_VALUES);
+        if ((!m_dontReplaceMissingValues) || props.contains("missings")) {
+          result.enable(Capability.MISSING_VALUES);
+        }
+        if (props.contains("twoclass")) {
+          result.enable(Capability.BINARY_CLASS);
+        }
+        if (props.contains("multiclass")) {
+          result.enable(Capability.NOMINAL_CLASS);
+        }
       } else {
-        if (output.indexOf("Supports missings:") > 0) {
-          boolean missings = output
-            .substring(output.indexOf("Supports missings:") + 18,
-              output.length()).trim().toLowerCase().startsWith("true");
 
-          if (missings) {
-            result.enable(Capability.MISSING_VALUES);
+        // Need to parse MLR 1 output
+        if (output.indexOf("Numerics:") >= 0) {
+          boolean numerics = output
+            .substring(output.indexOf("Numerics:") + 9, output.length()).trim()
+            .toLowerCase().startsWith("true");
+          
+          if (numerics) {
+            result.enable(Capability.NUMERIC_ATTRIBUTES);
           }
         }
-      }
-
-      if (output.indexOf("Supports classes:") >= 0) {
-        String classS = output.substring(output.indexOf("Supports classes:"),
-          output.length());
-        classS = classS
-          .substring(classS.indexOf(":") + 1, classS.indexOf("\n")).trim();
-        String[] parts = classS.split(",");
-
-        for (String s : parts) {
-          if (s.trim().startsWith("two")) {
-            result.enable(Capability.BINARY_CLASS);
+        
+        if (output.indexOf("Factors:") >= 0) {
+          boolean factors = output
+            .substring(output.indexOf("Factors:") + 8, output.length()).trim()
+            .toLowerCase().startsWith("true");
+          
+          if (factors) {
+            result.enable(Capability.NOMINAL_ATTRIBUTES);
           }
-
-          if (s.trim().startsWith("multi")) {
-            result.enable(Capability.NOMINAL_CLASS);
+        }
+        
+        if (!m_dontReplaceMissingValues) {
+          result.enable(Capability.MISSING_VALUES);
+        } else {
+          if (output.indexOf("Supports missings:") > 0) {
+            boolean missings = output
+              .substring(output.indexOf("Supports missings:") + 18,
+                         output.length()).trim().toLowerCase().startsWith("true");
+            
+            if (missings) {
+              result.enable(Capability.MISSING_VALUES);
+            }
+          }
+        }
+        
+        if (output.indexOf("Supports classes:") >= 0) {
+          String classS = output.substring(output.indexOf("Supports classes:"),
+                                           output.length());
+          classS = classS
+            .substring(classS.indexOf(":") + 1, classS.indexOf("\n")).trim();
+          String[] parts = classS.split(",");
+          
+          for (String s : parts) {
+            if (s.trim().startsWith("two")) {
+              result.enable(Capability.BINARY_CLASS);
+            }
+            
+            if (s.trim().startsWith("multi")) {
+              result.enable(Capability.NOMINAL_CLASS);
+            }
           }
         }
       }
@@ -387,28 +413,32 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    * @throws Exception if a problem occurs
    */
   protected void loadBaseLearnerLibrary() throws Exception {
-    String lib = MLRClassifier.TAGS_LEARNER[m_rLearner].getIDStr();
-    if (lib.indexOf('.') > 0) {
-      lib = lib.substring(lib.indexOf('.') + 1, lib.length());
+    String libString = MLRClassifier.TAGS_LEARNER[m_rLearner].getIDStr();
+    if (libString.indexOf('.') > 0) {
+      libString = libString.substring(libString.indexOf('.') + 1, libString.length());
     }
+
+    String[] libs = libString.split(",");
 
     RSession eng = null;
     eng = RSession.acquireSession(this);
     eng.setLog(this, m_logger);
-    if (!eng.loadLibrary(this, lib)) {
-      System.err.println("Attempting to install learner library: " + lib);
-
-      eng.installLibrary(this, lib);
-      /*
-       * if (!eng.installLibrary(this, lib)) {
-       * System.err.println("Unable to continue - " +
-       * "failed to install learner library: " + lib);
-       * m_baseLearnerLibraryAvailable = false; return; }
-       */
-
-      // try loading again
+    for (String lib : libs) {
       if (!eng.loadLibrary(this, lib)) {
-        return;
+        System.err.println("Attempting to install learner library: " + lib);
+        
+        eng.installLibrary(this, lib);
+        /*
+         * if (!eng.installLibrary(this, lib)) {
+         * System.err.println("Unable to continue - " +
+         * "failed to install learner library: " + lib);
+         * m_baseLearnerLibraryAvailable = false; return; }
+         */
+        
+        // try loading again
+        if (!eng.loadLibrary(this, lib)) {
+          return;
+        }
       }
     }
 

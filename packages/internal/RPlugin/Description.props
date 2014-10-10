@@ -5,10 +5,10 @@
 PackageName=RPlugin
 
 # Version (required)
-Version=1.1.3
+Version=1.1.4
 
 #Date (year-month-day)
-Date=2014-04-02
+Date=2014-10-10
 
 # Title (required)
 Title=Execute R Scripts
@@ -29,13 +29,13 @@ License=LGPL 3.0
 Description=Provides a Knowledge Flow component for executing an R script and a wrapper classifier for the MLR (machine learning in R) R package. Also provides a Knowledge Flow perspective and Explorer plugin that implements an interactive R console and allows visualization of graphics produced by R. IMPORTANT: This package requires the R system (>= 3.0.0) to be installed on your computer before it can be used. Before using this package you must manually install the R package "rJava" by typing install.packages("rJava") from the R console. Furthermore, the environment variable R_HOME must be set to point to the installation directory for R and the R executable must be in the PATH environment variable. This package will attempt to locate the JRI native library (which is installed  as part of rJava) automatically under Windows and Mac OS X. For this to succeed  under Windows it is necessary for the R_LIBS_USER environment variable to be set to point to the user's personal R packages directory. Alternatively, the jri.native.library  java property can be set to point directly to the jri native library file, or the  java.library.path can be set to point to the directory that contains the jri native library file. More information on configuring Java to access JRI under various OS can be found at http://www.rforge.net/JRI/ \n\nExample Knowledge Flow template files demonstrating the R components can be found in ${WEKA_HOME}/packages/RPlugin/templates.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.4.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
 
 # Changes in this release
-Changes=MLRClassifier will now release control when executed on the command line. Note that this depends on some small changes to weka.Run that will be available in the 3.7.11 release.
+Changes=MLRClassifier now works with MLR version 2 and contains all(?) schemes from MLR version 2.1 that are not already available elsewhere in WEKA.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
