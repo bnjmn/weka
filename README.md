@@ -1,7 +1,7 @@
 weka (mirror) 
 =============
 
-This is a git mirror of the [The Univserity of Waikato][uofw] machine learning
+This is a git mirror of the [The University of Waikato][uofw] machine learning
 project [WEKA][weka-home].
 
 > Weka is a collection of machine learning algorithms for data mining tasks.
