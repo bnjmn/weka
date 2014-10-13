@@ -842,13 +842,23 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     String output = eng.getConsoleBuffer(this);
 
-    if (output.indexOf("Supports probabilities:") > 0) {
-      result = output
-        .substring(output.indexOf("Supports probabilities:") + 23,
-          output.length()).trim().toLowerCase().startsWith("true");
-    }
+    // Are we working with MLR 2?
+    if (output.indexOf("Properties:") >= 0) {
+        // Get list of properties
+        List<String> props = Arrays.asList(output.replaceFirst("(.|\\s)*Properties: ", "").
+                                           replaceFirst("\\s(.|\\s)*", "").split(","));
+        return props.contains("prob");
+    } else {
 
-    return result;
+      // Need to parse MLR 1 output
+      if (output.indexOf("Supports probabilities:") > 0) {
+        result = output
+          .substring(output.indexOf("Supports probabilities:") + 23,
+                     output.length()).trim().toLowerCase().startsWith("true");
+      }
+      
+      return result;
+    }
   }
 
   /**
