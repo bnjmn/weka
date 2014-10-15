@@ -1078,6 +1078,10 @@ public final class Utils implements RevisionHandler {
   public static Object forName(Class<?> classType, String className,
     String[] options) throws Exception {
 
+    if (System.getProperty("weka.test.maventest", "").equalsIgnoreCase("true")) {
+      return forNameNoSchemeMatch(classType, className, options);
+    }
+
     List<String> matches = Run.findSchemeMatch(classType, className, false,
       true);
     if (matches.size() == 0) {
@@ -1102,6 +1106,54 @@ public final class Utils implements RevisionHandler {
       throw new Exception("Can't find class called: " + className);
     }
 
+    Object o = c.newInstance();
+    if ((o instanceof OptionHandler) && (options != null)) {
+      ((OptionHandler) o).setOptions(options);
+      Utils.checkForRemainingOptions(options);
+    }
+    return o;
+  }
+
+  /**
+   * Creates a new instance of an object given it's class name and (optional)
+   * arguments to pass to it's setOptions method. If the object implements
+   * OptionHandler and the options parameter is non-null, the object will have
+   * it's options set. Example use:
+   * <p>
+   * 
+   * <code> <pre>
+   * String classifierName = Utils.getOption('W', options);
+   * Classifier c = (Classifier)Utils.forName(Classifier.class,
+   *                                          classifierName,
+   *                                          options);
+   * setClassifier(c);
+   * </pre></code>
+   * 
+   * @param classType the class that the instantiated object should be
+   *          assignable to -- an exception is thrown if this is not the case
+   * @param className the fully qualified class name of the object
+   * @param options an array of options suitable for passing to setOptions. May
+   *          be null. Any options accepted by the object will be removed from
+   *          the array.
+   * @return the newly created object, ready for use.
+   * @exception Exception if the class name is invalid, or if the class is not
+   *              assignable to the desired class type, or the options supplied
+   *              are not acceptable to the object
+   */
+  protected static Object forNameNoSchemeMatch(Class classType,
+    String className,
+    String[] options) throws Exception {
+
+    Class c = null;
+    try {
+      c = Class.forName(className);
+    } catch (Exception ex) {
+      throw new Exception("Can't find class called: " + className);
+    }
+    if (!classType.isAssignableFrom(c)) {
+      throw new Exception(classType.getName() + " is not assignable from "
+        + className);
+    }
     Object o = c.newInstance();
     if ((o instanceof OptionHandler) && (options != null)) {
       ((OptionHandler) o).setOptions(options);
@@ -1568,7 +1620,7 @@ public final class Utils implements RevisionHandler {
    * @return an array of integers with the positions in the sorted array.
    */
   public static/* @pure@ */int[] sortWithNoMissingValues(
-  /* @non_null@ */double[] array) {
+    /* @non_null@ */double[] array) {
 
     int[] index = initialIndex(array.length);
     if (array.length > 1) {
@@ -1863,7 +1915,8 @@ public final class Utils implements RevisionHandler {
 
       // Move pivot to the right, partition, and restore pivot
       swap(index, pivotLocation, right - 1);
-      int center = partition(array, index, left, right, array[index[right - 1]]);
+      int center =
+        partition(array, index, left, right, array[index[right - 1]]);
       swap(index, center, right - 1);
 
       // Sort recursively
@@ -1936,7 +1989,8 @@ public final class Utils implements RevisionHandler {
 
       // Move pivot to the right, partition, and restore pivot
       swap(index, pivotLocation, right - 1);
-      int center = partition(array, index, left, right, array[index[right - 1]]);
+      int center =
+        partition(array, index, left, right, array[index[right - 1]]);
       swap(index, center, right - 1);
 
       // Proceed recursively
