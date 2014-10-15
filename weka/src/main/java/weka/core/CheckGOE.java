@@ -101,6 +101,33 @@ public class CheckGOE extends Check {
   }
 
   /**
+   * Creates a new instance of an object given it's class name.
+   * 
+   * @param classType the class that the instantiated object should be
+   *          assignable to
+   * @param className the fully qualified class name of the object
+   * @return the newly created object
+   * @throws Exception if the class name is invalid, or if the class is not
+   *           assignable from the desired type.
+   */
+  protected static Object forName(Class classType, String className)
+    throws Exception {
+    Class c = null;
+    try {
+      c = Class.forName(className);
+    } catch (Exception ex) {
+      throw new Exception("Can't find class called: " + className);
+    }
+    if (!classType.isAssignableFrom(c)) {
+      throw new Exception(classType.getName() + " is not assignable from "
+        + className);
+    }
+    Object o = c.newInstance();
+
+    return o;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -167,7 +194,7 @@ public class CheckGOE extends Check {
     if (tmpStr.length() == 0) {
       tmpStr = weka.classifiers.rules.ZeroR.class.getName();
     }
-    setObject(Utils.forName(Object.class, tmpStr, null));
+    setObject(forName(Object.class, tmpStr));
 
     tmpStr = Utils.getOption("ignored", options);
     if (tmpStr.length() == 0) {
