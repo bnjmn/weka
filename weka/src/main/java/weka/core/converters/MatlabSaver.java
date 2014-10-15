@@ -24,9 +24,11 @@ package weka.core.converters;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.Collections;
 import java.util.Date;
 import java.util.Enumeration;
+import java.util.Locale;
 import java.util.Vector;
 
 import weka.core.Capabilities;
@@ -233,11 +235,15 @@ public class MatlabSaver extends AbstractFileSaver implements BatchConverter,
    */
   public void setUseDouble(boolean value) {
     m_UseDouble = value;
+    
+    m_Format = (DecimalFormat) NumberFormat.getInstance(Locale.US);
     if (m_UseDouble) {
-      m_Format = new DecimalFormat(
-        "   0.0000000000000000E00;  -0.0000000000000000E00");
+      
+      //m_Format = new DecimalFormat(
+      m_Format.applyPattern("   0.0000000000000000E00;  -0.0000000000000000E00");
     } else {
-      m_Format = new DecimalFormat("   0.00000000E00;  -0.00000000E00");
+      // m_Format = new DecimalFormat("   0.00000000E00;  -0.00000000E00");
+      m_Format.applyPattern("   0.00000000E00;  -0.00000000E00");
     }
   }
 
