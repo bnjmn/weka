@@ -170,7 +170,9 @@ public class Ranker extends ASSearch implements RankedOutputSearch,
   @Override
   public int getCalculatedNumToSelect() {
     if (m_numToSelect >= 0) {
-      m_calculatedNumToSelect = m_numToSelect;
+      m_calculatedNumToSelect =
+        m_numToSelect > m_attributeMerit.length ? m_attributeMerit.length
+          : m_numToSelect;
     }
     return m_calculatedNumToSelect;
   }
@@ -541,9 +543,9 @@ public class Ranker extends ASSearch implements RankedOutputSearch,
       bestToWorst[i][1] = m_attributeMerit[temp];
     }
 
-    if (m_numToSelect > bestToWorst.length) {
-      throw new Exception("More attributes requested than exist in the data");
-    }
+    // if (m_numToSelect > bestToWorst.length) {
+    // throw new Exception("More attributes requested than exist in the data");
+    // }
 
     if (m_numToSelect <= 0) {
       if (m_threshold == -Double.MAX_VALUE) {
