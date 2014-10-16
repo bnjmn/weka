@@ -714,7 +714,8 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
                 m_corr_matrix[i][j] = corr;
                 denom += (2.0 * m_std_devs[i] * m_std_devs[j] * corr);
               } else {
-                denom += (2.0 * m_std_devs[i] * m_std_devs[j] * m_corr_matrix[i][j]);
+                denom +=
+                  (2.0 * m_std_devs[i] * m_std_devs[j] * m_corr_matrix[i][j]);
               }
             }
           }
@@ -846,7 +847,8 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
 
       System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
       System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
-      double total_missing = (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
+      double total_missing =
+        (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
 
       // do the missing i's
       if (sumi[ni - 1] > 0.0) {
@@ -1019,7 +1021,8 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
     // calculate weighted correlation
     for (i = 0, temp = 0.0; i < nx; i++) {
       // calculate the weighted variance of the nominal
-      temp += ((prior_nom[i] / m_numInstances) * (stdvs_nom[i] / m_numInstances));
+      temp +=
+        ((prior_nom[i] / m_numInstances) * (stdvs_nom[i] / m_numInstances));
 
       if ((stdvs_nom[i] * stdv_num) > 0.0) {
         // System.out.println("Stdv :"+stdvs_nom[i]);
@@ -1367,7 +1370,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
     int j = 0;
 
     if (!m_locallyPredictive) {
-      // m_trainInstances = new Instances(m_trainInstances,0);
+      m_trainInstances = new Instances(m_trainInstances, 0);
       return attributeSet;
     }
 
@@ -1395,7 +1398,7 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
       }
     }
 
-    // m_trainInstances = new Instances(m_trainInstances,0);
+    m_trainInstances = new Instances(m_trainInstances, 0);
     return newSet;
   }
 

@@ -469,6 +469,15 @@ public class OneRAttributeEval extends ASEvaluation implements
     return RevisionUtils.extract("$Revision$");
   }
 
+  @Override
+  public int[] postProcess(int[] attributeSet) {
+
+    // save memory
+    m_trainInstances = new Instances(m_trainInstances, 0);
+
+    return attributeSet;
+  }
+
   // ============
   // Test method.
   // ============

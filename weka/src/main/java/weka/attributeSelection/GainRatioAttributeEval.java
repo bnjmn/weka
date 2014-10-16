@@ -323,7 +323,8 @@ public class GainRatioAttributeEval extends ASEvaluation implements
 
       System.arraycopy(sumi, 0, i_copy, 0, sumi.length);
       System.arraycopy(sumj, 0, j_copy, 0, sumj.length);
-      double total_missing = (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
+      double total_missing =
+        (sumi[ni - 1] + sumj[nj - 1] - counts[ni - 1][nj - 1]);
 
       // do the missing i's
       if (sumi[ni - 1] > 0.0) {
@@ -409,6 +410,15 @@ public class GainRatioAttributeEval extends ASEvaluation implements
   @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+
+  @Override
+  public int[] postProcess(int[] attributeSet) {
+
+    // save memory
+    m_trainInstances = new Instances(m_trainInstances, 0);
+
+    return attributeSet;
   }
 
   /**

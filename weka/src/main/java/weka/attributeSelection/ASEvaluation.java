@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.attributeSelection;
 
 import java.io.Serializable;
@@ -33,15 +32,15 @@ import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
-/** 
+/**
  * Abstract attribute selection evaluation class
- *
+ * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public abstract class ASEvaluation
-  implements Serializable, CapabilitiesHandler, 
-             CapabilitiesIgnorer, RevisionHandler {
+  implements Serializable, CapabilitiesHandler,
+  CapabilitiesIgnorer, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 2091705669885950849L;
@@ -65,6 +64,7 @@ public abstract class ASEvaluation
    * 
    * @param doNotCheckCapabilities true if capabilities are not to be checked.
    */
+  @Override
   public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
 
     m_DoNotCheckCapabilities = doNotCheckCapabilities;
@@ -75,79 +75,78 @@ public abstract class ASEvaluation
    * 
    * @return true if capabilities checking is turned off.
    */
+  @Override
   public boolean getDoNotCheckCapabilities() {
 
     return m_DoNotCheckCapabilities;
   }
-  
+
   // ===============
   // Public methods.
   // ===============
 
   /**
-   * Generates a attribute evaluator. Has to initialize all fields of the 
+   * Generates a attribute evaluator. Has to initialize all fields of the
    * evaluator that are not being set via options.
-   *
-   * @param data set of instances serving as training data 
-   * @exception Exception if the evaluator has not been 
-   * generated successfully
+   * 
+   * @param data set of instances serving as training data
+   * @exception Exception if the evaluator has not been generated successfully
    */
   public abstract void buildEvaluator(Instances data) throws Exception;
 
   /**
-   * Provides a chance for a attribute evaluator to do any special
-   * post processing of the selected attribute set.
-   *
+   * Provides a chance for a attribute evaluator to do any special post
+   * processing of the selected attribute set. Can also be used to clean up any
+   * data structures post attribute selection.
+   * 
    * @param attributeSet the set of attributes found by the search
    * @return a possibly ranked list of postprocessed attributes
    * @exception Exception if postprocessing fails for some reason
    */
-  public int [] postProcess(int [] attributeSet) 
+  public int[] postProcess(int[] attributeSet)
     throws Exception {
     return attributeSet;
   }
 
   /**
-   * Creates a new instance of an attribute/subset evaluator 
-   * given it's class name and
-   * (optional) arguments to pass to it's setOptions method. If the
-   * evaluator implements OptionHandler and the options parameter is
-   * non-null, the evaluator will have it's options set.
-   *
+   * Creates a new instance of an attribute/subset evaluator given it's class
+   * name and (optional) arguments to pass to it's setOptions method. If the
+   * evaluator implements OptionHandler and the options parameter is non-null,
+   * the evaluator will have it's options set.
+   * 
    * @param evaluatorName the fully qualified class name of the evaluator
    * @param options an array of options suitable for passing to setOptions. May
-   * be null.
+   *          be null.
    * @return the newly created evaluator, ready for use.
    * @exception Exception if the evaluator name is invalid, or the options
-   * supplied are not acceptable to the evaluator
+   *              supplied are not acceptable to the evaluator
    */
   public static ASEvaluation forName(String evaluatorName,
-				     String [] options) throws Exception {
-    return (ASEvaluation)Utils.forName(ASEvaluation.class,
-				       evaluatorName,
-				       options);
+    String[] options) throws Exception {
+    return (ASEvaluation) Utils.forName(ASEvaluation.class,
+      evaluatorName,
+      options);
   }
 
   /**
-   * Creates copies of the current evaluator. Note that this method
-   * now uses Serialization to perform a deep copy, so the evaluator
-   * object must be fully Serializable. Any currently built model will
-   * now be copied as well.
-   *
+   * Creates copies of the current evaluator. Note that this method now uses
+   * Serialization to perform a deep copy, so the evaluator object must be fully
+   * Serializable. Any currently built model will now be copied as well.
+   * 
    * @param model an example evaluator to copy
    * @param num the number of evaluator copies to create.
    * @return an array of evaluators.
-   * @exception Exception if an error occurs 
+   * @exception Exception if an error occurs
    */
-  public static ASEvaluation [] makeCopies(ASEvaluation model,
-					 int num) throws Exception {
+  public static ASEvaluation[] makeCopies(ASEvaluation model,
+    int num) throws Exception {
 
     if (model == null) {
       throw new Exception("No model evaluator set");
     }
-    ASEvaluation [] evaluators = new ASEvaluation [num];
+    ASEvaluation[] evaluators = new ASEvaluation[num];
     SerializedObject so = new SerializedObject(model);
-    for(int i = 0; i < evaluators.length; i++) {
+    for (int i = 0; i < evaluators.length; i++) {
       evaluators[i] = (ASEvaluation) so.getObject();
     }
     return evaluators;
@@ -155,42 +154,44 @@ public abstract class ASEvaluation
 
   /**
    * Returns the capabilities of this evaluator.
-   *
-   * @return            the capabilities of this evaluator
-   * @see               Capabilities
+   * 
+   * @return the capabilities of this evaluator
+   * @see Capabilities
    */
+  @Override
   public Capabilities getCapabilities() {
     Capabilities result = new Capabilities(this);
     result.enableAll();
-    
+
     return result;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
+  @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * runs the evaluator with the given commandline options
    * 
-   * @param evaluator	the evaluator to run
-   * @param options	the commandline options
+   * @param evaluator the evaluator to run
+   * @param options the commandline options
    */
   public static void runEvaluator(ASEvaluation evaluator, String[] options) {
     try {
       System.out.println(
-	  AttributeSelection.SelectAttributes(evaluator, options));
-    }
-    catch (Exception e) {
+        AttributeSelection.SelectAttributes(evaluator, options));
+    } catch (Exception e) {
       String msg = e.toString().toLowerCase();
-      if (    (msg.indexOf("help requested") == -1)
-           && (msg.indexOf("no training file given") == -1) )
+      if ((msg.indexOf("help requested") == -1)
+        && (msg.indexOf("no training file given") == -1)) {
         e.printStackTrace();
+      }
       System.err.println(e.getMessage());
     }
   }
