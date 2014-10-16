@@ -5,17 +5,23 @@
 Search Method:
 	Attribute ranking.
 
-Attribute Evaluator (supervised, Class (nominal): 5 Class):
-	Classifier feature evaluator.
+Attribute Evaluator (supervised, Class (nominal): 7 Class):
+	Classifier feature evaluator 
 
-	Using 10 fold cross validation for evaluating attributes.
-	Classifier in use: weka.classifiers.rules.OneR -B 6
+	Using 	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.ZeroR
+	Scheme options: 
+	Subset evaluation: classification accuracy
+	Number of folds for accuracy estimation: 5
+
 
 Ranked attributes:
-100.0                  1 Nominal1
-100.0                  3 Numeric1
- 85                    2 Nominal2
- 55.00000000000001024  4 Date1
+  0  6 Relational1
+  0  5 Date1
+  0  2 Nominal2
+  0  3 Numeric1
+  0  4 String1
+  0  1 Nominal1
 
-Selected attributes: 1,3,2,4 : 4
+Selected attributes: 6,5,2,3,4,1 : 6
 
