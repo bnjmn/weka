@@ -6,10 +6,10 @@
 PackageName=classifierBasedAttributeSelection
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2013-12-03
+Date=2014-10-16
 
 # Title (required)
 Title=A subset evaluator and an attribute evaluator for evaluating the merit of subsets and single attributes respectively using a classifier.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=This package provides two classes - one for evaluating the merit of individual attributes using a classifier (ClassifierAttributeEval), and second for evaluating the merit of subsets of attributes using a classifier (ClassifierSubsetEval). Both invoke a user-specified classifier to perform the evaluation, either under cross-validation or on the training data.
 
-Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=ClassfierAttributeEval now uses the wrapper internally and has an option to evaluate an attribute based on the change in performance after removing it from the full set. It can now make use of multiple threads to evaluate attributes in parallel.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classifierBasedAttributeSelection1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classifierBasedAttributeSelection1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.dev/weka/attributeSelection/
