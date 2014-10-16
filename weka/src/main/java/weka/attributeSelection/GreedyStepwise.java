@@ -743,7 +743,7 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
 
     if (data != null) { // this is a fresh run so reset
       resetOptions();
-      m_Instances = data;
+      m_Instances = new Instances(data, 0);
     }
     m_ASEval = ASEval;
 
@@ -834,8 +834,9 @@ public class GreedyStepwise extends ASSearch implements RankedOutputSearch,
             final int attBeingEvaluated = i;
 
             // make a copy if the evaluator is not thread safe
-            final SubsetEvaluator theEvaluator = (ASEvaluator instanceof weka.core.ThreadSafe) ? ASEvaluator
-              : (SubsetEvaluator) ASEvaluation.makeCopies(m_ASEval, 1)[0];
+            final SubsetEvaluator theEvaluator =
+              (ASEvaluator instanceof weka.core.ThreadSafe) ? ASEvaluator
+                : (SubsetEvaluator) ASEvaluation.makeCopies(m_ASEval, 1)[0];
 
             Future<Double[]> future = m_pool.submit(new Callable<Double[]>() {
               @Override
