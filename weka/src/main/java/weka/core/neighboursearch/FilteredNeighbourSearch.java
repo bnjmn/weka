@@ -35,9 +35,48 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.AddID;
 
 /**
- * <!-- globalinfo-start --> <!-- globalinfo-end -->
+ * <!-- globalinfo-start -->
+ * Applies the given filter before calling the given neighbour search method. The filter must not change the size of the dataset or the order of the instances! Also, the range  setting is specified for the distance function is ignored: all attributes are used  for the distance calculation.
+ * <p/>
+ * <!-- globalinfo-end -->
  *
- * <!-- options-start --> <!-- options-end -->
+ * <!-- options-start -->
+ * Valid options are: <p/>
+ * 
+ * <pre> -F
+ *  The filter to use. (default: weka.unsupervised.attribute.RandomProjection</pre>
+ * 
+ * <pre> -S
+ *  The search method to use. (default: weka.core.neighboursearch.LinearNNSearch)</pre>
+ * 
+ * <pre> 
+ * Options specific to filter weka.filters.AllFilter:
+ * </pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> 
+ * Options specific to search method weka.core.neighboursearch.LinearNNSearch:
+ * </pre>
+ * 
+ * <pre> -S
+ *  Skip identical instances (distances equal to zero).
+ * </pre>
+ * 
+ * <pre> -A &lt;classname and options&gt;
+ *  Distance function to use.
+ *  (default: weka.core.EuclideanDistance)</pre>
+ * 
+ * <pre> -P
+ *  Calculate performance statistics.</pre>
+ * 
+ * <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
@@ -400,3 +439,4 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
       }
   }
 }
+
