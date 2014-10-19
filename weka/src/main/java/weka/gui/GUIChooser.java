@@ -88,7 +88,6 @@ import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
 import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.GroovyPanel;
 import weka.gui.scripting.JythonPanel;
 import weka.gui.sql.SqlViewer;
 import weka.gui.treevisualizer.Node;
@@ -985,25 +984,11 @@ public class GUIChooser extends JFrame {
       jMenuItemGroovyConsole.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          if (m_BayesNetGUIFrame == null) {
-            jMenuItemGroovyConsole.setEnabled(false);
-            final GroovyPanel groovyPanel = new GroovyPanel();
-            m_GroovyConsoleFrame = new JFrame(groovyPanel.getPlainTitle());
-            m_GroovyConsoleFrame.setIconImage(m_Icon);
-            m_GroovyConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            m_GroovyConsoleFrame.setJMenuBar(groovyPanel.getMenuBar());
-            m_GroovyConsoleFrame.getContentPane().add(groovyPanel,
-              BorderLayout.CENTER);
-            m_GroovyConsoleFrame.addWindowListener(new WindowAdapter() {
-              @Override
-              public void windowClosed(WindowEvent w) {
-                m_GroovyConsoleFrame = null;
-                jMenuItemGroovyConsole.setEnabled(true);
-                checkExit();
-              }
-            });
-            m_GroovyConsoleFrame.setSize(800, 600);
-            m_GroovyConsoleFrame.setVisible(true);
+          try {
+            Class groovyConsoleClass = Class.forName("groovy.ui.Console");
+            groovyConsoleClass.getMethod("run").invoke(groovyConsoleClass.newInstance());
+          } catch (Exception ex) {
+            System.err.println("Failed to start Groovy console.");
           }
         }
       });
