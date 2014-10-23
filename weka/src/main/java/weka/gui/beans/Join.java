@@ -334,16 +334,18 @@ public class Join extends JPanel implements BeanCommon, Visible, Serializable,
               .attribute(aName);
 
           if (anAtt == null) {
+            String msg =
+              statusMessagePrefix() + "ERROR: Invalid key attribute name: "
+                + aName;
             if (m_log != null) {
-              String msg =
-                statusMessagePrefix() + "ERROR: Invalid key attribute name: "
-                  + aName;
               m_log.statusMessage(msg);
               m_log.logMessage(msg);
-              stop();
-              m_busy = false;
-              return;
+            } else {
+              System.err.println(msg);
             }
+            stop();
+            m_busy = false;
+            return;
           }
 
           if (i == 0) {
