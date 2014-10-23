@@ -70,7 +70,7 @@ public class Tee
    * initializes the object, with a default printstream.
    */
   public Tee() {
-    this(null);
+    this(System.out);
   }
 
   /**

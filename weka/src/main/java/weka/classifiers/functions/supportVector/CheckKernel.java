@@ -980,8 +980,8 @@ public class CheckKernel extends CheckScheme {
       }
       Random random = new Random(1);
       for (int i = 0; i < train.numInstances() / 2; i++) {
-        int inst = Math.abs(random.nextInt()) % train.numInstances();
-        int weight = Math.abs(random.nextInt()) % 10 + 1;
+        int inst = random.nextInt(train.numInstances());
+        int weight = random.nextInt(10) + 1;
         train.instance(inst).setWeight(weight);
       }
       evaluationI.evaluate(kernels[1], train);

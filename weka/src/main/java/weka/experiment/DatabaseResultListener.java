@@ -48,9 +48,6 @@ public class DatabaseResultListener extends DatabaseUtils implements
   /** The name of the current results table */
   protected String m_ResultsTableName;
 
-  /** True if debugging output should be printed */
-  protected boolean m_Debug = true;
-
   /** Holds the name of the key field to cache upon, or null if no caching */
   protected String m_CacheKeyName = "";
 

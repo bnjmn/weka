@@ -181,10 +181,8 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm implements
       double fDeltaScore = 0.0;
       while (!bRunSucces) {
         // pick two nodes at random
-        int iTailNode = Math.abs(m_random.nextInt())
-          % instances.numAttributes();
-        int iHeadNode = Math.abs(m_random.nextInt())
-          % instances.numAttributes();
+        int iTailNode = m_random.nextInt(instances.numAttributes());
+        int iHeadNode = m_random.nextInt(instances.numAttributes());
         while (iTailNode == iHeadNode) {
           iHeadNode = Math.abs(m_random.nextInt()) % instances.numAttributes();
         }

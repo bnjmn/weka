@@ -141,10 +141,7 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
 
   /** The ResultListener to send results to */
   protected ResultListener m_ResultListener = new CSVResultListener();
-
-  /** The ResultProducer used to generate results */
-  protected ResultProducer m_ResultProducer = new CrossValidationResultProducer();
-
+ 
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String[] m_AdditionalMeasures = null;
 
@@ -171,6 +168,7 @@ public class DatabaseResultProducer extends DatabaseResultListener implements
   public DatabaseResultProducer() throws Exception {
 
     super();
+    m_ResultProducer = new CrossValidationResultProducer();
   }
 
   /**

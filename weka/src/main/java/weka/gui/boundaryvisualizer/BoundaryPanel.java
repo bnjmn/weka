@@ -791,9 +791,9 @@ public class BoundaryPanel extends JPanel {
       // TODO
       System.err
         .println("Trying to add to a null training set (BoundaryPanel)");
+    } else {
+      m_trainingData.add(instance);
     }
-
-    m_trainingData.add(instance);
   }
 
   /**

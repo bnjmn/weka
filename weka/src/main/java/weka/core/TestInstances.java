@@ -1530,12 +1530,11 @@ public class TestInstances implements Cloneable, Serializable, OptionHandler,
 
     switch (m_ClassType) {
     case Attribute.NUMERIC:
-      result = m_Random.nextFloat() * 0.25 + Math.abs(m_Random.nextInt())
-        % Math.max(2, m_NumNominal);
+      result = m_Random.nextFloat() * 0.25 + m_Random.nextInt(Math.max(2, m_NumNominal));
       break;
 
     case Attribute.NOMINAL:
-      result = Math.abs(m_Random.nextInt()) % data.numClasses();
+      result = m_Random.nextInt(data.numClasses());
       break;
 
     case Attribute.STRING:
@@ -1603,8 +1602,7 @@ public class TestInstances implements Cloneable, Serializable, OptionHandler,
 
     case Attribute.NOMINAL:
       if (m_Random.nextFloat() < 0.2) {
-        result = Math.abs(m_Random.nextInt())
-          % data.attribute(index).numValues();
+        result = m_Random.nextInt(data.attribute(index).numValues());
       } else {
         result = ((int) classVal) % data.attribute(index).numValues();
       }

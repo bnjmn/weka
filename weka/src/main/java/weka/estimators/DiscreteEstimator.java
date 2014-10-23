@@ -233,7 +233,7 @@ public class DiscreteEstimator extends Estimator implements
     java.util.Random r = new java.util.Random(1);
 
     for (int i = 0; i < 100; i++) {
-      int z = Math.abs(r.nextInt()) % 5;
+      int z = r.nextInt(5);
       df.addValue(z, 1);
 
       if (i < 50) {

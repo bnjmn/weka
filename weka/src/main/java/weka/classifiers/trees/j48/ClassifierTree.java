@@ -207,7 +207,8 @@ public class ClassifierTree implements Drawable, Serializable,
       if (Utils.eq(train.sumOfWeights(), 0)) {
         m_isEmpty = true;
       }
-      train = test = null;
+      train = null;
+      test = null;
     }
   }
 

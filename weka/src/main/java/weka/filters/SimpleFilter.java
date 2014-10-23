@@ -44,12 +44,6 @@ public abstract class SimpleFilter extends Filter {
   /** for serialization */
   private static final long serialVersionUID = 5702974949137433141L;
 
-  /** Whether the filter is run in debug mode. */
-  protected boolean m_Debug = false;
-
-  /** Whether capabilities should not be checked when input format is set. */
-  protected boolean m_DoNotCheckCapabilities = false;
-
   /**
    * Returns a string describing this filter.
    * 

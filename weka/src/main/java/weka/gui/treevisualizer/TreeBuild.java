@@ -461,10 +461,8 @@ public class TreeBuild {
         || m_st.sval.equalsIgnoreCase("edge")) {
         m_st.pushBack();
         attrStmt();
-      } else if (m_st.sval != null) {
-        nodeId(m_st.sval, 0);
       } else {
-        System.out.println("expects a STMT_LIST item or '}'");
+        nodeId(m_st.sval, 0);
       }
     }
   }

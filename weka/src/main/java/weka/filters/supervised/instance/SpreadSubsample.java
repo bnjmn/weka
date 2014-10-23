@@ -552,7 +552,7 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
         boolean ok = false;
         do {
           int index = classIndices[j]
-            + (Math.abs(random.nextInt()) % (classIndices[j + 1] - classIndices[j]));
+            + random.nextInt(classIndices[j + 1] - classIndices[j]);
           // Have we used this instance before?
           if (t.get("" + index) == null) {
             // if not, add it to the hashtable and use it

@@ -190,7 +190,7 @@ public class K2 extends LocalScoreSearchAlgorithm implements
         iClass = -1;
       }
       for (int iOrder = 0; iOrder < instances.numAttributes(); iOrder++) {
-        int iOrder2 = Math.abs(random.nextInt()) % instances.numAttributes();
+        int iOrder2 = random.nextInt(instances.numAttributes());
         if (iOrder != iClass && iOrder2 != iClass) {
           int nTmp = nOrder[iOrder];
           nOrder[iOrder] = nOrder[iOrder2];

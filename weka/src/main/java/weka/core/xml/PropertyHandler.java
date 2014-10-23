@@ -113,7 +113,7 @@ public class PropertyHandler implements RevisionHandler {
     HashSet<String> list;
 
     // retrieve list
-    if (m_Ignored.contains(c)) {
+    if (m_Ignored.containsKey(c)) {
       list = m_Ignored.get(c);
     } else {
       list = new HashSet<String>();
@@ -149,7 +149,7 @@ public class PropertyHandler implements RevisionHandler {
     HashSet<String> list;
 
     // retrieve list
-    if (m_Ignored.contains(c)) {
+    if (m_Ignored.containsKey(c)) {
       list = m_Ignored.get(c);
     } else {
       list = new HashSet<String>();

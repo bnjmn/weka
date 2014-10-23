@@ -224,17 +224,11 @@ public class RemoteEngine extends UnicastRemoteObject implements Compute,
             }
           } catch (Exception ex) {
             tsi.setExecutionStatus(TaskStatusInfo.FAILED);
-            if (ex instanceof java.io.FileNotFoundException) {
-              tsi.setStatusMessage("RemoteEngine (" + m_HostName + ") : "
-                + ex.getMessage());
-              System.err.println("Task id " + taskId + " Failed, "
-                + ex.getMessage());
-            } else {
-              tsi.setStatusMessage("RemoteEngine (" + m_HostName + ") : task "
-                + taskId + " failed.");
-              System.err.println("Task id " + taskId + " Failed!");
-            }
-          } finally {
+            tsi.setStatusMessage("RemoteEngine (" + m_HostName + ") : "
+              + ex.getMessage());
+            System.err.println("Task id " + taskId + " Failed, "
+              + ex.getMessage());
+           } finally {
             if (m_TaskStatus.size() == 0) {
               purgeClasses();
             }
