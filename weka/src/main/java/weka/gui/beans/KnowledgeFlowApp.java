@@ -6030,9 +6030,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           group.setCustomName(name);
         }
 
-        if (group instanceof BeanContextChild) {
-          m_bcSupport.add(group);
-        }
+        // if (group instanceof BeanContextChild) {
+        // m_bcSupport.add(group);
+        // }
 
         // int bx = (int)r.getCenterX() -
         // group.getVisual().m_icon.getIconWidth();
