@@ -667,7 +667,8 @@ public class CheckClassifier extends CheckScheme {
     accepts.add("relational");
     accepts.add("multi-instance");
     accepts.add("not in classpath");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
@@ -701,7 +702,8 @@ public class CheckClassifier extends CheckScheme {
     ArrayList<String> accepts = new ArrayList<String>();
     accepts.add("class");
     accepts.add("zeror");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel =
+      0;
     boolean predictorMissing = false, classMissing = false;
 
     return runBasicTest(false, false, false, false, false, false, classType,
@@ -735,7 +737,8 @@ public class CheckClassifier extends CheckScheme {
     ArrayList<String> accepts = new ArrayList<String>();
     accepts.add("number");
     accepts.add("class");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), missingLevel =
+      0;
     boolean predictorMissing = false, classMissing = false;
 
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
@@ -774,7 +777,8 @@ public class CheckClassifier extends CheckScheme {
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
     ArrayList<String> accepts = new ArrayList<String>();
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
@@ -807,7 +811,8 @@ public class CheckClassifier extends CheckScheme {
     ArrayList<String> accepts = new ArrayList<String>();
     accepts.add("train");
     accepts.add("value");
-    int numTrain = 0, numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = 0, numTest = getNumInstances(), numClasses = 2, missingLevel =
+      0;
     boolean predictorMissing = false, classMissing = false;
 
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
@@ -846,7 +851,8 @@ public class CheckClassifier extends CheckScheme {
     printAttributeSummary(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     Instances train1 = null;
@@ -943,8 +949,10 @@ public class CheckClassifier extends CheckScheme {
       String msg = ex.getMessage().toLowerCase();
       if (msg.indexOf("worse than zeror") >= 0) {
         println("warning: performs worse than ZeroR");
-        result[0] = (stage < 1);
-        result[1] = (stage < 1);
+        // result[0] = (stage < 1);
+        // result[1] = (stage < 1);
+        result[0] = true;
+        result[1] = true;
       } else {
         println("no");
         result[0] = false;
@@ -1026,7 +1034,8 @@ public class CheckClassifier extends CheckScheme {
     accepts.add("missing");
     accepts.add("value");
     accepts.add("train");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2;
 
     return runBasicTest(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType,
@@ -1059,7 +1068,8 @@ public class CheckClassifier extends CheckScheme {
     printAttributeSummary(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     boolean[] result = new boolean[2];
@@ -1160,7 +1170,8 @@ public class CheckClassifier extends CheckScheme {
     printAttributeSummary(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = 2 * getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = 2 * getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     boolean[] result = new boolean[2];
@@ -1274,7 +1285,8 @@ public class CheckClassifier extends CheckScheme {
     printAttributeSummary(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = 2 * getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 0;
+    int numTrain = 2 * getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 0;
     boolean predictorMissing = false, classMissing = false;
 
     boolean[] result = new boolean[2];
@@ -1397,7 +1409,8 @@ public class CheckClassifier extends CheckScheme {
     printAttributeSummary(nominalPredictor, numericPredictor, stringPredictor,
       datePredictor, relationalPredictor, multiInstance, classType);
     print("...");
-    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses = 2, missingLevel = 20;
+    int numTrain = getNumInstances(), numTest = getNumInstances(), numClasses =
+      2, missingLevel = 20;
 
     boolean[] result = new boolean[2];
     Instances train = null;
