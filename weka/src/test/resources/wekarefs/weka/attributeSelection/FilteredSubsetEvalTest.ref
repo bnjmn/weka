@@ -7,7 +7,7 @@ Search Method:
 	Start set: no attributes
 	Search direction: forward
 	Stale search after 5 node expansions
-	Total number of subsets evaluated: 13
+	Total number of subsets evaluated: 11
 	Merit of best subset found:    1    
 
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
@@ -27,6 +27,6 @@ Filtered header:
 @data
 
 
-Selected attributes: 1 : 1
-                     Nominal1
+Selected attributes: 3 : 1
+                     Numeric1
 

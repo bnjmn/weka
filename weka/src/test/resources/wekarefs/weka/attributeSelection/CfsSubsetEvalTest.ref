@@ -28,7 +28,7 @@ Search Method:
 	Start set: no attributes
 	Search direction: forward
 	Stale search after 5 node expansions
-	Total number of subsets evaluated: 13
+	Total number of subsets evaluated: 11
 	Merit of best subset found:    1    
 
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
@@ -56,7 +56,7 @@ Attribute Subset Evaluator (supervised, Class (numeric): 5 Class):
 	CFS Subset Evaluator
 	Including locally predictive attributes
 
-Selected attributes: 2,3 : 2
-                     Nominal2
+Selected attributes: 1,3 : 2
+                     Nominal1
                      Numeric1
 

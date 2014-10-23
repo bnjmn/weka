@@ -12,10 +12,10 @@ Attribute Evaluator (supervised, Class (nominal): 5 Class):
 	Minimum bucket size for OneR: 6
 
 Ranked attributes:
-100.0                  1 Nominal1
-100.0                  3 Numeric1
- 85                    2 Nominal2
- 55.00000000000001024  4 Date1
+ 100  3 Numeric1
+  90  2 Nominal2
+  85  1 Nominal1
+  35  4 Date1
 
-Selected attributes: 1,3,2,4 : 4
+Selected attributes: 3,2,1,4 : 4
 

@@ -2,19 +2,19 @@
 Tertius
 =======
 
- 1. /* 0.736907 0.000000 */ Class = class1 ==> Nominal2 = att2val1
- 2. /* 0.722456 0.100000 */ Nominal2 = att2val1 ==> Class = class1
- 3. /* 0.719188 0.000000 */ Nominal2 = att2val1 and Nominal1 = att1val1 ==> Class = class1
- 4. /* 0.644492 0.050000 */ Nominal1 = att1val1 ==> Class = class1
- 5. /* 0.644492 0.050000 */ Class = class1 ==> Nominal1 = att1val1
- 6. /* 0.532211 0.050000 */ Nominal1 = att1val1 ==> Nominal2 = att2val1
- 7. /* 0.521773 0.150000 */ Nominal2 = att2val1 ==> Nominal1 = att1val1
- 8. /* 0.000000 0.300000 */ Class = class1 ==> FALSE
- 9. /* 0.000000 0.300000 */ Nominal1 = att1val1 ==> FALSE
-10. /* 0.000000 0.400000 */ Nominal2 = att2val1 ==> FALSE
-11. /* 0.000000 0.600000 */ TRUE ==> Nominal2 = att2val1
-12. /* 0.000000 0.700000 */ TRUE ==> Class = class1
-13. /* 0.000000 0.700000 */ TRUE ==> Nominal1 = att1val1
+ 1. /* 0.911935 0.000000 */ Nominal2 = att2val1 and Nominal1 = att1val1 ==> Class = class1
+ 2. /* 0.845896 0.000000 */ Class = class1 ==> Nominal1 = att1val1
+ 3. /* 0.840330 0.050000 */ Nominal1 = att1val1 ==> Class = class1
+ 4. /* 0.781732 0.000000 */ Class = class1 ==> Nominal2 = att2val1
+ 5. /* 0.775170 0.100000 */ Nominal2 = att2val1 ==> Class = class1
+ 6. /* 0.682617 0.050000 */ Nominal1 = att1val1 ==> Nominal2 = att2val1
+ 7. /* 0.681048 0.100000 */ Nominal2 = att2val1 ==> Nominal1 = att1val1
+ 8. /* 0.000000 0.350000 */ Class = class1 ==> FALSE
+ 9. /* 0.000000 0.400000 */ Nominal1 = att1val1 ==> FALSE
+10. /* 0.000000 0.450000 */ Nominal2 = att2val1 ==> FALSE
+11. /* 0.000000 0.550000 */ TRUE ==> Nominal2 = att2val1
+12. /* 0.000000 0.600000 */ TRUE ==> Nominal1 = att1val1
+13. /* 0.000000 0.650000 */ TRUE ==> Class = class1
 
 Number of hypotheses considered: 76
 Number of hypotheses explored: 76
@@ -22,11 +22,11 @@ Number of hypotheses explored: 76
 Tertius
 =======
 
-1. /* 0.111111 0.000000 */ Nominal1 = att1val2 ==> Nominal2 = att2val1
-2. /* 0.111111 0.800000 */ Nominal2 = att2val1 ==> Nominal1 = att1val2
-3. /* 0.000000 0.100000 */ TRUE ==> Nominal2 = att2val1
-4. /* 0.000000 0.100000 */ TRUE ==> Nominal1 = att1val1
-5. /* 0.000000 0.900000 */ Nominal2 = att2val1 ==> FALSE
+1. /* 0.139568 0.000000 */ Nominal1 = att1val2 ==> Nominal2 = att2val1
+2. /* 0.136808 0.750000 */ Nominal2 = att2val1 ==> Nominal1 = att1val2
+3. /* 0.000000 0.100000 */ TRUE ==> Nominal1 = att1val1
+4. /* 0.000000 0.150000 */ TRUE ==> Nominal2 = att2val1
+5. /* 0.000000 0.850000 */ Nominal2 = att2val1 ==> FALSE
 6. /* 0.000000 0.900000 */ Nominal1 = att1val1 ==> FALSE
 
 Number of hypotheses considered: 16

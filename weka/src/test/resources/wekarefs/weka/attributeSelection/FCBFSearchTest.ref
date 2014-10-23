@@ -7,16 +7,16 @@ Search Method:
 
 
      J || SU(j,Class) ||    I || SU(i,j). 
-     1 ;    1         ;     *
-     3 ;    1         ;     1 ; 1.0
-     2 ;    0.3792789 ;     1 ; 0.3792789067360213
-     4 ;    0         ;     1 ; 0.0
+     3 ;    1         ;     *
+     2 ;    0.618977  ;     3 ; 0.6189770040174556
+     1 ;    0.3987532 ;     3 ; 0.39875321459928403
+     4 ;    0         ;     3 ; 0.0
 
 Attribute Evaluator (supervised, Class (nominal): 5 Class):
 	Symmetrical Uncertainty Ranking Filter
 
 Ranked attributes:
- 1  1 Nominal1
+ 1  3 Numeric1
 
-Selected attributes: 1 : 1
+Selected attributes: 3 : 1
 

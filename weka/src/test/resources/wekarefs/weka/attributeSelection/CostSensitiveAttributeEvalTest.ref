@@ -22,10 +22,10 @@ Cost Matrix
  1 0
 
 Ranked attributes:
- 1      1 Nominal1
- 0.763  3 Numeric1
- 0.438  2 Nominal2
- 0      4 Date1
+ 1.000000000000000384  1 Nominal1
+ 0.785005195795661184  3 Numeric1
+ 0.566666666666666624  2 Nominal2
+ 0                     4 Date1
 
 Selected attributes: 1,3,2,4 : 4
 

@@ -6,9 +6,9 @@ Search Method:
 	RankSearch :
 	Attribute evaluator : weka.attributeSelection.GainRatioAttributeEval  
 	Attribute ranking : 
-	 1 Nominal1
 	 3 Numeric1
 	 2 Nominal2
+	 1 Nominal1
 	 4 Date1
 	Merit of best subset found : 1   
 

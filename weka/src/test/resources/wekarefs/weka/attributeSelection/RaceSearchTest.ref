@@ -7,7 +7,7 @@ Search Method:
 	Race type : forward selection race
 	Base set : no attributes
 	Cross validation mode : 10 fold
-	Merit of best subset found :  0   
+	Merit of best subset found :  0.05  
 
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Classifier Subset Evaluator
@@ -16,6 +16,6 @@ Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Hold out/test set: Training data
 	Subset evaluation: classification error
 
-Selected attributes: 1 : 1
-                     Nominal1
+Selected attributes: 3 : 1
+                     Numeric1
 

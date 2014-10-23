@@ -47,7 +47,7 @@ Attribute Evaluator (unsupervised):
 Number of latent variables utilized: 1
 
 SingularValue	LatentVariable#
-13535468797765.83936	1
+13535468797765.84192	1
 
 Attribute vectors (left singular vectors) -- row vectors show
 the relation between the original attributes and the latent 
@@ -83,7 +83,7 @@ Attribute Evaluator (unsupervised):
 Number of latent variables utilized: 1
 
 SingularValue	LatentVariable#
-10940596499549.85984	1
+10940596499549.86112	1
 
 Attribute vectors (left singular vectors) -- row vectors show
 the relation between the original attributes and the latent 

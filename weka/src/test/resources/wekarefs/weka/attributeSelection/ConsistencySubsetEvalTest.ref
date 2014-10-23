@@ -10,6 +10,6 @@ Search Method:
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Consistency Subset Evaluator
 
-Selected attributes: 1 : 1
-                     Nominal1
+Selected attributes: 3 : 1
+                     Numeric1
 

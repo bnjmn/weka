@@ -9,9 +9,9 @@ Attribute Evaluator (supervised, Class (nominal): 4 Class):
 	SVM feature evaluator
 
 Ranked attributes:
- 3  3 Numeric1
- 2  2 Nominal2
- 1  1 Nominal1
+ 3  1 Nominal1
+ 2  3 Numeric1
+ 1  2 Nominal2
 
-Selected attributes: 3,2,1 : 3
+Selected attributes: 1,3,2 : 3
 

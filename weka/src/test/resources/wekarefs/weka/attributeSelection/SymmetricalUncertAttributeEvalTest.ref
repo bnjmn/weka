@@ -9,10 +9,10 @@ Attribute Evaluator (supervised, Class (nominal): 5 Class):
 	Symmetrical Uncertainty Ranking Filter
 
 Ranked attributes:
- 1      1 Nominal1
  1      3 Numeric1
- 0.379  2 Nominal2
+ 0.619  2 Nominal2
+ 0.399  1 Nominal1
  0      4 Date1
 
-Selected attributes: 1,3,2,4 : 4
+Selected attributes: 3,2,1,4 : 4
 
