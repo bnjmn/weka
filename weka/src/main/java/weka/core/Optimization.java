@@ -171,7 +171,7 @@ public abstract class Optimization implements TechnicalInformationHandler,
 
   protected int m_MAXITS = 200;
 
-  protected static boolean m_Debug = false;
+  protected boolean m_Debug = false;
 
   /** function value */
   protected double m_f;
@@ -194,10 +194,6 @@ public abstract class Optimization implements TechnicalInformationHandler,
     }
     m_Epsilon *= 2.0;
     m_Zero = Math.sqrt(m_Epsilon);
-    if (m_Debug) {
-      System.err.print("Machine precision is " + m_Epsilon
-        + " and zero set to " + m_Zero);
-    }
   }
 
   /**
@@ -369,7 +365,12 @@ public abstract class Optimization implements TechnicalInformationHandler,
   public double[] lnsrch(double[] xold, double[] gradient, double[] direct,
     double stpmax, boolean[] isFixed, double[][] nwsBounds,
     DynamicIntArray wsBdsIndx) throws Exception {
-
+    
+    if (m_Debug) {
+      System.err.print("Machine precision is " + m_Epsilon
+        + " and zero set to " + m_Zero);
+    }
+  
     int i, k, len = xold.length, fixedOne = -1; // idx of variable to be fixed
     double alam, alamin; // lambda to be found, and its lower bound
 

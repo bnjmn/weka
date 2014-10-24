@@ -45,7 +45,7 @@ public class Memory implements RevisionHandler {
   public static final long MAX_SLEEP_TIME = 10L;
 
   /** whether memory management is enabled */
-  protected static boolean m_Enabled = true;
+  protected boolean m_Enabled = true;
 
   /** whether a GUI is present */
   protected boolean m_UseGUI = false;

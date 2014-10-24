@@ -372,7 +372,17 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   public final/* @ pure @ */boolean equals(Object other) {
     return (equalsMsg(other) == null);
   }
-
+  
+  /**
+   * Returns a hash code for this attribute based on its name.
+   * 
+   * @return the hash code
+   */
+  @Override
+  public final/* @ pure @ */int hashCode() {
+    return name().hashCode();
+  }
+  
   /**
    * Tests if given attribute is equal to this attribute. If they're not the
    * same a message detailing why they differ will be returned, otherwise null.
