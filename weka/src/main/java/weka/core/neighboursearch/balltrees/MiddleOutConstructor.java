@@ -1085,7 +1085,7 @@ public class MiddleOutConstructor extends BallTreeConstructor implements
    * @author Ashraf M. Kibriya (amk14[at-the-rate]cs[dot]waikato[dot]ac[dot]nz)
    * @version $Revision$
    */
-  protected class ListNode implements RevisionHandler {
+  protected class ListNode implements RevisionHandler, Serializable {
 
     /** The index of the point. */
     int idx = -1;

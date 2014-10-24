@@ -66,7 +66,6 @@ public final class YongSplitInfo implements Cloneable, Serializable,
     maxImpurity = -1.e20;
     splitAttr = attr; // attr < 0 is an empty object
     splitValue = 0.0;
-    Utils.SMALL = 1e-10;
   }
 
   /**

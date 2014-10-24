@@ -195,7 +195,8 @@ public class ClassifierTree implements Drawable, Serializable,
     if (m_localModel.numSubsets() > 1) {
       localTrain = m_localModel.split(train);
       localTest = m_localModel.split(test);
-      train = test = null;
+      train = null;
+      test = null;
       m_sons = new ClassifierTree[m_localModel.numSubsets()];
       for (i = 0; i < m_sons.length; i++) {
         m_sons[i] = getNewTree(localTrain[i], localTest[i]);
