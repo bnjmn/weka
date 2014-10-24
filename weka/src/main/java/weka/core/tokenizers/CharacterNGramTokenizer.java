@@ -22,7 +22,6 @@ package weka.core.tokenizers;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.LinkedList;
 import java.util.Vector;
 
 import weka.core.Option;

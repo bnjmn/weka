@@ -184,7 +184,7 @@ public class SimulatedAnnealing extends GlobalScoreSearchAlgorithm implements
         int iTailNode = m_random.nextInt(instances.numAttributes());
         int iHeadNode = m_random.nextInt(instances.numAttributes());
         while (iTailNode == iHeadNode) {
-          iHeadNode = Math.abs(m_random.nextInt()) % instances.numAttributes();
+          iHeadNode = m_random.nextInt(instances.numAttributes());
         }
         if (isArc(bayesNet, iHeadNode, iTailNode)) {
           bRunSucces = true;
