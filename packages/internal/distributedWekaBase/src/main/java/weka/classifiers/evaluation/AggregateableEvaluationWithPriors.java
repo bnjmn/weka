@@ -126,7 +126,7 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
    */
   @SuppressWarnings({ "cast", "deprecation" })
   public void prunePredictions(double retain, long seed) throws Exception {
-    if (m_Predictions == null || m_Predictions.size() == 0) {
+    if (m_Predictions == null || m_Predictions.size() == 0 || retain == 1) {
       return;
     }
 
@@ -149,7 +149,8 @@ public class AggregateableEvaluationWithPriors extends AggregateableEvaluation {
       // downSampled.addElement(m_Predictions.elementAt(index));
 
       // cast necessary for 3.7.10 compatibility
-      downSampled.add((Prediction) m_Predictions.get(index));
+      downSampled.add(tmpV.get(index));
+      // downSampled.add(m_Predictions.get(index));
 
       if (downSampled.size() == numToRetain) {
         break;
