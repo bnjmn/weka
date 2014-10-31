@@ -1004,25 +1004,36 @@ public class GUIChooser extends JFrame {
       jMenuItemJythonConsole.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          if (m_JythonConsoleFrame == null) {
-            jMenuItemJythonConsole.setEnabled(false);
-            final JythonPanel jythonPanel = new JythonPanel();
-            m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
-            m_JythonConsoleFrame.setIconImage(m_Icon);
-            m_JythonConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-            m_JythonConsoleFrame.setJMenuBar(jythonPanel.getMenuBar());
-            m_JythonConsoleFrame.getContentPane().add(jythonPanel,
-              BorderLayout.CENTER);
-            m_JythonConsoleFrame.addWindowListener(new WindowAdapter() {
-              @Override
-              public void windowClosed(WindowEvent w) {
-                m_JythonConsoleFrame = null;
-                jMenuItemJythonConsole.setEnabled(true);
-                checkExit();
-              }
-            });
-            m_JythonConsoleFrame.setSize(800, 600);
-            m_JythonConsoleFrame.setVisible(true);
+
+          // Do we have TigerJython?
+          try {
+            Class tigerJythonClass = Class.forName("tigerjython.core.TigerJython");
+            Object[] args = new Object[1];
+            args[0] = new String[0];
+            tigerJythonClass.getMethod("main", String[].class).invoke(null, args);
+          } catch (Exception ex) {
+
+            // Default to built-in console
+            if (m_JythonConsoleFrame == null) {
+              jMenuItemJythonConsole.setEnabled(false);
+              final JythonPanel jythonPanel = new JythonPanel();
+              m_JythonConsoleFrame = new JFrame(jythonPanel.getPlainTitle());
+              m_JythonConsoleFrame.setIconImage(m_Icon);
+              m_JythonConsoleFrame.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
+              m_JythonConsoleFrame.setJMenuBar(jythonPanel.getMenuBar());
+              m_JythonConsoleFrame.getContentPane().add(jythonPanel,
+                                                        BorderLayout.CENTER);
+              m_JythonConsoleFrame.addWindowListener(new WindowAdapter() {
+                  @Override
+                    public void windowClosed(WindowEvent w) {
+                    m_JythonConsoleFrame = null;
+                    jMenuItemJythonConsole.setEnabled(true);
+                    checkExit();
+                  }
+                });
+              m_JythonConsoleFrame.setSize(800, 600);
+              m_JythonConsoleFrame.setVisible(true);
+            }
           }
         }
       });
