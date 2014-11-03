@@ -69,66 +69,74 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
 
   // Classification
   public static final int R_CLASSIF_ADA = 0;
-  public static final int R_CLASSIF_BOOSTING = 1;
-  public static final int R_CLASSIF_BLACKBOOST = 2;
-  public static final int R_CLASSIF_CFOREST = 3; // new: party, cforest
-  public static final int R_CLASSIF_CTREE = 4;
-  public static final int R_CLASSIF_FNN = 5;
-  public static final int R_CLASSIF_GBM = 6;
-  public static final int R_CLASSIF_GEODA = 7; // new: DiscriMiner,geoDA
-  public static final int R_CLASSIF_GLMBOOST = 8;
-  public static final int R_CLASSIF_GLMNET = 9; // new: glmnet,glmnet
-  public static final int R_CLASSIF_KKNN = 10;
-  public static final int R_CLASSIF_KSVM = 11;
-  public static final int R_CLASSIF_LDA = 12;
-  public static final int R_CLASSIF_LINDA = 13; // new: DiscriMiner,linDA
-  public static final int R_CLASSIF_LOGREG = 14;
-  public static final int R_CLASSIF_LSSVM = 15;
-  public static final int R_CLASSIF_LVQ1 = 16;
-  public static final int R_CLASSIF_MDA = 17;
-  public static final int R_CLASSIF_MULTINOM = 18;
-  public static final int R_CLASSIF_NAIVE_BAYES = 19;
-  public static final int R_CLASSIF_NNET = 20;
-  public static final int R_CLASSIF_PLR = 21; // new: stepPlr,plr
-  public static final int R_CLASSIF_PLSDA = 22; // new: DiscriMiner,plsDA
-  public static final int R_CLASSIF_PLSDACARET = 23; // new: caret, plsda
-  public static final int R_CLASSIF_QDA = 24;
-  public static final int R_CLASSIF_QUADA = 25; // new: DiscriMiner, quaDA
-  public static final int R_CLASSIF_RANDOM_FOREST = 26;
-  public static final int R_CLASSIF_RDA = 27;
-  public static final int R_CLASSIF_RPART = 28;
-  public static final int R_CLASSIF_SVM = 29;
+  public static final int R_CLASSIF_BARTMACHINE = 1; // new in 2.2: bartMachine, bartMachine
+  public static final int R_CLASSIF_BOOSTING = 2;
+  public static final int R_CLASSIF_BLACKBOOST = 3;
+  public static final int R_CLASSIF_CFOREST = 4; // new: party, cforest
+  public static final int R_CLASSIF_CTREE = 5;
+  public static final int R_CLASSIF_FNN = 6;
+  public static final int R_CLASSIF_GBM = 7;
+  public static final int R_CLASSIF_GEODA = 8; // new: DiscriMiner, geoDA
+  public static final int R_CLASSIF_GLMBOOST = 9;
+  public static final int R_CLASSIF_GLMNET = 10; // new: glmnet, glmnet
+  public static final int R_CLASSIF_KKNN = 11;
+  public static final int R_CLASSIF_KSVM = 12;
+  public static final int R_CLASSIF_LDA = 13;
+  public static final int R_CLASSIF_LINDA = 14; // new: DiscriMiner, linDA
+  public static final int R_CLASSIF_LOGREG = 15;
+  public static final int R_CLASSIF_LQA = 16; // new in 2.2: lqa, lqa
+  public static final int R_CLASSIF_LSSVM = 17;
+  public static final int R_CLASSIF_LVQ1 = 18;
+  public static final int R_CLASSIF_MDA = 19;
+  public static final int R_CLASSIF_MULTINOM = 20;
+  public static final int R_CLASSIF_NAIVE_BAYES = 21;
+  public static final int R_CLASSIF_NNET = 22;
+  public static final int R_CLASSIF_PLR = 23; // new: stepPlr, plr
+  public static final int R_CLASSIF_PLSDA = 24; // new: DiscriMiner, plsDA
+  public static final int R_CLASSIF_PLSDACARET = 25; // new: caret, plsda
+  public static final int R_CLASSIF_QDA = 26;
+  public static final int R_CLASSIF_QUADA = 27; // new: DiscriMiner, quaDA
+  public static final int R_CLASSIF_RANDOM_FOREST = 28;
+  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 29; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_CLASSIF_RDA = 30;
+  public static final int R_CLASSIF_RPART = 31;
+  public static final int R_CLASSIF_SDA = 32; // new in 2.2: sda, sda
+  public static final int R_CLASSIF_SVM = 33;
 
   // public static final int R_CLASSIF_LOCLDA = 6;
 
   // Regression
-  public static final int R_REGR_BLACKBOOST = 30;
-  public static final int R_REGR_CFOREST = 31; // new: party, cforest
-  public static final int R_REGR_CRS = 32; // new: crs, crs
-  public static final int R_REGR_EARTH = 33;
-  public static final int R_REGR_FNN = 34;
-  public static final int R_REGR_GBM = 35;
-  public static final int R_REGR_GLMNET = 36; // new: glmnet, glmnet
-  public static final int R_REGR_KKNN = 37;
-  public static final int R_REGR_KM = 38;
-  public static final int R_REGR_KSVM = 39;
-  public static final int R_REGR_LASSO = 40;
-  public static final int R_REGR_LM = 41;
-  public static final int R_REGR_MARS = 42;
-  public static final int R_REGR_MOB = 43; // new: party, mob
-  public static final int R_REGR_NNET = 44;
-  public static final int R_REGR_PCR = 45; // new: pls, pcr
-  public static final int R_REGR_RANDOM_FOREST = 46;
-  public static final int R_REGR_RIDGE = 47;
-  public static final int R_REGR_RPART = 48;
-  public static final int R_REGR_RSM = 49;
-  public static final int R_REGR_RVM = 50;
-  public static final int R_REGR_SVM = 51; // new: e1071, svm
+  public static final int R_REGR_BLACKBOOST = 34;
+  public static final int R_REGR_CFOREST = 35; // new: party, cforest
+  public static final int R_REGR_CRS = 36; // new: crs, crs
+  public static final int R_REGR_CTREE = 37; // new in 2.2: party, ctree
+  public static final int R_REGR_EARTH = 38;
+  public static final int R_REGR_FNN = 39;
+  public static final int R_REGR_GBM = 40;
+  public static final int R_REGR_GLMNET = 41; // new: glmnet, glmnet
+  public static final int R_REGR_KKNN = 42;
+  public static final int R_REGR_KM = 43;
+  public static final int R_REGR_KSVM = 44;
+  public static final int R_REGR_LASSO = 45;
+  public static final int R_REGR_LM = 46;
+  public static final int R_REGR_MARS = 47;
+  public static final int R_REGR_MOB = 48; // new: party, mob
+  public static final int R_REGR_NNET = 49;
+  public static final int R_REGR_PCR = 50; // new: pls, pcr
+  public static final int R_REGR_PLSR = 51; // new in 2.2: pls, pls
+  public static final int R_REGR_RANDOM_FOREST = 52;
+  public static final int R_REGR_RANDOM_FOREST_SRC = 53; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_REGR_RIDGE = 54;
+  public static final int R_REGR_RPART = 55;
+  public static final int R_REGR_RSM = 56;
+  public static final int R_REGR_RVM = 57;
+  public static final int R_REGR_SVM = 58; // new: e1071, svm
 
 
   /** Tags for the various types of learner */
   public static final Tag[] TAGS_LEARNER = {
     new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
+    new Tag(R_CLASSIF_BARTMACHINE, "bartMachine", "classif.bartMachine", false),
     new Tag(R_CLASSIF_BOOSTING, "adabag", "classif.boosting", false),
     new Tag(R_CLASSIF_BLACKBOOST, "a.mboost", "classif.blackboost", false),
     new Tag(R_CLASSIF_CFOREST, "a.party", "classif.cforest", false),
@@ -143,6 +151,7 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     new Tag(R_CLASSIF_LDA, "a.MASS", "classif.lda", false),
     new Tag(R_CLASSIF_LINDA, "b.DiscriMiner", "classif.linDA", false),
     new Tag(R_CLASSIF_LOGREG, "a.stats", "classif.logreg", false),
+    new Tag(R_CLASSIF_LQA, "lqa", "classif.lqa", false),
     new Tag(R_CLASSIF_LSSVM, "b.kernlab", "classif.lssvm", false),
     new Tag(R_CLASSIF_LVQ1, "class", "classif.lvq1", false),
     new Tag(R_CLASSIF_MDA, "a.mda", "classif.mda", false),
@@ -156,8 +165,11 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     new Tag(R_CLASSIF_QUADA, "d.DiscriMiner", "classif.quaDA", false),
     new Tag(R_CLASSIF_RANDOM_FOREST, "a.randomForest", "classif.randomForest",
       false),
+    new Tag(R_CLASSIF_RANDOM_FOREST_SRC, "a.randomForestSRC", "classif.randomForestSRC",
+      false),
     new Tag(R_CLASSIF_RDA, "b.klaR", "classif.rda", false),
     new Tag(R_CLASSIF_RPART, "a.rpart", "classif.rpart", false),
+    new Tag(R_CLASSIF_SDA, "sda", "classif.sda", false),
     new Tag(R_CLASSIF_SVM, "b.e1071", "classif.svm", false),
 
     // ` new Tag(R_CLASSIF_LOCLDA, "a.klaR", "classif.loclda", false),
@@ -165,6 +177,7 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     new Tag(R_REGR_BLACKBOOST, "c.mboost", "regr.blackboost", false),
     new Tag(R_REGR_CFOREST, "c.party", "regr.cforest", false),
     new Tag(R_REGR_CRS, "crs", "regr.crs", false),
+    new Tag(R_REGR_CTREE, "d.party", "regr.ctree", false),
     new Tag(R_REGR_EARTH, "earth", "regr.earth", false),
     new Tag(R_REGR_FNN, "b.FNN", "regr.fnn", false),
     new Tag(R_REGR_GBM, "b.gbm", "regr.gbm", false),
@@ -175,10 +188,13 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     new Tag(R_REGR_LASSO, "a.penalized", "regr.penalized.lasso", false),
     new Tag(R_REGR_LM, "b.stats", "regr.lm", false),
     new Tag(R_REGR_MARS, "b.mda", "regr.mars", false),
-    new Tag(R_REGR_MOB, "d.party", "regr.mob", false),
+    new Tag(R_REGR_MOB, "e.party", "regr.mob", false),
     new Tag(R_REGR_NNET, "c.nnet", "regr.nnet", false),
-    new Tag(R_REGR_PCR, "pls", "regr.pcr", false),
+    new Tag(R_REGR_PCR, "a.pls", "regr.pcr", false),
+    new Tag(R_REGR_PLSR, "b.pls", "regr.plsr", false),
     new Tag(R_REGR_RANDOM_FOREST, "b.randomForest", "regr.randomForest", false),
+    new Tag(R_REGR_RANDOM_FOREST_SRC, "b.randomForestSRC", "regr.randomForestSRC",
+      false),
     new Tag(R_REGR_RIDGE, "b.penalized", "regr.penalized.ridge", false),
     new Tag(R_REGR_RPART, "b.rpart", "regr.rpart", false),
     new Tag(R_REGR_RSM, "a.rsm", "regr.rsm", false),
@@ -204,7 +220,14 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
    */
   public String globalInfo() {
     return "Classifier that wraps the MLR R library for building "
-      + "and making predictions with various R classifiers";
+      + "and making predictions with various R classifiers and regression methods. Check\n\n"
+      + "  http://berndbischl.github.io/mlr/tutorial/html/integrated_learners\n\n"
+      + "for the list of algorithms in MLR, and\n\n"
+      + "  http://http://cran.r-project.org/web/packages/mlr\n\n"
+      + "for further information on the package and its algorithms.\n\n"
+      + "Note that a classifier/regressor will be installed in R when it is selected as the "
+      + "learner parameter for MLRClassifier and has not been installed before in R. This may take a little while "
+      + "because it involves downloading and processing R packages.";
   }
 
   /**

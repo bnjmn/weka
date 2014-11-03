@@ -182,7 +182,14 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    */
   public String globalInfo() {
     return "Classifier that wraps the MLR R library for building "
-      + "and making predictions with various R classifiers";
+      + "and making predictions with various R classifiers and regression methods. Check\n\n"
+      + "  http://berndbischl.github.io/mlr/tutorial/html/integrated_learners\n\n"
+      + "for the list of algorithms in MLR, and\n\n"
+      + "  http://http://cran.r-project.org/web/packages/mlr\n\n"
+      + "for further information on the package and its algorithms.\n\n"
+      + "Note that a classifier/regressor will be installed in R when it is selected as the "
+      + "learner parameter for MLRClassifier and has not been installed before in R. This may take a little while"
+      + "because it involves downloading and processing R packages.";
   }
 
   protected void enableCapabilitiesForLearner(Capabilities result,
@@ -197,86 +204,26 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       String learnString = "";
       learnString = "l <- makeLearner(\"" + mlrIdentifier + "\")";
 
+      // Make learner in R
       eng.parseAndEval(this, learnString);
-      eng.parseAndEval(this, "print(l)");
 
-      String output = eng.getConsoleBuffer(this);
+      // Get list of properties
+      List<String> props = Arrays.asList(eng.parseAndEval(this, "l$properties").asStrings());
 
-      // Are we working with MLR 2?
-      if (output.indexOf("Properties:") >= 0) {
-
-        // Get list of properties
-        List<String> props = Arrays.asList(output.replaceFirst("(.|\\s)*Properties: ", "").
-                                           replaceFirst("\\s(.|\\s)*", "").split(","));
-        if (props.contains("numerics")) {
-          result.enable(Capability.NUMERIC_ATTRIBUTES);
-        }          
-        if (props.contains("factors")) {
-          result.enable(Capability.NOMINAL_ATTRIBUTES);
-        }
-        if ((!m_dontReplaceMissingValues) || props.contains("missings")) {
-          result.enable(Capability.MISSING_VALUES);
-        }
-        if (props.contains("twoclass")) {
-          result.enable(Capability.BINARY_CLASS);
-        }
-        if (props.contains("multiclass")) {
-          result.enable(Capability.NOMINAL_CLASS);
-        }
-      } else {
-
-        // Need to parse MLR 1 output
-        if (output.indexOf("Numerics:") >= 0) {
-          boolean numerics = output
-            .substring(output.indexOf("Numerics:") + 9, output.length()).trim()
-            .toLowerCase().startsWith("true");
-          
-          if (numerics) {
-            result.enable(Capability.NUMERIC_ATTRIBUTES);
-          }
-        }
-        
-        if (output.indexOf("Factors:") >= 0) {
-          boolean factors = output
-            .substring(output.indexOf("Factors:") + 8, output.length()).trim()
-            .toLowerCase().startsWith("true");
-          
-          if (factors) {
-            result.enable(Capability.NOMINAL_ATTRIBUTES);
-          }
-        }
-        
-        if (!m_dontReplaceMissingValues) {
-          result.enable(Capability.MISSING_VALUES);
-        } else {
-          if (output.indexOf("Supports missings:") > 0) {
-            boolean missings = output
-              .substring(output.indexOf("Supports missings:") + 18,
-                         output.length()).trim().toLowerCase().startsWith("true");
-            
-            if (missings) {
-              result.enable(Capability.MISSING_VALUES);
-            }
-          }
-        }
-        
-        if (output.indexOf("Supports classes:") >= 0) {
-          String classS = output.substring(output.indexOf("Supports classes:"),
-                                           output.length());
-          classS = classS
-            .substring(classS.indexOf(":") + 1, classS.indexOf("\n")).trim();
-          String[] parts = classS.split(",");
-          
-          for (String s : parts) {
-            if (s.trim().startsWith("two")) {
-              result.enable(Capability.BINARY_CLASS);
-            }
-            
-            if (s.trim().startsWith("multi")) {
-              result.enable(Capability.NOMINAL_CLASS);
-            }
-          }
-        }
+      if (props.contains("numerics")) {
+        result.enable(Capability.NUMERIC_ATTRIBUTES);
+      }          
+      if (props.contains("factors")) {
+        result.enable(Capability.NOMINAL_ATTRIBUTES);
+      }
+      if ((!m_dontReplaceMissingValues) || props.contains("missings")) {
+        result.enable(Capability.MISSING_VALUES);
+      }
+      if (props.contains("twoclass")) {
+        result.enable(Capability.BINARY_CLASS);
+      }
+      if (props.contains("multiclass")) {
+        result.enable(Capability.NOMINAL_CLASS);
       }
     } catch (Exception ex) {
       ex.printStackTrace();
@@ -492,11 +439,16 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   public void setOptions(String[] options) throws Exception {
     String learnerS = Utils.getOption("learner", options);
     if (learnerS.length() > 0) {
+      boolean found = false;
       for (Tag t : MLRClassifier.TAGS_LEARNER) {
         if (t.getReadable().startsWith(learnerS)) {
           setRLearner(new SelectedTag(t.getID(), MLRClassifier.TAGS_LEARNER));
+          found = true;
           break;
         }
+      }
+      if (!found) {
+        throw new IllegalArgumentException("MLR learner " + learnerS + " not found.");
       }
     }
 
