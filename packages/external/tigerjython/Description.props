@@ -1,0 +1,38 @@
+# Description file for tigerjython
+#
+# 
+
+# Package name (required)
+PackageName=tigerjython
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2014-10-31
+
+# Title (required)
+Title=TigerJython
+
+Category=Scripting
+
+# Author (required)
+Author=Tobias Kohn
+
+# Maintainer (required)
+Maintainer=Eibe Frank <eibe@waikato.ac.nz>
+
+# License (required)
+License=Apache License Version 2.0, Jython Software License
+
+# Description (required)
+Description=Makes the simple TigerJython development environment for Jython written by Tobias Kohn, including its interactive console, available via the Tools menu in WEKA's GUIChooser. Can be used to write Jython programs that work with WEKA objects. Also enables you to interactively experiment with WEKA.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/tigerjython1.0.0.zip?download
+
+# URL for further information
+URL=http://http://jython.tobiaskohn.ch
+
+# Dependencies
+Depends=weka (>=3.7.12)
