@@ -54,13 +54,19 @@ public class SelectedTag
     HashSet<Integer> ID = new HashSet<Integer>();
     HashSet<String> IDStr = new HashSet<String>();
     for (int i = 0; i < tags.length; i++) {
-      ID.add(new Integer(tags[i].getID()));
-      IDStr.add(tags[i].getIDStr());
+      Integer newID = new Integer(tags[i].getID());
+      if (!ID.contains(newID)) {
+        ID.add(newID);
+      } else {
+        throw new IllegalArgumentException("The IDs are not unique: " + newID + "!");
+      }
+      String IDstring = tags[i].getIDStr();
+      if (!IDStr.contains(IDstring)) {
+        IDStr.add(IDstring);
+      } else {
+        throw new IllegalArgumentException("The ID strings are not unique: " + IDstring + "!");
+      }
     }
-    if (ID.size() != tags.length)
-      throw new IllegalArgumentException("The IDs are not unique!");
-    if (IDStr.size() != tags.length)
-      throw new IllegalArgumentException("The ID strings are not unique!");
 
     for (int i = 0; i < tags.length; i++) {
       if (tags[i].getID() == tagID) {
