@@ -25,7 +25,6 @@ import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.beancontext.BeanContextSupport;
-import java.util.Vector;
 
 import javax.swing.Icon;
 import javax.swing.JButton;
@@ -123,17 +122,19 @@ public class SQLViewerPerspective extends JPanel implements
 
       KnowledgeFlowApp singleton = KnowledgeFlowApp.getSingleton();
       m_mainPerspective.addTab("DBSource");
-      /*
-       * BeanInstance beanI = new
-       * BeanInstance(m_mainPerspective.getBeanLayout(m_mainPerspective
-       * .getNumTabs() - 1), loaderComp, 50, 50, m_mainPerspective.getNumTabs()
-       * - 1);
-       */
-      Vector<Object> beans = BeanInstance.getBeanInstances(m_mainPerspective
-        .getNumTabs() - 1);
-      Vector<BeanConnection> connections = BeanConnection
-        .getConnections(m_mainPerspective.getNumTabs() - 1);
-      singleton.integrateFlow(beans, connections, true, false);
+
+      // The process of creating a BeanInstance integrates will result
+      // in it integrating itself into the flow in the specified tab
+      new BeanInstance(m_mainPerspective.getBeanLayout(m_mainPerspective
+        .getNumTabs() - 1), loaderComp, 50, 50,
+        m_mainPerspective.getNumTabs()
+        - 1);
+
+      // Vector<Object> beans = BeanInstance.getBeanInstances(m_mainPerspective
+      // .getNumTabs() - 1);
+      // Vector<BeanConnection> connections = BeanConnection
+      // .getConnections(m_mainPerspective.getNumTabs() - 1);
+      // singleton.integrateFlow(beans, connections, true, false);
       singleton.setActivePerspective(0); // switch back to the main perspective
 
       m_newFlowBut.setEnabled(true);
