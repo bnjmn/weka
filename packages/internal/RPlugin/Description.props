@@ -35,7 +35,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.5.zip?download
 URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
 
 # Changes in this release
-Changes=MLRClassifier is now based on MLR library version 2.2.
+Changes=MLRClassifier is now based on MLR library version 2.2. All non-WEKA classifiers from MLR 2.2 excluding bartMachine should be available now.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

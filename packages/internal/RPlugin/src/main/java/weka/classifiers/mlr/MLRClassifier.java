@@ -69,74 +69,74 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
 
   // Classification
   public static final int R_CLASSIF_ADA = 0;
-  public static final int R_CLASSIF_BARTMACHINE = 1; // new in 2.2: bartMachine, bartMachine
-  public static final int R_CLASSIF_BOOSTING = 2;
-  public static final int R_CLASSIF_BLACKBOOST = 3;
-  public static final int R_CLASSIF_CFOREST = 4; // new: party, cforest
-  public static final int R_CLASSIF_CTREE = 5;
-  public static final int R_CLASSIF_FNN = 6;
-  public static final int R_CLASSIF_GBM = 7;
-  public static final int R_CLASSIF_GEODA = 8; // new: DiscriMiner, geoDA
-  public static final int R_CLASSIF_GLMBOOST = 9;
-  public static final int R_CLASSIF_GLMNET = 10; // new: glmnet, glmnet
-  public static final int R_CLASSIF_KKNN = 11;
-  public static final int R_CLASSIF_KSVM = 12;
-  public static final int R_CLASSIF_LDA = 13;
-  public static final int R_CLASSIF_LINDA = 14; // new: DiscriMiner, linDA
-  public static final int R_CLASSIF_LOGREG = 15;
-  public static final int R_CLASSIF_LQA = 16; // new in 2.2: lqa, lqa
-  public static final int R_CLASSIF_LSSVM = 17;
-  public static final int R_CLASSIF_LVQ1 = 18;
-  public static final int R_CLASSIF_MDA = 19;
-  public static final int R_CLASSIF_MULTINOM = 20;
-  public static final int R_CLASSIF_NAIVE_BAYES = 21;
-  public static final int R_CLASSIF_NNET = 22;
-  public static final int R_CLASSIF_PLR = 23; // new: stepPlr, plr
-  public static final int R_CLASSIF_PLSDA = 24; // new: DiscriMiner, plsDA
-  public static final int R_CLASSIF_PLSDACARET = 25; // new: caret, plsda
-  public static final int R_CLASSIF_QDA = 26;
-  public static final int R_CLASSIF_QUADA = 27; // new: DiscriMiner, quaDA
-  public static final int R_CLASSIF_RANDOM_FOREST = 28;
-  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 29; // new in 2.2: randomForestSRC, randomForestSRC
-  public static final int R_CLASSIF_RDA = 30;
-  public static final int R_CLASSIF_RPART = 31;
-  public static final int R_CLASSIF_SDA = 32; // new in 2.2: sda, sda
-  public static final int R_CLASSIF_SVM = 33;
+  //public static final int R_CLASSIF_BARTMACHINE = 1; // new in 2.2: bartMachine, bartMachine 
+  public static final int R_CLASSIF_BOOSTING = 1;
+  public static final int R_CLASSIF_BLACKBOOST = 2;
+  public static final int R_CLASSIF_CFOREST = 3; // new: party, cforest
+  public static final int R_CLASSIF_CTREE = 4;
+  public static final int R_CLASSIF_FNN = 5;
+  public static final int R_CLASSIF_GBM = 6;
+  public static final int R_CLASSIF_GEODA = 7; // new: DiscriMiner, geoDA
+  public static final int R_CLASSIF_GLMBOOST = 8;
+  public static final int R_CLASSIF_GLMNET = 9; // new: glmnet, glmnet
+  public static final int R_CLASSIF_KKNN = 10;
+  public static final int R_CLASSIF_KSVM = 11;
+  public static final int R_CLASSIF_LDA = 12;
+  public static final int R_CLASSIF_LINDA = 13; // new: DiscriMiner, linDA
+  public static final int R_CLASSIF_LOGREG = 14;
+  public static final int R_CLASSIF_LQA = 15; // new in 2.2: lqa, lqa
+  public static final int R_CLASSIF_LSSVM = 16;
+  public static final int R_CLASSIF_LVQ1 = 17;
+  public static final int R_CLASSIF_MDA = 18;
+  public static final int R_CLASSIF_MULTINOM = 19;
+  public static final int R_CLASSIF_NAIVE_BAYES = 20;
+  public static final int R_CLASSIF_NNET = 21;
+  public static final int R_CLASSIF_PLR = 22; // new: stepPlr, plr
+  public static final int R_CLASSIF_PLSDA = 23; // new: DiscriMiner, plsDA
+  public static final int R_CLASSIF_PLSDACARET = 24; // new: caret, plsda
+  public static final int R_CLASSIF_QDA = 25;
+  public static final int R_CLASSIF_QUADA = 26; // new: DiscriMiner, quaDA
+  public static final int R_CLASSIF_RANDOM_FOREST = 27;
+  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 28; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_CLASSIF_RDA = 29;
+  public static final int R_CLASSIF_RPART = 30;
+  public static final int R_CLASSIF_SDA = 31; // new in 2.2: sda, sda
+  public static final int R_CLASSIF_SVM = 32;
 
   // public static final int R_CLASSIF_LOCLDA = 6;
 
   // Regression
-  public static final int R_REGR_BLACKBOOST = 34;
-  public static final int R_REGR_CFOREST = 35; // new: party, cforest
-  public static final int R_REGR_CRS = 36; // new: crs, crs
-  public static final int R_REGR_CTREE = 37; // new in 2.2: party, ctree
-  public static final int R_REGR_EARTH = 38;
-  public static final int R_REGR_FNN = 39;
-  public static final int R_REGR_GBM = 40;
-  public static final int R_REGR_GLMNET = 41; // new: glmnet, glmnet
-  public static final int R_REGR_KKNN = 42;
-  public static final int R_REGR_KM = 43;
-  public static final int R_REGR_KSVM = 44;
-  public static final int R_REGR_LASSO = 45;
-  public static final int R_REGR_LM = 46;
-  public static final int R_REGR_MARS = 47;
-  public static final int R_REGR_MOB = 48; // new: party, mob
-  public static final int R_REGR_NNET = 49;
-  public static final int R_REGR_PCR = 50; // new: pls, pcr
-  public static final int R_REGR_PLSR = 51; // new in 2.2: pls, pls
-  public static final int R_REGR_RANDOM_FOREST = 52;
-  public static final int R_REGR_RANDOM_FOREST_SRC = 53; // new in 2.2: randomForestSRC, randomForestSRC
-  public static final int R_REGR_RIDGE = 54;
-  public static final int R_REGR_RPART = 55;
-  public static final int R_REGR_RSM = 56;
-  public static final int R_REGR_RVM = 57;
-  public static final int R_REGR_SVM = 58; // new: e1071, svm
+  public static final int R_REGR_BLACKBOOST = 33;
+  public static final int R_REGR_CFOREST = 34; // new: party, cforest
+  public static final int R_REGR_CRS = 35; // new: crs, crs
+  public static final int R_REGR_CTREE = 36; // new in 2.2: party, ctree
+  public static final int R_REGR_EARTH = 37;
+  public static final int R_REGR_FNN = 38;
+  public static final int R_REGR_GBM = 39;
+  public static final int R_REGR_GLMNET = 40; // new: glmnet, glmnet
+  public static final int R_REGR_KKNN = 41;
+  public static final int R_REGR_KM = 42;
+  public static final int R_REGR_KSVM = 43;
+  public static final int R_REGR_LASSO = 44;
+  public static final int R_REGR_LM = 45;
+  public static final int R_REGR_MARS = 46;
+  public static final int R_REGR_MOB = 47; // new: party, mob
+  public static final int R_REGR_NNET = 48;
+  public static final int R_REGR_PCR = 49; // new: pls, pcr
+  public static final int R_REGR_PLSR = 50; // new in 2.2: pls, pls
+  public static final int R_REGR_RANDOM_FOREST = 51;
+  public static final int R_REGR_RANDOM_FOREST_SRC = 52; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_REGR_RIDGE = 53;
+  public static final int R_REGR_RPART = 54;
+  public static final int R_REGR_RSM = 55;
+  public static final int R_REGR_RVM = 56;
+  public static final int R_REGR_SVM = 57; // new: e1071, svm
 
 
   /** Tags for the various types of learner */
   public static final Tag[] TAGS_LEARNER = {
     new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
-    new Tag(R_CLASSIF_BARTMACHINE, "bartMachine", "classif.bartMachine", false),
+    //new Tag(R_CLASSIF_BARTMACHINE, "bartMachine", "classif.bartMachine", false),
     new Tag(R_CLASSIF_BOOSTING, "adabag", "classif.boosting", false),
     new Tag(R_CLASSIF_BLACKBOOST, "a.mboost", "classif.blackboost", false),
     new Tag(R_CLASSIF_CFOREST, "a.party", "classif.cforest", false),
