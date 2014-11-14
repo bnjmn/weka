@@ -22,6 +22,7 @@
 package weka.gui.ensembleLibraryEditor.tree;
 
 import weka.classifiers.Classifier;
+import weka.gui.EnsembleLibraryEditor;
 import weka.gui.GenericObjectEditor;
 import weka.gui.ensembleLibraryEditor.AddModelsPanel;
 
@@ -101,6 +102,10 @@ public class GenericObjectNode
   
   /** the GenericObjectEditor that was supplied for this node */
   private GenericObjectEditor m_GenericObjectEditor;
+
+    // SRT
+    /** The GenericObjectNodeEditor for this node */
+    private GenericObjectNodeEditor m_GenericObjectNodeEditor = null;
   
   /** this Vector stores all of the possible combinations of parameters 
    * that it obtains from its child nodes.  These combinations are 
@@ -142,7 +147,8 @@ public class GenericObjectNode
     m_ParentPanel = panel;
     this.m_GenericObjectEditor = genericObjectEditor;
     this.m_ToolTipText = toolTipText;
-    
+    // SRT
+    this.m_GenericObjectNodeEditor = null;    
   }
   
   /** 
@@ -178,7 +184,31 @@ public class GenericObjectNode
   public GenericObjectEditor getEditor() {
     return m_GenericObjectEditor;
   }
-  
+
+  /**
+   * A setter for the GenericObjectNodeEditor for this node
+   * 
+   * @param Editor A new GenericObjectNodeEditor
+   * @return		void
+   */
+    // SRT
+  public void setNodeEditor(GenericObjectNodeEditor editor) {
+      if (m_GenericObjectNodeEditor != null) {
+	  m_ParentPanel.remove(m_GenericObjectNodeEditor);
+      };
+      m_GenericObjectNodeEditor = editor;
+  }
+
+  /**
+   * A getter for the GenericObjectNodeEditor for this node
+   * 
+   * @return		the editor
+   */
+    // SRT
+  public GenericObjectNodeEditor getNodeEditor() {
+    return m_GenericObjectNodeEditor;
+  }
+    
   /**
    * getter for the tooltip text
    * 
