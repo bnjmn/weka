@@ -238,8 +238,8 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * For each cluster, holds the frequency counts for the values of each nominal
    * attribute.
    */
-  protected int[][][] m_ClusterNominalCounts;
-  protected int[][] m_ClusterMissingCounts;
+  protected double[][][] m_ClusterNominalCounts;
+  protected double[][] m_ClusterMissingCounts;
 
   /**
    * Stats on the full data set for comparison purposes. In case the attribute
@@ -249,8 +249,8 @@ public class SimpleKMeans extends RandomizableClusterer implements
    */
   protected double[] m_FullMeansOrMediansOrModes;
   protected double[] m_FullStdDevs;
-  protected int[][] m_FullNominalCounts;
-  protected int[] m_FullMissingCounts;
+  protected double[][] m_FullNominalCounts;
+  protected double[] m_FullMissingCounts;
 
   /**
    * Display standard deviations for numeric atts.
@@ -265,7 +265,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
   /**
    * The number of instances in each cluster.
    */
-  protected int[] m_ClusterSizes;
+  protected double[] m_ClusterSizes;
 
   /**
    * Maximum number of iterations to be executed.
@@ -605,24 +605,26 @@ public class SimpleKMeans extends RandomizableClusterer implements
       instances = Filter.useFilter(instances, m_ReplaceMissingFilter);
     }
 
-    m_FullMissingCounts = new int[instances.numAttributes()];
+    m_ClusterNominalCounts = new double[m_NumClusters][instances.numAttributes()][];
+    m_ClusterMissingCounts = new double[m_NumClusters][instances.numAttributes()];
     if (m_displayStdDevs) {
       m_FullStdDevs = new double[instances.numAttributes()];
     }
-    m_FullNominalCounts = new int[instances.numAttributes()][0];
-
-    m_FullMeansOrMediansOrModes = moveCentroid(0, instances, false, false);
+   
+    m_FullMeansOrMediansOrModes = moveCentroid(0, instances, true, false);
+    
+    m_FullMissingCounts = m_ClusterMissingCounts[0];
+    m_FullNominalCounts = m_ClusterNominalCounts[0];
+    double sumOfWeights = instances.sumOfWeights();
     for (int i = 0; i < instances.numAttributes(); i++) {
-      m_FullMissingCounts[i] = instances.attributeStats(i).missingCount;
       if (instances.attribute(i).isNumeric()) {
         if (m_displayStdDevs) {
           m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
         }
-        if (m_FullMissingCounts[i] == instances.numInstances()) {
+        if (m_FullMissingCounts[i] == sumOfWeights) {
           m_FullMeansOrMediansOrModes[i] = Double.NaN; // mark missing as mean
         }
       } else {
-        m_FullNominalCounts[i] = instances.attributeStats(i).nominalCounts;
         if (m_FullMissingCounts[i] > m_FullNominalCounts[i][Utils
           .maxIndex(m_FullNominalCounts[i])]) {
           m_FullMeansOrMediansOrModes[i] = -1; // mark missing as most common
@@ -721,9 +723,8 @@ public class SimpleKMeans extends RandomizableClusterer implements
     int emptyClusterCount;
     Instances[] tempI = new Instances[m_NumClusters];
     m_squaredErrors = new double[m_NumClusters];
-    m_ClusterNominalCounts =
-      new int[m_NumClusters][instances.numAttributes()][0];
-    m_ClusterMissingCounts = new int[m_NumClusters][instances.numAttributes()];
+    m_ClusterNominalCounts = new double[m_NumClusters][instances.numAttributes()][0];
+    m_ClusterMissingCounts = new double[m_NumClusters][instances.numAttributes()];
     startExecutorPool();
 
     while (!converged) {
@@ -808,8 +809,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
       }
 
       if (!converged) {
-        m_ClusterNominalCounts =
-          new int[m_NumClusters][instances.numAttributes()][0];
+        m_ClusterNominalCounts = new double[m_NumClusters][instances.numAttributes()][0];
       }
     }
 
@@ -823,7 +823,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     if (m_displayStdDevs) {
       m_ClusterStdDevs = new Instances(instances, m_NumClusters);
     }
-    m_ClusterSizes = new int[m_NumClusters];
+    m_ClusterSizes = new double[m_NumClusters];
     for (i = 0; i < m_NumClusters; i++) {
       if (m_displayStdDevs) {
         double[] vals2 = new double[instances.numAttributes()];
@@ -993,65 +993,93 @@ public class SimpleKMeans extends RandomizableClusterer implements
    */
   protected double[] moveCentroid(int centroidIndex, Instances members,
     boolean updateClusterInfo, boolean addToCentroidInstances) {
+    
     double[] vals = new double[members.numAttributes()];
-
-    // used only for Manhattan Distance
-    Instances sortedMembers = null;
-    int middle = 0;
-    boolean dataIsEven = false;
-
+    double[][] nominalDists = new double[members.numAttributes()][];
+    double[] weightMissing = new double[members.numAttributes()];
+    double[] weightNonMissing = new double[members.numAttributes()];
+    
+    // Quickly calculate some relevant statistics 
+    for (int j = 0; j < members.numAttributes(); j++) {
+      if (members.attribute(j).isNominal()) {
+        nominalDists[j] = new double[members.attribute(j).numValues()];
+      }
+    }
+    for (Instance inst : members) {
+      for (int j = 0; j < members.numAttributes(); j++) {
+        if (inst.isMissing(j)) {
+          weightMissing[j] += inst.weight(); 
+        } else {
+          weightNonMissing[j] += inst.weight();
+          if (members.attribute(j).isNumeric()) {
+            vals[j] += inst.weight() * inst.value(j); // Will be overwritten in Manhattan case
+          } else {
+            nominalDists[j][(int)inst.value(j)] += inst.weight();
+          }
+        }
+      }      
+    }
+    for (int j = 0; j < members.numAttributes(); j++) {
+      if (members.attribute(j).isNumeric()) {
+        if  (weightNonMissing[j] > 0) {
+          vals[j] /= weightNonMissing[j];
+        } else {
+          vals[j] = Utils.missingValue();
+        }
+      } else {
+        double max = -Double.MAX_VALUE;
+        double maxIndex = -1;
+        for (int i = 0; i < nominalDists[j].length; i++) {
+          if (nominalDists[j][i] > max) {
+            max = nominalDists[j][i];
+            maxIndex = i;
+          }
+          if (max < weightMissing[j]) {
+            vals[j] = Utils.missingValue();
+          } else {
+            vals[j] = maxIndex;
+          }
+        }
+      }
+    }
+    
     if (m_DistanceFunction instanceof ManhattanDistance) {
-      middle = (members.numInstances() - 1) / 2;
-      dataIsEven = ((members.numInstances() % 2) == 0);
+      
+      // Need to replace means by medians
+      Instances sortedMembers = null;
+      int middle = (members.numInstances() - 1) / 2;
+      boolean dataIsEven = ((members.numInstances() % 2) == 0);
       if (m_PreserveOrder) {
         sortedMembers = members;
       } else {
         sortedMembers = new Instances(members);
       }
-    }
-
-    for (int j = 0; j < members.numAttributes(); j++) {
-
-      // in case of Euclidian distance the centroid is the mean point
-      // in case of Manhattan distance the centroid is the median point
-      // in both cases, if the attribute is nominal, the centroid is the mode
-      if (m_DistanceFunction instanceof EuclideanDistance
-        || members.attribute(j).isNominal()) {
-        vals[j] = members.meanOrMode(j);
-      } else if (m_DistanceFunction instanceof ManhattanDistance) {
-        // singleton special case
-        if (members.numInstances() == 1) {
-          vals[j] = members.instance(0).value(j);
-        } else {
-          vals[j] = sortedMembers.kthSmallestValue(j, middle + 1);
-          if (dataIsEven) {
-            vals[j] =
-              (vals[j] + sortedMembers.kthSmallestValue(j, middle + 2)) / 2;
-          }
-        }
-      }
-
-      if (updateClusterInfo) {
-        m_ClusterMissingCounts[centroidIndex][j] =
-          members.attributeStats(j).missingCount;
-        m_ClusterNominalCounts[centroidIndex][j] =
-          members.attributeStats(j).nominalCounts;
-        if (members.attribute(j).isNominal()) {
-          if (m_ClusterMissingCounts[centroidIndex][j] > m_ClusterNominalCounts[centroidIndex][j][Utils
-            .maxIndex(m_ClusterNominalCounts[centroidIndex][j])]) {
-            vals[j] = Utils.missingValue(); // mark mode as missing
-          }
-        } else {
-          if (m_ClusterMissingCounts[centroidIndex][j] == members
-            .numInstances()) {
-            vals[j] = Utils.missingValue(); // mark mean as missing
+      for (int j = 0; j < members.numAttributes(); j++) {
+        if (weightNonMissing[j] > 0) {
+          // singleton special case
+          if (members.numInstances() == 1) {
+            vals[j] = members.instance(0).value(j);
+          } else {
+            vals[j] = sortedMembers.kthSmallestValue(j, middle + 1);
+            if (dataIsEven) {
+              vals[j] = (vals[j] + sortedMembers.kthSmallestValue(j, middle + 2)) / 2;
+            }
           }
         }
       }
     }
+      
+    if (updateClusterInfo) {   
+      for (int j = 0; j < members.numAttributes(); j++) {
+        m_ClusterMissingCounts[centroidIndex][j] = weightMissing[j];
+        m_ClusterNominalCounts[centroidIndex][j] = nominalDists[j];
+      } 
+    }
+    
     if (addToCentroidInstances) {
       m_ClusterCentroids.add(new DenseInstance(1.0, vals));
     }
+    
     return vals;
   }
 
@@ -2043,7 +2071,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     }
 
     // check for size of cluster sizes
-    for (int m_ClusterSize : m_ClusterSizes) {
+    for (double m_ClusterSize : m_ClusterSizes) {
       String size = "(" + m_ClusterSize + ")";
       if (size.length() > maxWidth) {
         maxWidth = size.length();
@@ -2239,7 +2267,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
             // full data
             String val = "  " + a.value(j);
             temp.append(pad(val, " ", maxAttWidth + 1 - val.length(), false));
-            int count = m_FullNominalCounts[i][j];
+            double count = m_FullNominalCounts[i][j];
             int percent =
               (int) ((double) m_FullNominalCounts[i][j]
                 / Utils.sum(m_ClusterSizes) * 100.0);
@@ -2252,13 +2280,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
             // Clusters
             for (int k = 0; k < m_NumClusters; k++) {
-              count = m_ClusterNominalCounts[k][i][j];
               percent =
                 (int) ((double) m_ClusterNominalCounts[k][i][j]
                   / m_ClusterSizes[k] * 100.0);
               percentS = "" + percent + "%)";
               percentS = pad(percentS, " ", 5 - percentS.length(), true);
-              stdDevVal = "" + count + " (" + percentS;
+              stdDevVal = "" + m_ClusterNominalCounts[k][i][j] + " (" + percentS;
               stdDevVal =
                 pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
               temp.append(stdDevVal);
@@ -2270,7 +2297,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
             // Full data
             temp.append(pad("  missing", " ",
               maxAttWidth + 1 - "  missing".length(), false));
-            int count = m_FullMissingCounts[i];
+            double count = m_FullMissingCounts[i];
             int percent =
               (int) ((double) m_FullMissingCounts[i]
                 / Utils.sum(m_ClusterSizes) * 100.0);
@@ -2283,13 +2310,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
 
             // Clusters
             for (int k = 0; k < m_NumClusters; k++) {
-              count = m_ClusterMissingCounts[k][i];
               percent =
                 (int) ((double) m_ClusterMissingCounts[k][i]
                   / m_ClusterSizes[k] * 100.0);
               percentS = "" + percent + "%)";
               percentS = pad(percentS, " ", 5 - percentS.length(), true);
-              stdDevVal = "" + count + " (" + percentS;
+              stdDevVal = "" + m_ClusterMissingCounts[k][i] + " (" + percentS;
               stdDevVal =
                 pad(stdDevVal, " ", maxWidth + 1 - stdDevVal.length(), true);
               temp.append(stdDevVal);
@@ -2375,12 +2401,12 @@ public class SimpleKMeans extends RandomizableClusterer implements
   }
 
   /**
-   * Returns for each cluster the frequency counts for the values of each
+   * Returns for each cluster the weighted frequency counts for the values of each
    * nominal attribute.
    * 
    * @return the counts
    */
-  public int[][][] getClusterNominalCounts() {
+  public double[][][] getClusterNominalCounts() {
     return m_ClusterNominalCounts;
   }
 
@@ -2403,7 +2429,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
    * 
    * @return The number of instances in each cluster
    */
-  public int[] getClusterSizes() {
+  public double[] getClusterSizes() {
     return m_ClusterSizes;
   }
 

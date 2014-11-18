@@ -849,8 +849,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
 
     Instances centers = bestK.getClusterCentroids();
     Instances stdD = bestK.getClusterStandardDevs();
-    int[][][] nominalCounts = bestK.getClusterNominalCounts();
-    int[] clusterSizes = bestK.getClusterSizes();
+    double[][][] nominalCounts = bestK.getClusterNominalCounts();
+    double[] clusterSizes = bestK.getClusterSizes();
 
     for (i = 0; i < m_num_clusters; i++) {
       Instance center = centers.instance(i);
