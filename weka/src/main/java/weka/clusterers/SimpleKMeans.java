@@ -1055,7 +1055,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
         sortedMembers = new Instances(members);
       }
       for (int j = 0; j < members.numAttributes(); j++) {
-        if (weightNonMissing[j] > 0) {
+        if ((weightNonMissing[j] > 0) && members.attribute(j).isNumeric()) {
           // singleton special case
           if (members.numInstances() == 1) {
             vals[j] = members.instance(0).value(j);
