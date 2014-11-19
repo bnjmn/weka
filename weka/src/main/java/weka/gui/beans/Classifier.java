@@ -1175,6 +1175,26 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   }
 
   /**
+   * Check if the class is missing for all instances in the supplied set
+   * 
+   * @param toCheck the instances to check
+   * @return true if all class values are missing
+   */
+  protected static boolean allMissingClass(Instances toCheck) {
+    if (toCheck.classIndex() < 0) {
+      return false;
+    }
+
+    for (int i = 0; i < toCheck.numInstances(); i++) {
+      if (!toCheck.instance(i).classIsMissing()) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  /**
    * Accepts a test set for a batch trained classifier
    * 
    * @param e a <code>TestSetEvent</code> value
@@ -1381,8 +1401,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
           // all class values are missing
           if (testSet.numInstances() > 0) {
             if (testSet.classIndex() == m_trainingSet.classIndex()
-              && testSet.attributeStats(testSet.classIndex()).missingCount == testSet
-                .numInstances()) {
+              && allMissingClass(testSet)) {
               // now check the other attributes against the training
               // structure
               boolean ok = true;
