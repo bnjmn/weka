@@ -608,7 +608,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     m_ClusterNominalCounts = new double[m_NumClusters][instances.numAttributes()][];
     m_ClusterMissingCounts = new double[m_NumClusters][instances.numAttributes()];
     if (m_displayStdDevs) {
-      m_FullStdDevs = new double[instances.numAttributes()];
+      m_FullStdDevs = instances.variances();
     }
    
     m_FullMeansOrMediansOrModes = moveCentroid(0, instances, true, false);
@@ -619,7 +619,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (instances.attribute(i).isNumeric()) {
         if (m_displayStdDevs) {
-          m_FullStdDevs[i] = Math.sqrt(instances.variance(i));
+          m_FullStdDevs[i] = Math.sqrt(m_FullStdDevs[i]);
         }
         if (m_FullMissingCounts[i] == sumOfWeights) {
           m_FullMeansOrMediansOrModes[i] = Double.NaN; // mark missing as mean
@@ -826,10 +826,10 @@ public class SimpleKMeans extends RandomizableClusterer implements
     m_ClusterSizes = new double[m_NumClusters];
     for (i = 0; i < m_NumClusters; i++) {
       if (m_displayStdDevs) {
-        double[] vals2 = new double[instances.numAttributes()];
+        double[] vals2 = tempI[i].variances();
         for (int j = 0; j < instances.numAttributes(); j++) {
           if (instances.attribute(j).isNumeric()) {
-            vals2[j] = Math.sqrt(tempI[i].variance(j));
+            vals2[j] = Math.sqrt(vals2[j]);
           } else {
             vals2[j] = Utils.missingValue();
           }

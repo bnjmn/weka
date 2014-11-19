@@ -72,7 +72,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @version $Revision$
  */
 public class Instances extends AbstractList<Instance> implements Serializable,
-  RevisionHandler {
+RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -19412345060742748L;
@@ -240,7 +240,7 @@ public class Instances extends AbstractList<Instance> implements Serializable,
    * @throws IllegalArgumentException if attribute names are not unique
    */
   public Instances(/* @non_null@ */String name,
-  /* @non_null@ */ArrayList<Attribute> attInfo, int capacity) {
+    /* @non_null@ */ArrayList<Attribute> attInfo, int capacity) {
 
     // check whether the attribute names are unique
     HashSet<String> names = new HashSet<String>();
@@ -281,7 +281,7 @@ public class Instances extends AbstractList<Instance> implements Serializable,
         newAtts.add(new Attribute(att.name(), (List<String>) null, att.index()));
       } else if (att.type() == Attribute.RELATIONAL) {
         newAtts.add(new Attribute(att.name(), new Instances(att.relation(), 0),
-                                  att.index()));
+          att.index()));
       }
     }
     if (newAtts.size() == 0) {
@@ -1023,7 +1023,7 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     if ((position < 0) || (position > m_Attributes.size())) {
       throw new IllegalArgumentException("Index out of range");
     }
-    
+
     // Does the new attribute have a different name?
     if (!att.name().equals(m_Attributes.get(position).name())) {
 
@@ -1031,8 +1031,8 @@ public class Instances extends AbstractList<Instance> implements Serializable,
       Attribute candidate = attribute(att.name());
       if ((candidate != null) && (position != candidate.index())) {
         throw new IllegalArgumentException("Attribute name '" + att.name()
-                                           + "' already in use at position #" + 
-                                           attribute(att.name()).index());
+          + "' already in use at position #" + 
+          attribute(att.name()).index());
       }
     }
     att = (Attribute) att.copy();
@@ -1596,7 +1596,7 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     StringBuffer text = new StringBuffer();
 
     text.append(ARFF_RELATION).append(" ").append(Utils.quote(m_RelationName))
-      .append("\n\n");
+    .append("\n\n");
     for (int i = 0; i < numAttributes(); i++) {
       text.append(attribute(i)).append("\n");
     }
@@ -1686,6 +1686,50 @@ public class Instances extends AbstractList<Instance> implements Serializable,
     Instances train = trainCV(numFolds, numFold);
     train.randomize(random);
     return train;
+  }
+
+  /**
+   * Computes the variance for all numeric attributes simultaneously.
+   * This is faster than calling variance() for each attribute.
+   * The resulting array has as many dimensions as there are attributes.
+   * Array elements corresponding to non-numeric attributes are set to 0.
+   * 
+   * @return the array containing the variance values
+   */
+  public/* @pure@ */double[] variances() {
+
+    double[] sum = new double[numAttributes()];
+    double[] sumSquared = new double[numAttributes()];
+    double[] sumOfWeights = new double[numAttributes()];
+
+    for (int i = 0; i < numInstances(); i++) {
+      for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
+        if (attribute(attIndex).isNumeric()) {
+          if (!instance(i).isMissing(attIndex)) {
+            sum[attIndex] += instance(i).weight() * instance(i).value(attIndex);
+            sumSquared[attIndex] += instance(i).weight() * instance(i).value(attIndex)
+              * instance(i).value(attIndex);
+            sumOfWeights[attIndex] += instance(i).weight();
+          }
+        }
+      }
+    }
+
+    double[] variances = new double[numAttributes()];
+    for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
+      if (attribute(attIndex).isNumeric()) {
+        if (sumOfWeights[attIndex] > 1) {
+          double result = (sumSquared[attIndex] - (sum[attIndex] * sum[attIndex] / sumOfWeights[attIndex]))
+            / (sumOfWeights[attIndex] - 1);
+
+          // We don't like negative variance
+          if (result > 0) {
+            variances[attIndex] = result;
+          }
+        }
+      }
+    }
+    return variances;
   }
 
   /**
@@ -2328,28 +2372,28 @@ public class Instances extends AbstractList<Instance> implements Serializable,
       // wrong parameters or help
       else {
         System.err
-          .println("\nUsage:\n"
-            // help
-            + "\tweka.core.Instances help\n"
-            + "\t\tPrints this help\n"
-            // stats
-            + "\tweka.core.Instances <filename>\n"
-            + "\t\tOutputs dataset statistics\n"
-            // merge
-            + "\tweka.core.Instances merge <filename1> <filename2>\n"
-            + "\t\tMerges the datasets (must have same number of rows).\n"
-            + "\t\tGenerated dataset gets output on stdout.\n"
-            // append
-            + "\tweka.core.Instances append <filename1> <filename2>\n"
-            + "\t\tAppends the second dataset to the first (must have same number of attributes).\n"
-            + "\t\tGenerated dataset gets output on stdout.\n"
-            // headers
-            + "\tweka.core.Instances headers <filename1> <filename2>\n"
-            + "\t\tCompares the structure of the two datasets and outputs whether they\n"
-            + "\t\tdiffer or not.\n"
-            // randomize
-            + "\tweka.core.Instances randomize <seed> <filename>\n"
-            + "\t\tRandomizes the dataset and outputs it on stdout.\n");
+        .println("\nUsage:\n"
+          // help
+          + "\tweka.core.Instances help\n"
+          + "\t\tPrints this help\n"
+          // stats
+          + "\tweka.core.Instances <filename>\n"
+          + "\t\tOutputs dataset statistics\n"
+          // merge
+          + "\tweka.core.Instances merge <filename1> <filename2>\n"
+          + "\t\tMerges the datasets (must have same number of rows).\n"
+          + "\t\tGenerated dataset gets output on stdout.\n"
+          // append
+          + "\tweka.core.Instances append <filename1> <filename2>\n"
+          + "\t\tAppends the second dataset to the first (must have same number of attributes).\n"
+          + "\t\tGenerated dataset gets output on stdout.\n"
+          // headers
+          + "\tweka.core.Instances headers <filename1> <filename2>\n"
+          + "\t\tCompares the structure of the two datasets and outputs whether they\n"
+          + "\t\tdiffer or not.\n"
+          // randomize
+          + "\tweka.core.Instances randomize <seed> <filename>\n"
+          + "\t\tRandomizes the dataset and outputs it on stdout.\n");
       }
     } catch (Exception ex) {
       ex.printStackTrace();
