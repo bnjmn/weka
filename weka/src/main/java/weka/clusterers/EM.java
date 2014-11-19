@@ -867,10 +867,11 @@ public class EM extends RandomizableDensityBasedClusterer implements
           double mean = (center.isMissing(j)) ? inst.meanOrMode(j) : center
             .value(j);
           m_modelNormal[i][j][0] = mean;
-          double stdv = (stdD.instance(i).isMissing(j)) ? ((m_maxValues[j] - m_minValues[j]) / (2 * m_num_clusters))
-            : stdD.instance(i).value(j);
+          double stdv =
+            (stdD.instance(i).isMissing(j)) ? ((m_maxValues[j] - m_minValues[j]) / (2 * m_num_clusters))
+              : stdD.instance(i).value(j);
           if (stdv < minStdD) {
-            stdv = inst.attributeStats(j).numericStats.stdDev;
+            stdv = Math.sqrt(inst.variance(j));
             if (Double.isInfinite(stdv)) {
               stdv = minStdD;
             }
@@ -953,7 +954,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
           m_modelNormalPrev[i][j][0] = m_modelNormal[i][j][0];
           m_modelNormalPrev[i][j][1] = m_modelNormal[i][j][1];
           m_modelNormalPrev[i][j][2] = m_modelNormal[i][j][2];
-          m_modelNormal[i][j][0] = m_modelNormal[i][j][1] = m_modelNormal[i][j][2] = 0.0;
+          m_modelNormal[i][j][0] =
+            m_modelNormal[i][j][1] = m_modelNormal[i][j][2] = 0.0;
         }
       }
     }
@@ -1045,7 +1047,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
                 m_taskModel[i][j].addValue(in.value(j), in.weight()
                   * m_weights[l][i]);
               } else {
-                m_taskModelNormal[i][j][0] += (in.value(j) * in.weight() * m_weights[l][i]);
+                m_taskModelNormal[i][j][0] +=
+                  (in.value(j) * in.weight() * m_weights[l][i]);
                 m_taskModelNormal[i][j][2] += in.weight() * m_weights[l][i];
                 m_taskModelNormal[i][j][1] += (in.value(j) * in.value(j)
                   * in.weight() * m_weights[l][i]);
@@ -1072,9 +1075,10 @@ public class EM extends RandomizableDensityBasedClusterer implements
           } else {
 
             // variance
-            m_modelNormal[i][j][1] = (m_modelNormal[i][j][1] - (m_modelNormal[i][j][0]
-              * m_modelNormal[i][j][0] / m_modelNormal[i][j][2]))
-              / (m_modelNormal[i][j][2]);
+            m_modelNormal[i][j][1] =
+              (m_modelNormal[i][j][1] - (m_modelNormal[i][j][0]
+                * m_modelNormal[i][j][0] / m_modelNormal[i][j][2]))
+                / (m_modelNormal[i][j][2]);
 
             if (m_modelNormal[i][j][1] < 0) {
               m_modelNormal[i][j][1] = 0;
@@ -1087,7 +1091,7 @@ public class EM extends RandomizableDensityBasedClusterer implements
             m_modelNormal[i][j][1] = Math.sqrt(m_modelNormal[i][j][1]);
 
             if ((m_modelNormal[i][j][1] <= minStdD)) {
-              m_modelNormal[i][j][1] = inst.attributeStats(j).numericStats.stdDev;
+              m_modelNormal[i][j][1] = Math.sqrt(inst.variance(j));
               if ((m_modelNormal[i][j][1] <= minStdD)) {
                 m_modelNormal[i][j][1] = minStdD;
               }
@@ -1130,7 +1134,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
               m_model[i][j]
                 .addValue(in.value(j), in.weight() * m_weights[l][i]);
             } else {
-              m_modelNormal[i][j][0] += (in.value(j) * in.weight() * m_weights[l][i]);
+              m_modelNormal[i][j][0] +=
+                (in.value(j) * in.weight() * m_weights[l][i]);
               m_modelNormal[i][j][2] += in.weight() * m_weights[l][i];
               m_modelNormal[i][j][1] += (in.value(j) * in.value(j)
                 * in.weight() * m_weights[l][i]);
@@ -1389,7 +1394,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
     return temp.toString();
   }
 
-  private String pad(String source, String padChar, int length, boolean leftPad) {
+  private String
+    pad(String source, String padChar, int length, boolean leftPad) {
     StringBuffer temp = new StringBuffer();
 
     if (leftPad) {
@@ -1495,8 +1501,9 @@ public class EM extends RandomizableDensityBasedClusterer implements
     double templl, tll;
     boolean CVincreased = true;
     m_num_clusters = 1;
-    int upperBoundMaxClusters = (m_upperBoundNumClustersCV > 0) ? m_upperBoundNumClustersCV
-      : Integer.MAX_VALUE;
+    int upperBoundMaxClusters =
+      (m_upperBoundNumClustersCV > 0) ? m_upperBoundNumClustersCV
+        : Integer.MAX_VALUE;
     int num_clusters = m_num_clusters;
     int i;
     Random cvr;
@@ -1872,7 +1879,8 @@ public class EM extends RandomizableDensityBasedClusterer implements
         end = inst.numInstances();
       }
 
-      DiscreteEstimator[][] model = new DiscreteEstimator[m_num_clusters][m_num_attribs];
+      DiscreteEstimator[][] model =
+        new DiscreteEstimator[m_num_clusters][m_num_attribs];
       double[][][] normal = new double[m_num_clusters][m_num_attribs][3];
       for (int ii = 0; ii < m_num_clusters; ii++) {
         for (int j = 0; j < m_num_attribs; j++) {
