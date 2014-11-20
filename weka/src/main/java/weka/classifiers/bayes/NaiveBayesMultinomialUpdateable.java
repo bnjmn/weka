@@ -147,7 +147,8 @@ public class NaiveBayesMultinomialUpdateable extends NaiveBayesMultinomial
     m_probOfClass[classIndex] += instance.weight();
 
     for (int a = 0; a < instance.numValues(); a++) {
-      if (instance.index(a) == instance.classIndex() || instance.isMissing(a)) {
+      if (instance.index(a) == instance.classIndex()
+        || instance.isMissingSparse(a)) {
         continue;
       }
 
