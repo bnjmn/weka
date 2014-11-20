@@ -1462,22 +1462,54 @@ RevisionHandler {
    */
   public void sort(int attIndex) {
 
-    double[] vals = new double[numInstances()];
-    Instance[] backup = new Instance[vals.length];
-    for (int i = 0; i < vals.length; i++) {
-      Instance inst = instance(i);
-      backup[i] = inst;
-      double val = inst.value(attIndex);
-      if (Utils.isMissingValue(val)) {
-        vals[i] = Double.MAX_VALUE;
-      } else {
-        vals[i] = val;
-      }
-    }
+    if (attribute(attIndex).isNumeric()) {
 
-    int[] sortOrder = Utils.sortWithNoMissingValues(vals);
-    for (int i = 0; i < vals.length; i++) {
-      m_Instances.set(i, backup[sortOrder[i]]);
+      // Use quicksort from Utils class for sorting
+      double[] vals = new double[numInstances()];
+      Instance[] backup = new Instance[vals.length];
+      for (int i = 0; i < vals.length; i++) {
+        Instance inst = instance(i);
+        backup[i] = inst;
+        double val = inst.value(attIndex);
+        if (Utils.isMissingValue(val)) {
+          vals[i] = Double.MAX_VALUE;
+        } else {
+          vals[i] = val;
+        }
+      }
+
+      int[] sortOrder = Utils.sortWithNoMissingValues(vals);
+      for (int i = 0; i < vals.length; i++) {
+        m_Instances.set(i, backup[sortOrder[i]]);
+      }
+    } else {
+
+      // Figure out number of instances for each attribute value
+      // and store original list of instances away
+      int[] counts = new int[attribute(attIndex).numValues()];
+      Instance[] backup = new Instance[numInstances()];
+      int j = 0;
+      for (Instance inst : this) {
+        backup[j++] = inst;
+        if (!inst.isMissing(attIndex)) {
+          counts[(int)inst.value(attIndex)]++;
+        }
+      }
+
+      // Indices to figure out where to add instances
+      int[] indices = new int[counts.length];
+      int start = 0;
+      for (int i = 0; i < counts.length; i++) {
+        indices[i] = start;
+        start += counts[i];
+      }
+      for (Instance inst : backup) { // Use backup here
+        if (!inst.isMissing(attIndex)) {
+          m_Instances.set(indices[(int)inst.value(attIndex)]++, inst);
+        } else {
+          m_Instances.set(start++, inst);
+        }
+      }
     }
   }
 
