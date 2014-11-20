@@ -126,10 +126,13 @@ RevisionHandler {
    * @throws IOException if the ARFF file is not read successfully
    */
   public Instances(/* @non_null@ */Reader reader) throws IOException {
-    ArffReader arff = new ArffReader(reader);
-    Instances dataset = arff.getData();
-    initialize(dataset, dataset.numInstances());
-    dataset.copyInstances(0, this, dataset.numInstances());
+    ArffReader arff = new ArffReader(reader, 1000, false);
+    initialize(arff.getData(), 1000);
+    arff.setRetainStringValues(true);
+    Instance inst;
+    while ((inst = arff.readInstance(this)) != null) {
+      m_Instances.add(inst);
+    }
     compactify();
   }
 
