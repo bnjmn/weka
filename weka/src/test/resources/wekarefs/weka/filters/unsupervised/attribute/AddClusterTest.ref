@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.unsupervised.attribute.AddCluster-Wweka.clusterers.EM -I 100 -N -1 -X 10 -max -1 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -num-slots 1 -S 100'
+@relation 'FilterTest-weka.filters.unsupervised.attribute.AddCluster-Wweka.clusterers.EM -I 100 -N -1 -X 10 -max -1 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -K 10 -num-slots 1 -S 100'
 
 @attribute NominalAtt1 {r,g,b}
 @attribute NumericAtt1 numeric

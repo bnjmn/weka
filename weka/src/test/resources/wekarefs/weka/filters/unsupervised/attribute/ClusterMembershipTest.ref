@@ -1,4 +1,4 @@
-@relation FilterTest_clusterMembership-weka.filters.unsupervised.attribute.ClusterMembership-Wweka.clusterers.EM---I100-N-1-X10-max-1-ll-cv1.0E-6-ll-iter1.0E-6-M1.0E-6-num-slots1-S100
+@relation FilterTest_clusterMembership-weka.filters.unsupervised.attribute.ClusterMembership-Wweka.clusterers.EM---I100-N-1-X10-max-1-ll-cv1.0E-6-ll-iter1.0E-6-M1.0E-6-K10-num-slots1-S100
 
 @attribute pCluster_0_0 numeric
 @attribute NumericAtt1 numeric
