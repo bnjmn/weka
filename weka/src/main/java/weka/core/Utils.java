@@ -91,7 +91,7 @@ public final class Utils implements RevisionHandler {
   public static <T> T cast(Object x) {
     return (T) x;
   }
-
+  
   /**
    * Reads properties that inherit from three locations. Properties are first
    * defined in the system resource location (i.e. in the CLASSPATH). These

@@ -79,7 +79,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class Resample extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+OptionHandler {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
@@ -132,9 +132,9 @@ public class Resample extends Filter implements UnsupervisedFilter,
         + "\tthe input dataset (default 100)", "Z", 1, "-Z <num>"));
 
     result
-      .addElement(new Option("\tDisables replacement of instances\n"
-        + "\t(default: with replacement)", "no-replacement", 0,
-        "-no-replacement"));
+    .addElement(new Option("\tDisables replacement of instances\n"
+      + "\t(default: with replacement)", "no-replacement", 0,
+      "-no-replacement"));
 
     result.addElement(new Option(
       "\tInverts the selection - only available with '-no-replacement'.", "V",
@@ -446,22 +446,48 @@ public class Resample extends Filter implements UnsupervisedFilter,
    * instances are pushed onto the output queue for collection.
    */
   protected void createSubsample() {
-    
+
     Instances data = getInputFormat();
     int numEligible = data.numInstances();
     int sampleSize = (int) (numEligible * m_SampleSizePercent / 100);
     Random random = new Random(m_RandomSeed);
-    for (int i = 0; i < sampleSize; i++) {
-      if (getNoReplacement()) {
-        
+
+    if (getNoReplacement()) {
+
+      // Set up array of indices
+      int[] selected = new int[numEligible];
+      for (int j = 0; j < numEligible; j++) {
+        selected[j] = j;
+      }
+      for (int i = 0; i < sampleSize; i++) {
+
         // Sampling without replacement
         int chosenLocation = random.nextInt(numEligible);
-        push(data.instance(chosenLocation));
+        int chosen = selected[chosenLocation];
         numEligible--;
-        data.swap(chosenLocation, numEligible);
+        selected[chosenLocation] = selected[numEligible];
+        selected[numEligible] = chosen;
+      }
+
+      // Do we need to invert the selection?
+      if (getInvertSelection()) {
+
+        // Take the first numEligible instances
+        // because they have not been selected
+        for (int j = 0; j < numEligible; j++) {
+          push(data.instance(selected[j]));
+        }
       } else {
-        
-        // Sampling with replacement
+
+        // Take the elements that have been selected
+        for (int j = numEligible; j < data.numInstances(); j++) {
+          push(data.instance(selected[j]));
+        }
+      }
+    } else {
+
+      // Sampling with replacement
+      for (int i = 0; i < sampleSize; i++) {
         push(data.instance(random.nextInt(numEligible)));
       }
     }

@@ -550,7 +550,7 @@ public class Resample extends Filter implements SupervisedFilter, OptionHandler 
       if (numInstancesPerClass[i] == 0) {
         continue;
       }
-      
+
       // Blend observed prior and uniform prior based on user-defined blending parameter
       int sampleSize = (int)((m_SampleSizePercent / 100.0) * ((1 - m_BiasToUniformClass) * numInstancesPerClass[i] +
         m_BiasToUniformClass * data.numInstances() / numActualClasses));
@@ -564,20 +564,47 @@ public class Resample extends Filter implements SupervisedFilter, OptionHandler 
 
     // Sample data
     Random random = new Random(m_RandomSeed);
-    for (int i = 0; i < data.numClasses(); i++) {
-      int numEligible = (int)numInstancesPerClass[i];
-      for (int j = 0; j < numInstancesToSample[i]; j++) {
-        if (!getNoReplacement()) {
-
+    if (!getNoReplacement()) {
+      for (int i = 0; i < data.numClasses(); i++) {
+        int numEligible = (int)numInstancesPerClass[i];
+        for (int j = 0; j < numInstancesToSample[i]; j++) {
           // Sampling with replacement
           push(instancesPerClass[i][random.nextInt(numEligible)]);
-        } else {
+        }
+      }
+    } else {
+      for (int i = 0; i < data.numClasses(); i++) {
+        int numEligible = (int)numInstancesPerClass[i];
+        
+        // Set up array of indices
+        int[] selected = new int[numEligible];
+        for (int j = 0; j < numEligible; j++) {
+          selected[j] = j;
+        }
+        for (int j = 0; j < numInstancesToSample[i]; j++) {
 
           // Sampling without replacement
           int chosenLocation = random.nextInt(numEligible);
-          push(instancesPerClass[i][chosenLocation]);
+          int chosen = selected[chosenLocation];
           numEligible--;
-          instancesPerClass[i][chosenLocation] = instancesPerClass[i][numEligible];
+          selected[chosenLocation] = selected[numEligible];
+          selected[numEligible] = chosen;
+        }
+
+        // Do we need to invert the selection?
+        if (getInvertSelection()) {
+
+          // Take the first numEligible instances
+          // because they have not been selected
+          for (int j = 0; j < numEligible; j++) {
+            push(instancesPerClass[i][selected[j]]);
+          }
+        } else {
+
+          // Take the elements that have been selected
+          for (int j = numEligible; j < (int)numInstancesPerClass[i]; j++) {
+            push(instancesPerClass[i][selected[j]]);
+          }
         }
       }
     }
