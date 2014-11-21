@@ -85,6 +85,7 @@ import weka.filters.SupervisedFilter;
  * 
  * @author Len Trigg (len@reeltwo.com)
  * @author FracPete (fracpete at waikato dot ac dot nz)
+ * @author Eibe Frank
  * @version $Revision$
  */
 public class Resample extends Filter implements SupervisedFilter, OptionHandler {
@@ -153,9 +154,9 @@ public class Resample extends Filter implements SupervisedFilter, OptionHandler 
         + "\t(default 0)", "B", 1, "-B <num>"));
 
     result
-      .addElement(new Option("\tDisables replacement of instances\n"
-        + "\t(default: with replacement)", "no-replacement", 0,
-        "-no-replacement"));
+    .addElement(new Option("\tDisables replacement of instances\n"
+      + "\t(default: with replacement)", "no-replacement", 0,
+      "-no-replacement"));
 
     result.addElement(new Option(
       "\tInverts the selection - only available with '-no-replacement'.", "V",
@@ -513,185 +514,72 @@ public class Resample extends Filter implements SupervisedFilter, OptionHandler 
   }
 
   /**
-   * creates the subsample with replacement.
-   * 
-   * @param random the random number generator to use
-   * @param origSize the original size of the dataset
-   * @param sampleSize the size to generate
-   * @param actualClasses the number of classes found in the data
-   * @param classIndices the indices where classes start
-   */
-  public void createSubsampleWithReplacement(Random random, int origSize,
-    int sampleSize, int actualClasses, int[] classIndices) {
-
-    for (int i = 0; i < sampleSize; i++) {
-      int index = 0;
-      if (random.nextDouble() < m_BiasToUniformClass) {
-        // Pick a random class (of those classes that actually appear)
-        int cIndex = random.nextInt(actualClasses);
-        for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
-          if ((classIndices[j] != classIndices[j + 1]) && (k++ >= cIndex)) {
-            // Pick a random instance of the designated class
-            index = classIndices[j]
-              + random.nextInt(classIndices[j + 1] - classIndices[j]);
-            break;
-          }
-        }
-      } else {
-        index = random.nextInt(origSize);
-      }
-      push((Instance) getInputFormat().instance(index).copy());
-    }
-  }
-
-  /**
-   * creates the subsample without replacement.
-   * 
-   * @param random the random number generator to use
-   * @param origSize the original size of the dataset
-   * @param sampleSize the size to generate
-   * @param actualClasses the number of classes found in the data
-   * @param classIndices the indices where classes start
-   */
-  public void createSubsampleWithoutReplacement(Random random, int origSize,
-    int sampleSize, int actualClasses, int[] classIndices) {
-
-    if (sampleSize > origSize) {
-      sampleSize = origSize;
-      System.err
-        .println("Resampling without replacement can only use percentage <=100% - "
-          + "Using full dataset!");
-    }
-
-    @SuppressWarnings("unchecked")
-    Vector<Integer>[] indices = new Vector[classIndices.length - 1];
-    @SuppressWarnings("unchecked")
-    Vector<Integer>[] indicesNew = new Vector[classIndices.length - 1];
-
-    // generate list of all indices to draw from
-    for (int i = 0; i < classIndices.length - 1; i++) {
-      indices[i] = new Vector<Integer>(classIndices[i + 1] - classIndices[i]);
-      indicesNew[i] = new Vector<Integer>(indices[i].capacity());
-      for (int n = classIndices[i]; n < classIndices[i + 1]; n++) {
-        indices[i].add(n);
-      }
-    }
-
-    // draw X samples
-    int currentSize = origSize;
-    for (int i = 0; i < sampleSize; i++) {
-      int index = 0;
-      if (random.nextDouble() < m_BiasToUniformClass) {
-        // Pick a random class (of those classes that actually appear)
-        int cIndex = random.nextInt(actualClasses);
-        for (int j = 0, k = 0; j < classIndices.length - 1; j++) {
-          if ((classIndices[j] != classIndices[j + 1]) && (k++ >= cIndex)) {
-            // no more indices for this class left, try again
-            if (indices[j].size() == 0) {
-              i--;
-              break;
-            }
-            // Pick a random instance of the designated class
-            index = random.nextInt(indices[j].size());
-            indicesNew[j].add(indices[j].get(index));
-            indices[j].remove(index);
-            break;
-          }
-        }
-      } else {
-        index = random.nextInt(currentSize);
-        for (int n = 0; n < actualClasses; n++) {
-          if (index < indices[n].size()) {
-            indicesNew[n].add(indices[n].get(index));
-            indices[n].remove(index);
-            break;
-          } else {
-            index -= indices[n].size();
-          }
-        }
-        currentSize--;
-      }
-    }
-
-    // sort indices
-    if (getInvertSelection()) {
-      indicesNew = indices;
-    } else {
-      for (Vector<Integer> element : indicesNew) {
-        Collections.sort(element);
-      }
-    }
-
-    // add to ouput
-    for (Vector<Integer> element : indicesNew) {
-      for (int n = 0; n < element.size(); n++) {
-        push((Instance) getInputFormat().instance(element.get(n)).copy());
-      }
-    }
-
-    // clean up
-    for (int i = 0; i < indices.length; i++) {
-      indices[i].clear();
-      indicesNew[i].clear();
-    }
-    indices = null;
-    indicesNew = null;
-  }
-
-  /**
    * Creates a subsample of the current set of input instances. The output
    * instances are pushed onto the output queue for collection.
    */
   protected void createSubsample() {
-    int origSize = getInputFormat().numInstances();
-    int sampleSize = (int) (origSize * m_SampleSizePercent / 100);
 
-    // Subsample that takes class distribution into consideration
+    Instances data = getInputFormat();
 
-    // Sort according to class attribute.
-    getInputFormat().sort(getInputFormat().classIndex());
-
-    // Create an index of where each class value starts
-    int[] classIndices = new int[getInputFormat().numClasses() + 1];
-    int currentClass = 0;
-    classIndices[currentClass] = 0;
-    for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      Instance current = getInputFormat().instance(i);
-      if (current.classIsMissing()) {
-        for (int j = currentClass + 1; j < classIndices.length; j++) {
-          classIndices[j] = i;
-        }
-        break;
-      } else if (current.classValue() != currentClass) {
-        for (int j = currentClass + 1; j <= current.classValue(); j++) {
-          classIndices[j] = i;
-        }
-        currentClass = (int) current.classValue();
-      }
-    }
-    if (currentClass <= getInputFormat().numClasses()) {
-      for (int j = currentClass + 1; j < classIndices.length; j++) {
-        classIndices[j] = getInputFormat().numInstances();
-      }
+    // Figure out how much data there is per class
+    double[] numInstancesPerClass = new double[data.numClasses()];
+    for (Instance instance : data) {
+      numInstancesPerClass[(int)instance.classValue()]++;
     }
 
-    int actualClasses = 0;
-    for (int i = 0; i < classIndices.length - 1; i++) {
-      if (classIndices[i] != classIndices[i + 1]) {
-        actualClasses++;
+    // Collect data per class
+    Instance[][] instancesPerClass = new Instance[data.numClasses()][];
+    int numActualClasses = 0;
+    for (int i = 0; i < data.numClasses(); i++) {
+      instancesPerClass[i] = new Instance[(int)numInstancesPerClass[i]];
+      if (numInstancesPerClass[i] > 0) {
+        numActualClasses++;
       }
     }
+    int[] counterPerClass = new int[data.numClasses()];
+    for (Instance instance : data) {
+      int classValue = (int)instance.classValue();
+      instancesPerClass[classValue][counterPerClass[classValue]++] = instance;
+    }
 
-    // Create the new sample
+    // Determine how much data we want for each class
+    int[] numInstancesToSample = new int[data.numClasses()];
+    for (int i = 0; i < data.numClasses(); i++) {
+
+      // Can't sample any data if there is no data for the class
+      if (numInstancesPerClass[i] == 0) {
+        continue;
+      }
+      
+      // Blend observed prior and uniform prior based on user-defined blending parameter
+      int sampleSize = (int)((m_SampleSizePercent / 100.0) * ((1 - m_BiasToUniformClass) * numInstancesPerClass[i] +
+        m_BiasToUniformClass * data.numInstances() / numActualClasses));
+      if (getNoReplacement() && sampleSize > numInstancesPerClass[i]) {
+        System.err.println("WARNING: Not enough instances of " + data.classAttribute().value(i) + 
+          " for selected value of bias parameter in supervised Resample filter when sampling without replacement.");
+        sampleSize = (int)numInstancesPerClass[i];
+      }
+      numInstancesToSample[i] = (int)sampleSize;
+    }
+
+    // Sample data
     Random random = new Random(m_RandomSeed);
+    for (int i = 0; i < data.numClasses(); i++) {
+      int numEligible = (int)numInstancesPerClass[i];
+      for (int j = 0; j < numInstancesToSample[i]; j++) {
+        if (!getNoReplacement()) {
 
-    // Convert pending input instances
-    if (getNoReplacement()) {
-      createSubsampleWithoutReplacement(random, origSize, sampleSize,
-        actualClasses, classIndices);
-    } else {
-      createSubsampleWithReplacement(random, origSize, sampleSize,
-        actualClasses, classIndices);
+          // Sampling with replacement
+          push(instancesPerClass[i][random.nextInt(numEligible)]);
+        } else {
+
+          // Sampling without replacement
+          int chosenLocation = random.nextInt(numEligible);
+          push(instancesPerClass[i][chosenLocation]);
+          numEligible--;
+          instancesPerClass[i][chosenLocation] = instancesPerClass[i][numEligible];
+        }
+      }
     }
   }
 
