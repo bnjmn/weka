@@ -21,6 +21,7 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
@@ -40,7 +41,10 @@ import weka.core.Utils;
  */
 public class UnivariateEqualFrequencyHistogramEstimator implements
   UnivariateDensityEstimator, UnivariateIntervalEstimator,
-  UnivariateQuantileEstimator {
+  UnivariateQuantileEstimator, Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -3180287591539683137L;
 
   /** The collection used to store the weighted values. */
   protected TreeMap<Double, Double> m_TM = new TreeMap<Double, Double>();

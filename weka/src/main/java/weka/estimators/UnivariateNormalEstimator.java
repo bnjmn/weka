@@ -21,6 +21,7 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.Random;
 
 import weka.core.Statistics;
@@ -33,7 +34,11 @@ import weka.core.Statistics;
  */
 public class UnivariateNormalEstimator implements UnivariateDensityEstimator,
                                                   UnivariateIntervalEstimator,
-                                                  UnivariateQuantileEstimator {
+                                                  UnivariateQuantileEstimator,
+                                                  Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -1669009817825826548L;
 
   /** The weighted sum of values */
   protected double m_WeightedSum = 0;

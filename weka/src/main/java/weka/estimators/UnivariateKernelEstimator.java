@@ -21,6 +21,7 @@
 
 package weka.estimators;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
@@ -38,7 +39,10 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
-  UnivariateIntervalEstimator, UnivariateQuantileEstimator {
+  UnivariateIntervalEstimator, UnivariateQuantileEstimator, Serializable {
+
+  /** For serialization */
+  private static final long serialVersionUID = -1163983347810498880L;
 
   /** The collection used to store the weighted values. */
   protected TreeMap<Double, Double> m_TM = new TreeMap<Double, Double>();
