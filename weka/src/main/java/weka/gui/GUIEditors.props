@@ -36,6 +36,10 @@ weka.core.tokenizers.Tokenizer=weka.gui.GenericObjectEditor
 weka.estimators.Estimator=weka.gui.GenericObjectEditor
 weka.estimators.Estimator[]=weka.gui.GenericArrayEditor
 
+# univariate estimators
+weka.estimators.UnivariateDensityEstimator=weka.gui.GenericObjectEditor
+weka.estimators.UnivariateDensityEstimator[]=weka.gui.GenericArrayEditor
+
 # filters
 weka.filters.Filter=weka.gui.GenericObjectEditor
 weka.filters.Filter[]=weka.gui.GenericArrayEditor
