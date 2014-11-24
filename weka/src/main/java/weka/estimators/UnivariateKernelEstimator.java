@@ -29,6 +29,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.TreeMap;
 
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 
@@ -74,6 +75,12 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
   /** The number of intervals used to approximate prediction interval. */
   protected int m_NumIntervals = 1000;
 
+  /**
+   * Returns a string describing the estimator.
+   */
+  public String globalInfo() {
+    return "Provides a univariate kernel estimator.";
+  }
   /**
    * Adds a value to the density estimator.
    * 
@@ -332,6 +339,16 @@ public class UnivariateKernelEstimator implements UnivariateDensityEstimator,
 
     return "Kernel estimator with bandwidth " + m_Width + " and total weight "
       + m_SumOfWeights + " based on\n" + m_TM.toString();
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision$");
   }
 
   /**

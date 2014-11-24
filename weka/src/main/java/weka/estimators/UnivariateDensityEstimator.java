@@ -21,6 +21,8 @@
 
 package weka.estimators;
 
+import weka.core.RevisionHandler;
+
 /**
  * Interface that can be implemented by simple weighted univariate
  * density estimators.
@@ -28,7 +30,7 @@ package weka.estimators;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public interface UnivariateDensityEstimator {
+public interface UnivariateDensityEstimator extends RevisionHandler {
 
   /**
    * Adds a value to the density estimator.

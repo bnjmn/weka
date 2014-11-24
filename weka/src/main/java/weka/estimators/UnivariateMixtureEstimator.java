@@ -32,6 +32,7 @@ import weka.core.Instances;
 import weka.core.DenseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
 import weka.clusterers.EM;
@@ -89,6 +90,13 @@ Serializable {
   protected double m_SumOfWeights = 0;
 
   /**
+   * Returns a string describing the estimator.
+   */
+  public String globalInfo() {
+    return "Estimates a univariate mixture model.";
+  }
+  
+  /**
    * The tool tip for this property.
    */
   public String numComponentsToolTipText() {
@@ -114,7 +122,7 @@ Serializable {
   }
 
   /**
-   * Constructs the intial estimator
+   * Constructs the initial estimator
    */
   public UnivariateMixtureEstimator() {
 
@@ -369,6 +377,16 @@ Serializable {
     options.add("" + getNumComponents());
 
     return options.toArray(new String[0]);
+  }
+
+  /**
+   * Returns the revision string.
+   * 
+   * @return the revision
+   */
+  @Override
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 10971 $");
   }
 
   /**
