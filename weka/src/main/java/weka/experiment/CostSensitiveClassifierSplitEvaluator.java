@@ -49,22 +49,22 @@ import weka.core.Utils;
  * misclassification costs.
  * <p/>
  * <!-- globalinfo-end -->
- * 
+ *
  * <!-- options-start --> Valid options are:
  * <p/>
- * 
+ *
  * <pre>
  * -W &lt;class name&gt;
  *  The full class name of the classifier.
  *  eg: weka.classifiers.bayes.NaiveBayes
  * </pre>
- * 
+ *
  * <pre>
  * -C &lt;index&gt;
  *  The index of the class for which IR statistics
  *  are to be output. (default 1)
  * </pre>
- * 
+ *
  * <pre>
  * -I &lt;index&gt;
  *  The index of an attribute to output in the
@@ -73,33 +73,33 @@ import weka.core.Utils;
  *  in the test set of a cross validation. if 0
  *  no output (default 0).
  * </pre>
- * 
+ *
  * <pre>
  * -P
  *  Add target and prediction columns to the result
  *  for each fold.
  * </pre>
- * 
+ *
  * <pre>
  * Options specific to classifier weka.classifiers.rules.ZeroR:
  * </pre>
- * 
+ *
  * <pre>
  * -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console
  * </pre>
- * 
+ *
  * <pre>
  * -D &lt;directory&gt;
  *  Name of a directory to search for cost files when loading
  *  costs on demand (default current directory).
  * </pre>
- * 
+ *
  * <!-- options-end -->
- * 
+ *
  * All options after -- will be passed to the classifier.
- * 
+ *
  * @author Len Trigg (len@reeltwo.com)
  * @version $Revision$
  */
@@ -116,11 +116,11 @@ public class CostSensitiveClassifierSplitEvaluator extends
   protected File m_OnDemandDirectory = new File(System.getProperty("user.dir"));
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 31;
+  private static final int RESULT_SIZE = 33;
 
   /**
    * Returns a string describing this split evaluator
-   * 
+   *
    * @return a description of the split evaluator suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -133,7 +133,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
 
   /**
    * Returns an enumeration describing the available options..
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -154,22 +154,22 @@ public class CostSensitiveClassifierSplitEvaluator extends
   /**
    * Parses a given list of options.
    * <p/>
-   * 
+   *
    * <!-- options-start --> Valid options are:
    * <p/>
-   * 
+   *
    * <pre>
    * -W &lt;class name&gt;
    *  The full class name of the classifier.
    *  eg: weka.classifiers.bayes.NaiveBayes
    * </pre>
-   * 
+   *
    * <pre>
    * -C &lt;index&gt;
    *  The index of the class for which IR statistics
    *  are to be output. (default 1)
    * </pre>
-   * 
+   *
    * <pre>
    * -I &lt;index&gt;
    *  The index of an attribute to output in the
@@ -178,33 +178,33 @@ public class CostSensitiveClassifierSplitEvaluator extends
    *  in the test set of a cross validation. if 0
    *  no output (default 0).
    * </pre>
-   * 
+   *
    * <pre>
    * -P
    *  Add target and prediction columns to the result
    *  for each fold.
    * </pre>
-   * 
+   *
    * <pre>
    * Options specific to classifier weka.classifiers.rules.ZeroR:
    * </pre>
-   * 
+   *
    * <pre>
    * -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console
    * </pre>
-   * 
+   *
    * <pre>
    * -D &lt;directory&gt;
    *  Name of a directory to search for cost files when loading
    *  costs on demand (default current directory).
    * </pre>
-   * 
+   *
    * <!-- options-end -->
-   * 
+   *
    * All options after -- will be passed to the classifier.
-   * 
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -223,7 +223,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
 
   /**
    * Gets the current settings of the Classifier.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -241,7 +241,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -253,7 +253,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
   /**
    * Returns the directory that will be searched for cost files when loading on
    * demand.
-   * 
+   *
    * @return The cost file search directory.
    */
   public File getOnDemandDirectory() {
@@ -264,7 +264,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
   /**
    * Sets the directory that will be searched for cost files when loading on
    * demand.
-   * 
+   *
    * @param newDir The cost file search directory.
    */
   public void setOnDemandDirectory(File newDir) {
@@ -280,7 +280,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
    * Gets the data types of each of the result columns produced for a single
    * run. The number of result fields must be constant for a given
    * SplitEvaluator.
-   * 
+   *
    * @return an array containing objects of the type of each result column. The
    *         objects should be Strings, or Doubles.
    */
@@ -323,6 +323,8 @@ public class CostSensitiveClassifierSplitEvaluator extends
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // sizes
     resultTypes[current++] = doub;
@@ -344,7 +346,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
   /**
    * Gets the names of each of the result columns produced for a single run. The
    * number of result fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing the name of each result column
    */
   @Override
@@ -389,6 +391,8 @@ public class CostSensitiveClassifierSplitEvaluator extends
     resultNames[current++] = "Elapsed_Time_testing";
     resultNames[current++] = "UserCPU_Time_training";
     resultNames[current++] = "UserCPU_Time_testing";
+    resultNames[current++] = "UserCPU_Time_millis_training";
+    resultNames[current++] = "UserCPU_Time_millis_testing";
 
     // sizes
     resultNames[current++] = "Serialized_Model_Size";
@@ -411,7 +415,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
    * Gets the results for the supplied train and test datasets. Now performs a
    * deep copy of the classifier before it is built and evaluated (just in case
    * the classifier is not initialized properly in buildClassifier()).
-   * 
+   *
    * @param train the training Instances.
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in the array may
@@ -506,9 +510,16 @@ public class CostSensitiveClassifierSplitEvaluator extends
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
     if (canMeasureCPUTime) {
-      result[current++] = new Double((trainCPUTimeElapsed / 1000000.0) / 1000.0);
+      result[current++] =
+        new Double((trainCPUTimeElapsed / 1000000.0) / 1000.0);
       result[current++] = new Double((testCPUTimeElapsed / 1000000.0) / 1000.0);
+
+      result[current++] =
+        new Double(trainCPUTimeElapsed / 1000000.0);
+      result[current++] = new Double(testCPUTimeElapsed / 1000000.0);
     } else {
+      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Utils.missingValue());
       result[current++] = new Double(Utils.missingValue());
       result[current++] = new Double(Utils.missingValue());
     }
@@ -555,12 +566,15 @@ public class CostSensitiveClassifierSplitEvaluator extends
     if (current != RESULT_SIZE + addm) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
+
+    m_Evaluation = eval;
+
     return result;
   }
 
   /**
    * Returns a text description of the split evaluator.
-   * 
+   *
    * @return a text description of the split evaluator.
    */
   @Override
@@ -576,7 +590,7 @@ public class CostSensitiveClassifierSplitEvaluator extends
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override

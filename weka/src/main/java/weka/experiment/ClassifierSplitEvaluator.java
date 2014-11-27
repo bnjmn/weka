@@ -54,22 +54,22 @@ import weka.core.Utils;
  * classification scheme on a nominal class attribute.
  * <p/>
  * <!-- globalinfo-end -->
- * 
+ *
  * <!-- options-start --> Valid options are:
  * <p/>
- * 
+ *
  * <pre>
  * -W &lt;class name&gt;
  *  The full class name of the classifier.
  *  eg: weka.classifiers.bayes.NaiveBayes
  * </pre>
- * 
+ *
  * <pre>
  * -C &lt;index&gt;
  *  The index of the class for which IR statistics
  *  are to be output. (default 1)
  * </pre>
- * 
+ *
  * <pre>
  * -I &lt;index&gt;
  *  The index of an attribute to output in the
@@ -78,33 +78,33 @@ import weka.core.Utils;
  *  in the test set of a cross validation. if 0
  *  no output (default 0).
  * </pre>
- * 
+ *
  * <pre>
  * -P
  *  Add target and prediction columns to the result
  *  for each fold.
  * </pre>
- * 
+ *
  * <pre>
  * -no-size
  *  Skips the determination of sizes (train/test/classifier)
  *  (default: sizes are determined)
  * </pre>
- * 
+ *
  * <pre>
  * Options specific to classifier weka.classifiers.rules.ZeroR:
  * </pre>
- * 
+ *
  * <pre>
  * -D
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console
  * </pre>
- * 
+ *
  * <!-- options-end -->
- * 
+ *
  * All options after -- will be passed to the classifier.
- * 
+ *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
@@ -119,6 +119,9 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /** The classifier used for evaluation */
   protected Classifier m_Classifier;
+
+  /** Holds the most recently used Evaluation object */
+  protected Evaluation m_Evaluation;
 
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String[] m_AdditionalMeasures = null;
@@ -150,7 +153,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   private static final int KEY_SIZE = 3;
 
   /** The length of a result */
-  private static final int RESULT_SIZE = 30;
+  private static final int RESULT_SIZE = 32;
 
   /** The number of IR statistics */
   private static final int NUM_IR_STATISTICS = 16;
@@ -173,7 +176,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /** whether to skip determination of sizes (train/test/classifier). */
   private boolean m_NoSizeDetermination;
 
-  protected final List<AbstractEvaluationMetric> m_pluginMetrics = new ArrayList<AbstractEvaluationMetric>();
+  protected final List<AbstractEvaluationMetric> m_pluginMetrics =
+    new ArrayList<AbstractEvaluationMetric>();
   protected int m_numPluginStatistics = 0;
 
   /**
@@ -198,7 +202,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns a string describing this split evaluator
-   * 
+   *
    * @return a description of the split evaluator suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -209,7 +213,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns an enumeration describing the available options..
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -250,22 +254,22 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Parses a given list of options.
    * <p/>
-   * 
+   *
    * <!-- options-start --> Valid options are:
    * <p/>
-   * 
+   *
    * <pre>
    * -W &lt;class name&gt;
    *  The full class name of the classifier.
    *  eg: weka.classifiers.bayes.NaiveBayes
    * </pre>
-   * 
+   *
    * <pre>
    * -C &lt;index&gt;
    *  The index of the class for which IR statistics
    *  are to be output. (default 1)
    * </pre>
-   * 
+   *
    * <pre>
    * -I &lt;index&gt;
    *  The index of an attribute to output in the
@@ -274,33 +278,33 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    *  in the test set of a cross validation. if 0
    *  no output (default 0).
    * </pre>
-   * 
+   *
    * <pre>
    * -P
    *  Add target and prediction columns to the result
    *  for each fold.
    * </pre>
-   * 
+   *
    * <pre>
    * -no-size
    *  Skips the determination of sizes (train/test/classifier)
    *  (default: sizes are determined)
    * </pre>
-   * 
+   *
    * <pre>
    * Options specific to classifier weka.classifiers.rules.ZeroR:
    * </pre>
-   * 
+   *
    * <pre>
    * -D
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console
    * </pre>
-   * 
+   *
    * <!-- options-end -->
-   * 
+   *
    * All options after -- will be passed to the classifier.
-   * 
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -342,7 +346,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Gets the current settings of the Classifier.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -386,7 +390,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * Classifiers. This could contain many measures (of which only a subset may
    * be produceable by the current Classifier) if an experiment is the type that
    * iterates over a set of properties.
-   * 
+   *
    * @param additionalMeasures a list of method names
    */
   @Override
@@ -419,7 +423,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Returns an enumeration of any additional measure names that might be in the
    * classifier
-   * 
+   *
    * @return an enumeration of the measure names
    */
   @Override
@@ -438,7 +442,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns the value of the named measure
-   * 
+   *
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @throws IllegalArgumentException if the named measure is not supported
@@ -464,7 +468,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Gets the data types of each of the key columns produced for a single run.
    * The number of key fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing objects of the type of each key column. The
    *         objects should be Strings, or Doubles.
    */
@@ -481,7 +485,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Gets the names of each of the key columns produced for a single run. The
    * number of key fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing the name of each key column
    */
   @Override
@@ -499,7 +503,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * contain the name of the classifier used for classifier predictive
    * evaluation. The number of key fields must be constant for a given
    * SplitEvaluator.
-   * 
+   *
    * @return an array of objects containing the key.
    */
   @Override
@@ -516,7 +520,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * Gets the data types of each of the result columns produced for a single
    * run. The number of result fields must be constant for a given
    * SplitEvaluator.
-   * 
+   *
    * @return an array containing objects of the type of each result column. The
    *         objects should be Strings, or Doubles.
    */
@@ -604,6 +608,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
     resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
+    resultTypes[current++] = doub;
 
     // sizes
     resultTypes[current++] = doub;
@@ -645,7 +651,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Gets the names of each of the result columns produced for a single run. The
    * number of result fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing the name of each result column
    */
   @Override
@@ -734,6 +740,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     resultNames[current++] = "Elapsed_Time_testing";
     resultNames[current++] = "UserCPU_Time_training";
     resultNames[current++] = "UserCPU_Time_testing";
+    resultNames[current++] = "UserCPU_Time_millis_training";
+    resultNames[current++] = "UserCPU_Time_millis_testing";
 
     // sizes
     resultNames[current++] = "Serialized_Model_Size";
@@ -777,7 +785,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
    * Gets the results for the supplied train and test datasets. Now performs a
    * deep copy of the classifier before it is built and evaluated (just in case
    * the classifier is not initialized properly in buildClassifier()).
-   * 
+   *
    * @param train the training Instances.
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in the array may
@@ -911,9 +919,16 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     result[current++] = new Double(trainTimeElapsed / 1000.0);
     result[current++] = new Double(testTimeElapsed / 1000.0);
     if (canMeasureCPUTime) {
-      result[current++] = new Double((trainCPUTimeElapsed / 1000000.0) / 1000.0);
+      result[current++] =
+        new Double((trainCPUTimeElapsed / 1000000.0) / 1000.0);
       result[current++] = new Double((testCPUTimeElapsed / 1000000.0) / 1000.0);
+
+      result[current++] =
+        new Double(trainCPUTimeElapsed / 1000000.0);
+      result[current++] = new Double(testCPUTimeElapsed / 1000000.0);
     } else {
+      result[current++] = new Double(Utils.missingValue());
+      result[current++] = new Double(Utils.missingValue());
       result[current++] = new Double(Utils.missingValue());
       result[current++] = new Double(Utils.missingValue());
     }
@@ -939,7 +954,8 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     }
 
     // Prediction interval statistics
-    result[current++] = new Double(eval.coverageOfTestCasesByPredictedRegions());
+    result[current++] =
+      new Double(eval.coverageOfTestCasesByPredictedRegions());
     result[current++] = new Double(eval.sizeOfPredictedRegions());
 
     // IDs
@@ -1051,12 +1067,15 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
     if (current != overall_length) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
+
+    m_Evaluation = eval;
+
     return result;
   }
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1066,7 +1085,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Get the value of Classifier.
-   * 
+   *
    * @return Value of Classifier.
    */
   public Classifier getClassifier() {
@@ -1076,7 +1095,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Sets the classifier.
-   * 
+   *
    * @param newClassifier the new classifier to use.
    */
   public void setClassifier(Classifier newClassifier) {
@@ -1087,7 +1106,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Get the value of ClassForIRStatistics.
-   * 
+   *
    * @return Value of ClassForIRStatistics.
    */
   public int getClassForIRStatistics() {
@@ -1096,7 +1115,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Set the value of ClassForIRStatistics.
-   * 
+   *
    * @param v Value to assign to ClassForIRStatistics.
    */
   public void setClassForIRStatistics(int v) {
@@ -1105,7 +1124,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Get the index of Attibute Identifying the instances
-   * 
+   *
    * @return index of outputed Attribute.
    */
   public int getAttributeID() {
@@ -1114,7 +1133,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Set the index of Attibute Identifying the instances
-   * 
+   *
    * @param v index the attribute to output
    */
   public void setAttributeID(int v) {
@@ -1130,7 +1149,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Set the flag for prediction and target output.
-   * 
+   *
    * @param v true if the 2 columns have to be outputed. false otherwise.
    */
   public void setPredTargetColumn(boolean v) {
@@ -1139,7 +1158,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns whether the size determination (train/test/classifer) is skipped.
-   * 
+   *
    * @return true if size determination skipped
    */
   public boolean getNoSizeDetermination() {
@@ -1148,7 +1167,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Sets whether the size determination (train/test/classifer) is skipped.
-   * 
+   *
    * @param value true if to determine sizes
    */
   public void setNoSizeDetermination(boolean value) {
@@ -1157,7 +1176,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1187,7 +1206,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
   /**
    * Set the Classifier to use, given it's class name. A new classifier will be
    * instantiated.
-   * 
+   *
    * @param newClassifierName the Classifier class name.
    * @throws Exception if the class name is invalid.
    */
@@ -1203,7 +1222,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Gets the raw output from the classifier
-   * 
+   *
    * @return the raw output from th,0e classifier
    */
   @Override
@@ -1244,7 +1263,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns a text description of the split evaluator.
-   * 
+   *
    * @return a text description of the split evaluator.
    */
   @Override
@@ -1260,7 +1279,7 @@ public class ClassifierSplitEvaluator implements SplitEvaluator, OptionHandler,
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override

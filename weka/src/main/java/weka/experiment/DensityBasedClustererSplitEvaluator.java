@@ -49,65 +49,65 @@ import weka.filters.unsupervised.attribute.Remove;
  * density based clusterer.
  * <p/>
  * <!-- globalinfo-end -->
- * 
+ *
  * <!-- options-start --> Valid options are:
  * <p/>
- * 
+ *
  * <pre>
  * -no-size
  *  Skips the determination of sizes (train/test/clusterer)
  *  (default: sizes are determined)
  * </pre>
- * 
+ *
  * <pre>
  * -W &lt;class name&gt;
  *  The full class name of the density based clusterer.
  *  eg: weka.clusterers.EM
  * </pre>
- * 
+ *
  * <pre>
  * Options specific to clusterer weka.clusterers.EM:
  * </pre>
- * 
+ *
  * <pre>
  * -N &lt;num&gt;
- *  number of clusters. If omitted or -1 specified, then 
+ *  number of clusters. If omitted or -1 specified, then
  *  cross validation is used to select the number of clusters.
  * </pre>
- * 
+ *
  * <pre>
  * -I &lt;num&gt;
  *  max iterations.
  * (default 100)
  * </pre>
- * 
+ *
  * <pre>
  * -V
  *  verbose.
  * </pre>
- * 
+ *
  * <pre>
  * -M &lt;num&gt;
  *  minimum allowable standard deviation for normal density
  *  computation
  *  (default 1e-6)
  * </pre>
- * 
+ *
  * <pre>
  * -O
  *  Display model in old format (good when there are many clusters)
  * </pre>
- * 
+ *
  * <pre>
  * -S &lt;num&gt;
  *  Random number seed.
  *  (default 100)
  * </pre>
- * 
+ *
  * <!-- options-end -->
- * 
+ *
  * All options after -- will be passed to the clusterer.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}org
  * @version $Revision$
  */
@@ -123,6 +123,9 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /** The clusterer used for evaluation */
   protected DensityBasedClusterer m_clusterer = new EM();
+
+  /** Holds the most recently used ClusterEvaluation object */
+  protected ClusterEvaluation m_Evaluation;
 
   /** The names of any additional measures to look for in SplitEvaluators */
   protected String[] m_additionalMeasures = null;
@@ -165,7 +168,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns a string describing this split evaluator
-   * 
+   *
    * @return a description of the split evaluator suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -175,7 +178,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -203,13 +206,13 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Parses a given list of options. Valid options are:
    * <p>
-   * 
+   *
    * -W classname <br>
    * Specify the full class name of the clusterer to evaluate.
    * <p>
-   * 
+   *
    * All option after -- will be passed to the classifier.
-   * 
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -235,7 +238,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Gets the current settings of the Classifier.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -270,7 +273,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
    * Classifiers. This could contain many measures (of which only a subset may
    * be produceable by the current Classifier) if an experiment is the type that
    * iterates over a set of properties.
-   * 
+   *
    * @param additionalMeasures a list of method names
    */
   @Override
@@ -303,7 +306,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Returns an enumeration of any additional measure names that might be in the
    * classifier
-   * 
+   *
    * @return an enumeration of the measure names
    */
   @Override
@@ -322,7 +325,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the value of the named measure
-   * 
+   *
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
@@ -343,7 +346,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Gets the data types of each of the key columns produced for a single run.
    * The number of key fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing objects of the type of each key column. The
    *         objects should be Strings, or Doubles.
    */
@@ -360,7 +363,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Gets the names of each of the key columns produced for a single run. The
    * number of key fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing the name of each key column
    */
   @Override
@@ -378,7 +381,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
    * contain the name of the classifier used for classifier predictive
    * evaluation. The number of key fields must be constant for a given
    * SplitEvaluator.
-   * 
+   *
    * @return an array of objects containing the key.
    */
   @Override
@@ -395,7 +398,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
    * Gets the data types of each of the result columns produced for a single
    * run. The number of result fields must be constant for a given
    * SplitEvaluator.
-   * 
+   *
    * @return an array containing objects of the type of each result column. The
    *         objects should be Strings, or Doubles.
    */
@@ -441,7 +444,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Gets the names of each of the result columns produced for a single run. The
    * number of result fields must be constant for a given SplitEvaluator.
-   * 
+   *
    * @return an array containing the name of each result column
    */
   @Override
@@ -481,7 +484,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Gets the results for the supplied train and test datasets.
-   * 
+   *
    * @param train the training Instances.
    * @param test the testing Instances.
    * @return the results stored in an array. The objects stored in the array may
@@ -575,12 +578,15 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
     if (current != overall_length) {
       throw new Error("Results didn't fit RESULT_SIZE");
     }
+
+    m_Evaluation = eval;
+
     return result;
   }
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -590,7 +596,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Set whether the class column should be removed from the data.
-   * 
+   *
    * @param r true if the class column is to be removed.
    */
   public void setRemoveClassColumn(boolean r) {
@@ -599,7 +605,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Get whether the class column is to be removed.
-   * 
+   *
    * @return true if the class column is to be removed.
    */
   public boolean getRemoveClassColumn() {
@@ -608,7 +614,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -618,7 +624,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Get the value of clusterer
-   * 
+   *
    * @return Value of clusterer.
    */
   public DensityBasedClusterer getClusterer() {
@@ -628,7 +634,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Sets the clusterer.
-   * 
+   *
    * @param newClusterer the new clusterer to use.
    */
   public void setClusterer(DensityBasedClusterer newClusterer) {
@@ -639,7 +645,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns whether the size determination (train/test/clusterer) is skipped.
-   * 
+   *
    * @return true if size determination skipped
    */
   public boolean getNoSizeDetermination() {
@@ -648,7 +654,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Sets whether the size determination (train/test/clusterer) is skipped.
-   * 
+   *
    * @param value true if to determine sizes
    */
   public void setNoSizeDetermination(boolean value) {
@@ -657,7 +663,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -684,7 +690,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
   /**
    * Set the Clusterer to use, given it's class name. A new clusterer will be
    * instantiated.
-   * 
+   *
    * @param newClustererName the clusterer class name.
    * @exception Exception if the class name is invalid.
    */
@@ -701,7 +707,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Gets the raw output from the classifier
-   * 
+   *
    * @return the raw output from the classifier
    */
   @Override
@@ -739,7 +745,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns a text description of the split evaluator.
-   * 
+   *
    * @return a text description of the split evaluator.
    */
   @Override
@@ -755,7 +761,7 @@ public class DensityBasedClustererSplitEvaluator implements SplitEvaluator,
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
