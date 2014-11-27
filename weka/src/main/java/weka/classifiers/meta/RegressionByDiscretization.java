@@ -552,6 +552,8 @@ extends SingleClassifierEnhancer implements IntervalEstimator, ConditionalDensit
         tmpStr, tmpOptions)));
     }
 
+    super.setOptions(options);
+
     Utils.checkForRemainingOptions(options);
   }
 
