@@ -95,6 +95,7 @@ InstType "Minimal"
 
 # Installer sections
 Section -Main SectionMain
+    SetShellVarContext all
     SetOverwrite on
     SetRegView 64
     # Files
@@ -115,6 +116,7 @@ SectionEnd
 Section "Associate Files" SectionAssociations
     SectionIn 1
     SetRegView 64
+    SetShellVarContext all
     # ARFF
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
@@ -164,6 +166,7 @@ SectionEnd
 # End: JRE
 
 Section -post SectionPost
+    SetShellVarContext all
     SetRegView 64
     WriteRegStr HKLM "${REGKEY}" Path $INSTDIR
     WriteUninstaller $INSTDIR\uninstall.exe
@@ -188,6 +191,7 @@ SectionEnd
 
 # Macro for selecting uninstaller sections
 !macro SELECT_UNSECTION SECTION_NAME UNSECTION_ID
+    SetShellVarContext all
     SetRegView 64
     Push $R0
     ReadRegStr $R0 HKLM "${REGKEY}\Components" "${SECTION_NAME}"
@@ -202,6 +206,7 @@ done${UNSECTION_ID}:
 
 # Uninstaller sections
 Section /o un.Main UNSEC0000
+    SetShellVarContext all
     SetRegView 64
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX}.lnk"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\${WEKA_LINK_PREFIX} (with console).lnk"
@@ -220,6 +225,7 @@ Section /o un.Main UNSEC0000
 SectionEnd
 
 Section un.post UNSEC0001
+    SetShellVarContext all
     SetRegView 64
     DeleteRegKey HKLM "SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\$(^Name)"
     Delete /REBOOTOK "$SMPROGRAMS\$StartMenuGroup\Uninstall $(^Name).lnk"
@@ -247,6 +253,7 @@ FunctionEnd
 
 # Uninstaller functions
 Function un.onInit
+    SetShellVarContext all
     SetRegView 64
     ReadRegStr $INSTDIR HKLM "${REGKEY}" Path
     ReadRegStr $StartMenuGroup HKLM "${REGKEY}" StartMenuGroup
