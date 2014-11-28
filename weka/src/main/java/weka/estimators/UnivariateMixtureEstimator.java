@@ -39,7 +39,7 @@ import weka.clusterers.EM;
 
 /**
  * Simple weighted mixture density estimator. Uses a mixture of Gaussians
- * and applies the leave-one-out bootstrap for model selection.
+ * and applies the leave-one-out Bootstrap for model selection.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
@@ -59,8 +59,17 @@ Serializable {
   /** The current mixture model */
   protected EM m_MixtureModel;
 
-  /** The number of components to use (default is 2)*/
-  protected int m_NumComponents = 2; 
+  /** The number of components to use (default is -1)*/
+  protected int m_NumComponents = -1; 
+
+  /** The maximum number of components to use (default is 5) */
+  protected int m_MaxNumComponents = 5;
+
+  /** The random number seed to use (default is 1*/
+  protected int m_Seed = 1;
+
+  /** The number of Bootstrap runs to use to select the number of components (default is 10) */
+  protected int m_NumBootstrapRuns = 10;
 
   /** The current bandwidth (only computed when needed) */
   protected double m_Width = Double.MAX_VALUE;
@@ -89,13 +98,41 @@ Serializable {
   /** The total sum of weights. */
   protected double m_SumOfWeights = 0;
 
+  /** Whether to output debug info. */
+  protected boolean m_Debug = true;
+
   /**
    * Returns a string describing the estimator.
    */
   public String globalInfo() {
     return "Estimates a univariate mixture model.";
   }
-  
+
+  /**
+   * The tool tip for this property.
+   */
+  public String numBootstrapRunsToolTipText() {
+    return "The number of Bootstrap runs to choose the number of components.";
+  }
+
+  /**
+   * Returns the number of Bootstrap runs.
+   * 
+   * @return the number of Bootstrap runs
+   */
+  public int getNumBootstrapRuns() {
+    return m_NumBootstrapRuns;
+  }
+
+  /**
+   * Sets the number of Bootstrap runs.
+   * 
+   * @param mnumBootstrapRuns the number of Bootstrap runs
+   */
+  public void setNumBootstrapRuns(int numBootstrapRuns) {
+    m_NumBootstrapRuns = numBootstrapRuns;
+  }
+
   /**
    * The tool tip for this property.
    */
@@ -117,8 +154,61 @@ Serializable {
    * 
    * @param m_NumComponents the m_NumComponents to set
    */
-  public void setNumComponents(int m_NumComponents) {
-    this.m_NumComponents = m_NumComponents;
+  public void setNumComponents(int numComponents) {
+    this.m_NumComponents = numComponents;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random number seed to be used.";
+  }
+
+  /**
+   * Set the seed for random number generation.
+   *
+   * @param seed the seed
+   */
+  public void setSeed(int seed) {
+
+    m_Seed = seed;
+  }
+
+  /**
+   * Gets the seed for the random number generations
+   *
+   * @return the seed for the random number generation
+   */
+  public int getSeed() {
+
+    return m_Seed;
+  } 
+  /**
+   * The tool tip for this property.
+   */
+  public String maxNumComponentsToolTipText() {
+    return "The maximum number of mixture components to use.";
+  }
+
+  /**
+   * Returns the number of components to use.
+   * 
+   * @return the maximum number of components to use
+   */
+  public int getMaxNumComponents() {
+    return m_MaxNumComponents;
+  }
+
+  /**
+   * Sets the number of components to use.
+   * 
+   * @param maxNumComponents the maximum number of components to evaluate
+   */
+  public void setMaxNumComponents(int maxNumComponents) {
+    m_MaxNumComponents = maxNumComponents;
   }
 
   /**
@@ -155,22 +245,86 @@ Serializable {
   }
 
   /**
+   * Selects the number of components using leave-one-out Bootstrap, estimating loglikelihood.
+   *
+   * @return the number of components to use
+   */
+  protected int findNumComponents() {
+
+    if (m_NumComponents > 0) {
+      return m_NumComponents;
+    }
+    if (m_MaxNumComponents <= 1) {
+      return 1;
+    }
+
+    Random random = new Random(m_Seed);
+
+    double bestLogLikelihood = -Double.MAX_VALUE;
+    int bestNumComponents = 1;  
+    for (int i = 1; i <= m_MaxNumComponents; i++) {
+      double logLikelihood = 0;
+      for (int k = 0; k <= m_NumBootstrapRuns; k++) {
+        double locLogLikelihood = 0;
+        boolean[] inBag = new boolean[m_Instances.numInstances()];
+        EM mixtureModel = buildModel(m_Seed, i, m_Instances.resampleWithWeights(random, inBag, true));
+        try {
+          double totalWeight = 0;
+          for (int j = 0; j < m_Instances.numInstances(); j++) {
+            if (!inBag[j]) {
+              double weight = m_Instances.instance(j).weight();
+              locLogLikelihood += weight * mixtureModel.logDensityForInstance(m_Instances.instance(j));
+              totalWeight += weight;
+            }
+          }
+          locLogLikelihood /= totalWeight;
+        } catch (Exception ex) {
+          ex.printStackTrace();
+          locLogLikelihood = -Double.MAX_VALUE;
+        }
+        logLikelihood += locLogLikelihood;
+      }
+      logLikelihood /= (double)m_NumBootstrapRuns;
+      if (m_Debug) {
+        System.err.println("Loglikelihood: " + logLikelihood + "\tNumber of components: " + i);
+      }
+      if (logLikelihood > bestLogLikelihood) {
+        bestNumComponents = i;
+        bestLogLikelihood = logLikelihood;
+      }
+    }
+
+    return bestNumComponents;
+  }
+
+  /**
+   * Builds model from given dataset
+   */
+  protected EM buildModel(int seed, int numComponents, Instances data) {
+
+    try {
+      EM mixtureModel = new EM();
+      mixtureModel.setSeed(seed);
+      mixtureModel.setNumClusters(numComponents);
+      mixtureModel.buildClusterer(data);
+      return mixtureModel;
+    } catch (Exception e) {
+      e.printStackTrace();
+      return null;
+    } 
+  }
+
+  /**
    * Updates the model based on the current data.
-   * Uses the leave-one-out bootstrap to choose the number of components.
+   * Uses the leave-one-out Bootstrap to choose the number of components.
    */
   protected void updateModel() {
 
     if (m_MixtureModel != null) {
       return;
     } else if (m_Instances.numInstances() > 0) {
-      try {
-        m_MixtureModel = new EM();
-        m_MixtureModel.setNumClusters(m_NumComponents);
-        m_MixtureModel.buildClusterer(m_Instances);
-      } catch (Exception e) {
-        e.printStackTrace();
-        m_MixtureModel = null;
-      }
+
+      m_MixtureModel = buildModel(m_Seed, findNumComponents(), m_Instances);
 
       // Update widths for cases that are out of bounds,
       // using same code as in kernel estimator
@@ -345,7 +499,10 @@ Serializable {
   public Enumeration<Option> listOptions() {
 
     Vector<Option> options = new Vector<Option>();
-    options.addElement(new Option("\tNumber of components to use.", "N", 0, "-N"));
+    options.addElement(new Option("\tNumber of components to use (default: -1).", "N", 1, "-N"));
+    options.addElement(new Option("\tMaximum number of components to use (default: 5).", "M", 1, "-M"));
+    options.addElement(new Option("\tSeed for the random number generator (default: 1).", "S", 1, "-S"));
+    options.addElement(new Option("\tThe number of bootstrap runs to use (default: 10).", "B", 1, "-B"));
     return options.elements();
   }
 
@@ -356,12 +513,32 @@ Serializable {
    */
   @Override
   public void setOptions(String[] options) throws Exception {
+
     String optionString = Utils.getOption("N", options);
     if (optionString.length() > 0) {
       setNumComponents(Integer.parseInt(optionString));    
     } else {
-      setNumComponents(2);
+      setNumComponents(-1);
     }
+    optionString = Utils.getOption("M", options);
+    if (optionString.length() > 0) {
+      setMaxNumComponents(Integer.parseInt(optionString));    
+    } else {
+      setMaxNumComponents(5);
+    }
+    optionString = Utils.getOption("S", options);
+    if (optionString.length() > 0) {
+      setSeed(Integer.parseInt(optionString));    
+    } else {
+      setSeed(1);
+    }
+    optionString = Utils.getOption("B", options);
+    if (optionString.length() > 0) {
+      setNumBootstrapRuns(Integer.parseInt(optionString));    
+    } else {
+      setNumBootstrapRuns(10);
+    }
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -375,6 +552,15 @@ Serializable {
 
     options.add("-N");
     options.add("" + getNumComponents());
+
+    options.add("-M");
+    options.add("" + getMaxNumComponents());
+
+    options.add("-S");
+    options.add("" + getSeed());
+
+    options.add("-B");
+    options.add("" + getNumBootstrapRuns());
 
     return options.toArray(new String[0]);
   }
