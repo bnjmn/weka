@@ -28,9 +28,12 @@ import java.io.Serializable;
 import java.util.AbstractList;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
+import java.util.Set;
 
 import weka.core.converters.ArffLoader.ArffReader;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -101,6 +104,9 @@ RevisionHandler {
    * public invariant (\forall int i; 0 <= i && i < m_Attributes.size();
    * m_Attributes.get(i) != null);
    */
+
+  /** A map to quickly find attribute indices based on their names. */
+  protected HashMap<String, Integer> m_NamesToAttributeIndices;
 
   /** The instances. */
   protected/* @spec_public non_null@ */ArrayList<Instance> m_Instances;
@@ -206,6 +212,7 @@ RevisionHandler {
     m_ClassIndex = dataset.m_ClassIndex;
     m_RelationName = dataset.m_RelationName;
     m_Attributes = dataset.m_Attributes;
+    m_NamesToAttributeIndices = dataset.m_NamesToAttributeIndices;
     m_Instances = new ArrayList<Instance>(capacity);
   }
 
@@ -263,8 +270,10 @@ RevisionHandler {
     m_RelationName = name;
     m_ClassIndex = -1;
     m_Attributes = attInfo;
+    m_NamesToAttributeIndices = new HashMap<String, Integer>((int) (numAttributes() / 0.75));
     for (int i = 0; i < numAttributes(); i++) {
       attribute(i).setIndex(i);
+      m_NamesToAttributeIndices.put(attribute(i).name(), i);
     }
     m_Instances = new ArrayList<Instance>(capacity);
   }
@@ -364,11 +373,11 @@ RevisionHandler {
    */
   public/* @pure@ */Attribute attribute(String name) {
 
-    for (int i = 0; i < numAttributes(); i++) {
-      if (attribute(i).name().equals(name)) {
-        return attribute(i);
-      }
+    Integer index = m_NamesToAttributeIndices.get(name);
+    if (index != null) {
+      return attribute(index);
     }
+
     return null;
   }
 
@@ -503,13 +512,20 @@ RevisionHandler {
     }
 
     ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() - 1);
-    newList.addAll(m_Attributes.subList(0, position));
+    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() - 1) / 0.75));
+    for (int i = 0 ; i < position; i++) {
+      Attribute att = m_Attributes.get(i);
+      newList.add(att);
+      newMap.put(att.name(), i);
+    }
     for (int i = position + 1; i < m_Attributes.size(); i++) {
       Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
       newAtt.setIndex(i - 1);
       newList.add(newAtt);
+      newMap.put(newAtt.name(), i - 1);
     }
     m_Attributes = newList;
+    m_NamesToAttributeIndices = newMap;
 
     if (m_ClassIndex > position) {
       m_ClassIndex--;
@@ -712,14 +728,22 @@ RevisionHandler {
     att.setIndex(position);
 
     ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size() + 1);
-    newList.addAll(m_Attributes.subList(0, position));
+    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() + 1) / 0.75));
+    for (int i = 0 ; i < position; i++) {
+      Attribute oldAtt = m_Attributes.get(i);
+      newList.add(oldAtt);
+      newMap.put(oldAtt.name(), i);
+    }
     newList.add(att);
+    newMap.put(att.name(), position);
     for (int i = position; i < m_Attributes.size(); i++) {
       Attribute newAtt = (Attribute) m_Attributes.get(i).copy();
       newAtt.setIndex(i + 1);
       newList.add(newAtt);
+      newMap.put(newAtt.name(), i + 1);
     }
     m_Attributes = newList;
+    m_NamesToAttributeIndices = newMap;
 
     for (int i = 0; i < numInstances(); i++) {
       instance(i).setDataset(null);
@@ -1042,10 +1066,21 @@ RevisionHandler {
     att.setIndex(position);
 
     ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-    newList.addAll(m_Attributes.subList(0, position));
+    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int) ((m_Attributes.size() + 1) / 0.75));
+    for (int i = 0 ; i < position; i++) {
+      Attribute oldAtt = m_Attributes.get(i);
+      newList.add(oldAtt);
+      newMap.put(oldAtt.name(), i);
+    }
     newList.add(att);
-    newList.addAll(m_Attributes.subList(position + 1, m_Attributes.size()));
+    newMap.put(att.name(), position);
+    for (int i = position; i < m_Attributes.size(); i++) {
+      Attribute newAtt = (Attribute) m_Attributes.get(i);
+      newList.add(newAtt);
+      newMap.put(newAtt.name(), i);
+    }
     m_Attributes = newList;
+    m_NamesToAttributeIndices = newMap;
 
     for (int i = 0; i < numInstances(); i++) {
       instance(i).setDataset(null);
@@ -1089,27 +1124,31 @@ RevisionHandler {
    * @param name the new name
    */
   public void renameAttribute(int att, String name) {
-    // name already present?
-    for (int i = 0; i < numAttributes(); i++) {
-      if (i == att) {
-        continue;
-      }
-      if (attribute(i).name().equals(name)) {
+
+    Attribute existingAtt = attribute(name);
+    if (existingAtt != null) {
+      if (att == existingAtt.index()) {
+        return; // Old name is equal to new name
+      } else {
         throw new IllegalArgumentException("Attribute name '" + name
-          + "' already present at position #" + i);
+          + "' already present at position #" + existingAtt.index());
       }
     }
 
     Attribute newAtt = attribute(att).copy(name);
     ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
+    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int)(numAttributes() / 0.75));
     for (Attribute attr : m_Attributes) {
       if (attr.index() == att) {
         newVec.add(newAtt);
+        newMap.put(name, att);
       } else {
         newVec.add(attr);
+        newMap.put(attr.name(), attr.index());
       }
     }
     m_Attributes = newVec;
+    m_NamesToAttributeIndices = newMap;
   }
 
   /**
@@ -1991,18 +2030,6 @@ RevisionHandler {
   }
 
   /**
-   * Replaces the attribute information by a clone of itself.
-   */
-  protected void freshAttributeInfo() {
-
-    ArrayList<Attribute> newList = new ArrayList<Attribute>(m_Attributes.size());
-    for (Attribute att : m_Attributes) {
-      newList.add((Attribute) att.copy());
-    }
-    m_Attributes = newList;
-  }
-
-  /**
    * Returns string including all instances, their weights and their indices in
    * the original dataset.
    * 
@@ -2076,7 +2103,8 @@ RevisionHandler {
     }
 
     // Create the vector of merged attributes
-    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>();
+    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(first.numAttributes() +
+      second.numAttributes());
     for (Attribute att : first.m_Attributes) {
       newAttributes.add(att);
     }
