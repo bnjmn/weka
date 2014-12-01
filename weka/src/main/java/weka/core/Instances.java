@@ -1074,7 +1074,7 @@ RevisionHandler {
     }
     newList.add(att);
     newMap.put(att.name(), position);
-    for (int i = position; i < m_Attributes.size(); i++) {
+    for (int i = position + 1; i < m_Attributes.size(); i++) {
       Attribute newAtt = (Attribute) m_Attributes.get(i);
       newList.add(newAtt);
       newMap.put(newAtt.name(), i);
