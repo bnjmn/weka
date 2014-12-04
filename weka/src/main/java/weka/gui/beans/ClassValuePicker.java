@@ -52,8 +52,10 @@ public class ClassValuePicker extends JPanel implements Visible,
 
   private Object m_dataProvider;
 
-  private final Vector<DataSourceListener> m_dataListeners = new Vector<DataSourceListener>();
-  private final Vector<DataFormatListener> m_dataFormatListeners = new Vector<DataFormatListener>();
+  private final Vector<DataSourceListener> m_dataListeners =
+    new Vector<DataSourceListener>();
+  private final Vector<DataFormatListener> m_dataFormatListeners =
+    new Vector<DataFormatListener>();
 
   protected transient weka.gui.Logger m_logger = null;
 
@@ -181,6 +183,15 @@ public class ClassValuePicker extends JPanel implements Visible,
     if (newDataSet != null) {
       e = new DataSetEvent(this, newDataSet);
       notifyDataListeners(e);
+    } else {
+      if (m_logger != null) {
+        m_logger.logMessage("[ClassValuePicker] " + statusMessagePrefix()
+          + " Class value '" + m_classValue + "' does not seem to exist!");
+        m_logger
+          .statusMessage(statusMessagePrefix()
+            + "ERROR: Class value '" + m_classValue
+            + "' does not seem to exist!");
+      }
     }
   }
 
