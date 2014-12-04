@@ -253,6 +253,26 @@ public class ArffSortedTableModel
   }
   
   /**
+   * sorts the instances via the given attribute
+   * 
+   * @param columnIndex         the index of the column
+   * @param ascending ascending if true, otherwise descending
+   */
+  public void sortInstances(int columnIndex, boolean ascending) {
+    ((ArffTableModel) getModel()).sortInstances(columnIndex, ascending);
+  }
+
+  /**
+   * sorts the table over the given column, either ascending or descending
+   * 
+   * @param columnIndex the column to sort over
+   * @param ascending ascending if true, otherwise descending
+   */
+  public void sort(int columnIndex, boolean ascending) {
+    sortInstances(columnIndex, ascending);
+  }
+  
+  /**
    * returns the column of the given attribute name, -1 if not found
    * 
    * @param name		the name of the attribute

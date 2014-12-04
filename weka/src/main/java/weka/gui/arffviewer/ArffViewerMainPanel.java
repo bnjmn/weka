@@ -951,7 +951,7 @@ public class ArffViewerMainPanel extends JPanel implements ActionListener,
     if (!isPanelSelected()) {
       return;
     }
-
+   
     getCurrentPanel().sortInstances();
   }
 

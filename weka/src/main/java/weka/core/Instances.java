@@ -1494,6 +1494,42 @@ RevisionHandler {
   }
 
   /**
+   * Sorts a nominal attribute (stable, linear-time sort). Instances
+   * are sorted based on the attribute label ordering specified in the header.  
+   * 
+   * @param attIndex the attribute's index (index starts with 0)
+   */
+  protected void sortBasedOnNominalAttribute(int attIndex) {
+
+    // Figure out number of instances for each attribute value
+    // and store original list of instances away
+    int[] counts = new int[attribute(attIndex).numValues()];
+    Instance[] backup = new Instance[numInstances()];
+    int j = 0;
+    for (Instance inst : this) {
+      backup[j++] = inst;
+      if (!inst.isMissing(attIndex)) {
+        counts[(int)inst.value(attIndex)]++;
+      }
+    }
+
+    // Indices to figure out where to add instances
+    int[] indices = new int[counts.length];
+    int start = 0;
+    for (int i = 0; i < counts.length; i++) {
+      indices[i] = start;
+      start += counts[i];
+    }
+    for (Instance inst : backup) { // Use backup here
+      if (!inst.isMissing(attIndex)) {
+        m_Instances.set(indices[(int)inst.value(attIndex)]++, inst);
+      } else {
+        m_Instances.set(start++, inst);
+      }
+    }
+  }
+
+  /**
    * Sorts the instances based on an attribute. For numeric attributes,
    * instances are sorted in ascending order. For nominal attributes, instances
    * are sorted based on the attribute label ordering specified in the header.
@@ -1504,7 +1540,7 @@ RevisionHandler {
    */
   public void sort(int attIndex) {
 
-    if (attribute(attIndex).isNumeric()) {
+    if (!attribute(attIndex).isNominal()) {
 
       // Use quicksort from Utils class for sorting
       double[] vals = new double[numInstances()];
@@ -1525,33 +1561,7 @@ RevisionHandler {
         m_Instances.set(i, backup[sortOrder[i]]);
       }
     } else {
-
-      // Figure out number of instances for each attribute value
-      // and store original list of instances away
-      int[] counts = new int[attribute(attIndex).numValues()];
-      Instance[] backup = new Instance[numInstances()];
-      int j = 0;
-      for (Instance inst : this) {
-        backup[j++] = inst;
-        if (!inst.isMissing(attIndex)) {
-          counts[(int)inst.value(attIndex)]++;
-        }
-      }
-
-      // Indices to figure out where to add instances
-      int[] indices = new int[counts.length];
-      int start = 0;
-      for (int i = 0; i < counts.length; i++) {
-        indices[i] = start;
-        start += counts[i];
-      }
-      for (Instance inst : backup) { // Use backup here
-        if (!inst.isMissing(attIndex)) {
-          m_Instances.set(indices[(int)inst.value(attIndex)]++, inst);
-        } else {
-          m_Instances.set(start++, inst);
-        }
-      }
+      sortBasedOnNominalAttribute(attIndex);
     }
   }
 
@@ -1567,6 +1577,51 @@ RevisionHandler {
   public void sort(Attribute att) {
 
     sort(att.index());
+  }
+
+  /**
+   * Sorts the instances based on an attribute, using a stable sort. For numeric attributes,
+   * instances are sorted in ascending order. For nominal attributes, instances
+   * are sorted based on the attribute label ordering specified in the header.
+   * Instances with missing values for the attribute are placed at the end of
+   * the dataset.
+   * 
+   * @param attIndex the attribute's index (index starts with 0)
+   */
+  public void stableSort(int attIndex) {
+
+    if (!attribute(attIndex).isNominal()) {
+
+      // Use quicksort from Utils class for sorting
+      double[] vals = new double[numInstances()];
+      Instance[] backup = new Instance[vals.length];
+      for (int i = 0; i < vals.length; i++) {
+        Instance inst = instance(i);
+        backup[i] = inst;
+        vals[i] = inst.value(attIndex);
+      }
+
+      int[] sortOrder = Utils.stableSort(vals);
+      for (int i = 0; i < vals.length; i++) {
+        m_Instances.set(i, backup[sortOrder[i]]);
+      }
+    } else {
+      sortBasedOnNominalAttribute(attIndex);
+    }
+  }
+
+  /**
+   * Sorts the instances based on an attribute, using a stable sort. For numeric attributes,
+   * instances are sorted into ascending order. For nominal attributes,
+   * instances are sorted based on the attribute label ordering specified in the
+   * header. Instances with missing values for the attribute are placed at the
+   * end of the dataset.
+   * 
+   * @param att the attribute
+   */
+  public void stableSort(Attribute att) {
+
+    stableSort(att.index());
   }
 
   /**

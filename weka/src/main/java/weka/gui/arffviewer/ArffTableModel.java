@@ -455,7 +455,40 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
   public void sortInstances(int columnIndex) {
     if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
       addUndoPoint();
-      m_Data.sort(columnIndex - 1);
+      m_Data.stableSort(columnIndex - 1);
+      notifyListener(new TableModelEvent(this));
+    }
+  }
+
+  /**
+   * sorts the instances via the given attribute
+   * 
+   * @param columnIndex the index of the column
+   * @param ascending ascending if true, otherwise descending
+   */
+  public void sortInstances(int columnIndex, boolean ascending) {
+    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+      addUndoPoint();
+      m_Data.stableSort(columnIndex - 1);
+      if (!ascending) {
+        Instances reversedData = new Instances(m_Data, m_Data.numInstances());
+        int i = m_Data.numInstances();
+        while (i > 0) {
+          i--;
+          int equalCount = 1;
+          while ((i > 0) && (m_Data.instance(i).value(columnIndex - 1) ==
+            m_Data.instance(i - 1).value(columnIndex - 1))) {
+            equalCount++;
+            i--;
+          }
+          int j = 0;
+          while (j < equalCount) {
+            reversedData.add(m_Data.instance(i + j));
+            j++;
+          }
+        }
+        m_Data = reversedData;
+      }
       notifyListener(new TableModelEvent(this));
     }
   }
