@@ -336,13 +336,14 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
-   * Set the classifier to use
-   * 
-   * @param classifier the classifier to use
+   * Checks to see if the base classifier is an IteratedSingleClassifierEnhancer
+   * and whether the environment variable TOTAL_NUMBER_OF_MAPS has been set. If
+   * both of these is the case then the user-requested number of iterations
+   * (base classifiers) is divided (as close as possible) by the number of maps
+   * that will run in order to divide up the work involved in building base
+   * classifiers.
    */
-  public void setClassifier(Classifier classifier) {
-    m_classifier = classifier;
-
+  protected void checkForAndConfigureIteratedMetaClassifier() {
     if (m_classifier instanceof weka.classifiers.IteratedSingleClassifierEnhancer) {
       // see if we need to adjust the number of iterations on
       // the basis of the number of maps
@@ -350,13 +351,13 @@ public class WekaClassifierMapTask implements OptionHandler,
       if (numMaps != null && numMaps.length() > 0) {
         int nM = Integer.parseInt(numMaps);
 
-        if (nM > 1) {
-          // Err on the safe side just in case a classifier gets dropped from
-          // the ensemble due to seeing less data than the rest (i.e.
-          // considerable
-          // smaller input split than max split size).
-          nM--;
-        }
+        // if (nM > 1) {
+        // // Err on the safe side just in case a classifier gets dropped from
+        // // the ensemble due to seeing less data than the rest (i.e.
+        // // considerable
+        // // smaller input split than max split size).
+        // nM--;
+        // }
 
         int totalClassifiersRequested =
           ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
@@ -368,8 +369,20 @@ public class WekaClassifierMapTask implements OptionHandler,
         }
         ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
           .setNumIterations(classifiersPerMap);
+        System.err.println("[ClassifierMapTask] total maps to be run " + nM
+          + " total base classifiers requested " + totalClassifiersRequested
+          + " classifiers per map " + classifiersPerMap);
       }
     }
+  }
+
+  /**
+   * Set the classifier to use
+   * 
+   * @param classifier the classifier to use
+   */
+  public void setClassifier(Classifier classifier) {
+    m_classifier = classifier;
   }
 
   /**
@@ -844,6 +857,8 @@ public class WekaClassifierMapTask implements OptionHandler,
       throw new DistributedWekaException("No classifier has been configured!");
     }
 
+    checkForAndConfigureIteratedMetaClassifier();
+
     m_trainingHeader = new Instances(trainingHeader, 0);
     if (m_trainingHeader.classIndex() < 0) {
       throw new DistributedWekaException("No class index set in the data!");
@@ -948,7 +963,7 @@ public class WekaClassifierMapTask implements OptionHandler,
    */
   public void finalizeTask() throws DistributedWekaException {
 
-    System.gc();
+    // System.gc();
     Runtime currR = Runtime.getRuntime();
     long freeM = currR.freeMemory();
     long totalM = currR.totalMemory();
