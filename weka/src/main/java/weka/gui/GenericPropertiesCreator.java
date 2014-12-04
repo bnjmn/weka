@@ -23,6 +23,7 @@ package weka.gui;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.lang.annotation.Annotation;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -98,13 +99,15 @@ public class GenericPropertiesCreator {
    * 
    * @see #PROPERTY_FILE
    */
-  protected static String CREATOR_FILE = "weka/gui/GenericPropertiesCreator.props";
+  protected static String CREATOR_FILE =
+    "weka/gui/GenericPropertiesCreator.props";
 
   /**
    * The name of the properties file that lists classes/interfaces/superclasses
    * to exclude from being shown in the GUI. See the file for more information.
    */
-  protected static String EXCLUDE_FILE = "weka/gui/GenericPropertiesCreator.excludes";
+  protected static String EXCLUDE_FILE =
+    "weka/gui/GenericPropertiesCreator.excludes";
 
   /** the prefix for an interface exclusion */
   protected static String EXCLUDE_INTERFACE = "I";
@@ -353,7 +356,8 @@ public class GenericPropertiesCreator {
       while (enm.hasMoreElements()) {
         String name = enm.nextElement().toString();
         // new Hashtable for key
-        Hashtable<String, Vector<String>> t = new Hashtable<String, Vector<String>>();
+        Hashtable<String, Vector<String>> t =
+          new Hashtable<String, Vector<String>>();
         m_Excludes.put(name, t);
         t.put(EXCLUDE_INTERFACE, new Vector<String>());
         t.put(EXCLUDE_CLASS, new Vector<String>());
@@ -436,16 +440,20 @@ public class GenericPropertiesCreator {
     int i;
 
     result = true;
+    try {
+      clsCurrent = Class.forName(classname);
+      // check for GPCIgnore
+      for (Annotation a : clsCurrent.getAnnotations()) {
+        if (a instanceof GPCIgnore) {
+          return false;
+        }
+      }
+    } catch (Exception ex) {
+      clsCurrent = null;
+    }
 
     // are there excludes for this key?
     if (m_Excludes.containsKey(key)) {
-      try {
-        clsCurrent = Class.forName(classname);
-      } catch (Exception e) {
-        // we ignore this Exception
-        clsCurrent = null;
-      }
-
       // interface
       if ((clsCurrent != null) && result) {
         list = m_Excludes.get(key).get(EXCLUDE_INTERFACE);
