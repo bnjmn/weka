@@ -9,7 +9,7 @@ PackageName=ensembleLibrary
 Version=1.0.5
 
 #Date
-Date=2012-03-20
+Date=2014-11-14
 
 # Title (required)
 Title=Manages a libary of ensemble classifiers
