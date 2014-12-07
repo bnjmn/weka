@@ -118,7 +118,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /** Whether capabilities should not be checked before classifier is built. */
   protected boolean m_DoNotCheckCapabilities = false;
-
+ 
   /**
    * Returns true if the a new batch was started, either a new instance of the
    * filter was created or the batchFinished() method got called.
@@ -986,6 +986,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *          -o output_file <br/>
    *          -c class_index <br/>
    *          -z classname (for filters implementing weka.filters.Sourcable) <br/>
+   *          -decimal num (the number of decimal places to use in the output; default = 6) <br/>
    *          or -h for help on options
    * @throws Exception if something goes wrong or the user requests help on
    *           command options
@@ -999,6 +1000,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     PrintWriter output = null;
     boolean helpRequest;
     String sourceCode = "";
+    int maxDecimalPlaces = 6;
 
     try {
       helpRequest = Utils.getFlag('h', options);
@@ -1013,6 +1015,11 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         sourceCode = Utils.getOption('z', options);
       }
 
+      String tmpStr = Utils.getOption("decimal", options);
+      if (tmpStr.length() > 0) {
+        maxDecimalPlaces = Integer.parseInt(tmpStr);
+      }
+ 
       if (filter instanceof OptionHandler) {
         ((OptionHandler) filter).setOptions(options);
       }
@@ -1066,7 +1073,10 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         + "-c <class index>\n"
         + "\tThe number of the attribute to use as the class.\n"
         + "\t\"first\" and \"last\" are also valid entries.\n"
-        + "\tIf not supplied then no class is assigned.\n";
+        + "\tIf not supplied then no class is assigned.\n"
+        + "-decimal <integer>\n"
+        + "\tThe maximum number of digits to print after the decimal\n"
+        + "\tplace for numeric values (default: 6)\n";
 
       if (filter instanceof Sourcable) {
         genericOptions += "-z <class name>\n"
@@ -1107,7 +1117,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         if (debug) {
           System.err.println("Getting output instance");
         }
-        output.println(filter.output().toString());
+        output.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1129,7 +1139,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         System.err.println("Getting output instance");
       }
       while (filter.numPendingOutput() > 0) {
-        output.println(filter.output().toString());
+        output.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
         if (debug) {
           System.err.println("Getting output instance");
         }
@@ -1160,6 +1170,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *          -s (second) output file <br/>
    *          -c class_index <br/>
    *          -z classname (for filters implementing weka.filters.Sourcable) <br/>
+   *          -decimal num (the number of decimal places to use in the output; default = 6) <br/>
    *          or -h for help on options
    * @throws Exception if something goes wrong or the user requests help on
    *           command options
@@ -1175,6 +1186,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     PrintWriter secondOutput = null;
     boolean helpRequest;
     String sourceCode = "";
+    int maxDecimalPlaces = 6;
 
     try {
       helpRequest = Utils.getFlag('h', options);
@@ -1211,6 +1223,11 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         sourceCode = Utils.getOption('z', options);
       }
 
+      String tmpStr = Utils.getOption("decimal", options);
+      if (tmpStr.length() > 0) {
+        maxDecimalPlaces = Integer.parseInt(tmpStr);
+      }
+   
       if (filter instanceof OptionHandler) {
         ((OptionHandler) filter).setOptions(options);
       }
@@ -1260,7 +1277,10 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         + "-c <class index>\n"
         + "\tThe number of the attribute to use as the class.\n"
         + "\t\"first\" and \"last\" are also valid entries.\n"
-        + "\tIf not supplied then no class is assigned.\n";
+        + "\tIf not supplied then no class is assigned.\n"
+        + "-decimal <integer>\n"
+        + "\tThe maximum number of digits to print after the decimal\n"
+          + "\tplace for numeric values (default: 6)\n";
 
       if (filter instanceof Sourcable) {
         genericOptions += "-z <class name>\n"
@@ -1285,7 +1305,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
           throw new Error("Filter didn't return true from setInputFormat() "
             + "earlier!");
         }
-        firstOutput.println(filter.output().toString());
+        firstOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1295,7 +1315,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         firstOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
-        firstOutput.println(filter.output().toString());
+        firstOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1315,7 +1335,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
           throw new Error("Filter didn't return true from"
             + " isOutputFormatDefined() earlier!");
         }
-        secondOutput.println(filter.output().toString());
+        secondOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1325,7 +1345,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         secondOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
-        secondOutput.println(filter.output().toString());
+        secondOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
     if (secondOutput != null) {
