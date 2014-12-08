@@ -23,7 +23,7 @@ package weka.core;
 
 /**
  * Class for Weka-specific exceptions.
- *
+ * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
@@ -35,7 +35,7 @@ public class WekaException
 
   /**
    * Creates a new WekaException with no message.
-   *
+   * 
    */
   public WekaException() {
 
@@ -44,11 +44,32 @@ public class WekaException
 
   /**
    * Creates a new WekaException.
-   *
+   * 
    * @param message the reason for raising an exception.
    */
   public WekaException(String message) {
 
     super(message);
+  }
+
+  /**
+   * Constructor with message and cause
+   * 
+   * @param message the message for the exception
+   * @param cause the root cause Throwable
+   */
+  public WekaException(String message, Throwable cause) {
+    this(message);
+    initCause(cause);
+    fillInStackTrace();
+  }
+
+  /**
+   * Constructor with cause argument
+   * 
+   * @param cause the root cause Throwable
+   */
+  public WekaException(Throwable cause) {
+    this(cause.getMessage(), cause);
   }
 }
