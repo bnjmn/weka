@@ -289,11 +289,6 @@ public class LibSVMLoader
         String oldLine = null;
         String read = null;
         while ((cInt = m_sourceReader.read(cbuf, 0, len)) != -1) {
-          iter++;
-          if (iter % 10 == 0) {
-            System.out.println("Read iteration #" + iter + " ("
-              + (len / 1024 / 1024 * (iter - 1)) + " MB read)");
-          }
           read = String.valueOf(cbuf, 0, cInt);
 
           if (oldLine != null) {
