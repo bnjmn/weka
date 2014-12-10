@@ -103,7 +103,7 @@ Serializable {
   protected boolean m_UseNormalizedEntropy = false;
   
   /** Whether to output debug info. */
-  protected boolean m_Debug = true;
+  protected boolean m_Debug = false;
 
   /**
    * Returns a string describing the estimator.
