@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 
 import weka.core.Attribute;
+import weka.core.ContingencyTables;
 import weka.core.Instances;
 import weka.core.DenseInstance;
 import weka.core.Option;
@@ -98,14 +99,31 @@ Serializable {
   /** The total sum of weights. */
   protected double m_SumOfWeights = 0;
 
+  /** Whether to use normalized entropy instance of bootstrap. */
+  protected boolean m_UseNormalizedEntropy = false;
+  
   /** Whether to output debug info. */
-  protected boolean m_Debug = false;
+  protected boolean m_Debug = true;
 
   /**
    * Returns a string describing the estimator.
    */
   public String globalInfo() {
     return "Estimates a univariate mixture model.";
+  }
+
+  /**
+   * @return whether normalized entropy is used
+   */
+  public boolean getUseNormalizedEntropy() {
+    return m_UseNormalizedEntropy;
+  }
+
+  /**
+   * @param useNormalizedEntropy whether to use normalized entropy
+   */
+  public void setUseNormalizedEntropy(boolean useNormalizedEntropy) {
+    m_UseNormalizedEntropy = useNormalizedEntropy;
   }
 
   /**
@@ -249,7 +267,7 @@ Serializable {
    *
    * @return the number of components to use
    */
-  protected int findNumComponents() {
+  protected int findNumComponentsUsingBootStrap() {
 
     if (m_NumComponents > 0) {
       return m_NumComponents;
@@ -298,6 +316,85 @@ Serializable {
   }
 
   /**
+   * Calculates loglikelihood for given model and data.
+   */
+  protected double loglikelihood(EM model, Instances data) {
+
+    double logLikelihood = 0;
+    try {
+      for (int j = 0; j < data.numInstances(); j++) {
+        logLikelihood += data.instance(j).weight() * model.logDensityForInstance(data.instance(j));
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      logLikelihood = -Double.MAX_VALUE;
+    }
+    return logLikelihood;
+  }
+
+  /**
+   * Calculates entrpy for given model and data.
+   */
+  protected double entropy(EM model, Instances data) {
+
+    double entropy = 0;
+    try {
+      for (int j = 0; j < data.numInstances(); j++) {
+        entropy += data.instance(j).weight() * 
+          ContingencyTables.entropy(model.distributionForInstance(data.instance(j)));
+      }
+      entropy *= Utils.log2; // Need natural logarithm, not base-2 logarithm
+    } catch (Exception ex) {
+      ex.printStackTrace();
+      entropy = Double.MAX_VALUE;
+    }
+    return entropy;
+  }
+
+
+  /**
+   * Selects the number of components using normalized entropy.
+   *
+   * @return the model to use
+   */
+  protected EM findModelUsingNormalizedEntroy() {
+
+    if (m_NumComponents > 0) {
+      return buildModel(m_Seed, m_NumComponents, m_Instances);
+    }
+    if (m_MaxNumComponents <= 1) {
+      return buildModel(m_Seed, 1, m_Instances);
+    }
+
+    //Loglikelihood for one cluster
+    EM bestMixtureModel = buildModel(m_Seed, 1, m_Instances);
+    double loglikelihoodForOneCluster = loglikelihood(bestMixtureModel, m_Instances);
+    double bestNormalizedEntropy = 1;
+    for (int i = 2; i <= m_MaxNumComponents; i++) {
+      EM mixtureModel = buildModel(m_Seed, i, m_Instances);
+      
+      double loglikelihood = loglikelihood(mixtureModel, m_Instances);
+      if (loglikelihood < loglikelihoodForOneCluster) {
+        // This appears to happen in practice, hopefully not because of a bug...
+        continue;
+      }     
+      double entropy = entropy(mixtureModel, m_Instances);
+      double normalizedEntropy = entropy / (loglikelihood - loglikelihoodForOneCluster);
+
+      if (m_Debug) {
+        System.err.println("Entropy: " + entropy + "\tLogLikelihood: " + loglikelihood +
+            "\tLoglikelihood for one cluster: " + loglikelihoodForOneCluster + "\tNormalized entropy: " + normalizedEntropy + "\tNumber of components: " + i);
+      }
+      if (normalizedEntropy < bestNormalizedEntropy) {
+        bestMixtureModel = mixtureModel;
+        bestNormalizedEntropy = normalizedEntropy;
+      }
+    }
+
+    return bestMixtureModel;
+  }
+
+  /**
    * Builds model from given dataset
    */
   protected EM buildModel(int seed, int numComponents, Instances data) {
@@ -324,7 +421,12 @@ Serializable {
       return;
     } else if (m_Instances.numInstances() > 0) {
 
-      m_MixtureModel = buildModel(m_Seed, findNumComponents(), m_Instances);
+      if (m_UseNormalizedEntropy) {
+        m_MixtureModel = findModelUsingNormalizedEntroy();
+      } else {
+        m_MixtureModel = buildModel(m_Seed, findNumComponentsUsingBootStrap(), m_Instances);
+          
+      }
 
       // Update widths for cases that are out of bounds,
       // using same code as in kernel estimator
@@ -503,6 +605,7 @@ Serializable {
     options.addElement(new Option("\tMaximum number of components to use (default: 5).", "M", 1, "-M"));
     options.addElement(new Option("\tSeed for the random number generator (default: 1).", "S", 1, "-S"));
     options.addElement(new Option("\tThe number of bootstrap runs to use (default: 10).", "B", 1, "-B"));
+    options.addElement(new Option("\tUse normalized entropy instead of bootstrap.", "E", 1, "-E"));
     return options.elements();
   }
 
@@ -538,6 +641,7 @@ Serializable {
     } else {
       setNumBootstrapRuns(10);
     }
+    m_UseNormalizedEntropy = Utils.getFlag("E", options);
     Utils.checkForRemainingOptions(options);
   }
 
@@ -562,6 +666,10 @@ Serializable {
     options.add("-B");
     options.add("" + getNumBootstrapRuns());
 
+    if (m_UseNormalizedEntropy) {
+      options.add("-E");
+    }
+    
     return options.toArray(new String[0]);
   }
 
@@ -580,11 +688,15 @@ Serializable {
    */
   public static void main(String[] args) {
 
+    // Whether to use normalized entropy instead of bootstrap
+    boolean useNormalizedEntropy = true;
+    
     // Get random number generator initialized by system
     Random r = new Random();
 
     // Create density estimator
     UnivariateMixtureEstimator e = new UnivariateMixtureEstimator();
+    e.setUseNormalizedEntropy(useNormalizedEntropy);
 
     // Output the density estimator
     System.out.println(e);
@@ -614,6 +726,7 @@ Serializable {
 
     // Create density estimator
     e = new UnivariateMixtureEstimator();
+    e.setUseNormalizedEntropy(useNormalizedEntropy);
 
     // Add Gaussian values into it
     for (int i = 0; i < 100000; i++) {
@@ -635,6 +748,7 @@ Serializable {
 
     // Create density estimator
     e = new UnivariateMixtureEstimator();
+    e.setUseNormalizedEntropy(useNormalizedEntropy);
 
     // Add Gaussian values into it
     for (int i = 0; i < 100000; i++) {
