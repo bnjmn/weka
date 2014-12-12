@@ -247,6 +247,134 @@ Serializable {
 
       return max + Math.log(sum);
     }
+
+    /**
+     * Returns the interval for the given confidence value. 
+     * 
+     * @param conf the confidence value in the interval [0, 1]
+     * @return the interval
+     */
+    public double[][] predictIntervals(double conf) {
+
+      // Compute minimum and maximum value, and delta
+      double val = Statistics.normalInverse(1.0 - (1.0 - conf) / 2);
+      double min = Double.MAX_VALUE;
+      double max = -Double.MAX_VALUE;
+      for (int i = 0; i < m_Means.length; i++) {
+        double l = m_Means[i] - val * m_StdDevs[i];
+        if (l < min) {
+          min = l;
+        }
+        double r = m_Means[i] + val * m_StdDevs[i];
+        if (r > max) {
+          max = r;
+        }
+      }
+      double delta = (max - min) / m_NumIntervals;
+
+      // Create array with estimated probabilities
+      double[] probabilities = new double[m_NumIntervals];
+      double leftVal = Math.exp(logDensity(min));
+      for (int i = 0; i < m_NumIntervals; i++) {
+        double rightVal = Math.exp(logDensity(min + (i + 1) * delta));
+        probabilities[i] = 0.5 * (leftVal + rightVal) * delta;
+        leftVal = rightVal;
+      }
+
+      // Sort array based on area of bin estimates
+      int[] sortedIndices = Utils.sort(probabilities);
+
+      // Mark the intervals to use
+      double sum = 0;
+      boolean[] toUse = new boolean[probabilities.length];
+      int k = 0;
+      while ((sum < conf) && (k < toUse.length)) {
+        toUse[sortedIndices[toUse.length - (k + 1)]] = true;
+        sum += probabilities[sortedIndices[toUse.length - (k + 1)]];
+        k++;
+      }
+
+      // Don't need probabilities anymore
+      probabilities = null;
+
+      // Create final list of intervals
+      ArrayList<double[]> intervals = new ArrayList<double[]>();
+
+      // The current interval
+      double[] interval = null;
+
+      // Calculate actual intervals
+      boolean haveStartedInterval = false;
+      for (int i = 0; i < m_NumIntervals; i++) {
+
+        // Should the current bin be used?
+        if (toUse[i]) {
+
+          // Do we need to create a new interval?
+          if (haveStartedInterval == false) {
+            haveStartedInterval = true;
+            interval = new double[2];
+            interval[0] = min + i * delta;
+          }
+
+          // Regardless, we should update the upper boundary
+          interval[1] = min + (i + 1) * delta;
+        } else {
+
+          // We need to finalize and store the last interval
+          // if necessary.
+          if (haveStartedInterval) {
+            haveStartedInterval = false;
+            intervals.add(interval);
+          }
+        }
+      }
+
+      // Add last interval if there is one
+      if (haveStartedInterval) {
+        intervals.add(interval);
+      }
+
+      return intervals.toArray(new double[0][0]);
+    }
+
+    /**
+     * Returns the quantile for the given percentage.
+     * 
+     * @param percentage the percentage
+     * @return the quantile
+     */
+    public double predictQuantile(double percentage) {
+
+      // Compute minimum and maximum value, and delta
+      double valRight = Statistics.normalInverse(percentage);
+      double valLeft = Statistics.normalInverse(0.001);
+      double min = Double.MAX_VALUE;
+      double max = -Double.MAX_VALUE;
+      for (int i = 0; i < m_Means.length; i++) {
+        double l = m_Means[i] - valLeft * m_StdDevs[i];
+        if (l < min) {
+          min = l;
+        }
+        double r = m_Means[i] + valRight * m_StdDevs[i];
+        if (r > max) {
+          max = r;
+        }
+      }
+      double delta = (max - min) / m_NumIntervals;
+
+      double sum = 0;
+      double leftVal = Math.exp(logDensity(min));
+      for (int i = 0; i < m_NumIntervals; i++) {
+        if (sum >= percentage) {
+          return min + i * delta;
+        }
+        double rightVal = Math.exp(logDensity(min + (i + 1) * delta));
+        sum += 0.5 * (leftVal + rightVal) * delta;
+        leftVal = rightVal;
+      }
+      return max;
+    }
   }
 
   /** For serialization */
@@ -276,32 +404,8 @@ Serializable {
   /** The number of Bootstrap runs to use to select the number of components (default is 10) */
   protected int m_NumBootstrapRuns = 10;
 
-  /** The current bandwidth (only computed when needed) */
-  protected double m_Width = Double.MAX_VALUE;
-
-  /** The exponent to use in computation of bandwidth (default: -0.25) */
-  protected double m_Exponent = -0.25;
-
-  /** The minimum allowed value of the kernel width (default: 1.0E-6) */
-  protected double m_MinWidth = 1.0E-6;
-
   /** The number of intervals used to approximate prediction interval. */
   protected int m_NumIntervals = 1000;
-
-  /** The smallest value in the data */
-  protected double m_Min = Double.MAX_VALUE;
-
-  /** The largest value in the data */
-  protected double m_Max = -Double.MAX_VALUE;
-
-  /** The weighted sum of values */
-  protected double m_WeightedSum = 0;
-
-  /** The weighted sum of squared values */
-  protected double m_WeightedSumSquared = 0;
-
-  /** The total sum of weights. */
-  protected double m_SumOfWeights = 0;
 
   /** Whether to use normalized entropy instance of bootstrap. */
   protected boolean m_UseNormalizedEntropy = false;
@@ -458,17 +562,6 @@ Serializable {
     m_Values[m_NumValues] = value;
     m_Weights[m_NumValues] = weight;
     m_NumValues++;
-
-    // Update statistics
-    m_WeightedSum += value * weight;
-    m_WeightedSumSquared += value * value * weight;
-    m_SumOfWeights += weight;
-    if (value < m_Min) {
-      m_Min = value;
-    }
-    if (value > m_Max) {
-      m_Max = value;
-    }
   }
 
   /**
@@ -722,23 +815,6 @@ Serializable {
       } else {
         m_MixtureModel = buildModel(findNumComponentsUsingBootStrap(), m_Values, m_Weights);
       }
-
-      // Update widths for cases that are out of bounds,
-      // using same code as in kernel estimator
-
-      // First, compute variance for scaling
-      double mean = m_WeightedSum / m_SumOfWeights;
-      double variance = m_WeightedSumSquared / m_SumOfWeights - mean * mean;
-      if (variance < 0) {
-        variance = 0;
-      }
-
-      // Compute kernel bandwidth
-      m_Width = Math.sqrt(variance) * Math.pow(m_SumOfWeights, m_Exponent);
-
-      if (m_Width <= m_MinWidth) {
-        m_Width = m_MinWidth;
-      }
     }
   }
 
@@ -752,76 +828,7 @@ Serializable {
 
     updateModel();
 
-    // Compute minimum and maximum value, and delta
-    double val = Statistics.normalInverse(1.0 - (1.0 - conf) / 2);
-    double min = m_Min - val * m_Width;
-    double max = m_Max + val * m_Width;
-    double delta = (max - min) / m_NumIntervals;
-
-    // Create array with estimated probabilities
-    double[] probabilities = new double[m_NumIntervals];
-    double leftVal = Math.exp(logDensity(min));
-    for (int i = 0; i < m_NumIntervals; i++) {
-      double rightVal = Math.exp(logDensity(min + (i + 1) * delta));
-      probabilities[i] = 0.5 * (leftVal + rightVal) * delta;
-      leftVal = rightVal;
-    }
-
-    // Sort array based on area of bin estimates
-    int[] sortedIndices = Utils.sort(probabilities);
-
-    // Mark the intervals to use
-    double sum = 0;
-    boolean[] toUse = new boolean[probabilities.length];
-    int k = 0;
-    while ((sum < conf) && (k < toUse.length)) {
-      toUse[sortedIndices[toUse.length - (k + 1)]] = true;
-      sum += probabilities[sortedIndices[toUse.length - (k + 1)]];
-      k++;
-    }
-
-    // Don't need probabilities anymore
-    probabilities = null;
-
-    // Create final list of intervals
-    ArrayList<double[]> intervals = new ArrayList<double[]>();
-
-    // The current interval
-    double[] interval = null;
-
-    // Iterate through kernels
-    boolean haveStartedInterval = false;
-    for (int i = 0; i < m_NumIntervals; i++) {
-
-      // Should the current bin be used?
-      if (toUse[i]) {
-
-        // Do we need to create a new interval?
-        if (haveStartedInterval == false) {
-          haveStartedInterval = true;
-          interval = new double[2];
-          interval[0] = min + i * delta;
-        }
-
-        // Regardless, we should update the upper boundary
-        interval[1] = min + (i + 1) * delta;
-      } else {
-
-        // We need to finalize and store the last interval
-        // if necessary.
-        if (haveStartedInterval) {
-          haveStartedInterval = false;
-          intervals.add(interval);
-        }
-      }
-    }
-
-    // Add last interval if there is one
-    if (haveStartedInterval) {
-      intervals.add(interval);
-    }
-
-    return intervals.toArray(new double[0][0]);
+    return m_MixtureModel.predictIntervals(conf);
   }
 
   /**
@@ -834,24 +841,9 @@ Serializable {
 
     updateModel();
 
-    // Compute minimum and maximum value, and delta
-    double val = Statistics.normalInverse(1.0 - (1.0 - 0.95) / 2);
-    double min = m_Min - val * m_Width;
-    double max = m_Max + val * m_Width;
-    double delta = (max - min) / m_NumIntervals;
-
-    double sum = 0;
-    double leftVal = Math.exp(logDensity(min));
-    for (int i = 0; i < m_NumIntervals; i++) {
-      if (sum >= percentage) {
-        return min + i * delta;
-      }
-      double rightVal = Math.exp(logDensity(min + (i + 1) * delta));
-      sum += 0.5 * (leftVal + rightVal) * delta;
-      leftVal = rightVal;
-    }
-    return max;
+    return m_MixtureModel.predictQuantile(percentage);
   }
+
 
   /**
    * Returns the natural logarithm of the density estimate at the given
@@ -1067,5 +1059,8 @@ Serializable {
       }
     }
     System.out.println("Coverage: " + covered / 100000);
+    
+    // Output quantile
+    System.out.println("95% quantile: " + e.predictQuantile(0.95));
   }
 }
