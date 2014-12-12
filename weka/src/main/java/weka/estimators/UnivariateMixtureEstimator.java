@@ -14,29 +14,26 @@
  */
 
 /*
- *    UnivariateNormalEstimator.java
- *    Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ *    UnivariateMixtureEstimator.java
+ *    Copyright (C) 2014 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.estimators;
 
 import java.io.Serializable;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.ArrayList;
 import java.util.Vector;
 
-import weka.core.Attribute;
 import weka.core.ContingencyTables;
-import weka.core.Instances;
-import weka.core.DenseInstance;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Statistics;
 import weka.core.Utils;
-import weka.clusterers.EM;
 
 /**
  * Simple weighted mixture density estimator. Uses a mixture of Gaussians
@@ -51,14 +48,221 @@ UnivariateQuantileEstimator,
 OptionHandler,
 Serializable {
 
+  /** Constant for normal distribution. */
+  private static double m_normConst = Math.log(Math.sqrt(2 * Math.PI));
+
+  /**
+   * Fast univariate mixture model implementation.
+   */
+  public class MM {
+
+    /** Means */
+    protected double[] m_Means = null;
+
+    /** Standard deviations */
+    protected double[] m_StdDevs = null;
+
+    /** The priors, on log scale */
+    protected double[] m_LogPriors = null;
+
+    /** The number of actual components */
+    protected int m_K;
+
+    /**
+     * Returns string describing the estimator.
+     */
+    public String toString() {
+
+      StringBuffer sb = new StringBuffer();
+      sb.append("Mixture model estimator\n\n");
+      for (int i = 0; i < m_LogPriors.length; i++) {
+        sb.append("Mean: " + m_Means[i] + "\tStd. dev.: " + m_StdDevs[i] + "\tPrior prob.: " +
+          Math.exp(m_LogPriors[i]) + "\n");
+      }
+
+      return sb.toString();
+    }
+
+    /**
+     * Returns smallest distance to given elements.
+     * Assumes m_Means has at least one element (i.e. m_K >= 1).
+     */
+    protected double smallestDistance(double val) {
+
+      double min = Math.abs(val - m_Means[0]);
+      for (int i = 1; i < m_K; i++) {
+        if (Math.abs(val - m_Means[i]) < min) {
+          min = Math.abs(val - m_Means[i]);
+        }
+      }
+      return min;
+    }
+
+    /**
+     * Returns the index of the nearest mean.
+     * Assumes m_Means has at least one element (i.e. m_K >= 1).
+     */
+    protected int nearestMean(double val) {
+
+      double min = Math.abs(val - m_Means[0]);
+      int index = 0;
+      for (int i = 1; i < m_K; i++) {
+        if (Math.abs(val - m_Means[i]) < min) {
+          min = Math.abs(val - m_Means[i]);
+          index = i;
+        }
+      }
+      return index;
+    }
+
+    /**
+     * Initializes the model. Assumes K >= 1, values.length >= 1,
+     * and values.length = weights.length.
+     */
+    public void initializeModel(int K, double[] values, double[] weights) {
+
+      // Initialize means using farthest points
+      m_Means = new double[K];
+
+      // Find minimum
+      double furthestVal = values[0];
+      for (int i = 1; i < values.length; i++) {
+        if (values[i] < furthestVal) {
+          furthestVal = values[i];
+        }
+      }
+
+      // Find K maximally distant points (if possible)
+      m_K = 0;
+      do {
+        m_Means[m_K] = furthestVal;
+        m_K++;
+        if (m_K >= K) {
+          break;
+        }
+        double maxMinDist = smallestDistance(values[0]);
+        furthestVal = values[0];
+        for (int i = 1; i < values.length; i++) {
+          double minDist = smallestDistance(values[i]);
+          if (minDist > maxMinDist) {
+            maxMinDist = minDist;
+            furthestVal = values[i];
+          }
+        }
+        if (maxMinDist <= 0) {
+          break;
+        }
+      } while (true);
+
+      // Establish initial cluster assignments
+      double[][] probs = new double[m_K][values.length];
+      for (int i = 0; i < values.length; i++) {
+        probs[nearestMean(values[i])][i] = 1.0;
+      }
+
+      // Compute initial parameters
+      m_StdDevs = new double[m_K];
+      m_LogPriors = new double[m_K];
+      estimateParameters(values, weights, probs);
+    }
+
+    /**
+     * Estimate parameters.
+     */
+    protected void estimateParameters(double[] values, double[] weights, double[][] probs) {
+
+      double totalSumOfWeights = 0;
+      for (int j = 0; j < m_K; j++) {
+        double sum = 0;
+        double sumWeights = 0;
+        for (int i = 0; i < values.length; i++) {
+          double weight = probs[j][i] * weights[i];
+          sum += weight * values[i];
+          sumWeights += weight;
+        }
+        m_Means[j] = sum / sumWeights;
+        totalSumOfWeights += sumWeights;
+      }
+
+      for (int j = 0; j < m_K; j++) {
+        double sum = 0;
+        double sumWeights = 0;
+        for (int i = 0; i < values.length; i++) {
+          double weight = probs[j][i] * weights[i];
+          double diff = values[i] - m_Means[j];
+          sum += weight * diff * diff;
+          sumWeights += weight;
+        }
+        m_StdDevs[j] = Math.sqrt(sum / sumWeights);
+        m_LogPriors[j] = Math.log(sumWeights / totalSumOfWeights);
+      }
+    }
+
+    /**
+     * Computes loglikelihood of current model.
+     */
+    public double loglikelihood(double[] values, double[] weights) {
+
+      double sum = 0;
+      double sumOfWeights = 0;
+      for (int i = 0; i < values.length; i++) {
+        sum += weights[i] * logDensity(values[i]);
+        sumOfWeights += weights[i];
+      }
+      return sum / sumOfWeights;
+    }
+
+    /**
+     * Density function of normal distribution.
+     */
+    protected double logNormalDens(double x, double mean, double stdDev) {
+
+      double diff = x - mean;
+      return -(diff * diff / (2 * stdDev * stdDev)) - m_normConst - Math.log(stdDev);
+    }
+
+    /**
+     * Joint densities per cluster.
+     */
+    protected double[] logJointDensities(double value) {
+
+      double[] a = new double[m_K];
+      for (int i = 0; i < m_K; i++) {
+        a[i] = m_LogPriors[i] + logNormalDens(value, m_Means[i], m_StdDevs[i]);
+      }
+      return a;
+    }
+
+    /**
+     * Computes log of density for given value.
+     */
+    public double logDensity(double value) {
+
+      double[] a = logJointDensities(value);
+      double max = a[Utils.maxIndex(a)];
+      double sum = 0.0;
+      for(int i = 0; i < a.length; i++) {
+        sum += Math.exp(a[i] - max);
+      }
+
+      return max + Math.log(sum);
+    }
+  }
+
   /** For serialization */
   private static final long serialVersionUID = -2035274930137353656L;
 
-  /** The instances to be used for the estimator */
-  protected Instances m_Instances;
+  /** The values used for this estimator */
+  protected double[] m_Values = new double[1000];
+
+  /** The weights used for this estimator */
+  protected double[] m_Weights = new double[1000];
+
+  /** The number of values that have been seen */
+  protected int m_NumValues;
 
   /** The current mixture model */
-  protected EM m_MixtureModel;
+  protected MM m_MixtureModel;
 
   /** The number of components to use (default is -1)*/
   protected int m_NumComponents = -1; 
@@ -101,7 +305,7 @@ Serializable {
 
   /** Whether to use normalized entropy instance of bootstrap. */
   protected boolean m_UseNormalizedEntropy = false;
-  
+
   /** Whether to output debug info. */
   protected boolean m_Debug = false;
 
@@ -230,16 +434,6 @@ Serializable {
   }
 
   /**
-   * Constructs the initial estimator
-   */
-  public UnivariateMixtureEstimator() {
-
-    ArrayList<Attribute> att = new ArrayList<Attribute>(1);
-    att.add(new Attribute("x"));
-    m_Instances = new Instances("Mixture estimator data", att, 100);
-  }
-
-  /**
    * Adds a value to the density estimator.
    *
    * @param value the value to add
@@ -247,8 +441,23 @@ Serializable {
    */
   public void addValue(double value, double weight) {
 
+    // Invalid current model
     m_MixtureModel = null;
-    m_Instances.add(new DenseInstance(weight, new double[] {value}));
+
+    // Do we need to expand the arrays?
+    if (m_NumValues == m_Values.length) {
+      double[] newWeights = new double[2 * m_NumValues];
+      double[] newValues = new double[2 * m_NumValues];
+      System.arraycopy(m_Values, 0, newValues, 0, m_NumValues);
+      System.arraycopy(m_Weights, 0, newWeights, 0, m_NumValues);
+      m_Values = newValues;
+      m_Weights = newWeights;
+    }
+
+    // Add values
+    m_Values[m_NumValues] = value;
+    m_Weights[m_NumValues] = weight;
+    m_NumValues++;
 
     // Update statistics
     m_WeightedSum += value * weight;
@@ -260,6 +469,123 @@ Serializable {
     if (value > m_Max) {
       m_Max = value;
     }
+  }
+
+  /**
+   * Build mixture model. Assumes K >= 1, values.length >= 1,
+   * and values.length = weights.length.
+   */
+  public MM buildModel(int K, double[] values, double[] weights) {
+
+    // Initialize model
+    MM model = new UnivariateMixtureEstimator().new MM();
+    model.initializeModel(K, values, weights);
+
+    // Run until likelihood converges
+    double oldLogLikelihood = -Double.MAX_VALUE;
+    double loglikelihood = model.loglikelihood(values, weights);
+    double[][] probs = new double[model.m_K][values.length];
+    while (Utils.gr(loglikelihood, oldLogLikelihood)){
+
+      // Establish membership probabilities
+      for (int i = 0; i < values.length; i++) {
+        double[] p = Utils.logs2probs(model.logJointDensities(values[i]));
+        for (int j = 0; j < p.length; j++) {
+          probs[j][i] = p[j];
+        }
+      }
+
+      // Estimate parameters
+      model.estimateParameters(values, weights, probs);
+
+      // Compute loglikelihood for updated model
+      oldLogLikelihood = loglikelihood;
+      loglikelihood = model.loglikelihood(values, weights);
+    }
+
+    return model;
+  }
+
+  /**
+   * Creates a new dataset of the same size using random sampling with
+   * replacement according to the given weight vector. The weights of the
+   * instances in the new dataset are set to one. 
+   */
+  public double[][] resampleWithWeights(Random random, boolean[] sampled) {
+
+    // Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley
+    double[] P = new double[m_Weights.length];
+    System.arraycopy(m_Weights, 0, P, 0, m_Weights.length);
+    Utils.normalize(P);
+    double[] Q = new double[m_Weights.length];
+    int[] A = new int[m_Weights.length];
+    int[] W = new int[m_Weights.length];
+    int M = m_Weights.length;
+    int NN = -1;
+    int NP = M;
+    for (int I = 0; I < M; I++) {
+      if (P[I] < 0) {
+        throw new IllegalArgumentException("Weights have to be positive.");
+      }
+      Q[I] = M * P[I];
+      if (Q[I] < 1.0) {
+        W[++NN] = I;
+      } else {
+        W[--NP] = I;
+      }
+    }
+    if (NN > -1 && NP < M) {
+      for (int S = 0; S < M - 1; S++) {
+        int I = W[S];
+        int J = W[NP];
+        A[I] = J;
+        Q[J] += Q[I] - 1.0;
+        if (Q[J] < 1.0) {
+          NP++;
+        }
+        if (NP >= M) {
+          break;
+        }
+      }
+      // A[W[M]] = W[M];
+    }
+
+    for (int I = 0; I < M; I++) {
+      Q[I] += I;
+    }
+
+    // Do we need to keep track of how many copies to use?
+    int[] counts = new int[M];
+
+    int count = 0;
+    for (int i = 0; i < m_Weights.length; i++) {
+      int ALRV;
+      double U = M * random.nextDouble();
+      int I = (int) U;
+      if (U < Q[I]) {
+        ALRV = I;
+      } else {
+        ALRV = A[I];
+      }
+      counts[ALRV]++;
+      if (!sampled[ALRV]) {
+        sampled[ALRV] = true;
+        count++;
+      }
+    }
+
+    // Generate output
+    double[][] output = new double[2][count];
+    int index = 0;
+    for (int i = 0; i < M; i++) {
+      if (counts[i] > 0) {
+        output[0][index] = m_Values[i];
+        output[1][index] = counts[i];
+        index++;
+      }
+    }
+
+    return output;
   }
 
   /**
@@ -282,24 +608,20 @@ Serializable {
     int bestNumComponents = 1;  
     for (int i = 1; i <= m_MaxNumComponents; i++) {
       double logLikelihood = 0;
-      for (int k = 0; k <= m_NumBootstrapRuns; k++) {
+      for (int k = 0; k < m_NumBootstrapRuns; k++) {
+        boolean[] inBag = new boolean[m_NumValues];
+        double[][] output = resampleWithWeights(random, inBag);
+        MM mixtureModel = buildModel(i, output[0], output[1]);
         double locLogLikelihood = 0;
-        boolean[] inBag = new boolean[m_Instances.numInstances()];
-        EM mixtureModel = buildModel(m_Seed, i, m_Instances.resampleWithWeights(random, inBag, true));
-        try {
-          double totalWeight = 0;
-          for (int j = 0; j < m_Instances.numInstances(); j++) {
-            if (!inBag[j]) {
-              double weight = m_Instances.instance(j).weight();
-              locLogLikelihood += weight * mixtureModel.logDensityForInstance(m_Instances.instance(j));
-              totalWeight += weight;
-            }
+        double totalWeight = 0;
+        for (int j = 0; j < m_NumValues; j++) {
+          if (!inBag[j]) {
+            double weight = m_Weights[j];
+            locLogLikelihood += weight * mixtureModel.logDensity(m_Values[j]);
+            totalWeight += weight;
           }
-          locLogLikelihood /= totalWeight;
-        } catch (Exception ex) {
-          ex.printStackTrace();
-          locLogLikelihood = -Double.MAX_VALUE;
         }
+        locLogLikelihood /= totalWeight;
         logLikelihood += locLogLikelihood;
       }
       logLikelihood /= (double)m_NumBootstrapRuns;
@@ -316,74 +638,55 @@ Serializable {
   }
 
   /**
-   * Calculates loglikelihood for given model and data.
-   */
-  protected double loglikelihood(EM model, Instances data) {
-
-    double logLikelihood = 0;
-    try {
-      for (int j = 0; j < data.numInstances(); j++) {
-        logLikelihood += data.instance(j).weight() * model.logDensityForInstance(data.instance(j));
-      }
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      logLikelihood = -Double.MAX_VALUE;
-    }
-    return logLikelihood;
-  }
-
-  /**
    * Calculates entrpy for given model and data.
    */
-  protected double entropy(EM model, Instances data) {
+  protected double entropy(MM mixtureModel) {
 
     double entropy = 0;
-    try {
-      for (int j = 0; j < data.numInstances(); j++) {
-        entropy += data.instance(j).weight() * 
-          ContingencyTables.entropy(model.distributionForInstance(data.instance(j)));
-      }
-      entropy *= Utils.log2; // Need natural logarithm, not base-2 logarithm
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      entropy = Double.MAX_VALUE;
+    for (int j = 0; j < m_NumValues; j++) {
+      entropy += m_Weights[j] * 
+        ContingencyTables.entropy(Utils.logs2probs(mixtureModel.logJointDensities(m_Values[j])));
     }
-    return entropy;
-  }
+    entropy *= Utils.log2; // Need natural logarithm, not base-2 logarithm
 
+    return entropy / (double)m_NumValues;
+  }
 
   /**
    * Selects the number of components using normalized entropy.
    *
    * @return the model to use
    */
-  protected EM findModelUsingNormalizedEntroy() {
+  protected MM findModelUsingNormalizedEntropy() {
 
     if (m_NumComponents > 0) {
-      return buildModel(m_Seed, m_NumComponents, m_Instances);
+      return buildModel(m_NumComponents, m_Values, m_Weights);
     }
     if (m_MaxNumComponents <= 1) {
-      return buildModel(m_Seed, 1, m_Instances);
+      return buildModel(1, m_Values, m_Weights);
     }
 
     //Loglikelihood for one cluster
-    EM bestMixtureModel = buildModel(m_Seed, 1, m_Instances);
-    double loglikelihoodForOneCluster = loglikelihood(bestMixtureModel, m_Instances);
+    MM bestMixtureModel = buildModel(1, m_Values, m_Weights);
+    double loglikelihoodForOneCluster = bestMixtureModel.loglikelihood(m_Values, m_Weights);
     double bestNormalizedEntropy = 1;
     for (int i = 2; i <= m_MaxNumComponents; i++) {
-      EM mixtureModel = buildModel(m_Seed, i, m_Instances);
-      
-      double loglikelihood = loglikelihood(mixtureModel, m_Instances);
+      MM mixtureModel = buildModel(i, m_Values, m_Weights);
+
+      double loglikelihood = mixtureModel.loglikelihood(m_Values, m_Weights);
       if (loglikelihood < loglikelihoodForOneCluster) {
         // This appears to happen in practice, hopefully not because of a bug...
+        if (m_Debug) {
+          System.err.println("Likelihood for one cluster greater than for " + i + " clusters.");
+        }
         continue;
       }     
-      double entropy = entropy(mixtureModel, m_Instances);
+      double entropy = entropy(mixtureModel);
       double normalizedEntropy = entropy / (loglikelihood - loglikelihoodForOneCluster);
 
       if (m_Debug) {
         System.err.println("Entropy: " + entropy + "\tLogLikelihood: " + loglikelihood +
-            "\tLoglikelihood for one cluster: " + loglikelihoodForOneCluster + "\tNormalized entropy: " + normalizedEntropy + "\tNumber of components: " + i);
+          "\tLoglikelihood for one cluster: " + loglikelihoodForOneCluster + "\tNormalized entropy: " + normalizedEntropy + "\tNumber of components: " + i);
       }
       if (normalizedEntropy < bestNormalizedEntropy) {
         bestMixtureModel = mixtureModel;
@@ -395,23 +698,6 @@ Serializable {
   }
 
   /**
-   * Builds model from given dataset
-   */
-  protected EM buildModel(int seed, int numComponents, Instances data) {
-
-    try {
-      EM mixtureModel = new EM();
-      mixtureModel.setSeed(seed);
-      mixtureModel.setNumClusters(numComponents);
-      mixtureModel.buildClusterer(data);
-      return mixtureModel;
-    } catch (Exception e) {
-      e.printStackTrace();
-      return null;
-    } 
-  }
-
-  /**
    * Updates the model based on the current data.
    * Uses the leave-one-out Bootstrap to choose the number of components.
    */
@@ -419,13 +705,22 @@ Serializable {
 
     if (m_MixtureModel != null) {
       return;
-    } else if (m_Instances.numInstances() > 0) {
+    } else if (m_NumValues > 0) {
+
+      // Shrink arrays if necessary
+      if (m_Values.length > m_NumValues) {
+        double[] values = new double[m_NumValues];
+        double[] weights = new double[m_NumValues];
+        System.arraycopy(m_Values,  0,  values,  0,  m_NumValues);
+        System.arraycopy(m_Weights,  0,  weights,  0,  m_NumValues);
+        m_Values = values;
+        m_Weights = weights;
+      }
 
       if (m_UseNormalizedEntropy) {
-        m_MixtureModel = findModelUsingNormalizedEntroy();
+        m_MixtureModel = findModelUsingNormalizedEntropy();
       } else {
-        m_MixtureModel = buildModel(m_Seed, findNumComponentsUsingBootStrap(), m_Instances);
-          
+        m_MixtureModel = buildModel(findNumComponentsUsingBootStrap(), m_Values, m_Weights);
       }
 
       // Update widths for cases that are out of bounds,
@@ -572,12 +867,7 @@ Serializable {
     if (m_MixtureModel == null) {
       return Math.log(Double.MIN_VALUE);
     }
-    try {
-      return m_MixtureModel.logDensityForInstance(new DenseInstance(1.0, new double[] {value}));
-    } catch (Exception e) {
-      e.printStackTrace();
-      return Double.NaN; // We should get NaN in downstream calculations
-    }
+    return m_MixtureModel.logDensity(value);
   }
 
   /**
@@ -669,7 +959,7 @@ Serializable {
     if (m_UseNormalizedEntropy) {
       options.add("-E");
     }
-    
+
     return options.toArray(new String[0]);
   }
 
@@ -686,17 +976,14 @@ Serializable {
   /**
    * Main method, used for testing this class.
    */
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
 
-    // Whether to use normalized entropy instead of bootstrap
-    boolean useNormalizedEntropy = true;
-    
     // Get random number generator initialized by system
     Random r = new Random();
 
     // Create density estimator
     UnivariateMixtureEstimator e = new UnivariateMixtureEstimator();
-    e.setUseNormalizedEntropy(useNormalizedEntropy);
+    e.setOptions(Arrays.copyOf(args, args.length));
 
     // Output the density estimator
     System.out.println(e);
@@ -726,7 +1013,7 @@ Serializable {
 
     // Create density estimator
     e = new UnivariateMixtureEstimator();
-    e.setUseNormalizedEntropy(useNormalizedEntropy);
+    e.setOptions(Arrays.copyOf(args, args.length));
 
     // Add Gaussian values into it
     for (int i = 0; i < 100000; i++) {
@@ -748,7 +1035,7 @@ Serializable {
 
     // Create density estimator
     e = new UnivariateMixtureEstimator();
-    e.setUseNormalizedEntropy(useNormalizedEntropy);
+    e.setOptions(Arrays.copyOf(args, args.length));
 
     // Add Gaussian values into it
     for (int i = 0; i < 100000; i++) {
