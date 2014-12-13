@@ -119,18 +119,13 @@ Serializable {
      * Initializes the model. Assumes K >= 1, values.length >= 1,
      * and values.length = weights.length.
      */
-    public void initializeModel(int K, double[] values, double[] weights) {
+    public void initializeModel(int K, double[] values, double[] weights, Random r) {
 
       // Initialize means using farthest points
       m_Means = new double[K];
 
-      // Find minimum
-      double furthestVal = values[0];
-      for (int i = 1; i < values.length; i++) {
-        if (values[i] < furthestVal) {
-          furthestVal = values[i];
-        }
-      }
+      // Randomly choose first point
+      double furthestVal = r.nextInt(values.length);
 
       // Find K maximally distant points (if possible)
       m_K = 0;
@@ -432,6 +427,9 @@ Serializable {
   /** Whether to output debug info. */
   protected boolean m_Debug = false;
 
+  /** The random number generator. */
+  protected Random m_Random = new Random(m_Seed);
+  
   /**
    * Returns a string describing the estimator.
    */
@@ -520,6 +518,7 @@ Serializable {
   public void setSeed(int seed) {
 
     m_Seed = seed;
+    m_Random = new Random(seed);
   }
 
   /**
@@ -590,8 +589,19 @@ Serializable {
   public MM buildModel(int K, double[] values, double[] weights) {
 
     // Initialize model
-    MM model = new UnivariateMixtureEstimator().new MM();
-    model.initializeModel(K, values, weights);
+    MM model = null;
+    double iLL = -Double.MAX_VALUE, bestLL = -Double.MAX_VALUE;
+    int numAttempts = 0;
+    while ((numAttempts < 5) || (bestLL < -1000 && numAttempts < 100)) {
+      MM tempModel = new UnivariateMixtureEstimator().new MM();
+      tempModel.initializeModel(K, values, weights, m_Random);
+      iLL = tempModel.loglikelihood(values, weights);
+      if (iLL > bestLL) {
+        bestLL = iLL;
+        model = tempModel;
+      }
+      numAttempts++;
+    }
 
     // Run until likelihood converges
     double oldLogLikelihood = -Double.MAX_VALUE;
@@ -714,15 +724,13 @@ Serializable {
       return 1;
     }
 
-    Random random = new Random(m_Seed);
-
     double bestLogLikelihood = -Double.MAX_VALUE;
     int bestNumComponents = 1;  
     for (int i = 1; i <= m_MaxNumComponents; i++) {
       double logLikelihood = 0;
       for (int k = 0; k < m_NumBootstrapRuns; k++) {
         boolean[] inBag = new boolean[m_NumValues];
-        double[][] output = resampleWithWeights(random, inBag);
+        double[][] output = resampleWithWeights(m_Random, inBag);
         MM mixtureModel = buildModel(i, output[0], output[1]);
         double locLogLikelihood = 0;
         double totalWeight = 0;
