@@ -154,6 +154,13 @@ Serializable {
         }
       } while (true);
 
+      // Shrink array of means if necessary
+      if (m_K < K) {
+        double[] tempMeans = new double[m_K];
+        System.arraycopy(m_Means, 0, tempMeans, 0, m_K);
+        m_Means = tempMeans;
+      }
+
       // Establish initial cluster assignments
       double[][] probs = new double[m_K][values.length];
       for (int i = 0; i < values.length; i++) {
