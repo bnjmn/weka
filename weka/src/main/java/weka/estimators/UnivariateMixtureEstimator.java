@@ -180,7 +180,11 @@ Serializable {
           sum += weight * values[i];
           sumWeights += weight;
         }
-        m_Means[j] = sum / sumWeights;
+        if (sumWeights <= 0) {
+          m_Means[j] = 0;
+        } else {
+          m_Means[j] = sum / sumWeights;
+        }
         totalSumOfWeights += sumWeights;
       }
 
@@ -193,8 +197,16 @@ Serializable {
           sum += weight * diff * diff;
           sumWeights += weight;
         }
-        m_StdDevs[j] = Math.sqrt(sum / sumWeights);
-        m_LogPriors[j] = Math.log(sumWeights / totalSumOfWeights);
+        if ((sum <= 0) || (sumWeights <= 0)) {
+          m_StdDevs[j] = 1.0e-6; // Hack to prevent unpleasantness
+        } else {
+          m_StdDevs[j] = Math.sqrt(sum / sumWeights);
+        }
+        if (sumWeights <= 0) {
+          m_LogPriors[j] = -Double.MAX_VALUE;
+        } else {
+          m_LogPriors[j] = Math.log(sumWeights / totalSumOfWeights);
+        }
       }
     }
 
@@ -1059,7 +1071,7 @@ Serializable {
       }
     }
     System.out.println("Coverage: " + covered / 100000);
-    
+
     // Output quantile
     System.out.println("95% quantile: " + e.predictQuantile(0.95));
   }
