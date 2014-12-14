@@ -37,6 +37,7 @@ import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.filters.PreconstructedFilter;
 import weka.filters.SimpleStreamFilter;
+import weka.gui.GPCIgnore;
 import weka.gui.beans.KFIgnore;
 
 /**
@@ -46,6 +47,7 @@ import weka.gui.beans.KFIgnore;
  * @version $Revision: $
  */
 @KFIgnore
+@GPCIgnore
 public class PreconstructedMissingValuesReplacer extends SimpleStreamFilter
   implements Serializable, PreconstructedFilter {
 
