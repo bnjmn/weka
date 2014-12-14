@@ -37,7 +37,7 @@ import weka.core.Utils;
 
 /**
  * Simple weighted mixture density estimator. Uses a mixture of Gaussians
- * and applies the leave-one-out Bootstrap for model selection.
+ * and applies the leave-one-out bootstrap for model selection. Can alternatively use normalized entropy.
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
@@ -125,7 +125,7 @@ Serializable {
       m_Means = new double[K];
 
       // Randomly choose first point
-      double furthestVal = r.nextInt(values.length);
+      double furthestVal = values[r.nextInt(values.length)];
 
       // Find K maximally distant points (if possible)
       m_K = 0;
@@ -203,6 +203,9 @@ Serializable {
           m_StdDevs[j] = 1.0e-6; // Hack to prevent unpleasantness
         } else {
           m_StdDevs[j] = Math.sqrt(sum / sumWeights);
+          if (m_StdDevs[j] < 1.0e-6) {
+            m_StdDevs[j] = 1.0e-6;
+          }
         }
         if (sumWeights <= 0) {
           m_LogPriors[j] = -Double.MAX_VALUE;
@@ -225,6 +228,18 @@ Serializable {
       }
       return sum / sumOfWeights;
     }
+
+    /**
+     * Returns average of squared errors for current model.
+     */
+    public double MSE() {
+
+      double mse = 0;
+      for (int i = 0; i < m_K; i++) {
+        mse += m_StdDevs[i] * m_StdDevs[i] * Math.exp(m_LogPriors[i]);
+      }
+      return mse;
+    }  
 
     /**
      * Density function of normal distribution.
@@ -429,7 +444,7 @@ Serializable {
 
   /** The random number generator. */
   protected Random m_Random = new Random(m_Seed);
-  
+
   /**
    * Returns a string describing the estimator.
    */
@@ -563,23 +578,27 @@ Serializable {
    */
   public void addValue(double value, double weight) {
 
-    // Invalid current model
-    m_MixtureModel = null;
+    // Do we need to add value at all?
+    if (!Utils.eq(weight, 0)) {
 
-    // Do we need to expand the arrays?
-    if (m_NumValues == m_Values.length) {
-      double[] newWeights = new double[2 * m_NumValues];
-      double[] newValues = new double[2 * m_NumValues];
-      System.arraycopy(m_Values, 0, newValues, 0, m_NumValues);
-      System.arraycopy(m_Weights, 0, newWeights, 0, m_NumValues);
-      m_Values = newValues;
-      m_Weights = newWeights;
+      // Invalidate current model
+      m_MixtureModel = null;
+
+      // Do we need to expand the arrays?
+      if (m_NumValues == m_Values.length) {
+        double[] newWeights = new double[2 * m_NumValues];
+        double[] newValues = new double[2 * m_NumValues];
+        System.arraycopy(m_Values, 0, newValues, 0, m_NumValues);
+        System.arraycopy(m_Weights, 0, newWeights, 0, m_NumValues);
+        m_Values = newValues;
+        m_Weights = newWeights;
+      }
+
+      // Add values
+      m_Values[m_NumValues] = value;
+      m_Weights[m_NumValues] = weight;
+      m_NumValues++;
     }
-
-    // Add values
-    m_Values[m_NumValues] = value;
-    m_Weights[m_NumValues] = weight;
-    m_NumValues++;
   }
 
   /**
@@ -588,18 +607,55 @@ Serializable {
    */
   public MM buildModel(int K, double[] values, double[] weights) {
 
-    // Initialize model
+    // Initialize model using k-means
     MM model = null;
-    double iLL = -Double.MAX_VALUE, bestLL = -Double.MAX_VALUE;
+    double bestMSE = Double.MAX_VALUE;
     int numAttempts = 0;
-    while ((numAttempts < 5) || (bestLL < -1000 && numAttempts < 100)) {
+    while (numAttempts < 5) {
+
+      // Initialize model
       MM tempModel = new UnivariateMixtureEstimator().new MM();
       tempModel.initializeModel(K, values, weights, m_Random);
-      iLL = tempModel.loglikelihood(values, weights);
-      if (iLL > bestLL) {
-        bestLL = iLL;
+
+      // Run k-means until MSE converges
+      double oldMSE = Double.MAX_VALUE;
+      double MSE = tempModel.MSE();
+
+      if (m_Debug) {
+        System.err.println("MSE: " + MSE);
+      }
+
+      double[][] probs = new double[tempModel.m_K][values.length];
+      while (Utils.sm(MSE, oldMSE)){
+
+        // Compute memberships
+        for (int j = 0; j < probs.length; j++) {
+          Arrays.fill(probs[j], 0);
+        }
+        for (int i = 0; i < values.length; i++) {
+          probs[tempModel.nearestMean(values[i])][i] = 1.0;
+        }
+
+        // Estimate parameters
+        tempModel.estimateParameters(values, weights, probs);
+
+        // Compute MSE for updated model
+        oldMSE = MSE;
+        MSE = tempModel.MSE();
+
+        if (m_Debug) {
+          System.err.println("MSE: " + MSE);
+        }
+      }
+      if (MSE < bestMSE) {
+        bestMSE = MSE;
         model = tempModel;
       }
+
+      if (m_Debug) {
+        System.err.println("Best MSE: " + bestMSE);
+      }
+
       numAttempts++;
     }
 
