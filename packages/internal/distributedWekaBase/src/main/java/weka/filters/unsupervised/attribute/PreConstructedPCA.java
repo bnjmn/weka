@@ -53,6 +53,7 @@ import weka.distributed.CorrelationMatrixRowReduceTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
 import weka.filters.StreamableFilter;
+import weka.gui.GPCIgnore;
 import weka.gui.beans.KFIgnore;
 import distributed.core.DistributedJobConfig;
 
@@ -119,6 +120,7 @@ import distributed.core.DistributedJobConfig;
  * @version $Revision$
  */
 @KFIgnore
+@GPCIgnore
 public class PreConstructedPCA extends Filter implements StreamableFilter,
   Serializable, PreconstructedFilter, OptionHandler, CommandlineRunnable {
 
