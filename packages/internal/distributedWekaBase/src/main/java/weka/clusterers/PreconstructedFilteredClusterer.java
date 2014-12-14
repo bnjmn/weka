@@ -24,6 +24,7 @@ package weka.clusterers;
 import weka.core.Instances;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
+import weka.gui.GPCIgnore;
 import weka.gui.beans.KFIgnore;
 
 /**
@@ -36,6 +37,7 @@ import weka.gui.beans.KFIgnore;
  * @version $Revision: $
  */
 @KFIgnore
+@GPCIgnore
 public class PreconstructedFilteredClusterer extends FilteredClusterer {
 
   /**
