@@ -45,7 +45,7 @@ import distributed.core.DistributedJobConfig;
  * fields and those that the model expects. Degrades gracefully (via missing
  * values) when model fields are missing from the incoming data or there are
  * type mismatches.
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
@@ -84,7 +84,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Base class for wrapping classifiers or clusterers
-   * 
+   *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected abstract static class ScoringModel implements Serializable {
@@ -100,7 +100,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Constructor for a new ScoringModel
-     * 
+     *
      * @param model the model to wrap
      */
     public ScoringModel(Object model) {
@@ -109,7 +109,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Return true if the underlying model is a BatchPredictor
-     * 
+     *
      * @return return true if the underlying model is a BatchPredictor
      */
     public boolean isBatchPredicor() {
@@ -118,7 +118,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Returns predictions in the case where the base model is a BatchPredictor
-     * 
+     *
      * @param insts the instances to provide predictions for
      * @return the predictions
      * @throws Exception if a problem occurs
@@ -131,7 +131,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Set the training header used to train the model
-     * 
+     *
      * @param header the header of the data used to train the model
      */
     public void setHeader(Instances header) {
@@ -140,7 +140,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Get the header of the data used to train the model
-     * 
+     *
      * @return the header of the data used to train the model
      */
     public Instances getHeader() {
@@ -149,21 +149,21 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Set the model to wrap
-     * 
+     *
      * @param model the model to wrap
      */
     public abstract void setModel(Object model);
 
     /**
      * Get the wrapped model
-     * 
+     *
      * @return the wrapped model
      */
     public abstract Object getModel();
 
     /**
      * Get a list of labels that this ScoringModel can produce as predictions
-     * 
+     *
      * @return a list of labels that the model can produce as predictions
      * @throws DistributedWekaException if a problem occurs
      */
@@ -172,7 +172,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Return a probability distribution over the predicted labels
-     * 
+     *
      * @param inst the instance to predict/score
      * @return a probability distribution over the possible labels
      * @throws Exception if a problem occurs
@@ -183,7 +183,7 @@ public class WekaScoringMapTask implements Serializable {
     /**
      * Static factory method to create an appropriate concrete ScoringModel
      * given a particular base model
-     * 
+     *
      * @param model the model to wrap in a ScoringModel
      * @return a concrete subclass of ScoringModel
      * @throws Exception if a problem occurs
@@ -200,7 +200,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Subclass of ScoringModel for classifiers
-   * 
+   *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected static class ClassifierScoringModel extends ScoringModel {
@@ -213,7 +213,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Construct a new ClassifierScoringModel
-     * 
+     *
      * @param model the model to wrap
      */
     public ClassifierScoringModel(Object model) {
@@ -258,7 +258,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Subclass of ScoringModel for clusterers
-   * 
+   *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   protected static class ClustererScoringModel extends ScoringModel {
@@ -271,7 +271,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Construct a new ClustererScoringModel
-     * 
+     *
      * @param model the clusterer to wrap
      */
     public ClustererScoringModel(Object model) {
@@ -314,7 +314,7 @@ public class WekaScoringMapTask implements Serializable {
 
     /**
      * Get the number of clusters from the base clusterer
-     * 
+     *
      * @return the number of clusters
      * @throws Exception if a problem occurs
      */
@@ -328,7 +328,7 @@ public class WekaScoringMapTask implements Serializable {
    * the header used to train the model. Uses attribute names to match between
    * the two. Also constructs a list of missing attributes and a list of type
    * mismatches.
-   * 
+   *
    * @param modelHeader the header of the data used to train the model
    * @param incomingHeader the header of the incoming data
    * @throws DistributedWekaException if more than 50% of the attributes
@@ -373,7 +373,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Set the model to use
-   * 
+   *
    * @param model the model to use
    * @param modelHeader the header of the training data used to train the model
    * @param dataHeader the header of the incoming data
@@ -418,7 +418,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Constructs an instance suitable for passing to the model for scoring
-   * 
+   *
    * @param incoming the incoming instance
    * @return an instance with values mapped to be consistent with what the model
    *         is expecting
@@ -478,7 +478,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Process (score) an instance
-   * 
+   *
    * @param inst the instance to score
    * @return a probability distribution over the labels that the model can
    *         predict
@@ -501,7 +501,7 @@ public class WekaScoringMapTask implements Serializable {
   /**
    * Process an instance. When the batch size is met then a batch of predictions
    * is returned; returns null if the batch size has not been matched yet
-   * 
+   *
    * @param inst the instance to process
    * @return a batch of predictions or null if we have not seen enough input
    *         instances to meet the batch size yet
@@ -535,7 +535,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Finish off the last partial batch (if any).
-   * 
+   *
    * @return predictions for the last partial batch or null
    * @throws DistributedWekaException if a problem occurs
    */
@@ -561,7 +561,7 @@ public class WekaScoringMapTask implements Serializable {
   /**
    * Get a string summarizing missing and type mismatches between the incoming
    * data and what the model expects
-   * 
+   *
    * @return a summary string of problems
    */
   public String getMissingMismatchAttributeInfo() {
@@ -576,7 +576,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Get a list of labels that the model can predict
-   * 
+   *
    * @return a list of labels that the model can predict
    * @throws DistributedWekaException if a problem occurs
    */
@@ -586,7 +586,7 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Returns true if the underlying model is a BatchPredictor
-   * 
+   *
    * @return true if the underlying model is a BatchPredictor
    */
   public boolean isBatchPredictor() {
@@ -595,10 +595,19 @@ public class WekaScoringMapTask implements Serializable {
 
   /**
    * Returns true if model is using string attributes
-   * 
+   *
    * @return true if model is using string attributes
    */
   public boolean modelIsUsingStringAttributes() {
     return m_isUsingStringAttributes;
+  }
+
+  /**
+   * Returns true if the underlying model is a classifier
+   *
+   * @return true if the underlying model is a classifier
+   */
+  public boolean modelIsAClassifier() {
+    return m_model.getModel() instanceof weka.classifiers.Classifier;
   }
 }
