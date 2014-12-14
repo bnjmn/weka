@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    PreconstructedKMeans.java
+ *    Copyright (C) 2014 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.clusterers;
 
 import java.util.List;
@@ -14,9 +35,18 @@ import weka.core.stats.NominalStats;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.filters.Filter;
+import weka.gui.GPCIgnore;
 import weka.gui.beans.KFIgnore;
 
+/**
+ * A "preconstructed" version of SimpleKMeans that has it's cluster centroids
+ * and cluster statistics supplied by an external client.
+ * 
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 @KFIgnore
+@GPCIgnore
 public class PreconstructedKMeans extends SimpleKMeans implements
   Preconstructed {
 
@@ -61,17 +91,17 @@ public class PreconstructedKMeans extends SimpleKMeans implements
     }
 
     m_ClusterNominalCounts =
-      new int[m_NumClusters][m_ClusterCentroids.numAttributes()][];
+      new double[m_NumClusters][m_ClusterCentroids.numAttributes()][];
     m_ClusterMissingCounts =
-      new int[m_NumClusters][m_ClusterCentroids.numAttributes()];
+      new double[m_NumClusters][m_ClusterCentroids.numAttributes()];
     m_ClusterStdDevs = new Instances(m_ClusterCentroids, 0);
-    m_ClusterSizes = new int[m_NumClusters];
+    m_ClusterSizes = new double[m_NumClusters];
 
     m_FullMeansOrMediansOrModes =
       new double[m_ClusterCentroids.numAttributes()];
     m_FullStdDevs = new double[m_ClusterCentroids.numAttributes()];
-    m_FullNominalCounts = new int[m_ClusterCentroids.numAttributes()][];
-    m_FullMissingCounts = new int[m_ClusterCentroids.numAttributes()];
+    m_FullNominalCounts = new double[m_ClusterCentroids.numAttributes()][];
+    m_FullMissingCounts = new double[m_ClusterCentroids.numAttributes()];
 
     // stats for individual clusters
     for (int i = 0; i < m_NumClusters; i++) {
@@ -89,7 +119,7 @@ public class PreconstructedKMeans extends SimpleKMeans implements
 
           m_ClusterMissingCounts[i][j] = (int) numMissing;
           double sumNonMissing = 0;
-          m_ClusterNominalCounts[i][j] = new int[orig.numValues()];
+          m_ClusterNominalCounts[i][j] = new double[orig.numValues()];
           for (int k = 0; k < orig.numValues(); k++) {
             m_ClusterNominalCounts[i][j][k] =
               (int) stats.getCount(orig.value(k));
@@ -131,7 +161,7 @@ public class PreconstructedKMeans extends SimpleKMeans implements
         String mode = stats.getModeLabel();
         m_FullMeansOrMediansOrModes[i] = orig.indexOfValue(mode);
         double modeCount = stats.getCount(mode);
-        m_FullNominalCounts[i] = new int[orig.numValues()];
+        m_FullNominalCounts[i] = new double[orig.numValues()];
         for (int j = 0; j < orig.numValues(); j++) {
           m_FullNominalCounts[i][j] = (int) stats.getCount(orig.value(j));
         }
