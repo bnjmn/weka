@@ -329,6 +329,9 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="kernelLogisticRegression"/>
     </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="discriminantAnalysis"/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
