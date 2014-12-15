@@ -23,6 +23,7 @@
   <property name="os"  value="osx"/>
   <property name="makensis"  value="makensis"/>
   <property name="osx_jre_vendor" value="apple"/>
+  <property environment="env" />
 
   <!-- load the last release date -->
   <property file="last-release.props"/>
@@ -44,6 +45,8 @@
     <!-- Remove packages that have no test classes -->
     <delete dir="packages/internal/WekaExcel"/>
     <delete dir="packages/internal/WekaODF"/>
+    <!-- Something in the lib dir of scatterPlot3D makes the GOE barf when running the tests -->
+    <delete dir="packages/external/scatterPlot3D"/>
 
     <mkdir dir="${temp}/weka-${release}"/>
     <mkdir dir="${temp}/weka-${release}/changelogs"/>
@@ -223,8 +226,9 @@
         identifier="nz.ac.waikato.cms.Weka"
         shortversion="${version}"
         mainclassname="weka.gui.GUIChooser">
-        <classpath file="${temp}/weka-${release}/weka.jar"/>
-        <option value="-Xmx1024M"/>
+      <runtime dir="${env.JAVA_HOME}" />
+      <classpath file="${temp}/weka-${release}/weka.jar"/>
+      <option value="-Xmx1024M"/>
     </bundleapp>
 
     <antcall target="dmg_${os}">
@@ -373,7 +377,7 @@
   </target>
 
   <target name="win_installers" depends="installer_init">
-        <!-- non-jre installer - 32 bit -->
+    <!-- non-jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
       <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7'"/>
@@ -382,6 +386,7 @@
         <pathelement path="${java.class.path}"/>
       </classpath>
     </java>
+
     <!-- non-jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
