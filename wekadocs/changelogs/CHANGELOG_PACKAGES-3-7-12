@@ -1,0 +1,1796 @@
+------------------------------------------------------------------------
+r10661 | mhall | 2014-04-23 11:56:06 +1200 (Wed, 23 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+   M /trunk/packages/external/LibSVM/src/main/java/weka/classifiers/functions/LibSVM.java
+
+Now sets the missing values capability and pre-processes nominal attributes using the unsupervised NominalToBinary filter
+------------------------------------------------------------------------
+r10695 | mhall | 2014-04-25 13:30:47 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/functionalTrees/pom.xml
+
+[maven-release-plugin] prepare release functionalTrees-1.0.3
+------------------------------------------------------------------------
+r10696 | mhall | 2014-04-25 13:33:24 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/functionalTrees/pom.xml
+
+[maven-release-plugin] rollback the release of functionalTrees-1.0.3
+------------------------------------------------------------------------
+r10697 | mhall | 2014-04-25 13:36:21 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/functionalTrees/pom.xml
+
+Fixed a svn url
+------------------------------------------------------------------------
+r10698 | mhall | 2014-04-25 13:36:56 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/functionalTrees/pom.xml
+
+[maven-release-plugin] prepare release functionalTrees-1.0.3
+------------------------------------------------------------------------
+r10700 | mhall | 2014-04-25 13:37:03 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/functionalTrees/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10701 | mhall | 2014-04-25 13:49:58 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/J48graft/pom.xml
+
+[maven-release-plugin] prepare release J48graft-1.0.3
+------------------------------------------------------------------------
+r10703 | mhall | 2014-04-25 13:50:06 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/J48graft/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10704 | mhall | 2014-04-25 18:53:42 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/thresholdSelector/pom.xml
+
+Updated urls in pom
+------------------------------------------------------------------------
+r10705 | mhall | 2014-04-25 19:05:42 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/thresholdSelector/pom.xml
+
+[maven-release-plugin] prepare release thresholdSelector-1.0.3
+------------------------------------------------------------------------
+r10707 | mhall | 2014-04-25 19:05:51 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/thresholdSelector/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10708 | mhall | 2014-04-25 19:25:26 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+
+Updated urls in pom
+------------------------------------------------------------------------
+r10709 | mhall | 2014-04-25 19:28:40 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+
+[maven-release-plugin] prepare release predictiveApriori-1.0.3
+------------------------------------------------------------------------
+r10711 | mhall | 2014-04-25 19:28:47 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10712 | mhall | 2014-04-25 19:49:42 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/userClassifier/Description.props
+
+Bumped version number to get back in sync with maven releases
+------------------------------------------------------------------------
+r10713 | mhall | 2014-04-25 19:55:20 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/userClassifier/pom.xml
+
+[maven-release-plugin] prepare release userClassifier-1.0.3
+------------------------------------------------------------------------
+r10715 | mhall | 2014-04-25 19:55:27 +1200 (Fri, 25 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/userClassifier/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10716 | mhall | 2014-04-26 18:59:58 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Updated description.props and pom
+------------------------------------------------------------------------
+r10717 | mhall | 2014-04-26 19:04:57 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+
+Had two changes entries - fixed
+------------------------------------------------------------------------
+r10718 | mhall | 2014-04-26 19:18:10 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Fixed a typo in a dependency
+------------------------------------------------------------------------
+r10719 | mhall | 2014-04-26 19:24:13 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Added missing jgoodies-looks dependency
+------------------------------------------------------------------------
+r10720 | mhall | 2014-04-26 19:26:20 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Updated jgoodies-looks version
+------------------------------------------------------------------------
+r10721 | mhall | 2014-04-26 19:38:17 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/cascadeKMeans/Description.props
+   M /trunk/packages/external/cascadeKMeans/pom.xml
+
+Updated description and pom
+------------------------------------------------------------------------
+r10722 | mhall | 2014-04-26 19:45:25 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/cascadeKMeans/pom.xml
+
+[maven-release-plugin] prepare release cascadeKMeans-1.0.3
+------------------------------------------------------------------------
+r10724 | mhall | 2014-04-26 19:45:34 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/cascadeKMeans/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10725 | mhall | 2014-04-26 19:50:07 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/Description.props
+   M /trunk/packages/external/DilcaDistance/pom.xml
+
+Updated description and pom
+------------------------------------------------------------------------
+r10726 | mhall | 2014-04-26 20:07:14 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/pom.xml
+
+[maven-release-plugin] prepare release DilcaDistance-1.0.1
+------------------------------------------------------------------------
+r10728 | mhall | 2014-04-26 20:07:21 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/DilcaDistance/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10729 | mhall | 2014-04-26 20:10:57 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+Updated urls
+------------------------------------------------------------------------
+r10730 | mhall | 2014-04-26 20:25:13 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare release LibSVM-1.0.6
+------------------------------------------------------------------------
+r10732 | mhall | 2014-04-26 20:25:20 +1200 (Sat, 26 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10733 | mhall | 2014-04-27 20:20:28 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/Description.props
+
+Updated version number in description.props
+------------------------------------------------------------------------
+r10734 | mhall | 2014-04-27 20:28:02 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] prepare release alternatingDecisionTrees-1.0.5
+------------------------------------------------------------------------
+r10736 | mhall | 2014-04-27 20:28:09 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10737 | mhall | 2014-04-27 20:33:04 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/Description.props
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+Updated weka dependency in description.props and mailing list url in pom
+------------------------------------------------------------------------
+r10738 | mhall | 2014-04-27 20:42:21 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare release attributeSelectionSearchMethods-1.0.7
+------------------------------------------------------------------------
+r10740 | mhall | 2014-04-27 20:42:29 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10741 | mhall | 2014-04-27 20:47:22 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/Description.props
+   M /trunk/packages/internal/bestFirstTree/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10742 | mhall | 2014-04-27 20:53:43 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/pom.xml
+
+[maven-release-plugin] prepare release bestFirstTree-1.0.4
+------------------------------------------------------------------------
+r10744 | mhall | 2014-04-27 20:53:51 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10745 | mhall | 2014-04-27 20:57:37 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/chiSquaredAttributeEval/Description.props
+   M /trunk/packages/internal/chiSquaredAttributeEval/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10746 | mhall | 2014-04-27 21:03:45 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/chiSquaredAttributeEval/pom.xml
+
+[maven-release-plugin] prepare release chiSquaredAttributeEval-1.0.4
+------------------------------------------------------------------------
+r10748 | mhall | 2014-04-27 21:03:53 +1200 (Sun, 27 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/chiSquaredAttributeEval/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10749 | mhall | 2014-04-28 14:55:30 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaScoringHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/HadoopJobCustomizer.java
+
+Fixed a bug in the CSVToARFF job that affected manually specified attribute names which contained spaces. Fixed a glitch in the GUI that affected setting attribute names in the CSVToARFF part of the Scoring job's dialog
+------------------------------------------------------------------------
+r10750 | mhall | 2014-04-28 14:59:52 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r10751 | mhall | 2014-04-28 15:00:40 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r10752 | mhall | 2014-04-28 15:03:08 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated build properties
+------------------------------------------------------------------------
+r10753 | mhall | 2014-04-28 15:03:25 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/build.properties
+
+Updated build properties
+------------------------------------------------------------------------
+r10756 | mhall | 2014-04-28 22:50:53 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaClustering/pom.xml
+
+Updated urls in pom
+------------------------------------------------------------------------
+r10757 | mhall | 2014-04-28 22:54:02 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaClustering/Description.props
+
+Updated weka dependency
+------------------------------------------------------------------------
+r10758 | mhall | 2014-04-28 23:01:58 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/Description.props
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10759 | mhall | 2014-04-28 23:02:55 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaClustering/pom.xml
+
+[maven-release-plugin] prepare release classificationViaClustering-1.0.3
+------------------------------------------------------------------------
+r10761 | mhall | 2014-04-28 23:03:03 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaClustering/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10762 | mhall | 2014-04-28 23:10:24 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare release classifierBasedAttributeSelection-1.0.4
+------------------------------------------------------------------------
+r10764 | mhall | 2014-04-28 23:10:32 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10765 | mhall | 2014-04-28 23:12:00 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/Description.props
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10766 | mhall | 2014-04-28 23:20:47 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+[maven-release-plugin] prepare release clojureClassifier-1.0.1
+------------------------------------------------------------------------
+r10768 | mhall | 2014-04-28 23:20:55 +1200 (Mon, 28 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/clojureClassifier/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10769 | mhall | 2014-04-29 15:52:12 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/complementNaiveBayes/Description.props
+   M /trunk/packages/internal/complementNaiveBayes/pom.xml
+
+Updated Weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10770 | mhall | 2014-04-29 16:36:11 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/complementNaiveBayes/pom.xml
+
+[maven-release-plugin] prepare release complementNaiveBayes-1.0.3
+------------------------------------------------------------------------
+r10772 | mhall | 2014-04-29 16:36:19 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/complementNaiveBayes/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10773 | mhall | 2014-04-29 19:48:29 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/conjunctiveRule/Description.props
+   M /trunk/packages/internal/conjunctiveRule/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10774 | mhall | 2014-04-29 19:55:35 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/conjunctiveRule/pom.xml
+
+[maven-release-plugin] prepare release conjunctiveRule-1.0.4
+------------------------------------------------------------------------
+r10776 | mhall | 2014-04-29 19:55:42 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/conjunctiveRule/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10777 | mhall | 2014-04-29 19:59:50 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/Description.props
+   M /trunk/packages/internal/consistencySubsetEval/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10778 | mhall | 2014-04-29 20:11:35 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/pom.xml
+
+[maven-release-plugin] prepare release consistencySubsetEval-1.0.3
+------------------------------------------------------------------------
+r10780 | mhall | 2014-04-29 20:11:44 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10781 | mhall | 2014-04-29 20:15:30 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/costSensitiveAttributeSelection/Description.props
+   M /trunk/packages/internal/costSensitiveAttributeSelection/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10782 | mhall | 2014-04-29 20:22:06 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/costSensitiveAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare release costSensitiveAttributeSelection-1.0.3
+------------------------------------------------------------------------
+r10784 | mhall | 2014-04-29 20:22:14 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/costSensitiveAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10785 | mhall | 2014-04-29 20:25:30 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dagging/Description.props
+   M /trunk/packages/internal/dagging/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10786 | mhall | 2014-04-29 20:31:49 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dagging/pom.xml
+
+[maven-release-plugin] prepare release dagging-1.0.3
+------------------------------------------------------------------------
+r10788 | mhall | 2014-04-29 20:31:56 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dagging/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10789 | mhall | 2014-04-29 22:28:13 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/denormalize/Description.props
+   M /trunk/packages/internal/denormalize/pom.xml
+
+Updated weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10790 | mhall | 2014-04-29 22:33:22 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/denormalize/pom.xml
+
+[maven-release-plugin] prepare release denormalize-1.0.3
+------------------------------------------------------------------------
+r10792 | mhall | 2014-04-29 22:33:30 +1200 (Tue, 29 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/denormalize/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10795 | mhall | 2014-04-30 12:46:32 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/Description.props
+   M /trunk/packages/internal/DTNB/pom.xml
+
+Updated Weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10796 | mhall | 2014-04-30 12:52:38 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/pom.xml
+
+[maven-release-plugin] prepare release DTNB-1.0.3
+------------------------------------------------------------------------
+r10798 | mhall | 2014-04-30 12:52:46 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10799 | mhall | 2014-04-30 12:56:01 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/Description.props
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+Updated Weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10800 | mhall | 2014-04-30 13:02:37 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+[maven-release-plugin] prepare release ensemblesOfNestedDichotomies-1.0.3
+------------------------------------------------------------------------
+r10802 | mhall | 2014-04-30 13:02:44 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10803 | mhall | 2014-04-30 13:05:40 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/extraTrees/Description.props
+   M /trunk/packages/internal/extraTrees/pom.xml
+
+Updated Weka dependency in description.props and urls in pom
+------------------------------------------------------------------------
+r10804 | mhall | 2014-04-30 13:11:32 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/extraTrees/pom.xml
+
+Fixed a bug in the pom
+------------------------------------------------------------------------
+r10805 | mhall | 2014-04-30 13:13:13 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/extraTrees/pom.xml
+
+Fixed version number in pom
+------------------------------------------------------------------------
+r10806 | mhall | 2014-04-30 13:14:20 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/extraTrees/pom.xml
+
+[maven-release-plugin] prepare release extraTrees-1.0.1
+------------------------------------------------------------------------
+r10808 | mhall | 2014-04-30 13:14:27 +1200 (Wed, 30 Apr 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/extraTrees/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10823 | mhall | 2014-05-09 12:16:02 +1200 (Fri, 09 May 2014) | 1 line
+Changed paths:
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/FailureEvent.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/FailureListener.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/InstancesProducer.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/SuccessEvent.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/SuccessListener.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/TextProducer.java
+
+Moving thes to distributedWekaBase
+------------------------------------------------------------------------
+r10824 | mhall | 2014-05-09 12:16:51 +1200 (Fri, 09 May 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/FailureEvent.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/FailureListener.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/ImageProducer.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/InstancesProducer.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/SuccessEvent.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/SuccessListener.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/TextProducer.java
+
+Moved these here from distributedWekaHadoop
+------------------------------------------------------------------------
+r10838 | eibe | 2014-05-19 16:38:43 +1200 (Mon, 19 May 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/DBSCAN.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/OPTICS.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/DataObject.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/Databases/Database.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/GraphPanel.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/OPTICS_Visualizer.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/ResultVectorTableModel.java
+   M /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/OPTICS_GUI/SERObject.java
+
+Now uses distance functions for WEKA core. Deleted database parameter as only one database could be specified.
+------------------------------------------------------------------------
+r10839 | eibe | 2014-05-21 17:21:54 +1200 (Wed, 21 May 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/optics_dbScan/Description.props
+   D /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/EuclideanDataObject.java
+   D /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/DataObjects/ManhattanDataObject.java
+   D /trunk/packages/external/optics_dbScan/src/main/java/weka/clusterers/forOPTICSAndDBScan/Databases/SequentialDatabase.java
+
+OPTICS and DBSCAN now use distance functions from the core of WEKA. More distance functions can be applied, and normalization of attributes can now be turned off. Removed database parameter.
+------------------------------------------------------------------------
+r10840 | mhall | 2014-05-27 20:04:48 +1200 (Tue, 27 May 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/build.properties
+
+Updated build.properties
+------------------------------------------------------------------------
+r10845 | mhall | 2014-06-05 15:16:53 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/IncrementalQuantileEstimator.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/QuantileCalculator.java
+
+Initial import
+------------------------------------------------------------------------
+r10846 | mhall | 2014-06-05 15:18:07 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+
+Added quartiles
+------------------------------------------------------------------------
+r10847 | mhall | 2014-06-05 15:20:48 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/org
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/org/tc33
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/org/tc33/jheatchart
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/org/tc33/jheatchart/HeatChart.java
+
+Initial import of Tom Castle's HeatChart class
+------------------------------------------------------------------------
+r10848 | mhall | 2014-06-05 15:21:31 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CorrelationMatrixRowReduceTask.java
+
+Now produces a heat chart png for the correlation matrix
+------------------------------------------------------------------------
+r10849 | mhall | 2014-06-05 15:24:08 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopReducer.java
+
+Made a couple of constants final
+------------------------------------------------------------------------
+r10850 | mhall | 2014-06-05 15:25:09 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJob.java
+
+Initial import
+------------------------------------------------------------------------
+r10851 | mhall | 2014-06-05 15:26:15 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopMapper.java
+
+Made some performance improvements
+------------------------------------------------------------------------
+r10852 | mhall | 2014-06-05 15:27:22 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+
+Added quantile calculation. Now computes these and re-writes the arff header with new summary attributes if necessary
+------------------------------------------------------------------------
+r10853 | mhall | 2014-06-05 15:29:16 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/CorrelationMatrixHadoopJob.java
+
+Now produces a png heat map for the correlation matrix - this is fetched from hdfs and output from the Knowledge Flow step as an image event
+------------------------------------------------------------------------
+r10854 | mhall | 2014-06-05 15:31:19 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopMapper.java
+
+Removed some commented out code
+------------------------------------------------------------------------
+r10855 | mhall | 2014-06-05 15:32:04 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/CorrelationMatrixHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/CorrelationMatrixHadoopJobBeanInfo.java
+
+Now produces a png heat map for the correlation matrix - this is fetched from hdfs and output from the Knowledge Flow step as an image event
+------------------------------------------------------------------------
+r10856 | mhall | 2014-06-05 15:42:41 +1200 (Thu, 05 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopJob.java
+
+Now uses the separate randomized data chunk job
+------------------------------------------------------------------------
+r10887 | eibe | 2014-06-18 10:22:34 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/Description.props
+   M /trunk/packages/internal/alternatingDecisionTrees/src/main/java/weka/classifiers/trees/ADTree.java
+   M /trunk/packages/internal/alternatingDecisionTrees/src/main/java/weka/classifiers/trees/LADTree.java
+
+Now compatible with modified IterativeClassifier interface. Now both implement IterativeClassifier and can be used with IterativeClassifierOptimizer.
+------------------------------------------------------------------------
+r10895 | mhall | 2014-06-18 15:06:25 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/InteractiveTableModel.java
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/InteractiveTablePanel.java
+
+No longer needed as these are in core Weka now
+------------------------------------------------------------------------
+r10896 | mhall | 2014-06-18 15:07:50 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/ChartUtils.java
+
+Initial import
+------------------------------------------------------------------------
+r10897 | mhall | 2014-06-18 15:13:07 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/ivy.xml
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/distributed/core/DistributedJobConfig.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/QuantileCalculator.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderReduceTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CSVToARFFHeaderMapTaskTest.java
+
+ARFF header summary stats can now store quartiles and histogram data for numeric attributes. Various code cleanups. Added routines for generating summary attribute charts using JFreeChart
+------------------------------------------------------------------------
+r10902 | mhall | 2014-06-18 15:23:52 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated Description.props and pom.xml
+------------------------------------------------------------------------
+r10903 | mhall | 2014-06-18 15:30:38 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated some dependencies in pom.xml
+------------------------------------------------------------------------
+r10904 | mhall | 2014-06-18 15:31:39 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated version number in build.properties
+------------------------------------------------------------------------
+r10905 | mhall | 2014-06-18 15:40:10 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJobBeanInfo.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/RandomizedDataChunkHadoopJob.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/RandomizedDataChunkHadoopJobBeanInfo.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/icons/RandomizedDataChunkHadoopJob.gif
+
+Initial import
+------------------------------------------------------------------------
+r10906 | mhall | 2014-06-18 15:41:44 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Beans.props
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+   M /trunk/packages/internal/distributedWekaHadoop/build.properties
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/distributed/hadoop/AbstractHadoopJobConfig.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/distributed/hadoop/MapReduceJobConfig.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJobBeanInfo.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/CSVToArffHeaderHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/HadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopMapper.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierEvaluationHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/CSVToARFFHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/CSVToARFFHadoopJobBeanInfo.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/HadoopJobCustomizer.java
+
+Updated with changes relating to additional summary attribute information, chart generation, code cleanups and the refactoring of the randomly shuffled data chunk job out into its own job class
+------------------------------------------------------------------------
+r10907 | mhall | 2014-06-18 15:46:06 +1200 (Wed, 18 Jun 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/InteractiveTableModel.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/InteractiveTablePanel.java
+
+Re-added as these are not in weka 3.7.11 - oops.
+------------------------------------------------------------------------
+r10908 | mhall | 2014-06-19 10:53:12 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/HadoopJob.java
+
+Updated the jcommon version.
+------------------------------------------------------------------------
+r10909 | mhall | 2014-06-19 10:54:07 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/ivy.xml
+
+Made the jfreechart dependency transitive in order to pull in jcommon
+------------------------------------------------------------------------
+r10910 | mhall | 2014-06-19 10:55:44 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Removed the jcommon dependency as this is pulled in by jfreechart
+------------------------------------------------------------------------
+r10911 | mhall | 2014-06-19 10:58:25 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaBase-1.0.6
+------------------------------------------------------------------------
+r10913 | mhall | 2014-06-19 10:58:34 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10914 | mhall | 2014-06-19 11:02:27 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaHadoop-1.0.9
+------------------------------------------------------------------------
+r10916 | mhall | 2014-06-19 11:02:33 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10917 | mhall | 2014-06-19 11:04:55 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+Updated base Weka dependency in pom
+------------------------------------------------------------------------
+r10918 | mhall | 2014-06-19 11:05:12 +1200 (Thu, 19 Jun 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated base Weka dependency in pom
+------------------------------------------------------------------------
+r10926 | mhall | 2014-07-01 14:05:23 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/ChartUtils.java
+   D /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/IncrementalQuantileEstimator.java
+   D /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/QuantileCalculator.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/IncrementalQuantileEstimator.java (from /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/IncrementalQuantileEstimator.java:10917)
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/QuantileCalculator.java (from /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/QuantileCalculator.java:10917)
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderReduceTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CorrelationMatrixMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CorrelationMatrixRowReduceTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaClassifierMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/unsupervised/attribute/PreConstructedPCA.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CSVToARFFHeaderMapTaskTest.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CorrelationMatrixMapTaskTest.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/WekaScoringTaskTest.java
+
+Refactored stats classes out of CSVToARFFHeaderMapTask into separate classes in weka.core.stats
+------------------------------------------------------------------------
+r10927 | mhall | 2014-07-01 14:09:24 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/ArffSummaryNumericMetric.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NominalStats.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericStats.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/Stats.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StringStats.java
+
+Refactored stats classes out of CSVToARFFHeaderMapTask into separate classes in weka.core.stats
+------------------------------------------------------------------------
+r10928 | mhall | 2014-07-01 14:10:47 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaFoldBasedClassifierEvaluationHadoopMapper.java
+
+Updated for the change of packaging for Stats classes in distributedWekaBase
+------------------------------------------------------------------------
+r10929 | mhall | 2014-07-01 14:16:24 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/ArffSummaryNumericMetric.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NominalStats.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericStats.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/Stats.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StringStats.java
+
+Added GPL headers
+------------------------------------------------------------------------
+r10930 | mhall | 2014-07-01 20:28:21 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/ChartUtils.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/QuantileCalculator.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderReduceTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CSVToARFFHeaderMapTaskTest.java
+
+Refactored NumericAttributeBinData out of ChartUtils and into its own class in weka.core.stats
+------------------------------------------------------------------------
+r10931 | mhall | 2014-07-01 20:28:56 +1200 (Tue, 01 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/CSVToArffHeaderHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+
+Updated for changes to NumericAttributeBinData in distributedWekaBase
+------------------------------------------------------------------------
+r10949 | eibe | 2014-07-15 10:50:08 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPClassifier.java
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPRegressor.java
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/filters/unsupervised/attribute/MLPAutoencoder.java
+
+MLPClassifier, MLPRegressor, and MLPAutoencoder now implement WeightedInstancesHandler.
+------------------------------------------------------------------------
+r10950 | eibe | 2014-07-15 13:39:40 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/Description.props
+
+Updated Description.props for new release.
+------------------------------------------------------------------------
+r10951 | eibe | 2014-07-15 16:35:43 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/Description.props
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFClassifier.java
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFNetwork.java
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFRegressor.java
+
+RBFRegressor, RBFClassifier, and RBFNetwork now implement WeightedInstancesHandler.
+------------------------------------------------------------------------
+r10952 | mhall | 2014-07-15 19:51:15 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+Updated version number in pom
+------------------------------------------------------------------------
+r10953 | mhall | 2014-07-15 20:06:07 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.6
+------------------------------------------------------------------------
+r10955 | mhall | 2014-07-15 20:06:16 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10956 | mhall | 2014-07-15 20:32:06 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+Updated version number in pom
+------------------------------------------------------------------------
+r10957 | mhall | 2014-07-15 20:32:51 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.7
+------------------------------------------------------------------------
+r10959 | mhall | 2014-07-15 20:32:59 +1200 (Tue, 15 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r10969 | eibe | 2014-07-18 14:10:16 +1200 (Fri, 18 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/Description.props
+   M /trunk/packages/internal/RBFNetwork/src/main/java/weka/classifiers/functions/RBFModel.java
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+   M /trunk/weka/src/main/java/weka/classifiers/meta/AdaBoostM1.java
+
+Fixed bug in error message in Evaluation.java. Fixed bug that caused modified AdaBoostM1 to crash when base learner implements Randomizable and WeightedInstancesHandler. Modified RBFModel so that RBFRegressor and RBFClassifier can now be used to learn networks with a single unit in the hidden layer.
+------------------------------------------------------------------------
+r10975 | mhall | 2014-07-18 19:50:41 +1200 (Fri, 18 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare release RBFNetwork-1.0.7
+------------------------------------------------------------------------
+r10977 | mhall | 2014-07-18 19:50:49 +1200 (Fri, 18 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RBFNetwork/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11005 | mhall | 2014-07-24 09:33:11 +1200 (Thu, 24 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/hotSpot/src/main/java/weka/associations/HotSpot.java
+
+Now implements the new doNotCheckCapabilities methods in CapabilitiesHandler
+------------------------------------------------------------------------
+r11008 | mhall | 2014-07-24 15:14:23 +1200 (Thu, 24 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/hotSpot/src/main/java/weka/associations/HotSpot.java
+
+Now implements CapabilitiesIgnorer
+------------------------------------------------------------------------
+r11017 | mhall | 2014-07-25 09:22:27 +1200 (Fri, 25 Jul 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/KFIgnore.java
+
+Initial import here to allow compilation against 3.7.11 until 3.7.12 is released
+------------------------------------------------------------------------
+r11018 | mhall | 2014-07-25 09:25:41 +1200 (Fri, 25 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/ivy.xml
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/stream
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/stream/quantile
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/stream/quantile/GroupTree.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/stream/quantile/TDigest.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/util
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/util/AbstractIterator.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/util/Lists.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/com/clearspring/analytics/util/Preconditions.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/meta/AggregateableFilteredClassifier.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/meta/AggregateableFilteredClassifierUpdateable.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericStats.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StringStats.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTaskBeanInfo.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderReduceTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CorrelationMatrixMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/MakePreconstructedFilter.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/unsupervised/attribute/PreConstructedPCA.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CSVToARFFHeaderMapTaskTest.java
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CorrelationMatrixMapTaskTest.java
+
+Replaced p^2 quantile computation with TDigest from the stream-lib library. This allows quantile computation to be done in parallel and in one pass during the ARFF header job. Also fixed a bug with respect to names file handling when running under Windows.
+------------------------------------------------------------------------
+r11019 | mhall | 2014-07-25 09:31:56 +1200 (Fri, 25 Jul 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericAttributeBinData.java
+
+Initial import
+------------------------------------------------------------------------
+r11020 | mhall | 2014-07-25 09:33:53 +1200 (Fri, 25 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJobBeanInfo.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/CSVToArffHeaderHadoopMapper.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/CSVToArffHeaderHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaFoldBasedClassifierHadoopMapper.java
+
+Updated to account for move from p^2 to TDigest for quantile calculation
+------------------------------------------------------------------------
+r11028 | mhall | 2014-07-29 14:14:40 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyUnorderedRuleInduction/pom.xml
+
+[maven-release-plugin] prepare release fuzzyUnorderedRuleInduction-1.0.2
+------------------------------------------------------------------------
+r11029 | mhall | 2014-07-29 14:14:59 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyUnorderedRuleInduction/pom.xml
+
+[maven-release-plugin] rollback the release of fuzzyUnorderedRuleInduction-1.0.2
+------------------------------------------------------------------------
+r11030 | mhall | 2014-07-29 14:16:00 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyUnorderedRuleInduction/pom.xml
+
+Updated URLs in pom
+------------------------------------------------------------------------
+r11031 | mhall | 2014-07-29 14:16:24 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyUnorderedRuleInduction/pom.xml
+
+[maven-release-plugin] prepare release fuzzyUnorderedRuleInduction-1.0.2
+------------------------------------------------------------------------
+r11033 | mhall | 2014-07-29 14:16:38 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/fuzzyUnorderedRuleInduction/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11034 | mhall | 2014-07-29 14:19:23 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/classAssociationRules/pom.xml
+
+Updated URLs in pom
+------------------------------------------------------------------------
+r11037 | mhall | 2014-07-29 15:09:17 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/classAssociationRules/pom.xml
+
+[maven-release-plugin] prepare release classAssociationRules-1.0.3
+------------------------------------------------------------------------
+r11039 | mhall | 2014-07-29 15:09:24 +1200 (Tue, 29 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/classAssociationRules/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11040 | mhall | 2014-07-30 10:51:35 +1200 (Wed, 30 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/HadoopJobCustomizer.java
+
+Change label of tab for ARFF part of each job from "ARFF header creation" to "ARFF header/CSV parsing" since the CSV parsing options are important even when a ARFF header already exists in HDFS.
+------------------------------------------------------------------------
+r11041 | mhall | 2014-07-30 10:57:41 +1200 (Wed, 30 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated Description and build properties
+------------------------------------------------------------------------
+r11042 | mhall | 2014-07-30 10:57:56 +1200 (Wed, 30 Jul 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+   M /trunk/packages/internal/distributedWekaHadoop/build.properties
+
+Updated Description and build properties
+------------------------------------------------------------------------
+r11047 | eibe | 2014-08-05 10:11:53 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/Description.props
+   M /trunk/packages/internal/predictiveApriori/src/main/java/weka/associations/PredictiveApriori.java
+
+Mining of class association rules did not work properly with externally provided class index, e.g. using JCBA. Fixed.
+------------------------------------------------------------------------
+r11048 | mhall | 2014-08-05 10:44:00 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11049 | mhall | 2014-08-05 10:47:06 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11050 | mhall | 2014-08-05 10:49:30 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/SPegasos/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11051 | mhall | 2014-08-05 10:49:37 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/SVMAttributeEval/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11052 | mhall | 2014-08-05 10:50:15 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11053 | mhall | 2014-08-05 10:50:32 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaODF/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11054 | mhall | 2014-08-05 10:51:50 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11055 | mhall | 2014-08-05 10:52:00 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/alternatingDecisionTrees/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11056 | mhall | 2014-08-05 10:52:10 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/attributeSelectionSearchMethods/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11057 | mhall | 2014-08-05 10:52:18 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/bestFirstTree/build_package.xml
+
+Updated clean target to delete the doc directory too
+------------------------------------------------------------------------
+r11058 | mhall | 2014-08-05 10:53:09 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+
+[maven-release-plugin] prepare release predictiveApriori-1.0.4
+------------------------------------------------------------------------
+r11060 | mhall | 2014-08-05 10:53:17 +1200 (Tue, 05 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11092 | mhall | 2014-08-13 11:00:51 +1200 (Wed, 13 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/MakePreconstructedFilter.java
+
+Now checks for string attributes and ensures that they do not collect in the header in memory.
+------------------------------------------------------------------------
+r11093 | mhall | 2014-08-18 13:47:55 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaScoringHadoopMapper.java
+
+Fixed a bug in the handling of the range used for outputting certain input attributes along with the predictions.
+------------------------------------------------------------------------
+r11094 | mhall | 2014-08-18 13:59:27 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaFoldBasedClassifierHadoopReducer.java
+
+Now outputs some info on memory usage to system err. Also checks for a user property that can be used to suppress the textual output of the classifiers produced: weka.classifier.reducer.suppressTextOut=true
+------------------------------------------------------------------------
+r11095 | mhall | 2014-08-18 14:00:49 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopMapper.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/RandomizedDataChunkHadoopReducer.java
+
+Now handles randomizing when the class is not not set. Also added an option to turn off the default behavior of setting the class attribute as the last attribute if it is not set in the data
+------------------------------------------------------------------------
+r11096 | mhall | 2014-08-18 14:01:53 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CorrelationMatrixMapTaskTest.java
+
+Made a few static data set creation methods public instead of protected
+------------------------------------------------------------------------
+r11097 | mhall | 2014-08-18 14:04:26 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaClassifierMapTask.java
+
+Now prints some memory usage stats in the finalizeTask() method. Also checks for UpdateableBatchProcessor
+------------------------------------------------------------------------
+r11098 | mhall | 2014-08-18 14:05:16 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/meta/AggregateableFilteredClassifierUpdateable.java
+
+Now implements UpdateableBatchProcessor
+------------------------------------------------------------------------
+r11099 | mhall | 2014-08-18 14:06:17 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/meta/FilteredClassifierUpdateable.java
+
+Now implements UpdateableBatchProcessor
+------------------------------------------------------------------------
+r11100 | mhall | 2014-08-18 18:31:25 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/UpdateableBatchProcessor.java
+
+Initial import
+------------------------------------------------------------------------
+r11101 | mhall | 2014-08-18 18:39:50 +1200 (Mon, 18 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/MakePreconstructedFilter.java
+
+Removing @override on options methods in order to compile against 3.7.11. 
+------------------------------------------------------------------------
+r11104 | eibe | 2014-08-22 21:57:06 +1200 (Fri, 22 Aug 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/discriminantAnalysis
+   A /trunk/packages/internal/discriminantAnalysis/Description.props
+   A /trunk/packages/internal/discriminantAnalysis/build_package.xml
+   A /trunk/packages/internal/discriminantAnalysis/lib
+   A /trunk/packages/internal/discriminantAnalysis/pom.xml
+   A /trunk/packages/internal/discriminantAnalysis/src
+   A /trunk/packages/internal/discriminantAnalysis/src/main
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/classifiers
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/classifiers/functions/FLDA.java
+   A /trunk/packages/internal/discriminantAnalysis/src/test
+   A /trunk/packages/internal/discriminantAnalysis/src/test/java
+   A /trunk/packages/internal/discriminantAnalysis/src/test/java/weka
+   A /trunk/packages/internal/discriminantAnalysis/src/test/java/weka/classifiers
+   A /trunk/packages/internal/discriminantAnalysis/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/discriminantAnalysis/src/test/java/weka/classifiers/functions/FLDATest.java
+
+Initial import.
+------------------------------------------------------------------------
+r11105 | eibe | 2014-08-23 18:57:17 +1200 (Sat, 23 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/classifiers/functions/FLDA.java
+
+Forgot to update Javadoc.
+------------------------------------------------------------------------
+r11106 | mhall | 2014-08-24 14:17:25 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+Changed version to 1.0.0-SNAPSHOT prior to first release
+------------------------------------------------------------------------
+r11107 | mhall | 2014-08-24 14:18:28 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/build_package.xml
+
+clean target now deletes doc directory too
+------------------------------------------------------------------------
+r11108 | mhall | 2014-08-24 14:49:03 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11110 | mhall | 2014-08-24 14:49:09 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11111 | mhall | 2014-08-24 14:50:07 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] rollback the release of discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11112 | mhall | 2014-08-24 14:56:55 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11114 | mhall | 2014-08-24 14:57:02 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11115 | mhall | 2014-08-24 15:01:22 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] rollback the release of discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11116 | mhall | 2014-08-24 15:01:43 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11117 | mhall | 2014-08-24 15:02:38 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] rollback the release of discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11119 | mhall | 2014-08-24 15:05:16 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11121 | mhall | 2014-08-24 15:05:22 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11122 | mhall | 2014-08-24 15:09:29 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] rollback the release of discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11124 | mhall | 2014-08-24 15:37:21 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.0
+------------------------------------------------------------------------
+r11126 | mhall | 2014-08-24 15:37:27 +1200 (Sun, 24 Aug 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11140 | mhall | 2014-09-09 21:07:05 +1200 (Tue, 09 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaScoringMapTask.java
+
+Added a method to return whether the model is using string attributes or not.
+------------------------------------------------------------------------
+r11141 | mhall | 2014-09-09 21:08:28 +1200 (Tue, 09 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaScoringHadoopMapper.java
+
+Changed so that batch prediction is not invoked for BatchPredictors if the underlying model is using string attributes.
+------------------------------------------------------------------------
+r11151 | mhall | 2014-09-12 12:19:19 +1200 (Fri, 12 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/PreconstructedKMeans.java
+
+Within cluster sum of errors now takes instance weights into account.
+------------------------------------------------------------------------
+r11155 | mhall | 2014-09-16 20:39:59 +1200 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/ClassifierProducer.java
+
+Moving from distributedWekaHadoop
+------------------------------------------------------------------------
+r11156 | mhall | 2014-09-16 20:40:29 +1200 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   D /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/ClassifierProducer.java
+
+Moved to distributedWekaBase
+------------------------------------------------------------------------
+r11157 | mhall | 2014-09-16 20:44:19 +1200 (Tue, 16 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/gui/beans/ClustererProducer.java
+
+Initial import.
+------------------------------------------------------------------------
+r11158 | mhall | 2014-09-18 22:06:29 +1200 (Thu, 18 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/CentroidSketch.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/ClusterUtils.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/PreconstructedFilteredClusterer.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/StreamableFilterHelper.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/WeightedReservoirSample.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/KMeansMapTask.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/KMeansMapTaskBeanInfo.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/KMeansReduceTask.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/unsupervised/attribute/PreconstructedMissingValuesReplacer.java
+   A /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/KMeansTaskTest.java
+
+Initial import of k-means stuff
+------------------------------------------------------------------------
+r11159 | mhall | 2014-09-18 22:13:50 +1200 (Thu, 18 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/ClusterUtils.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/KMeansMapTask.java
+
+Moved routine for computing priming data from CanopyMapTask to ClusterUtils
+------------------------------------------------------------------------
+r11160 | mhall | 2014-09-19 12:05:48 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/distributed/hadoop/HDFSUtils.java
+
+Added a utility method for serializing a supplied object directly into the staging area in HDFS and adding it to the distributed cache for a job
+------------------------------------------------------------------------
+r11161 | mhall | 2014-09-19 12:06:55 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/HadoopJob.java
+
+Added a debug flag and logging to apache commons logging
+------------------------------------------------------------------------
+r11162 | mhall | 2014-09-19 12:07:48 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopJob.java
+
+Inproved the stopping of the job (now stops internal arff and randomize jobs)
+------------------------------------------------------------------------
+r11163 | mhall | 2014-09-19 12:08:16 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/WekaClassifierHadoopJobBeanInfo.java
+
+Small javadoc fix
+------------------------------------------------------------------------
+r11164 | mhall | 2014-09-19 13:44:04 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansCentroidSketchHadoopMapper.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansCentroidSketchHadoopReducer.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansClustererHadoopJob.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansClustererHadoopJobBeanInfo.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansHadoopMapper.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/KMeansHadoopReducer.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/KMeansClustererHadoopJob.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/KMeansClustererHadoopJobBeanInfo.java
+   A /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/icons/KMeansClustererHadoopJob.gif
+
+Initial import of KMeans hadoop wrapper
+------------------------------------------------------------------------
+r11165 | mhall | 2014-09-19 13:44:42 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Beans.props
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/distributed/hadoop/HadoopJobBeanInfo.java
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/gui/beans/HadoopJobCustomizer.java
+
+Updated for k-means
+------------------------------------------------------------------------
+r11166 | mhall | 2014-09-19 13:58:08 +1200 (Fri, 19 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/src/main/java/weka/core/converters/HDFSSaver.java
+
+Now ensures that no header row is specified on the CSVSaver delegate
+------------------------------------------------------------------------
+r11168 | mhall | 2014-09-22 10:31:17 +1200 (Mon, 22 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+
+Small change to how range strings are handled in order to prevent some GUI weirdness.
+------------------------------------------------------------------------
+r11169 | mhall | 2014-09-23 10:20:45 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/CentroidSketch.java
+
+Added technical info and global info.
+------------------------------------------------------------------------
+r11170 | mhall | 2014-09-23 10:26:40 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/KMeansMapTask.java
+
+Small doc fix.
+------------------------------------------------------------------------
+r11171 | mhall | 2014-09-23 15:13:38 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+   M /trunk/packages/internal/distributedWekaHadoop/build.properties
+
+Updated for version 1.0.11
+------------------------------------------------------------------------
+r11172 | mhall | 2014-09-23 15:14:39 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated for version 1.0.8
+------------------------------------------------------------------------
+r11173 | mhall | 2014-09-23 16:00:28 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r11174 | mhall | 2014-09-23 16:01:05 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaBase-1.0.8
+------------------------------------------------------------------------
+r11176 | mhall | 2014-09-23 16:01:08 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11177 | mhall | 2014-09-23 16:02:47 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r11178 | mhall | 2014-09-23 16:03:19 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaHadoop-1.0.11
+------------------------------------------------------------------------
+r11180 | mhall | 2014-09-23 16:03:25 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11181 | eibe | 2014-09-23 19:16:21 +1200 (Tue, 23 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/Description.props
+   M /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Removed filter configuration because FilteredClassifier should be used instead. This also simplifies configuration. Made SMOreg default learner being optimized. Made command-line defaults and GUI defaults consistent.
+------------------------------------------------------------------------
+r11188 | mhall | 2014-09-25 13:05:04 +1200 (Thu, 25 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/src/test/java/weka/classifiers/meta/GridSearchTest.java
+
+Now isn't completele broken after latest changes to GridSearch
+------------------------------------------------------------------------
+r11189 | mhall | 2014-09-25 15:46:26 +1200 (Thu, 25 Sep 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.props
+
+Initial import of default settings properties file for GridSearch.
+------------------------------------------------------------------------
+r11190 | mhall | 2014-09-25 15:47:51 +1200 (Thu, 25 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Now reads default settings for all options from a properties file (included with the main package jar file): weka/classifiers/meta/GridSearch.props. This file can be copied, altered and placed in ${WEKA_HOME}/props if desired.
+------------------------------------------------------------------------
+r11193 | mhall | 2014-09-26 09:58:02 +1200 (Fri, 26 Sep 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/src/main/java/weka/classifiers/meta/GridSearch.java
+
+Now loads default properties just once when the class is first loaded.
+------------------------------------------------------------------------
+r11197 | eibe | 2014-10-10 15:08:14 +1300 (Fri, 10 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/MLRClassifier.java
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/impl/MLRClassifierImpl.java
+
+MLRClassifier now works with MLR version 2 and contains all(?) schemes from MLR version 2.1 that are not already available elsewhere in WEKA.
+------------------------------------------------------------------------
+r11200 | eibe | 2014-10-13 16:56:51 +1300 (Mon, 13 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/impl/MLRClassifierImpl.java
+
+Whether scheme supports probabilities is no also correctly detected with new versions of MLR.
+------------------------------------------------------------------------
+r11220 | mhall | 2014-10-17 08:42:34 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/Description.props
+   M /trunk/packages/internal/classifierBasedAttributeSelection/src/main/java/weka/attributeSelection/ClassifierAttributeEval.java
+
+ClassifierAttributeEval now uses the wrapper under the hood for evaluation of individual attributes. Now has an option to evaluate an attribute by measuring the affect on performance by leaving it out of the full set. Can now evaluate multiple attributes in parallel.
+------------------------------------------------------------------------
+r11221 | mhall | 2014-10-17 09:19:12 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare release classifierBasedAttributeSelection-1.0.5
+------------------------------------------------------------------------
+r11223 | mhall | 2014-10-17 09:19:15 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classifierBasedAttributeSelection/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11226 | mhall | 2014-10-17 09:28:20 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/Description.props
+   M /trunk/packages/internal/consistencySubsetEval/src/main/java/weka/attributeSelection/ConsistencySubsetEval.java
+
+Now releases a reference to the training data after attribute selection has completed.
+------------------------------------------------------------------------
+r11230 | mhall | 2014-10-17 09:51:11 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/pom.xml
+
+[maven-release-plugin] prepare release consistencySubsetEval-1.0.4
+------------------------------------------------------------------------
+r11232 | mhall | 2014-10-17 09:51:15 +1300 (Fri, 17 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/consistencySubsetEval/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11236 | eibe | 2014-10-20 12:04:38 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+
+Now includes Groovy 2.3.7.
+------------------------------------------------------------------------
+r11237 | eibe | 2014-10-20 12:05:26 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   A /trunk/packages/external/kfGroovy/lib/groovy-all-2.3.7.jar
+
+New version of Groovy.
+------------------------------------------------------------------------
+r11238 | eibe | 2014-10-20 12:06:01 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   D /trunk/packages/external/kfGroovy/lib/groovy-all-1.7.2.jar
+
+Deleted old version of Groovy.
+------------------------------------------------------------------------
+r11239 | mhall | 2014-10-20 14:38:02 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r11240 | mhall | 2014-10-20 18:26:37 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updated groovy version in pom
+------------------------------------------------------------------------
+r11241 | mhall | 2014-10-20 18:26:44 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] rollback the release of kfGroovy-1.0.8
+------------------------------------------------------------------------
+r11242 | mhall | 2014-10-20 18:27:23 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare release kfGroovy-1.0.8
+------------------------------------------------------------------------
+r11244 | mhall | 2014-10-20 18:27:32 +1300 (Mon, 20 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11273 | mhall | 2014-10-31 12:16:02 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaClassifierEvaluationReduceTask.java
+
+Added a utility method to return basic and info-retrieval evaluation results as a single-instance Instances object
+------------------------------------------------------------------------
+r11274 | mhall | 2014-10-31 12:16:32 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/classifiers/evaluation/AggregateableEvaluationWithPriors.java
+
+Fixed a bug in the downsampling of predictions for AUC routine
+------------------------------------------------------------------------
+r11275 | mhall | 2014-10-31 12:16:52 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+pom now sets property for tests
+------------------------------------------------------------------------
+r11276 | mhall | 2014-10-31 14:59:02 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated for the 1.0.9 release
+------------------------------------------------------------------------
+r11277 | mhall | 2014-10-31 15:14:34 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaBase-1.0.9
+------------------------------------------------------------------------
+r11279 | mhall | 2014-10-31 15:14:41 +1300 (Fri, 31 Oct 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r11281 | eibe | 2014-11-04 08:50:01 +1300 (Tue, 04 Nov 2014) | 1 line
+Changed paths:
+   A /trunk/packages/external/tigerjython
+   A /trunk/packages/external/tigerjython/Description.props
+   A /trunk/packages/external/tigerjython/build_package.xml
+   A /trunk/packages/external/tigerjython/lib
+   A /trunk/packages/external/tigerjython/lib/tigerjython2.cfg
+   A /trunk/packages/external/tigerjython/lib/tigerjython2.jar
+
+Initial import of TigerJython package.
+------------------------------------------------------------------------
+r11282 | mhall | 2014-11-04 09:28:19 +1300 (Tue, 04 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/Description.props
+
+Updated changes and changed version number to match pom.
+------------------------------------------------------------------------
+r11283 | mhall | 2014-11-04 09:30:23 +1300 (Tue, 04 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/gridSearch/pom.xml
+
+Updated Weka dependency in pom
+------------------------------------------------------------------------
+r11285 | eibe | 2014-11-04 12:02:49 +1300 (Tue, 04 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/MLRClassifier.java
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/impl/MLRClassifierImpl.java
+
+MLRClassifier is now based on MLR library version 2.2.
+------------------------------------------------------------------------
+r11288 | eibe | 2014-11-14 16:01:27 +1300 (Fri, 14 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/MLRClassifier.java
+
+Removed bartMachine from MLRClassifier again because I failed to get it to work on my machine using MLRClassifier. BartMachine works fine if I start it from R, but there is a problem when running it from MLRClassifier, at least in my environment.
+------------------------------------------------------------------------
+r11289 | mhall | 2014-11-14 21:02:45 +1300 (Fri, 14 Nov 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/ensembleLibrary/Description.props
+   M /trunk/packages/external/ensembleLibrary/src/main/java/weka/gui/ensembleLibraryEditor/tree/GenericObjectNode.java
+
+Improvements courtesy of Scott Turner
+------------------------------------------------------------------------
+r11341 | mhall | 2014-12-04 13:18:28 +1300 (Thu, 04 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/external/ensembleLibrary/Description.props
+
+Updated date in Description.props
+------------------------------------------------------------------------
+r11350 | mhall | 2014-12-05 10:38:04 +1300 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaClassifierMapTask.java
+
+Removed the call to System.gc() in finalizeTask(). Removed the code that adjusts the number of base classifiers for IteratedSingleClassifierEnhancer's when anticipating the dropping of a model due to a split with less data than the others
+------------------------------------------------------------------------
+r11351 | mhall | 2014-12-05 10:38:36 +1300 (Fri, 05 Dec 2014) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CanopyTaskTest.java
+
+Initial import
+------------------------------------------------------------------------
+r11375 | mhall | 2014-12-14 18:34:41 +1300 (Sun, 14 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/PreconstructedFilteredClusterer.java
+
+Now uses the GPCIgnore annotation to avoid appearing in the lists generated by the GenericPropertiesCreator
+------------------------------------------------------------------------
+r11376 | mhall | 2014-12-14 18:35:22 +1300 (Sun, 14 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/clusterers/PreconstructedKMeans.java
+
+Updated for changes to SimpleKMeans; now uses the GPCIgnore annotation to avoid appearing in the lists generated by the GenericPropertiesCreator
+------------------------------------------------------------------------
+r11377 | mhall | 2014-12-14 18:36:49 +1300 (Sun, 14 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/WekaScoringMapTask.java
+
+Added a method to return true if  the wrapped algorithm is a classifier
+------------------------------------------------------------------------
+r11378 | mhall | 2014-12-14 18:37:44 +1300 (Sun, 14 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/unsupervised/attribute/PreConstructedPCA.java
+
+Now uses the GPCIgnore annotation to avoid appearing in the lists generated by the GenericPropertiesCreator
+------------------------------------------------------------------------
+r11379 | mhall | 2014-12-14 18:38:00 +1300 (Sun, 14 Dec 2014) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/unsupervised/attribute/PreconstructedMissingValuesReplacer.java
+
+Now uses the GPCIgnore annotation to avoid appearing in the lists generated by the GenericPropertiesCreator
+------------------------------------------------------------------------
