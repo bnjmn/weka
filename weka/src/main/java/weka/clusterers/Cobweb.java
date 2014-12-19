@@ -524,7 +524,7 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
           for (int j = 0; j < m_clusterInstances.attribute(i).numValues(); j++) {
             double x = child.getProbability(i, j);
             double y = getProbability(i, j);
-            sum += (x * x) - (y * y);
+            sum += (x - y)*(x + y);
           }
         } else {
           // numeric attribute

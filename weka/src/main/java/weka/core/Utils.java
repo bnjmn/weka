@@ -1690,23 +1690,25 @@ public final class Utils implements RevisionHandler {
    */
   public static/* @pure@ */double variance(double[] vector) {
 
-    double sum = 0, sumSquared = 0;
-
-    if (vector.length <= 1) {
-      return 0;
+    if (vector.length <= 1)
+      return Double.NaN;
+    
+    double mean = 0;
+    double var = 0;
+    
+    for (int i = 0; i < vector.length; i++) {
+      double delta = vector[i] - mean;
+      mean += delta/(i + 1);
+      var += (vector[i] - mean)*delta;
     }
-    for (double element : vector) {
-      sum += element;
-      sumSquared += (element * element);
-    }
-    double result = (sumSquared - (sum * sum / vector.length))
-      / (vector.length - 1);
+    
+    var /= vector.length - 1;
 
     // We don't like negative variance
-    if (result < 0) {
+    if (var < 0) {
       return 0;
     } else {
-      return result;
+      return var;
     }
   }
 

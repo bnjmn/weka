@@ -31,9 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map.Entry;
 import java.util.Random;
-import java.util.Set;
 
 import weka.core.converters.ArffLoader.ArffReader;
 import weka.core.converters.ConverterUtils.DataSource;
@@ -1827,38 +1825,56 @@ RevisionHandler {
    */
   public/* @pure@ */double[] variances() {
 
-    double[] sum = new double[numAttributes()];
-    double[] sumSquared = new double[numAttributes()];
-    double[] sumOfWeights = new double[numAttributes()];
+    double[] vars = new double[numAttributes()];
+    
+    for (int i = 0; i < numAttributes(); i++)
+      vars[i] = Double.NaN;
+
+    if (numInstances() <= 1) {
+      return vars;
+    }
+
+    double[] means = new double[numAttributes()];
+    double[] sumWeights = new double[numAttributes()];
 
     for (int i = 0; i < numInstances(); i++) {
+      double weight = instance(i).weight();
       for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
         if (attribute(attIndex).isNumeric()) {
           if (!instance(i).isMissing(attIndex)) {
-            sum[attIndex] += instance(i).weight() * instance(i).value(attIndex);
-            sumSquared[attIndex] += instance(i).weight() * instance(i).value(attIndex)
-              * instance(i).value(attIndex);
-            sumOfWeights[attIndex] += instance(i).weight();
+            double value = instance(i).value(attIndex);
+            
+            if (Double.isNaN(vars[attIndex])) {
+              // For the first value the mean can suffer from loss of precision
+              // so we treat it separately and make sure the calculation stays accurate
+              means[attIndex] = value;
+              sumWeights[attIndex] = weight;
+              vars[attIndex] = 0;
+              continue;
+            }
+
+            double delta = weight*(value - means[attIndex]);
+            sumWeights[attIndex] += weight;
+            means[attIndex] += delta/sumWeights[attIndex];
+            vars[attIndex] += delta*(value - means[attIndex]);
           }
         }
       }
     }
 
-    double[] variances = new double[numAttributes()];
     for (int attIndex = 0; attIndex < numAttributes(); attIndex++) {
       if (attribute(attIndex).isNumeric()) {
-        if (sumOfWeights[attIndex] > 1) {
-          double result = (sumSquared[attIndex] - (sum[attIndex] * sum[attIndex] / sumOfWeights[attIndex]))
-            / (sumOfWeights[attIndex] - 1);
-
-          // We don't like negative variance
-          if (result > 0) {
-            variances[attIndex] = result;
-          }
+        if (sumWeights[attIndex] <= 1) {
+          vars[attIndex] = Double.NaN;
+        } else {
+          vars[attIndex] /= sumWeights[attIndex] - 1;
+          if (vars[attIndex] < 0)
+            vars[attIndex] = 0;
         }
       }
     }
-    return variances;
+
+    return vars;
   }
 
   /**
@@ -1869,32 +1885,50 @@ RevisionHandler {
    * @throws IllegalArgumentException if the attribute is not numeric
    */
   public/* @pure@ */double variance(int attIndex) {
-
-    double sum = 0, sumSquared = 0, sumOfWeights = 0;
-
+    
     if (!attribute(attIndex).isNumeric()) {
       throw new IllegalArgumentException(
         "Can't compute variance because attribute is " + "not numeric!");
     }
+
+    if (numInstances() <= 1)
+      return Double.NaN;
+
+    double mean = 0;
+    double var = Double.NaN;
+    double sumWeights = 0;
     for (int i = 0; i < numInstances(); i++) {
       if (!instance(i).isMissing(attIndex)) {
-        sum += instance(i).weight() * instance(i).value(attIndex);
-        sumSquared += instance(i).weight() * instance(i).value(attIndex)
-          * instance(i).value(attIndex);
-        sumOfWeights += instance(i).weight();
+        double weight = instance(i).weight();
+        double value = instance(i).value(attIndex);
+
+        if (Double.isNaN(var)) {
+          // For the first value the mean can suffer from loss of precision
+          // so we treat it separately and make sure the calculation stays accurate
+          mean = value;
+          sumWeights = weight;
+          var = 0;
+          continue;
+        }
+
+        double delta = weight*(value - mean);
+        sumWeights += weight;
+        mean += delta/sumWeights;
+        var += delta*(value - mean);
       }
     }
-    if (sumOfWeights <= 1) {
-      return 0;
+
+    if (sumWeights <= 1) {
+      return Double.NaN;
     }
-    double result = (sumSquared - (sum * sum / sumOfWeights))
-      / (sumOfWeights - 1);
+    
+    var /= sumWeights - 1;
 
     // We don't like negative variance
-    if (result < 0) {
+    if (var < 0) {
       return 0;
     } else {
-      return result;
+      return var;
     }
   }
 
