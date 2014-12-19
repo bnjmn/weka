@@ -290,6 +290,15 @@ public class JSONNode extends DefaultMutableTreeNode {
   }
 
   /**
+   * Add a key-value object child into the array
+   * 
+   * @return the newly added node
+   */
+  public JSONNode addObjectArrayElement() {
+    return add(null, null, NodeType.OBJECT);
+  }
+
+  /**
    * Adds an array element child to the array.
    * 
    * @param value the value of the element array
