@@ -57,7 +57,8 @@ public class LogPanel extends JPanel implements Logger {
    * Holds the index (line number) in the JTable of each component being
    * tracked.
    */
-  protected HashMap<String, Integer> m_tableIndexes = new HashMap<String, Integer>();
+  protected HashMap<String, Integer> m_tableIndexes =
+    new HashMap<String, Integer>();
 
   /**
    * Holds the timers associated with each component being tracked.
@@ -318,7 +319,12 @@ public class LogPanel extends JPanel implements Logger {
             m_tableModel.setValueAt(stepParametersCopy, rowNum.intValue(), 1);
             m_tableModel.setValueAt(m_table.getValueAt(rowNum.intValue(), 2),
               rowNum.intValue(), 2);
-            m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
+            if (m_table.getValueAt(rowNum.intValue(), 3) != null
+              && !m_table.getValueAt(rowNum.intValue(), 3).toString()
+                .toLowerCase()
+                .startsWith("finished")) {
+              m_tableModel.setValueAt(stepStatusCopy, rowNum.intValue(), 3);
+            }
           }
         }
         if (stepStatus.startsWith("ERROR")
