@@ -72,12 +72,11 @@ import weka.core.Utils;
  * 
  * For the field {@link #stdDev} the following rules apply:<p>
  * <ol>
- * <li>If 0 or 1 value(s) have been observed or count <= 1 then
+ * <li>If count <= 1 then
  *     {@link #stdDev}=Double.NaN.</li>
  * <li>Otherwise {@link #stdDev} >= 0 and it should take on the value by best
  *     effort of the implementation.</li>
  * </ol>
- * Note: This is regardless of the weights.<p>
  * 
  * For the methods {@link #add(double)}, {@link #add(double, double)},
  * {@link #subtract(double)} and {@link #subtract(double, double)} the following
@@ -111,11 +110,11 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class Stats
-  implements Serializable, RevisionHandler {
+implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -8610544539090024102L;
-  
+
   /** The number of values seen */
   public double count = 0;
 
@@ -139,10 +138,7 @@ public class Stats
 
   /** an important factor to calculate the standard deviation incrementally */
   private double stdDevFactor = 0;
-  
-  /** The number of values seen ignoring weights */
-  private long valuesSeen = 0;
-  
+
   private void reset() {
     count = 0;
     sum = 0;
@@ -152,9 +148,8 @@ public class Stats
     min = Double.NaN;
     max = Double.NaN;
     stdDevFactor = 0;
-    valuesSeen = 0;
   }
-  
+
   private void negativeCount() {
     sum = Double.NaN;
     sumSq = Double.NaN;
@@ -163,12 +158,12 @@ public class Stats
     min = Double.NaN;
     max = Double.NaN;
   }
-  
+
   private void goInvalid() {
     count = Double.NaN;
     negativeCount();
   }
-  
+
   private boolean isInvalid() {
     return Double.isNaN(count);
   }
@@ -192,20 +187,20 @@ public class Stats
    * @param weight the weight of the observed value
    */
   public void add(double value, double weight) {
-    
+
     // treat as subtract
     if (weight < 0) {
       subtract(value, -weight);
       return;
     }
-    
+
     // don't leave invalid state
     if (isInvalid())
       return;
-    
+
     // go invalid
     if (Double.isInfinite(weight) || Double.isNaN(weight) ||
-        Double.isInfinite(value) || Double.isNaN(value)) {
+      Double.isInfinite(value) || Double.isNaN(value)) {
       goInvalid();
       return;
     }
@@ -213,21 +208,19 @@ public class Stats
     // ignore
     if (weight == 0)
       return;
-      
-    ++valuesSeen;
-    
+
     double newCount = count + weight;
     if (count < 0 && (newCount > 0 || Utils.eq(newCount, 0))) {
       reset();
       return;
     }
-    
+
     count = newCount;
-    
+
     if (count < 0) {
       return;
     }
-    
+
     double weightedValue = value*weight;
     sum += weightedValue;
     sumSq += value * weightedValue;
@@ -270,7 +263,7 @@ public class Stats
    * @param weight the weight of the observed value
    */
   public void subtract(double value, double weight) {
-    
+
     // treat as add
     if (weight < 0) {
       add(value, -weight);
@@ -283,18 +276,17 @@ public class Stats
 
     // go invalid
     if (Double.isInfinite(weight) || Double.isNaN(weight) ||
-        Double.isInfinite(value) || Double.isNaN(value)) {
+      Double.isInfinite(value) || Double.isNaN(value)) {
       goInvalid();
       return;
     }
-    
+
     // ignore
     if (weight == 0)
       return;
 
-    --valuesSeen;
     count -= weight;
-    
+
     if (Utils.eq(count, 0)) {
       reset();
       return;
@@ -302,7 +294,7 @@ public class Stats
       negativeCount();
       return;
     }
-    
+
     double weightedValue = value*weight;
     sum -= weightedValue;
     sumSq -= value * weightedValue;
@@ -317,8 +309,8 @@ public class Stats
    * and standard deviation.
    */
   public void calculateDerived() {
-    
-    if (count <= 1 || valuesSeen <= 1) {
+
+    if (count <= 1) {
       stdDev = Double.NaN;
       return;
     }
@@ -328,9 +320,9 @@ public class Stats
       return;
     }
     stdDev = Math.sqrt(stdDev);
-    
+
   }
- 
+
   /**
    * Returns a string summarising the stats so far.
    *
@@ -347,7 +339,7 @@ public class Stats
       + "Mean    " + Utils.doubleToString(mean, 8) + '\n'
       + "StdDev  " + Utils.doubleToString(stdDev, 8) + '\n';
   }
-  
+
   /**
    * Returns the revision string.
    * 
@@ -368,28 +360,28 @@ public class Stats
     try {
       Stats ps = new Stats();
       java.io.LineNumberReader r = new java.io.LineNumberReader(
-				   new java.io.InputStreamReader(System.in));
+        new java.io.InputStreamReader(System.in));
       String line;
       while ((line = r.readLine()) != null) {
         line = line.trim();
         if (line.equals("") || line.startsWith("@") || line.startsWith("%")) {
           continue;
         }
-	java.util.StringTokenizer s 
-          = new java.util.StringTokenizer(line, " ,\t\n\r\f");
-	int count = 0;
-	double v1 = 0;
-	while (s.hasMoreTokens()) {
-	  double val = (new Double(s.nextToken())).doubleValue();
-	  if (count == 0) {
-	    v1 = val;
-	  } else {
+        java.util.StringTokenizer s 
+        = new java.util.StringTokenizer(line, " ,\t\n\r\f");
+        int count = 0;
+        double v1 = 0;
+        while (s.hasMoreTokens()) {
+          double val = (new Double(s.nextToken())).doubleValue();
+          if (count == 0) {
+            v1 = val;
+          } else {
             System.err.println("MSG: Too many values in line \"" 
-                               + line + "\", skipped.");
-	    break;
-	  }
-	  count++;
-	}
+              + line + "\", skipped.");
+            break;
+          }
+          count++;
+        }
         if (count == 1) {
           ps.add(v1);
         }
