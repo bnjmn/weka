@@ -172,32 +172,7 @@ public class StatsTest extends TestCase {
     addWeightedStats(stats, 1.0, 1.0, 2.0, 2.0, 3.0, 1.0);
     stats.calculateDerived();
     assertNaN(descr, stats.stdDev);
-    
-    // test count > 1 and values seen = 1
-    stats = getStats();
-    stats.add(1.0, 2.0);
-    stats.calculateDerived();
-    assertNaN(descr, stats.stdDev);
-    
-    stats = getStats();
-    stats.add(1.0, 2.0);
-    stats.calculateDerived();
-    assertNaN(descr, stats.stdDev);
-    
-    // first add then subtract
-    stats = getStats();
-    addWeightedStats(stats, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0);
-    subtractWeightedStats(stats, 1.0, 1.0, 3.0, 3.0);
-    stats.calculateDerived();
-    assertNaN(descr, stats.stdDev);
-    
-    // first subtract then add
-    stats = getStats();
-    subtractWeightedStats(stats, 1.0, 1.0, 3.0, 3.0);
-    addWeightedStats(stats, 1.0, 1.0, 2.0, 2.0, 3.0, 3.0);
-    stats.calculateDerived();
-    assertNaN(descr, stats.stdDev);
-    
+   
     // test count <= 1 and values seen > 1
     stats = getStats();
     addWeightedStats(stats, 1.0, 0.1, 2.0, 0.2, 3.0, 0.3);
