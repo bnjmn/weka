@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.11
+Version=1.0.12
 
 #Date (year-month-day)
-Date=2014-09-22
+Date=2014-12-23
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Apache Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Now includes an implementation of scalable k-means using the k-means parallel version of the k-means++ initialization routine. More info at http://markahall.blogspot.com/2014/09/k-means-in-distributed-weka-for-hadoop.html
+Changes=This release has been compiled against Weka 3.7.12.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.11.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.12.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,7 +44,7 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.11), distributedWekaBase (>=1.0.8)
+Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.10)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
