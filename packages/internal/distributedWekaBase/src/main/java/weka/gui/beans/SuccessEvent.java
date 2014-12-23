@@ -22,6 +22,8 @@
 package weka.gui.beans;
 
 import java.util.EventObject;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Success event for Hadoop KF steps
@@ -36,6 +38,9 @@ public class SuccessEvent extends EventObject {
    */
   private static final long serialVersionUID = -8295162572660141362L;
 
+  /** Any additional stuff that needs to be passed on */
+  protected Map<String, Object> m_payload = new HashMap<String, Object>();
+
   /**
    * Constructor
    * 
@@ -43,5 +48,25 @@ public class SuccessEvent extends EventObject {
    */
   public SuccessEvent(Object source) {
     super(source);
+  }
+
+  /**
+   * Set a payload element
+   * 
+   * @param key the key for the element
+   * @param value the value of the element
+   */
+  public void setPayloadElement(String key, Object value) {
+    m_payload.put(key, value);
+  }
+
+  /**
+   * Get a payload element
+   * 
+   * @param key the key of the element to get
+   * @return the value of the element (or null if it is not set)
+   */
+  public Object getPayloadElement(String key) {
+    return m_payload.get(key);
   }
 }
