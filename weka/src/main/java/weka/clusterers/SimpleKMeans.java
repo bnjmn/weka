@@ -836,7 +836,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
         }
         m_ClusterStdDevs.add(new DenseInstance(1.0, vals2));
       }
-      m_ClusterSizes[i] = tempI[i].numInstances();
+      m_ClusterSizes[i] = tempI[i].sumOfWeights();
     }
 
     m_executorPool.shutdown();
@@ -2425,7 +2425,7 @@ public class SimpleKMeans extends RandomizableClusterer implements
   }
 
   /**
-   * Gets the number of instances in each cluster.
+   * Gets the sum of weights for all the instances in each cluster.
    * 
    * @return The number of instances in each cluster
    */
