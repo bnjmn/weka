@@ -1830,10 +1830,6 @@ RevisionHandler {
     for (int i = 0; i < numAttributes(); i++)
       vars[i] = Double.NaN;
 
-    if (numInstances() <= 1) {
-      return vars;
-    }
-
     double[] means = new double[numAttributes()];
     double[] sumWeights = new double[numAttributes()];
 
@@ -1890,9 +1886,6 @@ RevisionHandler {
       throw new IllegalArgumentException(
         "Can't compute variance because attribute is " + "not numeric!");
     }
-
-    if (numInstances() <= 1)
-      return Double.NaN;
 
     double mean = 0;
     double var = Double.NaN;
