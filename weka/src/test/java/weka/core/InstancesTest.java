@@ -90,33 +90,6 @@ public class InstancesTest
   public void testVarianceBehavior() {
     Instances inst;
     
-    // one value leads to NaN variance
-    inst = getNumericInstances();
-    addWeightedValues(inst, 100, 1);
-
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variance(0)));
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variances()[0]));
-    
-    // no matter the weight, one value leads to NaN variance
-    inst = getNumericInstances();
-    addWeightedValues(inst, 100, 2);
-
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variance(0)));
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variances()[0]));
-    
-    // still one value leads to NaN variance
-    inst = getNumericInstances();
-    addWeightedValues(inst, 100, 0.5);
-
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variance(0)));
-    assertTrue("Instances.variance not NaN for 1 value!",
-        Double.isNaN(inst.variances()[0]));
-    
     // weight <= 1 leads to NaN variance:
     inst = getNumericInstances();
     addWeightedValues(inst, 100, 0.5);
