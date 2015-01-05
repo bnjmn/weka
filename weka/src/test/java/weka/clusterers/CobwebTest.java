@@ -41,7 +41,9 @@ public class CobwebTest
 
   /** Creates a default Cobweb */
   public Clusterer getClusterer() {
-    return new Cobweb();
+    Cobweb cb = new Cobweb();
+    cb.setSeed(-1); // Make sure data is not randomized in buildClassifier() (incremental == batch)
+    return cb;
   }
 
   public static Test suite() {

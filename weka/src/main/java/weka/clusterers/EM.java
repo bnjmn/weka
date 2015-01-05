@@ -899,7 +899,7 @@ NumberOfClustersRequestable, WeightedInstancesHandler {
               stdv = minStdD;
             }
           }
-          if (stdv <= 0) {
+          if ((stdv <= 0) || Double.isNaN(stdv)) {
             stdv = m_minStdDev;
           }
 
@@ -1185,6 +1185,10 @@ NumberOfClustersRequestable, WeightedInstancesHandler {
       }
     }
 
+    if (sOW <= 0) { // In case all weights are zero
+      return 0;
+    }
+    
     // reestimate priors
     /*
      * if (change_weights) { estimate_priors(inst); }
