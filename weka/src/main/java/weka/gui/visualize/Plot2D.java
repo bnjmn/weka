@@ -531,7 +531,8 @@ public class Plot2D extends JPanel {
 
                   if (temp_plot.m_plotInstances.instance(i).isMissing(j)) {
                     insts.append("Missing");
-                  } else if (temp_plot.m_plotInstances.attribute(j).isNominal()) {
+                  } else if (temp_plot.m_plotInstances.attribute(j).isNominal() ||
+                    temp_plot.m_plotInstances.attribute(j).isString()) {
                     insts.append(temp_plot.m_plotInstances.attribute(j).value(
                       (int) temp_plot.m_plotInstances.instance(i).value(j)));
                   } else {
