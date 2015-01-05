@@ -459,6 +459,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.UNARY_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
