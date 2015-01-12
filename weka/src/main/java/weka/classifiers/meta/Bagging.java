@@ -504,7 +504,7 @@ public class Bagging
    */
   @Override
   protected synchronized Instances getTrainingSet(int iteration) throws Exception {
-    int bagSize = m_data.numInstances() * m_BagSizePercent / 100;
+    int bagSize = (int) (m_data.numInstances() * (m_BagSizePercent / 100.0));
     Instances bagData = null;
     Random r = new Random(m_Seed + iteration);
 
