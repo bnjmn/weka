@@ -472,9 +472,8 @@ public class AttributeSelectedClassifier
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    // remove instances with missing class
+    // get fresh Instances object
     Instances newData = new Instances(data);
-    newData.deleteWithMissingClass();
     
     if (newData.numInstances() == 0) {
       m_Classifier.buildClassifier(newData);

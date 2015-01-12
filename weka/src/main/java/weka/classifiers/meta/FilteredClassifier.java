@@ -481,10 +481,9 @@ public class FilteredClassifier
 
     getCapabilities().testWithFail(data);
 
-    // remove instances with missing class
+    // get fresh instances object
     data = new Instances(data);
-    data.deleteWithMissingClass();
-    
+   
     /*
     String fname = m_Filter.getClass().getName();
     fname = fname.substring(fname.lastIndexOf('.') + 1);

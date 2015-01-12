@@ -394,10 +394,9 @@ public class RandomSubSpace
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    // remove instances with missing class
+    // get fresh Instances object
     m_data = new Instances(data);
-    m_data.deleteWithMissingClass();
-    
+       
     // only class? -> build ZeroR model
     if (m_data.numAttributes() == 1) {
       System.err.println(

@@ -544,10 +544,9 @@ public class Bagging
                                          "WeightedInstancesHandler.");
     }
 
-    // remove instances with missing class
+    // get fresh Instances object
     m_data = new Instances(data);
-    m_data.deleteWithMissingClass();
-    
+   
     super.buildClassifier(m_data);
 
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
@@ -622,7 +621,7 @@ public class Bagging
         }
         
         // error for instance
-        if (!Utils.isMissingValue(vote)) {
+        if (!Utils.isMissingValue(vote) && !m_data.instance(i).classIsMissing()) {
           outOfBagCount += m_data.instance(i).weight();
           if (numeric) {
             errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 

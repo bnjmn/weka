@@ -39,7 +39,6 @@ import weka.classifiers.IterativeClassifier;
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.evaluation.Evaluation;
 import weka.classifiers.evaluation.EvaluationMetricHelper;
-import weka.classifiers.evaluation.ThresholdProducingMetric;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;

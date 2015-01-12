@@ -270,12 +270,11 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
 
     getCapabilities().testWithFail(data);
 
-    // remove instances with missing class
+    // get fresh instances object
     data = new Instances(data);
-    data.deleteWithMissingClass();
     
     if (data.numInstances() == 0) {
-      throw new Exception("Not enough training instances with class labels.");
+      throw new Exception("No training instances.");
     }
 
     try {
