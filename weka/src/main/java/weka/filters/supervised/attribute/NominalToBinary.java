@@ -172,6 +172,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
 
     return result;
   }
