@@ -908,6 +908,10 @@ public class SGD extends RandomizableClassifier implements
       buff.append("Hinge loss (SVM)\n\n");
     } else if (m_loss == LOGLOSS) {
       buff.append("Log loss (logistic regression)\n\n");
+    } if (m_loss == EPSILON_INSENSITIVE) {
+      buff.append("Epsilon insensitive loss (SVM regression)\n\n");
+    } else if (m_loss == HUBER) {
+      buff.append("Huber loss (robust regression)\n\n");
     } else {
       buff.append("Squared loss (linear regression)\n\n");
     }
