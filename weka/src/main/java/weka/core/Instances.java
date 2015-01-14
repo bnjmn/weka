@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map.Entry;
 import java.util.Random;
 
 import weka.core.converters.ArffLoader.ArffReader;
@@ -920,8 +921,7 @@ RevisionHandler {
   }
 
   /**
-   * Returns the number of distinct values of a given attribute. Returns the
-   * number of instances if the attribute is a string attribute. The value
+   * Returns the number of distinct values of a given attribute. The value
    * 'missing' is not counted.
    * 
    * @param attIndex the attribute (index starts with 0)
@@ -931,30 +931,18 @@ RevisionHandler {
   // @ requires attIndex < numAttributes();
   public/* @pure@ */int numDistinctValues(int attIndex) {
 
-    if (attribute(attIndex).isNumeric()) {
-      double[] attVals = attributeToDoubleArray(attIndex);
-      int[] sorted = Utils.sort(attVals);
-      double prev = 0;
-      int counter = 0;
-      for (int i = 0; i < sorted.length; i++) {
-        Instance current = instance(sorted[i]);
-        if (current.isMissing(attIndex)) {
-          break;
-        }
-        if ((i == 0) || (current.value(attIndex) > prev)) {
-          prev = current.value(attIndex);
-          counter++;
-        }
+    HashSet<Double> set = new HashSet<Double>(2 * numInstances());
+    for (Instance current : this) {
+      double key = current.value(attIndex);
+      if (!Utils.isMissingValue(key)) {
+        set.add(key);
       }
-      return counter;
-    } else {
-      return attribute(attIndex).numValues();
     }
+    return set.size();
   }
 
   /**
-   * Returns the number of distinct values of a given attribute. Returns the
-   * number of instances if the attribute is a string attribute. The value
+   * Returns the number of distinct values of a given attribute. The value
    * 'missing' is not counted.
    * 
    * @param att the attribute
@@ -1826,7 +1814,7 @@ RevisionHandler {
   public/* @pure@ */double[] variances() {
 
     double[] vars = new double[numAttributes()];
-    
+
     for (int i = 0; i < numAttributes(); i++)
       vars[i] = Double.NaN;
 
@@ -1839,7 +1827,7 @@ RevisionHandler {
         if (attribute(attIndex).isNumeric()) {
           if (!instance(i).isMissing(attIndex)) {
             double value = instance(i).value(attIndex);
-            
+
             if (Double.isNaN(vars[attIndex])) {
               // For the first value the mean can suffer from loss of precision
               // so we treat it separately and make sure the calculation stays accurate
@@ -1881,7 +1869,7 @@ RevisionHandler {
    * @throws IllegalArgumentException if the attribute is not numeric
    */
   public/* @pure@ */double variance(int attIndex) {
-    
+
     if (!attribute(attIndex).isNumeric()) {
       throw new IllegalArgumentException(
         "Can't compute variance because attribute is " + "not numeric!");
@@ -1914,7 +1902,7 @@ RevisionHandler {
     if (sumWeights <= 1) {
       return Double.NaN;
     }
-    
+
     var /= sumWeights - 1;
 
     // We don't like negative variance
@@ -1957,29 +1945,28 @@ RevisionHandler {
     }
     result.totalCount = numInstances();
 
-    double[] attVals = attributeToDoubleArray(index);
-    int[] sorted = Utils.sort(attVals);
-    int currentCount = 0;
-    double currentWeight = 0;
-    double prev = Double.NaN;
-    for (int j = 0; j < numInstances(); j++) {
-      Instance current = instance(sorted[j]);
-      if (current.isMissing(index)) {
-        result.missingCount = numInstances() - j;
-        break;
-      }
-      if (current.value(index) == prev) {
-        currentCount++;
-        currentWeight += current.weight();
+    HashMap<Double,double[]> map = new HashMap<Double,double[]>(2 * result.totalCount);
+    for (Instance current : this) {
+      double key = current.value(index);
+      if (Utils.isMissingValue(key)) {
+        result.missingCount++;
       } else {
-        result.addDistinct(prev, currentCount, currentWeight);
-        currentCount = 1;
-        currentWeight = current.weight();
-        prev = current.value(index);
+        double[] values = map.get(key);
+        if (values == null) {
+          values = new double[2];
+          values[0] = 1.0;
+          values[1] = current.weight();
+          map.put(key, values);
+        } else {
+          values[0]++;
+          values[1] += current.weight();
+        }
       }
     }
-    result.addDistinct(prev, currentCount, currentWeight);
-    result.distinctCount--; // So we don't count "missing" as a value
+
+    for (Entry<Double, double[]> entry : map.entrySet()) {
+      result.addDistinct(entry.getKey(), (int)entry.getValue()[0], entry.getValue()[1]);
+    }
     return result;
   }
 
