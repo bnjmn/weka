@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>RBFNetwork</artifactId>
-  <version>1.0.8</version>
+  <version>1.0.9-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>RBFNetwork</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/RBFNetwork-1.0.8</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/RBFNetwork-1.0.8</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/RBFNetwork-1.0.8</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/RBFNetwork</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/RBFNetwork</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/RBFNetwork</url>
   </scm>
 
   <profiles>
