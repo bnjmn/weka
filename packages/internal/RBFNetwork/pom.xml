@@ -11,7 +11,7 @@
   <name>RBFNetwork</name>
   <description>
   RBFNetwork implements a normalized Gaussian radial basisbasis function network.
-  It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class.It standardizes all numeric attributes to zero mean and unit variance. RBFRegressor implements radial basis function networks for regression, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. It is possible to use conjugate gradient descent rather than BFGS updates, which is faster for cases with many parameters, and to use normalized basis functions instead of unnormalized ones.
+  It uses the k-means clustering algorithm to provide the basis functions and learns either a logistic regression (discrete class problems) or linear regression (numeric class problems) on top of that. Symmetric multivariate Gaussians are fit to the data from each cluster. If the class is nominal it uses the given number of clusters per class. RBFRegressor implements radial basis function networks for regression, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. It is possible to use conjugate gradient descent rather than BFGS updates, which is faster for cases with many parameters, and to use normalized basis functions instead of unnormalized ones.
   </description>
   <url>http://weka.sourceforge.net/doc.packages/RBFNetwork</url>
   <organization>

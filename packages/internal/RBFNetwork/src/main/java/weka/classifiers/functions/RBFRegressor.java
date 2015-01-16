@@ -29,89 +29,75 @@ import weka.core.Instance;
 import weka.core.WeightedInstancesHandler;
 
 /**
- * <!-- globalinfo-start --> Class implementing radial basis function networks
- * for classification, trained in a fully supervised manner using WEKA's
- * Optimization class by minimizing squared error with the BFGS method. Note
- * that all attributes are normalized into the [0,1] scale. The initial centers
- * for the Gaussian radial basis functions are found using WEKA's SimpleKMeans.
- * The initial sigma values are set to the maximum distance between any center
- * and its nearest neighbour in the set of centers. There are several
- * parameters. The ridge parameter is used to penalize the size of the weights
- * in the output layer. The number of basis functions can also be specified.
- * Note that large numbers produce long training times. Another option
- * determines whether one global sigma value is used for all units (fastest),
- * whether one value is used per unit (common practice, it seems, and set as the
- * default), or a different value is learned for every unit/attribute
- * combination. It is also possible to learn attribute weights for the distance
- * function. (The square of the value shown in the output is used.) Finally, it
- * is possible to use conjugate gradient descent rather than BFGS updates, which
- * can be faster for cases with many parameters, and to use normalized basis
- * functions instead of unnormalized ones. To improve speed, an approximate
- * version of the logistic function is used as the activation function in the
- * output layer. Also, if delta values in the backpropagation step are within
- * the user-specified tolerance, the gradient is not updated for that particular
- * instance, which saves some additional time. Paralled calculation of squared
- * error and gradient is possible when multiple CPU cores are present. Data is
- * split into batches and processed in separate threads in this case. Note that
- * this only improves runtime for larger datasets. Nominal attributes are
- * processed using the unsupervised NominalToBinary filter and missing values
- * are replaced globally using ReplaceMissingValues.
+ * <!-- globalinfo-start -->
+ * Class implementing radial basis function networks, trained in a fully supervised manner using WEKA's Optimization class by minimizing squared error with the BFGS method. Note that all attributes are normalized into the [0,1] scale.<br/>
+ * <br/>
+ * The initial centers for the Gaussian radial basis functions are found using WEKA's SimpleKMeans. The initial sigma values are set to the maximum distance between any center and its nearest neighbour in the set of centers.<br/>
+ * <br/>
+ * There are several parameters. The ridge parameter is used to penalize the size of the weights in the output layer. The number of basis functions can also be specified. Note that large numbers produce long training times. Another option determines whether one global sigma value is used for all units (fastest), whether one value is used per unit (common practice, it seems, and set as the default), or a different value is learned for every unit/attribute combination. It is also possible to learn attribute weights for the distance function. (The square of the value shown in the output is used.)  Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which can be faster for cases with many parameters, and to use normalized basis functions instead of unnormalized ones.<br/>
+ * <br/>
+ * To improve speed, an approximate version of the logistic function is used as the activation function in the output layer. Also, if delta values in the backpropagation step are within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time.<br/>
+ * <br/>
+ * Paralled calculation of squared error and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets.<br/>
+ * <br/>
+ * Nominal attributes are processed using the unsupervised  NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.<br/>
+ * <br/>
+ * For more information see:<br/>
+ * <br/>
+ * Eibe Frank (2014). Fully supervised training of Gaussian radial basis function networks in WEKA. Department of Computer Science, University of Waikato.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -N &lt;int&gt;
+ * <pre> -N &lt;int&gt;
  *  Number of Gaussian basis functions (default is 2).
  * </pre>
  * 
- * <pre>
- * -R &lt;double&gt;
+ * <pre> -R &lt;double&gt;
  *  Ridge factor for quadratic penalty on output weights (default is 0.01).
  * </pre>
  * 
- * <pre>
- * -L &lt;double&gt;
+ * <pre> -L &lt;double&gt;
  *  Tolerance parameter for delta values (default is 1.0e-6).
  * </pre>
  * 
- * <pre>
- * -C &lt;1|2|3&gt;
+ * <pre> -C &lt;1|2|3&gt;
  *  The scale optimization option: global scale (1), one scale per unit (2), scale per unit and attribute (3) (default is 2).
  * </pre>
  * 
- * <pre>
- * -G
+ * <pre> -G
  *  Use conjugate gradient descent (recommended for many attributes).
  * </pre>
  * 
- * <pre>
- * -O
+ * <pre> -O
  *  Use normalized basis functions.
  * </pre>
  * 
- * <pre>
- * -A
+ * <pre> -A
  *  Use attribute weights.
  * </pre>
  * 
- * <pre>
- * -P &lt;int&gt;
+ * <pre> -P &lt;int&gt;
  *  The size of the thread pool, for example, the number of cores in the CPU. (default 1)
  * </pre>
  * 
- * <pre>
- * -E &lt;int&gt;
+ * <pre> -E &lt;int&gt;
  *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
  * </pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 1)
- * </pre>
+ *  (default 1)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
  * 
  * <!-- options-end -->
  * 
@@ -312,3 +298,4 @@ public class RBFRegressor extends RBFModel implements WeightedInstancesHandler {
     runClassifier(new RBFRegressor(), argv);
   }
 }
+

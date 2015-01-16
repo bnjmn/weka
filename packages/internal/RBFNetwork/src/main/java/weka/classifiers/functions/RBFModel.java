@@ -44,6 +44,8 @@ import weka.core.Option;
 import weka.core.RevisionUtils;
 import weka.core.SelectedTag;
 import weka.core.Tag;
+import weka.core.TechnicalInformation;
+import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
@@ -59,7 +61,7 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8966 $
  */
-public abstract class RBFModel extends RandomizableClassifier {
+public abstract class RBFModel extends RandomizableClassifier implements TechnicalInformationHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -7847473336438394611L;
@@ -83,6 +85,28 @@ public abstract class RBFModel extends RandomizableClassifier {
     return result;
   }
 
+  /**
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
+   *
+   * @return the technical information about this class
+   */
+  @Override
+  public TechnicalInformation getTechnicalInformation() {
+
+    TechnicalInformation result;
+
+    result = new TechnicalInformation(TechnicalInformation.Type.TECHREPORT);
+    result.setValue(TechnicalInformation.Field.AUTHOR, "Eibe Frank");
+    result.setValue(TechnicalInformation.Field.TITLE,
+            "Fully supervised training of Gaussian radial basis function networks in WEKA");
+    result.setValue(TechnicalInformation.Field.YEAR, "2014");
+    result.setValue(TechnicalInformation.Field.NUMBER, "04/14");
+    result.setValue(TechnicalInformation.Field.ADDRESS, "Department of Computer Science, University of Waikato");
+
+    return result;
+  }
   /**
    * Simple wrapper class needed to use the BFGS method implemented in
    * weka.core.Optimization.
@@ -884,14 +908,14 @@ public abstract class RBFModel extends RandomizableClassifier {
    */
   public String globalInfo() {
 
-    return "Class implementing radial basis function networks for classification,"
+    return "Class implementing radial basis function networks,"
       + " trained in a fully supervised manner using WEKA's Optimization"
       + " class by minimizing squared error with the BFGS method. Note that"
-      + " all attributes are normalized into the [0,1] scale."
-      + " The initial centers for the Gaussian radial basis functions"
+      + " all attributes are normalized into the [0,1] scale.\n\n"
+      + "The initial centers for the Gaussian radial basis functions"
       + " are found using WEKA's SimpleKMeans. The initial sigma values are"
       + " set to the maximum distance between any center and its nearest"
-      + " neighbour in the set of centers. There are several parameters. The"
+      + " neighbour in the set of centers.\n\nThere are several parameters. The"
       + " ridge parameter is used to penalize the size of the weights in the"
       + " output layer. The number of basis functions can also be specified. Note that large"
       + " numbers produce long training times. Another option determines"
@@ -902,17 +926,18 @@ public abstract class RBFModel extends RandomizableClassifier {
       + " weights for the distance function. (The square of the value shown"
       + " in the output is used.)  Finally, it is possible to use conjugate gradient"
       + " descent rather than BFGS updates, which can be faster for cases with many parameters, and"
-      + " to use normalized basis functions instead of unnormalized ones."
-      + " To improve speed, an approximate version of the logistic function is used as the"
-      + " activation function in the output layer. Also, if delta values in the backpropagation step are "
+      + " to use normalized basis functions instead of unnormalized ones.\n\n"
+      + "To improve speed, an approximate version of the logistic function is used as the"
+      + " activation function in the output layer. Also, if delta values in the backpropagation step are"
       + " within the user-specified tolerance, the gradient is not updated for that"
-      + " particular instance, which saves some additional time. Paralled calculation"
+      + " particular instance, which saves some additional time.\n\nParalled calculation"
       + " of squared error and gradient is possible when multiple CPU cores are present."
       + " Data is split into batches and processed in separate threads in this case."
-      + " Note that this only improves runtime for larger datasets."
-      + " Nominal attributes are processed using the unsupervised "
+      + " Note that this only improves runtime for larger datasets.\n\n"
+      + "Nominal attributes are processed using the unsupervised "
       + " NominalToBinary filter and missing values are replaced globally"
-      + " using ReplaceMissingValues.";
+      + " using ReplaceMissingValues.\n\n"
+      + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
 
   /**
