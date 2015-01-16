@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=alternatingModelTrees
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2015-01-16
+
+# Title (required)
+Title=Alternating Model Trees
+
+Category=Regression
+
+# Author (required)
+Author=Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Grows an alternating model tree by minimising squared error. For more information see "Eibe Frank, Michael Mayo, Stefan Kramer: Alternating Model Trees. In: Proceedings of the ACM Symposium on Applied Computing, Data Mining Track, 2015."
+
+#Changes=Initial import.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/alternatingModelTrees1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/alternatingModelTrees
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)
