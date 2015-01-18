@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>alternatingModelTrees</artifactId>
-  <version>1.0.0-SNAPSHOT</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>alternatingModelTrees</name>
@@ -48,9 +48,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingModelTrees</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingModelTrees</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/alternatingModelTrees</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingModelTrees-1.0.0</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingModelTrees-1.0.0</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/alternatingModelTrees-1.0.0</url>
   </scm>
 
   <profiles>
