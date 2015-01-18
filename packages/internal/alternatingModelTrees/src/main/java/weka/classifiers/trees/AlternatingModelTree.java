@@ -25,7 +25,6 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.SimpleLinearRegression;
 import weka.classifiers.rules.ZeroR;
 import weka.classifiers.Classifier;
-import weka.classifiers.Evaluation;
 import weka.classifiers.IterativeClassifier;
 
 import weka.core.*;
@@ -62,12 +61,10 @@ import java.io.Serializable;
  *  Set the number of iterations to perform. (default 10).</pre>
  * 
  * <pre> -H &lt;double&gt;
- *  Set shrinkage parameter (default 1.0).
- * </pre>
+ *  Set shrinkage parameter (default 1.0).</pre>
  * 
  * <pre> -B
- *  Build a decision tree instead of an alternating tree. .
- * </pre>
+ *  Build a decision tree instead of an alternating tree.</pre>
  * 
  * <pre> -output-debug-info
  *  If set, classifier is run in debug mode and
@@ -79,7 +76,7 @@ import java.io.Serializable;
  * 
  <!-- options-end -->
  *
- * @version $Revision: ???? $ 
+ * @version $Revision: $
  */
 public class AlternatingModelTree extends AbstractClassifier 
   implements WeightedInstancesHandler, IterativeClassifier, Drawable, TechnicalInformationHandler, RevisionHandler {
@@ -159,12 +156,12 @@ public class AlternatingModelTree extends AbstractClassifier
     
     newVector.addElement(
 	new Option(
-	    "\tSet shrinkage parameter (default 1.0).\n",
+	    "\tSet shrinkage parameter (default 1.0).",
 	    "H", 1, "-H <double>"));
     
     newVector.addElement(
 	new Option(
-	    "\tBuild a decision tree instead of an alternating tree. .\n",
+	    "\tBuild a decision tree instead of an alternating tree.",
 	    "B", 0, "-B"));
 
     newVector.addAll(Collections.list(super.listOptions()));
@@ -762,9 +759,15 @@ public class AlternatingModelTree extends AbstractClassifier
     String id) throws Exception {
 
     text.append(id + " [label=\"");
-    text.append(currentNode.m_Model.toString().replaceAll("[ a-zA-Z]*(\\r|\\n)", "")
-                .replaceAll("[ a-zA-Z]*:", "") +
-                " (" + currentNode.m_Size + ")");
+    if (currentNode.m_Model instanceof ZeroR) {
+      text.append(currentNode.m_Model.toString().replaceAll("ZeroR predicts class value: ", "") +
+              " (" + currentNode.m_Size + ")");
+    } else {
+      text.append(currentNode.m_Model.toString().replaceAll("Linear(.*\\n)", "").
+              replaceAll("Predicting", " :").replaceAll("if attribute value is missing.", "for ?").
+              replaceAll("(\\r|\\n)", "") +
+              " (" + currentNode.m_Size + ")");
+    }
     text.append("\" shape=box style=filled");
     text.append("]\n");
     int splitIndex = 0;
@@ -1011,7 +1014,7 @@ public class AlternatingModelTree extends AbstractClassifier
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision: 10201 $");
+    return RevisionUtils.extract("$Revision: $");
   }
 
   /**
