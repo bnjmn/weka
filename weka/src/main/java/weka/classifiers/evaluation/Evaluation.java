@@ -81,88 +81,88 @@ import weka.estimators.UnivariateKernelEstimator;
 /**
  * Class for evaluating machine learning models.
  * <p/>
- *
+ * 
  * -------------------------------------------------------------------
  * <p/>
- *
+ * 
  * General options when evaluating a learning scheme from the command-line:
  * <p/>
- *
+ * 
  * -t filename <br/>
  * Name of the file with the training data. (required)
  * <p/>
- *
+ * 
  * -T filename <br/>
  * Name of the file with the test data. If missing a cross-validation is
  * performed.
  * <p/>
- *
+ * 
  * -c index <br/>
  * Index of the class attribute (1, 2, ...; default: last).
  * <p/>
- *
+ * 
  * -x number <br/>
  * The number of folds for the cross-validation (default: 10).
  * <p/>
- *
+ * 
  * -no-cv <br/>
  * No cross validation. If no test file is provided, no evaluation is done.
  * <p/>
- *
+ * 
  * -split-percentage percentage <br/>
  * Sets the percentage for the train/test set split, e.g., 66.
  * <p/>
- *
+ * 
  * -preserve-order <br/>
  * Preserves the order in the percentage split instead of randomizing the data
  * first with the seed value ('-s').
  * <p/>
- *
+ * 
  * -s seed <br/>
  * Random number seed for the cross-validation and percentage split (default:
  * 1).
  * <p/>
- *
+ * 
  * -m filename <br/>
  * The name of a file containing a cost matrix.
  * <p/>
- *
+ * 
  * -disable list <br/>
  * A comma separated list of metric names not to include in the output.
  * <p/>
- *
+ * 
  * -l filename <br/>
  * Loads classifier from the given file. In case the filename ends with ".xml",
  * a PMML file is loaded or, if that fails, options are loaded from XML.
  * <p/>
- *
+ * 
  * -d filename <br/>
  * Saves classifier built from the training data into the given file. In case
  * the filename ends with ".xml" the options are saved XML, not the model.
  * <p/>
- *
+ * 
  * -v <br/>
  * Outputs no statistics for the training data.
  * <p/>
- *
+ * 
  * -o <br/>
  * Outputs statistics only, not the classifier.
  * <p/>
- *
+ * 
  * -do-not-output-per-class-statistics <br/>
  * Do not output statistics per class.
  * <p/>
- *
+ * 
  * -k <br/>
  * Outputs information-theoretic statistics.
  * <p/>
- *
+ * 
  * -classifications
  * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
  * Uses the specified class for generating the classification output. E.g.:
  * weka.classifiers.evaluation.output.prediction.PlainText or :
  * weka.classifiers.evaluation.output.prediction.CSV
- *
+ * 
  * -p range <br/>
  * Outputs predictions for test instances (or the train instances if no test
  * instances provided and -no-cv is used), along with the attributes in the
@@ -170,44 +170,44 @@ import weka.estimators.UnivariateKernelEstimator;
  * <p/>
  * Deprecated: use "-classifications ..." instead.
  * <p/>
- *
+ * 
  * -distribution <br/>
  * Outputs the distribution instead of only the prediction in conjunction with
  * the '-p' option (only nominal classes).
  * <p/>
  * Deprecated: use "-classifications ..." instead.
  * <p/>
- *
+ * 
  * -no-predictions <br/>
  * Turns off the collection of predictions in order to conserve memory.
  * <p/>
- *
+ * 
  * -r <br/>
  * Outputs cumulative margin distribution (and nothing else).
  * <p/>
- *
+ * 
  * -g <br/>
  * Only for classifiers that implement "Graphable." Outputs the graph
  * representation of the classifier (and nothing else).
  * <p/>
- *
+ * 
  * -xml filename | xml-string <br/>
  * Retrieves the options from the XML-data instead of the command line.
  * <p/>
- *
+ * 
  * -threshold-file file <br/>
  * The file to save the threshold data to. The format is determined by the
  * extensions, e.g., '.arff' for ARFF format or '.csv' for CSV.
  * <p/>
- *
+ * 
  * -threshold-label label <br/>
  * The class label to determine the threshold data for (default is the first
  * label)
  * <p/>
- *
+ * 
  * -------------------------------------------------------------------
  * <p/>
- *
+ * 
  * Example usage as the main of a classifier (called FunkyClassifier):
  * <code> <pre>
  * public static void main(String [] args) {
@@ -215,10 +215,10 @@ import weka.estimators.UnivariateKernelEstimator;
  * }
  * </pre> </code>
  * <p/>
- *
+ * 
  * ------------------------------------------------------------------
  * <p/>
- *
+ * 
  * Example usage from within an application: <code> <pre>
  * Instances trainInstances = ... instances got from somewhere
  * Instances testInstances = ... instances got from somewhere
@@ -228,8 +228,8 @@ import weka.estimators.UnivariateKernelEstimator;
  * evaluation.evaluateModel(scheme, testInstances);
  * System.out.println(evaluation.toSummaryString());
  * </pre> </code>
- *
- *
+ * 
+ * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
@@ -396,7 +396,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Utility method to get a list of the names of all built-in and plugin
    * evaluation metrics
-   *
+   * 
    * @return the complete list of available evaluation metrics
    */
   public static List<String> getAllEvaluationMetricNames() {
@@ -405,8 +405,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     for (String s : Evaluation.BUILT_IN_EVAL_METRICS) {
       allEvals.add(s);
     }
-    final List<AbstractEvaluationMetric> pluginMetrics = AbstractEvaluationMetric
-      .getPluginMetrics();
+    final List<AbstractEvaluationMetric> pluginMetrics =
+      AbstractEvaluationMetric
+        .getPluginMetrics();
 
     if (pluginMetrics != null) {
       for (AbstractEvaluationMetric m : pluginMetrics) {
@@ -429,7 +430,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * <code>useNoPriors()</code> if the dataset is the test set and you can't
    * initialize with the priors from the training set via
    * <code>setPriors(Instances)</code>.
-   *
+   * 
    * @param data set of training instances, to get some header information and
    *          prior class distribution information
    * @throws Exception if the class is not defined
@@ -446,7 +447,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * matrix as parameter. Use <code>useNoPriors()</code> if the dataset is the
    * test set and you can't initialize with the priors from the training set via
    * <code>setPriors(Instances)</code>.
-   *
+   * 
    * @param data set of training instances, to get some header information and
    *          prior class distribution information
    * @param costMatrix the cost matrix---if null, default costs will be used
@@ -504,7 +505,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the header of the underlying dataset.
-   *
+   * 
    * @return the header information
    */
   public Instances getHeader() {
@@ -514,7 +515,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Sets whether to discard predictions, ie, not storing them for future
    * reference via predictions() method in order to conserve memory.
-   *
+   * 
    * @param value true if to discard the predictions
    * @see #predictions()
    */
@@ -528,7 +529,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Returns whether predictions are not recorded at all, in order to conserve
    * memory.
-   *
+   * 
    * @return true if predictions are not recorded
    * @see #predictions()
    */
@@ -538,7 +539,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the list of plugin metrics in use (or null if there are none)
-   *
+   * 
    * @return the list of plugin metrics
    */
   public List<AbstractEvaluationMetric> getPluginMetrics() {
@@ -549,7 +550,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Set a list of the names of metrics to have appear in the output. The
    * default is to display all built in metrics and plugin metrics that haven't
    * been globally disabled.
-   *
+   * 
    * @param display a list of metric names to have appear in the output
    */
   public void setMetricsToDisplay(List<String> display) {
@@ -564,7 +565,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Get a list of the names of metrics to have appear in the output The default
    * is to display all built in metrics and plugin metrics that haven't been
    * globally disabled.
-   *
+   * 
    * @param display a list of metric names to have appear in the output
    */
   public List<String> getMetricsToDisplay() {
@@ -573,7 +574,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Remove the supplied list of metrics from the list of those to display.
-   *
+   * 
    * @param metricsNotToDisplay
    */
   public void dontDisplayMetrics(List<String> metricsNotToDisplay) {
@@ -584,11 +585,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Get the named plugin evaluation metric
-   *
+   * 
    * @param name the name of the metric (as returned by
    *          AbstractEvaluationMetric.getName()) or the fully qualified class
    *          name of the metric to find
-   *
+   * 
    * @return the metric or null if the metric is not in the list of plugin
    *         metrics
    */
@@ -612,7 +613,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Returns the area under ROC for those predictions that have been collected
    * in the evaluateClassifier(Classifier, Instances) method. Returns
    * Utils.missingValue() if the area is not available.
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the area under the ROC curve or not a number
    */
@@ -630,7 +631,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) AUC.
-   *
+   * 
    * @return the weighted AUC.
    */
   public double weightedAreaUnderROC() {
@@ -659,7 +660,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Returns the area under precision-recall curve (AUPRC) for those predictions
    * that have been collected in the evaluateClassifier(Classifier, Instances)
    * method. Returns Utils.missingValue() if the area is not available.
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the area under the precision-recall curve or not a number
    */
@@ -676,7 +677,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) AUPRC.
-   *
+   * 
    * @return the weighted AUPRC.
    */
   public double weightedAreaUnderPRC() {
@@ -703,7 +704,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns a copy of the confusion matrix.
-   *
+   * 
    * @return a copy of the confusion matrix as a two-dimensional array
    */
   public double[][] confusionMatrix() {
@@ -723,7 +724,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * classifier on a set of instances. Now performs a deep copy of the
    * classifier before each call to buildClassifier() (just in case the
    * classifier is not initialized properly).
-   *
+   * 
    * @param classifier the classifier with any options set.
    * @param data the data on which the cross-validation is to be performed
    * @param numFolds the number of folds for the cross-validation
@@ -775,7 +776,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Performs a (stratified if class is nominal) cross-validation for a
    * classifier on a set of instances.
-   *
+   * 
    * @param classifierString a string naming the class of the classifier
    * @param data the data on which the cross-validation is to be performed
    * @param numFolds the number of folds for the cross-validation
@@ -795,82 +796,82 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Evaluates a classifier with the options given in an array of strings.
    * <p/>
-   *
+   * 
    * Valid options are:
    * <p/>
-   *
+   * 
    * -t filename <br/>
    * Name of the file with the training data. (required)
    * <p/>
-   *
+   * 
    * -T filename <br/>
    * Name of the file with the test data. If missing a cross-validation is
    * performed.
    * <p/>
-   *
+   * 
    * -c index <br/>
    * Index of the class attribute (1, 2, ...; default: last).
    * <p/>
-   *
+   * 
    * -x number <br/>
    * The number of folds for the cross-validation (default: 10).
    * <p/>
-   *
+   * 
    * -no-cv <br/>
    * No cross validation. If no test file is provided, no evaluation is done.
    * <p/>
-   *
+   * 
    * -split-percentage percentage <br/>
    * Sets the percentage for the train/test set split, e.g., 66.
    * <p/>
-   *
+   * 
    * -preserve-order <br/>
    * Preserves the order in the percentage split instead of randomizing the data
    * first with the seed value ('-s').
    * <p/>
-   *
+   * 
    * -s seed <br/>
    * Random number seed for the cross-validation and percentage split (default:
    * 1).
    * <p/>
-   *
+   * 
    * -m filename <br/>
    * The name of a file containing a cost matrix.
    * <p/>
-   *
+   * 
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
    * ".xml",a PMML file is loaded or, if that fails, options are loaded from
    * XML.
    * <p/>
-   *
+   * 
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case
    * the filename ends with ".xml" the options are saved XML, not the model.
    * <p/>
-   *
+   * 
    * -v <br/>
    * Outputs no statistics for the training data.
    * <p/>
-   *
+   * 
    * -o <br/>
    * Outputs statistics only, not the classifier.
    * <p/>
-   *
+   * 
    * -do-not-output-per-class-statistics <br/>
    * Do not output statistics per class.
    * <p/>
-   *
+   * 
    * -k <br/>
    * Outputs information-theoretic statistics.
    * <p/>
-   *
+   * 
    * -classifications
    * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
    * Uses the specified class for generating the classification output. E.g.:
    * weka.classifiers.evaluation.output.prediction.PlainText or :
    * weka.classifiers.evaluation.output.prediction.CSV
-   *
+   * 
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
    * instances provided and -no-cv is used), along with the attributes in the
@@ -879,41 +880,41 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * <p/>
    * Deprecated: use "-classifications ..." instead.
    * <p/>
-   *
+   * 
    * -distribution <br/>
    * Outputs the distribution instead of only the prediction in conjunction with
    * the '-p' option (only nominal classes).
    * <p/>
    * Deprecated: use "-classifications ..." instead.
    * <p/>
-   *
+   * 
    * -no-predictions <br/>
    * Turns off the collection of predictions in order to conserve memory.
    * <p/>
-   *
+   * 
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else).
    * <p/>
-   *
+   * 
    * -g <br/>
    * Only for classifiers that implement "Graphable." Outputs the graph
    * representation of the classifier (and nothing else).
    * <p/>
-   *
+   * 
    * -xml filename | xml-string <br/>
    * Retrieves the options from the XML-data instead of the command line.
    * <p/>
-   *
+   * 
    * -threshold-file file <br/>
    * The file to save the threshold data to. The format is determined by the
    * extensions, e.g., '.arff' for ARFF format or '.csv' for CSV.
    * <p/>
-   *
+   * 
    * -threshold-label label <br/>
    * The class label to determine the threshold data for (default is the first
    * label)
    * <p/>
-   *
+   * 
    * @param classifierString class of machine learning classifier as a string
    * @param options the array of string containing the options
    * @throws Exception if model could not be evaluated successfully
@@ -927,8 +928,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     // Create classifier
     try {
       classifier =
-      // (Classifier)Class.forName(classifierString).newInstance();
-      AbstractClassifier.forName(classifierString, null);
+        // (Classifier)Class.forName(classifierString).newInstance();
+        AbstractClassifier.forName(classifierString, null);
     } catch (Exception e) {
       throw new Exception("Can't find class with name " + classifierString
         + '.');
@@ -939,7 +940,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * A test method for this class. Just extracts the first command line argument
    * as a classifier class name and calls evaluateModel.
-   *
+   * 
    * @param args an array of command line arguments, the first of which must be
    *          the class name of a classifier.
    */
@@ -962,82 +963,82 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Evaluates a classifier with the options given in an array of strings.
    * <p/>
-   *
+   * 
    * Valid options are:
    * <p/>
-   *
+   * 
    * -t name of training file <br/>
    * Name of the file with the training data. (required)
    * <p/>
-   *
+   * 
    * -T name of test file <br/>
    * Name of the file with the test data. If missing a cross-validation is
    * performed.
    * <p/>
-   *
+   * 
    * -c class index <br/>
    * Index of the class attribute (1, 2, ...; default: last).
    * <p/>
-   *
+   * 
    * -x number of folds <br/>
    * The number of folds for the cross-validation (default: 10).
    * <p/>
-   *
+   * 
    * -no-cv <br/>
    * No cross validation. If no test file is provided, no evaluation is done.
    * <p/>
-   *
+   * 
    * -split-percentage percentage <br/>
    * Sets the percentage for the train/test set split, e.g., 66.
    * <p/>
-   *
+   * 
    * -preserve-order <br/>
    * Preserves the order in the percentage split instead of randomizing the data
    * first with the seed value ('-s').
    * <p/>
-   *
+   * 
    * -s seed <br/>
    * Random number seed for the cross-validation and percentage split (default:
    * 1).
    * <p/>
-   *
+   * 
    * -m file with cost matrix <br/>
    * The name of a file containing a cost matrix.
    * <p/>
-   *
+   * 
    * -l filename <br/>
    * Loads classifier from the given file. In case the filename ends with
    * ".xml",a PMML file is loaded or, if that fails, options are loaded from
    * XML.
    * <p/>
-   *
+   * 
    * -d filename <br/>
    * Saves classifier built from the training data into the given file. In case
    * the filename ends with ".xml" the options are saved XML, not the model.
    * <p/>
-   *
+   * 
    * -v <br/>
    * Outputs no statistics for the training data.
    * <p/>
-   *
+   * 
    * -o <br/>
    * Outputs statistics only, not the classifier.
    * <p/>
-   *
+   * 
    * -do-not-output-per-class-statistics <br/>
    * Do not output statistics per class.
    * <p/>
-   *
+   * 
    * -k <br/>
    * Outputs information-theoretic statistics.
    * <p/>
-   *
+   * 
    * -classifications
    * "weka.classifiers.evaluation.output.prediction.AbstractOutput + options" <br/>
    * Uses the specified class for generating the classification output. E.g.:
    * weka.classifiers.evaluation.output.prediction.PlainText or :
    * weka.classifiers.evaluation.output.prediction.CSV
-   *
+   * 
    * -p range <br/>
    * Outputs predictions for test instances (or the train instances if no test
    * instances provided and -no-cv is used), along with the attributes in the
@@ -1046,31 +1047,31 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * <p/>
    * Deprecated: use "-classifications ..." instead.
    * <p/>
-   *
+   * 
    * -distribution <br/>
    * Outputs the distribution instead of only the prediction in conjunction with
    * the '-p' option (only nominal classes).
    * <p/>
    * Deprecated: use "-classifications ..." instead.
    * <p/>
-   *
+   * 
    * -no-predictions <br/>
    * Turns off the collection of predictions in order to conserve memory.
    * <p/>
-   *
+   * 
    * -r <br/>
    * Outputs cumulative margin distribution (and nothing else).
    * <p/>
-   *
+   * 
    * -g <br/>
    * Only for classifiers that implement "Graphable." Outputs the graph
    * representation of the classifier (and nothing else).
    * <p/>
-   *
+   * 
    * -xml filename | xml-string <br/>
    * Retrieves the options from the XML-data instead of the command line.
    * <p/>
-   *
+   * 
    * @param classifier machine learning classifier
    * @param options the array of string containing the options
    * @throws Exception if model could not be evaluated successfully
@@ -1083,17 +1084,19 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     int seed = 1, folds = 10, classIndex = -1;
     boolean noCrossValidation = false;
     String trainFileName, testFileName, sourceClass, classIndexString, seedString, foldsString, objectInputFileName, objectOutputFileName;
-    boolean noOutput = false, trainStatistics = true, printMargins = false, printComplexityStatistics = false, printGraph = false, classStatistics = false, printSource = false;
+    boolean noOutput = false, trainStatistics = true, printMargins = false, printComplexityStatistics =
+      false, printGraph = false, classStatistics = false, printSource = false;
     StringBuffer text = new StringBuffer();
     DataSource trainSource = null, testSource = null;
     ObjectInputStream objectInputStream = null;
     BufferedInputStream xmlInputStream = null;
     CostMatrix costMatrix = null;
     StringBuffer schemeOptionsText = null;
-    long trainTimeStart = 0, trainTimeElapsed = 0, testTimeStart = 0, testTimeElapsed = 0;
+    long trainTimeStart = 0, trainTimeElapsed = 0, testTimeStart = 0, testTimeElapsed =
+      0;
     String xml = "";
     String[] optionsTmp = null;
-    Classifier classifierBackup;
+    Classifier classifierBackup = null;
     int actualClassIndex = -1; // 0-based class index
     String splitPercentageString = "";
     double splitPercentage = -1;
@@ -1325,7 +1328,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       costMatrix = handleCostOption(Utils.getOption('m', options),
         template.numClasses());
 
-      classStatistics = !Utils.getFlag("do-not-output-per-class-statistics", options);
+      classStatistics =
+        !Utils.getFlag("do-not-output-per-class-statistics", options);
       noOutput = Utils.getFlag('o', options);
       trainStatistics = !Utils.getFlag('v', options);
       printComplexityStatistics = Utils.getFlag('k', options);
@@ -1408,6 +1412,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         + makeOptionString(classifier, false));
     }
 
+    boolean serializedClassifierLoaded = false;
     if (objectInputFileName.length() != 0) {
       // Load classifier from file
       if (objectInputStream != null) {
@@ -1427,11 +1432,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           }
         }
         objectInputStream.close();
+        serializedClassifierLoaded = true;
       } else if (xmlInputStream != null) {
         // whether KOML is available has already been checked (objectInputStream
         // would null otherwise)!
         classifier = (Classifier) KOML.read(xmlInputStream);
         xmlInputStream.close();
+        serializedClassifierLoaded = true;
       }
     }
 
@@ -1441,8 +1448,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     Evaluation testingEvaluation = new Evaluation(new Instances(template, 0),
       costMatrix);
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getModelHeader(new Instances(template, 0));
+      Instances mappedClassifierHeader =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getModelHeader(new Instances(template, 0));
 
       trainingEvaluation = new Evaluation(new Instances(mappedClassifierHeader,
         0), costMatrix);
@@ -1459,8 +1467,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       testingEvaluation.useNoPriors();
     }
 
-    // backup of fully setup classifier for cross-validation
-    classifierBackup = AbstractClassifier.makeCopy(classifier);
+    if (!serializedClassifierLoaded) {
+      // backup of fully setup classifier for cross-validation
+      classifierBackup = AbstractClassifier.makeCopy(classifier);
+    }
 
     // Build the classifier if no object file provided
     if ((classifier instanceof UpdateableClassifier)
@@ -1494,11 +1504,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         // the structure expected by the mapped classifier - this is only
         // to ensure that the structure and priors computed by the *testing*
         // evaluation object is correct with respect to the mapped classifier
-        Instances mappedClassifierDataset = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-          .getModelHeader(new Instances(template, 0));
+        Instances mappedClassifierDataset =
+          ((weka.classifiers.misc.InputMappedClassifier) classifier)
+            .getModelHeader(new Instances(template, 0));
         for (int zz = 0; zz < tempTrain.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-            .constructMappedInstance(tempTrain.instance(zz));
+          Instance mapped =
+            ((weka.classifiers.misc.InputMappedClassifier) classifier)
+              .constructMappedInstance(tempTrain.instance(zz));
           mappedClassifierDataset.add(mapped);
         }
         tempTrain = mappedClassifierDataset;
@@ -1750,7 +1762,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Attempts to load a cost matrix.
-   *
+   * 
    * @param costFileName the filename of the cost matrix
    * @param numClasses the number of classes that should be in the cost matrix
    *          (only used if the cost file is in old format).
@@ -1809,7 +1821,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * must have exactly the same format (e.g. order of attributes) as the data
    * used to train the classifier! Otherwise the results will generally be
    * meaningless.
-   *
+   * 
    * @param classifier machine learning classifier
    * @param data set of test instances for evaluation
    * @param forPredictionsPrinting varargs parameter that, if supplied, is
@@ -1865,7 +1877,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @param storePredictions whether to store predictions for nominal classifier
@@ -1907,7 +1919,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the classifier on a single instance and records the prediction.
-   *
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @param storePredictions whether to store predictions for nominal classifier
@@ -1926,8 +1938,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       instance = ((weka.classifiers.misc.InputMappedClassifier) classifier)
         .constructMappedInstance(instance);
       // System.out.println("Mapped instance " + instance);
-      int mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getMappedClassIndex();
+      int mappedClass =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getMappedClassIndex();
       classMissing.setMissing(mappedClass);
     } else {
       classMissing.setClassMissing();
@@ -1963,7 +1976,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the classifier on a single instance and records the prediction.
-   *
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @return the prediction made by the clasifier
@@ -1978,7 +1991,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the classifier on a single instance.
-   *
+   * 
    * @param classifier machine learning classifier
    * @param instance the test instance to be classified
    * @return the prediction made by the clasifier
@@ -1993,7 +2006,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @return the prediction
@@ -2007,7 +2020,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the supplied distribution on a single instance.
-   *
+   * 
    * @param dist the supplied distribution
    * @param instance the test instance to be classified
    * @return the prediction
@@ -2021,7 +2034,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Evaluates the supplied prediction on a single instance.
-   *
+   * 
    * @param prediction the supplied prediction
    * @param instance the test instance to be classified
    * @throws Exception if model could not be evaluated successfully
@@ -2034,7 +2047,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the predictions that have been collected.
-   *
+   * 
    * @return a reference to the FastVector containing the predictions that have
    *         been collected. This should be null if no predictions have been
    *         collected.
@@ -2050,15 +2063,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Wraps a static classifier in enough source to test using the weka class
    * libraries.
-   *
+   * 
    * @param classifier a Sourcable Classifier
    * @param className the name to give to the source code class
    * @return the source for a static classifier that can be tested with weka
    *         libraries.
    * @throws Exception if code-generation fails
    */
-  public static String wekaStaticWrapper(Sourcable classifier, String className)
-    throws Exception {
+  public static String
+    wekaStaticWrapper(Sourcable classifier, String className)
+      throws Exception {
 
     StringBuffer result = new StringBuffer();
     String staticClassifier = classifier.toSource(className);
@@ -2196,7 +2210,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the number of test instances that had a known class value (actually
    * the sum of the weights of test instances with known class value).
-   *
+   * 
    * @return the number of test instances with known class
    */
   public final double numInstances() {
@@ -2207,7 +2221,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the coverage of the test cases by the predicted regions at the
    * confidence level specified when evaluation was performed.
-   *
+   * 
    * @return the coverage of the test cases by the predicted regions
    */
   public final double coverageOfTestCasesByPredictedRegions() {
@@ -2223,7 +2237,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Gets the average size of the predicted regions, relative to the range of
    * the target in the training data, at the confidence level specified when
    * evaluation was performed.
-   *
+   * 
    * @return the average size of the predicted regions
    */
   public final double sizeOfPredictedRegions() {
@@ -2239,7 +2253,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Gets the number of instances incorrectly classified (that is, for which an
    * incorrect prediction was made). (Actually the sum of the weights of these
    * instances)
-   *
+   * 
    * @return the number of incorrectly classified instances
    */
   public final double incorrect() {
@@ -2250,7 +2264,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the percentage of instances incorrectly classified (that is, for which
    * an incorrect prediction was made).
-   *
+   * 
    * @return the percent of incorrectly classified instances (between 0 and 100)
    */
   public final double pctIncorrect() {
@@ -2261,7 +2275,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the total cost, that is, the cost of each prediction times the weight
    * of the instance, summed over all instances.
-   *
+   * 
    * @return the total cost
    */
   public final double totalCost() {
@@ -2272,7 +2286,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the average cost, that is, total cost of misclassifications (incorrect
    * plus unclassified) over the total number of instances.
-   *
+   * 
    * @return the average cost.
    */
   public final double avgCost() {
@@ -2284,7 +2298,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Gets the number of instances correctly classified (that is, for which a
    * correct prediction was made). (Actually the sum of the weights of these
    * instances)
-   *
+   * 
    * @return the number of correctly classified instances
    */
   public final double correct() {
@@ -2295,7 +2309,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the percentage of instances correctly classified (that is, for which a
    * correct prediction was made).
-   *
+   * 
    * @return the percent of correctly classified instances (between 0 and 100)
    */
   public final double pctCorrect() {
@@ -2307,7 +2321,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Gets the number of instances not classified (that is, for which no
    * prediction was made by the classifier). (Actually the sum of the weights of
    * these instances)
-   *
+   * 
    * @return the number of unclassified instances
    */
   public final double unclassified() {
@@ -2318,7 +2332,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Gets the percentage of instances not classified (that is, for which no
    * prediction was made by the classifier).
-   *
+   * 
    * @return the percent of unclassified instances (between 0 and 100)
    */
   public final double pctUnclassified() {
@@ -2330,7 +2344,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Returns the estimated error rate or the root mean squared error (if the
    * class is numeric). If a cost matrix was given this error rate gives the
    * average cost.
-   *
+   * 
    * @return the estimated error rate (between 0 and 1, or between 0 and maximum
    *         cost)
    */
@@ -2348,7 +2362,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns value of kappa statistic if class is nominal.
-   *
+   * 
    * @return the value of the kappa statistic
    */
   public final double kappa() {
@@ -2380,7 +2394,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the correlation coefficient if the class is numeric.
-   *
+   * 
    * @return the correlation coefficient
    * @throws Exception if class is not numeric
    */
@@ -2412,7 +2426,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Returns the mean absolute error. Refers to the error of the predicted
    * values for numeric classes, and the error of the predicted probability
    * distribution for nominal classes.
-   *
+   * 
    * @return the mean absolute error
    */
   public final double meanAbsoluteError() {
@@ -2422,7 +2436,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the mean absolute error of the prior.
-   *
+   * 
    * @return the mean absolute error
    */
   public final double meanPriorAbsoluteError() {
@@ -2436,7 +2450,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the relative absolute error.
-   *
+   * 
    * @return the relative absolute error
    * @throws Exception if it can't be computed
    */
@@ -2451,7 +2465,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the root mean squared error.
-   *
+   * 
    * @return the root mean squared error
    */
   public final double rootMeanSquaredError() {
@@ -2461,7 +2475,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the root mean prior squared error.
-   *
+   * 
    * @return the root mean prior squared error
    */
   public final double rootMeanPriorSquaredError() {
@@ -2475,7 +2489,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the root relative squared error if the class is numeric.
-   *
+   * 
    * @return the root relative squared error
    */
   public final double rootRelativeSquaredError() {
@@ -2489,7 +2503,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculate the entropy of the prior distribution.
-   *
+   * 
    * @return the entropy of the prior distribution
    * @throws Exception if the class is not nominal
    */
@@ -2514,7 +2528,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Return the total Kononenko & Bratko Information score in bits.
-   *
+   * 
    * @return the K&B information score
    * @throws Exception if the class is not nominal
    */
@@ -2533,7 +2547,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Return the Kononenko & Bratko Information score in bits per instance.
-   *
+   * 
    * @return the K&B information score
    * @throws Exception if the class is not nominal
    */
@@ -2552,7 +2566,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Return the Kononenko & Bratko Relative Information score.
-   *
+   * 
    * @return the K&B relative information score
    * @throws Exception if the class is not nominal
    */
@@ -2571,7 +2585,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the total entropy for the null model.
-   *
+   * 
    * @return the total null model entropy
    */
   public final double SFPriorEntropy() {
@@ -2585,7 +2599,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the entropy per instance for the null model.
-   *
+   * 
    * @return the null model entropy per instance
    */
   public final double SFMeanPriorEntropy() {
@@ -2599,7 +2613,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the total entropy for the scheme.
-   *
+   * 
    * @return the total scheme entropy
    */
   public final double SFSchemeEntropy() {
@@ -2613,7 +2627,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the entropy per instance for the scheme.
-   *
+   * 
    * @return the scheme entropy per instance
    */
   public final double SFMeanSchemeEntropy() {
@@ -2628,7 +2642,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Returns the total SF, which is the null model entropy minus the scheme
    * entropy.
-   *
+   * 
    * @return the total SF
    */
   public final double SFEntropyGain() {
@@ -2643,7 +2657,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Returns the SF per instance, which is the null model entropy minus the
    * scheme entropy, per instance.
-   *
+   * 
    * @return the SF per instance
    */
   public final double SFMeanEntropyGain() {
@@ -2659,7 +2673,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Output the cumulative margin distribution as a string suitable for input
    * for gnuplot or similar package.
-   *
+   * 
    * @return the cumulative margin distribution
    * @throws Exception if the class attribute is nominal
    */
@@ -2688,7 +2702,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calls toSummaryString() with no title and no complexity stats.
-   *
+   * 
    * @return a summary description of the classifier evaluation
    */
   @Override
@@ -2699,7 +2713,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calls toSummaryString() with a default title.
-   *
+   * 
    * @param printComplexityStatistics if true, complexity statistics are
    *          returned as well
    * @return the summary string
@@ -2714,13 +2728,14 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * percentage) of instances classified correctly, incorrectly and
    * unclassified. Outputs the total number of instances classified, and the
    * number of instances (if any) that had no class value provided.
-   *
+   * 
    * @param title the title for the statistics
    * @param printComplexityStatistics if true, complexity statistics are
    *          returned as well
    * @return the summary as a String
    */
-  public String toSummaryString(String title, boolean printComplexityStatistics) {
+  public String
+    toSummaryString(String title, boolean printComplexityStatistics) {
 
     StringBuffer text = new StringBuffer();
 
@@ -2874,8 +2889,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
                     .toLowerCase()));
                 }
                 if (display) {
-                  String formattedS = ((InformationTheoreticEvaluationMetric) m)
-                    .toSummaryString();
+                  String formattedS =
+                    ((InformationTheoreticEvaluationMetric) m)
+                      .toSummaryString();
                   text.append(formattedS);
                 }
               }
@@ -2973,7 +2989,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calls toMatrixString() with a default title.
-   *
+   * 
    * @return the confusion matrix as a string
    * @throws Exception if the class is numeric
    */
@@ -2985,7 +3001,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Outputs the performance statistics as a classification confusion matrix.
    * For each class value, shows the distribution of predicted class values.
-   *
+   * 
    * @param title the title for the confusion matrix
    * @return the confusion matrix as a String
    * @throws Exception if the class is numeric
@@ -2993,8 +3009,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   public String toMatrixString(String title) throws Exception {
 
     StringBuffer text = new StringBuffer();
-    char[] IDChars = { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
-      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z' };
+    char[] IDChars =
+    { 'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k',
+      'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y',
+      'z' };
     int IDWidth;
     boolean fractional = false;
 
@@ -3051,7 +3069,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * incorporating various information-retrieval statistics, such as true/false
    * positive rate, precision/recall/F-Measure. Should be useful for ROC curves,
    * recall/precision curves.
-   *
+   * 
    * @return the statistics presented as a string
    * @throws Exception if class is not nominal
    */
@@ -3065,7 +3083,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * information-retrieval statistics, such as true/false positive rate,
    * precision/recall/F-Measure. Should be useful for ROC curves,
    * recall/precision curves.
-   *
+   * 
    * @param title the title to prepend the stats string with
    * @return the statistics presented as a string
    * @throws Exception if class is not nominal
@@ -3250,11 +3268,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the number of true positives with respect to a particular class.
    * This is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -3273,13 +3291,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the true positive rate with respect to a particular class. This
    * is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *       total positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -3300,7 +3318,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) true positive rate.
-   *
+   * 
    * @return the weighted true positive rate.
    */
   public double weightedTruePositiveRate() {
@@ -3327,11 +3345,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the number of true negatives with respect to a particular class.
    * This is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -3354,13 +3372,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the true negative rate with respect to a particular class. This
    * is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified negatives
    * ------------------------------
    *       total negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the true positive rate
    */
@@ -3385,7 +3403,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) true negative rate.
-   *
+   * 
    * @return the weighted true negative rate.
    */
   public double weightedTrueNegativeRate() {
@@ -3412,11 +3430,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate number of false positives with respect to a particular class.
    * This is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * incorrectly classified negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -3439,13 +3457,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the false positive rate with respect to a particular class. This
    * is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * incorrectly classified negatives
    * --------------------------------
    *        total negatives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -3470,7 +3488,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) false positive rate.
-   *
+   * 
    * @return the weighted false positive rate.
    */
   public double weightedFalsePositiveRate() {
@@ -3497,11 +3515,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate number of false negatives with respect to a particular class.
    * This is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * incorrectly classified positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -3524,13 +3542,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the false negative rate with respect to a particular class. This
    * is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * incorrectly classified positives
    * --------------------------------
    *        total positives
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the false positive rate
    */
@@ -3555,7 +3573,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) false negative rate.
-   *
+   * 
    * @return the weighted false negative rate.
    */
   public double weightedFalseNegativeRate() {
@@ -3581,10 +3599,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Calculates the matthews correlation coefficient (sometimes called phi
    * coefficient) for the supplied class
-   *
+   * 
    * @param classIndex the index of the class to compute the matthews
    *          correlation coefficient for
-   *
+   * 
    * @return the mathews correlation coefficient
    */
   public double matthewsCorrelationCoefficient(int classIndex) {
@@ -3605,7 +3623,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) matthews correlation coefficient.
-   *
+   * 
    * @return the weighted matthews correlation coefficient.
    */
   public double weightedMatthewsCorrelation() {
@@ -3633,7 +3651,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Calculate the recall with respect to a particular class. This is defined as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
@@ -3641,7 +3659,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * </pre>
    * <p/>
    * (Which is also the same as the truePositiveRate.)
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the recall
    */
@@ -3652,7 +3670,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) recall.
-   *
+   * 
    * @return the weighted recall.
    */
   public double weightedRecall() {
@@ -3663,13 +3681,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the precision with respect to a particular class. This is defined
    * as
    * <p/>
-   *
+   * 
    * <pre>
    * correctly classified positives
    * ------------------------------
    *  total predicted as positive
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the precision
    */
@@ -3690,7 +3708,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the weighted (by class size) precision.
-   *
+   * 
    * @return the weighted precision.
    */
   public double weightedPrecision() {
@@ -3717,13 +3735,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Calculate the F-Measure with respect to a particular class. This is defined
    * as
    * <p/>
-   *
+   * 
    * <pre>
    * 2 * recall * precision
    * ----------------------
    *   recall + precision
    * </pre>
-   *
+   * 
    * @param classIndex the index of the class to consider as "positive"
    * @return the F-Measure
    */
@@ -3739,7 +3757,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Calculates the macro weighted (by class size) average F-Measure.
-   *
+   * 
    * @return the weighted F-Measure.
    */
   public double weightedFMeasure() {
@@ -3765,7 +3783,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Unweighted macro-averaged F-measure. If some classes not present in the
    * test set, they're just skipped (since recall is undefined there anyway) .
-   *
+   * 
    * @return unweighted macro-averaged F-measure.
    * */
   public double unweightedMacroFmeasure() {
@@ -3783,9 +3801,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Unweighted micro-averaged F-measure. If some classes not present in the
    * test set, they have no effect.
-   *
+   * 
    * Note: if the test set is *single-label*, then this is the same as accuracy.
-   *
+   * 
    * @return unweighted micro-averaged F-measure.
    */
   public double unweightedMicroFmeasure() {
@@ -3802,7 +3820,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Sets the class prior probabilities.
-   *
+   * 
    * @param train the training instances used to determine the prior
    *          probabilities
    * @throws Exception if the class attribute of the instances is not set
@@ -3856,7 +3874,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Get the current weighted class counts.
-   *
+   * 
    * @return the weighted class counts
    */
   public double[] getClassPriors() {
@@ -3866,7 +3884,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Updates the class prior probabilities or the mean respectively (when
    * incrementally training).
-   *
+   * 
    * @param instance the new training instance seen
    * @throws Exception if the class of the instance is not set
    */
@@ -3895,7 +3913,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Tests whether the current evaluation object is equal to another evaluation
    * object.
-   *
+   * 
    * @param obj the object to compare against
    * @return true if the two objects are equal
    */
@@ -3969,7 +3987,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Make up the help string giving all the command line options.
-   *
+   * 
    * @param classifier the classifier to include options for
    * @param globalInfo include the global information string for the classifier
    *          (if available).
@@ -4116,7 +4134,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         + "\t(default is the first label)\n");
     optionsText.append("-no-predictions\n");
     optionsText
-    .append("\tTurns off the collection of predictions in order to conserve memory.\n");
+      .append("\tTurns off the collection of predictions in order to conserve memory.\n");
 
     // Get scheme-specific options
     if (classifier instanceof OptionHandler) {
@@ -4144,7 +4162,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Return the global info (if it exists) for the supplied classifier.
-   *
+   * 
    * @param classifier the classifier to get the global info for
    * @return the global info (synopsis) for the classifier
    * @throws Exception if there is a problem reflecting on the classifier
@@ -4172,7 +4190,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Method for generating indices for the confusion matrix.
-   *
+   * 
    * @param num integer to format
    * @param IDChars the characters to use
    * @param IDWidth the width of the entry
@@ -4200,7 +4218,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Convert a single prediction into a probability distribution with all zero
    * probabilities except the predicted value which has probability 1.0.
-   *
+   * 
    * @param predictedClass the index of the predicted class
    * @return the probability distribution
    */
@@ -4221,7 +4239,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Updates all the statistics about a classifiers performance for the current
    * test instance.
-   *
+   * 
    * @param predictedDistribution the probabilities assigned to each class
    * @param instance the instance to be classified
    * @throws Exception if the class of the instance is not set
@@ -4331,7 +4349,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Updates stats for interval estimator based on current test instance.
-   *
+   * 
    * @param classifier the interval estimator
    * @param classMissing the instance for which the intervals are computed,
    *          without a class value
@@ -4369,7 +4387,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Updates stats for conditional density estimator based on current test
    * instance.
-   *
+   * 
    * @param classifier the conditional density estimator
    * @param classMissing the instance for which density is to be computed,
    *          without a class value
@@ -4392,7 +4410,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Updates all the statistics about a predictors performance for the current
    * test instance.
-   *
+   * 
    * @param predictedValue the numeric value the classifier predicts
    * @param instance the instance to be classified
    * @throws Exception if the class of the instance is not set
@@ -4438,7 +4456,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Update the cumulative record of classification margins.
-   *
+   * 
    * @param predictedDistribution the probability distribution predicted for the
    *          current instance
    * @param actualClass the index of the actual instance class
@@ -4465,7 +4483,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Update the numeric accuracy measures. For numeric classes, the accuracy is
    * between the actual and predicted class values. For nominal classes, the
    * accuracy is between the actual and predicted class probabilities.
-   *
+   * 
    * @param predicted the predicted values
    * @param actual the actual value
    * @param weight the weight associated with this prediction
@@ -4495,7 +4513,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   /**
    * Adds a numeric (non-missing) training class value and weight to the buffer
    * of stored values. Also updates minimum and maximum target value.
-   *
+   * 
    * @param classValue the class value
    * @param weight the instance weight
    */
@@ -4543,7 +4561,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Returns the revision string.
-   *
+   * 
    * @return the revision
    */
   @Override
