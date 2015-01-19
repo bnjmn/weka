@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.unsupervised.attribute.AddExpression-Ea1^2-Nexpression
+@relation FilterTest-weka.filters.unsupervised.attribute.AddExpression-E0.0-Nexpression
 
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r,g,b}
@@ -7,27 +7,27 @@
 @attribute NominalAtt2 {a,b,c,d}
 @attribute NumericAtt2 numeric
 @attribute DateAtt1 date yyyy-MM-dd
-@attribute a1^2 numeric
+@attribute 0.0 numeric
 
 @data
-humpty,g,1,the,a,-2.3,2001-04-03,1
-dumpty,b,2,quick,b,-3.3,2001-04-03,4
-sat,r,3,brown,c,-2.4,2001-04-03,9
-on,r,4,fox,d,-5.3,2001-04-03,16
-a,b,5,jumped,a,-2.6,2001-04-03,25
-wall,r,6,over,b,-7.3,2001-04-04,36
-humpty,r,7,the,c,-2.8,2001-04-04,1
-dumpty,g,8,lazy,d,-9.3,2001-04-04,4
-had,b,9,dog,?,-2,2001-05-04,49
-a,r,9.4,?,?,-9,2001-05-04,25
-great,r,1.4,the,a,-8.3,2001-05-05,64
-fall,b,2.3,quick,b,-7.3,2001-05-05,81
-all,r,3.3,brown,c,?,2001-05-05,100
-the,r,4.3,fox,d,-5.3,2001-05-05,121
-kings,g,5.3,jumped,?,-5.6,2001-05-06,144
-horses,b,6.5,over,b,-4.3,2001-05-06,169
-and,r,7.5,the,c,-3.8,2001-06-06,196
-all,r,8.5,lazy,d,-2.3,2001-06-06,100
-the,r,9.4,?,a,-1,2001-06-07,121
-{0 wall,2 4.3,3 the,4 d,7 36}
-{0 humpty,1 b,3 lazy,5 3.4,7 1}
+humpty,g,1,the,a,-2.3,2001-04-03,0
+dumpty,b,2,quick,b,-3.3,2001-04-03,0
+sat,r,3,brown,c,-2.4,2001-04-03,0
+on,r,4,fox,d,-5.3,2001-04-03,0
+a,b,5,jumped,a,-2.6,2001-04-03,0
+wall,r,6,over,b,-7.3,2001-04-04,0
+humpty,r,7,the,c,-2.8,2001-04-04,0
+dumpty,g,8,lazy,d,-9.3,2001-04-04,0
+had,b,9,dog,?,-2,2001-05-04,0
+a,r,9.4,?,?,-9,2001-05-04,0
+great,r,1.4,the,a,-8.3,2001-05-05,0
+fall,b,2.3,quick,b,-7.3,2001-05-05,0
+all,r,3.3,brown,c,?,2001-05-05,0
+the,r,4.3,fox,d,-5.3,2001-05-05,0
+kings,g,5.3,jumped,?,-5.6,2001-05-06,0
+horses,b,6.5,over,b,-4.3,2001-05-06,0
+and,r,7.5,the,c,-3.8,2001-06-06,0
+all,r,8.5,lazy,d,-2.3,2001-06-06,0
+the,r,9.4,?,a,-1,2001-06-07,0
+{0 wall,2 4.3,3 the,4 d}
+{0 humpty,1 b,3 lazy,5 3.4}

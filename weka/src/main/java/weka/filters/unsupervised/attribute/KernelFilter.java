@@ -25,7 +25,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Vector;
 
 import weka.classifiers.functions.supportVector.Kernel;
@@ -37,7 +36,6 @@ import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.MathematicalExpression;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
@@ -48,6 +46,14 @@ import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 import weka.core.converters.ConverterUtils.DataSource;
+import weka.core.expressionlanguage.common.IfElseMacro;
+import weka.core.expressionlanguage.common.JavaMacro;
+import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
+import weka.core.expressionlanguage.common.MathFunctions;
+import weka.core.expressionlanguage.common.Primitives.DoubleExpression;
+import weka.core.expressionlanguage.common.SimpleVariableDeclarations;
+import weka.core.expressionlanguage.core.Node;
+import weka.core.expressionlanguage.parser.Parser;
 import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
@@ -781,14 +787,33 @@ public class KernelFilter extends SimpleBatchFilter implements
    */
   public void initFilter(Instances instances) throws Exception {
 
-    HashMap<String, Double> symbols;
-
     // determine kernel factor
-    symbols = new HashMap<String, Double>();
-    symbols.put("A", new Double(instances.numAttributes()));
-    symbols.put("N", new Double(instances.numInstances()));
-    m_KernelFactor = MathematicalExpression.evaluate(
-      getKernelFactorExpression(), symbols);
+    SimpleVariableDeclarations variables = new SimpleVariableDeclarations();
+    variables.addDouble("A");
+    variables.addDouble("N");
+
+    Node root = Parser.parse(
+        // expression
+        getKernelFactorExpression(),
+        // variables
+        variables,
+        // macros
+        new MacroDeclarationsCompositor(
+            new MathFunctions(),
+            new IfElseMacro(),
+            new JavaMacro()
+            )
+        );
+    
+    if (!(root instanceof DoubleExpression))
+      throw new Exception("Kernel factor expression must be of double type!");
+    
+    if (variables.getInitializer().hasVariable("A"))
+      variables.getInitializer().setDouble("A", instances.numAttributes());
+    if (variables.getInitializer().hasVariable("N"))
+      variables.getInitializer().setDouble("N", instances.numInstances());
+    
+    m_KernelFactor = ((DoubleExpression) root).evaluate();
 
     // init filters
     if (!m_checksTurnedOff) {

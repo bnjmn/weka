@@ -1,0 +1,331 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Parser.cup
+ * Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ */
+
+/**
+ * The parser used for the expression language
+ *
+ * @author Benjamin Weber ( benweber at student dot ethz dot ch )
+ * @version $Revision: 1000 $
+ */
+package weka.core.expressionlanguage.parser;
+
+import java.util.List;
+import java.util.ArrayList;
+import java.io.StringReader;
+
+import java_cup.runtime.Symbol;
+
+import weka.core.expressionlanguage.core.Node;
+import weka.core.expressionlanguage.core.VariableDeclarations;
+import weka.core.expressionlanguage.core.SemanticException;
+import weka.core.expressionlanguage.core.SyntaxException;
+import weka.core.expressionlanguage.core.MacroDeclarations;
+import weka.core.expressionlanguage.common.Operators;
+import weka.core.expressionlanguage.common.NoVariables;
+import weka.core.expressionlanguage.common.NoMacros;
+import weka.core.expressionlanguage.common.Primitives.DoubleConstant;
+import weka.core.expressionlanguage.common.Primitives.BooleanConstant;
+import weka.core.expressionlanguage.common.Primitives.StringConstant;
+import weka.core.expressionlanguage.parser.Scanner;
+
+parser code
+{:
+  /** the variables available to the program */
+  private VariableDeclarations variables = new NoVariables();
+
+  /** the macros available to the program */
+  private MacroDeclarations macros = new NoMacros();
+  
+  /** the root node */
+  private Node root;
+  
+  /**
+   * Sets the variable declarations for the program
+   *
+   * @param variables the variables that should be exposed to the program
+   */
+  public void setVariables(VariableDeclarations variables) {
+    this.variables = variables;
+  }
+  
+  /**
+   * Sets the macro declarations for the program
+   *
+   * @param macros the macros that should be exposed to the program
+   */
+  public void setMacros(MacroDeclarations macros) {
+    this.macros = macros;
+  }
+  
+  /**
+   * Sets the root node
+   */
+  private void setRoot(Node root) {
+    this.root = root;
+  }
+  
+  /**
+   * Returns the root node of the program
+   *
+   * @return the root node
+   */
+  public Node getRoot() {
+    return root;
+  }
+  
+  /**
+   * Tries to parse and compile a program from the textual representation in
+   * expr while exposing the variables and marcos
+   *
+   * @param expr the expression to be compiled in textual form
+   * @param variables the variables exposed to the program
+   * @param macros the macros exposed to the program
+   * @return the root node of the compiled program
+   * @throws Exception if an error occurs during compilation
+   */
+  public static Node parse(String expr, VariableDeclarations variables,
+    MacroDeclarations macros) throws Exception {
+  
+    Parser parser = new Parser(new Scanner(new StringReader(expr)));
+    parser.setVariables(variables);
+    parser.setMacros(macros);
+    parser.parse();
+    return parser.getRoot();
+  }
+  
+  public void unrecovered_syntax_error(Symbol token) throws SyntaxException {
+    throw new SyntaxException("Syntax error at token '"
+      + sym.terminalNames[token.sym] + "'!");
+  }
+:}
+
+terminal String IDENTIFIER;
+terminal Double FLOAT;
+terminal String STRING;
+terminal Boolean BOOLEAN;
+terminal LPAREN, RPAREN, COMMA;
+terminal PLUS, MINUS, TIMES, DIVISION, POW;
+terminal UMINUS, UPLUS;
+terminal AND, OR, NOT;
+terminal EQUAL, LT, LE, GT, GE;
+terminal IS, REGEXP;
+
+nonterminal Node unit;
+nonterminal Node expr;
+nonterminal List<Node> paramlistOpt;
+nonterminal List<Node> paramlist;
+
+// top lowest, bottom highest (same as java except for POW, IS & REGEXP)
+precedence left OR;
+precedence left AND;
+// bitwise and, or, not
+precedence nonassoc IS; // non-java
+precedence nonassoc EQUAL; // not equal
+precedence nonassoc LT, LE, GT, GE, REGEXP; // non-java
+// shifts
+precedence left PLUS, MINUS; // string concatenation
+precedence left TIMES, DIVISION; // modulo
+precedence nonassoc NOT, UMINUS, UPLUS; // bitwise not, unary minus, unary plus
+precedence right POW; // non-java
+
+start with unit;
+
+unit          ::= expr:e
+                    {:
+                      RESULT = e;
+                      setRoot(RESULT);
+                    :}
+                 ;
+
+
+paramlist     ::= 
+                   paramlist:l COMMA expr:e
+                     {:
+                       l.add(e);
+                       RESULT = l;
+                     :}
+
+                 | expr:e
+                     {:
+                       List<Node> l = new ArrayList<Node>();
+                       l.add(e);
+                       RESULT = l;
+                     :}
+
+                 ;
+
+paramlistOpt  ::=
+                   paramlist:l
+                     {:
+                       RESULT = l;
+                     :}
+                 
+                 | // nothing
+                     {:
+                       RESULT = new ArrayList<Node>();
+                     :}
+
+                 ;
+
+expr          ::=
+                   LPAREN expr:e RPAREN
+                     {:
+                       RESULT = e;
+                     :}
+                
+                // macro
+                |  IDENTIFIER:m LPAREN paramlistOpt:p RPAREN
+                    {:
+                      if (!macros.hasMacro(m))
+                        throw new SemanticException("Macro '" + m + "' is undefined!");
+                      RESULT = macros.getMacro(m).evaluate(p.toArray(new Node[0]));
+                    :}
+
+                // variable
+                |  IDENTIFIER:v
+                    {:
+                      if (!variables.hasVariable(v))
+                        throw new SemanticException("Variable '" + v + "' is undefined!");
+                      RESULT = variables.getVariable(v);
+                    :}
+
+                // float
+                | FLOAT:f
+                    {:
+                      RESULT = new DoubleConstant(f);
+                    :}
+                
+                // boolean
+                | BOOLEAN:b
+                    {:
+                      RESULT = new BooleanConstant(b);
+                    :}
+                
+                // string
+                | STRING:s
+                    {:
+                      RESULT = new StringConstant(s);
+                    :}
+
+                // unary plus
+                | PLUS expr:e
+                    {:
+                      RESULT = Operators.uplus(e);
+                    :}
+                    %prec UPLUS
+                    
+                // unary minus
+                | MINUS expr:e
+                    {:
+                      RESULT = Operators.uminus(e);
+                    :}
+                    %prec UMINUS
+                    
+                // pow operator
+                | expr:l POW expr:r
+                    {:
+                      RESULT = Operators.pow(l, r);
+                    :}
+  
+                // plus operator
+                | expr:l PLUS expr:r
+                    {:
+                      RESULT = Operators.plus(l, r);
+                    :}
+  
+                // minus operator
+                | expr:l MINUS expr:r
+                    {:
+                      RESULT = Operators.minus(l, r);
+                    :}
+  
+                // times operator
+                | expr:l TIMES expr:r
+                    {:
+                      RESULT = Operators.times(l, r);
+                    :}
+  
+                // division operator
+                | expr:l DIVISION expr:r
+                    {:
+                      RESULT = Operators.division(l, r);
+                    :}
+  
+                // and operator
+                | expr:l AND expr:r
+                    {:
+                      RESULT = Operators.and(l, r);
+                    :}
+  
+                // or operator
+                | expr:l OR expr:r
+                    {:
+                      RESULT = Operators.or(l, r);
+                    :}
+  
+                // not operator
+                | NOT expr:e
+                    {:
+                      RESULT = Operators.not(e);
+                    :}
+  
+                // equal operator
+                | expr:l EQUAL expr:r
+                    {:
+                      RESULT = Operators.equal(l, r);
+                    :}
+  
+                // less than operator
+                | expr:l LT expr:r
+                    {:
+                      RESULT = Operators.lessThan(l, r);
+                    :}
+  
+                // less equal operator
+                | expr:l LE expr:r
+                    {:
+                      RESULT = Operators.lessEqual(l, r);
+                    :}
+  
+                // greater than operator
+                | expr:l GT expr:r
+                    {:
+                      RESULT = Operators.greaterThan(l, r);
+                    :}
+  
+                // greater equal operator
+                | expr:l GE expr:r
+                    {:
+                      RESULT = Operators.greaterEqual(l, r);
+                    :}
+                
+                // is operator
+                | expr:l IS expr:r
+                    {:
+                      RESULT = Operators.is(l, r);
+                    :}
+                
+                // regexp operator
+                | expr:l REGEXP expr:r
+                    {:
+                      RESULT = Operators.regexp(l, r);
+                    :}
+
+                ;

@@ -21,28 +21,33 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.io.ByteArrayInputStream;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Vector;
 
-import java_cup.runtime.DefaultSymbolFactory;
-import java_cup.runtime.SymbolFactory;
-import weka.core.AttributeStats;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.MathematicalExpression;
 import weka.core.Option;
 import weka.core.Range;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.mathematicalexpression.Parser;
-import weka.core.mathematicalexpression.Scanner;
+import weka.core.expressionlanguage.common.IfElseMacro;
+import weka.core.expressionlanguage.common.JavaMacro;
+import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
+import weka.core.expressionlanguage.common.MathFunctions;
+import weka.core.expressionlanguage.common.Primitives.DoubleExpression;
+import weka.core.expressionlanguage.common.SimpleVariableDeclarations;
+import weka.core.expressionlanguage.common.SimpleVariableDeclarations.VariableInitializer;
+import weka.core.expressionlanguage.common.VariableDeclarationsCompositor;
+import weka.core.expressionlanguage.core.Node;
+import weka.core.expressionlanguage.parser.Parser;
+import weka.core.expressionlanguage.weka.InstancesHelper;
+import weka.core.expressionlanguage.weka.StatsHelper;
+import weka.experiment.Stats;
 import weka.filters.UnsupervisedFilter;
 
 /**
@@ -104,9 +109,21 @@ public class MathExpression extends PotentialClassIgnorer implements
 
   /** The modification expression */
   private String m_expression = m_defaultExpression;
+  
+  /** The compiled modification expression */
+  private DoubleExpression m_CompiledExpression;
 
   /** Attributes statistics */
-  private AttributeStats[] m_attStats;
+  private Stats[] m_attStats;
+
+  /** InstancesHelpers for different indices */
+  private InstancesHelper m_InstancesHelper;
+  
+  /** StatsHelpers for different indices */
+  private StatsHelper m_StatsHelper;
+  
+  /** VariableInitializer for the current value 'A' in an expression */
+  private VariableInitializer m_CurrentValue;
 
   /**
    * Constructor
@@ -164,8 +181,62 @@ public class MathExpression extends PotentialClassIgnorer implements
     m_SelectCols.setUpper(instanceInfo.numAttributes() - 1);
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
-    m_attStats = null;
+
+    m_attStats = new Stats[instanceInfo.numAttributes()];
+    
+    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
+      if (m_SelectCols.isInRange(i)
+          && instanceInfo.attribute(i).isNumeric()
+          && instanceInfo.classIndex() != i) {
+        
+        m_attStats[i] = new Stats();
+      }
+    }
+    
+    if (instanceInfo != null)
+      compile();
+
     return true;
+  }
+  
+  /**
+   * Compiles the expression
+   * Requires that the input format is set and not null
+   * 
+   * @throws Exception if a compilation error occurs
+   */
+  private void compile() throws Exception {
+
+    m_InstancesHelper = new InstancesHelper(getInputFormat());
+    m_StatsHelper = new StatsHelper();
+    SimpleVariableDeclarations currentValueDeclaration = new SimpleVariableDeclarations();
+    currentValueDeclaration.addDouble("A");
+
+    Node node = Parser.parse(
+        // expression
+        m_expression,
+        // variables
+        new VariableDeclarationsCompositor(
+            m_InstancesHelper,
+            m_StatsHelper,
+            currentValueDeclaration
+            ),
+        // macros
+        new MacroDeclarationsCompositor(
+            m_InstancesHelper,
+            new MathFunctions(),
+            new IfElseMacro(),
+            new JavaMacro()
+            )
+        );
+
+    if (!(node instanceof DoubleExpression))
+      throw new Exception("Expression must be of type double!");
+    
+    m_CurrentValue = currentValueDeclaration.getInitializer();
+
+    m_CompiledExpression = (DoubleExpression) node;
+    
   }
 
   /**
@@ -186,7 +257,16 @@ public class MathExpression extends PotentialClassIgnorer implements
       resetQueue();
       m_NewBatch = false;
     }
-    if (m_attStats == null) {
+    if (!m_FirstBatchDone) {
+      for (int i = 0; i < instance.numAttributes(); i++) {
+        if (m_SelectCols.isInRange(i)
+            && instance.attribute(i).isNumeric()
+            && getInputFormat().classIndex() != i) {
+
+          m_attStats[i].add(instance.value(i), instance.weight());
+        }
+      }
+     
       bufferInput(instance);
       return false;
     } else {
@@ -209,16 +289,19 @@ public class MathExpression extends PotentialClassIgnorer implements
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
-    if (m_attStats == null) {
+    if (!m_FirstBatchDone) {
+      
       Instances input = getInputFormat();
 
-      m_attStats = new AttributeStats[input.numAttributes()];
-
       for (int i = 0; i < input.numAttributes(); i++) {
-        if (input.attribute(i).isNumeric() && (input.classIndex() != i)) {
-          m_attStats[i] = input.attributeStats(i);
+        if (m_SelectCols.isInRange(i)
+            && input.attribute(i).isNumeric()
+            && input.classIndex() != i) {
+
+          m_attStats[i].calculateDerived();
         }
       }
+      
 
       // Convert pending input instances
       for (int i = 0; i < input.numInstances(); i++) {
@@ -229,35 +312,8 @@ public class MathExpression extends PotentialClassIgnorer implements
     flushInput();
 
     m_NewBatch = true;
+    m_FirstBatchDone = true;
     return (numPendingOutput() != 0);
-  }
-
-  /**
-   * Evaluates the symbols.
-   * 
-   * @param symbols the symbols to use for evaluation
-   * @return the calculated value, Double.NaN in case of an error
-   */
-  @SuppressWarnings("deprecation")
-  protected double eval(HashMap<String, Double> symbols) {
-    SymbolFactory sf;
-    ByteArrayInputStream parserInput;
-    Parser parser;
-    double result;
-
-    try {
-      sf = new DefaultSymbolFactory();
-      parserInput = new ByteArrayInputStream(m_expression.getBytes());
-      parser = new Parser(new Scanner(parserInput, sf), sf);
-      parser.setSymbols(symbols);
-      parser.parse();
-      result = parser.getResult();
-    } catch (Exception e) {
-      result = Double.NaN;
-      e.printStackTrace();
-    }
-
-    return result;
   }
 
   /**
@@ -269,101 +325,46 @@ public class MathExpression extends PotentialClassIgnorer implements
    */
   private void convertInstance(Instance instance) throws Exception {
 
-    Instance inst = null;
-    HashMap<String, Double> symbols = new HashMap<String, Double>(5);
+    Instance outInstance;
     if (instance instanceof SparseInstance) {
-      double[] newVals = new double[instance.numAttributes()];
-      int[] newIndices = new int[instance.numAttributes()];
-      double[] vals = instance.toDoubleArray();
-      double[] valsCopy = instance.toDoubleArray();
-      // add a symbol for all the numeric attributes except the class
-      for (int z = 0; z < getInputFormat().numAttributes(); z++) {
-        if (instance.attribute(z).isNumeric()
-          && z != getInputFormat().classIndex()) {
-          symbols.put("A" + (z + 1), new Double(valsCopy[z]));
-        }
-      }
-      int ind = 0;
-      double value;
-      for (int j = 0; j < instance.numAttributes(); j++) {
-        if (m_SelectCols.isInRange(j)) {
-          if (instance.attribute(j).isNumeric()
-            && (!Utils.isMissingValue(vals[j]))
-            && (getInputFormat().classIndex() != j)) {
-            symbols.put("A", new Double(vals[j]));
-            symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
-            symbols.put("MIN", new Double(m_attStats[j].numericStats.min));
-            symbols.put("MEAN", new Double(m_attStats[j].numericStats.mean));
-            symbols.put("SD", new Double(m_attStats[j].numericStats.stdDev));
-            symbols.put("COUNT", new Double(m_attStats[j].numericStats.count));
-            symbols.put("SUM", new Double(m_attStats[j].numericStats.sum));
-            symbols.put("SUMSQUARED", new Double(
-              m_attStats[j].numericStats.sumSq));
-            value = eval(symbols);
-            if (Double.isNaN(value) || Double.isInfinite(value)) {
-              System.err
-                .println("WARNING:Error in evaluating the expression: missing value set");
-              value = Utils.missingValue();
-            }
-            if (value != 0.0) {
-              newVals[ind] = value;
-              newIndices[ind] = j;
-              ind++;
-            }
-
-          }
-        } else {
-          value = vals[j];
-          if (value != 0.0) {
-            newVals[ind] = value;
-            newIndices[ind] = j;
-            ind++;
-          }
-        }
-      }
-      double[] tempVals = new double[ind];
-      int[] tempInd = new int[ind];
-      System.arraycopy(newVals, 0, tempVals, 0, ind);
-      System.arraycopy(newIndices, 0, tempInd, 0, ind);
-      inst = new SparseInstance(instance.weight(), tempVals, tempInd,
-        instance.numAttributes());
+      outInstance = new SparseInstance(instance.weight(), instance.toDoubleArray());
     } else {
-      double[] vals = instance.toDoubleArray();
-      double[] valsCopy = instance.toDoubleArray();
-      // add a symbol for all the numeric attributes except the class
-      for (int z = 0; z < getInputFormat().numAttributes(); z++) {
-        if (instance.attribute(z).isNumeric()
-          && z != getInputFormat().classIndex()) {
-          symbols.put("A" + (z + 1), new Double(valsCopy[z]));
-        }
-      }
-      for (int j = 0; j < getInputFormat().numAttributes(); j++) {
-        if (m_SelectCols.isInRange(j)) {
-          if (instance.attribute(j).isNumeric()
-            && (!Utils.isMissingValue(vals[j]))
-            && (getInputFormat().classIndex() != j)) {
-            symbols.put("A", new Double(vals[j]));
-            symbols.put("MAX", new Double(m_attStats[j].numericStats.max));
-            symbols.put("MIN", new Double(m_attStats[j].numericStats.min));
-            symbols.put("MEAN", new Double(m_attStats[j].numericStats.mean));
-            symbols.put("SD", new Double(m_attStats[j].numericStats.stdDev));
-            symbols.put("COUNT", new Double(m_attStats[j].numericStats.count));
-            symbols.put("SUM", new Double(m_attStats[j].numericStats.sum));
-            symbols.put("SUMSQUARED", new Double(
-              m_attStats[j].numericStats.sumSq));
-            vals[j] = eval(symbols);
-            if (Double.isNaN(vals[j]) || Double.isInfinite(vals[j])) {
-              System.err
-                .println("WARNING:Error in Evaluation the Expression: missing value set");
-              vals[j] = Utils.missingValue();
-            }
-          }
-        }
-      }
-      inst = new DenseInstance(instance.weight(), vals);
+      outInstance = new DenseInstance(instance.weight(), instance.toDoubleArray());
     }
-    inst.setDataset(instance.dataset());
-    push(inst);
+    outInstance.setDataset(instance.dataset());
+    
+    for (int i = 0; i < instance.numAttributes(); i++) {
+
+      if (
+          m_SelectCols.isInRange(i)
+          && instance.attribute(i).isNumeric()
+          && !instance.isMissing(i)
+          && getInputFormat().classIndex() != i
+          ) {
+
+        // setup program
+        m_InstancesHelper.setInstance(instance);
+        m_StatsHelper.setStats(m_attStats[i]);
+        if (m_CurrentValue.hasVariable("A"))
+          m_CurrentValue.setDouble("A", instance.value(i));
+
+        // compute
+        double value = m_CompiledExpression.evaluate();
+
+        // set new value
+        if (Double.isNaN(value) || Double.isInfinite(value) ||
+            m_InstancesHelper.missingAccessed()) {
+          System.err
+          .println("WARNING:Error in evaluating the expression: missing value set");
+          outInstance.setMissing(i);
+        } else {
+          outInstance.setValue(i, value);
+        }
+
+      }
+    }
+
+    push(outInstance);
   }
 
   /**
@@ -514,9 +515,12 @@ public class MathExpression extends PotentialClassIgnorer implements
    * Set the expression to apply
    * 
    * @param expr a mathematical expression to apply
+   * @throws Exception if the input format is set and there is a problem with the expression
    */
-  public void setExpression(String expr) {
+  public void setExpression(String expr) throws Exception {
     m_expression = expr;
+    if (getInputFormat() != null)
+      compile();
   }
 
   /**

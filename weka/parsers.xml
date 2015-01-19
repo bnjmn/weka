@@ -58,10 +58,7 @@
    <!-- central target for calling the parser targets -->
    <target name="parsers" depends="init" description="Generates all the parsers subsequently.">
       <antcall target="parser">
-         <param name="parserpkg" value="weka/core/mathematicalexpression"/>
-      </antcall>
-      <antcall target="parser">
-         <param name="parserpkg" value="weka/filters/unsupervised/instance/subsetbyexpression"/>
+         <param name="parserpkg" value="weka/core/expressionlanguage/parser"/>
       </antcall>
       <antcall target="parser">
          <param name="parserpkg" value="weka/core/json"/>
