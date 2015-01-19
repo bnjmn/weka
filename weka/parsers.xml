@@ -73,18 +73,19 @@
         (using Parser.cup and Scanner.jflex). -->
    <target name="parser" description="Generates the parser ${parserpkg}.">
       <echo message="Generating lexer (${parserpkg})."/>
-      <java classname="JFlex.Main">
+      <java classname="jflex.Main">
       	 <classpath refid="project.class.path"/>
          <arg value="--jlex"/>
          <arg value="--quiet"/>
          <arg value="--nobak"/>
-         <arg value="--outdir"/>
+         <arg value="-d"/>
          <arg value="${src}/${parserpkg}"/>
          <arg value="${src}/${parserpkg}/Scanner.jflex"/>
       </java>
       <echo message="Generating parser (${parserpkg})."/>
       <java classname="java_cup.Main">
       	 <classpath refid="project.class.path"/>
+         <arg value="-nopositions"/>
          <arg value="-parser"/>
          <arg value="Parser"/>
          <arg value="-interface"/>

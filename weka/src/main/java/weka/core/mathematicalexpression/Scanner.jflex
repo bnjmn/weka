@@ -39,7 +39,7 @@ import java.io.*;
   protected SymbolFactory sf;
 
   public Scanner(InputStream r, SymbolFactory sf){
-    this(r);
+    this(new InputStreamReader(r));
     this.sf = sf;
   }
 %}

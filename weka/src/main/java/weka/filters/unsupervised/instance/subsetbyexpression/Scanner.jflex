@@ -44,7 +44,7 @@ import java.io.*;
   protected StringBuffer m_String = new StringBuffer();
 
   public Scanner(InputStream r, SymbolFactory sf) {
-    this(r);
+    this(new InputStreamReader(r));
     m_SymFactory = sf;
   }
 %}
