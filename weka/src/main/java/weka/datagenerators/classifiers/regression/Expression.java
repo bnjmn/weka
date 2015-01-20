@@ -381,7 +381,6 @@ public class Expression extends MexicanHat {
     double[] atts;
     Instance inst;
 
-    result = null;
     rand = getRandom();
 
     if (m_DatasetFormat == null) {
@@ -397,6 +396,7 @@ public class Expression extends MexicanHat {
     atts = new double[1];
     atts[0] = x;
     inst = new DenseInstance(1.0, atts);
+    inst.setDataset(m_RawData);
     m_Filter.input(inst);
     m_Filter.batchFinished();
     inst = m_Filter.output();
