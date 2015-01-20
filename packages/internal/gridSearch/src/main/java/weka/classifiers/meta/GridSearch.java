@@ -26,7 +26,6 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Enumeration;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Properties;
@@ -46,7 +45,6 @@ import weka.core.Capabilities.Capability;
 import weka.core.Debug;
 import weka.core.Instance;
 import weka.core.Instances;
-import weka.core.MathematicalExpression;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.PropertyPath;
@@ -58,6 +56,13 @@ import weka.core.Summarizable;
 import weka.core.Tag;
 import weka.core.Utils;
 import weka.core.WekaException;
+import weka.core.expressionlanguage.common.Primitives.DoubleExpression;
+import weka.core.expressionlanguage.common.SimpleVariableDeclarations;
+import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
+import weka.core.expressionlanguage.common.MathFunctions;
+import weka.core.expressionlanguage.common.IfElseMacro;
+import weka.core.expressionlanguage.common.JavaMacro;
+import weka.core.expressionlanguage.parser.Parser;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MathExpression;
 import weka.filters.unsupervised.instance.Resample;
@@ -1642,7 +1647,19 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     /** for serialization. */
     private static final long serialVersionUID = -2517395033342543417L;
-
+    
+    /** variables exposed to expressions. */
+    private static final SimpleVariableDeclarations variables =
+        new SimpleVariableDeclarations();
+    
+    static {
+        variables.addDouble("BASE");
+        variables.addDouble("FROM");
+        variables.addDouble("TO");
+        variables.addDouble("STEP");
+        variables.addDouble("I");
+    }
+    
     /** the owner. */
     protected GridSearch m_Owner;
 
@@ -1664,6 +1681,9 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     /** The expression for the Y property. */
     protected String m_Y_Expression;
 
+    /** the compiled expression for the Y property. */
+    private DoubleExpression m_Y_Node;
+
     /** the X option to work on. */
     protected String m_X_Property;
 
@@ -1678,6 +1698,9 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     /** the base for X. */
     protected double m_X_Base;
+
+    /** the compiled expression for the X property. */
+    private DoubleExpression m_X_Node;
 
     /** The expression for the X property. */
     protected String m_X_Expression;
@@ -1699,12 +1722,55 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       m_Y_Step = m_Owner.getYStep();
       m_Y_Base = m_Owner.getYBase();
 
+      // precompile expression
+      try {
+        m_Y_Node = (DoubleExpression) Parser.parse(
+          // expression
+          m_Y_Expression,
+          // variables
+          variables,
+          // macros
+          new MacroDeclarationsCompositor(
+            new MathFunctions(),
+            new IfElseMacro(),
+            new JavaMacro()
+            )
+          );
+      } catch (Exception e) {
+        m_Y_Node = null;
+        System.err.println("Failed to compile Y expression '"
+          + m_Y_Expression + "'");
+        e.printStackTrace();
+      }
+
       m_X_Expression = m_Owner.getXExpression();
       m_X_Property = m_Owner.getXProperty();
       m_X_Min = m_Owner.getXMin();
       m_X_Max = m_Owner.getXMax();
       m_X_Step = m_Owner.getXStep();
       m_X_Base = m_Owner.getXBase();
+
+      try {
+        // precompile expression
+        m_X_Node = (DoubleExpression) Parser.parse(
+          // expression
+          m_X_Expression,
+          // variables
+          variables,
+          // macros
+          new MacroDeclarationsCompositor(
+            new MathFunctions(),
+            new IfElseMacro(),
+            new JavaMacro()
+            )
+          );
+      } catch (Exception e) {
+        m_X_Node = null;
+        System.err.println("Failed to compile X expression '"
+          + m_X_Expression + "'");
+        e.printStackTrace();
+      }
+
     }
 
     /**
@@ -1716,42 +1782,39 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
      * @return the generated value, NaN if the evaluation fails
      */
     public double evaluate(double value, boolean isX) {
-      double result;
-      HashMap<String, Double> symbols;
-      String expr;
-      double base;
-      double min;
-      double max;
-      double step;
+      
+      DoubleExpression expr;
 
       if (isX) {
-        expr = m_X_Expression;
-        base = m_X_Base;
-        min = m_X_Min;
-        max = m_X_Max;
-        step = m_X_Step;
+        if (variables.getInitializer().hasVariable("BASE"))
+          variables.getInitializer().setDouble("BASE", m_X_Base);
+        if (variables.getInitializer().hasVariable("FROM"))
+          variables.getInitializer().setDouble("FROM", m_X_Min);
+        if (variables.getInitializer().hasVariable("TO"))
+          variables.getInitializer().setDouble("TO", m_X_Max);
+        if (variables.getInitializer().hasVariable("STEP"))
+          variables.getInitializer().setDouble("STEP", m_X_Step);
+        expr = m_X_Node;
       } else {
-        expr = m_Y_Expression;
-        base = m_Y_Base;
-        min = m_Y_Min;
-        max = m_Y_Max;
-        step = m_Y_Step;
+        if (variables.getInitializer().hasVariable("BASE"))
+          variables.getInitializer().setDouble("BASE", m_Y_Base);
+        if (variables.getInitializer().hasVariable("FROM"))
+          variables.getInitializer().setDouble("FROM", m_Y_Min);
+        if (variables.getInitializer().hasVariable("TO"))
+          variables.getInitializer().setDouble("TO", m_Y_Max);
+        if (variables.getInitializer().hasVariable("STEP"))
+          variables.getInitializer().setDouble("STEP", m_Y_Step);
+        expr = m_Y_Node;
       }
+      if (variables.getInitializer().hasVariable("I"))
+        variables.getInitializer().setDouble("I", value);
 
       try {
-        symbols = new HashMap<String, Double>();
-        symbols.put("BASE", new Double(base));
-        symbols.put("FROM", new Double(min));
-        symbols.put("TO", new Double(max));
-        symbols.put("STEP", new Double(step));
-        symbols.put("I", new Double(value));
-        result = MathematicalExpression.evaluate(expr, symbols);
+        return expr.evaluate();
       } catch (Exception e) {
         e.printStackTrace();
-        result = Double.NaN;
+        return Double.NaN;
       }
-
-      return result;
     }
 
     /**
@@ -2029,7 +2092,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * <li>I - the current value (from 'from' to 'to' with stepsize 'step')</li>
    * </ul>
    * 
-   * @see MathematicalExpression
    * @see MathExpression
    */
   protected String m_Y_Expression = "pow(BASE,I)";
@@ -2061,7 +2123,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * <li>I - the current value (from 'from' to 'to' with stepsize 'step')</li>
    * </ul>
    * 
-   * @see MathematicalExpression
    * @see MathExpression
    */
   protected String m_X_Expression = "pow(BASE,I)";
