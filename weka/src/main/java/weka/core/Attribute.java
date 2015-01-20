@@ -137,9 +137,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   /** The keyword used to denote the end of the declaration of a subrelation */
   public final static String ARFF_END_SUBRELATION = "@end";
 
-  /** Dummy first value for String attributes (useful for sparse instances) */
-  public final static String DUMMY_STRING_VAL = "*WEKA*DUMMY*STRING*FOR*STRING*ATTRIBUTES*";
-
   /** Strings longer than this will be stored compressed. */
   protected static final int STRING_COMPRESS_THRESHOLD = 200;
 
@@ -274,10 +271,6 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     m_AttributeInfo = new NominalAttributeInfo(attributeValues, attributeName);
     if (attributeValues == null) {
       m_Type = STRING;
-
-      // Make sure there is at least one value so that string attribute
-      // values are always represented when output as part of a sparse instance.
-      addStringValue(DUMMY_STRING_VAL);
     } else {
       m_Type = NOMINAL;
     }
@@ -716,7 +709,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
    * otherwise an empty string.
    * 
    * @return the date format pattern
-   * @see SimpleDateFormat
+   * @see java.text.SimpleDateFormat
    */
   public final String getDateFormat() {
     if (isDate()) {

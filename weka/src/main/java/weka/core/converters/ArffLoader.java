@@ -557,12 +557,10 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
       int valIndex, numValues = 0, maxIndex = -1;
 
       // if reading incrementally, and we have string values, make sure that all
-      // string
-      // attributes are initialized to "0" with the dummy first value
+      // string attributes are initialized
       if (!m_batchMode && !m_retainStringValues && m_stringAttIndices != null) {
         for (int i = 0; i < m_stringAttIndices.size(); i++) {
-          m_Data.attribute(m_stringAttIndices.get(i)).setStringValue(
-            Attribute.DUMMY_STRING_VAL);
+          m_Data.attribute(m_stringAttIndices.get(i)).setStringValue(null);
         }
       }
 
@@ -628,9 +626,7 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
                 m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(
                   m_Tokenizer.sval);
             } else {
-              m_ValueBuffer[numValues] = 1;
-              m_Data.attribute(m_IndicesBuffer[numValues]).setStringValue(
-                Attribute.DUMMY_STRING_VAL);
+              m_ValueBuffer[numValues] = 0;
               m_Data.attribute(m_IndicesBuffer[numValues]).addStringValue(
                 m_Tokenizer.sval);
             }

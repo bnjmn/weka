@@ -94,7 +94,7 @@ public class NominalToStringTest
     assertEquals("Attribute type should now be STRING",
                  Attribute.STRING, result.attribute(1).type());
 
-    assertEquals(4, result.attribute(1).numValues());
+    assertEquals(3, result.attribute(1).numValues());
   }
 
   public void testMissing() {
@@ -105,8 +105,7 @@ public class NominalToStringTest
     assertEquals(m_Instances.numInstances(),  result.numInstances());
     assertEquals("Attribute type should now be STRING",
                  Attribute.STRING, result.attribute(4).type());
-
-    assertEquals(5, result.attribute(4).numValues());
+    assertEquals(4, result.attribute(4).numValues());
     for (int i = 0; i < result.numInstances(); i++) {
       assertTrue("Missing values should be preserved",
              m_Instances.instance(i).isMissing(4) ==

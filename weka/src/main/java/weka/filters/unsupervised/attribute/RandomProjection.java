@@ -557,6 +557,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
+    result.disable(Capability.STRING_ATTRIBUTES);
 
     // class
     result.enable(Capability.NUMERIC_CLASS);

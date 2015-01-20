@@ -235,9 +235,6 @@ public class ClassValuePickerCustomizer
         m_ClassValueCombo.setSelectedIndex(classValIndex);
       } else {
         String toSet = existingCopy != null ? existingCopy : attribValNames[0];
-        if (toSet.equals(Attribute.DUMMY_STRING_VAL)) {
-          toSet = "/first";
-        }
         m_ClassValueCombo.setSelectedItem(toSet);
       }
       // }

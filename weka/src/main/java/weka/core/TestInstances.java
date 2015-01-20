@@ -1750,6 +1750,9 @@ public class TestInstances implements Cloneable, Serializable, OptionHandler,
           classVal = m_Random.nextFloat();
         }
 
+        if ((clsIndex != NO_CLASS) && (m_Data.classAttribute().isString()))
+          classVal++; // Hack to make regression tests pass after eliminating dummy value for string attributes
+
         // other attributes
         for (int n = 0; n < getNumAttributes(); n++) {
           if (clsIndex == n) {

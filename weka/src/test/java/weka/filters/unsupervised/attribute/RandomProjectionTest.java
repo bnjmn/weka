@@ -19,6 +19,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.SelectedTag;
 import weka.filters.AbstractFilterTest;
@@ -41,9 +42,11 @@ public class RandomProjectionTest
     super(name);  
   }
 
-  /** Need to remove non-nominal attributes, set class index */
+  /** Need to remove string attributes, set class index */
   protected void setUp() throws Exception {
     super.setUp();
+
+    m_Instances.deleteAttributeType(Attribute.STRING);
 
     // class index
     m_Instances.setClassIndex(1);

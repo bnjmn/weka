@@ -452,53 +452,61 @@ public class SparseInstance extends AbstractInstance {
   @Override
   public String toStringNoWeight(int afterDecimalPoint) {
 
-    StringBuffer text = new StringBuffer();
+    StringBuilder text = new StringBuilder();
 
     text.append('{');
-    for (int i = 0; i < m_Indices.length; i++) {
-      if (i > 0) {
-        text.append(",");
+    String prefix = "";
+    int sparseIndex = 0;
+    for (int i = 0; i < m_NumAttributes; i++) {
+
+      // Have we already output some values?
+      if (text.length() > 1) {
+        prefix = ",";
       }
-      if (isMissingSparse(i)) {
-        text.append(m_Indices[i] + " ?");
-      } else {
-        if (m_Dataset == null) {
-          text.append(m_Indices[i] + " "
-            + Utils.doubleToString(m_AttValues[i], afterDecimalPoint));
-        } else {
-          if (m_Dataset.attribute(m_Indices[i]).isNominal()
-            || m_Dataset.attribute(m_Indices[i]).isString()
-            || m_Dataset.attribute(m_Indices[i]).isDate()) {
-            try {
-              text.append(m_Indices[i] + " "
-                + Utils.quote(stringValue(m_Indices[i])));
-            } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:"
-                + valueSparse(i));
-              throw new Error("This should never happen!");
-            }
-          } else if (m_Dataset.attribute(m_Indices[i]).isRelationValued()) {
-            try {
-              text.append(m_Indices[i]
-                + " "
-                + Utils.quote(m_Dataset.attribute(m_Indices[i])
-                  .relation((int) valueSparse(i)).stringWithoutHeader()));
-            } catch (Exception e) {
-              e.printStackTrace();
-              System.err.println(new Instances(m_Dataset, 0));
-              System.err.println("Att:" + m_Indices[i] + " Val:"
-                + valueSparse(i));
-              throw new Error("This should never happen!");
-            }
-          } else {
-            text.append(m_Indices[i] + " "
-              + Utils.doubleToString(m_AttValues[i], afterDecimalPoint));
+
+      double value = 0;
+
+      try {
+
+        // Get the actual attribute value
+        if (sparseIndex < m_Indices.length && m_Indices[sparseIndex] == i) {
+          value = m_AttValues[sparseIndex++];
+          if (Utils.isMissingValue(value)) {
+            text.append(prefix).append(i).append(" ?");
+            continue;
           }
         }
+
+        // Have to treat all attributes as numeric if we don't have access to a dataset
+        if (m_Dataset == null) {
+          if (value != 0) {
+            text.append(prefix).append(i).append(" ").append(Utils.doubleToString(value, afterDecimalPoint));
+          }
+        } else {
+          Attribute att = m_Dataset.attribute(i);
+          if (att.isString()) { // Output string value regardless
+            text.append(prefix).append(i).append(" ").append(Utils.quote(att.value((int) value)));
+          } else if (att.isRelationValued()) { // Output relational value regardless
+            text.append(prefix).append(i).append(" ").append(Utils.quote(att.relation((int) value).stringWithoutHeader()));
+          } else if (value != 0) { // Only output other attribute types if value != 0
+            if (att.isNominal()) {
+              text.append(prefix).append(i).append(" ").append(Utils.quote(att.value((int) value)));
+            } else if (att.isDate()) {
+              text.append(prefix).append(i).append(" ").append(Utils.quote(att.formatDate(value)));
+            } else {
+              text.append(prefix).append(i).append(" ").append(Utils.doubleToString(value, afterDecimalPoint));
+            }
+          }
+        }
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println(new Instances(m_Dataset, 0) + "\n" + "Att: " + i + " Val: " + value);
+        throw new Error("This should never happen!");
       }
     }
+
+
     text.append('}');
 
     return text.toString();
@@ -526,7 +534,7 @@ public class SparseInstance extends AbstractInstance {
   /**
    * Deletes an attribute at the given position (0 to numAttributes() - 1).
    * 
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   @Override
   protected void forceDeleteAttributeAt(int position) {
@@ -563,7 +571,7 @@ public class SparseInstance extends AbstractInstance {
    * Inserts an attribute at the given position (0 to numAttributes()) and sets
    * its value to be missing.
    * 
-   * @param pos the attribute's position
+   * @param position the attribute's position
    */
   @Override
   protected void forceInsertAttributeAt(int position) {

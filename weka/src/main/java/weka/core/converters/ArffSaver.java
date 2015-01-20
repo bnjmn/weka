@@ -397,20 +397,6 @@ public class ArffSaver extends AbstractFileSaver implements BatchConverter,
         throw new IOException("No instances information available.");
       }
       if (inst != null) {
-        if (inst instanceof weka.core.SparseInstance
-          && inst.dataset().checkForStringAttributes()) {
-          // check for single valued string attributes
-          for (int i = 0; i < inst.numAttributes(); i++) {
-            if (inst.attribute(i).isString()
-              && inst.attribute(i).numValues() == 1) {
-              String theVal = inst.stringValue(i);
-              inst.attribute(i).setStringValue(
-                weka.core.Attribute.DUMMY_STRING_VAL);
-              inst.attribute(i).addStringValue(theVal);
-              inst.setValue(i, 1);
-            }
-          }
-        }
 
         // write instance
         if (retrieveFile() == null && outW == null) {
