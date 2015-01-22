@@ -48,7 +48,7 @@ import weka.gui.PropertySheetPanel;
 
 /**
  * Class implementing some simple utility methods.
- * 
+ *
  * @author Eibe Frank
  * @author Yong Wang
  * @author Len Trigg
@@ -57,20 +57,32 @@ import weka.gui.PropertySheetPanel;
  */
 public final class Utils implements RevisionHandler {
 
-  /** The natural logarithm of 2. */
+  /**
+   * The natural logarithm of 2.
+   */
   public static double log2 = Math.log(2);
 
-  /** The small deviation allowed in double comparisons. */
+  /**
+   * The small deviation allowed in double comparisons.
+   */
   public static double SMALL = 1e-6;
 
-  /** Decimal format symbols for DecimalFormat. */
-  public static DecimalFormatSymbols DFS;
+  /** Decimal format */
+  private static final ThreadLocal<DecimalFormat> DF = new ThreadLocal<DecimalFormat>() {
 
-  {
-    DFS = new DecimalFormat().getDecimalFormatSymbols();
-    DFS.setNaN("NaN");
-    DFS.setInfinity("Infinity");
-  }
+    @Override
+    protected DecimalFormat initialValue() {
+
+      DecimalFormat df = new DecimalFormat();
+      DecimalFormatSymbols dfs = df.getDecimalFormatSymbols();
+      dfs.setNaN("NaN");
+      dfs.setInfinity("Infinity");
+      df.setGroupingUsed(false);
+      df.setRoundingMode(RoundingMode.HALF_UP);
+      df.setDecimalFormatSymbols(dfs);
+      return df;
+    }
+  };
 
   /**
    * Tests if the given value codes "missing".
@@ -329,12 +341,8 @@ public final class Utils implements RevisionHandler {
   public static/* @pure@ */String doubleToString(double value,
     int afterDecimalPoint) {
 
-    DecimalFormat df = new DecimalFormat();
-    df.setMaximumFractionDigits(afterDecimalPoint);
-    df.setGroupingUsed(false);
-    df.setRoundingMode(RoundingMode.HALF_UP);
-    df.setDecimalFormatSymbols(DFS);
-    return df.format(value);
+    DF.get().setMaximumFractionDigits(afterDecimalPoint);
+    return DF.get().format(value);
   }
 
   /**
