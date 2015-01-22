@@ -40,35 +40,36 @@ import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> Merges all values of the specified nominal
- * attribute that are sufficiently infrequent.
+ * <!-- globalinfo-start -->
+ * Merges all values of the specified nominal attribute that are sufficiently infrequent.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -D
- *  Turns on output of debugging information.
- * </pre>
- * 
- * <pre>
- * -N &lt;int&gt;
+ * <pre> -N &lt;int&gt;
  *  The minimum frequency for a value to remain (default: 2).
  * </pre>
  * 
- * <pre>
- * -R &lt;range&gt;
+ * <pre> -R &lt;range&gt;
  *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
  *  E.g.: first-5,7,9,20-last
- *  (default: 1,2)
- * </pre>
+ *  (default: 1,2)</pre>
  * 
- * <pre>
- * -V
- *  Invert matching sense (i.e. act on all attributes not specified in list)
- * </pre>
+ * <pre> -V
+ *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+ * 
+ * <pre> -S
+ *  Use short IDs for merged attribute values.</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
  * 
  * <!-- options-end -->
  * 
@@ -95,6 +96,9 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
 
   /** The new values. */
   protected int[][] m_NewValues;
+
+  /** Whether to use short identifiers for merge values. */
+  protected boolean m_UseShortIDs = false;
 
   /**
    * Returns a string describing this filter.
@@ -130,6 +134,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
       .addElement(new Option(
         "\tInvert matching sense (i.e. act on all attributes not specified in list)",
         "V", 0, "-V"));
+    result.addElement(new Option("\tUse short IDs for merged attribute values.", "S", 0, "-S"));
 
     result.addAll(Collections.list(super.listOptions()));
 
@@ -156,6 +161,10 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
       result.add("-V");
     }
 
+    if (getUseShortIDs()) {
+      result.add("-S");
+    }
+
     Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
@@ -165,30 +174,31 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   * <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -D
-   *  Turns on output of debugging information.
-   * </pre>
-   * 
-   * <pre>
-   * -N &lt;int&gt;
+   * <pre> -N &lt;int&gt;
    *  The minimum frequency for a value to remain (default: 2).
    * </pre>
    * 
-   * <pre>
-   * -R &lt;range&gt;
+   * <pre> -R &lt;range&gt;
    *  Sets list of attributes to act on (or its inverse). 'first and 'last' are accepted as well.'
    *  E.g.: first-5,7,9,20-last
-   *  (default: 1,2)
-   * </pre>
+   *  (default: 1,2)</pre>
    * 
-   * <pre>
-   * -V
-   *  Invert matching sense (i.e. act on all attributes not specified in list)
-   * </pre>
+   * <pre> -V
+   *  Invert matching sense (i.e. act on all attributes not specified in list)</pre>
+   * 
+   * <pre> -S
+   *  Use short IDs for merged attribute values.</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, filter is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, filter capabilities are not checked before filter is built
+   *  (use with caution).</pre>
    * 
    * <!-- options-end -->
    * 
@@ -213,6 +223,8 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
     }
 
     setInvertSelection(Utils.getFlag('V', options));
+
+    setUseShortIDs(Utils.getFlag('S', options));
 
     super.setOptions(options);
 
@@ -243,7 +255,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
   /**
    * Sets the minimum frequency.
    * 
-   * @param the minimum frequency as an integer.
+   * @param minF the minimum frequency as an integer.
    */
   public void setMinimumFrequency(int minF) {
 
@@ -330,6 +342,35 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
   public void setInvertSelection(boolean invert) {
 
     m_SelectCols.setInvert(invert);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String useShortIDsTipText() {
+
+    return "If true, short IDs will be used for merged attribute values.";
+  }
+
+  /**
+   * Get whether short IDs are to be used.
+   *
+   * @return true if short IDs are to be used.
+   */
+  public boolean getUseShortIDs() {
+    return m_UseShortIDs;
+  }
+
+  /**
+   * Sets whether short IDs are to be used.
+   *
+   * @param m_UseShortIDs if true, short IDs will be used
+   */
+  public void setUseShortIDs(boolean m_UseShortIDs) {
+    this.m_UseShortIDs = m_UseShortIDs;
   }
 
   /**
@@ -440,7 +481,11 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
             vals.add(att.value(j));
           }
         }
-        vals.set(0, sb.toString()); // Replace empty string
+        if (m_UseShortIDs) {
+          vals.set(0, new StringBuilder().append("").append(sb.toString().hashCode()).toString());
+        } else {
+          vals.set(0, sb.toString()); // Replace empty string
+        }
         atts.add(new Attribute(att.name() + "_merged_infrequent_values", vals));
       } else {
         atts.add((Attribute) att.copy());
@@ -532,3 +577,4 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
     runFilter(new MergeInfrequentNominalValues(), args);
   }
 }
+
