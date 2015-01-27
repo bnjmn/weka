@@ -465,7 +465,6 @@ public class PrincipalComponents extends Filter implements OptionHandler,
    * @param inputFormat the input format to base the output format on
    * @return the output format
    * @throws Exception in case the determination goes wrong
-   * @see #hasImmediateOutputFormat()
    * @see #batchFinished()
    */
   protected Instances determineOutputFormat(Instances inputFormat)
@@ -557,32 +556,27 @@ public class PrincipalComponents extends Filter implements OptionHandler,
 
   protected void fillCovariance() throws Exception {
 
-    if (!m_center) {
-      fillCorrelation();
-      return;
-    }
 
-    // now center the data by subtracting the mean
-    m_centerFilter = new Center();
-    m_centerFilter.setInputFormat(m_TrainInstances);
-    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_centerFilter);
+    // just center the data or standardize it?
+    if (m_center) {
+      m_centerFilter = new Center();
+      m_centerFilter.setInputFormat(m_TrainInstances);
+      m_TrainInstances = Filter.useFilter(m_TrainInstances, m_centerFilter);
+    } else {
+      m_standardizeFilter = new Standardize();
+      m_standardizeFilter.setInputFormat(m_TrainInstances);
+      m_TrainInstances = Filter.useFilter(m_TrainInstances, m_standardizeFilter);
+    }
 
     // now compute the covariance matrix
     m_Correlation = new double[m_NumAttribs][m_NumAttribs];
 
     for (int i = 0; i < m_NumAttribs; i++) {
-      for (int j = 0; j < m_NumAttribs; j++) {
+      for (int j = i; j < m_NumAttribs; j++) {
 
         double cov = 0;
-        for (int k = 0; k < m_NumInstances; k++) {
-
-          if (i == j) {
-            cov += (m_TrainInstances.instance(k).value(i) * m_TrainInstances
-              .instance(k).value(i));
-          } else {
-            cov += (m_TrainInstances.instance(k).value(i) * m_TrainInstances
-              .instance(k).value(j));
-          }
+        for (Instance inst: m_TrainInstances) {
+          cov += inst.value(i) * inst.value(j);
         }
 
         cov /= m_TrainInstances.numInstances() - 1;
@@ -590,43 +584,6 @@ public class PrincipalComponents extends Filter implements OptionHandler,
         m_Correlation[j][i] = cov;
       }
     }
-  }
-
-  /**
-   * Fill the correlation matrix.
-   */
-  protected void fillCorrelation() throws Exception {
-    int i;
-    int j;
-    int k;
-    double[] att1;
-    double[] att2;
-    double corr;
-
-    m_Correlation = new double[m_NumAttribs][m_NumAttribs];
-    att1 = new double[m_NumInstances];
-    att2 = new double[m_NumInstances];
-
-    for (i = 0; i < m_NumAttribs; i++) {
-      for (j = 0; j < m_NumAttribs; j++) {
-        for (k = 0; k < m_NumInstances; k++) {
-          att1[k] = m_TrainInstances.instance(k).value(i);
-          att2[k] = m_TrainInstances.instance(k).value(j);
-        }
-        if (i == j) {
-          m_Correlation[i][j] = 1.0;
-        } else {
-          corr = Utils.correlation(att1, att2, m_NumInstances);
-          m_Correlation[i][j] = corr;
-          m_Correlation[j][i] = corr;
-        }
-      }
-    }
-
-    // now standardize the input data
-    m_standardizeFilter = new Standardize();
-    m_standardizeFilter.setInputFormat(m_TrainInstances);
-    m_TrainInstances = Filter.useFilter(m_TrainInstances, m_standardizeFilter);
   }
 
   /**
