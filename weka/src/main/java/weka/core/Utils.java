@@ -75,6 +75,7 @@ public final class Utils implements RevisionHandler {
 
       DecimalFormat df = new DecimalFormat();
       DecimalFormatSymbols dfs = df.getDecimalFormatSymbols();
+      dfs.setDecimalSeparator('.');
       dfs.setNaN("NaN");
       dfs.setInfinity("Infinity");
       df.setGroupingUsed(false);
