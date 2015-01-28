@@ -175,10 +175,10 @@ Eigenvectors
  0.1115	 0.8129	-0.5627	 0.1006	Date1
 
 Ranked attributes:
- 0.602  1 0.681Nominal1+0.642Nominal2-0.333Numeric1+0.112Date1
- 0.338  2 0.813Date1+0.572Numeric1+0.095Nominal2+0.057Nominal1
- 0.12   3 0.728Numeric1-0.563Date1+0.382Nominal2+0.088Nominal1
- 0      4 -0.724Nominal1+0.658Nominal2-0.179Numeric1+0.101Date1
+ 0.6023850765394408    1 0.681Nominal1+0.642Nominal2-0.333Numeric1+0.112Date1
+ 0.3378395306122485    2 0.813Date1+0.572Numeric1+0.095Nominal2+0.057Nominal1
+ 0.11984232259317606   3 0.728Numeric1-0.563Date1+0.382Nominal2+0.088Nominal1
+-0.000000000000000222  4 -0.724Nominal1+0.658Nominal2-0.179Numeric1+0.101Date1
 
 Selected attributes: 1,2,3,4 : 4
 
