@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>timeSeriesFilters</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>timeSeriesFilters</name>
@@ -48,9 +48,9 @@ Description=Provides a set of filters for time series. Currently contains PAA an
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/timeSeriesFilters-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/timeSeriesFilters-1.0.0</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/timeSeriesFilters-1.0.0</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/timeSeriesFilters</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/timeSeriesFilters</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/timeSeriesFilters</url>
   </scm>
 
   <profiles>
