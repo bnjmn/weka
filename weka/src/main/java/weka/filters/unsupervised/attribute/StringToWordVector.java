@@ -462,10 +462,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       }
       String stemmerName = stemmerSpec[0];
       stemmerSpec[0] = "";
-      Stemmer stemmer = (Stemmer) Class.forName(stemmerName).newInstance();
-      if (stemmer instanceof OptionHandler) {
-        ((OptionHandler) stemmer).setOptions(stemmerSpec);
-      }
+      Stemmer stemmer = (Stemmer) Utils.forName(Class.forName("weka.core.stemmers.Stemmer"), stemmerName, stemmerSpec);
       setStemmer(stemmer);
     }
 
@@ -479,10 +476,9 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       }
       String stopwordsHandlerName = stopwordsHandlerSpec[0];
       stopwordsHandlerSpec[0] = "";
-      StopwordsHandler stopwordsHandler = (StopwordsHandler) Class.forName(stopwordsHandlerName).newInstance();
-      if (stopwordsHandler instanceof OptionHandler) {
-        ((OptionHandler) stopwordsHandler).setOptions(stopwordsHandlerSpec);
-      }
+      StopwordsHandler stopwordsHandler =
+              (StopwordsHandler) Utils.forName(Class.forName("weka.core.stopwords.StopwordsHandler"),
+              stopwordsHandlerName, stopwordsHandlerSpec);
       setStopwordsHandler(stopwordsHandler);
     }
 
@@ -497,11 +493,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       }
       String tokenizerName = tokenizerSpec[0];
       tokenizerSpec[0] = "";
-      Tokenizer tokenizer = (Tokenizer) Class.forName(tokenizerName)
-        .newInstance();
-      if (tokenizer instanceof OptionHandler) {
-        ((OptionHandler) tokenizer).setOptions(tokenizerSpec);
-      }
+      Tokenizer tokenizer = (Tokenizer) Utils.forName(Class.forName("weka.core.tokenizers.Tokenizer"), tokenizerName,
+              tokenizerSpec);
       setTokenizer(tokenizer);
     }
 
