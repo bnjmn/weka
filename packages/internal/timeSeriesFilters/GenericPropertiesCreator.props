@@ -1,0 +1,8 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+#
+# Version: $Revision: 8121 $
+
+# Lists the additional filters in the new timeSeriesFilters package
+weka.filters.Filter=\
+  weka.filters.unsupervised.timeseries
