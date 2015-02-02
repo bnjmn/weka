@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 10 and a = 20
+%
+% It has been created using GNU Octave 3.8.1 and the SAX implementation of the
+% "N/n not equal an integer" specialization.
+% See: http://www.cs.ucr.edu/~eamonn/SAX_2006_ver.zip
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" relational
+   @attribute "data point" {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t}
+@end "time series"
+
+@data
+"i\ni\nt\ni\ni\ni\ni\ni\ni\ni"
+"i\ni\nt\ni\ni\ni\ni\ni\ni\ni"
+"t\ni\ni\ni\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\ni\nt\ni\ni\ni\ni\ni"
+"i\ni\ni\ni\ni\ni\ni\nt\ni\ni"
+"i\ni\ni\nt\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\nt\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\ni\ni\ni\nt\ni\ni\ni"
+"t\ni\ni\ni\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\ni\ni\ni\ni\ni\nt\ni"
+"j\nj\nj\nj\nq\nj\nj\nj\nj\nj"
+"j\nj\nj\nj\nj\nj\nj\nj\nq\nj"
+"j\nj\nj\nj\nj\nj\nj\nq\nj\nj"
+"q\nj\nj\nj\nj\nj\nj\nj\nj\nj"
+"j\nj\nj\nj\nj\nj\nj\nj\nq\nj"
+"j\nj\nj\nj\nj\nj\nq\nj\nj\nj"
+"j\nj\nj\nj\nj\nj\nj\nq\nj\nj"
+"j\nj\nq\nj\nj\nj\nj\nj\nj\nj"
+"j\nj\nj\nj\nj\nj\nj\nq\nj\nj"
+"j\nj\nq\nj\nj\nj\nj\nj\nj\nj"
+"j\nl\nj\nq\np\nb\ni\nj\nr\nc"
+"e\nq\np\nd\ng\np\nc\nq\ni\nl"
+"c\nk\nb\nq\ng\nm\nl\nj\nr\nn"
+"l\nd\nk\nm\nm\ni\ni\ng\nl\np"
+"m\ng\nk\ni\nj\no\nl\nf\ni\nn"
+"k\nf\nn\no\nh\ni\nj\np\ng\ng"
+"o\nn\no\nj\nc\nj\nn\ng\np\nc"
+"i\nq\nd\np\nf\ng\nq\nk\nk\ne"
+"r\nm\nd\nk\nk\nm\nl\nc\ni\nj"
+"r\ne\nc\nh\no\np\ni\nj\nj\nj"
+"q\ni\nn\nd\nm\ng\nc\np\nm\nj"
+"h\ni\no\nf\nr\ni\ng\nd\nl\np"
+"d\nh\ng\nq\ni\nj\ng\nn\nl\nq"
+"c\nm\np\nq\ne\nk\ni\ni\nn\ni"
+"o\nc\nc\nq\np\nf\nl\ng\nq\nj"
+"i\nl\nr\nf\ng\nj\nh\nm\nm\ng"
+"f\nk\no\nf\ns\nd\nh\no\nc\np"
+"k\nr\nj\nb\nj\nl\nj\nj\nn\nh"
+"o\nk\nh\ne\nf\nm\ni\ns\nj\ni"
+"e\nr\nr\nc\nl\nn\nk\ne\nm\ne"
+"l\no\ni\nd\nl\np\nm\np\nd\ng"
+"d\nk\nl\ni\nq\nc\nj\nr\ng\no"
+"q\ng\np\ng\nl\nc\nn\nr\nc\ni"
+"d\nh\nh\nm\nh\nn\nk\nk\no\nm"
+"e\nf\nr\nf\nq\nd\nh\np\nh\np"
+"f\nj\nk\nq\nj\no\nl\nk\nf\ng"
+"f\nn\ne\nm\nk\nk\nj\np\ne\nn"
+"p\nq\nk\ni\ng\nh\nl\nj\nf\nj"
+"f\ng\nl\nj\ns\ne\np\nk\nj\ni"
+"i\ng\nn\nn\nn\nb\nk\np\no\ne"

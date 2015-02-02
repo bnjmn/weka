@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 7 and a = 4
+% and then transformed with the OneDimensionalTimeSeriesToString filter
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" string
+
+@data
+"bdbbbbb"
+"bdbbbbb"
+"dbbbbbb"
+"bbbdbbb"
+"bbbbbdb"
+"bbdbbbb"
+"bbdbbbb"
+"bbbbdbb"
+"dbbbbbb"
+"bbbbbdb"
+"bbbcbbb"
+"bbbbbcb"
+"bbbbbcb"
+"cbbbbbb"
+"bbbbbcb"
+"bbbbcbb"
+"bbbbccb"
+"bcbbbbb"
+"bbbbccb"
+"bcbbbbb"
+"cbcbbcb"
+"bdacacb"
+"aaccccd"
+"bbccbcc"
+"bbbdbac"
+"bbdbccb"
+"dcbacca"
+"bbcacca"
+"dbbccac"
+"cabdbbc"
+"dcbbadb"
+"bdbcbbc"
+"badbbcd"
+"bcdbbcb"
+"cadcbcc"
+"ccbcbbb"
+"bcbcbcb"
+"ccacbcb"
+"dbabcdb"
+"bdbccbb"
+"cbbccbb"
+"bbcbbcc"
+"ccbbccb"
+"bbbcccc"
+"accbbcc"
+"acdccca"
+"cbbcbcb"
+"dcbbbbb"
+"bbccccb"
+"bbcbbcb"

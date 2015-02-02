@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 10  and a = 4
+%
+% It has been created using GNU Octave 3.8.1 and the SAX implementation of the
+% "N/n not equal an integer" specialization.
+% See: http://www.cs.ucr.edu/~eamonn/SAX_2006_ver.zip
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" relational
+   @attribute "data point" {a, b, c, d}
+@end "time series"
+
+@data
+"b\nb\nd\nb\nb\nb\nb\nb\nb\nb"
+"b\nb\nd\nb\nb\nb\nb\nb\nb\nb"
+"d\nb\nb\nb\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nd\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nd\nb\nb"
+"b\nb\nb\nd\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nd\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nd\nb\nb\nb"
+"d\nb\nb\nb\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nb\nd\nb"
+"b\nb\nb\nb\nd\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nb\nd\nb"
+"b\nb\nb\nb\nb\nb\nb\nd\nb\nb"
+"d\nb\nb\nb\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nb\nd\nb"
+"b\nb\nb\nb\nb\nb\nd\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nd\nb\nb"
+"b\nb\nd\nb\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nb\nb\nd\nb\nb"
+"b\nb\nd\nb\nb\nb\nb\nb\nb\nb"
+"b\nc\nb\nd\nd\na\nb\nb\nd\na"
+"a\nd\nd\na\nb\nd\na\nd\nb\nc"
+"a\nc\na\nd\nb\nc\nc\nb\nd\nc"
+"c\na\nc\nc\nc\nb\nb\nb\nc\nd"
+"c\nb\nc\nb\nb\nc\nc\nb\nb\nc"
+"c\nb\nc\nc\nb\nb\nb\nd\nb\nb"
+"c\nc\nc\nb\na\nb\nc\nb\nd\na"
+"b\nd\na\nd\nb\nb\nd\nc\nc\na"
+"d\nc\na\nc\nc\nc\nc\na\nb\nb"
+"d\na\na\nb\nc\nd\nb\nb\nb\nb"
+"d\nb\nc\na\nc\nb\na\nd\nc\nb"
+"b\nb\nc\nb\nd\nb\nb\na\nc\nd"
+"a\nb\nb\nd\nb\nb\nb\nc\nc\nd"
+"a\nc\nd\nd\na\nc\nb\nb\nc\nb"
+"c\na\na\nd\nd\nb\nc\nb\nd\nb"
+"b\nc\nd\nb\nb\nb\nb\nc\nc\nb"
+"b\nc\nc\nb\nd\na\nb\nc\na\nd"
+"c\nd\nb\na\nb\nc\nb\nb\nc\nb"
+"c\nc\nb\na\nb\nc\nb\nd\nb\nb"
+"a\nd\nd\na\nc\nc\nc\na\nc\na"
+"c\nc\nb\na\nc\nd\nc\nd\na\nb"
+"a\nc\nc\nb\nd\na\nb\nd\nb\nc"
+"d\nb\nd\nb\nc\na\nc\nd\na\nb"
+"a\nb\nb\nc\nb\nc\nc\nc\nc\nc"
+"a\nb\nd\nb\nd\na\nb\nd\nb\nd"
+"b\nb\nc\nd\nb\nc\nc\nc\nb\nb"
+"b\nc\na\nc\nc\nc\nb\nd\na\nc"
+"d\nd\nc\nb\nb\nb\nc\nb\nb\nb"
+"b\nb\nc\nb\nd\na\nd\nc\nb\nb"
+"b\nb\nc\nc\nc\na\nc\nd\nc\na"

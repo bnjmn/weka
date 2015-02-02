@@ -1,0 +1,63 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 10 and a = 20
+% and then transformed with the OneDimensionalTimeSeriesToString filter
+% 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" string
+
+@data
+"iitiiiiiii"
+"iitiiiiiii"
+"tiiiiiiiii"
+"iiiitiiiii"
+"iiiiiiitii"
+"iiitiiiiii"
+"iiitiiiiii"
+"iiiiiitiii"
+"tiiiiiiiii"
+"iiiiiiiiti"
+"jjjjqjjjjj"
+"jjjjjjjjqj"
+"jjjjjjjqjj"
+"qjjjjjjjjj"
+"jjjjjjjjqj"
+"jjjjjjqjjj"
+"jjjjjjjqjj"
+"jjqjjjjjjj"
+"jjjjjjjqjj"
+"jjqjjjjjjj"
+"jljqpbijrc"
+"eqpdgpcqil"
+"ckbqgmljrn"
+"ldkmmiiglp"
+"mgkijolfin"
+"kfnohijpgg"
+"onojcjngpc"
+"iqdpfgqkke"
+"rmdkkmlcij"
+"rechopijjj"
+"qindmgcpmj"
+"hiofrigdlp"
+"dhgqijgnlq"
+"cmpqekiini"
+"occqpflgqj"
+"ilrfgjhmmg"
+"fkofsdhocp"
+"krjbjljjnh"
+"okhefmisji"
+"errclnkeme"
+"loidlpmpdg"
+"dkliqcjrgo"
+"qgpglcnrci"
+"dhhmhnkkom"
+"efrfqdhphp"
+"fjkqjolkfg"
+"fnemkkjpen"
+"pqkighljfj"
+"fgljsepkji"
+"ignnnbkpoe"

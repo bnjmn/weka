@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 7 and a = 4
+%
+% It has been created using GNU Octave 3.8.1 and the SAX implementation of the
+% "N/n not equal an integer" specialization.
+% See: http://www.cs.ucr.edu/~eamonn/SAX_2006_ver.zip
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" relational
+   @attribute "data point" {a, b, c, d}
+@end "time series"
+
+@data
+"b\nd\nb\nb\nb\nb\nb"
+"b\nd\nb\nb\nb\nb\nb"
+"d\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nd\nb\nb\nb"
+"b\nb\nb\nb\nb\nd\nb"
+"b\nb\nd\nb\nb\nb\nb"
+"b\nb\nd\nb\nb\nb\nb"
+"b\nb\nb\nb\nd\nb\nb"
+"d\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nd\nb"
+"b\nb\nb\nc\nb\nb\nb"
+"b\nb\nb\nb\nb\nc\nb"
+"b\nb\nb\nb\nb\nc\nb"
+"c\nb\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nb\nc\nb"
+"b\nb\nb\nb\nc\nb\nb"
+"b\nb\nb\nb\nc\nc\nb"
+"b\nc\nb\nb\nb\nb\nb"
+"b\nb\nb\nb\nc\nc\nb"
+"b\nc\nb\nb\nb\nb\nb"
+"c\nb\nc\nb\nb\nc\nb"
+"b\nd\na\nc\na\nc\nb"
+"a\na\nc\nc\nc\nc\nd"
+"b\nb\nc\nc\nb\nc\nc"
+"b\nb\nb\nd\nb\na\nc"
+"b\nb\nd\nb\nc\nc\nb"
+"d\nc\nb\na\nc\nc\na"
+"b\nb\nc\na\nc\nc\na"
+"d\nb\nb\nc\nc\na\nc"
+"c\na\nb\nd\nb\nb\nc"
+"d\nc\nb\nb\na\nd\nb"
+"b\nd\nb\nc\nb\nb\nc"
+"b\na\nd\nb\nb\nc\nd"
+"b\nc\nd\nb\nb\nc\nb"
+"c\na\nd\nc\nb\nc\nc"
+"c\nc\nb\nc\nb\nb\nb"
+"b\nc\nb\nc\nb\nc\nb"
+"c\nc\na\nc\nb\nc\nb"
+"d\nb\na\nb\nc\nd\nb"
+"b\nd\nb\nc\nc\nb\nb"
+"c\nb\nb\nc\nc\nb\nb"
+"b\nb\nc\nb\nb\nc\nc"
+"c\nc\nb\nb\nc\nc\nb"
+"b\nb\nb\nc\nc\nc\nc"
+"a\nc\nc\nb\nb\nc\nc"
+"a\nc\nd\nc\nc\nc\na"
+"c\nb\nb\nc\nb\nc\nb"
+"d\nc\nb\nb\nb\nb\nb"
+"b\nb\nc\nc\nc\nc\nb"
+"b\nb\nc\nb\nb\nc\nb"

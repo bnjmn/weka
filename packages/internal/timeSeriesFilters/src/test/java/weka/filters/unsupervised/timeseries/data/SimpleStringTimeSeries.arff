@@ -1,0 +1,32 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% A simple dataset with some simple numeric time series
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "Simple numeric time series"
+
+@attribute "other numeric" numeric
+@attribute "other nominal" {a, b, c}
+
+@attribute "time series" relational
+  @attribute "data point" {a, b, c, d, e, f}
+@end "time series"
+
+@attribute "other string" string
+
+@data
+1.0,a,"a\nb\nc\nd\ne\nf","Hello World!"
+2.0,?,"'a'\n'b'\n'c'\n'd'\n'e'\n'f'","abdcdefg"
+1.0,a,?,"Hello World!"
+?,a,"b\nb\nb\na\nb\nd\nf\ne\nd","and another string"
+4.0,b,"d\na\ne\nf\nd\nc\nc\nc","String"
+0.0,b,"a\n?\nb\n?\nc\n?\nd\n?\nc","String"
+?,a,?,"and another string"
+?,a,"","repetitions"
+-2.0,c,"?\n?\n?","repetitions"
+1000000,a,"a\nb\n?\na\nc\nd\ne\n?\n?\n?","adfasdf;asdsf"
+-100000,b,"",""
+0.000001,?,"'a'\n'b'\n'c'\nd\ne\nf",?
+-0.000001,a,"a\na\na\na\na\nb\nb\nb\nb\nb\n?\n?\n?\n?",?
+-2.0,c,?,"repetitions"

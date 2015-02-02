@@ -1,0 +1,30 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% A simple dataset with some simple numeric time series
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "Simple numeric time series"
+
+@attribute "other numeric" numeric
+@attribute "other nominal" {a, b, c}
+
+@attribute "time series" String
+
+@attribute "other string" string
+
+@data
+1.0,a,"abcdef","Hello World!"
+2.0,?,"abcdef","abdcdefg"
+1.0,a,?,"Hello World!"
+?,a,"bbbabdfed","and another string"
+4.0,b,"daefdccc","String"
+0.0,b,"a?b?c?d?c","String"
+?,a,?,"and another string"
+?,a,"","repetitions"
+-2.0,c,"???","repetitions"
+1000000,a,"ab?acde???","adfasdf;asdsf"
+-100000,b,"",""
+0.000001,?,"abcdef",?
+-0.000001,a,"aaaaabbbbb????",?
+-2.0,c,?,"repetitions"

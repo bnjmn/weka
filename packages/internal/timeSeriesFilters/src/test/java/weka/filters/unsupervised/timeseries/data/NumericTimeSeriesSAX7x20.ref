@@ -1,0 +1,68 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%
+% The reference dataset for the "NumericTimeSeries.arff" dataset when
+% when transformed with the SAX transformation with w = 7 and a = 20
+%
+% It has been created using GNU Octave 3.8.1 and the SAX implementation of the
+% "N/n not equal an integer" specialization.
+% See: http://www.cs.ucr.edu/~eamonn/SAX_2006_ver.zip
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+@relation "SAX numerics"
+
+@attribute "time series" relational
+   @attribute "data point" {a, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t}
+@end "time series"
+
+@data
+"i\ns\ni\ni\ni\ni\ni"
+"i\ns\ni\ni\ni\ni\ni"
+"s\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\ns\ni\ni\ni"
+"i\ni\ni\ni\ni\ns\ni"
+"i\ni\ns\ni\ni\ni\ni"
+"i\ni\ns\ni\ni\ni\ni"
+"i\ni\ni\ni\ns\ni\ni"
+"s\ni\ni\ni\ni\ni\ni"
+"i\ni\ni\ni\ni\ns\ni"
+"j\nj\nj\no\nj\nj\nj"
+"j\nj\nj\nj\nj\no\nj"
+"j\nj\nj\nj\nj\no\nj"
+"o\nj\nj\nj\nj\nj\nj"
+"j\nj\nj\nj\nj\no\nj"
+"j\nj\nj\nj\no\nj\nj"
+"j\nj\nj\nj\nl\nm\nj"
+"j\no\nj\nj\nj\nj\nj"
+"j\nj\nj\nj\nl\nm\nj"
+"j\no\nj\nj\nj\nj\nj"
+"m\nj\no\ni\ng\nm\ng"
+"h\nq\ne\nm\ne\no\nj"
+"e\nd\nl\nl\nk\nm\np"
+"h\nh\nl\nn\ng\nm\nl"
+"j\ni\nh\np\nj\ne\no"
+"j\ni\np\nf\nl\nk\ni"
+"q\nl\nh\ne\nn\nm\nd"
+"j\nj\nn\ne\no\nn\ne"
+"r\nf\nh\no\nk\ne\nk"
+"o\nd\ni\nq\nj\nh\nk"
+"q\nk\ng\nj\nd\nq\nh"
+"f\np\ni\nm\nh\nh\nn"
+"g\ne\np\nf\nj\nl\nq"
+"g\nm\np\ng\ni\nl\nj"
+"k\nc\np\nk\nj\nn\nk"
+"m\nm\ng\nk\nh\nj\nj"
+"j\nl\nj\nk\nj\nl\nj"
+"m\nn\nc\nl\nj\nn\nh"
+"p\nf\ne\nj\nk\np\nj"
+"j\nr\ng\nl\nk\nh\ng"
+"o\ni\nf\nn\nm\nj\ng"
+"i\nh\nk\ni\nj\nm\nn"
+"o\nk\nj\nf\nl\nm\nf"
+"g\nf\nj\nm\nk\no\nl"
+"e\no\nk\nj\nh\nl\nm"
+"d\nn\np\nk\nm\nk\ne"
+"k\nf\ni\nn\nj\nm\nj"
+"p\nn\ng\nj\nj\nh\nh"
+"h\ng\nl\nl\no\nm\nf"
+"j\nh\nm\ni\ni\no\nh"
