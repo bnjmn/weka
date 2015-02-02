@@ -941,24 +941,34 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
     }
 
     setLowercaseTokens(Utils.getFlag("lowercase", options));
+    
+    String stemmerString = Utils.getOption("stemmer", options);
+    if (stemmerString.length() == 0) {
+      setStemmer(null);
+    } else {
+      String[] stemmerSpec = Utils.splitOptions(stemmerString);
+      if (stemmerSpec.length == 0) {
+        throw new Exception("Invalid stemmer specification string");
+      }
+      String stemmerName = stemmerSpec[0];
+      stemmerSpec[0] = "";
+      Stemmer stemmer = (Stemmer) Utils.forName(Class.forName("weka.core.stemmers.Stemmer"), stemmerName, stemmerSpec);
+      setStemmer(stemmer);
+    }
 
-    String stopwordsHandlerString =
-      Utils.getOption("stopwords-handler", options);
+    String stopwordsHandlerString = Utils.getOption("stopwords-handler", options);
     if (stopwordsHandlerString.length() == 0) {
       setStopwordsHandler(null);
     } else {
-      String[] stopwordsHandlerSpec =
-        Utils.splitOptions(stopwordsHandlerString);
+      String[] stopwordsHandlerSpec = Utils.splitOptions(stopwordsHandlerString);
       if (stopwordsHandlerSpec.length == 0) {
         throw new Exception("Invalid StopwordsHandler specification string");
       }
       String stopwordsHandlerName = stopwordsHandlerSpec[0];
       stopwordsHandlerSpec[0] = "";
       StopwordsHandler stopwordsHandler =
-        (StopwordsHandler) Class.forName(stopwordsHandlerName).newInstance();
-      if (stopwordsHandler instanceof OptionHandler) {
-        ((OptionHandler) stopwordsHandler).setOptions(stopwordsHandlerSpec);
-      }
+              (StopwordsHandler) Utils.forName(Class.forName("weka.core.stopwords.StopwordsHandler"),
+                      stopwordsHandlerName, stopwordsHandlerSpec);
       setStopwordsHandler(stopwordsHandler);
     }
 
@@ -972,29 +982,9 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
       }
       String tokenizerName = tokenizerSpec[0];
       tokenizerSpec[0] = "";
-      Tokenizer tokenizer =
-        (Tokenizer) Class.forName(tokenizerName).newInstance();
-      if (tokenizer instanceof OptionHandler) {
-        ((OptionHandler) tokenizer).setOptions(tokenizerSpec);
-      }
+      Tokenizer tokenizer = (Tokenizer) Utils.forName(Class.forName("weka.core.tokenizers.Tokenizer"), tokenizerName,
+              tokenizerSpec);
       setTokenizer(tokenizer);
-    }
-
-    String stemmerString = Utils.getOption("stemmer", options);
-    if (stemmerString.length() == 0) {
-      setStemmer(null);
-    } else {
-      String[] stemmerSpec = Utils.splitOptions(stemmerString);
-      if (stemmerSpec.length == 0) {
-        throw new Exception("Invalid stemmer specification string");
-      }
-      String stemmerName = stemmerSpec[0];
-      stemmerSpec[0] = "";
-      Stemmer stemmer = (Stemmer) Class.forName(stemmerName).newInstance();
-      if (stemmer instanceof OptionHandler) {
-        ((OptionHandler) stemmer).setOptions(stemmerSpec);
-      }
-      setStemmer(stemmer);
     }
 
     Utils.checkForRemainingOptions(options);
