@@ -29,12 +29,10 @@ License=GPL 3.0
 Description=Provides a set of filters for time series. Currently contains PAA and SAX transformation filters and a filter that converts symbolic time series to string attribute values. The time series need to be given as values of a relation-valued attribute in the ARFF file. For example data in ARFF format, check the data directory of this package.
 
 # Package URL for obtaining the package archive (required)
-# TODO
-#PackageURL=http://somewhere.net/weka/funkyPackage.zip?download
-
+http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.0.zip?download
+	
 # URL for further information
-# TODO
-#URL=http://somewhere.net/funkyResearchInfo.html
+URL=http://weka.sourceforge.net/doc.packages/timeSeriesFilters
 
 # Enhances various other packages ?
 #Enhances=
