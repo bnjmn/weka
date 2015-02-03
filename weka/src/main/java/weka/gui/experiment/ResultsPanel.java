@@ -1194,6 +1194,7 @@ public class ResultsPanel extends JPanel {
     int compareCol = m_CompareCombo.getSelectedIndex();
     int tType = m_TestsList.getSelectedIndex();
 
+    m_TTester.setResultMatrix(m_ResultMatrix);
     String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date())
       + (String) m_CompareCombo.getSelectedItem() + " - "
       + (String) m_TestsList.getSelectedValue();
@@ -1203,7 +1204,6 @@ public class ResultsPanel extends JPanel {
     m_History.addResult(name, outBuff);
     m_History.setSingle(name);
     m_TTester.setDisplayedResultsets(m_DisplayedList.getSelectedIndices());
-    m_TTester.setResultMatrix(m_ResultMatrix);
     try {
       if (tType < m_TTester.getNumResultsets()) {
         outBuff.append(m_TTester.multiResultsetFull(tType, compareCol));

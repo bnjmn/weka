@@ -369,13 +369,13 @@ public abstract class ResultMatrix implements Serializable, RevisionHandler,
 
     setRemoveFilterName(Utils.getFlag("remove-filter", options));
 
-    setPrintColNames(Utils.getFlag("print-col-names", options));
-
-    setPrintRowNames(Utils.getFlag("print-row-names", options));
-
     setEnumerateColNames(Utils.getFlag("enum-col-names", options));
 
     setEnumerateRowNames(Utils.getFlag("enum-row-names", options));
+
+    setPrintColNames(Utils.getFlag("print-col-names", options));
+
+    setPrintRowNames(Utils.getFlag("print-row-names", options));
   }
 
   /**

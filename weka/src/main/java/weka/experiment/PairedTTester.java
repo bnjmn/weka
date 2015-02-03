@@ -25,10 +25,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.Attribute;
 import weka.core.Instance;
@@ -802,7 +799,7 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
     }
 
     initResultMatrix();
-    m_ResultMatrix.addHeader("Tester", getClass().getName());
+    m_ResultMatrix.addHeader("Tester", getClass().getName() + " " + Utils.joinOptions(getOptions()));
     m_ResultMatrix.addHeader("Analysing",
       m_Instances.attribute(comparisonColumn).name());
     m_ResultMatrix.addHeader("Datasets", Integer.toString(getNumDatasets()));
@@ -1066,7 +1063,9 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
 
     // append a key so that we can tell the difference between long
     // scheme+option names
-    result.append("\n\n" + m_ResultMatrix.toStringKey());
+    if (m_ResultMatrix.getEnumerateColNames()) {
+      result.append("\n\n" + m_ResultMatrix.toStringKey());
+    }
 
     return result.toString();
   }
@@ -1099,6 +1098,10 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
     newVector.addElement(new Option(
       "\tSet the significance level for comparisons (default 0.05)", "S", 1,
       "-S <significance level>"));
+    newVector.addElement(new Option(
+            "\tSet the result matrix (classname plus parameters).\n\t(default: weka.experiment.ResultMatrixPlainText)",
+            "result-matrix", 1,
+            "-result-matrix <result-matrix-class>"));
     newVector
       .addElement(new Option("\tShow standard deviations", "V", 0, "-V"));
     newVector.addElement(new Option(
@@ -1113,7 +1116,12 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
     newVector.addElement(new Option(
       "\tProduce table comparisons output suitable for GNUPlot", "gnuplot", 0,
       "-gnuplot"));
+    newVector.addElement(new Option(
+            "",
+            "", 0, "\nOptions specific to result matrix "
+            + getResultMatrix().getClass().getName() + ":"));
 
+    newVector.addAll(Collections.list(((OptionHandler) getResultMatrix()).listOptions()));
     return newVector.elements();
   }
 
@@ -1192,17 +1200,27 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
   public void setOptions(String[] options) throws Exception {
 
     setShowStdDevs(Utils.getFlag('V', options));
-    if (Utils.getFlag('L', options)) {
+    String outputOption = Utils.getOption("result-matrix", options);
+    if (outputOption.length() != 0) {
+      String[] resultMatrixSpec = Utils.splitOptions(outputOption);
+      if (resultMatrixSpec.length == 0) {
+        throw new Exception("Invalid ResultMatrix specification string");
+      }
+      String resultMatrixName = resultMatrixSpec[0];
+      resultMatrixSpec[0] = "";
+      ResultMatrix resultMatrix = (ResultMatrix) Utils.forName(Class.forName("weka.experiment.ResultMatrix"),
+                      resultMatrixName, resultMatrixSpec);
+      setResultMatrix(resultMatrix);
+    } else if (Utils.getFlag('L', options)) {
       setResultMatrix(new ResultMatrixLatex());
-    }
-    if (Utils.getFlag("csv", options)) {
+    } else if (Utils.getFlag("csv", options)) {
       setResultMatrix(new ResultMatrixCSV());
-    }
-    if (Utils.getFlag("html", options)) {
+    } else if (Utils.getFlag("html", options)) {
       setResultMatrix(new ResultMatrixHTML());
-    }
-    if (Utils.getFlag("significance", options)) {
+    } else if (Utils.getFlag("significance", options)) {
       setResultMatrix(new ResultMatrixSignificance());
+    } else if (Utils.getFlag("gnuplot", options)) {
+      setResultMatrix(new ResultMatrixGnuPlot());
     }
 
     String datasetList = Utils.getOption('D', options);
@@ -1255,46 +1273,33 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
   @Override
   public String[] getOptions() {
 
-    String[] options = new String[11];
-    int current = 0;
+    Vector<String> options = new Vector<String>();;
 
     if (!getResultsetKeyColumns().getRanges().equals("")) {
-      options[current++] = "-G";
-      options[current++] = getResultsetKeyColumns().getRanges();
+      options.add("-G");
+      options.add(getResultsetKeyColumns().getRanges());
     }
     if (!getDatasetKeyColumns().getRanges().equals("")) {
-      options[current++] = "-D";
-      options[current++] = getDatasetKeyColumns().getRanges();
+      options.add("-D");
+      options.add(getDatasetKeyColumns().getRanges());
     }
-    options[current++] = "-R";
-    options[current++] = "" + (getRunColumn() + 1);
-    options[current++] = "-S";
-    options[current++] = "" + getSignificanceLevel();
+    options.add("-R");
+    options.add("" + (getRunColumn() + 1));
+    options.add("-S");
+    options.add("" + getSignificanceLevel());
 
     if (getShowStdDevs()) {
-      options[current++] = "-V";
+      options.add("-V");
     }
 
-    if (getResultMatrix() instanceof ResultMatrixLatex) {
-      options[current++] = "-L";
+    options.add("-result-matrix");
+    String spec = getResultMatrix().getClass().getName();
+    if (getResultMatrix() instanceof OptionHandler) {
+      spec += " " + Utils.joinOptions(((OptionHandler) getResultMatrix()).getOptions());
     }
+    options.add(spec.trim());
 
-    if (getResultMatrix() instanceof ResultMatrixCSV) {
-      options[current++] = "-csv";
-    }
-
-    if (getResultMatrix() instanceof ResultMatrixHTML) {
-      options[current++] = "-html";
-    }
-
-    if (getResultMatrix() instanceof ResultMatrixSignificance) {
-      options[current++] = "-significance";
-    }
-
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    return options.toArray(new String[options.size()]);
   }
 
   /**
@@ -1556,6 +1561,7 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
       String baseColStr = Utils.getOption('b', args);
       boolean summaryOnly = Utils.getFlag('s', args);
       boolean rankingOnly = Utils.getFlag('r', args);
+      boolean noHeader = Utils.getFlag('n', args);
       try {
         if ((datasetName.length() == 0) || (compareColStr.length() == 0)) {
           throw new Exception("-t and -c options are required");
@@ -1569,25 +1575,27 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
           Option option = enu.nextElement();
           result += option.synopsis() + '\n' + option.description() + '\n';
         }
-        throw new Exception("Usage:\n\n" + "-t <file>\n"
+        throw new Exception(ex.getMessage() + "\n\nUsage:\n\n" + "-t <file>\n"
           + "\tSet the dataset containing data to evaluate\n" + "-b <index>\n"
           + "\tSet the resultset to base comparisons against (optional)\n"
           + "-c <index>\n" + "\tSet the column to perform a comparison on\n"
-          + "-s\n" + "\tSummarize wins over all resultset pairs\n\n" + "-r\n"
-          + "\tGenerate a resultset ranking\n\n" + result);
+          + "-s\n" + "\tSummarize wins over all resultset pairs\n" + "-r\n"
+          + "\tGenerate a resultset ranking\n" + "-n\n" + "\tDo not output header info\n"+ result);
       }
       Instances data = new Instances(new BufferedReader(new FileReader(
         datasetName)));
       tt.setInstances(data);
       // tt.prepareData();
       int compareCol = Integer.parseInt(compareColStr) - 1;
-      System.out.println(tt.header(compareCol));
+      if (!noHeader) {
+        System.out.println(tt.header(compareCol));
+      }
       if (rankingOnly) {
         System.out.println(tt.multiResultsetRanking(compareCol));
       } else if (summaryOnly) {
         System.out.println(tt.multiResultsetSummary(compareCol));
       } else {
-        System.out.println(tt.resultsetKey());
+        //System.out.println(tt.resultsetKey());
         if (baseColStr.length() == 0) {
           for (int i = 0; i < tt.getNumResultsets(); i++) {
             if (!tt.displayResultset(i)) {
@@ -1601,7 +1609,6 @@ public class PairedTTester implements OptionHandler, Tester, RevisionHandler {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
       System.err.println(e.getMessage());
     }
   }
