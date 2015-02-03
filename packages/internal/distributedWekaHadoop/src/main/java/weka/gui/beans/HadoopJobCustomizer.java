@@ -21,9 +21,7 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -31,12 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
+import javax.swing.*;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -111,72 +104,6 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
 
   /** For restoring original state */
   protected String m_optionsOrig;
-
-  /**
-   * Panel for editing user-defined properties to set on the Hadoop
-   * Configuration object
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  protected class HadoopPropertyPanel extends JPanel {
-
-    /** For serialization */
-    private static final long serialVersionUID = 7587461519469576557L;
-
-    /** The JTable for configuring properties */
-    protected InteractiveTablePanel m_table = new InteractiveTablePanel(
-      new String[] { "Property", "Value", "" });
-
-    /**
-     * Constructor
-     * 
-     * @param properties a map of properties to edit
-     */
-    public HadoopPropertyPanel(Map<String, String> properties) {
-      setLayout(new BorderLayout());
-      setBorder(BorderFactory.createTitledBorder("User defined properties"));
-      add(m_table, BorderLayout.CENTER);
-
-      // populate table with supplied properties
-      if (properties != null) {
-        int row = 0;
-        JTable table = m_table.getTable();
-        for (Map.Entry<String, String> e : properties.entrySet()) {
-          String prop = e.getKey();
-          String val = e.getValue();
-
-          // make sure to skip internal weka properties!!
-          if (!DistributedJobConfig.isEmpty(val) && !prop.startsWith("*")) {
-            table.getModel().setValueAt(prop, row, 0);
-            table.getModel().setValueAt(val, row, 1);
-            ((InteractiveTableModel) table.getModel()).addEmptyRow();
-            row++;
-          }
-        }
-      }
-    }
-
-    /**
-     * Get the properties being edited
-     * 
-     * @return the map of properties being edited
-     */
-    public Map<String, String> getProperties() {
-      Map<String, String> result = new HashMap<String, String>();
-      JTable table = m_table.getTable();
-      int numRows = table.getModel().getRowCount();
-
-      for (int i = 0; i < numRows; i++) {
-        String paramName = table.getValueAt(i, 0).toString();
-        String paramValue = table.getValueAt(i, 1).toString();
-        if (paramName.length() > 0 && paramValue.length() > 0) {
-          result.put(paramName, paramValue);
-        }
-      }
-
-      return result;
-    }
-  }
 
   /**
    * The constructor
@@ -534,6 +461,9 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
    */
   protected List<String> getBaseConfig(HadoopJob job) {
 
+    String additionalPackages =
+      m_mrConfig
+        .getUserSuppliedProperty(DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY);
     m_mrConfig.clearUserSuppliedProperties();
     Map<String, String> userProps = m_propPanel.getProperties();
     for (Map.Entry<String, String> e : userProps.entrySet()) {
@@ -542,6 +472,10 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
         && !e.getKey().equals(DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY)) {
         m_mrConfig.setUserSuppliedProperty(e.getKey(), e.getValue());
       }
+    }
+    if (!DistributedJobConfig.isEmpty(additionalPackages)) {
+      m_mrConfig.setUserSuppliedProperty(
+        DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY, additionalPackages);
     }
 
     String[] baseJobOpts = job.getBaseOptionsOnly();
@@ -864,5 +798,71 @@ public class HadoopJobCustomizer extends JPanel implements BeanCustomizer,
   @Override
   public void setParentWindow(Window parent) {
     m_parentWindow = parent;
+  }
+
+  /**
+   * Panel for editing user-defined properties to set on the Hadoop
+   * Configuration object
+   * 
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
+  protected class HadoopPropertyPanel extends JPanel {
+
+    /** For serialization */
+    private static final long serialVersionUID = 7587461519469576557L;
+
+    /** The JTable for configuring properties */
+    protected InteractiveTablePanel m_table = new InteractiveTablePanel(
+      new String[] { "Property", "Value", "" });
+
+    /**
+     * Constructor
+     * 
+     * @param properties a map of properties to edit
+     */
+    public HadoopPropertyPanel(Map<String, String> properties) {
+      setLayout(new BorderLayout());
+      setBorder(BorderFactory.createTitledBorder("User defined properties"));
+      add(m_table, BorderLayout.CENTER);
+
+      // populate table with supplied properties
+      if (properties != null) {
+        int row = 0;
+        JTable table = m_table.getTable();
+        for (Map.Entry<String, String> e : properties.entrySet()) {
+          String prop = e.getKey();
+          String val = e.getValue();
+
+          // make sure to skip internal weka properties!!
+          if (!DistributedJobConfig.isEmpty(val) && !prop.startsWith("*")) {
+            table.getModel().setValueAt(prop, row, 0);
+            table.getModel().setValueAt(val, row, 1);
+            ((InteractiveTableModel) table.getModel()).addEmptyRow();
+            row++;
+          }
+        }
+      }
+    }
+
+    /**
+     * Get the properties being edited
+     * 
+     * @return the map of properties being edited
+     */
+    public Map<String, String> getProperties() {
+      Map<String, String> result = new HashMap<String, String>();
+      JTable table = m_table.getTable();
+      int numRows = table.getModel().getRowCount();
+
+      for (int i = 0; i < numRows; i++) {
+        String paramName = table.getValueAt(i, 0).toString();
+        String paramValue = table.getValueAt(i, 1).toString();
+        if (paramName.length() > 0 && paramValue.length() > 0) {
+          result.put(paramName, paramValue);
+        }
+      }
+
+      return result;
+    }
   }
 }
