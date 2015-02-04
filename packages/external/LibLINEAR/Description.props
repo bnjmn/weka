@@ -21,7 +21,7 @@ Description=A wrapper class for the liblinear classifier. Rong-En Fan, Kai-Wei C
 Changes=Updated to 1.95 version of the Java port of LibLINEAR. Enabled application to regression problems.
 
 # Package URL for obtaining the package archive
-PackageURL=####
+PackageURL=http://prdownloads.sourceforge.net/weka/LibLINEAR1.9.5.zip?download
 
 # URL for further information
 URL=http://liblinear.bwaldvogel.de/
