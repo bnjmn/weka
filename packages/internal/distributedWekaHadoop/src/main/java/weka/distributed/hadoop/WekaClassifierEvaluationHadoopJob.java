@@ -35,11 +35,7 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 
-import weka.core.CommandlineRunnable;
-import weka.core.Environment;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
+import weka.core.*;
 import weka.distributed.DistributedWekaException;
 import weka.gui.beans.InstancesProducer;
 import weka.gui.beans.TextProducer;
@@ -65,7 +61,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   /** For serialization */
   private static final long serialVersionUID = -5625588954027886749L;
 
-  protected WekaClassifierHadoopJob m_classifierJob = new WekaClassifierHadoopJob();
+  protected WekaClassifierHadoopJob m_classifierJob =
+    new WekaClassifierHadoopJob();
 
   /**
    * Use this to determine the optimal number of reducers for the reduce stage
@@ -114,9 +111,16 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
       .getName());
   }
 
+  public static void main(String[] args) {
+
+    WekaClassifierEvaluationHadoopJob wchej =
+      new WekaClassifierEvaluationHadoopJob();
+    wchej.run(wchej, args);
+  }
+
   /**
    * Help info for this job
-   * 
+   *
    * @return help info for this job
    */
   public String globalInfo() {
@@ -163,27 +167,6 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   }
 
   @Override
-  public void setOptions(String[] options) throws Exception {
-
-    String numNodes = Utils.getOption("num-nodes", options);
-    if (!DistributedJobConfig.isEmpty(numNodes)) {
-      setNumNodesInCluster(Integer.parseInt(numNodes));
-    }
-
-    String separateTestSet = Utils.getOption("test-set-path", options);
-    setSeparateTestSetPath(separateTestSet);
-
-    String auc = Utils.getOption("auc", options);
-    setSampleFractionForAUC(auc);
-
-    String[] optionsCopy = options.clone();
-
-    super.setOptions(options);
-
-    m_classifierJob.setOptions(optionsCopy);
-  }
-
-  @Override
   public String[] getOptions() {
     List<String> options = new ArrayList<String>();
 
@@ -212,9 +195,30 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     return options.toArray(new String[options.size()]);
   }
 
+  @Override
+  public void setOptions(String[] options) throws Exception {
+
+    String numNodes = Utils.getOption("num-nodes", options);
+    if (!DistributedJobConfig.isEmpty(numNodes)) {
+      setNumNodesInCluster(Integer.parseInt(numNodes));
+    }
+
+    String separateTestSet = Utils.getOption("test-set-path", options);
+    setSeparateTestSetPath(separateTestSet);
+
+    String auc = Utils.getOption("auc", options);
+    setSampleFractionForAUC(auc);
+
+    String[] optionsCopy = options.clone();
+
+    super.setOptions(options);
+
+    m_classifierJob.setOptions(optionsCopy);
+  }
+
   /**
    * Get the options pertaining to this job only
-   * 
+   *
    * @return the options for this job only
    */
   public String[] getJobOptionsOnly() {
@@ -238,21 +242,11 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
   /**
    * Tip text for this property
-   * 
+   *
    * @return the tip text for this property
    */
   public String separateTestSetPathTipText() {
     return "The path (in HDFS) to a separate test set to use";
-  }
-
-  /**
-   * Set the path in HDFS to the separate test set to use. Either this or the
-   * total number of folds should be specified (but not both).
-   * 
-   * @param path the path in HDFS to the separate test set to evaluate on
-   */
-  public void setSeparateTestSetPath(String path) {
-    m_separateTestSetPath = path;
   }
 
   /**
@@ -266,8 +260,18 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   }
 
   /**
+   * Set the path in HDFS to the separate test set to use. Either this or the
+   * total number of folds should be specified (but not both).
+   *
+   * @param path the path in HDFS to the separate test set to evaluate on
+   */
+  public void setSeparateTestSetPath(String path) {
+    m_separateTestSetPath = path;
+  }
+
+  /**
    * Tip text for this property
-   * 
+   *
    * @return the tip text for this property
    */
   public String sampleFractionForAUCTipText() {
@@ -276,18 +280,6 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
       + "no predictions are kept. "
       + "Use this option to keep the number of predictions retained under "
       + "control when computing AUC/AUPRC.";
-  }
-
-  /**
-   * Set the percentage of predictions to retain (via uniform random sampling)
-   * for computing AUC and AUPRC. If not specified, then no predictions are
-   * retained and these metrics are not computed.
-   * 
-   * @param f the fraction (between 0 and 1) of all predictions to retain for
-   *          computing AUC/AUPRC.
-   */
-  public void setSampleFractionForAUC(String f) {
-    m_predFrac = f;
   }
 
   /**
@@ -303,9 +295,21 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   }
 
   /**
+   * Set the percentage of predictions to retain (via uniform random sampling)
+   * for computing AUC and AUPRC. If not specified, then no predictions are
+   * retained and these metrics are not computed.
+   *
+   * @param f the fraction (between 0 and 1) of all predictions to retain for
+   *          computing AUC/AUPRC.
+   */
+  public void setSampleFractionForAUC(String f) {
+    m_predFrac = f;
+  }
+
+  /**
    * Stages classifiers generated by the model building job ready to be
    * distributed to nodes via the distributed cache for the evaluation job
-   * 
+   *
    * @param numFolds the number of folds (models) generated
    * @param outputModelPath the path in HDFS that the models were saved to
    * @param conf the Configuration for the job
@@ -317,15 +321,15 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     // String modelFileName = outputModelPath.substring(
     // outputModelPath.lastIndexOf("/") + 1, outputModelPath.length());
     String modelNameOnly = m_classifierJob.getModelFileName();
-    String pathOnly = outputModelPath.substring(0,
-      outputModelPath.lastIndexOf("/") + 1);
+    String pathOnly =
+      outputModelPath.substring(0, outputModelPath.lastIndexOf("/") + 1);
 
     for (int i = 0; i < numFolds; i++) {
       String modelNameWithFoldNumber = "" + (i + 1) + "_" + modelNameOnly;
       String outputModelPathWithFoldNumber = pathOnly + modelNameWithFoldNumber;
 
-      String stagingPath = HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES
-        + modelNameWithFoldNumber;
+      String stagingPath =
+        HDFSUtils.WEKA_TEMP_DISTRIBUTED_CACHE_FILES + modelNameWithFoldNumber;
 
       HDFSUtils.moveInHDFS(outputModelPathWithFoldNumber, stagingPath,
         m_classifierJob.m_mrConfig.getHDFSConfig(), m_env);
@@ -337,22 +341,12 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
   /**
    * Tip text for this property
-   * 
+   *
    * @return the tip text for this property
    */
   public String numNodesInClusterTipText() {
     return "The number of nodes in the cluster - used for setting the "
       + "number of reducers to use when performing a cross-validation";
-  }
-
-  /**
-   * Set the number of nodes in the user's Hadoop cluster. Used for setting the
-   * number of reducers to use when performing a cross-validation.
-   * 
-   * @param n the number of nodes in the cluster
-   */
-  public void setNumNodesInCluster(int n) {
-    m_nodesAvailable = n;
   }
 
   /**
@@ -366,23 +360,34 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
   }
 
   /**
+   * Set the number of nodes in the user's Hadoop cluster. Used for setting the
+   * number of reducers to use when performing a cross-validation.
+   *
+   * @param n the number of nodes in the cluster
+   */
+  public void setNumNodesInCluster(int n) {
+    m_nodesAvailable = n;
+  }
+
+  /**
    * Runs the evaluation phase/job
-   * 
+   *
    * @param outputModelPath the path in HDFS that the models were saved to by
    *          the model building phase
    * @return true if the job was successful
    * @throws Exception if a problem occurs
    */
   protected boolean runEvaluationPhase(String outputModelPath) throws Exception {
-    String pathToHeader = m_classifierJob.m_arffHeaderJob
-      .getAggregatedHeaderPath();
+    String pathToHeader =
+      m_classifierJob.m_arffHeaderJob.getAggregatedHeaderPath();
 
     Configuration conf = new Configuration();
 
     HDFSUtils.addFileToDistributedCache(m_mrConfig.getHDFSConfig(), conf,
       pathToHeader, m_env);
-    String fileNameOnly = pathToHeader.substring(
-      pathToHeader.lastIndexOf("/") + 1, pathToHeader.length());
+    String fileNameOnly =
+      pathToHeader.substring(pathToHeader.lastIndexOf("/") + 1,
+        pathToHeader.length());
 
     List<String> classifierMapOptions = new ArrayList<String>();
     classifierMapOptions.add("-arff-header");
@@ -394,8 +399,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
         .getClassAttribute()));
     }
 
-    String classifierMapTaskOptions = m_classifierJob
-      .getClassifierMapTaskOptions();
+    String classifierMapTaskOptions =
+      m_classifierJob.getClassifierMapTaskOptions();
 
     classifierMapOptions.add("-model-file-name");
     classifierMapOptions.add(environmentSubstitute(m_classifierJob
@@ -427,15 +432,15 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     }
 
     if (!DistributedJobConfig.isEmpty(classifierMapTaskOptions)) {
-      String[] parts = Utils
-        .splitOptions(environmentSubstitute(classifierMapTaskOptions));
+      String[] parts =
+        Utils.splitOptions(environmentSubstitute(classifierMapTaskOptions));
       for (String s : parts) {
         classifierMapOptions.add(s);
       }
     }
 
-    String[] mapOpts = Utils
-      .splitOptions(environmentSubstitute(classifierMapTaskOptions));
+    String[] mapOpts =
+      Utils.splitOptions(environmentSubstitute(classifierMapTaskOptions));
     String numFolds = Utils.getOption("total-folds", mapOpts.clone());
     int totalFolds = 1;
     if (!DistributedJobConfig.isEmpty(numFolds)) {
@@ -450,8 +455,9 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     } else {
       jobName += " (separate test set) ";
     }
-    jobName += Utils.joinOptions(classifierMapOptions
-      .toArray(new String[classifierMapOptions.size()]));
+    jobName +=
+      Utils.joinOptions(classifierMapOptions
+        .toArray(new String[classifierMapOptions.size()]));
     setJobName(jobName);
 
     String outputPath = m_mrConfig.getOutputPath();
@@ -495,11 +501,16 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
     // no need to install Weka libraries as this would have been done
     // by the classifier job. Just add to the classpath
+
     addWekaLibrariesToClasspath(conf);
+    addWekaPackageLibrariesToClasspath(
+      determinePackageJars(getAdditionalWekaPackageNames(m_mrConfig), true),
+      conf);
 
     // Now setup the job
-    Job job = m_mrConfig.configureForHadoop(
-      environmentSubstitute(getJobName()), conf, m_env);
+    Job job =
+      m_mrConfig.configureForHadoop(environmentSubstitute(getJobName()), conf,
+        m_env);
 
     cleanOutputDirectory(job);
 
@@ -525,8 +536,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
         // number of iterations for multi-pass incremental classifiers
         int numIterations = m_classifierJob.getNumIterations();
 
-        String classifierMapTaskOptions = environmentSubstitute(m_classifierJob
-          .getClassifierMapTaskOptions());
+        String classifierMapTaskOptions =
+          environmentSubstitute(m_classifierJob.getClassifierMapTaskOptions());
         String[] cOpts = Utils.splitOptions(classifierMapTaskOptions);
         int totalFolds = 1;
         String numFolds = Utils.getOption("total-folds", cOpts.clone());
@@ -545,23 +556,25 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
         // optimal number of reducers for the fold-based classifier
         // building job
         Configuration conf = new Configuration();
-        String reduceTasksMaxPerNode = conf
-          .get("mapred.tasktracker.reduce.tasks.maximum");
+        String reduceTasksMaxPerNode =
+          conf.get("mapred.tasktracker.reduce.tasks.maximum");
 
         // allow our configuration to override the defaults for the cluster
         if (!DistributedJobConfig.isEmpty(m_mrConfig
           .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
-          reduceTasksMaxPerNode = environmentSubstitute(m_mrConfig
-            .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+          reduceTasksMaxPerNode =
+            environmentSubstitute(m_mrConfig
+              .getUserSuppliedProperty(
+                "mapred.tasktracker.reduce.tasks.maximum"));
         }
 
         int reduceMax = 2;
         if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
-          reduceMax = Integer
-            .parseInt(environmentSubstitute(reduceTasksMaxPerNode));
+          reduceMax =
+            Integer.parseInt(environmentSubstitute(reduceTasksMaxPerNode));
         }
-        int numReducers = Math.min(totalFolds,
-          (reduceMax * getNumNodesInCluster()));
+        int numReducers =
+          Math.min(totalFolds, (reduceMax * getNumNodesInCluster()));
         logMessage("Setting num reducers per node for fold-based model building to: "
           + numReducers);
         m_classifierJob.m_mrConfig.setNumberOfReducers("" + numReducers);
@@ -575,8 +588,10 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
           return false;
         }
 
-        String outputModelPath = environmentSubstitute(m_classifierJob.m_mrConfig
-          .getUserSuppliedProperty(WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
+        String outputModelPath =
+          environmentSubstitute(m_classifierJob.m_mrConfig
+            .getUserSuppliedProperty(
+              WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
         if (DistributedJobConfig.isEmpty(outputModelPath)) {
           throw new Exception("The output model path is not set!");
         }
@@ -630,7 +645,7 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
   /**
    * Grabs the textual evaluation results out of HDFS
-   * 
+   *
    * @throws DistributedWekaException if a problem occurs
    */
   protected void retrieveResults() throws DistributedWekaException {
@@ -683,12 +698,6 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     return m_evalResults;
   }
 
-  public static void main(String[] args) {
-
-    WekaClassifierEvaluationHadoopJob wchej = new WekaClassifierEvaluationHadoopJob();
-    wchej.run(wchej, args);
-  }
-
   @Override
   public void run(Object toRun, String[] args) throws IllegalArgumentException {
 
@@ -698,7 +707,8 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
     }
 
     try {
-      WekaClassifierEvaluationHadoopJob wchej = (WekaClassifierEvaluationHadoopJob) toRun;
+      WekaClassifierEvaluationHadoopJob wchej =
+        (WekaClassifierEvaluationHadoopJob) toRun;
 
       if (Utils.getFlag('h', args)) {
         String help = DistributedJob.makeOptionsStr(wchej);

@@ -52,7 +52,7 @@ import distributed.core.DistributedJobConfig;
 import distributed.hadoop.HDFSUtils;
 
 /**
- * Job for creating randomly shuffled (and stratified if a numeric class is set)
+ * Job for creating randomly shuffled (and stratified if a nominal class is set)
  * data chunks.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)

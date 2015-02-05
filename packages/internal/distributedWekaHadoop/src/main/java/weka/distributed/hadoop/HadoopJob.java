@@ -58,19 +58,14 @@ import distributed.hadoop.MapReduceJobConfig;
  */
 public abstract class HadoopJob extends DistributedJob implements OptionHandler {
 
-  /** For serialization */
-  private static final long serialVersionUID = -9026086203818342364L;
-
   /** The path to the distributedWekaHadoop.jar */
   public static final String DISTRIBUTED_WEKA_HADOOP_JAR =
     WekaPackageManager.PACKAGES_DIR.toString() + File.separator
       + "distributedWekaHadoop" + File.separator + "distributedWekaHadoop.jar";
-
   /** The path to the distributedWekaBase.jar */
   public static final String DISTRIBUTED_WEKA_BASE_JAR =
     WekaPackageManager.PACKAGES_DIR.toString() + File.separator
       + "distributedWekaBase" + File.separator + "distributedWekaBase.jar";
-
   /** The path to the opencsv.jar */
   public static final String OPEN_CSV_JAR = WekaPackageManager.PACKAGES_DIR
     .toString()
@@ -78,7 +73,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "opencsv-2.3.jar";
-
   /** The path to the jfreechart jar */
   public static final String JFREECHART_JAR = WekaPackageManager.PACKAGES_DIR
     .toString()
@@ -86,7 +80,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "jfreechart-1.0.13.jar";
-
   /** The path to the jcommon jar */
   public static final String JCOMMON_JAR = WekaPackageManager.PACKAGES_DIR
     .toString()
@@ -94,7 +87,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "jcommon-1.0.16.jar";
-
   /** The path to the colt.jar */
   public static final String COLT_JAR = WekaPackageManager.PACKAGES_DIR
     .toString()
@@ -102,7 +94,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "colt-1.2.0.jar";
-
   /** The path to the la4j.jar */
   public static final String LA4J_JAR = WekaPackageManager.PACKAGES_DIR
     .toString()
@@ -110,7 +101,8 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "la4j-0.4.5.jar";
-
+  /** For serialization */
+  private static final long serialVersionUID = -9026086203818342364L;
   /**
    * A default path to a weka.jar file. If the classpath contains a weka.jar
    * file (rather than a directory of weka classes) when Weka is started then
@@ -155,6 +147,56 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   /** Hadoop logging */
   protected Log m_hadoopLog = LogFactory.getLog(HadoopJob.class);
 
+  /**
+   * Constructor for a HadoopJob
+   * 
+   * @param jobName the name of the job
+   * @param jobDescription a short description of the job
+   */
+  public HadoopJob(String jobName, String jobDescription) {
+    super(jobName, jobDescription);
+  }
+
+  /**
+   * Extract the number of a map/reduce attempt from the supplied taskID string.
+   * 
+   * @param taskID the taskID string
+   * @param prefix the prefix identifying the type of task (i.e. mapper or
+   *          reducer)
+   * @return the task number
+   */
+  public static int getMapReduceNumber(String taskID, String prefix) {
+    if (taskID.indexOf(prefix) < 0) {
+      return -1; // not what was expected
+    }
+
+    String lastPart =
+      taskID.substring(taskID.indexOf(prefix) + prefix.length());
+    String theNumber = lastPart.substring(0, lastPart.indexOf("_"));
+
+    return Integer.parseInt(theNumber);
+  }
+
+  /**
+   * Get the number of the map attempt from the supplied task ID string
+   * 
+   * @param taskID the task ID string
+   * @return the number of the map attempt
+   */
+  public static int getMapNumber(String taskID) {
+    return getMapReduceNumber(taskID, "_m_");
+  }
+
+  /**
+   * Get the number of the reduce attempt from the supplied task ID string
+   * 
+   * @param taskID the task ID string
+   * @return the number of the reduce attempt
+   */
+  public static int getReduceNumber(String taskID) {
+    return getMapReduceNumber(taskID, "_r");
+  }
+
   @Override
   public Enumeration<Option> listOptions() {
     Vector<Option> options = new Vector<Option>();
@@ -177,24 +219,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     }
 
     return options.elements();
-  }
-
-  @Override
-  public void setOptions(String[] options) throws Exception {
-    m_mrConfig.setOptions(options);
-
-    String wekaPath = Utils.getOption("weka-jar", options);
-    if (!DistributedJobConfig.isEmpty(wekaPath)) {
-      setPathToWekaJar(wekaPath);
-    }
-
-    String additionalPackages = Utils.getOption("weka-packages", options);
-    setAdditionalWekaPackages(additionalPackages);
-
-    String logInt = Utils.getOption("logging-interval", options);
-    setLoggingInterval(logInt);
-
-    setDebug(Utils.getFlag("debug", options));
   }
 
   /**
@@ -245,23 +269,22 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     return options.toArray(new String[options.size()]);
   }
 
-  /**
-   * Constructor for a HadoopJob
-   * 
-   * @param jobName the name of the job
-   * @param jobDescription a short description of the job
-   */
-  public HadoopJob(String jobName, String jobDescription) {
-    super(jobName, jobDescription);
-  }
+  @Override
+  public void setOptions(String[] options) throws Exception {
+    m_mrConfig.setOptions(options);
 
-  /**
-   * Set the main configuration to use with this job
-   * 
-   * @param conf the main configuration to use with this job
-   */
-  public void setMapReduceJobConfig(MapReduceJobConfig conf) {
-    m_mrConfig = conf;
+    String wekaPath = Utils.getOption("weka-jar", options);
+    if (!DistributedJobConfig.isEmpty(wekaPath)) {
+      setPathToWekaJar(wekaPath);
+    }
+
+    String additionalPackages = Utils.getOption("weka-packages", options);
+    setAdditionalWekaPackages(additionalPackages);
+
+    String logInt = Utils.getOption("logging-interval", options);
+    setLoggingInterval(logInt);
+
+    setDebug(Utils.getFlag("debug", options));
   }
 
   /**
@@ -274,22 +297,21 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
+   * Set the main configuration to use with this job
+   * 
+   * @param conf the main configuration to use with this job
+   */
+  public void setMapReduceJobConfig(MapReduceJobConfig conf) {
+    m_mrConfig = conf;
+  }
+
+  /**
    * Tip text for this property
    * 
    * @return the tip text for this property
    */
   public String deubgTipText() {
     return "Output debugging info to the log";
-  }
-
-  /**
-   * Set whether to output debug info. Some jobs may output more info to the log
-   * if this is turned on
-   * 
-   * @param debug true if debug info is to be output
-   */
-  public void setDebug(boolean debug) {
-    m_debug = debug;
   }
 
   /**
@@ -303,6 +325,16 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
+   * Set whether to output debug info. Some jobs may output more info to the log
+   * if this is turned on
+   * 
+   * @param debug true if debug info is to be output
+   */
+  public void setDebug(boolean debug) {
+    m_debug = debug;
+  }
+
+  /**
    * Tip text for this property
    * 
    * @return the tip text for this property
@@ -310,17 +342,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   public String pathToWekaJarTipText() {
     return "The path to the weka jar file. This will get installed in"
       + "HDFS and placed into the classpath for map and reduce tasks";
-  }
-
-  /**
-   * Set the path to the weka.jar file. Will be populated automatically if the
-   * classpath contains a weka.jar. The weka.jar is installed in HDFS and used
-   * in the classpath for map and reduce tasks.
-   * 
-   * @param path the path to the weka.jar.
-   */
-  public void setPathToWekaJar(String path) {
-    m_pathToWekaJar = path;
   }
 
   /**
@@ -335,6 +356,17 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
+   * Set the path to the weka.jar file. Will be populated automatically if the
+   * classpath contains a weka.jar. The weka.jar is installed in HDFS and used
+   * in the classpath for map and reduce tasks.
+   * 
+   * @param path the path to the weka.jar.
+   */
+  public void setPathToWekaJar(String path) {
+    m_pathToWekaJar = path;
+  }
+
+  /**
    * Tip text for this property.
    * 
    * @return the tip text for this property.
@@ -344,19 +376,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
       + "Any jar files in the main package directory and the lib "
       + "directory of each package will get installed in HDFS and "
       + "placed in the classpath of map and reduce tasks.";
-  }
-
-  /**
-   * Set a comma separated list of the names of additional weka packages to use
-   * with the job. Any jar files in the main package directory and the lib
-   * directory of the package will get installed in HDFS and placed in the
-   * classpath of map and reduce tasks
-   * 
-   * @param packages a comma separated list of weka packages to use with the job
-   */
-  public void setAdditionalWekaPackages(String packages) {
-    m_mrConfig.setUserSuppliedProperty(
-      DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY, packages);
   }
 
   /**
@@ -373,6 +392,19 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
+   * Set a comma separated list of the names of additional weka packages to use
+   * with the job. Any jar files in the main package directory and the lib
+   * directory of the package will get installed in HDFS and placed in the
+   * classpath of map and reduce tasks
+   * 
+   * @param packages a comma separated list of weka packages to use with the job
+   */
+  public void setAdditionalWekaPackages(String packages) {
+    m_mrConfig.setUserSuppliedProperty(
+      DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY, packages);
+  }
+
+  /**
    * Tip text for this property
    * 
    * @return tip text for this property
@@ -383,21 +415,21 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
-   * Set the interval between output of logging information from running jobs.
-   * 
-   * @param li the interval (in seconds) between output of logging information
-   */
-  public void setLoggingInterval(String li) {
-    m_loggingInterval = li;
-  }
-
-  /**
    * Get the interval between output of logging information from running jobs.
    * 
    * @return the interval (in seconds) between output of logging information
    */
   public String getLoggingInterval() {
     return m_loggingInterval;
+  }
+
+  /**
+   * Set the interval between output of logging information from running jobs.
+   * 
+   * @param li the interval (in seconds) between output of logging information
+   */
+  public void setLoggingInterval(String li) {
+    m_loggingInterval = li;
   }
 
   /**
@@ -451,18 +483,17 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
-   * Install the jar files for a list of named weka packages in HDFS and add
-   * them to the classpath for map and reduce tasks
-   * 
-   * @param packageNames a list of weka packages to install the jar files for
-   * @param conf the Hadoop configuration to set the classpath for map and
-   *          reduce tasks
+   * Determine a list of jar files in a given list of package names
+   *
+   * @param packageNames the names of the Weka packages to consider
+   * @param quiet true to suppress logging output related to copying files
+   * @return a list of jar files in the supplied list of packages
    * @throws IOException if a problem occurs
    */
-  private void installWekaPackageLibrariesInHDFS(List<String> packageNames,
-    Configuration conf) throws IOException {
+  protected List<String> determinePackageJars(List<String> packageNames,
+    boolean quiet) throws IOException {
     if (packageNames == null || packageNames.size() == 0) {
-      return;
+      return new ArrayList<String>();
     }
 
     File packagesDir = WekaPackageManager.PACKAGES_DIR;
@@ -477,8 +508,10 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
         File[] contents = current.listFiles();
         for (File f : contents) {
           if (f.isFile() && f.toString().toLowerCase().endsWith(".jar")) {
-            logMessage("Copying package '" + packageDir + "': " + f.getName()
-              + " to HDFS");
+            if (!quiet) {
+              logMessage("Copying package '" + packageDir + "': " + f.getName()
+                + " to HDFS");
+            }
             installLibraries.add(f.toString());
           }
         }
@@ -489,14 +522,36 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
           File[] libContents = libDir.listFiles();
           for (File f : libContents) {
             if (f.isFile() && f.toString().toLowerCase().endsWith(".jar")) {
-              logMessage("Copying package '" + packageDir + "': " + f.getName()
-                + " to HDFS");
+              if (!quiet) {
+                logMessage("Copying package '" + packageDir + "': "
+                  + f.getName() + " to HDFS");
+              }
               installLibraries.add(f.toString());
             }
           }
         }
       }
     }
+
+    return installLibraries;
+  }
+
+  /**
+   * Install the jar files for a list of named weka packages in HDFS and add
+   * them to the classpath for map and reduce tasks
+   * 
+   * @param packageNames a list of weka packages to install the jar files for
+   * @param conf the Hadoop configuration to set the classpath for map and
+   *          reduce tasks
+   * @throws IOException if a problem occurs
+   */
+  private void installWekaPackageLibrariesInHDFS(List<String> packageNames,
+    Configuration conf) throws IOException {
+    if (packageNames == null || packageNames.size() == 0) {
+      return;
+    }
+
+    List<String> installLibraries = determinePackageJars(packageNames, false);
 
     HDFSUtils.copyFilesToWekaHDFSInstallationDirectory(installLibraries,
       m_mrConfig.getHDFSConfig(), m_env, true);
@@ -534,12 +589,14 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   }
 
   /**
+   * Adds a list of jar files from from packages to the the classpath
+   *
    * @param packageJars a list of paths to jar files from packages to add to the
    *          classpath
    * @param conf the Hadoop Configuration to populate
    * @throws IOException if a problem occurs
    */
-  private void addWekaPackageLibrariesToClasspath(List<String> packageJars,
+  protected void addWekaPackageLibrariesToClasspath(List<String> packageJars,
     Configuration conf) throws IOException {
 
     if (packageJars == null || packageJars.size() == 0) {
@@ -655,46 +712,6 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     // logMessage(taskMessages.toString());
 
     return tcEvents.length;
-  }
-
-  /**
-   * Extract the number of a map/reduce attempt from the supplied taskID string.
-   * 
-   * @param taskID the taskID string
-   * @param prefix the prefix identifying the type of task (i.e. mapper or
-   *          reducer)
-   * @return the task number
-   */
-  public static int getMapReduceNumber(String taskID, String prefix) {
-    if (taskID.indexOf(prefix) < 0) {
-      return -1; // not what was expected
-    }
-
-    String lastPart =
-      taskID.substring(taskID.indexOf(prefix) + prefix.length());
-    String theNumber = lastPart.substring(0, lastPart.indexOf("_"));
-
-    return Integer.parseInt(theNumber);
-  }
-
-  /**
-   * Get the number of the map attempt from the supplied task ID string
-   * 
-   * @param taskID the task ID string
-   * @return the number of the map attempt
-   */
-  public static int getMapNumber(String taskID) {
-    return getMapReduceNumber(taskID, "_m_");
-  }
-
-  /**
-   * Get the number of the reduce attempt from the supplied task ID string
-   * 
-   * @param taskID the task ID string
-   * @return the number of the reduce attempt
-   */
-  public static int getReduceNumber(String taskID) {
-    return getMapReduceNumber(taskID, "_r");
   }
 
   /**

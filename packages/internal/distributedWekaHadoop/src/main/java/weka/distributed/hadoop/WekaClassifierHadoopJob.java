@@ -979,6 +979,9 @@ public class WekaClassifierHadoopJob extends HadoopJob implements
       installWekaLibrariesInHDFS(conf);
     } else {
       addWekaLibrariesToClasspath(conf);
+      addWekaPackageLibrariesToClasspath(
+        determinePackageJars(getAdditionalWekaPackageNames(m_mrConfig), true),
+        conf);
     }
 
     Job job = null;
