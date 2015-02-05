@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.13
+Version=1.0.14
 
 #Date (year-month-day)
-Date=2015-02-03
+Date=2015-02-05
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Includes libraries for Apache Hadoop 1.1.2.
 
 # Changes in this release
-Changes=Fixed a bug where the additional Weka package libraries property was not getting set properly in the Knowledge Flow GUI.
+Changes=Fixed a bug where the evaluation phase of the WekaClassifierEvaluationJob was not adding jar files from any additional Weka packages to the classpath of the job; fixed a similar problem in the WekaClassifierHadoopJob that occurred after iteration 1 (if iterating with an incremental classifier)
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.13.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.14.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
