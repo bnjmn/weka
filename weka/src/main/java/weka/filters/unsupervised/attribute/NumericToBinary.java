@@ -180,6 +180,24 @@ public class NumericToBinary extends PotentialClassIgnorer implements
     Utils.checkForRemainingOptions(options);
   }
   
+  @Override
+  public String[] getOptions() {
+	  
+    Vector<String> result = new Vector<String>();
+	
+    if ( !getAttributeIndices().equals("") ) {
+        result.add("-R");
+        result.add(getAttributeIndices());
+    }
+    
+    if( getInvertSelection() ) {
+    	result.add("-V");
+    }
+    
+    return result.toArray( new String[result.size()] );
+	
+  }
+  
   /**
    * Returns the tip text for this property
    * 
