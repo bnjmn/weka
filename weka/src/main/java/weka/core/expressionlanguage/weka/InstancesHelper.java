@@ -21,6 +21,7 @@
 
 package weka.core.expressionlanguage.weka;
 
+import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import weka.core.Utils;
@@ -50,7 +51,7 @@ import weka.core.expressionlanguage.common.Primitives.StringExpression;
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )
  * @version $Revision: 1000 $
  */
-public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclarations {
+public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclarations, Serializable {
 
   // from MathExpression filter and AttributeExpression
   private static final Pattern ATTRIBUTE1 = Pattern.compile("[aA][0-9]+");
@@ -63,7 +64,9 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
 
   // from subsetbyexpression
   private static final String IS_MISSING = "ismissing";
-  
+
+  private static final long serialVersionUID = -4398876812339967703L;
+
   /** the dataset whose instance values should be exposed */
   private final Instances dataset;
   
@@ -123,7 +126,9 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     throw new SemanticException(IS_MISSING + " is only applicable to a dataset value!");
   }
   
-  private static class isMissing implements BooleanExpression {
+  private static class isMissing implements BooleanExpression, Serializable {
+
+    private static final long serialVersionUID = -3805035561340865906L;
 
     private final Value value;
 
@@ -219,7 +224,9 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
       dataset.attribute(index).toString() + "' not supported!");
   }
   
-  private abstract class Value implements Node {
+  private abstract class Value implements Node, Serializable {
+
+    private static final long serialVersionUID = 5839070716097467627L;
 
     private final int index;
     
@@ -236,8 +243,10 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     }
   }
   
-  private class DoubleValue extends Value implements DoubleExpression {
-    
+  private class DoubleValue extends Value implements DoubleExpression, Serializable {
+
+    private static final long serialVersionUID = -1001674545929082424L;
+
     public DoubleValue(int index) {
       super(index);
       assert dataset.attribute(getIndex()).isNumeric();
@@ -253,8 +262,10 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     }
   }
   
-  private class StringValue extends Value implements StringExpression {
-    
+  private class StringValue extends Value implements StringExpression, Serializable {
+
+    private static final long serialVersionUID = -249974216283801876L;
+
     public StringValue(int index) {
       super(index);
       assert dataset.attribute(index).isString() || dataset.attribute(index).isNominal();

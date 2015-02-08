@@ -23,13 +23,17 @@ package weka.core.expressionlanguage.common;
 
 import weka.core.expressionlanguage.core.Node;
 
+import java.io.Serializable;
+
 /**
  * A class providing AST (abstract syntax tree) nodes to support primitive types.
  * 
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )
  * @version $Revision: 1000 $
  */
-public class Primitives {
+public class Primitives implements Serializable {
+
+  private static final long serialVersionUID = -6356635298310530223L;
   
   /*
    * Currently the different expressions of different primitive types are all
@@ -89,8 +93,10 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class BooleanConstant implements BooleanExpression {
-    
+  public static class BooleanConstant implements BooleanExpression, Serializable {
+
+    private static final long serialVersionUID = -7104666336890622673L;
+
     private final boolean value;
     
     public BooleanConstant(boolean value) {
@@ -109,7 +115,9 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class DoubleConstant implements DoubleExpression {
+  public static class DoubleConstant implements DoubleExpression, Serializable {
+
+    private static final long serialVersionUID = 6876724986473710563L;
 
     private final double value;
 
@@ -130,7 +138,9 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class StringConstant implements StringExpression {
+  public static class StringConstant implements StringExpression, Serializable {
+
+    private static final long serialVersionUID = 491766938196527684L;
 
     private final String value;
     
@@ -150,8 +160,10 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class BooleanVariable implements BooleanExpression {
-    
+  public static class BooleanVariable implements BooleanExpression, Serializable {
+
+    private static final long serialVersionUID = 6041670101306161521L;
+
     private boolean value;
     private final String name;
     
@@ -183,8 +195,10 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class DoubleVariable implements DoubleExpression {
-    
+  public static class DoubleVariable implements DoubleExpression, Serializable {
+
+    private static final long serialVersionUID = -6059066803856814750L;
+
     private double value;
     private final String name;
     
@@ -216,7 +230,9 @@ public class Primitives {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class StringVariable implements StringExpression {
+  public static class StringVariable implements StringExpression, Serializable {
+
+    private static final long serialVersionUID = -7332982581964981085L;
 
     private final String name;
     private String value;
