@@ -960,10 +960,11 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
       } else if (m_structure.attribute(i).isDate()) {
         String format = m_structure.attribute(i).getDateFormat();
         SimpleDateFormat sdf = new SimpleDateFormat(format);
+        String dateVal = Utils.unquote(val.toString());
         try {
-          vals[i] = sdf.parse(val.toString()).getTime();
+          vals[i] = sdf.parse(dateVal).getTime();
         } catch (ParseException e) {
-          throw new IOException("Unable to parse date value " + val.toString()
+          throw new IOException("Unable to parse date value " + dateVal
             + " using date format " + format + " for date attribute "
             + m_structure.attribute(i) + " (line: " + m_rowCount + ")");
         }
