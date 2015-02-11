@@ -47,27 +47,21 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Add;
 
 /**
- * <!-- globalinfo-start --> Class implementing the Cobweb and Classit
- * clustering algorithms.<br/>
+ * <!-- globalinfo-start -->
+ * Class implementing the Cobweb and Classit clustering algorithms.<br/>
  * <br/>
- * Note: the application of node operators (merging, splitting etc.) in terms of
- * ordering and priority differs (and is somewhat ambiguous) between the
- * original Cobweb and Classit papers. This algorithm always compares the best
- * host, adding a new leaf, merging the two best hosts, and splitting the best
- * host when considering where to place a new instance.<br/>
+ * Note: the application of node operators (merging, splitting etc.) in terms of ordering and priority differs (and is somewhat ambiguous) between the original Cobweb and Classit papers. This algorithm always compares the best host, adding a new leaf, merging the two best hosts, and splitting the best host when considering where to place a new instance.<br/>
  * <br/>
  * For more information see:<br/>
  * <br/>
- * D. Fisher (1987). Knowledge acquisition via incremental conceptual
- * clustering. Machine Learning. 2(2):139-172.<br/>
+ * D. Fisher (1987). Knowledge acquisition via incremental conceptual clustering. Machine Learning. 2(2):139-172.<br/>
  * <br/>
- * J. H. Gennari, P. Langley, D. Fisher (1990). Models of incremental concept
- * formation. Artificial Intelligence. 40:11-61.
+ * J. H. Gennari, P. Langley, D. Fisher (1990). Models of incremental concept formation. Artificial Intelligence. 40:11-61.
  * <p/>
  * <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
+ * <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;article{Fisher1987,
  *    author = {D. Fisher},
@@ -91,26 +85,31 @@ import weka.filters.unsupervised.attribute.Add;
  * <p/>
  * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ * <!-- options-start -->
+ * Valid options are: <p/>
  * 
- * <pre>
- * -A &lt;acuity&gt;
+ * <pre> -A &lt;acuity&gt;
  *  Acuity.
- *  (default=1.0)
- * </pre>
+ *  (default=1.0)</pre>
  * 
- * <pre>
- * -C &lt;cutoff&gt;
+ * <pre> -C &lt;cutoff&gt;
  *  Cutoff.
- *  (default=0.002)
- * </pre>
+ *  (default=0.002)</pre>
  * 
- * <pre>
- * -S &lt;num&gt;
+ * <pre> -save-data
+ *  Save instance data.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
  *  Random number seed.
- *  (default 42)
- * </pre>
+ *  (default 42)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, clusterer is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, clusterer capabilities are not checked before clusterer is built
+ *  (use with caution).</pre>
  * 
  * <!-- options-end -->
  * 
@@ -1048,6 +1047,9 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
     result.addElement(new Option("\tCutoff.\n" + "\t(default=0.002)", "C", 1,
       "-C <cutoff>"));
 
+    result.addElement(new Option("\tSave instance data.", "save-data", 0,
+      "-save-data"));
+   
     result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
@@ -1057,26 +1059,31 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   * <!-- options-start -->
+   * Valid options are: <p/>
    * 
-   * <pre>
-   * -A &lt;acuity&gt;
+   * <pre> -A &lt;acuity&gt;
    *  Acuity.
-   *  (default=1.0)
-   * </pre>
+   *  (default=1.0)</pre>
    * 
-   * <pre>
-   * -C &lt;cutoff&gt;
+   * <pre> -C &lt;cutoff&gt;
    *  Cutoff.
-   *  (default=0.002)
-   * </pre>
+   *  (default=0.002)</pre>
    * 
-   * <pre>
-   * -S &lt;num&gt;
+   * <pre> -save-data
+   *  Save instance data.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
    *  Random number seed.
-   *  (default 42)
-   * </pre>
+   *  (default 42)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, clusterer is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, clusterer capabilities are not checked before clusterer is built
+   *  (use with caution).</pre>
    * 
    * <!-- options-end -->
    * 
@@ -1101,6 +1108,8 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
     } else {
       m_cutoff = 0.01 * Cobweb.m_normal;
     }
+
+    setSaveInstanceData(Utils.getFlag("save-data", options));
 
     super.setOptions(options);
 
@@ -1208,6 +1217,10 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
     result.add("-C");
     result.add("" + m_cutoff);
 
+    if (getSaveInstanceData()) {
+      result.add("-save-data");
+    }
+     
     Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
@@ -1290,3 +1303,4 @@ public class Cobweb extends RandomizableClusterer implements Drawable,
     runClusterer(new Cobweb(), argv);
   }
 }
+
