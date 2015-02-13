@@ -173,6 +173,10 @@
           todir="${dist}/${package}"/>
     <copy file="Beans.props"
           todir="${dist}/${package}"/>
+    <copy file="README"
+          todir="${dist}/${package}"/>
+    <copy file="MacOSXDefaults.groovy"
+          todir="${dist}/${package}"/>
     <copy toDir="${dist}/${package}">
       <fileset dir=".">
         <include name="scripts/**/*.groovy"/>
