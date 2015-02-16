@@ -159,6 +159,11 @@ public class SimpleLogistic
     private boolean m_useAIC = false;
 
     /**
+     * The number of decimal places used when printing the model.
+     */
+    protected int m_numDecimalPlaces = 2;
+    
+    /**
      * Constructor for creating SimpleLogistic object with standard options.
      */
     public SimpleLogistic() {
@@ -211,35 +216,37 @@ public class SimpleLogistic
      * @param data the training data
      * @throws Exception if something goes wrong 
      */
-    public void buildClassifier(Instances data) throws Exception {
+  public void buildClassifier(Instances data) throws Exception {
 
-      // can classifier handle the data?
-      getCapabilities().testWithFail(data);
+    // can classifier handle the data?
+    getCapabilities().testWithFail(data);
 
-      // remove instances with missing class
-      data = new Instances(data);
-      data.deleteWithMissingClass();
+    // remove instances with missing class
+    data = new Instances(data);
+    data.deleteWithMissingClass();
 
-	//replace missing values
-	m_ReplaceMissingValues = new ReplaceMissingValues();
-	m_ReplaceMissingValues.setInputFormat(data);
-	data = Filter.useFilter(data, m_ReplaceMissingValues);
-	
-	//convert nominal attributes
-	m_NominalToBinary = new NominalToBinary();
-	m_NominalToBinary.setInputFormat(data);
-	data = Filter.useFilter(data, m_NominalToBinary);
-	
-	//create actual logistic model
-	m_boostedModel = new LogisticBase(m_numBoostingIterations, m_useCrossValidation, m_errorOnProbabilities);
-	m_boostedModel.setMaxIterations(m_maxBoostingIterations);
-	m_boostedModel.setHeuristicStop(m_heuristicStop);
-        m_boostedModel.setWeightTrimBeta(m_weightTrimBeta);
-        m_boostedModel.setUseAIC(m_useAIC);
-	
-	//build logistic model
-	m_boostedModel.buildClassifier(data);
-    }
+    // replace missing values
+    m_ReplaceMissingValues = new ReplaceMissingValues();
+    m_ReplaceMissingValues.setInputFormat(data);
+    data = Filter.useFilter(data, m_ReplaceMissingValues);
+
+    // convert nominal attributes
+    m_NominalToBinary = new NominalToBinary();
+    m_NominalToBinary.setInputFormat(data);
+    data = Filter.useFilter(data, m_NominalToBinary);
+
+    // create actual logistic model
+    m_boostedModel = new LogisticBase(m_numBoostingIterations,
+      m_useCrossValidation, m_errorOnProbabilities);
+    m_boostedModel.setMaxIterations(m_maxBoostingIterations);
+    m_boostedModel.setHeuristicStop(m_heuristicStop);
+    m_boostedModel.setWeightTrimBeta(m_weightTrimBeta);
+    m_boostedModel.setUseAIC(m_useAIC);
+    m_boostedModel.setNumDecimalPlaces(m_numDecimalPlaces);
+
+    // build logistic model
+    m_boostedModel.buildClassifier(data);
+  }
     
     /** 
      * Returns class probabilities for an instance.
@@ -266,46 +273,52 @@ public class SimpleLogistic
      *
      * @return an enumeration of all the available options.
      */
-    public Enumeration<Option> listOptions() {
-	Vector<Option> newVector = new Vector<Option>();
-	
-	newVector.addElement(new Option(
-	    "\tSet fixed number of iterations for LogitBoost",
-	    "I",1,"-I <iterations>"));
-	
-	newVector.addElement(new Option(
-	    "\tUse stopping criterion on training set (instead of\n"
-	    + "\tcross-validation)",
-	    "S",0,"-S"));
-	
-	newVector.addElement(new Option(
-	    "\tUse error on probabilities (rmse) instead of\n"
-	    + "\tmisclassification error for stopping criterion",
-	    "P",0,"-P"));
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector = new Vector<Option>();
 
-	newVector.addElement(new Option(
-	    "\tSet maximum number of boosting iterations",
-	    "M",1,"-M <iterations>"));
+    newVector.addElement(new Option(
+      "\tSet fixed number of iterations for LogitBoost", "I", 1,
+      "-I <iterations>"));
 
-	newVector.addElement(new Option(
-	    "\tSet parameter for heuristic for early stopping of\n"
-	    + "\tLogitBoost.\n"
-	    + "\tIf enabled, the minimum is selected greedily, stopping\n"
-	    + "\tif the current minimum has not changed for iter iterations.\n"
-	    + "\tBy default, heuristic is enabled with value 50. Set to\n"
-	    + "\tzero to disable heuristic.",
-	    "H",1,"-H <iterations>"));
-        
-        newVector.addElement(new Option("\tSet beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.\n",
-                                        "W",1,"-W <beta>"));
-        
-        newVector.addElement(new Option("\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
-                                        "A", 0, "-A"));
-	
-        newVector.addAll(Collections.list(super.listOptions()));
-        
-	return newVector.elements();
-    } 
+    newVector.addElement(new Option(
+      "\tUse stopping criterion on training set (instead of\n"
+        + "\tcross-validation)", "S", 0, "-S"));
+
+    newVector.addElement(new Option(
+      "\tUse error on probabilities (rmse) instead of\n"
+        + "\tmisclassification error for stopping criterion", "P", 0, "-P"));
+
+    newVector
+      .addElement(new Option("\tSet maximum number of boosting iterations",
+              "M", 1, "-M <iterations>"));
+
+    newVector.addElement(new Option(
+      "\tSet parameter for heuristic for early stopping of\n"
+        + "\tLogitBoost.\n"
+        + "\tIf enabled, the minimum is selected greedily, stopping\n"
+        + "\tif the current minimum has not changed for iter iterations.\n"
+        + "\tBy default, heuristic is enabled with value 50. Set to\n"
+        + "\tzero to disable heuristic.", "H", 1, "-H <iterations>"));
+
+    newVector
+      .addElement(new Option(
+              "\tSet beta for weight trimming for LogitBoost. Set to 0 for no weight trimming.\n",
+              "W", 1, "-W <beta>"));
+
+    newVector
+      .addElement(new Option(
+              "\tThe AIC is used to choose the best iteration (instead of CV or training error).\n",
+              "A", 0, "-A"));
+
+    newVector
+      .addElement(new Option(
+              "\tThe number of decimal places for the output of coefficients (default 2).",
+              "num-decimal-places", 1, "-num-decimal-places"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+
+    return newVector.elements();
+  }
     
 
     /**
@@ -349,74 +362,82 @@ public class SimpleLogistic
      * @param options the list of options as an array of strings
      * @throws Exception if an option is not supported
      */
-    public void setOptions(String[] options) throws Exception {
+  public void setOptions(String[] options) throws Exception {
 
-	String optionString = Utils.getOption('I', options);
-	if (optionString.length() != 0) {
-	    setNumBoostingIterations((new Integer(optionString)).intValue());
-	}
-		
-	setUseCrossValidation(!Utils.getFlag('S', options));
-	setErrorOnProbabilities(Utils.getFlag('P', options));
-	
-	optionString = Utils.getOption('M', options);
-	if (optionString.length() != 0) {
-	    setMaxBoostingIterations((new Integer(optionString)).intValue());
-	}
+    String optionString = Utils.getOption('I', options);
+    if (optionString.length() != 0) {
+      setNumBoostingIterations((new Integer(optionString)).intValue());
+    }
 
-	optionString = Utils.getOption('H', options);
-	if (optionString.length() != 0) {
-	    setHeuristicStop((new Integer(optionString)).intValue());
-	}
-        
-        optionString = Utils.getOption('W', options);
-        if (optionString.length() != 0) {
-            setWeightTrimBeta((new Double(optionString)).doubleValue());
-        }
-        
-        setUseAIC(Utils.getFlag('A', options));        
+    setUseCrossValidation(!Utils.getFlag('S', options));
+    setErrorOnProbabilities(Utils.getFlag('P', options));
 
-        super.setOptions(options);
-        
-	Utils.checkForRemainingOptions(options);
-    } 
+    optionString = Utils.getOption('M', options);
+    if (optionString.length() != 0) {
+      setMaxBoostingIterations((new Integer(optionString)).intValue());
+    }
+
+    optionString = Utils.getOption('H', options);
+    if (optionString.length() != 0) {
+      setHeuristicStop((new Integer(optionString)).intValue());
+    }
+
+    optionString = Utils.getOption("num-decimal-places", options);
+    if (optionString.length() != 0) {
+      setNumDecimalPlaces((new Integer(optionString)).intValue());
+    }
+
+    optionString = Utils.getOption('W', options);
+    if (optionString.length() != 0) {
+      setWeightTrimBeta((new Double(optionString)).doubleValue());
+    }
+
+    setUseAIC(Utils.getFlag('A', options));
+
+    super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
+  }
 
     /**
      * Gets the current settings of the Classifier.
      *
      * @return an array of strings suitable for passing to setOptions
      */
-    public String[] getOptions() {
-	Vector<String> options = new Vector<String>();
-	
-	options.add("-I"); 
-	options.add(""+getNumBoostingIterations());
-	
-	if (!getUseCrossValidation()) {
-	    options.add("-S");
-	} 
+  public String[] getOptions() {
+    Vector<String> options = new Vector<String>();
 
-	if (getErrorOnProbabilities()) {
-	    options.add("-P");
-	} 
+    options.add("-I");
+    options.add("" + getNumBoostingIterations());
 
-	options.add("-M"); 
-	options.add(""+getMaxBoostingIterations());
-	
-	options.add("-H"); 
-	options.add(""+getHeuristicStop());
-        
-        options.add("-W");
-        options.add(""+getWeightTrimBeta());
-        
-        if (getUseAIC()) {
-            options.add("-A");
-        }
+    if (!getUseCrossValidation()) {
+      options.add("-S");
+    }
 
-        Collections.addAll(options, super.getOptions());
-        
-	return options.toArray(new String[0]);
-    } 
+    if (getErrorOnProbabilities()) {
+      options.add("-P");
+    }
+
+    options.add("-M");
+    options.add("" + getMaxBoostingIterations());
+
+    options.add("-H");
+    options.add("" + getHeuristicStop());
+
+    options.add("-W");
+    options.add("" + getWeightTrimBeta());
+
+    if (getUseAIC()) {
+      options.add("-A");
+    }
+
+    options.add("-num-decimal-places");
+    options.add("" + getNumDecimalPlaces());
+
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
+  }
 
     /**
      * Get the value of numBoostingIterations.
@@ -554,6 +575,19 @@ public class SimpleLogistic
 	return m_boostedModel.getNumRegressions();
     }
 
+    /**
+     * Set the number of decimal places.
+     */
+    public void setNumDecimalPlaces(int num) {
+        m_numDecimalPlaces = num;
+    }
+
+    /**
+     * Get the number of decimal places.
+     */
+    public int getNumDecimalPlaces() {
+        return m_numDecimalPlaces;
+    }
     /**
      * Returns a description of the logistic model (attributes/coefficients).
      * 
@@ -724,6 +758,15 @@ public class SimpleLogistic
     public String useAICTipText() {
         return "The AIC is used to determine when to stop LogitBoost iterations "
         +"(instead of cross-validation or training error).";
+    }
+
+    /**
+     * Returns the tip text for this property
+     * @return tip text for this property suitable for
+     * displaying in the explorer/experimenter gui
+     */
+    public String numDecimalPlacesTipText() {
+        return "The number of decimal places to be used for the output of coefficients.";
     }
     
     /**

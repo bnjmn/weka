@@ -151,7 +151,7 @@ public class LMTNode extends LogisticBase {
    */
   public LMTNode(ModelSelection modelSelection, int numBoostingIterations,
     boolean fastRegression, boolean errorOnProbabilities, int minNumInstances,
-    double weightTrimBeta, boolean useAIC, NominalToBinary ntb) {
+    double weightTrimBeta, boolean useAIC, NominalToBinary ntb, int numDecimalPlaces) {
     m_modelSelection = modelSelection;
     m_fixedNumIterations = numBoostingIterations;
     m_fastRegression = fastRegression;
@@ -161,6 +161,7 @@ public class LMTNode extends LogisticBase {
     setWeightTrimBeta(weightTrimBeta);
     setUseAIC(useAIC);
     m_nominalToBinary = ntb;
+    m_numDecimalPlaces = numDecimalPlaces;
   }
 
   /**
@@ -348,7 +349,7 @@ public class LMTNode extends LogisticBase {
       for (int i = 0; i < m_sons.length; i++) {
         m_sons[i] = new LMTNode(m_modelSelection, m_fixedNumIterations,
           m_fastRegression, m_errorOnProbabilities, m_minNumInstances,
-          getWeightTrimBeta(), getUseAIC(), m_nominalToBinary);
+          getWeightTrimBeta(), getUseAIC(), m_nominalToBinary, m_numDecimalPlaces);
         m_sons[i].buildTree(localInstances[i], copyRegressions(m_regressions),
           m_totalInstanceWeight, m_numParameters, m_numericDataHeader);
         localInstances[i] = null;
