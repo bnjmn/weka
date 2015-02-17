@@ -37,7 +37,8 @@ import weka.core.WeightedInstancesHandler;
  * (weka.classifiers.trees.lmt.LMT) and standalone logistic regression
  * (weka.classifiers.functions.SimpleLogistic).
  * 
- * <!-- options-start --> Valid options are:
+ <!-- options-start -->
+ * Valid options are:
  * <p/>
  * 
  * <pre>
@@ -46,7 +47,7 @@ import weka.core.WeightedInstancesHandler;
  *  may output additional info to the console
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Niels Landwehr
  * @author Marc Sumner
@@ -118,11 +119,6 @@ public class LogisticBase extends AbstractClassifier implements
    * a percentage of total weights) are not included in the regression fit.
    **/
   protected double m_weightTrimBeta = 0;
-
-  /**
-   * The number of decimal places used when printing the model.
-   */
-  protected int m_numDecimalPlaces = 2;
 
   /**
    * Constructor that creates LogisticBase object with standard options.
@@ -1025,20 +1021,6 @@ public class LogisticBase extends AbstractClassifier implements
    */
   public boolean getUseAIC() {
     return m_useAIC;
-  }
-
-  /**
-   * Set the number of decimal places.
-   */
-  public void setNumDecimalPlaces(int num) {
-    m_numDecimalPlaces = num;
-  }
-
-  /**
-   * Get the number of decimal places.
-   */
-  public int getNumDecimalPlaces() {
-    return m_numDecimalPlaces;
   }
 
   /**

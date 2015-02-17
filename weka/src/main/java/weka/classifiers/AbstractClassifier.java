@@ -25,17 +25,7 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.CapabilitiesIgnorer;
-import weka.core.Instance;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SerializedObject;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * Abstract classifier. All schemes for numeric or nominal prediction in Weka
@@ -47,9 +37,8 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public abstract class AbstractClassifier implements Classifier, Cloneable,
-                                                    Serializable, OptionHandler, 
-                                                    CapabilitiesHandler, RevisionHandler,
-                                                    CapabilitiesIgnorer {
+  Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler,
+  CapabilitiesIgnorer {
 
   /** for serialization */
   private static final long serialVersionUID = 6502780192411755341L;
@@ -61,10 +50,90 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   protected boolean m_DoNotCheckCapabilities = false;
 
   /**
+   * The number of decimal places used when printing numbers in the model.
+   */
+  protected int m_numDecimalPlaces = 2;
+
+  /**
+   * Creates a new instance of a classifier given it's class name and (optional)
+   * arguments to pass to it's setOptions method. If the classifier implements
+   * OptionHandler and the options parameter is non-null, the classifier will
+   * have it's options set.
+   *
+   * @param classifierName the fully qualified class name of the classifier
+   * @param options an array of options suitable for passing to setOptions. May
+   *          be null.
+   * @return the newly created classifier, ready for use.
+   * @exception Exception if the classifier name is invalid, or the options
+   *              supplied are not acceptable to the classifier
+   */
+  public static Classifier forName(String classifierName, String[] options)
+    throws Exception {
+
+    return ((AbstractClassifier) Utils.forName(Classifier.class,
+      classifierName, options));
+  }
+
+  /**
+   * Creates a deep copy of the given classifier using serialization.
+   *
+   * @param model the classifier to copy
+   * @return a deep copy of the classifier
+   * @exception Exception if an error occurs
+   */
+  public static Classifier makeCopy(Classifier model) throws Exception {
+
+    return (Classifier) new SerializedObject(model).getObject();
+  }
+
+  /**
+   * Creates a given number of deep copies of the given classifier using
+   * serialization.
+   *
+   * @param model the classifier to copy
+   * @param num the number of classifier copies to create.
+   * @return an array of classifiers.
+   * @exception Exception if an error occurs
+   */
+  public static Classifier[] makeCopies(Classifier model, int num)
+    throws Exception {
+
+    if (model == null) {
+      throw new Exception("No model classifier set");
+    }
+    Classifier[] classifiers = new Classifier[num];
+    SerializedObject so = new SerializedObject(model);
+    for (int i = 0; i < classifiers.length; i++) {
+      classifiers[i] = (Classifier) so.getObject();
+    }
+    return classifiers;
+  }
+
+  /**
+   * runs the classifier instance with the given options.
+   *
+   * @param classifier the classifier to run
+   * @param options the commandline options
+   */
+  public static void runClassifier(Classifier classifier, String[] options) {
+    try {
+      System.out.println(Evaluation.evaluateModel(classifier, options));
+    } catch (Exception e) {
+      if (((e.getMessage() != null) && (e.getMessage().indexOf(
+        "General options") == -1))
+        || (e.getMessage() == null)) {
+        e.printStackTrace();
+      } else {
+        System.err.println(e.getMessage());
+      }
+    }
+  }
+
+  /**
    * Classifies the given test instance. The instance has to belong to a dataset
    * when it's being classified. Note that a classifier MUST implement either
    * this or distributionForInstance().
-   * 
+   *
    * @param instance the instance to be classified
    * @return the predicted most likely class for the instance or
    *         Utils.missingValue() if no prediction is made
@@ -107,7 +176,7 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
    * numeric, the array must consist of only one element, which contains the
    * predicted value. Note that a classifier MUST implement either this or
    * classifyInstance().
-   * 
+   *
    * @param instance the instance to be classified
    * @return an array containing the estimated membership probabilities of the
    *         test instance in each class or the numeric prediction
@@ -136,63 +205,8 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   }
 
   /**
-   * Creates a new instance of a classifier given it's class name and (optional)
-   * arguments to pass to it's setOptions method. If the classifier implements
-   * OptionHandler and the options parameter is non-null, the classifier will
-   * have it's options set.
-   * 
-   * @param classifierName the fully qualified class name of the classifier
-   * @param options an array of options suitable for passing to setOptions. May
-   *          be null.
-   * @return the newly created classifier, ready for use.
-   * @exception Exception if the classifier name is invalid, or the options
-   *              supplied are not acceptable to the classifier
-   */
-  public static Classifier forName(String classifierName, String[] options)
-    throws Exception {
-
-    return ((AbstractClassifier) Utils.forName(Classifier.class,
-      classifierName, options));
-  }
-
-  /**
-   * Creates a deep copy of the given classifier using serialization.
-   * 
-   * @param model the classifier to copy
-   * @return a deep copy of the classifier
-   * @exception Exception if an error occurs
-   */
-  public static Classifier makeCopy(Classifier model) throws Exception {
-
-    return (Classifier) new SerializedObject(model).getObject();
-  }
-
-  /**
-   * Creates a given number of deep copies of the given classifier using
-   * serialization.
-   * 
-   * @param model the classifier to copy
-   * @param num the number of classifier copies to create.
-   * @return an array of classifiers.
-   * @exception Exception if an error occurs
-   */
-  public static Classifier[] makeCopies(Classifier model, int num)
-    throws Exception {
-
-    if (model == null) {
-      throw new Exception("No model classifier set");
-    }
-    Classifier[] classifiers = new Classifier[num];
-    SerializedObject so = new SerializedObject(model);
-    for (int i = 0; i < classifiers.length; i++) {
-      classifiers[i] = (Classifier) so.getObject();
-    }
-    return classifiers;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -210,32 +224,11 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
           + "\t(use with caution).", "-do-not-check-capabilities", 0,
         "-do-not-check-capabilities"));
 
+    newVector.addElement(new Option(
+      "\tThe number of decimal places for the output of numbers in the model"
+        + " (default 2).", "num-decimal-places", 1, "-num-decimal-places"));
+
     return newVector.elements();
-  }
-
-  /**
-   * Parses a given list of options. Valid options are:
-   * <p>
-   * 
-   * -D <br>
-   * If set, classifier is run in debug mode and may output additional info to
-   * the console.
-   * <p>
-   * 
-   * -do-not-check-capabilities <br>
-   * If set, classifier capabilities are not checked before classifier is built
-   * (use with caution).
-   * <p>
-   * 
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   */
-  @Override
-  public void setOptions(String[] options) throws Exception {
-
-    setDebug(Utils.getFlag("output-debug-info", options));
-    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
-      options));
   }
 
   /**
@@ -254,18 +247,40 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
     if (getDoNotCheckCapabilities()) {
       options.add("-do-not-check-capabilities");
     }
+    options.add("-num-decimal-places");
+    options.add("" + getNumDecimalPlaces());
 
     return options.toArray(new String[0]);
   }
 
   /**
-   * Set debugging mode.
-   * 
-   * @param debug true if debug output should be printed
+   * Parses a given list of options. Valid options are:
+   * <p>
+   *
+   * -D <br>
+   * If set, classifier is run in debug mode and may output additional info to
+   * the console.
+   * <p>
+   *
+   * -do-not-check-capabilities <br>
+   * If set, classifier capabilities are not checked before classifier is built
+   * (use with caution).
+   * <p>
+   *
+   * @param options the list of options as an array of strings
+   * @exception Exception if an option is not supported
    */
-  public void setDebug(boolean debug) {
+  @Override
+  public void setOptions(String[] options) throws Exception {
 
-    m_Debug = debug;
+    setDebug(Utils.getFlag("output-debug-info", options));
+    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
+      options));
+
+    String optionString = Utils.getOption("num-decimal-places", options);
+    if (optionString.length() != 0) {
+      setNumDecimalPlaces((new Integer(optionString)).intValue());
+    }
   }
 
   /**
@@ -279,24 +294,24 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   }
 
   /**
+   * Set debugging mode.
+   *
+   * @param debug true if debug output should be printed
+   */
+  public void setDebug(boolean debug) {
+
+    m_Debug = debug;
+  }
+
+  /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String debugTipText() {
     return "If set to true, classifier may output additional info to "
       + "the console.";
-  }
-
-  /**
-   * Set whether not to check capabilities.
-   * 
-   * @param doNotCheckCapabilities true if capabilities are not to be checked.
-   */
-  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
-
-    m_DoNotCheckCapabilities = doNotCheckCapabilities;
   }
 
   /**
@@ -310,8 +325,18 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   }
 
   /**
+   * Set whether not to check capabilities.
+   *
+   * @param doNotCheckCapabilities true if capabilities are not to be checked.
+   */
+  public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
+
+    m_DoNotCheckCapabilities = doNotCheckCapabilities;
+  }
+
+  /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -321,11 +346,36 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String numDecimalPlacesTipText() {
+    return "The number of decimal places to be used for the output of numbers in "
+      + "the model.";
+  }
+
+  /**
+   * Get the number of decimal places.
+   */
+  public int getNumDecimalPlaces() {
+    return m_numDecimalPlaces;
+  }
+
+  /**
+   * Set the number of decimal places.
+   */
+  public void setNumDecimalPlaces(int num) {
+    m_numDecimalPlaces = num;
+  }
+
+  /**
    * Returns the Capabilities of this classifier. Maximally permissive
    * capabilities are allowed by default. Derived classifiers should override
    * this method and first disable all capabilities and then enable just those
    * capabilities that make sense for the scheme.
-   * 
+   *
    * @return the capabilities of this object
    * @see Capabilities
    */
@@ -339,31 +389,11 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
-  }
-
-  /**
-   * runs the classifier instance with the given options.
-   * 
-   * @param classifier the classifier to run
-   * @param options the commandline options
-   */
-  public static void runClassifier(Classifier classifier, String[] options) {
-    try {
-      System.out.println(Evaluation.evaluateModel(classifier, options));
-    } catch (Exception e) {
-      if (((e.getMessage() != null) && (e.getMessage().indexOf(
-        "General options") == -1))
-        || (e.getMessage() == null)) {
-        e.printStackTrace();
-      } else {
-        System.err.println(e.getMessage());
-      }
-    }
   }
 }

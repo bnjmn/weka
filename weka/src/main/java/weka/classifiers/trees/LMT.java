@@ -196,11 +196,6 @@ public class LMT extends AbstractClassifier implements OptionHandler,
   private boolean m_doNotMakeSplitPointActualValue;
 
   /**
-   * The number of decimal places used when printing the model.
-   */
-  protected int m_numDecimalPlaces = 2;
-
-  /**
    * Creates an instance of LMT with standard options
    */
   public LMT() {
@@ -391,11 +386,6 @@ public class LMT extends AbstractClassifier implements OptionHandler,
     newVector.addElement(new Option("\tDo not make split point actual value.",
       "-doNotMakeSplitPointActualValue", 0, "-doNotMakeSplitPointActualValue"));
 
-    newVector
-      .addElement(new Option(
-        "\tThe number of decimal places for the output of coefficients (default 2).",
-        "num-decimal-places", 1, "-num-decimal-places"));
-
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -481,11 +471,6 @@ public class LMT extends AbstractClassifier implements OptionHandler,
       setWeightTrimBeta((new Double(optionString)).doubleValue());
     }
 
-    optionString = Utils.getOption("num-decimal-places", options);
-    if (optionString.length() != 0) {
-      setNumDecimalPlaces((new Integer(optionString)).intValue());
-    }
-      
     setUseAIC(Utils.getFlag('A', options));
     m_doNotMakeSplitPointActualValue = Utils.getFlag(
       "doNotMakeSplitPointActualValue", options);
@@ -538,9 +523,6 @@ public class LMT extends AbstractClassifier implements OptionHandler,
     if (m_doNotMakeSplitPointActualValue) {
         options.add("-doNotMakeSplitPointActualValue");
     }
-
-    options.add("-num-decimal-places");
-    options.add("" + getNumDecimalPlaces());
 
     Collections.addAll(options, super.getOptions());
 
@@ -687,19 +669,6 @@ public class LMT extends AbstractClassifier implements OptionHandler,
     m_minNumInstances = c;
   }
 
-  /**
-   * Set the number of decimal places.
-   */
-  public void setNumDecimalPlaces(int num) {
-    m_numDecimalPlaces = num;
-  }
-
-  /**
-   * Get the number of decimal places.
-   */
-  public int getNumDecimalPlaces() {
-    return m_numDecimalPlaces;
-  }
   /**
    * Returns the type of graph this classifier represents.
    * 
@@ -935,14 +904,14 @@ public class LMT extends AbstractClassifier implements OptionHandler,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String numDecimalPlacesTipText() {
     return "The number of decimal places to be used for the output of coefficients.";
   }
-    
+
   /**
    * Gets the value of doNotMakeSplitPointActualValue.
    * 
