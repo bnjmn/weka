@@ -226,7 +226,8 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
 
     newVector.addElement(new Option(
       "\tThe number of decimal places for the output of numbers in the model"
-        + " (default 2).", "num-decimal-places", 1, "-num-decimal-places"));
+        + " (default " + m_numDecimalPlaces + ").", "num-decimal-places", 1,
+      "-num-decimal-places"));
 
     return newVector.elements();
   }
