@@ -15,11 +15,26 @@
 
 /*
  * ExcelLoader.java
- * Copyright (C) 2010-2011 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2010-2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.core.converters;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SingleIndex;
+import weka.core.Utils;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -31,22 +46,6 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Vector;
-
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.usermodel.WorkbookFactory;
-
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.Utils;
 
 /**
  * <!-- globalinfo-start --> Reads a source that is in the Excel spreadsheet
@@ -446,7 +445,7 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
       boolean newHeader = false;
       int[] attType = new int[m_structure.numAttributes()];
       Sheet sheet = m_Workbook.getSheetAt(m_SheetIndex.getIndex());
-      for (int i = 1; i < sheet.getLastRowNum(); i++) {
+      for (int i = 1; i <= sheet.getLastRowNum(); i++) {
         Object[] dataRow = new Object[m_structure.numAttributes()];
         data.add(dataRow);
         Row row = sheet.getRow(i);

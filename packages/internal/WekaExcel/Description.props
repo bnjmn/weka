@@ -9,7 +9,7 @@ PackageName=WekaExcel
 Version=1.0.5
 
 #Date (year-month-day)
-Date=2013-12-11
+Date=2015-02-19
 
 # Title (required)
 Title=WEKA MS Excel loader/saver
