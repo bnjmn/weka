@@ -71,7 +71,7 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
    *         histograms for numeric attributes
    * @throws DistributedWekaException if a problem occurs
    */
-  public Instances aggregateHeadersAndQuartiles(
+  public static Instances aggregateHeadersAndQuartiles(
     List<HeaderAndQuantileDataHolder> toAggregate)
     throws DistributedWekaException {
 
@@ -161,7 +161,7 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
    * @return a unified header as an Instances object
    * @throws DistributedWekaException if a problem occurs
    */
-  public Instances aggregate(List<Instances> headers)
+  public static Instances aggregate(List<Instances> headers)
     throws DistributedWekaException {
 
     if (headers.size() == 0) {
@@ -558,6 +558,10 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
 
         if (original.isNumeric()) {
           double[] currentStats = attributeToStatsArray(current);
+          // ensure derived stats and quantiles are set to missing
+          for (int k = ArffSummaryNumericMetric.MEAN.ordinal(); k < currentStats.length; k++) {
+            currentStats[k] = Utils.missingValue();
+          }
           NumericStats ns =
             (NumericStats) aggStats.get(original.name());
           if (ns == null) {
