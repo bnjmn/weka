@@ -72,7 +72,7 @@ public class FailureEvent extends EventObject {
    * @param key the key for the element
    * @param value the value of the element
    */
-  public void setPayloadElement(String key, Object value) {
+  public <T> void setPayloadElement(String key, T value) {
     m_payload.put(key, value);
   }
 
@@ -82,7 +82,7 @@ public class FailureEvent extends EventObject {
    * @param key the key of the element to get
    * @return the value of the element (or null if it is not set)
    */
-  public Object getPayloadElement(String key) {
-    return m_payload.get(key);
+  public <T> T getPayloadElement(String key) {
+    return (T) m_payload.get(key);
   }
 }
