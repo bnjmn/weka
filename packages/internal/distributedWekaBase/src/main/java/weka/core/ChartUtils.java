@@ -519,10 +519,11 @@ public class ChartUtils {
     return img;
   }
 
-  public static void createAttributeChartNumeric(
+  public static BufferedImage createAttributeChartNumeric(
     NumericAttributeBinData binStats, Attribute summaryAtt,
     OutputStream dos, int width, int height) throws IOException {
 
+    BufferedImage chart = null;
     double missingFreq = binStats.getMissingFreq();
     List<String> binLabs = binStats.getBinLabels();
     List<Double> freqs = binStats.getBinFreqs();
@@ -557,19 +558,24 @@ public class ChartUtils {
     opts.add("-title=" + binStats.getAttributeName());
 
     try {
-      BufferedImage chart =
+      chart =
         ChartUtils.renderCombinedBoxPlotAndHistogramFromSummaryData(width,
           height, binLabs, freqs, summary, null, opts);
-      try {
-        ChartUtils.writeImage(chart, dos);
-      } finally {
-        if (dos != null) {
-          dos.close();
+
+      if (dos != null) {
+        try {
+          ChartUtils.writeImage(chart, dos);
+        } finally {
+          if (dos != null) {
+            dos.close();
+          }
         }
       }
     } catch (Exception e) {
       throw new IOException(e);
     }
+
+    return chart;
   }
 
   /**
@@ -578,15 +584,17 @@ public class ChartUtils {
    * 
    * @param summaryAtt the summary attribute for the attribute to process
    * @param attName the name of the attribute
-   * @param dos the output stream to write to
+   * @param dos the output stream to write to (can be null for no write)
    * @param width the width of the chart
    * @param height the height of the chart
+   * @return a BufferedImage containing the chart
    * @throws IOException if a problem occurs
    */
-  public static void createAttributeChartNominal(Attribute summaryAtt,
+  public static BufferedImage createAttributeChartNominal(Attribute summaryAtt,
     String attName, OutputStream dos, int width, int height) throws IOException {
 
     NominalStats stats = NominalStats.attributeToStats(summaryAtt);
+    BufferedImage chart = null;
 
     Set<String> labels = stats.getLabels();
     String[] labs = new String[labels.size() + 1];
@@ -653,20 +661,24 @@ public class ChartUtils {
     opts.add("-title=" + attName);
 
     try {
-      BufferedImage chart =
+      chart =
         ChartUtils.renderCombinedPieAndHistogramFromSummaryData(width, height,
           values, freqL, opts);
 
-      try {
-        ChartUtils.writeImage(chart, dos);
-      } finally {
-        if (dos != null) {
-          dos.close();
+      if (dos != null) {
+        try {
+          ChartUtils.writeImage(chart, dos);
+        } finally {
+          if (dos != null) {
+            dos.close();
+          }
         }
       }
     } catch (Exception e) {
       throw new IOException(e);
     }
+
+    return chart;
   }
 
   public static void main(String[] args) {
