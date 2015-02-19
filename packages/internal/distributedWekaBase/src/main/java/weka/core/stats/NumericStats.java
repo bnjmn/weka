@@ -22,6 +22,7 @@
 package weka.core.stats;
 
 import java.io.Serializable;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -51,7 +52,10 @@ public class NumericStats extends Stats implements Serializable {
     new double[ArffSummaryNumericMetric.values().length];
 
   /** For quantiles/histograms (if we are estimating them) */
-  protected TDigest m_quantileEstimator;
+  protected transient TDigest m_quantileEstimator;
+
+  /** Holds the serialized quantile estimator (if we are using them) */
+  protected byte[] m_encodedTDigestEstimator;
 
   /**
    * The compression level to use (bigger = less compression/more accuracy/more
@@ -125,6 +129,9 @@ public class NumericStats extends Stats implements Serializable {
       }
 
       if (updateQuantiles) {
+        if (m_encodedTDigestEstimator != null) {
+          deSerializeCurrentQuantileEstimator();
+        }
         if (m_quantileEstimator == null) {
           m_quantileEstimator =
             new TDigest(m_quantileCompression, new Random(1));
@@ -169,6 +176,28 @@ public class NumericStats extends Stats implements Serializable {
    */
   public void setQuantileEstimator(TDigest estimator) {
     m_quantileEstimator = estimator;
+  }
+
+  /**
+   * Serialize the current TDigest quantile estimator
+   */
+  public void serializeCurrentQuantileEstimator() {
+    if (m_quantileEstimator != null) {
+      ByteBuffer buff = ByteBuffer.allocate(m_quantileEstimator.byteSize());
+      m_quantileEstimator.asSmallBytes(buff);
+      m_encodedTDigestEstimator = buff.array();
+    }
+  }
+
+  /**
+   * Decode the current TDigest quatile estimator
+   */
+  public void deSerializeCurrentQuantileEstimator() {
+    if (m_encodedTDigestEstimator != null) {
+      ByteBuffer buff = ByteBuffer.wrap(m_encodedTDigestEstimator);
+      m_quantileEstimator = TDigest.fromBytes(buff);
+      m_encodedTDigestEstimator = null;
+    }
   }
 
   /**
