@@ -22,17 +22,14 @@
 package distributed.core;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.io.Serializable;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
+import weka.core.*;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.DistributedWekaException;
 import weka.gui.Logger;
@@ -70,159 +67,8 @@ public abstract class DistributedJob implements EnvironmentHandler,
 
   /** True if the current job should abort */
   protected boolean m_stopRunningJob;
-
-  /** Enum of job status states */
-  public static enum JobStatus {
-    NOT_RUNNING, RUNNING, FINISHED, FAILED;
-  }
-
   /** Job's current status */
   protected JobStatus m_status = JobStatus.NOT_RUNNING;
-
-  /**
-   * Get a list of weka packages to use from the supplied config
-   * 
-   * @param config the job config to extract weka package names from
-   * @return a list of weka packages configured to be used
-   */
-  public List<String>
-    getAdditionalWekaPackageNames(DistributedJobConfig config) {
-    List<String> result = new ArrayList<String>();
-
-    String packages =
-      config.getUserSuppliedProperty(WEKA_ADDITIONAL_PACKAGES_KEY);
-    if (!DistributedJobConfig.isEmpty(packages)) {
-      packages = environmentSubstitute(packages);
-      String[] parts = packages.split(",");
-      for (String p : parts) {
-        result.add(p.trim());
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Substitute environment variables in the supplied string.
-   * 
-   * @param orig the string to modify
-   * @return the string with environment variables resolved
-   */
-  public String environmentSubstitute(String orig) {
-    if (m_env != null) {
-      try {
-        orig = m_env.substitute(orig);
-      } catch (Exception ex) {
-        // not interested if there are no variables substituted
-      }
-    }
-
-    return orig;
-  }
-
-  /**
-   * Get the job name
-   * 
-   * @return the job name
-   */
-  public String getJobName() {
-    return m_jobName;
-  }
-
-  /**
-   * Set the job name
-   * 
-   * @param jobName the name to use
-   */
-  public void setJobName(String jobName) {
-    m_jobName = environmentSubstitute(jobName);
-  }
-
-  /**
-   * Set the job description
-   * 
-   * @param jobDescription the description to use
-   */
-  public void setJobDescription(String jobDescription) {
-    m_jobDescription = environmentSubstitute(jobDescription);
-  }
-
-  /**
-   * Set the prefix to use for log status messages (primarily for use in the
-   * Knowledge Flow's status area)
-   * 
-   * @param prefix the prefix to use
-   */
-  public void setStatusMessagePrefix(String prefix) {
-    m_statusMessagePrefix = prefix;
-  }
-
-  /**
-   * Set the status of the current job
-   * 
-   * @param status the status of the job
-   */
-  public void setJobStatus(JobStatus status) {
-    m_status = status;
-  }
-
-  /**
-   * Get the status of the current job
-   * 
-   * @return the status of the job
-   */
-  public JobStatus getJobStatus() {
-    return m_status;
-  }
-
-  /**
-   * Set the log to use
-   * 
-   * @param log the log to use
-   */
-  public void setLog(Logger log) {
-    m_log = log;
-  }
-
-  /**
-   * Get the log in use
-   * 
-   * @return the log in use
-   */
-  public Logger getLog() {
-    return m_log;
-  }
-
-  @Override
-  public void setEnvironment(Environment env) {
-    m_env = env;
-  }
-
-  /**
-   * Log a message
-   * 
-   * @param message the message to log
-   */
-  protected void logMessage(String message) {
-    if (m_log != null) {
-      m_log.logMessage(m_statusMessagePrefix + message);
-    } else {
-      System.err.println(m_statusMessagePrefix + message);
-    }
-  }
-
-  /**
-   * Send a message to the status
-   * 
-   * @param message the message to status
-   */
-  protected void statusMessage(String message) {
-    if (m_log != null) {
-      m_log.statusMessage(m_statusMessagePrefix + message);
-    } else {
-      System.err.println(m_statusMessagePrefix + message);
-    }
-  }
 
   /**
    * Constructor
@@ -232,7 +78,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
 
   /**
    * Constructor
-   * 
+   *
    * @param jobName job name to use
    * @param jobDescription job description to use
    */
@@ -242,26 +88,9 @@ public abstract class DistributedJob implements EnvironmentHandler,
   }
 
   /**
-   * Run the job. Subclasses to implement
-   * 
-   * @return true if the job completed successfully
-   * @throws DistributedWekaException if a problem occurs
-   */
-  public abstract boolean runJob() throws DistributedWekaException;
-
-  /**
-   * Signal that the job should abort (if it is currently running)
-   */
-  public void stopJob() {
-    if (m_status == JobStatus.RUNNING) {
-      m_stopRunningJob = true;
-    }
-  }
-
-  /**
    * Utility method to make a "help" options string for the supplied object (if
    * it is an OptionHandler)
-   * 
+   *
    * @param obj the object to create an options description for
    * @return the options description for the supplied object
    */
@@ -289,7 +118,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
 
   /**
    * Utility method to parse an Instance out of a row of CSV data.
-   * 
+   *
    * @param row the row of data to convert to an Instance
    * @param rowHelper the CSVToARFFHeaderMap task to use for parsing purposes
    * @param headerNoSummary the header of the data (sans summary attributes)
@@ -318,5 +147,209 @@ public abstract class DistributedJob implements EnvironmentHandler,
     }
 
     return result;
+  }
+
+  /**
+   * Convert a stack trace from a Throwable to a string
+   *
+   * @param throwable the Throwable to get the stack trace from
+   * @return the stack trace as a string
+   */
+  public static String stackTraceToString(Throwable throwable) {
+    StringWriter sw = new StringWriter();
+    PrintWriter pw = new PrintWriter(sw);
+    throwable.printStackTrace(pw);
+
+    return sw.toString();
+  }
+
+  /**
+   * Get a list of weka packages to use from the supplied config
+   *
+   * @param config the job config to extract weka package names from
+   * @return a list of weka packages configured to be used
+   */
+  public List<String>
+    getAdditionalWekaPackageNames(DistributedJobConfig config) {
+    List<String> result = new ArrayList<String>();
+
+    String packages =
+      config.getUserSuppliedProperty(WEKA_ADDITIONAL_PACKAGES_KEY);
+    if (!DistributedJobConfig.isEmpty(packages)) {
+      packages = environmentSubstitute(packages);
+      String[] parts = packages.split(",");
+      for (String p : parts) {
+        result.add(p.trim());
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Substitute environment variables in the supplied string.
+   *
+   * @param orig the string to modify
+   * @return the string with environment variables resolved
+   */
+  public String environmentSubstitute(String orig) {
+    if (m_env != null) {
+      try {
+        orig = m_env.substitute(orig);
+      } catch (Exception ex) {
+        // not interested if there are no variables substituted
+      }
+    }
+
+    return orig;
+  }
+
+  /**
+   * Get the job name
+   *
+   * @return the job name
+   */
+  public String getJobName() {
+    return m_jobName;
+  }
+
+  /**
+   * Set the job name
+   *
+   * @param jobName the name to use
+   */
+  public void setJobName(String jobName) {
+    m_jobName = environmentSubstitute(jobName);
+  }
+
+  /**
+   * Set the job description
+   *
+   * @param jobDescription the description to use
+   */
+  public void setJobDescription(String jobDescription) {
+    m_jobDescription = environmentSubstitute(jobDescription);
+  }
+
+  /**
+   * Set the prefix to use for log status messages (primarily for use in the
+   * Knowledge Flow's status area)
+   *
+   * @param prefix the prefix to use
+   */
+  public void setStatusMessagePrefix(String prefix) {
+    m_statusMessagePrefix = prefix;
+  }
+
+  /**
+   * Get the status of the current job
+   *
+   * @return the status of the job
+   */
+  public JobStatus getJobStatus() {
+    return m_status;
+  }
+
+  /**
+   * Set the status of the current job
+   *
+   * @param status the status of the job
+   */
+  public void setJobStatus(JobStatus status) {
+    m_status = status;
+  }
+
+  /**
+   * Get the log in use
+   *
+   * @return the log in use
+   */
+  public Logger getLog() {
+    return m_log;
+  }
+
+  /**
+   * Set the log to use
+   *
+   * @param log the log to use
+   */
+  public void setLog(Logger log) {
+    m_log = log;
+  }
+
+  @Override
+  public void setEnvironment(Environment env) {
+    m_env = env;
+  }
+
+  /**
+   * Log a message
+   *
+   * @param message the message to log
+   */
+  protected void logMessage(String message) {
+    if (m_log != null) {
+      m_log.logMessage(m_statusMessagePrefix + message);
+    } else {
+      System.err.println(m_statusMessagePrefix + message);
+    }
+  }
+
+  /**
+   * Send a message to the status
+   *
+   * @param message the message to status
+   */
+  protected void statusMessage(String message) {
+    if (m_log != null) {
+      m_log.statusMessage(m_statusMessagePrefix + message);
+    } else {
+      System.err.println(m_statusMessagePrefix + message);
+    }
+  }
+
+  /**
+   * Log a stack trace from an exception
+   *
+   * @param ex the exception to extract the stack trace from
+   */
+  protected void logMessage(Throwable ex) {
+    if (m_log != null) {
+      String stackTrace = stackTraceToString(ex);
+      m_log.logMessage(stackTrace);
+    }
+  }
+
+  /**
+   * Log a message with a stack trace from an exception
+   *
+   * @param message the message to log
+   * @param ex the Exception to extract the stack trace from
+   */
+  protected void logMessage(String message, Throwable ex) {
+    logMessage(message);
+    logMessage(ex);
+  }
+
+  /**
+   * Run the job. Subclasses to implement
+   *
+   * @return true if the job completed successfully
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public abstract boolean runJob() throws DistributedWekaException;
+
+  /**
+   * Signal that the job should abort (if it is currently running)
+   */
+  public void stopJob() {
+    if (m_status == JobStatus.RUNNING) {
+      m_stopRunningJob = true;
+    }
+  }
+
+  /** Enum of job status states */
+  public static enum JobStatus {
+    NOT_RUNNING, RUNNING, FINISHED, FAILED;
   }
 }
