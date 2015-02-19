@@ -28,33 +28,13 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeSet;
-import java.util.Vector;
+import java.util.*;
 
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.stats.ArffSummaryNumericMetric;
-import weka.core.stats.NominalStats;
-import weka.core.stats.NumericStats;
-import weka.core.stats.Stats;
-import weka.core.stats.StringStats;
+import weka.core.*;
+import weka.core.stats.*;
 import au.com.bytecode.opencsv.CSVParser;
 
 import com.clearspring.analytics.stream.quantile.TDigest;
-
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -72,23 +52,13 @@ import distributed.core.DistributedJobConfig;
  */
 public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
+  /** Attribute name prefix for a summary statistics attribute */
+  public static final String ARFF_SUMMARY_ATTRIBUTE_PREFIX = "arff_summary_";
+  public static final int MAX_PARSING_ERRORS = 50;
   /**
    * For serialization
    */
   private static final long serialVersionUID = -3949274571568175413L;
-
-  /**
-   * Enumerated type for specifying the type of each attribute in the data
-   * 
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  protected enum TYPE {
-    UNDETERMINED, NUMERIC, NOMINAL, STRING, DATE;
-  }
-
-  /** Attribute name prefix for a summary statistics attribute */
-  public static final String ARFF_SUMMARY_ATTRIBUTE_PREFIX = "arff_summary_";
-
   /** Attribute types for the incoming CSV columns */
   protected TYPE[] m_attributeTypes;
 
@@ -124,27 +94,19 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * if not supplied by the user
    */
   protected List<String> m_attributeNames = new ArrayList<String>();
-
-  public static final int MAX_PARSING_ERRORS = 50;
-
   /** The formatting string to use to parse dates */
   protected String m_dateFormat = "yyyy-MM-dd'T'HH:mm:ss";
-
   /** The formatter to use on dates */
   protected SimpleDateFormat m_formatter;
-
   /** The user-supplied legal nominal values - each entry in the list is a spec */
   protected List<String> m_nominalLabelSpecs = new ArrayList<String>();
-
   /**
    * The user-supplied default nominal values - each entry in the list is a spec
    */
   protected List<String> m_nominalDefaultLabelSpecs = new ArrayList<String>();
-
   /** Lookup for nominal values */
   protected Map<Integer, TreeSet<String>> m_nominalVals =
     new HashMap<Integer, TreeSet<String>>();
-
   /**
    * Default labels (if any) to use with nominal attributes. These are like a
    * "catch-all" and can be used when you are are explicitly specifying labels
@@ -154,38 +116,250 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    */
   protected Map<Integer, String> m_nominalDefaultVals =
     new HashMap<Integer, String>();
-
   /** The placeholder for missing values. */
   protected String m_MissingValue = "?";
-
   /** enclosure character to use for strings - opencsv only allows one */
   protected String m_Enclosures = "\'";
-
   /** the field separator. */
   protected String m_FieldSeparator = ",";
-
-  /** The CSV parser */
-  protected CSVParser m_parser;
-
+  /** The CSV parser (unfortunately, the parser does not implement Serializable) */
+  protected transient CSVParser m_parser;
   /** Whether to compute summary statistics or not */
   protected boolean m_computeSummaryStats = true;
-
   /** A map of attribute names to summary statistics */
   protected Map<String, Stats> m_summaryStats = new HashMap<String, Stats>();
-
   /**
    * Whether to treat zeros as missing values when computing summary stats for
    * numeric attributes
    */
   protected boolean m_treatZeroAsMissing;
-
   /** Whether to perform quantile estimation too */
   protected boolean m_estimateQuantiles = false;
-
   /** The compression level for the TDigest quantile estimator */
   protected double m_quantileCompression = NumericStats.Q_COMPRESSION;
-
   protected int m_parsingErrors;
+
+  /**
+   * Update the summary statistics for a given attribute with the given value
+   *
+   * @param summaryStats the map of summary statistics
+   * @param attName the name of the attribute being updated
+   * @param value the value to update with (if the attribute is numeric)
+   * @param nominalLabel holds the label/string for the attribute (if it is
+   *          nominal or string)
+   * @param isNominal true if the attribute is nominal
+   * @param isString true if the attribute is a string attribute
+   * @param treatZeroAsMissing treats zero as missing value for numeric
+   *          attributes
+   * @param estimateQuantiles true if we should estimate quantiles too
+   * @param quantileCompression the compression level to use in the TDigest
+   *          estimators
+   */
+  public static void updateSummaryStats(Map<String, Stats> summaryStats,
+    String attName, double value, String nominalLabel, boolean isNominal,
+    boolean isString, boolean treatZeroAsMissing, boolean estimateQuantiles,
+    double quantileCompression) {
+    Stats s = summaryStats.get(attName);
+
+    if (!isNominal && !isString) {
+      // numeric attribute
+      if (s == null) {
+        s = new NumericStats(attName, quantileCompression);
+        summaryStats.put(attName, s);
+      }
+
+      NumericStats ns = (NumericStats) s;
+      ns.update(value, 1.0, treatZeroAsMissing, estimateQuantiles);
+      // if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0))
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
+      // } else {
+      // ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
+      // ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
+      // ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
+      // if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
+      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
+      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
+      // } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
+      // } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()])
+      // {
+      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
+      // }
+      // }
+    } else if (isNominal) {
+      // nominal attribute
+
+      if (s == null) {
+        s = new NominalStats(attName);
+        summaryStats.put(attName, s);
+      }
+
+      // check to see if the type is correct - it
+      // might not be if the first row(s) processed contain
+      // missing values. In this case the TYPE would have
+      // been undetermined (unless explicitly specified
+      // by the user). The default is to assume the
+      // attribute is numeric, so a NumericStats object
+      // (initialized with only the missing count) would
+      // have been created.
+
+      if (s instanceof NumericStats) {
+        double missing =
+          ((NumericStats) s).getStats()[ArffSummaryNumericMetric.MISSING
+            .ordinal()];
+
+        // need to replace this with NominalStats and transfer over the missing
+        // count
+        s = new NominalStats(attName);
+        ((NominalStats) s).add(null, missing);
+        summaryStats.put(attName, s);
+      }
+
+      NominalStats ns = (NominalStats) s;
+      ns.add(nominalLabel, 1.0);
+      // if (Utils.isMissingValue(value) && nominalLabel == null) {
+      // ns.add(nominalLabel, 1.0);
+      // } else {
+      //
+      // NominalStats.Count c = ns.m_counts.get(nominalLabel);
+      // if (c == null) {
+      // c = new NominalStats.Count();
+      // ns.m_counts.put(nominalLabel, c);
+      // }
+      // c.m_count += value;
+      // }
+    } else if (isString) {
+      if (s == null) {
+        s = new StringStats(attName);
+        summaryStats.put(attName, s);
+      }
+
+      StringStats ss = (StringStats) s;
+      ss.update(nominalLabel, 1.0);
+    }
+  }
+
+  public static List<String>
+    instanceHeaderToAttributeNameList(Instances header) {
+    List<String> attNames = new ArrayList<String>();
+
+    for (int i = 0; i < header.numAttributes(); i++) {
+      attNames.add(header.attribute(i).name());
+    }
+
+    return attNames;
+  }
+
+  public static void main(String[] args) {
+    try {
+      CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
+
+      task = new CSVToARFFHeaderMapTask();
+      task.setOptions(args);
+      // task.setComputeSummaryStats(true);
+
+      BufferedReader br = new BufferedReader(new FileReader(args[0]));
+      String line = br.readLine();
+      String[] names = line.split(",");
+      List<String> attNames = new ArrayList<String>();
+      for (String s : names) {
+        attNames.add(s);
+      }
+
+      while ((line = br.readLine()) != null) {
+        task.processRow(line, attNames);
+      }
+
+      br.close();
+
+      System.err.println(task.getHeader());
+
+      CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
+      List<Instances> instList = new ArrayList<Instances>();
+      instList.add(task.getHeader());
+      Instances withSummary = arffReduce.aggregate(instList);
+
+      System.err.println(withSummary);
+
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Performs a "combine" operation using the supplied partial
+   * CSVToARFFHeaderMapTask tasks. This is essentially a reduce operation, but
+   * returns a single CSVToARFFHeaderMapTask object (rather than the final
+   * header that is produced by CSVToARFFHeaderReduceTask). This allows several
+   * reduce stages to be implemented (if desired) or partial reduces to occur in
+   * parallel.
+   *
+   * @param tasks a list of CSVToARFFHeaderMapTasks to "combine"
+   * @return a CSVToARFFHeaderMapTask with the merged state
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public static CSVToARFFHeaderMapTask combine(
+    List<CSVToARFFHeaderMapTask> tasks) throws DistributedWekaException {
+    if (tasks == null || tasks.size() == 0) {
+      throw new DistributedWekaException(
+        "[CSVToARFFHeaderMapTask:combine] no tasks to combine!");
+    }
+    if (tasks.size() == 1) {
+      return tasks.get(0);
+    }
+
+    Instances combinedHeaders = null;
+    CSVToARFFHeaderMapTask master = tasks.get(0);
+    List<Instances> toCombine = new ArrayList<Instances>();
+    for (int i = 0; i < tasks.size(); i++) {
+      toCombine.add(tasks.get(i).getHeader());
+    }
+    combinedHeaders = CSVToARFFHeaderReduceTask.aggregate(toCombine);
+
+    Map<String, TDigest> mergedDigests = new HashMap<String, TDigest>();
+    if (master.getComputeQuartilesAsPartOfSummaryStats()) {
+      Instances headerNoSummary =
+        CSVToARFFHeaderReduceTask.stripSummaryAtts(combinedHeaders);
+
+      for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+        List<TDigest> digestsToMerge = new ArrayList<TDigest>();
+        String attName = headerNoSummary.attribute(i).name();
+
+        for (CSVToARFFHeaderMapTask t : tasks) {
+          Stats ns = t.m_summaryStats.get(attName);
+          if (ns instanceof NumericStats) {
+            TDigest partialEstimator =
+              ((NumericStats) ns).getQuantileEstimator();
+            if (partialEstimator != null) {
+              digestsToMerge.add(partialEstimator);
+            }
+          }
+
+          // HeaderAndQuantileDataHolder h =
+          // t.getHeaderAndQuantileEstimators();
+          // TDigest partialEstimator =
+          // h.getQuantileEstimator(attName);
+          // if (partialEstimator != null) {
+          // digestsToMerge.add(partialEstimator);
+          // }
+        }
+
+        if (digestsToMerge.size() > 0) {
+          TDigest mergedForAtt =
+            TDigest.merge(digestsToMerge.get(0).compression(), digestsToMerge);
+          mergedDigests.put(attName, mergedForAtt);
+        }
+      }
+    }
+
+    // need to re-construct master now that we've (potentially) resolved
+    // type conflicts within this combine operation
+    master.fromHeader(combinedHeaders, mergedDigests);
+
+    return master;
+  }
 
   @Override
   public Enumeration<Option> listOptions() {
@@ -242,21 +416,78 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       + "\tSpecify as a comma separated list (e.g. \",'" + " (default: \",')",
       "E", 1, "-E <enclosures>"));
 
-    result
-      .add(new Option(
-        "\tInclude quartile estimates (and histograms) in summary attributes.\n\t"
-          + "Note that this adds quite a bit to computation time",
-        "compute-quartiles", 0, "-compute-quartiles"));
+    result.add(new Option(
+            "\tInclude quartile estimates (and histograms) in summary attributes.\n\t"
+                    + "Note that this adds quite a bit to computation time",
+            "compute-quartiles", 0, "-compute-quartiles"));
 
     result
       .add(new Option(
         "\tThe compression level to use when computing estimated quantiles.\n\t"
           + "Higher values result in less compression and more accurate estimates\n\t"
           + "at the expense of time and space (default="
-          + NumericStats.Q_COMPRESSION + ").",
-        "compression", 1, "-compression <number>"));
+          + NumericStats.Q_COMPRESSION + ").", "compression", 1,
+        "-compression <number>"));
 
     return result.elements();
+  }
+
+  @Override
+  public String[] getOptions() {
+    Vector<String> result = new Vector<String>();
+
+    if (getNominalAttributes().length() > 0) {
+      result.add("-N");
+      result.add(getNominalAttributes());
+    }
+
+    if (getStringAttributes().length() > 0) {
+      result.add("-S");
+      result.add(getStringAttributes());
+    }
+
+    if (getDateAttributes().length() > 0) {
+      result.add("-D");
+      result.add(getDateAttributes());
+      result.add("-format");
+      result.add(getDateFormat());
+    }
+
+    result.add("-M");
+    result.add(getMissingValue());
+
+    result.add("-E");
+    String encl = getEnclosureCharacters();
+    if (encl.charAt(0) == '"') {
+      encl = "\\\"";
+    }
+    result.add(encl);
+
+    result.add("-F");
+    result.add(getFieldSeparator());
+
+    if (getComputeQuartilesAsPartOfSummaryStats()) {
+      result.add("-compute-quartiles");
+    }
+
+    result.add("-compression");
+    result.add("" + getCompressionLevelForQuartileEstimation());
+
+    if (getTreatZerosAsMissing()) {
+      result.add("-treat-zeros-as-missing");
+    }
+
+    for (String spec : m_nominalLabelSpecs) {
+      result.add("-L");
+      result.add(spec);
+    }
+
+    for (String spec : m_nominalDefaultLabelSpecs) {
+      result.add("-default-label");
+      result.add(spec);
+    }
+
+    return result.toArray(new String[result.size()]);
   }
 
   @Override
@@ -337,79 +568,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     }
   }
 
-  @Override
-  public String[] getOptions() {
-    Vector<String> result = new Vector<String>();
-
-    if (getNominalAttributes().length() > 0) {
-      result.add("-N");
-      result.add(getNominalAttributes());
-    }
-
-    if (getStringAttributes().length() > 0) {
-      result.add("-S");
-      result.add(getStringAttributes());
-    }
-
-    if (getDateAttributes().length() > 0) {
-      result.add("-D");
-      result.add(getDateAttributes());
-      result.add("-format");
-      result.add(getDateFormat());
-    }
-
-    result.add("-M");
-    result.add(getMissingValue());
-
-    result.add("-E");
-    String encl = getEnclosureCharacters();
-    if (encl.charAt(0) == '"') {
-      encl = "\\\"";
-    }
-    result.add(encl);
-
-    result.add("-F");
-    result.add(getFieldSeparator());
-
-    if (getComputeQuartilesAsPartOfSummaryStats()) {
-      result.add("-compute-quartiles");
-    }
-
-    result.add("-compression");
-    result.add("" + getCompressionLevelForQuartileEstimation());
-
-    if (getTreatZerosAsMissing()) {
-      result.add("-treat-zeros-as-missing");
-    }
-
-    for (String spec : m_nominalLabelSpecs) {
-      result.add("-L");
-      result.add(spec);
-    }
-
-    for (String spec : m_nominalDefaultLabelSpecs) {
-      result.add("-default-label");
-      result.add(spec);
-    }
-
-    return result.toArray(new String[result.size()]);
-  }
-
-  /**
-   * Set whether to treat zeros as missing values for numeric attributes when
-   * computing summary statistics.
-   * 
-   * @param t true if zeros are to be treated as missing values for the purposes
-   *          of computing summary stats.
-   */
-  public void setTreatZerosAsMissing(boolean t) {
-    m_treatZeroAsMissing = t;
-  }
-
   /**
    * Get whether to treat zeros as missing values for numeric attributes when
    * computing summary statistics.
-   * 
+   *
    * @return true if zeros are to be treated as missing values for the purposes
    *         of computing summary stats.
    */
@@ -418,18 +580,19 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Set the compression level to use in the TDigest quantile estimators
-   * 
-   * @param compression the compression level (smaller values give higher
-   *          compression and less accurate estimates).
+   * Set whether to treat zeros as missing values for numeric attributes when
+   * computing summary statistics.
+   *
+   * @param t true if zeros are to be treated as missing values for the purposes
+   *          of computing summary stats.
    */
-  public void setCompressionLevelForQuartileEstimation(double compression) {
-    m_quantileCompression = compression;
+  public void setTreatZerosAsMissing(boolean t) {
+    m_treatZeroAsMissing = t;
   }
 
   /**
    * Get the compression level to use in the TDigest quantile estimators
-   * 
+   *
    * @return the compression level (smaller values give higher compression and
    *         less accurate estimates).
    */
@@ -438,8 +601,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Set the compression level to use in the TDigest quantile estimators
+   *
+   * @param compression the compression level (smaller values give higher
+   *          compression and less accurate estimates).
+   */
+  public void setCompressionLevelForQuartileEstimation(double compression) {
+    m_quantileCompression = compression;
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -450,17 +623,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Set whether to include estimated quartiles in the profiling stats
-   * 
-   * @param c true if quartiles are to be estimated
-   */
-  public void setComputeQuartilesAsPartOfSummaryStats(boolean c) {
-    m_estimateQuantiles = c;
-  }
-
-  /**
    * Get whether to include estimated quartiles in the profiling stats
-   * 
+   *
    * @return true if quartiles are to be estimated
    */
   public boolean getComputeQuartilesAsPartOfSummaryStats() {
@@ -468,8 +632,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Set whether to include estimated quartiles in the profiling stats
+   *
+   * @param c true if quartiles are to be estimated
+   */
+  public void setComputeQuartilesAsPartOfSummaryStats(boolean c) {
+    m_estimateQuantiles = c;
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -479,17 +652,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Sets the placeholder for missing values.
-   * 
-   * @param value the placeholder
-   */
-  public void setMissingValue(String value) {
-    m_MissingValue = value;
-  }
-
-  /**
    * Returns the current placeholder for missing values.
-   * 
+   *
    * @return the placeholder
    */
   public String getMissingValue() {
@@ -497,8 +661,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Sets the placeholder for missing values.
+   *
+   * @param value the placeholder
+   */
+  public void setMissingValue(String value) {
+    m_MissingValue = value;
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -507,18 +680,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Sets the attribute range to be forced to type string.
-   * 
-   * @param value the range
-   */
-  public void setStringAttributes(String value) {
-    m_stringRange = value;
-    // m_forceString.setRanges(value);
-  }
-
-  /**
    * Returns the current attribute range to be forced to type string.
-   * 
+   *
    * @return the range
    */
   public String getStringAttributes() {
@@ -527,8 +690,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Sets the attribute range to be forced to type string.
+   *
+   * @param value the range
+   */
+  public void setStringAttributes(String value) {
+    m_stringRange = value;
+    // m_forceString.setRanges(value);
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -538,18 +711,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Sets the attribute range to be forced to type nominal.
-   * 
-   * @param value the range
-   */
-  public void setNominalAttributes(String value) {
-    m_nominalRange = value;
-    // m_forceNominal.setRanges(value);
-  }
-
-  /**
    * Returns the current attribute range to be forced to type nominal.
-   * 
+   *
    * @return the range
    */
   public String getNominalAttributes() {
@@ -558,8 +721,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Sets the attribute range to be forced to type nominal.
+   *
+   * @param value the range
+   */
+  public void setNominalAttributes(String value) {
+    m_nominalRange = value;
+    // m_forceNominal.setRanges(value);
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -569,8 +742,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Get the format to use for parsing date values.
+   *
+   * @return the format to use for parsing date values.
+   *
+   */
+  public String getDateFormat() {
+    return m_dateFormat;
+  }
+
+  /**
    * Set the format to use for parsing date values.
-   * 
+   *
    * @param value the format to use.
    */
   public void setDateFormat(String value) {
@@ -579,18 +762,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Get the format to use for parsing date values.
-   * 
-   * @return the format to use for parsing date values.
-   * 
-   */
-  public String getDateFormat() {
-    return m_dateFormat;
-  }
-
-  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -599,18 +772,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Set the attribute range to be forced to type date.
-   * 
-   * @param value the range
-   */
-  public void setDateAttributes(String value) {
-    m_dateRange = value;
-    // m_forceDate.setRanges(value);
-  }
-
-  /**
    * Returns the current attribute range to be forced to type date.
-   * 
+   *
    * @return the range.
    */
   public String getDateAttributes() {
@@ -619,8 +782,18 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Set the attribute range to be forced to type date.
+   *
+   * @param value the range
+   */
+  public void setDateAttributes(String value) {
+    m_dateRange = value;
+    // m_forceDate.setRanges(value);
+  }
+
+  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -631,7 +804,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -640,17 +813,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Set the character(s) to use/recognize as string enclosures
-   * 
-   * @param enclosure the characters to use as string enclosures
-   */
-  public void setEnclosureCharacters(String enclosure) {
-    m_Enclosures = enclosure;
-  }
-
-  /**
    * Get the character(s) to use/recognize as string enclosures
-   * 
+   *
    * @return the characters to use as string enclosures
    */
   public String getEnclosureCharacters() {
@@ -658,8 +822,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Set the character(s) to use/recognize as string enclosures
+   *
+   * @param enclosure the characters to use as string enclosures
+   */
+  public void setEnclosureCharacters(String enclosure) {
+    m_Enclosures = enclosure;
+  }
+
+  /**
+   * Returns the character used as column separator.
+   *
+   * @return the character to use
+   */
+  public String getFieldSeparator() {
+    return Utils.backQuoteChars(m_FieldSeparator);
+  }
+
+  /**
    * Sets the character used as column separator.
-   * 
+   *
    * @param value the character to use
    */
   public void setFieldSeparator(String value) {
@@ -673,17 +855,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Returns the character used as column separator.
-   * 
-   * @return the character to use
-   */
-  public String getFieldSeparator() {
-    return Utils.backQuoteChars(m_FieldSeparator);
-  }
-
-  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -693,7 +866,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -712,8 +885,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Get the default label specifications for nominal attributes
+   *
+   * @return an array of default label specifications
+   */
+  public Object[] getNominalDefaultLabelSpecs() {
+    return m_nominalDefaultLabelSpecs.toArray(new String[0]);
+  }
+
+  /**
    * Set the default label specifications for nominal attributes
-   * 
+   *
    * @param specs an array of default label specifications
    */
   public void setNominalDefaultLabelSpecs(Object[] specs) {
@@ -724,17 +906,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Get the default label specifications for nominal attributes
-   * 
-   * @return an array of default label specifications
-   */
-  public Object[] getNominalDefaultLabelSpecs() {
-    return m_nominalDefaultLabelSpecs.toArray(new String[0]);
-  }
-
-  /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -749,8 +922,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Get label specifications for nominal attributes.
+   *
+   * @return an array of label specifications
+   */
+  public Object[] getNominalLabelSpecs() {
+    return m_nominalLabelSpecs.toArray(new String[0]);
+  }
+
+  /**
    * Set label specifications for nominal attributes.
-   * 
+   *
    * @param specs an array of label specifications
    */
   public void setNominalLabelSpecs(Object[] specs) {
@@ -761,18 +943,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
-   * Get label specifications for nominal attributes.
-   * 
-   * @return an array of label specifications
-   */
-  public Object[] getNominalLabelSpecs() {
-    return m_nominalLabelSpecs.toArray(new String[0]);
-  }
-
-  /**
    * Generate attribute names. Attributes are named "attinitial",
    * "attinitial+1", ..., "attinitial+numAtts-1"
-   * 
+   *
    * @param initial the number to use for the first attribute
    * @param numAtts the number of attributes to generate
    */
@@ -785,7 +958,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   /**
    * Generate attribute names. Attributes are named "att0", "att1", ...
    * "attnumAtts-1"
-   * 
+   *
    * @param numAtts the number of attribute names to generate
    */
   public void generateNames(int numAtts) {
@@ -797,7 +970,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /**
    * Only initialize enough stuff in order to parse rows and construct instances
-   * 
+   *
    * @param attNames the names of the attributes to use
    */
   public void initParserOnly(List<String> attNames) {
@@ -805,8 +978,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     if (encl == '\\' && m_Enclosures.length() == 2) {
       encl = m_Enclosures.charAt(1);
     }
-    m_parser =
-      new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
+    m_parser = new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
 
     m_attributeNames = attNames;
     if (attNames != null) {
@@ -815,9 +987,11 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     }
   }
 
+  // called after map processing
+
   /**
    * Just parse a row.
-   * 
+   *
    * @param row the row to parse
    * @return the values of the row in an array
    * @throws IOException if a problem occurs
@@ -832,7 +1006,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * first row and is optional. If not supplied then names will be generated on
    * receiving the first row of data. An exception will be raised on subsequent
    * rows that don't have the same number of fields as seen in the first row
-   * 
+   *
    * @param row the row to process
    * @param attNames the names of the attributes (fields)
    * @exception if the number of fields in the current row does not match the
@@ -856,8 +1030,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       }
 
       // tokenize the first line
-      m_parser =
-        new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
+      m_parser = new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
 
       fields = m_parser.parseLine(row);
 
@@ -992,121 +1165,17 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         if (m_computeSummaryStats) {
           updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
             Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
-            m_attributeTypes[i] == TYPE.STRING,
-            m_treatZeroAsMissing, m_estimateQuantiles, m_quantileCompression);
+            m_attributeTypes[i] == TYPE.STRING, m_treatZeroAsMissing,
+            m_estimateQuantiles, m_quantileCompression);
         }
       }
     }
   }
 
   /**
-   * Update the summary statistics for a given attribute with the given value
-   * 
-   * @param summaryStats the map of summary statistics
-   * @param attName the name of the attribute being updated
-   * @param value the value to update with (if the attribute is numeric)
-   * @param nominalLabel holds the label/string for the attribute (if it is
-   *          nominal or string)
-   * @param isNominal true if the attribute is nominal
-   * @param isString true if the attribute is a string attribute
-   * @param treatZeroAsMissing treats zero as missing value for numeric
-   *          attributes
-   * @param estimateQuantiles true if we should estimate quantiles too
-   * @param quantileCompression the compression level to use in the TDigest
-   *          estimators
-   */
-  public static void updateSummaryStats(Map<String, Stats> summaryStats,
-    String attName, double value, String nominalLabel, boolean isNominal,
-    boolean isString,
-    boolean treatZeroAsMissing, boolean estimateQuantiles,
-    double quantileCompression) {
-    Stats s = summaryStats.get(attName);
-
-    if (!isNominal && !isString) {
-      // numeric attribute
-      if (s == null) {
-        s = new NumericStats(attName, quantileCompression);
-        summaryStats.put(attName, s);
-      }
-
-      NumericStats ns = (NumericStats) s;
-      ns.update(value, 1.0, treatZeroAsMissing, estimateQuantiles);
-      // if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0))
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
-      // } else {
-      // ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
-      // ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
-      // ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
-      // if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
-      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
-      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-      // } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
-      // } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()])
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-      // }
-      // }
-    } else if (isNominal) {
-      // nominal attribute
-
-      if (s == null) {
-        s = new NominalStats(attName);
-        summaryStats.put(attName, s);
-      }
-
-      // check to see if the type is correct - it
-      // might not be if the first row(s) processed contain
-      // missing values. In this case the TYPE would have
-      // been undetermined (unless explicitly specified
-      // by the user). The default is to assume the
-      // attribute is numeric, so a NumericStats object
-      // (initialized with only the missing count) would
-      // have been created.
-
-      if (s instanceof NumericStats) {
-        double missing =
-          ((NumericStats) s).getStats()[ArffSummaryNumericMetric.MISSING
-            .ordinal()];
-
-        // need to replace this with NominalStats and transfer over the missing
-        // count
-        s = new NominalStats(attName);
-        ((NominalStats) s).add(null, missing);
-        summaryStats.put(attName, s);
-      }
-
-      NominalStats ns = (NominalStats) s;
-      ns.add(nominalLabel, 1.0);
-      // if (Utils.isMissingValue(value) && nominalLabel == null) {
-      // ns.add(nominalLabel, 1.0);
-      // } else {
-      //
-      // NominalStats.Count c = ns.m_counts.get(nominalLabel);
-      // if (c == null) {
-      // c = new NominalStats.Count();
-      // ns.m_counts.put(nominalLabel, c);
-      // }
-      // c.m_count += value;
-      // }
-    } else if (isString) {
-      if (s == null) {
-        s = new StringStats(attName);
-        summaryStats.put(attName, s);
-      }
-
-      StringStats ss = (StringStats) s;
-      ss.update(nominalLabel, 1.0);
-    }
-  }
-
-  // called after map processing
-  /**
    * get the header information (as an Instances object) from what has been seen
    * so far by this map task
-   * 
+   *
    * @return the header information as an Instances object
    */
   public Instances getHeader() {
@@ -1116,7 +1185,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /**
    * Get the header information and the encoded quantile estimators
-   * 
+   *
    * @return a holder instance containing both the header information and
    *         encoded quantile estimators
    * @throws DistributedWekaException if we are not computing summary statistics
@@ -1139,7 +1208,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         NumericStats ns =
           (NumericStats) m_summaryStats.get(m_attributeNames.get(i));
 
-        quantileMap.put(m_attributeNames.get(i), ns.getQuantileEstimator());
+        if (ns.getQuantileEstimator() != null) {
+          quantileMap.put(m_attributeNames.get(i), ns.getQuantileEstimator());
+        }
       }
     }
 
@@ -1149,10 +1220,38 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Serialize all TDigest quantile estimators in use
+   */
+  public void serializeAllQuantileEstimators() {
+    for (int i = 0; i < m_attributeTypes.length; i++) {
+      if (m_attributeTypes[i] == TYPE.NUMERIC
+        || m_attributeTypes[i] == TYPE.DATE) {
+        NumericStats ns =
+          (NumericStats) m_summaryStats.get(m_attributeNames.get(i));
+        ns.serializeCurrentQuantileEstimator();
+      }
+    }
+  }
+
+  /**
+   * Deserialize all TDigest quantile estimators in use
+   */
+  public void deSerializeAllQuantileEstimators() {
+    for (int i = 0; i < m_attributeTypes.length; i++) {
+      if (m_attributeTypes[i] == TYPE.NUMERIC
+        || m_attributeTypes[i] == TYPE.DATE) {
+        NumericStats ns =
+          (NumericStats) m_summaryStats.get(m_attributeNames.get(i));
+        ns.deSerializeCurrentQuantileEstimator();
+      }
+    }
+  }
+
+  /**
    * Check if the header can be produced immediately without having to do a
    * pre-processing pass to determine and unify nominal attribute values. All
    * types should be specified via the ranges and nominal label specs.
-   * 
+   *
    * @param numFields number of fields in the data
    * @param attNames the names of the attributes (in order)
    * @param problems a StringBuffer to hold problem descriptions (if any)
@@ -1191,7 +1290,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * only be called in the situation where the data does not require a
    * pre-processing pass to determine and unify nominal attribute values. All
    * types should be specified via the ranges and nominal label specifications.
-   * 
+   *
    * @param numFields the number of attributes in the data
    * @param attNames the attribute names to use. May be null, in which case
    *          names are generated
@@ -1397,9 +1496,90 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Initialize internal state using the supplied ARFF header with summary
+   * attributes. Assumes that setOptions() has already been called on this
+   * instance of CSVToARFFHeaderMapTask.
+   *
+   * @param headerWithSummary the ARFF header (with summary attributes) to
+   *          initialize with
+   * @param quantileEstimators a map (keyed by attribute name) of TDigest
+   *          estimators for numeric attributes (can be null if quantiles are
+   *          not being estimated)
+   * @throws DistributedWekaException if a problem occurs
+   */
+  public void fromHeader(Instances headerWithSummary,
+    Map<String, TDigest> quantileEstimators) throws DistributedWekaException {
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
+
+    m_attributeTypes = new TYPE[headerNoSummary.numAttributes()];
+    m_attributeNames = new ArrayList<String>();
+    m_nominalVals = new HashMap<Integer, TreeSet<String>>();
+
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      String attName = headerNoSummary.attribute(i).name();
+      if (headerNoSummary.attribute(i).isNominal()) {
+        m_attributeTypes[i] = TYPE.NOMINAL;
+        TreeSet<String> vals = new TreeSet<String>();
+        for (int j = 0; j < headerNoSummary.attribute(i).numValues(); j++) {
+          vals.add(headerNoSummary.attribute(i).value(j));
+        }
+        m_nominalVals.put(i, vals);
+      } else if (headerNoSummary.attribute(i).isString()) {
+        m_attributeTypes[i] = TYPE.STRING;
+      } else if (headerNoSummary.attribute(i).isDate()) {
+        m_attributeTypes[i] = TYPE.DATE;
+      } else if (headerNoSummary.attribute(i).isNumeric()) {
+        m_attributeTypes[i] = TYPE.NUMERIC;
+      } else {
+        m_attributeTypes[i] = TYPE.UNDETERMINED;
+      }
+
+      m_attributeNames.add(attName);
+    }
+
+    m_summaryStats = new HashMap<String, Stats>();
+    // re-construct summary Stats
+    for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+      String attName = headerNoSummary.attribute(i).name();
+      Attribute origAtt = headerNoSummary.attribute(i);
+      Attribute summaryAtt =
+        headerWithSummary.attribute(ARFF_SUMMARY_ATTRIBUTE_PREFIX + attName);
+      if (summaryAtt != null) {
+        Stats s = null;
+        if (origAtt.isNominal()) {
+          s = NominalStats.attributeToStats(summaryAtt);
+        } else if (origAtt.isString()) {
+          s = StringStats.attributeToStats(summaryAtt);
+        } else if (origAtt.isNumeric()) {
+          s = NumericStats.attributeToStats(summaryAtt);
+        }
+
+        m_summaryStats.put(attName, s);
+      }
+    }
+
+    // estimators
+    if (quantileEstimators != null && quantileEstimators.size() > 0) {
+      for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
+        if (headerNoSummary.attribute(i).isNumeric()) {
+          TDigest estimator =
+            quantileEstimators.get(headerNoSummary.attribute(i).name());
+          if (estimator != null) {
+            NumericStats numStats =
+              (NumericStats) m_summaryStats.get(headerNoSummary.attribute(i)
+                .name());
+            numStats.setQuantileEstimator(estimator);
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Utility method for Constructing a dense instance given an array of parsed
    * CSV values
-   * 
+   *
    * @param trainingHeader the header to associate the instance with. Does not
    *          add the new instance to this data set; just gives the instance a
    *          reference to the header
@@ -1419,7 +1599,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   /**
    * Utility method for Constructing an instance given an array of parsed CSV
    * values
-   * 
+   *
    * @param trainingHeader the header to associate the instance with. Does not
    *          add the new instance to this data set; just gives the instance a
    *          reference to the header
@@ -1499,7 +1679,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   /**
    * Get the default label for a given attribute. May be null if a default value
    * hasn't been specified
-   * 
+   *
    * @param attIndex the index (0-based) of the attribute to get the default
    *          value for
    * @return the default value or null (if a default has not been specified)
@@ -1508,51 +1688,13 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     return m_nominalDefaultVals.get(attIndex);
   }
 
-  public static List<String>
-    instanceHeaderToAttributeNameList(Instances header) {
-    List<String> attNames = new ArrayList<String>();
-
-    for (int i = 0; i < header.numAttributes(); i++) {
-      attNames.add(header.attribute(i).name());
-    }
-
-    return attNames;
-  }
-
-  public static void main(String[] args) {
-    try {
-      CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
-
-      task = new CSVToARFFHeaderMapTask();
-      task.setOptions(args);
-      // task.setComputeSummaryStats(true);
-
-      BufferedReader br = new BufferedReader(new FileReader(args[0]));
-      String line = br.readLine();
-      String[] names = line.split(",");
-      List<String> attNames = new ArrayList<String>();
-      for (String s : names) {
-        attNames.add(s);
-      }
-
-      while ((line = br.readLine()) != null) {
-        task.processRow(line, attNames);
-      }
-
-      br.close();
-
-      System.err.println(task.getHeader());
-
-      CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
-      List<Instances> instList = new ArrayList<Instances>();
-      instList.add(task.getHeader());
-      Instances withSummary = arffReduce.aggregate(instList);
-
-      System.err.println(withSummary);
-
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
+  /**
+   * Enumerated type for specifying the type of each attribute in the data
+   *
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
+  protected enum TYPE {
+    UNDETERMINED, NUMERIC, NOMINAL, STRING, DATE;
   }
 
   /**
