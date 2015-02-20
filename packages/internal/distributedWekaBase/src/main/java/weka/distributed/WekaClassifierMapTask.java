@@ -22,11 +22,7 @@
 package weka.distributed;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -36,19 +32,8 @@ import weka.classifiers.meta.AggregateableFilteredClassifier;
 import weka.classifiers.meta.AggregateableFilteredClassifierUpdateable;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.FilteredClassifierUpdateable;
-import weka.core.Aggregateable;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.MakePreconstructedFilter;
-import weka.filters.MultiFilter;
-import weka.filters.PreconstructedFilter;
-import weka.filters.StreamableFilter;
+import weka.core.*;
+import weka.filters.*;
 import weka.filters.unsupervised.instance.ReservoirSample;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
@@ -174,6 +159,58 @@ public class WekaClassifierMapTask implements OptionHandler,
   /** Random seed for fold generation */
   protected String m_seed = "1";
 
+  public static void main(String[] args) {
+    try {
+      WekaClassifierMapTask task = new WekaClassifierMapTask();
+      if (Utils.getFlag('h', args)) {
+        String help = DistributedJob.makeOptionsStr(task);
+        System.err.println(help);
+        System.exit(1);
+      }
+
+      String trainingPath = Utils.getOption("t", args);
+      Instances train =
+        new Instances(new java.io.BufferedReader(new java.io.FileReader(
+          trainingPath)));
+      train.setClassIndex(train.numAttributes() - 1);
+
+      task.setOptions(args);
+      task.setup(new Instances(train, 0));
+      for (int i = 0; i < train.numInstances(); i++) {
+        task.processInstance(train.instance(i));
+      }
+      task.finalizeTask();
+
+      System.err.println("Batch trained classifier:\n"
+        + task.getClassifier().toString());
+
+      // now configure for an incremental classifier and
+      // train it for two passes over the data
+      task = new WekaClassifierMapTask();
+      task.setClassifier(new weka.classifiers.bayes.NaiveBayesUpdateable());
+      task.setup(new Instances(train, 0));
+      for (int i = 0; i < train.numInstances(); i++) {
+        task.processInstance(train.instance(i));
+      }
+      // task.finalizeTask(); // not needed as training is done in
+      // processInstance()
+
+      System.err.println("Incremental training (iteration 1):\n"
+        + task.getClassifier().toString());
+
+      task.setContinueTrainingUpdateableClassifier(true);
+      task.setup(new Instances(train, 0));
+      for (int i = 0; i < train.numInstances(); i++) {
+        task.processInstance(train.instance(i));
+      }
+      System.err.println("Incremental training (iteration 2):\n"
+        + task.getClassifier().toString());
+
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
   @Override
   public Enumeration<Option> listOptions() {
     Vector<Option> options = new Vector<Option>();
@@ -213,64 +250,6 @@ public class WekaClassifierMapTask implements OptionHandler,
       "-seed <integer>"));
 
     return options.elements();
-  }
-
-  @Override
-  public void setOptions(String[] options) throws Exception {
-    String classifier = Utils.getOption("W", options);
-
-    if (!DistributedJobConfig.isEmpty(classifier)) {
-      String[] classifierOpts = Utils.partitionOptions(options);
-      setClassifier(AbstractClassifier.forName(classifier, classifierOpts));
-    }
-
-    setForceBatchLearningForUpdateableClassifiers(Utils.getFlag("force-batch",
-      options));
-
-    String foldNum = Utils.getOption("fold-number", options);
-    if (!DistributedJobConfig.isEmpty(foldNum)) {
-      setFoldNumber(Integer.parseInt(foldNum));
-    }
-
-    String totalFolds = Utils.getOption("total-folds", options);
-    if (!DistributedJobConfig.isEmpty(totalFolds)) {
-      setTotalNumFolds(Integer.parseInt(totalFolds));
-    }
-
-    setUseReservoirSamplingWhenBatchLearning(Utils.getFlag("use-sampling",
-      options));
-
-    setForceVotedEnsembleCreation(Utils.getFlag("force-vote", options));
-
-    String sampleSize = Utils.getOption("sample-size", options);
-    if (!DistributedJobConfig.isEmpty(sampleSize)) {
-      setReservoirSampleSize(Integer.parseInt(sampleSize));
-    }
-
-    String seed = Utils.getOption("seed", options);
-    if (!DistributedJobConfig.isEmpty(seed)) {
-      setSeed(seed);
-    }
-
-    while (true) {
-      String filterString = Utils.getOption("filter", options);
-      if (DistributedJobConfig.isEmpty(filterString)) {
-        break;
-      }
-
-      String[] spec = Utils.splitOptions(filterString);
-      if (spec.length == 0) {
-        throw new IllegalArgumentException(
-          "Invalid filter specification string");
-      }
-      String filterClass = spec[0];
-      Filter f = (Filter) Class.forName(filterClass).newInstance();
-      spec[0] = "";
-      if (f instanceof OptionHandler) {
-        ((OptionHandler) f).setOptions(spec);
-      }
-      m_filtersToUse.add(f);
-    }
   }
 
   /**
@@ -335,6 +314,64 @@ public class WekaClassifierMapTask implements OptionHandler,
     return options.toArray(new String[options.size()]);
   }
 
+  @Override
+  public void setOptions(String[] options) throws Exception {
+    String classifier = Utils.getOption("W", options);
+
+    if (!DistributedJobConfig.isEmpty(classifier)) {
+      String[] classifierOpts = Utils.partitionOptions(options);
+      setClassifier(AbstractClassifier.forName(classifier, classifierOpts));
+    }
+
+    setForceBatchLearningForUpdateableClassifiers(Utils.getFlag("force-batch",
+      options));
+
+    String foldNum = Utils.getOption("fold-number", options);
+    if (!DistributedJobConfig.isEmpty(foldNum)) {
+      setFoldNumber(Integer.parseInt(foldNum));
+    }
+
+    String totalFolds = Utils.getOption("total-folds", options);
+    if (!DistributedJobConfig.isEmpty(totalFolds)) {
+      setTotalNumFolds(Integer.parseInt(totalFolds));
+    }
+
+    setUseReservoirSamplingWhenBatchLearning(Utils.getFlag("use-sampling",
+      options));
+
+    setForceVotedEnsembleCreation(Utils.getFlag("force-vote", options));
+
+    String sampleSize = Utils.getOption("sample-size", options);
+    if (!DistributedJobConfig.isEmpty(sampleSize)) {
+      setReservoirSampleSize(Integer.parseInt(sampleSize));
+    }
+
+    String seed = Utils.getOption("seed", options);
+    if (!DistributedJobConfig.isEmpty(seed)) {
+      setSeed(seed);
+    }
+
+    while (true) {
+      String filterString = Utils.getOption("filter", options);
+      if (DistributedJobConfig.isEmpty(filterString)) {
+        break;
+      }
+
+      String[] spec = Utils.splitOptions(filterString);
+      if (spec.length == 0) {
+        throw new IllegalArgumentException(
+          "Invalid filter specification string");
+      }
+      String filterClass = spec[0];
+      Filter f = (Filter) Class.forName(filterClass).newInstance();
+      spec[0] = "";
+      if (f instanceof OptionHandler) {
+        ((OptionHandler) f).setOptions(spec);
+      }
+      m_filtersToUse.add(f);
+    }
+  }
+
   /**
    * Checks to see if the base classifier is an IteratedSingleClassifierEnhancer
    * and whether the environment variable TOTAL_NUMBER_OF_MAPS has been set. If
@@ -344,7 +381,12 @@ public class WekaClassifierMapTask implements OptionHandler,
    * classifiers.
    */
   protected void checkForAndConfigureIteratedMetaClassifier() {
-    if (m_classifier instanceof weka.classifiers.IteratedSingleClassifierEnhancer) {
+    if (m_classifier instanceof weka.classifiers.IteratedSingleClassifierEnhancer
+      || m_classifier instanceof weka.classifiers.trees.RandomForest) {
+
+      boolean isRandomForest =
+        m_classifier instanceof weka.classifiers.trees.RandomForest;
+
       // see if we need to adjust the number of iterations on
       // the basis of the number of maps
       String numMaps = m_env.getVariableValue(TOTAL_NUMBER_OF_MAPS);
@@ -360,29 +402,27 @@ public class WekaClassifierMapTask implements OptionHandler,
         // }
 
         int totalClassifiersRequested =
-          ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
-            .getNumIterations();
+          isRandomForest ? ((weka.classifiers.trees.RandomForest) m_classifier)
+            .getNumTrees()
+            : ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
+              .getNumIterations();
 
         int classifiersPerMap = totalClassifiersRequested / nM;
         if (classifiersPerMap < 1) {
           classifiersPerMap = 1;
         }
-        ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
-          .setNumIterations(classifiersPerMap);
+        if (isRandomForest) {
+          ((weka.classifiers.trees.RandomForest) m_classifier)
+            .setNumTrees(classifiersPerMap);
+        } else {
+          ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
+            .setNumIterations(classifiersPerMap);
+        }
         System.err.println("[ClassifierMapTask] total maps to be run " + nM
           + " total base classifiers requested " + totalClassifiersRequested
           + " classifiers per map " + classifiersPerMap);
       }
     }
-  }
-
-  /**
-   * Set the classifier to use
-   * 
-   * @param classifier the classifier to use
-   */
-  public void setClassifier(Classifier classifier) {
-    m_classifier = classifier;
   }
 
   /**
@@ -395,22 +435,21 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set the classifier to use
+   *
+   * @param classifier the classifier to use
+   */
+  public void setClassifier(Classifier classifier) {
+    m_classifier = classifier;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String classifierTipText() {
     return "The classifier to use";
-  }
-
-  /**
-   * Set the seed for randomizing the data when batch learning and for reservoir
-   * sampling.
-   * 
-   * @param seed the seed to use
-   */
-  public void setSeed(String seed) {
-    m_seed = seed;
   }
 
   /**
@@ -424,24 +463,23 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set the seed for randomizing the data when batch learning and for reservoir
+   * sampling.
+   *
+   * @param seed the seed to use
+   */
+  public void setSeed(String seed) {
+    m_seed = seed;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String seedTipText() {
     return "Random seed for shuffling the training data and reservoir sampling "
       + "(batch learning only).";
-  }
-
-  /**
-   * Set whether to force the creation of a Vote ensemble for Aggregateable
-   * classifiers
-   * 
-   * @param f true if a Vote ensemble is to be created even in the case where
-   *          the base classifier is directly aggregateable
-   */
-  public void setForceVotedEnsembleCreation(boolean f) {
-    m_forceVotedEnsemble = f;
   }
 
   /**
@@ -456,8 +494,19 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set whether to force the creation of a Vote ensemble for Aggregateable
+   * classifiers
+   *
+   * @param f true if a Vote ensemble is to be created even in the case where
+   *          the base classifier is directly aggregateable
+   */
+  public void setForceVotedEnsembleCreation(boolean f) {
+    m_forceVotedEnsemble = f;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String forceVotedEnsembleCreation() {
@@ -468,7 +517,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Get the filters to wrap up with the base classifier
-   * 
+   *
    * @return the filters to wrap up with the base classifier
    */
   public Filter[] getFiltersToUse() {
@@ -492,7 +541,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Set the filters to wrap up with the base classifier
-   * 
+   *
    * @param toUse filters to wrap up with the base classifier
    */
   public void setFiltersToUse(Filter[] toUse) {
@@ -509,7 +558,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String filtersToUseTipText() {
@@ -523,22 +572,13 @@ public class WekaClassifierMapTask implements OptionHandler,
    * Add a Preconstructed filter (such as PreConstructedPCA) to use with the
    * classifier. This can be used instead of, or in conjunction with, a set of
    * standard filters.
-   * 
+   *
    * @param f the Preconstructed filter to use.
    */
   public void addPreconstructedFilterToUse(PreconstructedFilter f) {
     // add to the start because these preconstructed filters most
     // likely operate on the raw incoming data
     m_filtersToUse.add(0, (Filter) f);
-  }
-
-  /**
-   * Set whether to use reservoir sampling when batch learning
-   * 
-   * @param r true if reservoir sampling is to be used
-   */
-  public void setUseReservoirSamplingWhenBatchLearning(boolean r) {
-    m_useReservoirSampling = r;
   }
 
   /**
@@ -551,22 +591,22 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set whether to use reservoir sampling when batch learning
+   *
+   * @param r true if reservoir sampling is to be used
+   */
+  public void setUseReservoirSamplingWhenBatchLearning(boolean r) {
+    m_useReservoirSampling = r;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String useReservoirSamplingWhenBatchLearningTipText() {
     return "Apply reservoir sampling to enforce a maximum number "
       + "of training instances when batch learning";
-  }
-
-  /**
-   * Set the sample size for reservoir sampling
-   * 
-   * @param size the sample size to use for reservoir sampling
-   */
-  public void setReservoirSampleSize(int size) {
-    m_sampleSize = size;
   }
 
   /**
@@ -579,23 +619,22 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set the sample size for reservoir sampling
+   *
+   * @param size the sample size to use for reservoir sampling
+   */
+  public void setReservoirSampleSize(int size) {
+    m_sampleSize = size;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String reservoirSampleSizeTipText() {
     return "The sample size (number of instances/rows) for "
       + "reservoir sampling";
-  }
-
-  /**
-   * Set whether to force batch training for incremental (Updateable)
-   * classifiers
-   * 
-   * @param force true if incremental classifiers should be batch trained
-   */
-  public void setForceBatchLearningForUpdateableClassifiers(boolean force) {
-    m_forceBatchForUpdateable = force;
   }
 
   /**
@@ -609,25 +648,23 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set whether to force batch training for incremental (Updateable)
+   * classifiers
+   *
+   * @param force true if incremental classifiers should be batch trained
+   */
+  public void setForceBatchLearningForUpdateableClassifiers(boolean force) {
+    m_forceBatchForUpdateable = force;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String forceBatchLearningForUpdateableClassifiersTipText() {
     return "Use batch training even if the base classifier is an "
       + "incremental (Updateable) one.";
-  }
-
-  /**
-   * Set whether to continue training an incremental (updateable) classifier.
-   * Assumes that the classifier set via setClassifier() has already been
-   * trained (or at least initialized via buildClassifier()).
-   * 
-   * @param u true to continue training an incremental classifier rather than
-   *          starting from scratch
-   */
-  public void setContinueTrainingUpdateableClassifier(boolean u) {
-    m_continueTrainingUpdateable = u;
   }
 
   /**
@@ -643,23 +680,25 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set whether to continue training an incremental (updateable) classifier.
+   * Assumes that the classifier set via setClassifier() has already been
+   * trained (or at least initialized via buildClassifier()).
+   *
+   * @param u true to continue training an incremental classifier rather than
+   *          starting from scratch
+   */
+  public void setContinueTrainingUpdateableClassifier(boolean u) {
+    m_continueTrainingUpdateable = u;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String continueTrainingUpdateableClassifierTipText() {
     return "Continue training (updating) an incremental classifier "
       + "with the incoming data (rather than start from scratch)";
-  }
-
-  /**
-   * Set the fold number to train the classifier with. -1 indicates that all the
-   * data is to be used for training.
-   * 
-   * @param fn the fold number to train on.
-   */
-  public void setFoldNumber(int fn) {
-    m_foldNumber = fn;
   }
 
   /**
@@ -673,25 +712,24 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set the fold number to train the classifier with. -1 indicates that all the
+   * data is to be used for training.
+   *
+   * @param fn the fold number to train on.
+   */
+  public void setFoldNumber(int fn) {
+    m_foldNumber = fn;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String foldNumberTipText() {
     return "Set the fold number to train the classifier with. Default (-1) is "
       + "to use all the data for training the classifier. Use in conjunction "
       + "with setTotalNumberOfFolds";
-  }
-
-  /**
-   * Set the total number of folds to use. Use in conjunction with
-   * setFoldNumber(). Only has an effect if setFoldNumber() is set to something
-   * other than -1.
-   * 
-   * @param t the total number of folds
-   */
-  public void setTotalNumFolds(int t) {
-    m_totalFolds = t;
   }
 
   /**
@@ -706,8 +744,19 @@ public class WekaClassifierMapTask implements OptionHandler,
   }
 
   /**
+   * Set the total number of folds to use. Use in conjunction with
+   * setFoldNumber(). Only has an effect if setFoldNumber() is set to something
+   * other than -1.
+   *
+   * @param t the total number of folds
+   */
+  public void setTotalNumFolds(int t) {
+    m_totalFolds = t;
+  }
+
+  /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String totalNumberOfFoldsTipText() {
@@ -718,7 +767,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Get the number of training instances actually used to train the classifier.
-   * 
+   *
    * @return the number of training instances used to train the classifier
    */
   public int getNumTrainingInstances() {
@@ -727,7 +776,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Add the supplied instances to the training header
-   * 
+   *
    * @param toAdd the instances to add
    */
   public void addToTrainingHeader(Instances toAdd) {
@@ -738,7 +787,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Add the supplied instance to the training header
-   * 
+   *
    * @param toAdd the instance to add
    */
   public void addToTrainingHeader(Instance toAdd) {
@@ -848,7 +897,7 @@ public class WekaClassifierMapTask implements OptionHandler,
 
   /**
    * Initialize the map task
-   * 
+   *
    * @param trainingHeader the header of the incoming training data.
    * @throws DistributedWekaException if something goes wrong
    */
@@ -917,7 +966,7 @@ public class WekaClassifierMapTask implements OptionHandler,
    * immediately with the instance. In the case of batch learning, the instance
    * is cached in memory and the entire data set is processed in the
    * finalizeTask() method.
-   * 
+   *
    * @param inst the instance to train with
    * @throws DistributedWekaException if a problem occurs
    */
@@ -958,7 +1007,7 @@ public class WekaClassifierMapTask implements OptionHandler,
   /**
    * Finish up the map task. If the classifier is being batch trained then this
    * is where the action happens.
-   * 
+   *
    * @throws DistributedWekaException if something goes wrong
    */
   public void finalizeTask() throws DistributedWekaException {
@@ -970,9 +1019,8 @@ public class WekaClassifierMapTask implements OptionHandler,
     long maxM = currR.maxMemory();
     System.err
       .println("[ClassifierMapTask] Memory (free/total/max.) in bytes: "
-        + String.format("%,d", freeM) + " / "
-        + String.format("%,d", totalM) + " / "
-        + String.format("%,d", maxM));
+        + String.format("%,d", freeM) + " / " + String.format("%,d", totalM)
+        + " / " + String.format("%,d", maxM));
 
     if (m_classifier instanceof UpdateableClassifier
       && !m_forceBatchForUpdateable) {
@@ -1039,57 +1087,5 @@ public class WekaClassifierMapTask implements OptionHandler,
   @Override
   public void setEnvironment(Environment env) {
     m_env = env;
-  }
-
-  public static void main(String[] args) {
-    try {
-      WekaClassifierMapTask task = new WekaClassifierMapTask();
-      if (Utils.getFlag('h', args)) {
-        String help = DistributedJob.makeOptionsStr(task);
-        System.err.println(help);
-        System.exit(1);
-      }
-
-      String trainingPath = Utils.getOption("t", args);
-      Instances train =
-        new Instances(new java.io.BufferedReader(new java.io.FileReader(
-          trainingPath)));
-      train.setClassIndex(train.numAttributes() - 1);
-
-      task.setOptions(args);
-      task.setup(new Instances(train, 0));
-      for (int i = 0; i < train.numInstances(); i++) {
-        task.processInstance(train.instance(i));
-      }
-      task.finalizeTask();
-
-      System.err.println("Batch trained classifier:\n"
-        + task.getClassifier().toString());
-
-      // now configure for an incremental classifier and
-      // train it for two passes over the data
-      task = new WekaClassifierMapTask();
-      task.setClassifier(new weka.classifiers.bayes.NaiveBayesUpdateable());
-      task.setup(new Instances(train, 0));
-      for (int i = 0; i < train.numInstances(); i++) {
-        task.processInstance(train.instance(i));
-      }
-      // task.finalizeTask(); // not needed as training is done in
-      // processInstance()
-
-      System.err.println("Incremental training (iteration 1):\n"
-        + task.getClassifier().toString());
-
-      task.setContinueTrainingUpdateableClassifier(true);
-      task.setup(new Instances(train, 0));
-      for (int i = 0; i < train.numInstances(); i++) {
-        task.processInstance(train.instance(i));
-      }
-      System.err.println("Incremental training (iteration 2):\n"
-        + task.getClassifier().toString());
-
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
   }
 }
