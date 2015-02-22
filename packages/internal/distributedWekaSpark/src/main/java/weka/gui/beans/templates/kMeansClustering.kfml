@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA|object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.7.13-SNAPSHOT">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.7.13-SNAPSHOT">
+   <object class="java.util.Vector" name="0">
+      <object class="weka.gui.beans.BeanInstance" name="0">
+         <object class="int" name="id" primitive="yes">0</object>
+         <object class="int" name="x" primitive="yes">90</object>
+         <object class="int" name="y" primitive="yes">117</object>
+         <object class="java.lang.String" name="custom_name">ArffHeaderSparkJob</object>
+         <object class="weka.gui.beans.ArffHeaderSparkJob" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">ArffHeaderSparkJob</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ARFFHeaderSparkJob.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ARFFHeaderSparkJob.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">ArffHeaderSparkJob</object>
+            <object class="java.lang.String" name="jobOptions">-existing-header ${user.home}/sparkOutput/arff/hypo.arff -names-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -master local[*] -input-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="1">
+         <object class="int" name="id" primitive="yes">1</object>
+         <object class="int" name="x" primitive="yes">658</object>
+         <object class="int" name="y" primitive="yes">117</object>
+         <object class="java.lang.String" name="custom_name">TextViewer</object>
+         <object class="weka.gui.beans.TextViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TextViewer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultText.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultText_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TextViewer</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="2">
+         <object class="int" name="id" primitive="yes">2</object>
+         <object class="int" name="x" primitive="yes">498</object>
+         <object class="int" name="y" primitive="yes">117</object>
+         <object class="java.lang.String" name="custom_name">KMeansClustererSparkJob</object>
+         <object class="weka.gui.beans.KMeansClustererSparkJob" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">KMeansClustererSparkJob</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/KMeansClustererSparkJob.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/KMeansClustererSparkJob.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">KMeansClustererSparkJob</object>
+            <object class="java.lang.String" name="jobOptions">-model-file-name kMeans.model -num-clusters 4 -num-iterations 20 -num-runs 5 -init-kmeans-its 5 -seed 1 -tolerance 1.0E-4 -filter &quot;weka.filters.unsupervised.attribute.Remove -R last&quot; -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="3">
+         <object class="int" name="id" primitive="yes">3</object>
+         <object class="int" name="x" primitive="yes">338</object>
+         <object class="int" name="y" primitive="yes">117</object>
+         <object class="java.lang.String" name="custom_name">RandomlyShuffleDataSparkJob</object>
+         <object class="weka.gui.beans.RandomizedDataSparkJob" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">RandomlyShuffleDataSparkJob</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/RandomizedDataSparkJob.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/RandomizedDataSparkJob.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">RandomlyShuffleDataSparkJob</object>
+            <object class="java.lang.String" name="jobOptions">-seed 1 -num-splits 4 -weka-jar /Users/mhall/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="4">
+         <object class="int" name="id" primitive="yes">4</object>
+         <object class="int" name="x" primitive="yes">138</object>
+         <object class="int" name="y" primitive="yes">261</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;Uses the hypothyroid csv file&#10;in the &lt;b&gt;sample_data&lt;/b&gt; directory of&#10;the distributedWekaSpark package&#10;as input. The dataset is split into&#10;4 partitions, and an ARFF header&#10;with additional summary metadata&#10;attributes is computed using all the&#10;CPU cores on your computer.&#10;&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="5">
+         <object class="int" name="id" primitive="yes">5</object>
+         <object class="int" name="x" primitive="yes">339</object>
+         <object class="int" name="y" primitive="yes">223</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Randomly shuffle and&#10;stratify the data (RDD) &#10;into 4 partitions.</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="6">
+         <object class="int" name="id" primitive="yes">6</object>
+         <object class="int" name="x" primitive="yes">520</object>
+         <object class="int" name="y" primitive="yes">254</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Executes 5 separate runs&#10;of k-means++ and selects&#10;the best (lowest within&#10;cluster SSE). Uses a Remove&#10;filter to remove the class&#10;attribute from the data&#10;on the fly.</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+   </object>
+   <object class="java.util.Vector" name="1">
+      <object class="weka.gui.beans.BeanConnection" name="0">
+         <object class="int" name="source_id" primitive="yes">2</object>
+         <object class="int" name="target_id" primitive="yes">1</object>
+         <object class="java.lang.String" name="eventname">text</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="1">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">3</object>
+         <object class="java.lang.String" name="eventname">success</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="2">
+         <object class="int" name="source_id" primitive="yes">3</object>
+         <object class="int" name="target_id" primitive="yes">2</object>
+         <object class="java.lang.String" name="eventname">success</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+   </object>
+</object>

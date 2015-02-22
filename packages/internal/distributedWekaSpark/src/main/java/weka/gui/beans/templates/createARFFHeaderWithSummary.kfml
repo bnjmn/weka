@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA|object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.7.13-SNAPSHOT">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.7.13-SNAPSHOT">
+   <object class="java.util.Vector" name="0">
+      <object class="weka.gui.beans.BeanInstance" name="0">
+         <object class="int" name="id" primitive="yes">0</object>
+         <object class="int" name="x" primitive="yes">176</object>
+         <object class="int" name="y" primitive="yes">130</object>
+         <object class="java.lang.String" name="custom_name">ArffHeaderSparkJob</object>
+         <object class="weka.gui.beans.ArffHeaderSparkJob" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">ArffHeaderSparkJob</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/ARFFHeaderSparkJob.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ARFFHeaderSparkJob.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">ArffHeaderSparkJob</object>
+            <object class="java.lang.String" name="jobOptions">-names-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -master local[*] -input-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="1">
+         <object class="int" name="id" primitive="yes">1</object>
+         <object class="int" name="x" primitive="yes">456</object>
+         <object class="int" name="y" primitive="yes">130</object>
+         <object class="java.lang.String" name="custom_name">TextViewer</object>
+         <object class="weka.gui.beans.TextViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TextViewer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultText.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultText_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TextViewer</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="2">
+         <object class="int" name="id" primitive="yes">2</object>
+         <object class="int" name="x" primitive="yes">183</object>
+         <object class="int" name="y" primitive="yes">261</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;Uses the hypothyroid csv file&#10;in the &lt;b&gt;sample_data&lt;/b&gt; directory of&#10;the distributedWekaSpark package&#10;as input. The dataset is split into&#10;4 partitions, and an ARFF header&#10;with additional summary metadata&#10;attributes is computed using all the&#10;CPU cores on your computer.&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="3">
+         <object class="int" name="id" primitive="yes">3</object>
+         <object class="int" name="x" primitive="yes">366</object>
+         <object class="int" name="y" primitive="yes">30</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It stores output in ${user.home}/sparkOutput.&lt;/html&gt;</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+   </object>
+   <object class="java.util.Vector" name="1">
+      <object class="weka.gui.beans.BeanConnection" name="0">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">1</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+   </object>
+</object>

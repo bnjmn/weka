@@ -1,0 +1,2 @@
+# Specifies the tools to go into the Plugins toolbar
+weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.ArffHeaderSparkJob,weka.gui.beans.WekaClassifierSparkJob,weka.gui.beans.WekaClassifierEvaluationSparkJob,weka.gui.beans.CorrelationMatrixSparkJob,weka.gui.beans.WekaScoringSparkJob,weka.gui.beans.RandomizedDataSparkJob,weka.gui.beans.KMeansClustererSparkJob

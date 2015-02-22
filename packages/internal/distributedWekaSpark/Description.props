@@ -1,0 +1,62 @@
+# Description file for distributedWekaHadoop
+# 
+
+# Package name (required)
+PackageName=distributedWekaSpark
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2015-02-20
+
+# Title (required)
+Title=Spark wrappers for Weka
+
+# Category (recommended)
+Category=Distributed
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3
+
+# Description (required)
+Description=Provides Spark wrappers for the classes in distributedWekaBase. Includes generic Spark 1.1.1 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${user.home}/wekafiles/distributedWekaSpark/lib and copy in the spark-assembly-A.B.C-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
+
+# Changes in this release
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaSpark1.0.0.zip?download
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-spark.html
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.11)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+MessageToDisplayOnInstall= Includes generic Spark 1.1.1 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${WEKA_HOME}/distributedWekaSpark/lib and copy in the spark-assembly-a.b.c-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+# DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+# DoNotLoadIfFileNotPresentMessage=
