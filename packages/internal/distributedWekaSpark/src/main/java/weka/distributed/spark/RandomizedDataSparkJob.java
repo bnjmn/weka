@@ -1121,7 +1121,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
         + "attribute for attribute: " + summaryName);
     }
 
-    if (summaryAtt.isNominal()) {
+    if (summaryAttOrig.isNominal()) {
       NominalStats stats = NominalStats.attributeToStats(summaryAtt);
       for (String label : stats.getLabels()) {
         totalNumInstances += stats.getCount(label);
