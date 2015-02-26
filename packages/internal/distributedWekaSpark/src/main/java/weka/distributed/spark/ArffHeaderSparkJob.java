@@ -619,9 +619,6 @@ public class ArffHeaderSparkJob extends SparkJob implements
         outputPath
           + (outputPath.toLowerCase().contains("://") ? "/" : File.separator)
           + name + ".png";
-      if (checkFileExists(fileName)) {
-        continue;
-      }
 
       int chartWidth = DEFAULT_CHART_WIDTH;
       String userWidth = m_sjConfig.getUserSuppliedProperty(CHART_WIDTH_KEY);
