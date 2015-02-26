@@ -55,7 +55,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierEvaluationSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierEvaluationSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1 --</object>
+            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1 --</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="3">
@@ -92,7 +92,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/RandomizedDataSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">RandomlyShuffleDataSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-seed 1 -num-splits 4 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="5">
@@ -109,7 +109,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierEvaluationSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierEvaluationSparkJob2</object>
-            <object class="java.lang.String" name="jobOptions">-weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -K 0 -S 1 -num-slots 1</object>
+            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -K 0 -S 1 -num-slots 1</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="6">
@@ -138,6 +138,16 @@
          <object class="int" name="y" primitive="yes">79</object>
          <object class="weka.gui.beans.Note" name="bean">
             <object class="java.lang.String" name="noteText">Perform 10-fold&#10;cross-validation&#10;using Random Forests&#10;(100 trees total - 25 per &#10;partition).</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="9">
+         <object class="int" name="id" primitive="yes">9</object>
+         <object class="int" name="x" primitive="yes">326</object>
+         <object class="int" name="y" primitive="yes">18</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It stores output in ${user.home}/sparkOutput.&lt;/html&gt;</object>
             <object class="null" name="name" null="yes"/>
             <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
          </object>

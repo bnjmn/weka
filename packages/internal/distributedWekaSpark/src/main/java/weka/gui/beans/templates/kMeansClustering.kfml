@@ -65,7 +65,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/KMeansClustererSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">KMeansClustererSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-model-file-name kMeans.model -num-clusters 4 -num-iterations 20 -num-runs 5 -init-kmeans-its 5 -seed 1 -tolerance 1.0E-4 -filter &quot;weka.filters.unsupervised.attribute.Remove -R last&quot; -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-model-file-name kMeans.model -num-clusters 4 -num-iterations 20 -num-runs 5 -init-kmeans-its 5 -seed 1 -tolerance 1.0E-4 -filter &quot;weka.filters.unsupervised.attribute.Remove -R last&quot; -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="3">
@@ -82,7 +82,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/RandomizedDataSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">RandomlyShuffleDataSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-seed 1 -num-splits 4 -weka-jar /Users/mhall/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="4">
@@ -111,6 +111,16 @@
          <object class="int" name="y" primitive="yes">254</object>
          <object class="weka.gui.beans.Note" name="bean">
             <object class="java.lang.String" name="noteText">Executes 5 separate runs&#10;of k-means++ and selects&#10;the best (lowest within&#10;cluster SSE). Uses a Remove&#10;filter to remove the class&#10;attribute from the data&#10;on the fly.</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="7">
+         <object class="int" name="id" primitive="yes">7</object>
+         <object class="int" name="x" primitive="yes">354</object>
+         <object class="int" name="y" primitive="yes">26</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">&lt;html&gt;&lt;b&gt;NOTE: this flow is configured to run out of the box.&lt;/b&gt; It stores output in ${user.home}/sparkOutput.&lt;/html&gt;</object>
             <object class="null" name="name" null="yes"/>
             <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
          </object>

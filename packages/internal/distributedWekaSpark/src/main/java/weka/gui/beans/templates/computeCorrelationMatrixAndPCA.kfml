@@ -45,7 +45,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/CorrelationMatrixEvaluationSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">CorrelationMatrixSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-pca -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-pca -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="2">

@@ -45,7 +45,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-model-file-name naiveBayes.model -num-iterations 1 -class last -seed 1 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 1 -seed 1 --</object>
+            <object class="java.lang.String" name="jobOptions">-model-file-name naiveBayes.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 1 -seed 1 --</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="2">
@@ -82,7 +82,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/RandomizedDataSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">RandomlyShuffleDataSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-class last -seed 1 -num-splits 4 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-class last -seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="4">
@@ -99,7 +99,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierSparkJob2</object>
-            <object class="java.lang.String" name="jobOptions">-model-file-name votedJRIP.model -num-iterations 1 -class last -seed 1 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -weka-jar /Users/mhall/Documents/Pentaho/dev/myDev/wekasvn/trunk/weka/dist/weka.jar -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.rules.JRip -fold-number -1 -total-folds 1 -seed 1 -- -F 3 -N 2.0 -O 2 -S 1</object>
+            <object class="java.lang.String" name="jobOptions">-model-file-name votedJRIP.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.rules.JRip -fold-number -1 -total-folds 1 -seed 1 -- -F 3 -N 2.0 -O 2 -S 1</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="5">
