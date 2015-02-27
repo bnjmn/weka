@@ -84,10 +84,10 @@ public class RandomizedDataSparkJob extends SparkJob implements
   protected String m_classAttribute = "";
 
   /**
-   * If true then the process of assuming the last attribute is the class (when
-   * not explicitly set) is disabled
+   * If true then assume the last attribute is the class (when
+   * not explicitly set)
    */
-  protected boolean m_dontDefaultToLastAttIfClassNotSpecified;
+  protected boolean m_defaultToLastAttIfClassNotSpecified;
 
   /**
    * Holds the randomized and stratified RDD resulting from this job if the
@@ -279,11 +279,11 @@ public class RandomizedDataSparkJob extends SparkJob implements
   }
 
   public boolean getDontDefaultToLastAttIfClassNotSpecified() {
-    return m_dontDefaultToLastAttIfClassNotSpecified;
+    return m_defaultToLastAttIfClassNotSpecified;
   }
 
-  public void setDontDefaultToLastAttIfClassNotSpecified(boolean d) {
-    m_dontDefaultToLastAttIfClassNotSpecified = d;
+  public void setDefaultToLastAttIfClassNotSpecified( boolean d ) {
+    m_defaultToLastAttIfClassNotSpecified = d;
   }
 
   /**
@@ -1066,7 +1066,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
     try {
       WekaClassifierSparkJob.setClassIndex(
         environmentSubstitute(m_classAttribute), headerNoSummary,
-        !m_dontDefaultToLastAttIfClassNotSpecified);
+        m_defaultToLastAttIfClassNotSpecified );
 
     } catch (Exception e) {
       logMessage(e);

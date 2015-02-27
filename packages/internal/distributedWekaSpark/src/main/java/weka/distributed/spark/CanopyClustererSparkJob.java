@@ -2,7 +2,11 @@ package weka.distributed.spark;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -19,7 +23,12 @@ import weka.clusterers.Canopy;
 import weka.clusterers.Clusterer;
 import weka.clusterers.FilteredClusterer;
 import weka.clusterers.InstanceWithCanopyAssignments;
-import weka.core.*;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.CanopyMapTask;
 import weka.distributed.CanopyReduceTask;
@@ -618,7 +627,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
 
     // serialized input is assumed to already be randomized...
     if (getRandomizeAndStratify() /* && !getSerializedInput() */) {
-      m_randomizeSparkJob.setDontDefaultToLastAttIfClassNotSpecified(true);
+      m_randomizeSparkJob.setDefaultToLastAttIfClassNotSpecified(false);
       m_randomizeSparkJob.setEnvironment(m_env);
       m_randomizeSparkJob.setLog(getLog());
       m_randomizeSparkJob.setStatusMessagePrefix(m_statusMessagePrefix);

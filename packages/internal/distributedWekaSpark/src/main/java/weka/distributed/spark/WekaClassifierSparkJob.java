@@ -21,8 +21,19 @@
 
 package weka.distributed.spark;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -30,8 +41,19 @@ import org.apache.spark.api.java.function.FlatMapFunction;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
-import weka.core.*;
-import weka.distributed.*;
+import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
+import weka.core.WekaException;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.DistributedWekaException;
+import weka.distributed.WekaClassifierMapTask;
+import weka.distributed.WekaClassifierReduceTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
 import weka.gui.beans.ClassifierProducer;
@@ -840,6 +862,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
 
     if (getRandomizeAndStratify() /* && !m_sjConfig.getSerializedInput() */) {
       m_randomizeSparkJob.setEnvironment(m_env);
+      m_randomizeSparkJob.setDefaultToLastAttIfClassNotSpecified(true);
       m_randomizeSparkJob.setStatusMessagePrefix(m_statusMessagePrefix);
       m_randomizeSparkJob.setLog(getLog());
       m_randomizeSparkJob.setCachingStrategy(getCachingStrategy());

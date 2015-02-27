@@ -21,8 +21,16 @@
 
 package weka.distributed.spark;
 
-import java.io.*;
-import java.util.*;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -31,11 +39,29 @@ import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
 
 import scala.Tuple2;
-import weka.clusterers.*;
-import weka.core.*;
+import weka.clusterers.CentroidSketch;
+import weka.clusterers.Clusterer;
+import weka.clusterers.PreconstructedFilteredClusterer;
+import weka.clusterers.PreconstructedKMeans;
+import weka.clusterers.SimpleKMeans;
+import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.EuclideanDistance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.NormalizableDistance;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.SelectedTag;
+import weka.core.Utils;
 import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NominalStats;
-import weka.distributed.*;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.DistributedWekaException;
+import weka.distributed.KMeansMapTask;
+import weka.distributed.KMeansReduceTask;
 import weka.filters.Filter;
 import weka.gui.beans.ClustererProducer;
 import weka.gui.beans.TextProducer;
@@ -781,7 +807,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
                 runNumber = partial._1().intValue();
               } else {
                 if (partial._1().intValue() != runNumber) {
-                  throw new DistributedWekaException("[KMeans] reduce phase: "
+                  throw new DistributedWekaException("[k-means] reduce phase: "
                     + "was not expecting the run number to change within a "
                     + "partition!");
                 }
@@ -868,8 +894,11 @@ public class KMeansClustererSparkJob extends SparkJob implements
           numClusters);
     }
     if (getDebug()) {
-      System.err.println("[KMeansClustererSparkJob] k-means|| start points:\n"
-        + centers.get(0));
+      for (int i = 0; i < numRuns; i++) {
+        logMessage("[k-means] k-means"
+          + (getInitWithRandomCentroids() ? "" : "||") + " start points Run "
+          + i + ":\n" + centers.get(i));
+      }
     }
 
     final boolean[] converged = new boolean[numRuns];
@@ -877,25 +906,8 @@ public class KMeansClustererSparkJob extends SparkJob implements
     int[] numItsPerformed = new int[numRuns];
     int numConverged = 0;
 
-    // make sure our initial centers are filtered by any filters
-    // that the map tasks are using (including missing values replacement)
-    // try {
-    // for (int i = 0; i < numRuns; i++) {
-    // Instances transformedCenters = mapTasks[i].applyFilters(centers.get(i));
-    // centers.set(i, transformedCenters);
-    // }
-    // } catch (Exception ex) {
-    // throw new DistributedWekaException(ex);
-    // }
-
     // make a copy of the initial starting points
     List<Instances> initialCenters = new ArrayList<Instances>(centers);
-
-    if (getDebug()) {
-      System.err
-        .println("[KMeansClustererSparkJob] Initial centers for run 0: "
-          + centers.get(0));
-    }
 
     List<Tuple2<Integer, KMeansReduceTask>> runResults;
     KMeansReduceTask bestResult = null;
@@ -934,12 +946,11 @@ public class KMeansClustererSparkJob extends SparkJob implements
 
         Instances newCentersForRun = runRes.getCentroidsForRun();
 
-        // TODO - this is temporary debugging output (just prints run 0 centers)
-        if (run == 0 && getDebug()) {
-          logMessage("[KMeansClustererSparkJob] Centers for iteration: "
+        if (getDebug()) {
+          logMessage("[k-means] centers for run " + run + " iteration: "
             + (i + 1) + "\n" + newCentersForRun);
-          logMessage("[KMeansClustererSparkJob] Total within cluster error: "
-            + runRes.getTotalWithinClustersError());
+          logMessage("[k-means] Total within cluster error: "
+            + runRes.getTotalWithinClustersError() + "\n");
         }
 
         if (i < numIterations - 1) {
@@ -954,8 +965,8 @@ public class KMeansClustererSparkJob extends SparkJob implements
                 mapTasks[run].distance(newCentersForRun.instance(k), centers
                   .get(run).instance(k));
               if (m_debug) {
-                logMessage("[KMeansClustererSparkJob] Run " + run
-                  + " convergence distance: " + dist);
+                logMessage("[k-means] Run " + run + " convergence distance: "
+                  + dist);
               }
               totalDist += dist;
               if (dist > m_convergenceTolerance) {
@@ -964,8 +975,8 @@ public class KMeansClustererSparkJob extends SparkJob implements
             }
 
             if (!changed) {
-              logMessage("[KMeansClustererSparkJob] Run: " + run
-                + " converged in " + (i + 1) + " iterations.");
+              logMessage("[k-means] Run: " + run + " converged in " + (i + 1)
+                + " iterations.");
               List<Instances> centroidSummaries =
                 runRes.getAggregatedCentroidSummaries();
               if (m_debug) {
@@ -1001,7 +1012,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
               double currentSqErr = runRes.getTotalWithinClustersError();
               if ((bestResult.getTotalWithinClustersError() + m_convergenceTolerance) < (currentSqErr - projectedImprovement)) {
                 if (getDebug()) {
-                  logMessage("[KMeansClustererSparkJob] Aborting run " + run
+                  logMessage("[k-means] aborting run " + run
                     + " as its current within clust. error (" + currentSqErr
                     + ") " + "is unlikely to beat the current best run ("
                     + bestResult.getTotalWithinClustersError() + ") within "
@@ -1239,7 +1250,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
     final KMeansMapTask forFilteringOnly = mapTasks[0];
 
     for (int i = 0; i < numSteps; i++) {
-      logMessage("Running iteration " + (i + 1)
+      logMessage("[k-means] Running iteration " + (i + 1)
         + " of k-means|| initialization procedure.");
       final int iterationNum = i;
 
@@ -1318,8 +1329,9 @@ public class KMeansClustererSparkJob extends SparkJob implements
                 } else {
                   if (partial._1().intValue() != runNumber) {
                     throw new DistributedWekaException(
-                      "[KMeans] k-means|| initialization: "
-                        + "was not expecting the run number to change within a partition!");
+                      "[k-means] k-means|| initialization: "
+                        + "was not expecting the run number to change within "
+                        + "a partition!");
                   }
                 }
 
@@ -1376,7 +1388,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
           sketches[runNum].addReservoirToCurrentSketch();
 
           if (m_debug) {
-            System.err.println("***************** Iteration: " + i
+            logMessage("[k-means] Iteration: " + i
               + " - number of instances in sketch: "
               + sketches[runNum].getCurrentSketch().numInstances() + "\n"
               + sketches[runNum].getCurrentSketch());
@@ -1394,6 +1406,9 @@ public class KMeansClustererSparkJob extends SparkJob implements
     // each instance in the sketch.
     Instances globalPriming = sketches[0].getDistanceFunction().getInstances();
     if (globalPriming.numInstances() != 2) {
+      logMessage("[k-means] Error: as expecting a two instance "
+        + "(global priming data) dataset to be set in the distance function "
+        + "in each sketch!");
       throw new DistributedWekaException(
         "Was expecting a two instance (global priming data)"
           + " dataset to be set in the distance function in each sketch!");
@@ -1430,6 +1445,9 @@ public class KMeansClustererSparkJob extends SparkJob implements
       // as candidate instances with weight 0 (i.e. distance 0 to the sketch
       // in this case) are never added to the sketch.
       if (centroidSummaries.size() != sketchForRun.numInstances()) {
+        logMessage("[k-means] Error: was expecting as "
+          + "many summary headers as \n"
+          + "there are center candidates in the sketch for run " + rN);
         throw new DistributedWekaException(
           "Was expecting as many summary headers as "
             + "there are center candidates in the sketch for run " + rN);
@@ -1466,6 +1484,9 @@ public class KMeansClustererSparkJob extends SparkJob implements
         }
 
         if (weightForCandidate < 0) {
+          logMessage("[k-means] Error: unable to compute the "
+            + "number of training instances " + "assigned to sketch member "
+            + j + " in run " + i);
           throw new DistributedWekaException(
             "Unable to compute the number of training instances "
               + "assigned to sketch member " + j + " in run " + i);
@@ -1476,9 +1497,8 @@ public class KMeansClustererSparkJob extends SparkJob implements
       }
 
       if (m_debug) {
-        System.err
-          .println("********** Final weighted sketch prior to local KMeans:\n"
-            + sketchForRun);
+        logMessage("Final weighted sketch (run " + i
+          + ") prior to local KMeans:\n" + sketchForRun);
       }
 
       // now run standard k-means on the weighted sketch to
@@ -1581,12 +1601,12 @@ public class KMeansClustererSparkJob extends SparkJob implements
     if (getDataset(TRAINING_DATA) != null) {
       dataSet = getDataset(TRAINING_DATA).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
-      logMessage("RDD<Instance> dataset provided: "
+      logMessage("[k-means] RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
     }
 
     if (dataSet == null && headerWithSummary == null) {
-      logMessage("Invoking ARFF Job...");
+      logMessage("[k-means] invoking ARFF Job...");
       m_arffHeaderJob.setEnvironment(m_env);
       m_arffHeaderJob.setLog(getLog());
       m_arffHeaderJob.setStatusMessagePrefix(m_statusMessagePrefix);
@@ -1597,7 +1617,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
       if (!success) {
         setJobStatus(JobStatus.FAILED);
         statusMessage("Unable to continue - creating the ARFF header failed!");
-        logMessage("Unable to continue - creating the ARFF header failed!");
+        logMessage("[k-means] unable to continue - creating the ARFF header failed!");
         return false;
       }
 
@@ -1646,7 +1666,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
     Clusterer finalClusterer = null;
     // serialized input is assumed to already be randomized...
     if (getRandomlyShuffleData() /* && !getSerializedInput() */) {
-      m_randomizeSparkJob.setDontDefaultToLastAttIfClassNotSpecified(true);
+      m_randomizeSparkJob.setDefaultToLastAttIfClassNotSpecified(false);
       m_randomizeSparkJob.setEnvironment(m_env);
       m_randomizeSparkJob.setLog(getLog());
       m_randomizeSparkJob.setStatusMessagePrefix(m_statusMessagePrefix);
@@ -1655,8 +1675,10 @@ public class KMeansClustererSparkJob extends SparkJob implements
         headerWithSummary));
 
       if (!m_randomizeSparkJob.runJobWithContext(sparkContext)) {
-        statusMessage("Unable to continue - random shuffling of input data failed!");
-        logMessage("Unable to continue - random shuffling of input data failed!");
+        statusMessage("Unable to continue - random shuffling of "
+          + "input data failed!");
+        logMessage("[k-means] ynable to continue - random shuffling of input "
+          + "data failed!");
         return false;
       }
 

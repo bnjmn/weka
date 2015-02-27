@@ -25,7 +25,11 @@ import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
@@ -38,11 +42,23 @@ import scala.Tuple2;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.AggregateableEvaluation;
 import weka.classifiers.evaluation.Evaluation;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 import weka.core.converters.CSVSaver;
 import weka.core.converters.Saver;
 import weka.core.stats.ArffSummaryNumericMetric;
-import weka.distributed.*;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.DistributedWekaException;
+import weka.distributed.WekaClassifierEvaluationMapTask;
+import weka.distributed.WekaClassifierEvaluationReduceTask;
+import weka.distributed.WekaClassifierMapTask;
+import weka.distributed.WekaClassifierReduceTask;
 import weka.filters.PreconstructedFilter;
 import weka.gui.beans.InstancesProducer;
 import weka.gui.beans.TextProducer;
@@ -233,7 +249,6 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
       options.add("-output-subdir");
       options.add(getOutputSubdir());
     }
-
 
     return options.toArray(new String[options.size()]);
   }
@@ -774,6 +789,8 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
       /* && !m_classifierJob.getSerializedInput() */) {
         m_classifierJob.m_randomizeSparkJob.setEnvironment(m_env);
         m_classifierJob.m_randomizeSparkJob
+          .setDefaultToLastAttIfClassNotSpecified( true );
+        m_classifierJob.m_randomizeSparkJob
           .setStatusMessagePrefix(m_statusMessagePrefix);
         m_classifierJob.m_randomizeSparkJob.setLog(getLog());
         m_classifierJob.m_randomizeSparkJob
@@ -879,8 +896,8 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
       info += "test on training";
     } else {
       info +=
-        totalFolds + " fold cross-validation (seed=" + seed
-          + "): " + m_classifierJob.getClassifierMapTaskOptions()
+        totalFolds + " fold cross-validation (seed=" + seed + "): "
+          + m_classifierJob.getClassifierMapTaskOptions()
           + "\n(note: relative measures might be slightly "
           + "pessimistic due to the mean/mode of the target being computed on "
           + "all the data rather than on training folds)";
