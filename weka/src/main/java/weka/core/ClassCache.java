@@ -241,6 +241,10 @@ public class ClassCache implements RevisionHandler {
    * @param manifest the manifest to analyze
    */
   protected void initFromManifest(Manifest manifest) {
+    if (manifest == null) {
+      return;
+    }
+
     Attributes atts;
     String cp;
     String[] parts;
