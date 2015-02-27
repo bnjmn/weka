@@ -31,16 +31,16 @@
     <developer>
       <id>wekateam</id>
       <name>The WEKA Team</name>
-      <email>wekalist@list.scms.waikato.ac.nz</email>
+      <email>wekalist@list.waikato.ac.nz</email>
     </developer>
   </developers>
 
   <mailingLists>
     <mailingList>
       <name>wekalist</name>
-      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
-      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
-      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+      <subscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.waikato.ac.nz/mailman/htdig/wekalist/</archive>
     </mailingList>
   </mailingLists>
 
