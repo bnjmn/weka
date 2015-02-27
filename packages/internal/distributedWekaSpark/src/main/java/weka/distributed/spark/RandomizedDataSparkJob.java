@@ -522,181 +522,6 @@ public class RandomizedDataSparkJob extends SparkJob implements
 
   /**
    * Perform the randomization (and stratification) in the case where the input
-   * data *does* contain string or relational attributes. In this case, our
-   * final randomly shuffled RDD will contain CSV as strings. This is done to
-   * avoid collecting string or relational attribute values in the header
-   * Instances object. While not a problem for string/relational attributes with
-   * only a few values, it would be a problem for a text mining data set.
-   * Forcing the re-parsing and construction of each instance within the maps of
-   * subsequent jobs will allow just those string/relational values for each
-   * partition to accumulate in memory (batch learning), or just one string
-   * value at a time to be held in the header (incremental learning, e.g.
-   * SGDText or NaiveBayesMultinomialText).
-   *
-   * @param input
-   * @param outputPath
-   * @param numFoldSlices
-   * @param random
-   * @param headerNoSummary
-   * @throws IOException
-   */
-  protected void runStringOrRelationalPresent(JavaRDD<Instance> input,
-    String outputPath, final int numFoldSlices, final Random random,
-    final Instances headerNoSummary) throws IOException {
-
-    final PhaseOneRandomization phaseOne =
-      new PhaseOneRandomization(headerNoSummary, getCSVMapTaskOptions(), true,
-        random, numFoldSlices);
-
-    // Phase 1 - randomly shuffle the data
-    logMessage("[Randomly shuffle data (string atts present)] Starting phase 1...");
-    JavaPairRDD<Integer, Object> mapResults =
-      input.mapPartitionsToPair(
-        new PairFlatMapFunction<Iterator<Instance>, Integer, Object>() {
-
-          /**
-           * For serialization
-           */
-          private static final long serialVersionUID = 6252494717356697118L;
-
-          protected List<Tuple2<Integer, Object>> m_randomizedRows =
-            new ArrayList<Tuple2<Integer, Object>>();
-
-          // protected CSVToARFFHeaderMapTask m_rowHelper;
-
-          @Override
-          public Iterable<Tuple2<Integer, Object>>
-            call(Iterator<Instance> split) throws IOException,
-              DistributedWekaException {
-
-            while (split.hasNext()) {
-              Instance row = split.next();
-
-              Tuple2<Integer, Object> processed = phaseOne.process(row);
-              m_randomizedRows.add(processed);
-            }
-
-            return m_randomizedRows;
-          }
-        }).persist(getCachingStrategy().getStorageLevel());
-
-    // Now sort into ascending order of random assignment number
-    JavaPairRDD<Integer, Object> sortedByAssignment =
-      mapResults.sortByKey(true)
-        .partitionBy(new IntegerKeyPartitioner(numFoldSlices))
-        .persist(getCachingStrategy().getStorageLevel());
-
-    // discard mapResults
-    logMessage("[Randomly shuffle data (string atts present)] Finished "
-      + "phase 1");
-
-    if (headerNoSummary.classIndex() < 0
-      || headerNoSummary.classAttribute().isNumeric()) {
-
-      // No need for the second phase of dealing classes out to splits
-      // if there is no class or a numeric class
-      // m_sortedByFold = sortedByAssignment;
-
-      // now just convert the shuffled RDD[String] to an
-      // RDD[Instance]
-      CSVToInstancePairFlatMapFunction instanceFunction =
-        new CSVToInstancePairFlatMapFunction(headerNoSummary,
-          getCSVMapTaskOptions());
-
-      // , true here because we preserve partitions at this point
-      JavaRDD<Instance> finalDataSet =
-        sortedByAssignment.mapPartitions(instanceFunction, true).persist(
-          getCachingStrategy().getStorageLevel());
-
-      logMessage("[Randomly shuffle data] forcing materialization of final shuffled data");
-      finalDataSet.count();
-
-      logMessage("[Randomly shuffle data (string atts present)] Unpersisting "
-        + "sorted phase 1 RDD");
-      sortedByAssignment.unpersist();
-      sortedByAssignment = null;
-
-      m_sortedByFold = finalDataSet;
-    } else {
-
-      final PhaseTwoStratification phaseTwo =
-        new PhaseTwoStratification(headerNoSummary, numFoldSlices, true);
-
-      // phase 2 - deal classes out to splits + oversample minority classes
-      JavaPairRDD<Integer, Object> dealtToFolds =
-        sortedByAssignment
-          .mapPartitionsToPair(
-            new PairFlatMapFunction<Iterator<Tuple2<Integer, Object>>, Integer, Object>() {
-
-              /**
-               * For serialization
-               */
-              private static final long serialVersionUID =
-                -1876495607738562756L;
-
-              protected List<Tuple2<Integer, Object>> m_dealtRows =
-                new ArrayList<Tuple2<Integer, Object>>();
-
-              @Override
-              public Iterable<Tuple2<Integer, Object>> call(
-                Iterator<Tuple2<Integer, Object>> split) {
-
-                while (split.hasNext()) {
-                  Tuple2<Integer, Object> current = split.next();
-                  Tuple2<Integer, Object> result = phaseTwo.process(current._2);
-                  m_dealtRows.add(result);
-                }
-
-                phaseTwo.checkForMinorityClassCases(m_dealtRows);
-
-                return m_dealtRows;
-              }
-
-            }).persist(getCachingStrategy().getStorageLevel());
-
-      // discard sortedByAssignment
-
-      logMessage("[Randomly shuffle data (string atts present)] Repartitioning "
-        + "phase 2 RDD according to fold number");
-      JavaPairRDD<Integer, Object> tmpSortedByFold =
-        dealtToFolds.sortByKey(true)
-          .partitionBy(new IntegerKeyPartitioner(numFoldSlices))
-          .persist(getCachingStrategy().getStorageLevel());
-
-      CSVToInstancePairFlatMapFunction instanceFunction =
-        new CSVToInstancePairFlatMapFunction(headerNoSummary,
-          getCSVMapTaskOptions());
-
-      // , true here because we preserve the partitions from tmpSortedByFold
-      JavaRDD<Instance> finalDataSet =
-        tmpSortedByFold.mapPartitions(instanceFunction, true).persist(
-          getCachingStrategy().getStorageLevel());
-
-      logMessage("[Randomly shuffle data] forcing materialization of final shuffled data");
-      finalDataSet.count();
-
-      sortedByAssignment.unpersist();
-      sortedByAssignment = null;
-
-      dealtToFolds.unpersist();
-      dealtToFolds = null;
-
-      tmpSortedByFold.unpersist();
-      tmpSortedByFold = null;
-
-      m_sortedByFold = finalDataSet;
-    }
-
-    mapResults.unpersist();
-    mapResults = null;
-
-    if (m_writeRandomizedDataToOutput) {
-      writeRandomizedSplits(outputPath, m_sortedByFold);
-    }
-  }
-
-  /**
-   * Perform the randomization (and stratification) in the case where the input
    * data does not contain string or relational attributes. In this case, our
    * final RDD can contain instances objects, which will avoid further parsing
    * in subsequent jobs.
@@ -919,25 +744,14 @@ public class RandomizedDataSparkJob extends SparkJob implements
       finalDataSet.count();
 
       logMessage("[Randomly shuffle data] Unpersisting intermediate RDDs");
-      // sortedByAssignment.unpersist();
-      // sortedByAssignment = null;
 
       tmpSortedByFold.unpersist();
       tmpSortedByFold = null;
 
-      // dealtToFolds.unpersist();
-      // dealtToFolds = null;
-
       m_sortedByFold = finalDataSet;
       logMessage("[Randomly shuffle data] Finished shuffling/stratifying RDD. Number of partitions: "
         + m_sortedByFold.partitions().size());
-
-      // System.err.println("[Randomize job] number of entries in RDD: "
-      // + m_sortedByFold.collect().size());
     }
-
-    // mapResults.unpersist();
-    // mapResults = null;
 
     setDataset(TRAINING_DATA, new Dataset(m_sortedByFold, headerWithSummary));
 
@@ -1020,27 +834,6 @@ public class RandomizedDataSparkJob extends SparkJob implements
       logMessage("Fetching RDD<Instance> dataset from ARFF job: "
         + inputData.partitions().size() + " partitions.");
     }
-
-    /*
-     * int minSlices = 1; if
-     * (!DistributedJobConfig.isEmpty(m_sjConfig.getMinInputSlices())) { try {
-     * minSlices = Integer
-     * .parseInt(environmentSubstitute(m_sjConfig.getMinInputSlices())); } catch
-     * (NumberFormatException e) { } }
-     */
-
-    /*
-     * if (!m_cleanOutputDir) { // check for existing chunk files... String
-     * pathPlusChunk = outputPath + "/part-00000";
-     * logMessage("[Randomly shuffle data] Checking output directory: " +
-     * outputPath); if (SparkJob.checkFileExists(pathPlusChunk)) {
-     * logMessage("[Randomly shuffle data] Output directory is populated " +
-     * "with randomly shuffled chunk files already - " + "no need to execute.");
-     * 
-     * loadShuffledDataFiles(outputPath, sparkContext,
-     * CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary),
-     * minSlices); return true; } }
-     */
 
     /*
      * // TODO revisit at some stage... Current assumption: if you // have
@@ -1166,7 +959,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
       nc = Math.ceil(nc);
       numFoldSlices = (int) nc;
     }
-    logMessage("[Randomly shuffle] creating " + numFoldSlices + " splits.");
+    logMessage("[Randomly shuffle data] creating " + numFoldSlices + " splits.");
 
     if (headerNoSummary.attribute(className).isNominal()) {
       NominalStats stats = NominalStats.attributeToStats(summaryClassAtt);
