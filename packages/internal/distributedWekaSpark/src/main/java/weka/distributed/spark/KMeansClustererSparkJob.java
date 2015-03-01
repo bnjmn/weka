@@ -1737,6 +1737,6 @@ public class KMeansClustererSparkJob extends SparkJob implements
       kcsj.runJob();
     } catch (Exception ex) {
       ex.printStackTrace();
-    }
+   }
   }
 }
