@@ -1,12 +1,29 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    CanopyClustererSparkJob
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.distributed.spark;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
@@ -23,12 +40,7 @@ import weka.clusterers.Canopy;
 import weka.clusterers.Clusterer;
 import weka.clusterers.FilteredClusterer;
 import weka.clusterers.InstanceWithCanopyAssignments;
-import weka.core.CommandlineRunnable;
-import weka.core.Environment;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Utils;
+import weka.core.*;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.CanopyMapTask;
 import weka.distributed.CanopyReduceTask;
@@ -39,6 +51,12 @@ import weka.filters.Filter;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 
+/**
+ * Spark job for training a Canopy clusterer
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision$
+ */
 public class CanopyClustererSparkJob extends SparkJob implements
   CommandlineRunnable {
 
@@ -78,14 +96,10 @@ public class CanopyClustererSparkJob extends SparkJob implements
   /** The full path to the final model (local or HDFS file system) */
   protected String m_pathToAggregatedCanopy = "";
 
+  /** Maximum number of clusters to emerge from the reduce phase */
   protected String m_maxNumClustersReducePhase = "2";
 
-  // /**
-  // * Holds the randomly shuffled training data (in case other jobs need to use
-  // * it)
-  // */
-  // protected JavaRDD<Instance> m_randomlyShuffledData;
-
+  /** Holds the new RDD of instances with canopy assignments */
   protected JavaRDD<InstanceWithCanopyAssignments> m_canopiesAssigned;
 
   /**
@@ -367,48 +381,105 @@ public class CanopyClustererSparkJob extends SparkJob implements
     return "The maximum number of canopies to form in the reduce phase";
   }
 
+  /**
+   * Get the maximum number of canopies to form in the reduce phase
+   *
+   * @return the maximum number of canopies to form in the reduce phase
+   */
   public String getMaxNumCanopiesReducePhase() {
     return m_maxNumClustersReducePhase;
   }
 
+  /**
+   * Set the maximum number of canopies to form in the reduce phase
+   *
+   * @param max the maximum number of canopies to form in the reduce phase
+   */
   public void setMaxNumCanopiesReducePhase(String max) {
     m_maxNumClustersReducePhase = max;
   }
 
+  /**
+   * Tip text for this property
+   *
+   * @return the tip text for this property
+   */
   public String t1ReducePhaseTipText() {
     return "The T1 distance to use in the reduce phase. Values < 0 are taken "
       + "as a positive multiplier for the T2 distance";
   }
 
+  /**
+   * Get the T1 distance to use in the reduce phase
+   *
+   * @return the T1 distance to use in the reduce phase
+   */
   public String getT1ReducePhase() {
     return m_aggregationT1;
   }
 
+  /**
+   * Set the T1 distance to use in the reduce phase
+   *
+   * @param t1 the T1 distance to use in the reduce phase
+   */
   public void setT1ReducePhase(String t1) {
     m_aggregationT1 = t1;
   }
 
+  /**
+   * Tip text for this property
+   *
+   * @return the tip text for this property
+   */
   public String t2ReducePhaseTipText() {
     return "The T2 distance to use in the reduce phase. Values < 0 are taken "
       + "as a positive multiplier for the standard deviation-based heuristic T2 distance";
   }
 
+  /**
+   * Get the T2 distance to use in the reduce phase
+   *
+   * @return the T2 distance to use in the reduce phase
+   */
   public String getT2ReducePhase() {
     return m_aggregationT2;
   }
 
+  /**
+   * Set the T2 distance to use in the reduce phase
+   *
+   * @param t2 the T2 distance to use in the reduce phase
+   */
   public void setT2ReducePhase(String t2) {
     m_aggregationT2 = t2;
   }
 
+  /**
+   * Tip text for this property
+   *
+   * @return the tip text for this property
+   */
   public String assignCanopiesToTrainingDataTipText() {
     return "Assign canopies to each training instance once clustering is complete";
   }
 
+  /**
+   * Get whether to assign canopies to the training data
+   *
+   * @return true if the canopies found are to be assigned to the training data
+   *         (thus creating an new RDD)
+   */
   public boolean getAssignCanopiesToTrainingData() {
     return m_assignCanopiesToTrainingData;
   }
 
+  /**
+   * Set whether to assign canopies to the training data
+   *
+   * @param assign true if the canopies found are to be assigned to the training
+   *          data (thus creating an new RDD)
+   */
   public void setAssignCanopiesToTrainingData(boolean assign) {
     m_assignCanopiesToTrainingData = assign;
   }
@@ -456,6 +527,14 @@ public class CanopyClustererSparkJob extends SparkJob implements
     return result;
   }
 
+  /**
+   * Assigns canopy membership to the instances in a dataset. Creates a new
+   * RDD[InstanceWithCanopyAssignments].
+   *
+   * @param dataset the dataset to process
+   * @param headerNoSummary the header of the data (sans summary attributes)
+   * @throws Exception if a problem occurs
+   */
   protected void assignCanopiesToDataset(JavaRDD<Instance> dataset,
     final Instances headerNoSummary) throws Exception {
 
@@ -504,12 +583,6 @@ public class CanopyClustererSparkJob extends SparkJob implements
     m_canopiesAssigned =
       canopiesAssignedMapResults
         .persist(getCachingStrategy().getStorageLevel());
-
-    // if (m_randomlyShuffledData != null) {
-    // // save memory
-    // m_randomlyShuffledData.unpersist();
-    // m_randomlyShuffledData = null;
-    // }
   }
 
   protected void buildClusterer(JavaRDD<Instance> dataset,
@@ -648,36 +721,6 @@ public class CanopyClustererSparkJob extends SparkJob implements
       headerWithSummary = d.getHeaderWithSummary();
       setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
     }
-    // } else {
-    // String inputFile = environmentSubstitute(getInputFile());
-    //
-    // int minSlices = 1;
-    // if (!DistributedJobConfig.isEmpty(getMinInputSlices())) {
-    // try {
-    // minSlices =
-    // Integer.parseInt(environmentSubstitute(getMinInputSlices()));
-    // } catch (NumberFormatException e) {
-    // // don't complain
-    // }
-    // }
-    //
-    // if (m_dataSet == null) {
-    // m_dataSet = /*
-    // * m_arffHeaderJob.getInput() != null ?
-    // * stringRDDToInstanceRDD(m_arffHeaderJob.getInput(),
-    // * headerNoSummary, getCSVMapTaskOptions(),
-    // * getCachingStrategy(), true) :
-    // */
-    // loadInput(inputFile, headerNoSummary, getCSVMapTaskOptions(),
-    // sparkContext, getCachingStrategy(), minSlices, true);
-    // }
-    //
-    // try {
-    // buildClusterer(m_dataSet, m_headerWithSummary);
-    // } catch (Exception ex) {
-    // throw new DistributedWekaException(ex);
-    // }
-    // }
 
     try {
       buildClusterer(dataSet, headerWithSummary);
@@ -704,19 +747,6 @@ public class CanopyClustererSparkJob extends SparkJob implements
     return true;
   }
 
-  // public JavaRDD<Instance> getRandomlyShuffledData()
-  // throws DistributedWekaException {
-  // if (m_randomlyShuffledData == null) {
-  // throw new DistributedWekaException(
-  // "No randomly shuffled data is available. Did you "
-  // +
-  // "turn on the option to randomly shuffle the data? If canopy assignment is turned "
-  // + "on then you should call getDataWithCanopiesAssigned() instead");
-  // }
-  //
-  // return m_randomlyShuffledData;
-  // }
-
   public JavaRDD<InstanceWithCanopyAssignments> getDataWithCanopiesAssigned()
     throws DistributedWekaException {
     if (m_canopiesAssigned == null) {
@@ -735,12 +765,6 @@ public class CanopyClustererSparkJob extends SparkJob implements
     FileSystem fs = FileSystem.get(conf);
     Path p = new Path(pathOnly[0]);
     p = p.makeQualified(fs);
-
-    // if (!p.toString().toLowerCase().startsWith("file:/")) {
-    // m_finalOutputDirectory = p.toString();
-    // } else {
-    // m_finalOutputDirectory = pathOnly[0];
-    // }
 
     assignments.saveAsNewAPIHadoopFile(pathOnly[0], NullWritable.class,
       Text.class, SparkJob.NoKeyTextOutputFormat.class, conf);
