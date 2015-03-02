@@ -1131,6 +1131,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
     dist.setInstances(globalPrimingData);
     finalKMeans.setClusterCentroids(best.getCentroidsForRun());
     finalKMeans.setFinalNumberOfIterations(finalNumIterations + 1);
+    finalKMeans.setDisplayStdDevs(getDisplayCentroidStdDevs());
     if (initialStartingPoints != null) {
       finalKMeans.setInitialStartingPoints(initialStartingPoints);
     }
