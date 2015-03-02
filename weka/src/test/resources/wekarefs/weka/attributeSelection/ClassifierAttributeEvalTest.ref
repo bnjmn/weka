@@ -10,7 +10,7 @@ Attribute Evaluator (supervised, Class (nominal): 7 Class):
 
 	Using 	Wrapper Subset Evaluator
 	Learning scheme: weka.classifiers.rules.ZeroR
-	Scheme options: 
+	Scheme options: -num-decimal-places 2 
 	Subset evaluation: classification accuracy
 	Number of folds for accuracy estimation: 5
 

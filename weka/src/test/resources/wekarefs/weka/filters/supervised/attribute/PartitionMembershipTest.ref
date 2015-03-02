@@ -1,4 +1,4 @@
-@relation FilterTest_partitionMembership-weka.filters.supervised.attribute.PartitionMembership-Wweka.classifiers.trees.J48---C0.25-M2
+@relation FilterTest_partitionMembership-weka.filters.supervised.attribute.PartitionMembership-Wweka.classifiers.trees.J48---C0.25-M2-num-decimal-places2
 
 @attribute partition_0 numeric
 @attribute NominalAtt1 {r,g,b}

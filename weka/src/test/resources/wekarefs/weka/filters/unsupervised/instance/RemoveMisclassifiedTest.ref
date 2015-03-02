@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.unsupervised.instance.RemoveMisclassified-Wweka.classifiers.trees.J48 -C 0.25 -M 2-C-1-F0-T0.1-I0'
+@relation 'FilterTest-weka.filters.unsupervised.instance.RemoveMisclassified-Wweka.classifiers.trees.J48 -C 0.25 -M 2 -num-decimal-places 2-C-1-F0-T0.1-I0'
 
 @attribute NominalAtt1 {r,g,b}
 @attribute NumericAtt1 numeric
