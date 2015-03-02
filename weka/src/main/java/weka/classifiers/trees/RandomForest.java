@@ -759,6 +759,7 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   @Override
   public void finalizeAggregation() throws Exception {
     m_bagger.finalizeAggregation();
+    m_numTrees = m_bagger.getNumIterations();
   }
 }
 
