@@ -1787,6 +1787,7 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
     }
     m_SpreadInitialCount = Utils.getFlag('R', options);
 
+    super.setOptions(options);
     Utils.checkForRemainingOptions(options);
   }
 
