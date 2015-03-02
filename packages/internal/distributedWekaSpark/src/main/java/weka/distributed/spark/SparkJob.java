@@ -901,6 +901,9 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
     } finally {
       shutdownJob(logAppender);
       Thread.currentThread().setContextClassLoader(orig);
+      if (getJobStatus() != JobStatus.FAILED) {
+        setJobStatus(JobStatus.FINISHED);
+      }
     }
 
     return success;

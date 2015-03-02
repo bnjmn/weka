@@ -592,30 +592,6 @@ public class WekaScoringSparkJob extends SparkJob implements
     Instances headerNoSummary =
       CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
 
-    // String inputFile = environmentSubstitute(getInputFile());
-    // int minSlices = 1;
-    // if (!DistributedJobConfig.isEmpty(getMinInputSlices())) {
-    // try {
-    // minSlices =
-    // Integer.parseInt(environmentSubstitute(getMinInputSlices()));
-    // } catch (NumberFormatException e) {
-    // }
-    // }
-
-    // // if the arff job has loaded the data then grab that and convert to
-    // // RDD<Instance>;
-    // // otherwise load either string or serialzed instance data
-    // if (m_dataSet == null) {
-    // m_dataSet =
-    // /*
-    // * m_arffHeaderJob.getInput() != null ? stringRDDToInstanceRDD(
-    // * m_arffHeaderJob.getInput(), headerNoSummary, getCSVMapTaskOptions(),
-    // * getCachingStrategy(), true) :
-    // */
-    // loadInput(inputFile, headerNoSummary, getCSVMapTaskOptions(),
-    // sparkContext, getCachingStrategy(), minSlices, true);
-    // }
-
     String outputPath = environmentSubstitute(m_sjConfig.getOutputDir());
     outputPath = addSubdirToPath(outputPath, OUTPUT_SUBDIR);
 
@@ -651,6 +627,7 @@ public class WekaScoringSparkJob extends SparkJob implements
       throw new DistributedWekaException(ex);
     }
 
+    setJobStatus(JobStatus.FINISHED);
     return true;
   }
 

@@ -869,6 +869,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
       logMessage(ex);
       throw new DistributedWekaException(ex);
     }
+    setJobStatus(JobStatus.FINISHED);
 
     return true;
   }

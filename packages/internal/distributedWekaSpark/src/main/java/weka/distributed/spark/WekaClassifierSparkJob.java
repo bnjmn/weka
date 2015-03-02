@@ -915,6 +915,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
         + getModelFileName();
     writeModelToDestination(m_finalClassifier, headerNoSummary, outputPath);
 
+    setJobStatus(JobStatus.FINISHED);
     return true;
   }
 

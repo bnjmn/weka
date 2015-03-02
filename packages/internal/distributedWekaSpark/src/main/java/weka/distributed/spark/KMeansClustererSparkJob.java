@@ -1699,6 +1699,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
         + getModelFileName();
     writeClustererToDestination(m_finalClusterer, headerNoSummary, outputPath);
 
+    setJobStatus(JobStatus.FINISHED);
     return success;
   }
 

@@ -744,6 +744,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
       m_canopiesAssigned.saveAsTextFile(outputCanopyAssignments);
     }
 
+    setJobStatus(JobStatus.FINISHED);
     return true;
   }
 

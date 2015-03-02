@@ -820,6 +820,7 @@ public class CorrelationMatrixSparkJob extends SparkJob implements
       logMessage(e);
       throw new DistributedWekaException(e);
     }
+    setJobStatus(JobStatus.FINISHED);
 
     return true;
   }
