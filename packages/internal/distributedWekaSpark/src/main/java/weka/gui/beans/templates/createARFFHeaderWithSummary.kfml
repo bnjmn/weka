@@ -8,7 +8,7 @@
    <!ATTLIST object primitive CDATA "no">
    <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
    <!ATTLIST object null      CDATA "no">
-   <!ATTLIST object version   CDATA "3.7.13-SNAPSHOT">
+   <!ATTLIST object version   CDATA "3.7.12">
 ]
 >
 

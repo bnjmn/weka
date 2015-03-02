@@ -8,7 +8,7 @@
    <!ATTLIST object primitive CDATA "no">
    <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
    <!ATTLIST object null      CDATA "no">
-   <!ATTLIST object version   CDATA "3.7.13-SNAPSHOT">
+   <!ATTLIST object version   CDATA "3.7.12">
 ]
 >
 
@@ -55,7 +55,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierEvaluationSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierEvaluationSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1 -- -num-decimal-places 2</object>
+            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="3">
@@ -109,7 +109,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/WekaClassifierEvaluationSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">WekaClassifierEvaluationSparkJob2</object>
-            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -K 0 -S 1 -num-slots 1 -num-decimal-places 2</object>
+            <object class="java.lang.String" name="jobOptions">-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -K 0 -S 1 -num-slots 1</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="6">
