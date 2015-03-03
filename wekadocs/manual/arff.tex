@@ -73,8 +73,14 @@ The relation name is defined as the first line in the ARFF file. The format is:
   @relation <relation-name>
 \end{verbatim}
 
-where \textit{$<$relation-name$>$} is a string. The string must be quoted if the name includes spaces.
+where \textit{$<$relation-name$>$} is a string. The string must be quoted if the name includes spaces. Furthermore, relation names or attribute names (see below) cannot begin with
 
+\begin{itemize}
+	\item a character below \verb+\\u0021+
+        \item \verb+'{', '}', ',', or '%'+
+\end{itemize}
+
+Moreover, it can only begin with a single or double quote if there is a corresponding quote at the end of the name.
 
 \subsubsection*{The @attribute Declarations}
 Attribute declarations take the form of an ordered sequence of \texttt{@attribute} statements. Each attribute in the data set has its own \texttt{@attribute} statement which uniquely defines the name of that attribute and it's data type. The order the attributes are declared indicates the column position in the data section of the file. For example, if an attribute is the third one declared then Weka expects that all that attributes values will be found in the third comma delimited column.
@@ -85,7 +91,7 @@ The format for the \texttt{@attribute} statement is:
   @attribute <attribute-name> <datatype>
 \end{verbatim}
 
-where the \textit{$<$attribute-name$>$} must start with an alphabetic character. If spaces are to be included in the name then the entire name must be quoted.
+where the \textit{$<$attribute-name$>$} must adhere to the constraints specified in the above section on the \texttt{@relation} declaration.
 
 The \textit{$<$datatype$>$} can be any of the four types supported by Weka:
 \begin{itemize}
