@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.0.10
+Version=1.0.11
 
 #Date (year-month-day)
-Date=2014-12-23
+Date=2015-03-04
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-Changes=This version is compiled against Weka 3.7.12.
+Changes=Some small changes to support distributedWekaSpark
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.10.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaBase1.0.11.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html

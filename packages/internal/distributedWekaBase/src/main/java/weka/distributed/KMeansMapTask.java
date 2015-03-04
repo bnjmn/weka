@@ -127,7 +127,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Initilizes the map task. Configures any filters required.
-   * 
+   *
    * @param headerWithSummary header of the incoming instances with summary
    *          attributes included
    * @return the header (without summary attributes) after it has been through
@@ -191,7 +191,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * k-means has completed. At this point, the reduce task can compute global
    * min/max for transformed attributes using the partial summary metadata for
    * the clusters computed in the first iteration
-   * 
+   *
    * @param priming the dummy priming data to use in the distance function
    */
   public void setDummyDistancePrimingData(Instances priming)
@@ -214,7 +214,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * Processes a training instance. Uses the k-means clusterer to find the
    * nearest centroid to the supplied instance and then updates the summary meta
    * data header for the corresponding centroid with the training instance.
-   * 
+   *
    * @param toProcess the instance to process
    * @throws DistributedWekaException if a problem occurs
    */
@@ -259,7 +259,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Computes the distance between the two supplied instances
-   * 
+   *
    * @param one the first instance
    * @param two the second instance
    * @return the distance between the two
@@ -277,7 +277,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Get the summary stats for each centroid
-   * 
+   *
    * @return the summary stats (one instances object) for each centroid
    */
   public List<Instances> getCentroidStats() {
@@ -327,7 +327,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Configures filters to use when clustering
-   * 
+   *
    * @param headerNoSummary the header of the training data sans summary
    *          attributes
    * @throws DistributedWekaException if a problem occurs
@@ -377,7 +377,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -387,7 +387,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Sets whether missing values are to be replaced.
-   * 
+   *
    * @param r true if missing values are to be replaced
    */
   public void setDontReplaceMissingValues(boolean r) {
@@ -405,7 +405,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Get the distance function in use
-   * 
+   *
    * @return the distance function in use
    */
   public NormalizableDistance getDistanceFunction() {
@@ -416,7 +416,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * Set the cluster centroids to use for this iteration. NOTE: These should be
    * in the transformed space if any filters (including missing values
    * replacement) are being used.
-   * 
+   *
    * @param centers the centroids to use
    */
   public void setCentroids(Instances centers) {
@@ -432,7 +432,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
   /**
    * Apply the filters (if any) setup for this map task to the supplied
    * instances
-   * 
+   *
    * @param toApplyTo the instances to filer
    * @return a filtered set of instances
    * @throws Exception if a problem occurs
@@ -454,7 +454,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Apply the filters (if any) for this map task to the supplied instance
-   * 
+   *
    * @param original the instance in the original space
    * @return a filtered instance
    * @throws Exception if a problem occurs
@@ -472,7 +472,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * Gets the full set of preprocessing filters
-   * 
+   *
    * @return preprocessing filter(s) or null if no preprocessing/missing values
    *         handling is being done
    */
@@ -483,7 +483,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
   /**
    * Set whether the run of k-means that this map is associated with has
    * converged or not
-   * 
+   *
    * @param converged true if the run has converged
    */
   public void setConverged(boolean converged) {
@@ -503,7 +503,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
   /**
    * Get the header of the data after it has been through any pre-processing
    * filters specified by the user
-   * 
+   *
    * @return the transformed header
    */
   public Instances getTransformedHeader() {
@@ -514,7 +514,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * Get the user-specified filters to use with the k-means clusterer. Does not
    * include the missing values replacement filter that is automatically
    * configured using global ARFF profiling summary data
-   * 
+   *
    * @return the user-specified filters to use with k-means
    */
   public Filter[] getFiltersToUse() {
@@ -540,7 +540,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * Set the user-specified filters to use with the k-means clusterer. Does not
    * include the missing values replacement filter that is automatically
    * configured using global ARFF profiling summary data
-   * 
+   *
    * @param toUse the user-specified filters to use with k-means
    */
   public void setFiltersToUse(Filter[] toUse) {
@@ -558,7 +558,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
 
   /**
    * The tool tip text for this property.
-   * 
+   *
    * @return the tool tip text for this property
    */
   public String filtersToUseTipText() {
@@ -631,7 +631,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
    * Utility method to choose start points for a number of runs of k-means given
    * a list of randomly selected instance objects. Avoids choosing duplicate
    * instances as start points for each run.
-   * 
+   *
    * @param numRuns the numeber of runs of k-means
    * @param numClusters the number of clusters/start points for each run
    * @param candidates the list of total candidates to choose randomly from
