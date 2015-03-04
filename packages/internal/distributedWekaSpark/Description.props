@@ -8,7 +8,7 @@ PackageName=distributedWekaSpark
 Version=1.0.0
 
 #Date (year-month-day)
-Date=2015-02-20
+Date=2015-03-04
 
 # Title (required)
 Title=Spark wrappers for Weka
