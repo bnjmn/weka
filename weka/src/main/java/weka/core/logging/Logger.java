@@ -115,7 +115,6 @@ public abstract class Logger implements RevisionHandler {
       classname =
         m_Properties.getProperty("weka.core.logging.Logger",
           ConsoleLogger.class.getName());
-      System.err.println("Logging using: " + classname);
       try {
         m_Singleton = (Logger) Class.forName(classname).newInstance();
       } catch (Exception e) {
