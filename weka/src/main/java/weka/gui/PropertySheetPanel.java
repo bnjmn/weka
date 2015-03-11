@@ -249,6 +249,9 @@ public class PropertySheetPanel extends JPanel implements
   /** The target object being edited. */
   private Object m_Target;
 
+  /** Whether to show the about panel */
+  private boolean m_showAboutPanel = true;
+
   /** Holds the customizer (if one exists) for the object being edited */
   private GOECustomizer m_Customizer;
 
@@ -304,13 +307,23 @@ public class PropertySheetPanel extends JPanel implements
   private transient Environment m_env;
 
   /**
-   * Creates the property sheet panel.
+   * Creates the property sheet panel with an about panel.
    */
   public PropertySheetPanel() {
 
     // setBorder(BorderFactory.createLineBorder(Color.red));
     setBorder(BorderFactory.createEmptyBorder(0, 0, 10, 0));
     m_env = Environment.getSystemWide();
+  }
+
+  /**
+   * Creates the property sheet panel
+   *
+   * @param showAboutPanel true if the about panel is to be shown
+   */
+  public PropertySheetPanel(boolean showAboutPanel) {
+    super();
+    m_showAboutPanel = showAboutPanel;
   }
 
   /**
@@ -507,7 +520,9 @@ public class PropertySheetPanel extends JPanel implements
             gbConstraints.insets = new Insets(0, 5, 0, 5);
             gbLayout.setConstraints(jp, gbConstraints);
             m_aboutPanel = jp;
-            scrollablePanel.add(m_aboutPanel);
+            if (m_showAboutPanel) {
+              scrollablePanel.add(m_aboutPanel);
+            }
             componentOffset = 1;
 
             // break;
