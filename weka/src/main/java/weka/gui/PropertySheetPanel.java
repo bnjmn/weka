@@ -46,9 +46,13 @@ import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -603,6 +607,26 @@ public class PropertySheetPanel extends JPanel implements
       if (getter == null || setter == null) {
         continue;
       }
+
+      List<Annotation> annotations = new ArrayList<Annotation>();
+      if (setter.getDeclaredAnnotations().length > 0) {
+        annotations.addAll(Arrays.asList(setter.getDeclaredAnnotations()));
+      }
+      if (getter.getDeclaredAnnotations().length > 0) {
+        annotations.addAll(Arrays.asList(getter.getDeclaredAnnotations()));
+      }
+
+      boolean skip = false;
+      for (Annotation a : annotations) {
+        if (a instanceof ProgrammaticProperty) {
+          skip = true; // skip property that is only supposed to be manipulated programatically
+          break;
+        }
+      }
+      if (skip) {
+        continue;
+      }
+
 
       JComponent view = null;
 
