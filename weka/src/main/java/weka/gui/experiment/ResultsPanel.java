@@ -21,13 +21,7 @@
 
 package weka.gui.experiment;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -81,6 +75,7 @@ import weka.gui.ListSelectorDialog;
 import weka.gui.PropertyDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.explorer.Explorer;
 
 /**
  * This panel controls simple analysis of experimental results.
@@ -243,6 +238,9 @@ public class ResultsPanel extends JPanel {
 
   /** lets the user choose the format for the output. */
   protected JButton m_OutputFormatButton = new JButton("Select");
+
+  /** Click to load the results instances into the Explorer */
+  protected JButton m_Explorer = new JButton("Open Explorer...");
 
   /** Click to start the test. */
   protected JButton m_PerformBut = new JButton("Perform test");
@@ -432,6 +430,13 @@ public class ResultsPanel extends JPanel {
       }
     });
 
+    m_Explorer.setEnabled(false);
+    m_Explorer.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(ActionEvent e) {
+        openExplorer();
+      }
+    });
+
     m_PerformBut.setEnabled(false);
     m_PerformBut.addActionListener(new ActionListener() {
       @Override
@@ -456,8 +461,11 @@ public class ResultsPanel extends JPanel {
     m_History.setBorder(BorderFactory.createTitledBorder("Result list"));
 
     // Set up the GUI layout
+    JPanel sourceAndButsHolder = new JPanel();
+    sourceAndButsHolder.setLayout(new BorderLayout());
     JPanel p1 = new JPanel();
     p1.setBorder(BorderFactory.createTitledBorder("Source"));
+    sourceAndButsHolder.add(p1, BorderLayout.NORTH);
     JPanel p2 = new JPanel();
     GridBagLayout gb = new GridBagLayout();
     GridBagConstraints constraints = new GridBagConstraints();
@@ -487,6 +495,12 @@ public class ResultsPanel extends JPanel {
     p1.setLayout(new BorderLayout());
     p1.add(m_FromLab, BorderLayout.CENTER);
     p1.add(p2, BorderLayout.EAST);
+
+    JPanel newButHolder = new JPanel();
+    newButHolder.setLayout(new BorderLayout());
+    newButHolder.setBorder(BorderFactory.createTitledBorder("Actions"));
+    sourceAndButsHolder.add(newButHolder, BorderLayout.SOUTH);
+
 
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Configure test"));
@@ -702,18 +716,20 @@ public class ResultsPanel extends JPanel {
     JPanel bts = new JPanel();
     m_PerformBut.setMnemonic('t');
     m_SaveOutBut.setMnemonic('S');
-    bts.setLayout(new GridLayout(1, 2, 5, 5));
+    bts.setLayout(new GridLayout(1, 3, 5, 5));
     bts.add(m_PerformBut);
     bts.add(m_SaveOutBut);
+    bts.add(m_Explorer);
+    newButHolder.add(bts, BorderLayout.WEST);
 
-    gbC = new GridBagConstraints();
+    /* gbC = new GridBagConstraints();
     gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.HORIZONTAL;
     gbC.gridy = 1;
     gbC.gridx = 0;
     gbC.insets = new Insets(5, 5, 5, 5);
     gbL.setConstraints(bts, gbC);
-    mondo.add(bts);
+    mondo.add(bts); */
     gbC = new GridBagConstraints();
     // gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
@@ -735,7 +751,7 @@ public class ResultsPanel extends JPanel {
     // splitPane.setDividerLocation(100);
 
     setLayout(new BorderLayout());
-    add(p1, BorderLayout.NORTH);
+    add(sourceAndButsHolder, BorderLayout.NORTH);
     // add(mondo , BorderLayout.CENTER);
     add(splitPane, BorderLayout.CENTER);
   }
@@ -1168,7 +1184,7 @@ public class ResultsPanel extends JPanel {
     m_ShowStdDevs.setEnabled(true);
     m_OutputFormatButton.setEnabled(true);
     m_PerformBut.setEnabled(true);
-
+    m_Explorer.setEnabled(true);
   }
 
   /**
@@ -1377,6 +1393,30 @@ public class ResultsPanel extends JPanel {
     m_TTester = tester;
     m_PerformBut.setToolTipText(m_TTester.getToolTipText());
     System.out.println("Tester set to: " + m_TTester.getClass().getName());
+  }
+
+  protected synchronized void openExplorer() {
+    if (m_Instances != null) {
+      Explorer exp = new Explorer();
+      exp.getPreprocessPanel().setInstances(m_Instances);
+
+      final JFrame jf = new JFrame("Weka Explorer");
+      jf.getContentPane().setLayout(new BorderLayout());
+      jf.getContentPane().add(exp, BorderLayout.CENTER);
+      jf.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosing(WindowEvent e) {
+          jf.dispose();
+        }
+      });
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setVisible(true);
+      Image icon = Toolkit.getDefaultToolkit().getImage(
+        exp.getClass().getClassLoader()
+          .getResource("weka/gui/weka_icon_new_48.png"));
+      jf.setIconImage(icon);
+    }
   }
 
   /**
