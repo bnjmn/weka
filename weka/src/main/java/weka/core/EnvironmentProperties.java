@@ -33,7 +33,7 @@ import java.util.Properties;
  */
 public class EnvironmentProperties extends Properties {
 
-  protected Environment m_env = Environment.getSystemWide();
+  protected transient Environment m_env = Environment.getSystemWide();
 
   public EnvironmentProperties() {
     super();
@@ -45,6 +45,9 @@ public class EnvironmentProperties extends Properties {
 
   @Override public String getProperty(String key) {
     // allow system-wide properties to override
+    if (m_env == null) {
+      m_env = Environment.getSystemWide();
+    }
    String result = m_env.getVariableValue(key);
 
     if (result == null) {
