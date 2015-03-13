@@ -607,6 +607,31 @@ public class PropertySheetPanel extends JPanel implements
       }
     }
 
+    int[] propOrdering = new int[m_Properties.length];
+    for (int i = 0; i < propOrdering.length; i++) {
+      propOrdering[i] = Integer.MAX_VALUE;
+    }
+    for (int i = 0; i < m_Properties.length; i++) {
+      Method getter = m_Properties[i].getReadMethod();
+      Method setter = m_Properties[i].getWriteMethod();
+      if (getter == null || setter == null) {
+        continue;
+      }
+      List<Annotation> annotations = new ArrayList<Annotation>();
+      if (setter.getDeclaredAnnotations().length > 0) {
+        annotations.addAll(Arrays.asList(setter.getDeclaredAnnotations()));
+      }
+      if (getter.getDeclaredAnnotations().length > 0) {
+        annotations.addAll(Arrays.asList(getter.getDeclaredAnnotations()));
+      }
+      for (Annotation a : annotations) {
+        if (a instanceof PropertyDisplayOrder) {
+          propOrdering[i] = ((PropertyDisplayOrder)a).displayOrder();
+          break;
+        }
+      }
+    }
+    int[] sortedPropOrderings = Utils.sort(propOrdering);
     m_Editors = new PropertyEditor[m_Properties.length];
     m_Values = new Object[m_Properties.length];
     m_Views = new JComponent[m_Properties.length];
@@ -616,15 +641,16 @@ public class PropertySheetPanel extends JPanel implements
     for (int i = 0; i < m_Properties.length; i++) {
 
       // Don't display hidden or expert properties.
-      if (m_Properties[i].isHidden() || m_Properties[i].isExpert()) {
+      if (m_Properties[sortedPropOrderings[i]].isHidden() ||
+        m_Properties[sortedPropOrderings[i]].isExpert()) {
         continue;
       }
 
-      String name = m_Properties[i].getDisplayName();
+      String name = m_Properties[sortedPropOrderings[i]].getDisplayName();
       String origName = name;
-      Class<?> type = m_Properties[i].getPropertyType();
-      Method getter = m_Properties[i].getReadMethod();
-      Method setter = m_Properties[i].getWriteMethod();
+      Class<?> type = m_Properties[sortedPropOrderings[i]].getPropertyType();
+      Method getter = m_Properties[sortedPropOrderings[i]].getReadMethod();
+      Method setter = m_Properties[sortedPropOrderings[i]].getWriteMethod();
 
       // Only display read/write properties.
       if (getter == null || setter == null) {
@@ -666,10 +692,10 @@ public class PropertySheetPanel extends JPanel implements
       try {
         // Object args[] = { };
         Object value = getter.invoke(m_Target, args);
-        m_Values[i] = value;
+        m_Values[sortedPropOrderings[i]] = value;
 
         PropertyEditor editor = null;
-        Class<?> pec = m_Properties[i].getPropertyEditorClass();
+        Class<?> pec = m_Properties[sortedPropOrderings[i]].getPropertyEditorClass();
         if (pec != null) {
           try {
             editor = (PropertyEditor) pec.newInstance();
@@ -690,7 +716,7 @@ public class PropertySheetPanel extends JPanel implements
             editor = PropertyEditorManager.findEditor(type);
           }
         }
-        m_Editors[i] = editor;
+        m_Editors[sortedPropOrderings[i]] = editor;
 
         // If we can't edit this component, skip it.
         if (editor == null) {
@@ -738,9 +764,9 @@ public class PropertySheetPanel extends JPanel implements
                 String tempTip = (String) (meth.invoke(m_Target, args));
                 int ci = tempTip.indexOf('.');
                 if (ci < 0) {
-                  m_TipTexts[i] = tempTip;
+                  m_TipTexts[sortedPropOrderings[i]] = tempTip;
                 } else {
-                  m_TipTexts[i] = tempTip.substring(0, ci);
+                  m_TipTexts[sortedPropOrderings[i]] = tempTip.substring(0, ci);
                 }
                 /*
                  * if (m_HelpText != null) { if (firstTip) {
@@ -786,24 +812,24 @@ public class PropertySheetPanel extends JPanel implements
         continue;
       }
 
-      m_Labels[i] = new JLabel(name, SwingConstants.RIGHT);
-      m_Labels[i].setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 5));
-      m_Views[i] = view;
+      m_Labels[sortedPropOrderings[i]] = new JLabel(name, SwingConstants.RIGHT);
+      m_Labels[sortedPropOrderings[i]].setBorder(BorderFactory.createEmptyBorder(10, 10, 0, 5));
+      m_Views[sortedPropOrderings[i]] = view;
       GridBagConstraints gbConstraints = new GridBagConstraints();
       gbConstraints.anchor = GridBagConstraints.EAST;
       gbConstraints.fill = GridBagConstraints.HORIZONTAL;
       gbConstraints.gridy = i + componentOffset;
       gbConstraints.gridx = 0;
-      gbLayout.setConstraints(m_Labels[i], gbConstraints);
-      scrollablePanel.add(m_Labels[i]);
+      gbLayout.setConstraints(m_Labels[sortedPropOrderings[i]], gbConstraints);
+      scrollablePanel.add(m_Labels[sortedPropOrderings[i]]);
       JPanel newPanel = new JPanel();
-      if (m_TipTexts[i] != null) {
-        m_Views[i].setToolTipText(m_TipTexts[i]);
-        m_Labels[i].setToolTipText(m_TipTexts[i]);
+      if (m_TipTexts[sortedPropOrderings[sortedPropOrderings[i]]] != null) {
+        m_Views[sortedPropOrderings[i]].setToolTipText(m_TipTexts[sortedPropOrderings[i]]);
+        m_Labels[sortedPropOrderings[i]].setToolTipText(m_TipTexts[i]);
       }
       newPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       newPanel.setLayout(new BorderLayout());
-      newPanel.add(m_Views[i], BorderLayout.CENTER);
+      newPanel.add(m_Views[sortedPropOrderings[i]], BorderLayout.CENTER);
       gbConstraints = new GridBagConstraints();
       gbConstraints.anchor = GridBagConstraints.WEST;
       gbConstraints.fill = GridBagConstraints.BOTH;
