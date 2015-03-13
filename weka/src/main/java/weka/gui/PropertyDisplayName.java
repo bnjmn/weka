@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 public @interface PropertyDisplayName {
 
   /**
-   * The nice GUI dispalyable name for this property
+   * The nice GUI displayable name for this property
    *
    * @return a nice displayable name
    */
