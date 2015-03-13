@@ -33,6 +33,7 @@ import weka.core.*;
 import weka.core.Capabilities.Capability;
 import weka.gui.PasswordProperty;
 import weka.gui.PropertyDisplayName;
+import weka.gui.PropertyDisplayOrder;
 
 /**
  * <!-- globalinfo-start --> Writes to a database (tested with MySQL, InstantDB,
@@ -190,7 +191,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Set the environment variables to use.
-   * 
+   *
    * @param env the environment variables to use
    */
   @Override
@@ -211,7 +212,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   /**
    * Initializes a new DatabaseConnection object, either default one or from
    * custom props file.
-   * 
+   *
    * @return the DatabaseConnection object
    * @see #m_CustomPropsFile
    */
@@ -253,7 +254,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
     super.resetOptions();
 
-    setRetrieval(NONE);
+    setRetrieval( NONE );
 
     try {
       if (m_DataBaseConnection != null && m_DataBaseConnection.isConnected()) {
@@ -310,7 +311,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns a string describing this Saver.
-   * 
+   *
    * @return a description of the Saver suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -320,7 +321,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the table's name.
-   * 
+   *
    * @param tn the name of the table
    */
   public void setTableName(String tn) {
@@ -330,10 +331,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets the table's name.
-   * 
+   *
    * @return the table's name
    */
   @PropertyDisplayName(displayName = "Table name")
+  @PropertyDisplayOrder(displayOrder = 4)
   public String getTableName() {
 
     return m_tableName;
@@ -341,7 +343,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String tableNameTipText() {
@@ -352,7 +354,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   /**
    * Set whether to truncate (i.e. drop and recreate) the table if it already
    * exits. If false, then new data is appended to the table.
-   * 
+   *
    * @param t true if the table should be truncated first (if it exists).
    */
   public void setTruncate(boolean t) {
@@ -362,17 +364,18 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   /**
    * Get whether to truncate (i.e. drop and recreate) the table if it already
    * exits. If false, then new data is appended to the table.
-   * 
+   *
    * @param t true if the table should be truncated first (if it exists).
    */
   @PropertyDisplayName(displayName = "Truncate table")
+  @PropertyDisplayOrder(displayOrder = 6)
   public boolean getTruncate() {
     return m_truncate;
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String truncateTipText() {
@@ -381,7 +384,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * En/Dis-ables the automatic generation of a primary key.
-   * 
+   *
    * @param flag flag for automatic key-genereration
    */
   public void setAutoKeyGeneration(boolean flag) {
@@ -391,10 +394,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets whether or not a primary key will be generated automatically.
-   * 
+   *
    * @return true if a primary key column will be generated, false otherwise
    */
   @PropertyDisplayName(displayName = "Automatic primary key")
+  @PropertyDisplayOrder(displayOrder = 7)
   public boolean getAutoKeyGeneration() {
 
     return m_id;
@@ -402,7 +406,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property
    */
   public String autoKeyGenerationTipText() {
@@ -414,7 +418,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   /**
    * En/Dis-ables that the relation name is used for the name of the table
    * (default enabled).
-   * 
+   *
    * @param flag if true the relation name is used as table name
    */
   public void setRelationForTableName(boolean flag) {
@@ -424,11 +428,12 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets whether or not the relation name is used as name of the table.
-   * 
+   *
    * @return true if the relation name is used as the name of the table, false
    *         otherwise
    */
   @PropertyDisplayName(displayName = "Use relation name")
+  @PropertyDisplayOrder(displayOrder = 5)
   public boolean getRelationForTableName() {
 
     return m_tabName;
@@ -436,7 +441,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text fo this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String relationForTableNameTipText() {
@@ -446,7 +451,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the database URL.
-   * 
+   *
    * @param url the URL
    */
   @Override
@@ -464,10 +469,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets the database URL.
-   * 
+   *
    * @return the URL
    */
   @PropertyDisplayName(displayName = "Database URL")
+  @PropertyDisplayOrder(displayOrder = 1)
   @Override
   public String getUrl() {
 
@@ -476,7 +482,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String urlTipText() {
@@ -486,10 +492,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the database user.
-   * 
+   *
    * @param user the user name
    */
   @PropertyDisplayName(displayName = "Username")
+  @PropertyDisplayOrder(displayOrder = 2)
   @Override
   public void setUser(String user) {
     checkEnv();
@@ -505,7 +512,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets the database user.
-   * 
+   *
    * @return the user name
    */
   @Override
@@ -517,7 +524,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String userTipText() {
@@ -527,7 +534,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the database password.
-   * 
+   *
    * @param password the password
    */
   @Override
@@ -544,10 +551,11 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the database password.
-   * 
+   *
    * @return the database password
    */
   @PropertyDisplayName(displayName = "Password")
+  @PropertyDisplayOrder(displayOrder = 3)
   @PasswordProperty
   public String getPassword() {
     // return m_DataBaseConnection.getPassword();
@@ -556,7 +564,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return the tip text for this property
    */
   public String passwordTipText() {
@@ -566,7 +574,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the custom properties file to use.
-   * 
+   *
    * @param value the custom props file to load database parameters from, use
    *          null or directory to disable custom properties.
    */
@@ -576,17 +584,18 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the custom properties file in use, if any.
-   * 
+   *
    * @return the custom props file, null if none used
    */
   @PropertyDisplayName(displayName = "DB config file")
+  @PropertyDisplayOrder(displayOrder = 8)
   public File getCustomPropsFile() {
     return m_CustomPropsFile;
   }
 
   /**
    * The tip text for this property.
-   * 
+   *
    * @return the tip text
    */
   public String customPropsFileTipText() {
@@ -595,7 +604,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the database url.
-   * 
+   *
    * @param url the database url
    * @param userName the user name
    * @param password the password
@@ -619,7 +628,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Sets the database url.
-   * 
+   *
    * @param url the database url
    */
   public void setDestination(String url) {
@@ -629,8 +638,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
       m_DataBaseConnection = newDatabaseConnection();
       // m_DataBaseConnection.setDatabaseURL(url);
-      setUrl(url);
-      setUser(m_Username);
+      setUrl( url );
+      setUser( m_Username );
       setPassword(m_Password);
       // m_DataBaseConnection.setUsername(m_Username);
       // m_DataBaseConnection.setPassword(m_Password);
@@ -657,7 +666,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the Capabilities of this saver.
-   * 
+   *
    * @return the capabilities of this object
    * @see Capabilities
    */
@@ -685,7 +694,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Opens a connection to the database.
-   * 
+   *
    */
   public void connectToDatabase() {
 
@@ -701,7 +710,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   /**
    * Writes the structure (header information) to a database by creating a new
    * table.
-   * 
+   *
    * @throws Exception if something goes wrong
    */
   private void writeStructure() throws Exception {
@@ -795,7 +804,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * inserts the given instance into the table.
-   * 
+   *
    * @param inst the instance to insert
    * @throws Exception if something goes wrong
    */
@@ -843,7 +852,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * Saves an instances incrementally. Structure has to be set by using the
    * setStructure() method or setInstances() method. When a structure is set, a
    * table is created.
-   * 
+   *
    * @param inst the instance to save
    * @throws IOException throws IOEXception.
    */
@@ -906,7 +915,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Writes a Batch of instances.
-   * 
+   *
    * @throws IOException throws IOException
    */
   @Override
@@ -943,7 +952,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Prints an exception.
-   * 
+   *
    * @param ex the exception to print
    */
   private void printException(Exception ex) {
@@ -965,7 +974,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Gets the setting.
-   * 
+   *
    * @return the current setting
    */
   @Override
@@ -1015,7 +1024,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Lists the available options.
-   * 
+   *
    * @return an enumeration of the available options
    */
   @Override
@@ -1184,17 +1193,17 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
   public String getRevision() {
-    return RevisionUtils.extract("$Revision$");
+    return RevisionUtils.extract( "$Revision$" );
   }
 
   /**
    * Main method.
-   * 
+   *
    * @param options should contain the options of a Saver.
    */
   public static void main(String[] options) {
