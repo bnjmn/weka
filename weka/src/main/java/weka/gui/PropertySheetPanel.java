@@ -46,6 +46,7 @@ import java.beans.PropertyDescriptor;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.beans.PropertyVetoException;
+import java.io.File;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -66,12 +67,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.MultiInstanceCapabilitiesHandler;
 import weka.gui.beans.GOECustomizer;
 
 /**
@@ -101,7 +98,7 @@ public class PropertySheetPanel extends JPanel implements
 
     /**
      * default constructor.
-     * 
+     *
      * @param owner the owning frame
      */
     public CapabilitiesHelpDialog(Frame owner) {
@@ -112,7 +109,7 @@ public class PropertySheetPanel extends JPanel implements
 
     /**
      * default constructor.
-     * 
+     *
      * @param owner the owning dialog
      */
     public CapabilitiesHelpDialog(Dialog owner) {
@@ -173,7 +170,7 @@ public class PropertySheetPanel extends JPanel implements
 
     /**
      * This method gets called when a bound property is changed.
-     * 
+     *
      * @param evt the change event
      */
     @Override
@@ -184,7 +181,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * returns a comma-separated list of all the capabilities.
-   * 
+   *
    * @param c the capabilities to get a string representation from
    * @return the string describing the capabilities
    */
@@ -207,7 +204,7 @@ public class PropertySheetPanel extends JPanel implements
   /**
    * generates a string from the capapbilities, suitable to add to the help
    * text.
-   * 
+   *
    * @param title the title for the capabilities
    * @param c the capabilities
    * @return a string describing the capabilities
@@ -311,6 +308,11 @@ public class PropertySheetPanel extends JPanel implements
   private transient Environment m_env;
 
   /**
+   * Whether to use EnvironmentField and FileEnvironmentField for text and
+   * file properties respectively */
+  private boolean m_useEnvironmentPropertyEditors;
+
+  /**
    * Creates the property sheet panel with an about panel.
    */
   public PropertySheetPanel() {
@@ -331,10 +333,30 @@ public class PropertySheetPanel extends JPanel implements
   }
 
   /**
+   * Set whether to use environment property editors for string and
+   * file properties
+   *
+   * @param u true to use environment property editors
+   */
+  public void setUseEnvironmentPropertyEditors(boolean u) {
+    m_useEnvironmentPropertyEditors = u;
+  }
+
+  /**
+   * Get whether to use environment property editors for string and
+   * file properties
+   *
+   * @return true to use environment property editors
+   */
+  public boolean getUseEnvironmentPropertyEditors() {
+    return m_useEnvironmentPropertyEditors;
+  }
+
+  /**
    * Return the panel containing global info and help for the object being
    * edited. May return null if the edited object provides no global info or tip
    * text.
-   * 
+   *
    * @return the about panel.
    */
   public JPanel getAboutPanel() {
@@ -347,7 +369,7 @@ public class PropertySheetPanel extends JPanel implements
   /**
    * Updates the property sheet panel with a changed property and also passed
    * the event along.
-   * 
+   *
    * @param evt a value of type 'PropertyChangeEvent'
    */
   @Override
@@ -358,7 +380,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * Adds a PropertyChangeListener.
-   * 
+   *
    * @param l a value of type 'PropertyChangeListener'
    */
   @Override
@@ -368,7 +390,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * Removes a PropertyChangeListener.
-   * 
+   *
    * @param l a value of type 'PropertyChangeListener'
    */
   @Override
@@ -378,7 +400,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * Sets a new target object for customisation.
-   * 
+   *
    * @param targ a value of type 'Object'
    */
   public synchronized void setTarget(Object targ) {
@@ -599,6 +621,7 @@ public class PropertySheetPanel extends JPanel implements
       }
 
       String name = m_Properties[i].getDisplayName();
+      String origName = name;
       Class<?> type = m_Properties[i].getPropertyType();
       Method getter = m_Properties[i].getReadMethod();
       Method setter = m_Properties[i].getWriteMethod();
@@ -617,9 +640,19 @@ public class PropertySheetPanel extends JPanel implements
       }
 
       boolean skip = false;
+      boolean password = false;
       for (Annotation a : annotations) {
         if (a instanceof ProgrammaticProperty) {
           skip = true; // skip property that is only supposed to be manipulated programatically
+          break;
+        }
+
+        if (a instanceof PropertyDisplayName) {
+          name = ((PropertyDisplayName) a).displayName();
+        }
+
+        if (a instanceof PasswordProperty) {
+          password = true;
           break;
         }
       }
@@ -645,7 +678,17 @@ public class PropertySheetPanel extends JPanel implements
           }
         }
         if (editor == null) {
-          editor = PropertyEditorManager.findEditor(type);
+          if (password && String.class.isAssignableFrom(type)) {
+            editor = new PasswordField();
+          } else if (m_useEnvironmentPropertyEditors && String.class.isAssignableFrom(
+            type)) {
+            editor = new EnvironmentField();
+          } else if (m_useEnvironmentPropertyEditors && File.class.isAssignableFrom(
+            type)) {
+            editor = new FileEnvironmentField();
+          } else {
+            editor = PropertyEditorManager.findEditor(type);
+          }
         }
         m_Editors[i] = editor;
 
@@ -685,7 +728,7 @@ public class PropertySheetPanel extends JPanel implements
         editor.setValue(value);
 
         // now look for a TipText method for this property
-        String tipName = name + "TipText";
+        String tipName = origName + "TipText";
         for (MethodDescriptor m_Method : m_Methods) {
           String mname = m_Method.getDisplayName();
           Method meth = m_Method.getMethod();
@@ -865,7 +908,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * Gets the number of editable properties for the current target.
-   * 
+   *
    * @return the number of editable properties.
    */
   public int editableProperties() {
@@ -876,7 +919,7 @@ public class PropertySheetPanel extends JPanel implements
   /**
    * Updates the propertysheet when a value has been changed (from outside the
    * propertysheet?).
-   * 
+   *
    * @param evt a value of type 'PropertyChangeEvent'
    */
   synchronized void wasModified(PropertyChangeEvent evt) {
@@ -993,7 +1036,7 @@ public class PropertySheetPanel extends JPanel implements
 
   /**
    * Set environment variables to pass on to any editor that can use them
-   * 
+   *
    * @param env the variables to pass on to individual property editors
    */
   @Override
