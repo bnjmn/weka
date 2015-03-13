@@ -29,17 +29,10 @@ import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.gui.PasswordProperty;
+import weka.gui.PropertyDisplayName;
 
 /**
  * <!-- globalinfo-start --> Writes to a database (tested with MySQL, InstantDB,
@@ -340,6 +333,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @return the table's name
    */
+  @PropertyDisplayName(displayName = "Table name")
   public String getTableName() {
 
     return m_tableName;
@@ -371,6 +365,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @param t true if the table should be truncated first (if it exists).
    */
+  @PropertyDisplayName(displayName = "Truncate table")
   public boolean getTruncate() {
     return m_truncate;
   }
@@ -399,6 +394,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @return true if a primary key column will be generated, false otherwise
    */
+  @PropertyDisplayName(displayName = "Automatic primary key")
   public boolean getAutoKeyGeneration() {
 
     return m_id;
@@ -432,6 +428,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * @return true if the relation name is used as the name of the table, false
    *         otherwise
    */
+  @PropertyDisplayName(displayName = "Use relation name")
   public boolean getRelationForTableName() {
 
     return m_tabName;
@@ -470,6 +467,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @return the URL
    */
+  @PropertyDisplayName(displayName = "Database URL")
   @Override
   public String getUrl() {
 
@@ -491,6 +489,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @param user the user name
    */
+  @PropertyDisplayName(displayName = "Username")
   @Override
   public void setUser(String user) {
     checkEnv();
@@ -548,6 +547,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @return the database password
    */
+  @PropertyDisplayName(displayName = "Password")
+  @PasswordProperty
   public String getPassword() {
     // return m_DataBaseConnection.getPassword();
     return m_Password;
@@ -578,6 +579,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * 
    * @return the custom props file, null if none used
    */
+  @PropertyDisplayName(displayName = "DB config file")
   public File getCustomPropsFile() {
     return m_CustomPropsFile;
   }
