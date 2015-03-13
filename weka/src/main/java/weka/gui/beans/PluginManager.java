@@ -28,6 +28,8 @@ import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
@@ -50,7 +52,8 @@ public class PluginManager {
    * then stores individual plugin instances of the interface type, keyed by
    * plugin name/short title with values the actual fully qualified class name
    */
-  protected static Map<String, Map<String, String>> PLUGINS = new HashMap<String, Map<String, String>>();
+  protected static Map<String, Map<String, String>> PLUGINS =
+    new HashMap<String, Map<String, String>>();
 
   /**
    * Set of concrete fully qualified class names or abstract/interface base
@@ -86,7 +89,8 @@ public class PluginManager {
    * 
    * @param classnames a list of class names to remove
    */
-  public static synchronized void removeFromDisabledList(List<String> classnames) {
+  public static synchronized void
+    removeFromDisabledList(List<String> classnames) {
     for (String s : classnames) {
       removeFromDisabledList(s);
     }
@@ -115,42 +119,81 @@ public class PluginManager {
 
   /**
    * Add all key value pairs from the supplied property file
-   * 
+   *
    * @param propsFile the properties file to add
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(File propsFile)
     throws Exception {
-    BufferedInputStream bi = new BufferedInputStream(new FileInputStream(
-      propsFile));
+    addFromProperties(propsFile, false);
+  }
+
+  /**
+   * Add all key value pairs from the supplied property file
+   *
+   * @param propsFile the properties file to add
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(File propsFile,
+    boolean maintainInsertionOrder) throws Exception {
+    BufferedInputStream bi =
+      new BufferedInputStream(new FileInputStream(propsFile));
     addFromProperties(bi);
   }
 
   /**
    * Add all key value pairs from the supplied properties stream
-   * 
+   *
    * @param propsStream an input stream to a properties file
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(InputStream propsStream)
     throws Exception {
+    addFromProperties(propsStream, false);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties stream
+   *
+   * @param propsStream an input stream to a properties file
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(InputStream propsStream,
+    boolean maintainInsertionOrder) throws Exception {
     Properties expProps = new Properties();
 
     expProps.load(propsStream);
     propsStream.close();
     propsStream = null;
 
-    addFromProperties(expProps);
+    addFromProperties(expProps, maintainInsertionOrder);
   }
 
   /**
    * Add all key value pairs from the supplied properties object
-   * 
+   *
    * @param props a Properties object
    * @throws Exception if a problem occurs
    */
   public static synchronized void addFromProperties(Properties props)
     throws Exception {
+    addFromProperties(props, false);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties object
+   *
+   * @param props a Properties object
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(Properties props,
+    boolean maintainInsertionOrder) throws Exception {
     Set<Object> keys = props.keySet();
     Iterator<Object> keysI = keys.iterator();
     while (keysI.hasNext()) {
@@ -159,7 +202,8 @@ public class PluginManager {
       if (implementations != null && implementations.length() > 0) {
         String[] parts = implementations.split(",");
         for (String impl : parts) {
-          PluginManager.addPlugin(baseType, impl.trim(), impl.trim());
+          PluginManager.addPlugin(baseType, impl.trim(), impl.trim(),
+            maintainInsertionOrder);
         }
       }
     }
@@ -176,7 +220,7 @@ public class PluginManager {
   public static Set<String> getPluginNamesOfType(String interfaceName) {
     if (PLUGINS.get(interfaceName) != null) {
       Set<String> match = PLUGINS.get(interfaceName).keySet();
-      Set<String> result = new HashSet<String>();
+      Set<String> result = new LinkedHashSet<String>();
       for (String s : match) {
         String impl = PLUGINS.get(interfaceName).get(s);
         if (!DISABLED.contains(impl)) {
@@ -192,18 +236,37 @@ public class PluginManager {
 
   /**
    * Add a plugin.
-   * 
+   *
    * @param interfaceName the fully qualified interface name that the plugin
    *          implements
-   * 
+   *
    * @param name the name/short description of the plugin
    * @param concreteType the fully qualified class name of the actual concrete
    *          implementation
    */
   public static void addPlugin(String interfaceName, String name,
     String concreteType) {
+    addPlugin(interfaceName, name, concreteType, false);
+  }
+
+  /**
+   * Add a plugin.
+   *
+   * @param interfaceName the fully qualified interface name that the plugin
+   *          implements
+   *
+   * @param name the name/short description of the plugin
+   * @param concreteType the fully qualified class name of the actual concrete
+   *          implementation
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   */
+  public static void addPlugin(String interfaceName, String name,
+    String concreteType, boolean maintainInsertionOrder) {
     if (PLUGINS.get(interfaceName) == null) {
-      Map<String, String> pluginsOfInterfaceType = new TreeMap<String, String>();
+      Map<String, String> pluginsOfInterfaceType =
+        maintainInsertionOrder ? new LinkedHashMap<String, String>()
+          : new TreeMap<String, String>();
       pluginsOfInterfaceType.put(name, concreteType);
       PLUGINS.put(interfaceName, pluginsOfInterfaceType);
     } else {
