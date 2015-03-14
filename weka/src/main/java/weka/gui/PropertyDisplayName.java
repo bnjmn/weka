@@ -41,4 +41,11 @@ public @interface PropertyDisplayName {
    * @return a nice displayable name
    */
   String displayName();
+
+  /**
+   * Tip text for this property
+   *
+   * @return the tool-tip text for this property
+   */
+  String tipText();
 }
