@@ -667,6 +667,7 @@ public class PropertySheetPanel extends JPanel implements
 
       boolean skip = false;
       boolean password = false;
+      FilePropertyMetadata fileProp = null;
       for (Annotation a : annotations) {
         if (a instanceof ProgrammaticProperty) {
           skip = true; // skip property that is only supposed to be manipulated programatically
@@ -686,7 +687,10 @@ public class PropertySheetPanel extends JPanel implements
 
         if (a instanceof PasswordProperty) {
           password = true;
-          break;
+        }
+
+        if (a instanceof FilePropertyMetadata) {
+          fileProp = (FilePropertyMetadata) a;
         }
       }
       if (skip) {
@@ -716,9 +720,13 @@ public class PropertySheetPanel extends JPanel implements
           } else if (m_useEnvironmentPropertyEditors && String.class.isAssignableFrom(
             type)) {
             editor = new EnvironmentField();
-          } else if (m_useEnvironmentPropertyEditors && File.class.isAssignableFrom(
+          } else if ((m_useEnvironmentPropertyEditors || fileProp != null) && File.class.isAssignableFrom(
             type)) {
-            editor = new FileEnvironmentField();
+            if (fileProp != null) {
+              editor = new FileEnvironmentField("", fileProp.fileChooserDialogType(), fileProp.directoriesOnly());
+            } else {
+              editor = new FileEnvironmentField();
+            }
           } else {
             editor = PropertyEditorManager.findEditor(type);
           }
