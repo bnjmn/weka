@@ -675,6 +675,13 @@ public class PropertySheetPanel extends JPanel implements
 
         if (a instanceof PropertyDisplayName) {
           name = ((PropertyDisplayName) a).displayName();
+          String tempTip = ((PropertyDisplayName)a).tipText();
+          int ci = tempTip.indexOf( '.' );
+          if ( ci < 0 ) {
+            m_TipTexts[sortedPropOrderings[i]] = tempTip;
+          } else {
+            m_TipTexts[sortedPropOrderings[i]] = tempTip.substring( 0, ci );
+          }
         }
 
         if (a instanceof PasswordProperty) {
@@ -753,21 +760,22 @@ public class PropertySheetPanel extends JPanel implements
 
         editor.setValue(value);
 
-        // now look for a TipText method for this property
-        String tipName = origName + "TipText";
-        for (MethodDescriptor m_Method : m_Methods) {
-          String mname = m_Method.getDisplayName();
-          Method meth = m_Method.getMethod();
-          if (mname.equals(tipName)) {
-            if (meth.getReturnType().equals(String.class)) {
-              try {
-                String tempTip = (String) (meth.invoke(m_Target, args));
-                int ci = tempTip.indexOf('.');
-                if (ci < 0) {
-                  m_TipTexts[sortedPropOrderings[i]] = tempTip;
-                } else {
-                  m_TipTexts[sortedPropOrderings[i]] = tempTip.substring(0, ci);
-                }
+        if (m_TipTexts[sortedPropOrderings[i]] == null) {
+          // now look for a TipText method for this property
+          String tipName = origName + "TipText";
+          for ( MethodDescriptor m_Method : m_Methods ) {
+            String mname = m_Method.getDisplayName();
+            Method meth = m_Method.getMethod();
+            if ( mname.equals( tipName ) ) {
+              if ( meth.getReturnType().equals( String.class ) ) {
+                try {
+                  String tempTip = (String) ( meth.invoke( m_Target, args ) );
+                  int ci = tempTip.indexOf( '.' );
+                  if ( ci < 0 ) {
+                    m_TipTexts[sortedPropOrderings[i]] = tempTip;
+                  } else {
+                    m_TipTexts[sortedPropOrderings[i]] = tempTip.substring( 0, ci );
+                  }
                 /*
                  * if (m_HelpText != null) { if (firstTip) {
                  * m_HelpText.append("OPTIONS\n"); firstTip = false; }
@@ -775,10 +783,11 @@ public class PropertySheetPanel extends JPanel implements
                  * m_HelpText.append(tempTip).append("\n\n");
                  * //jt.setText(m_HelpText.toString()); }
                  */
-              } catch (Exception ex) {
+                } catch ( Exception ex ) {
 
+                }
+                break;
               }
-              break;
             }
           }
         }
@@ -823,9 +832,9 @@ public class PropertySheetPanel extends JPanel implements
       gbLayout.setConstraints(m_Labels[sortedPropOrderings[i]], gbConstraints);
       scrollablePanel.add(m_Labels[sortedPropOrderings[i]]);
       JPanel newPanel = new JPanel();
-      if (m_TipTexts[sortedPropOrderings[sortedPropOrderings[i]]] != null) {
+      if (m_TipTexts[sortedPropOrderings[i]] != null) {
         m_Views[sortedPropOrderings[i]].setToolTipText(m_TipTexts[sortedPropOrderings[i]]);
-        m_Labels[sortedPropOrderings[i]].setToolTipText(m_TipTexts[i]);
+        m_Labels[sortedPropOrderings[i]].setToolTipText(m_TipTexts[sortedPropOrderings[i]]);
       }
       newPanel.setBorder(BorderFactory.createEmptyBorder(10, 5, 0, 10));
       newPanel.setLayout(new BorderLayout());
