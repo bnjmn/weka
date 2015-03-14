@@ -162,7 +162,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   protected String m_Password;
 
   /** the custom props file to use instead of default one. */
-  protected File m_CustomPropsFile = null;
+  protected File m_CustomPropsFile = new File("${user.home}");
 
   /**
    * Whether to truncate (i.e. drop and then recreate) the table if it already
@@ -217,7 +217,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * @see #m_CustomPropsFile
    */
   protected DatabaseConnection newDatabaseConnection() throws Exception {
-    DatabaseConnection result;
+    DatabaseConnection result = new DatabaseConnection();
     checkEnv();
 
     if (m_CustomPropsFile != null) {
@@ -229,9 +229,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
         pFile = new File(pPath);
       } catch (Exception ex) {
       }
-      result = new DatabaseConnection(pFile);
-    } else {
-      result = new DatabaseConnection();
+      if (pFile.isFile()) {
+        result = new DatabaseConnection( pFile );
+      }
     }
 
     m_createText = result.getProperties().getProperty("CREATE_STRING");
@@ -334,7 +334,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the table's name
    */
-  @PropertyDisplayName(displayName = "Table name")
+  @PropertyDisplayName(displayName = "Table name", tipText = "Sets the name of the table")
   @PropertyDisplayOrder(displayOrder = 4)
   public String getTableName() {
 
@@ -365,9 +365,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * Get whether to truncate (i.e. drop and recreate) the table if it already
    * exits. If false, then new data is appended to the table.
    *
-   * @param t true if the table should be truncated first (if it exists).
+   * @return true if the table should be truncated first (if it exists).
    */
-  @PropertyDisplayName(displayName = "Truncate table")
+  @PropertyDisplayName(displayName = "Truncate table", tipText = "Truncate (i.e. drop and recreate) table if it already exists")
   @PropertyDisplayOrder(displayOrder = 6)
   public boolean getTruncate() {
     return m_truncate;
@@ -397,7 +397,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return true if a primary key column will be generated, false otherwise
    */
-  @PropertyDisplayName(displayName = "Automatic primary key")
+  @PropertyDisplayName(displayName = "Automatic primary key", tipText = "If set to true, a primary key column is generated automatically (containing the row number as INTEGER). The name of the key is read from DatabaseUtils (idColumn)"
+    + " This primary key can be used for incremental loading (requires an unique key). This primary key will not be loaded as an attribute.")
   @PropertyDisplayOrder(displayOrder = 7)
   public boolean getAutoKeyGeneration() {
 
@@ -432,7 +433,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * @return true if the relation name is used as the name of the table, false
    *         otherwise
    */
-  @PropertyDisplayName(displayName = "Use relation name")
+  @PropertyDisplayName(displayName = "Use relation name", tipText = "If set to true, the relation name will be used as name for the database table. Otherwise the user has to provide a table name.")
   @PropertyDisplayOrder(displayOrder = 5)
   public boolean getRelationForTableName() {
 
@@ -472,7 +473,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the URL
    */
-  @PropertyDisplayName(displayName = "Database URL")
+  @PropertyDisplayName(displayName = "Database URL", tipText = "The URL of the database")
   @PropertyDisplayOrder(displayOrder = 1)
   @Override
   public String getUrl() {
@@ -495,7 +496,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @param user the user name
    */
-  @PropertyDisplayName(displayName = "Username")
+  @PropertyDisplayName(displayName = "Username", tipText = "The user name for the database")
   @PropertyDisplayOrder(displayOrder = 2)
   @Override
   public void setUser(String user) {
@@ -554,7 +555,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the database password
    */
-  @PropertyDisplayName(displayName = "Password")
+  @PropertyDisplayName(displayName = "Password", tipText = "The database password")
   @PropertyDisplayOrder(displayOrder = 3)
   @PasswordProperty
   public String getPassword() {
@@ -587,7 +588,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the custom props file, null if none used
    */
-  @PropertyDisplayName(displayName = "DB config file")
+  @PropertyDisplayName(displayName = "DB config file", tipText = "The custom properties that the user can use to override the default ones.")
   @PropertyDisplayOrder(displayOrder = 8)
   public File getCustomPropsFile() {
     return m_CustomPropsFile;
