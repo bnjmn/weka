@@ -31,9 +31,12 @@ import java.util.Vector;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
+import weka.gui.FilePropertyMetadata;
 import weka.gui.PasswordProperty;
 import weka.gui.PropertyDisplayName;
 import weka.gui.PropertyDisplayOrder;
+
+import javax.swing.JFileChooser;
 
 /**
  * <!-- globalinfo-start --> Writes to a database (tested with MySQL, InstantDB,
@@ -589,6 +592,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * @return the custom props file, null if none used
    */
   @PropertyDisplayName(displayName = "DB config file", tipText = "The custom properties that the user can use to override the default ones.")
+  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG, directoriesOnly = false)
   @PropertyDisplayOrder(displayOrder = 8)
   public File getCustomPropsFile() {
     return m_CustomPropsFile;
