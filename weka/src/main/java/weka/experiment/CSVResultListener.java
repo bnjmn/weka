@@ -33,6 +33,9 @@ import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.gui.FilePropertyMetadata;
+
+import javax.swing.*;
 
 /**
  * <!-- globalinfo-start --> Takes results from a result producer and assembles
@@ -189,6 +192,7 @@ public class CSVResultListener implements ResultListener, OptionHandler,
    * 
    * @return Value of OutputFile.
    */
+  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.SAVE_DIALOG, directoriesOnly = false)
   public File getOutputFile() {
 
     return m_OutputFile;
