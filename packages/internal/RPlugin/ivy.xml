@@ -17,7 +17,6 @@
         <!-- this is an example dependency.  Add the dependencies for your project here -->
 
     <dependency org="pentaho.weka" name="pdm-3.7-ce" rev="${dependency.weka.revision}" transitive="false" conf="default->default" changing="true" />
-    <dependency org="dm-commons" name="dm-commons" rev="${dependency.dm-commons.revision}" transitive="false" conf="default->default" changing="true" />
 
     <dependency org="net.rforge" name="REngine" rev="${dependency.rengine.revision}" transitive="false" conf="default->default" changing="true" />
     <dependency org="javagd" name="javagd" rev="${dependency.javagd.revision}" transitive="false" conf="default->default" changing="true" />
