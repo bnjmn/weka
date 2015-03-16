@@ -73,10 +73,14 @@ import javax.swing.text.DocumentFilter;
 import javax.swing.text.NavigationFilter;
 import javax.swing.text.Position;
 
+import org.rosuda.REngine.REXP;
+import org.rosuda.REngine.REXPNull;
+import org.rosuda.REngine.REXPString;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.JavaGDListener;
 import weka.core.JavaGDOffscreenRenderer;
+import weka.core.RLoggerAPI;
 import weka.core.RSession;
 import weka.core.RUtils;
 import weka.core.Utils;
@@ -218,6 +222,8 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
 
   /** Log status messages */
   protected Logger m_statusLogger = new StatusOnlyLogger();
+
+  protected ConsoleLogger m_rLogger = new ConsoleLogger();
 
   /** Thread for executing the current command */
   protected Thread m_executor = null;
@@ -457,7 +463,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
       m_rConsole.getActionMap());
 
     // make sure that the cursor can't be moved over the command prompt
-    m_rConsole.setNavigationFilter(new NavigationFilter() {
+    /* m_rConsole.setNavigationFilter(new NavigationFilter() {
       @Override
       public void setDot(NavigationFilter.FilterBypass fb, int dot,
         Position.Bias bias) {
@@ -472,7 +478,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
         Position.Bias bias) {
         fb.setDot(dot, bias);
       }
-    });
+    });*/
 
     // handle enter key events
     m_rConsole.addKeyListener(new KeyAdapter() {
@@ -492,35 +498,70 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
               if (m_rConsole.getCaretPosition() >= promptPos) {
                 // try {
                 // String lastTyped =
-                // m_rConsole.getDocument().getText(m_docLength, newLength);
+                // m_rConsole.getDocument().getText(m_docLength, newLenKnth);
 
                 String text = m_rConsole.getText();
                 String lastTyped = text.substring(text.lastIndexOf(">>> ") + 4,
                   text.length());
                 // System.out.println(lastTyped);
                 lastTyped = lastTyped.replace("\n", "");
+                String origLastTyped = lastTyped;
+                boolean wrap = true;
+                wrap = wrap && !lastTyped.startsWith("print(");
+                wrap = wrap && !lastTyped.startsWith("library(");
+                wrap = wrap && !lastTyped.startsWith("install.packages(");
+                wrap = wrap && !lastTyped.startsWith("plot(");
+                wrap = wrap && !lastTyped.equals("q()");
+                if (lastTyped.indexOf("=") >= 0) {
+                  wrap = wrap && (lastTyped.indexOf("(") < 0
+                    ? false : lastTyped.indexOf("=") > lastTyped.indexOf("("));
+                }
+                if (lastTyped.indexOf("<-") >= 0) {
+                  wrap = wrap && (lastTyped.indexOf("(") < 0
+                    ? false : lastTyped.indexOf("<-") > lastTyped.indexOf("("));
+                }
                 if (lastTyped.length() > 0) {
+                  if (wrap) {
+                    lastTyped = "print(" + lastTyped + ")";
+                  }
                   RSession eng = null;
                   try {
-                    // m_statusLab.setText("Working...");
-                    // m_statusLab.repaint();
-                    m_statusLogger.statusMessage("Working...");
-                    eng = RSession.acquireSession(JavaGDConsolePanel.this);
-                    eng.clearConsoleBuffer(JavaGDConsolePanel.this);
-                    eng.parseAndEval(JavaGDConsolePanel.this, lastTyped);
-                    String consoleOut = eng
-                      .getConsoleBuffer(JavaGDConsolePanel.this);
-                    if (consoleOut != null && consoleOut.length() > 0) {
+                    if (lastTyped.equals("q()")) {
                       m_rConsole.getDocument().insertString(
-                        m_rConsole.getText().length(), consoleOut + "\n", null);
+                        m_rConsole.getText().length(), "q() ignored. R "
+                          + "will exit when Weka quits.\n", null);
+                    } else {
+                      // m_statusLab.setText("Working...");
+                      // m_statusLab.repaint();
+                      m_statusLogger.statusMessage("Working...");
+                      eng = RSession.acquireSession(JavaGDConsolePanel.this);
+                      eng.setLog(JavaGDConsolePanel.this, m_rLogger);
+                      eng.clearConsoleBuffer(JavaGDConsolePanel.this);
+                      REXP result = eng.parseAndEval(JavaGDConsolePanel.this, lastTyped);
+                      boolean getOutput = !(result instanceof REXPNull);
+                    /*if (result != null) {
+                      if (result instanceof REXPString) {
+                        System.err.println( ( (REXPString) result ).toDebugString() );
+                      }
+                    }*/
+
+                      String consoleOut = null;
+                      if (getOutput) {
+                        consoleOut = eng.getConsoleBuffer(JavaGDConsolePanel.this);
+                      }
+                      if (consoleOut != null && consoleOut.length() > 0) {
+                        m_rConsole.getDocument()
+                          .insertString(m_rConsole.getText().length(),
+                            consoleOut + "\n", null);
+                      }
+
+                      m_historyBuffer.add(origLastTyped);
+                      m_historyPos = m_historyBuffer.size() - 1;
+                      m_firstHistoryAccess = true;
+
+                      // m_statusLab.setText("Ready.");
+                      m_statusLogger.statusMessage("Ready.");
                     }
-
-                    m_historyBuffer.add(lastTyped);
-                    m_historyPos = m_historyBuffer.size() - 1;
-                    m_firstHistoryAccess = true;
-
-                    // m_statusLab.setText("Ready.");
-                    m_statusLogger.statusMessage("Ready.");
                   } catch (Exception ex) {
                     ex.printStackTrace();
                     // m_statusLab.setText("An error occurred - check log.");
@@ -763,14 +804,14 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
 
     RSession eng = null;
     try {
-      m_statusLogger.statusMessage("Transfered " + insts.relationName()
+      m_statusLogger.statusMessage("Transferred " + insts.relationName()
         + " into R as \"rdata\"");
-      m_statusLogger.logMessage("Transfered " + insts.relationName()
+      m_statusLogger.logMessage("Transferred " + insts.relationName()
         + " into R as \"rdata\"");
       eng = RSession.acquireSession(this);
       RUtils.instancesToDataFrame(eng, this, insts, "rdata");
     } catch (Exception ex) {
-      m_statusLogger.statusMessage("Problem transfering instances to R: "
+      m_statusLogger.statusMessage("Problem transferring instances to R: "
         + ex.getMessage());
       ex.printStackTrace();
     } finally {
@@ -802,5 +843,35 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
     m_history.addObject(name, image);
     m_plotter.setImage(image);
     m_plotter.repaint();
+  }
+
+  protected class ConsoleLogger implements RLoggerAPI {
+
+    protected StringBuffer m_logBuffer = new StringBuffer();
+
+    @Override public void statusMessage( String message ) {
+      // not needed
+    }
+
+    @Override public void logMessage( String message ) {
+      // m_logBuffer.append(message + "\n");
+      try {
+        m_rConsole.getDocument().insertString(
+          m_rConsole.getText().length(), message, null);
+      } catch ( BadLocationException e ) {
+        e.printStackTrace();
+      }
+    }
+
+    /**
+     * Get the current contents of the log buffer and then reset it.
+     *
+     * @return the current contents of the log buffer.
+     */
+    public String getLogBuffer() {
+      String toReturn = m_logBuffer.toString();
+      m_logBuffer.setLength(0);
+      return toReturn;
+    }
   }
 }

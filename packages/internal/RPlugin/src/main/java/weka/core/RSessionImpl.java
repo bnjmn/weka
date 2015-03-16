@@ -741,8 +741,8 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       m_consoleBuffer.add(text);
     }
     String t = "";
-    if (oType == 1) {
-      t += "WARNING: ";
+    if (oType == 1 && text.length() > 0) {
+      // t += "WARNING: ";
       t += text;
       if (m_logger != null) {
         m_logger.statusMessage("WARNING: check log");
