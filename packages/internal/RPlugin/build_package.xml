@@ -133,7 +133,7 @@
   </target>
 
   <!-- Compile the java code from ${src}/weka into ${build}/classes -->
-  <target name="compile" depends="resolve, init_compile, compile-r-api" 
+  <target name="compile" depends="init_compile, compile-r-api" 
    description="Compile package and deposit class files in build/classes">
     <javac srcdir="${src}" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
@@ -171,6 +171,7 @@
     </copy>
 
     <unzip src="${libExtPreload}/REngine.zip" dest="${build}/injectedClasses"/>
+    <unzip src="${libExtPreload}/rJavaClassLoader.zip" dest="${build}/injectedClasses"/>
   </target>
 
   <!-- Make the javadocs -->
