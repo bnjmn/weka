@@ -19,7 +19,6 @@
     <dependency org="pentaho.weka" name="pdm-3.7-ce" rev="${dependency.weka.revision}" transitive="false" conf="default->default" changing="true" />
 
     <dependency org="net.rforge" name="REngine" rev="${dependency.rengine.revision}" transitive="false" conf="default->default" changing="true" />
-    <dependency org="javagd" name="javagd" rev="${dependency.javagd.revision}" transitive="false" conf="default->default" changing="true" />
     <dependency org="net.sf.kxml" name="kxml2-min" rev="${dependency.kxml2-min.revision}" transitive="false" conf="default->default" changing="true" />
     <dependency org="xpp3" name="xpp3_min" rev="${dependency.xpp3-min.revision}" transitive="false" conf="default->default" changing="true" />
     <dependency org="com.thoughtworks.xstream" name="xstream" rev="${dependency.xstream.revision}" transitive="false" conf="default->default" changing="true" />
