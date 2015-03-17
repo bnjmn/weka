@@ -555,10 +555,6 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
                             consoleOut + "\n", null);
                       }
 
-                      m_historyBuffer.add(origLastTyped);
-                      m_historyPos = m_historyBuffer.size() - 1;
-                      m_firstHistoryAccess = true;
-
                       // m_statusLab.setText("Ready.");
                       m_statusLogger.statusMessage("Ready.");
                     }
@@ -566,9 +562,19 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
                     ex.printStackTrace();
                     // m_statusLab.setText("An error occurred - check log.");
                     m_statusLogger
-                      .statusMessage("An error occurred - check log.");
+                      .statusMessage("An error occurred.");
+                    try {
+                      m_rConsole.getDocument()
+                        .insertString(m_rConsole.getText().length(),
+                          ex.getMessage() + ": '" + origLastTyped +"'\n", null);
+                    } catch (BadLocationException e1) {
+                      e1.printStackTrace();
+                    }
                   } finally {
                     RSession.releaseSession(JavaGDConsolePanel.this);
+                    m_historyBuffer.add(origLastTyped);
+                    m_historyPos = m_historyBuffer.size() - 1;
+                    m_firstHistoryAccess = true;
                   }
                 }
 
