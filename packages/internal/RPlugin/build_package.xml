@@ -133,8 +133,9 @@
   </target>
 
   <!-- Compile the java code from ${src}/weka into ${build}/classes -->
-  <target name="compile" depends="init_compile, compile-r-api" 
+  <target name="compile" depends="resolve, init_compile, compile-r-api" 
    description="Compile package and deposit class files in build/classes">
+    <copy file="${libExt}/javagd-0.6.1.jar" toDir="${lib}" />
     <javac srcdir="${src}" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${build}/classes"
