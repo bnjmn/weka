@@ -48,4 +48,12 @@ public @interface PropertyDisplayName {
    * @return the tool-tip text for this property
    */
   String tipText();
+
+  /**
+   * The order (low to high), relative to other properties, that this property
+   * should be displayed in the GOE
+   *
+   * @return the order (default 100)
+   */
+  int displayOrder() default 100;
 }
