@@ -625,8 +625,8 @@ public class PropertySheetPanel extends JPanel implements
         annotations.addAll(Arrays.asList(getter.getDeclaredAnnotations()));
       }
       for (Annotation a : annotations) {
-        if (a instanceof PropertyDisplayOrder) {
-          propOrdering[i] = ((PropertyDisplayOrder)a).displayOrder();
+        if (a instanceof PropertyDisplayName) {
+          propOrdering[i] = ((PropertyDisplayName)a).displayOrder();
           break;
         }
       }
