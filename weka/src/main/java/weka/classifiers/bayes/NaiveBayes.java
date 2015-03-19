@@ -952,6 +952,28 @@ public class NaiveBayes extends AbstractClassifier implements OptionHandler,
     return m_displayModelInOldFormat;
   }
 
+  public Instances getHeader() {
+    return m_Instances;
+  }
+
+  /**
+   * Get all the conditional estimators.
+   *
+   * @return all the conditional estimators.
+   */
+  public Estimator[][] getConditionalEstimators() {
+    return m_Distributions;
+  }
+
+  /**
+   * Get the class estimator.
+   *
+   * @return the class estimator
+   */
+  public Estimator getClassEstimator() {
+    return m_ClassDistribution;
+  }
+
   /**
    * Returns the revision string.
    * 
