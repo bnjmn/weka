@@ -118,11 +118,11 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /** Whether capabilities should not be checked before classifier is built. */
   protected boolean m_DoNotCheckCapabilities = false;
- 
+
   /**
    * Returns true if the a new batch was started, either a new instance of the
    * filter was created or the batchFinished() method got called.
-   * 
+   *
    * @return true if a new batch has been initiated
    * @see #m_NewBatch
    * @see #batchFinished()
@@ -135,7 +135,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Returns true if the first batch of instances got processed. Necessary for
    * supervised filters, which "learn" from the first batch and then shouldn't
    * get updated with subsequent calls of batchFinished().
-   * 
+   *
    * @return true if the first batch has been processed
    * @see #m_FirstBatchDone
    * @see #batchFinished()
@@ -149,7 +149,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * able to produce an instance for output for every instance input after the
    * first batch has been completed - such filters should override this method
    * and return true.
-   * 
+   *
    * @return false by default
    */
   public boolean mayRemoveInstanceAfterFirstBatchDone() {
@@ -159,7 +159,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Returns the Capabilities of this filter. Derived filters have to override
    * this method to enable capabilities.
-   * 
+   *
    * @return the capabilities of this object
    * @see Capabilities
    */
@@ -177,7 +177,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
@@ -190,7 +190,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * I.e., if removes all class capabilities, in case there's not class
    * attribute present or removes the NO_CLASS capability, in case that there's
    * a class present.
-   * 
+   *
    * @param data the data to use for customization
    * @return the capabilities of this object, based on the data
    * @see #getCapabilities()
@@ -228,7 +228,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Sets the format of output instances. The derived class should use this
    * method once it has determined the outputformat. The output queue is
    * cleared.
-   * 
+   *
    * @param outputFormat the new output format
    */
   protected void setOutputFormat(Instances outputFormat) {
@@ -256,7 +256,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Gets the currently set inputformat instances. This dataset may contain
    * buffered instances.
-   * 
+   *
    * @return the input Instances.
    */
   protected Instances getInputFormat() {
@@ -266,7 +266,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns a reference to the current input format without copying it.
-   * 
+   *
    * @return a reference to the current input format
    */
   protected Instances inputFormatPeek() {
@@ -276,7 +276,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns a reference to the current output format without copying it.
-   * 
+   *
    * @return a reference to the current output format
    */
   protected Instances outputFormatPeek() {
@@ -287,7 +287,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Adds an output instance to the queue. The derived class should use this
    * method for each output instance it makes available.
-   * 
+   *
    * @param instance the instance to be added to the queue.
    */
   protected void push(Instance instance) {
@@ -315,7 +315,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Adds the supplied input instance to the inputformat dataset for later
    * processing. Use this method rather than getInputFormat().add(instance). Or
    * else. Note that the provided instance gets copied when buffered.
-   * 
+   *
    * @param instance the <code>Instance</code> to buffer.
    */
   protected void bufferInput(Instance instance) {
@@ -332,7 +332,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Initializes the input attribute locators. If indices is null then all
    * attributes of the data will be considered, otherwise only the ones that
    * were provided.
-   * 
+   *
    * @param data the data to initialize the locators with
    * @param indices if not null, the indices to which to restrict the locating
    */
@@ -350,7 +350,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Initializes the output attribute locators. If indices is null then all
    * attributes of the data will be considered, otherwise only the ones that
    * were provided.
-   * 
+   *
    * @param data the data to initialize the locators with
    * @param indices if not null, the indices to which to restrict the locating
    */
@@ -368,7 +368,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * Copies string/relational values contained in the instance copied to a new
    * dataset. The Instance must already be assigned to a dataset. This dataset
    * and the destination dataset must have the same structure.
-   * 
+   *
    * @param instance the Instance containing the string/relational values to
    *          copy.
    * @param isInput if true the input format and input attribute locators are
@@ -392,7 +392,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * string/relational attributes is the same in both indices (implicitly these
    * string/relational attributes should be semantically same but just with
    * shifted positions).
-   * 
+   *
    * @param instance the instance containing references to strings/ relational
    *          values in the source dataset that will have references updated to
    *          be valid for the destination dataset.
@@ -438,7 +438,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * tests the data whether the filter can actually handle it
-   * 
+   *
    * @param instanceInfo the data to test
    * @throws Exception if the test fails
    */
@@ -452,7 +452,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * default implementation clears the output format and output queue, and the
    * new batch flag is set. Overriders should call
    * <code>super.setInputFormat(Instances)</code>
-   * 
+   *
    * @param instanceInfo an Instances object containing the input instance
    *          structure (any instances contained in the object are ignored -
    *          only the structure is required).
@@ -477,7 +477,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * input() or batchFinished() has returned true. The relation name of the
    * output instances should be changed to reflect the action of the filter (eg:
    * add the filter name and options).
-   * 
+   *
    * @return an Instances object containing the output instance structure only.
    * @throws NullPointerException if no input structure has been defined (or the
    *           output format hasn't been determined yet)
@@ -497,7 +497,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * collected after calling batchFinished(). If the input marks the start of a
    * new batch, the output queue is cleared. This default implementation assumes
    * all instance conversion will occur when batchFinished() is called.
-   * 
+   *
    * @param instance the input instance
    * @return true if the filtered instance may now be collected with output().
    * @throws NullPointerException if the input format has not been defined.
@@ -525,7 +525,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * inputFormat has been re-assigned or new options have been set). This
    * default implementation assumes all instance processing occurs during
    * inputFormat() and input().
-   * 
+   *
    * @return true if there are instances pending output
    * @throws NullPointerException if no input structure has been defined,
    * @throws Exception if there was a problem finishing the batch.
@@ -554,7 +554,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Output an instance after filtering and remove from the output queue.
-   * 
+   *
    * @return the instance that has most recently been filtered (or null if the
    *         queue is empty).
    * @throws NullPointerException if no output structure has been defined
@@ -581,7 +581,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Output an instance after filtering but do not remove from the output queue.
-   * 
+   *
    * @return the instance that has most recently been filtered (or null if the
    *         queue is empty).
    * @throws NullPointerException if no input structure has been defined
@@ -600,7 +600,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns the number of instances pending output
-   * 
+   *
    * @return the number of instances pending output
    * @throws NullPointerException if no input structure has been defined
    */
@@ -614,7 +614,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns whether the output format is ready to be collected
-   * 
+   *
    * @return true if the output format is set
    */
   public boolean isOutputFormatDefined() {
@@ -624,7 +624,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Creates a deep copy of the given filter using serialization.
-   * 
+   *
    * @param model the filter to copy
    * @return a deep copy of the filter
    * @throws Exception if an error occurs
@@ -636,7 +636,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Creates a given number of deep copies of the given filter using
    * serialization.
-   * 
+   *
    * @param model the filter to copy
    * @param num the number of filter copies to create.
    * @return an array of filters.
@@ -658,7 +658,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Filters an entire set of instances through a filter and returns the new
    * set.
-   * 
+   *
    * @param data the data to be filtered
    * @param filter the filter to be used
    * @return the filtered set of data
@@ -689,7 +689,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns a description of the filter, by default only the classname.
-   * 
+   *
    * @return a string describing the filter
    */
   @Override
@@ -699,7 +699,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * generates source code from the filter
-   * 
+   *
    * @param filter the filter to output as source
    * @param className the name of the generated class
    * @param input the input data the header is generated for
@@ -979,7 +979,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Method for testing filters.
-   * 
+   *
    * @param filter the filter to use
    * @param options should contain the following arguments: <br/>
    *          -i input_file <br/>
@@ -1019,7 +1019,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       if (tmpStr.length() > 0) {
         maxDecimalPlaces = Integer.parseInt(tmpStr);
       }
- 
+
       if (filter instanceof OptionHandler) {
         ((OptionHandler) filter).setOptions(options);
       }
@@ -1161,7 +1161,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Method for testing filters ability to process multiple batches.
-   * 
+   *
    * @param filter the filter to use
    * @param options should contain the following arguments: <br/>
    *          -i (first) input file <br/>
@@ -1227,7 +1227,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       if (tmpStr.length() > 0) {
         maxDecimalPlaces = Integer.parseInt(tmpStr);
       }
-   
+
       if (filter instanceof OptionHandler) {
         ((OptionHandler) filter).setOptions(options);
       }
@@ -1360,7 +1360,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * runs the filter instance with the given options.
-   * 
+   *
    * @param filter the filter to run
    * @param options the commandline options
    */
@@ -1383,13 +1383,13 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector<Option> newVector = Option.listOptionsForClassHierarchy( this.getClass(), Filter.class );
 
     newVector.addElement(new Option(
       "\tIf set, filter is run in debug mode and\n"
@@ -1407,26 +1407,26 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   /**
    * Parses a given list of options. Valid options are:
    * <p>
-   * 
+   *
    * -D <br>
    * If set, filter is run in debug mode and may output additional info to
    * the console.
    * <p>
-   * 
+   *
    * -do-not-check-capabilities <br>
    * If set, filter capabilities are not checked before filter is built
    * (use with caution).
    * <p>
-   * 
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
   @Override
   public void setOptions(String[] options) throws Exception {
 
+    Option.setOptionsForHierarchy( options, this, Filter.class );
     setDebug(Utils.getFlag("output-debug-info", options));
-    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
-      options));
+    setDoNotCheckCapabilities( Utils.getFlag( "do-not-check-capabilities", options ) );
   }
 
   /**
@@ -1438,6 +1438,9 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
+    for (String s : Option.getOptionsForHierarchy(this, Filter.class)) {
+      options.add(s);
+    }
 
     if (getDebug()) {
       options.add("-output-debug-info");
@@ -1451,7 +1454,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Set debugging mode.
-   * 
+   *
    * @param debug true if debug output should be printed
    */
   public void setDebug(boolean debug) {
@@ -1471,7 +1474,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1482,7 +1485,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Set whether not to check capabilities.
-   * 
+   *
    * @param doNotCheckCapabilities true if capabilities are not to be checked.
    */
   public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
@@ -1502,7 +1505,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1513,7 +1516,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Main method for testing this class.
-   * 
+   *
    * @param args should contain arguments to the filter: use -h for help
    */
   public static void main(String[] args) {
