@@ -35,7 +35,7 @@ import weka.core.*;
 import weka.core.Capabilities.Capability;
 import weka.gui.FilePropertyMetadata;
 import weka.gui.PasswordProperty;
-import weka.gui.PropertyDisplayName;
+import weka.core.OptionMetadata;
 
 /**
  * <!-- globalinfo-start --> Writes to a database (tested with MySQL, InstantDB,
@@ -369,8 +369,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the table's name
    */
-  @PropertyDisplayName(displayName = "Table name",
-    tipText = "Sets the name of the table", displayOrder = 4)
+  @OptionMetadata(displayName = "Table name",
+    description = "Sets the name of the table", displayOrder = 4)
   public String getTableName() {
 
     return m_tableName;
@@ -402,8 +402,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return true if the table should be truncated first (if it exists).
    */
-  @PropertyDisplayName(displayName = "Truncate table",
-    tipText = "Truncate (i.e. drop and recreate) table if it already exists",
+  @OptionMetadata(displayName = "Truncate table",
+    description = "Truncate (i.e. drop and recreate) table if it already exists",
     displayOrder = 6)
   public boolean getTruncate() {
     return m_truncate;
@@ -433,9 +433,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return true if a primary key column will be generated, false otherwise
    */
-  @PropertyDisplayName(
+  @OptionMetadata(
     displayName = "Automatic primary key",
-    tipText = "If set to true, a primary key column is generated automatically (containing the row number as INTEGER). The name of the key is read from DatabaseUtils (idColumn)"
+    description = "If set to true, a primary key column is generated automatically (containing the row number as INTEGER). The name of the key is read from DatabaseUtils (idColumn)"
       + " This primary key can be used for incremental loading (requires an unique key). This primary key will not be loaded as an attribute.",
     displayOrder = 7)
   public
@@ -471,9 +471,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    * @return true if the relation name is used as the name of the table, false
    *         otherwise
    */
-  @PropertyDisplayName(
+  @OptionMetadata(
     displayName = "Use relation name",
-    tipText = "If set to true, the relation name will be used as name for the database table. Otherwise the user has to provide a table name.",
+    description = "If set to true, the relation name will be used as name for the database table. Otherwise the user has to provide a table name.",
     displayOrder = 5)
   public
     boolean getRelationForTableName() {
@@ -507,8 +507,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the URL
    */
-  @PropertyDisplayName(displayName = "Database URL",
-    tipText = "The URL of the database", displayOrder = 1)
+  @OptionMetadata(displayName = "Database URL",
+    description = "The URL of the database", displayOrder = 1)
   @Override
   public String getUrl() {
 
@@ -560,8 +560,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @param user the user name
    */
-  @PropertyDisplayName(displayName = "Username",
-    tipText = "The user name for the database", displayOrder = 2)
+  @OptionMetadata(displayName = "Username",
+    description = "The user name for the database", displayOrder = 2)
   @Override
   public void setUser(String user) {
     checkEnv();
@@ -590,8 +590,8 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the database password
    */
-  @PropertyDisplayName(displayName = "Password",
-    tipText = "The database password", displayOrder = 3)
+  @OptionMetadata(displayName = "Password",
+    description = "The database password", displayOrder = 3)
   @PasswordProperty
   public String getPassword() {
     // return m_DataBaseConnection.getPassword();
@@ -630,9 +630,9 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
    *
    * @return the custom props file, null if none used
    */
-  @PropertyDisplayName(
+  @OptionMetadata(
     displayName = "DB config file",
-    tipText = "The custom properties that the user can use to override the default ones.",
+    description = "The custom properties that the user can use to override the default ones.",
     displayOrder = 8)
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
     directoriesOnly = false)

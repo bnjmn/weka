@@ -625,8 +625,8 @@ public class PropertySheetPanel extends JPanel implements
         annotations.addAll(Arrays.asList(getter.getDeclaredAnnotations()));
       }
       for (Annotation a : annotations) {
-        if (a instanceof PropertyDisplayName) {
-          propOrdering[i] = ((PropertyDisplayName)a).displayOrder();
+        if (a instanceof OptionMetadata) {
+          propOrdering[i] = ((OptionMetadata)a).displayOrder();
           break;
         }
       }
@@ -674,9 +674,9 @@ public class PropertySheetPanel extends JPanel implements
           break;
         }
 
-        if (a instanceof PropertyDisplayName) {
-          name = ((PropertyDisplayName) a).displayName();
-          String tempTip = ((PropertyDisplayName)a).tipText();
+        if (a instanceof OptionMetadata) {
+          name = ((OptionMetadata) a).displayName();
+          String tempTip = ((OptionMetadata)a).description();
           int ci = tempTip.indexOf( '.' );
           if ( ci < 0 ) {
             m_TipTexts[sortedPropOrderings[i]] = tempTip;
