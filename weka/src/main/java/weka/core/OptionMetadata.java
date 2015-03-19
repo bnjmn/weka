@@ -21,11 +21,7 @@
 
 package weka.core;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * Method annotation that can be used with scheme parameters to provide a nice
@@ -64,7 +60,9 @@ public @interface OptionMetadata {
   int displayOrder() default 100;
 
   /**
-   * The name of the command line version of this parameter (without leading -)
+   * The name of the command line version of this parameter (without leading -).
+   * If this parameter is not a command line one, then just leave at the default
+   * empty string.
    *
    * @return the name of the command line version of this parameter
    */
@@ -80,7 +78,8 @@ public @interface OptionMetadata {
 
   /**
    * The synopsis to display on in the command line help for this parameter
-   * (e.g. -Z <integer>)
+   * (e.g. -Z <integer>). If this parameter is not a command line one, then just
+   * leave at the default empty string.
    *
    * @return the command line synopsis for this parameter
    */
