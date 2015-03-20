@@ -280,6 +280,8 @@ public class Option implements RevisionHandler {
               }
               options
                 .add(getOptionStringForOptionHandler((OptionHandler) value));
+            } else if (value instanceof SelectedTag) {
+              options.add("" + ((SelectedTag)value).getSelectedTag().getID());
             } else {
               // check for boolean/flag
               if (parameterDescription.commandLineParamIsFlag()) {
@@ -435,6 +437,37 @@ public class Option implements RevisionHandler {
                       constructOptionHandlerValue(optionValues.get(i));
                   }
                   Array.set(valueToSet, i, elementObject);
+                }
+              } else if (value instanceof SelectedTag) {
+                Tag[] legalTags = ((SelectedTag)value).getTags();
+                int tagIndex = Integer.MAX_VALUE;
+                // first try and parse as an integer
+                try {
+                  int specifiedID = Integer.parseInt(optionValue);
+                  for (int z = 0; z < legalTags.length; z++) {
+                    if (legalTags[z].getID() == specifiedID) {
+                      tagIndex = z;
+                      break;
+                    }
+                  }
+                } catch (NumberFormatException e) {
+                  // try to match tag strings
+                  for (int z = 0; z < legalTags.length; z++) {
+                    if (legalTags[z].getReadable().equals(optionValue.trim())) {
+                      tagIndex = z;
+                      break;
+                    }
+                  }
+                }
+                if (tagIndex != Integer.MAX_VALUE) {
+                  valueToSet = new SelectedTag(tagIndex, legalTags);
+                } else {
+                  throw new Exception("Unable to set option: '"
+                    + parameterDescription.commandLineParamName() +
+                    "'. This option takes a SelectedTag argument, and "
+                    + "the supplied value of '" + optionValue + "' "
+                    + "does not match any of the legal IDs or strings "
+                    + "for it.");
                 }
               } else if (value instanceof OptionHandler) {
                 valueToSet = constructOptionHandlerValue(optionValue);
