@@ -91,13 +91,13 @@ public class Option implements RevisionHandler {
     Class<?> childClazz, Class<?> oldestAncestorClazz) {
     Vector<Option> results = listOptionsForClass(childClazz);
 
-    Class<?> parent = childClazz.getSuperclass();
+    Class<?> parent = childClazz;
     do {
+      parent = parent.getSuperclass();
       if (parent == null) {
         break;
       }
       results.addAll(listOptionsForClass(parent));
-      parent = parent.getSuperclass();
     } while (!parent.equals(oldestAncestorClazz));
 
     return results;
@@ -196,15 +196,15 @@ public class Option implements RevisionHandler {
       options.add(s);
     }
 
-    Class<?> parent = target.getClass().getSuperclass();
+    Class<?> parent = target.getClass();
     do {
+      parent = parent.getSuperclass();
       if (parent == null) {
         break;
       }
       for (String s : getOptions(target, parent)) {
         options.add(s);
       }
-      parent = parent.getSuperclass();
     } while (!parent.equals(oldestAncestorClazz));
 
     return options.toArray(new String[options.size()]);
@@ -339,14 +339,14 @@ public class Option implements RevisionHandler {
 
     setOptions(options, target, target.getClass());
 
-    Class<?> parent = target.getClass().getSuperclass();
+    Class<?> parent = target.getClass();
     do {
+      parent = parent.getSuperclass();
       if (parent == null) {
         break;
       }
 
       setOptions(options, target, parent);
-      parent = parent.getSuperclass();
     } while (!parent.equals(oldestAncestorClazz));
   }
 
