@@ -140,6 +140,8 @@ public class LeastMedSq extends AbstractClassifier implements OptionHandler,
 
   private long m_randomseed = 0;
 
+  private weka.core.SelectedTag m_tag = new weka.core.SelectedTag(1, LinearRegression.TAGS_SELECTION);
+
   /**
    * Returns a string describing this classifier
    * 
@@ -334,7 +336,8 @@ public class LeastMedSq extends AbstractClassifier implements OptionHandler,
   private void genRegression() throws Exception {
 
     m_currentRegression = new LinearRegression();
-    m_currentRegression.setOptions(new String[] { "-S", "1" });
+    m_currentRegression.setAttributeSelectionMethod(m_tag);
+    //    m_currentRegression.setOptions(new String[] { "-S", "1" });
     selectSubSample(m_Data);
     m_currentRegression.buildClassifier(m_SubSample);
   }
@@ -431,7 +434,8 @@ public class LeastMedSq extends AbstractClassifier implements OptionHandler,
       m_ls = m_currentRegression;
     } else {
       m_ls = new LinearRegression();
-      m_ls.setOptions(new String[] { "-S", "1" });
+      //      m_ls.setOptions(new String[] { "-S", "1" });
+      m_ls.setAttributeSelectionMethod(m_tag);
       m_ls.buildClassifier(m_RLSData);
       m_currentRegression = m_ls;
     }
