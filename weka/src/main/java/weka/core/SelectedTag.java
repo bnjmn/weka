@@ -21,6 +21,7 @@
 
 package weka.core;
 
+import java.io.Serializable;
 import java.util.HashSet;
 
 /**
@@ -33,8 +34,10 @@ import java.util.HashSet;
  * @version $Revision$
  */
 public class SelectedTag
-  implements RevisionHandler {
-  
+  implements RevisionHandler, Serializable {
+
+  private static final long serialVersionUID = 6947341624626504975L;
+
   /** The index of the selected tag */
   protected int m_Selected;
   
