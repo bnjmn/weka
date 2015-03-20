@@ -211,8 +211,7 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
    */
   @Override
   public Enumeration<Option> listOptions() {
-
-    //Vector<Option> newVector = new Vector<Option>(2);
+    
     Vector<Option> newVector =
       Option.listOptionsForClassHierarchy(this.getClass(), AbstractClassifier.class);
 
