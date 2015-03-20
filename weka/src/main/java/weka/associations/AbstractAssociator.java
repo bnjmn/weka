@@ -22,14 +22,10 @@
 package weka.associations;
 
 import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.CapabilitiesIgnorer;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SerializedObject;
-import weka.core.Utils;
+import weka.core.*;
 
 /** 
  * Abstract scheme for learning associations. All schemes for learning
@@ -40,13 +36,50 @@ import weka.core.Utils;
  */
 public abstract class AbstractAssociator 
   implements Cloneable, Associator, Serializable, CapabilitiesHandler, 
-             CapabilitiesIgnorer, RevisionHandler {
+             CapabilitiesIgnorer, RevisionHandler, OptionHandler {
  
   /** for serialization */
   private static final long serialVersionUID = -3017644543382432070L;
 
   /** Whether capabilities should not be checked */
   protected boolean m_DoNotCheckCapabilities = false;
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  @Override
+  public Enumeration<Option> listOptions() {
+    Vector<Option> newVector =
+      Option.listOptionsForClassHierarchy(this.getClass(), AbstractAssociator.class);
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options.
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  @Override
+  public void setOptions(String[] options) throws Exception {
+    Option.setOptionsForHierarchy(options, this, AbstractAssociator.class);
+  }
+
+  /**
+   * Gets the current settings of the associator
+   *
+   * @return an array of strings suitable for passing to setOptions
+   */
+  public String[] getOptions() {
+    Vector<String> options = new Vector<String>();
+    for (String s : Option.getOptionsForHierarchy(this, AbstractAssociator.class)) {
+      options.add(s);
+    }
+    return options.toArray(new String[0]);
+  }
 
   /**
    * Returns the tip text for this property

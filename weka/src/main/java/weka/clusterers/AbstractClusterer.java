@@ -131,7 +131,8 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(2);
+    Vector<Option> newVector =
+      Option.listOptionsForClassHierarchy(this.getClass(), AbstractClusterer.class);
 
     newVector.addElement(new Option(
       "\tIf set, clusterer is run in debug mode and\n"
@@ -165,6 +166,7 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   @Override
   public void setOptions(String[] options) throws Exception {
 
+    Option.setOptions(options, this, AbstractClusterer.class);
     setDebug(Utils.getFlag("output-debug-info", options));
     setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
       options));
@@ -241,6 +243,9 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
+    for (String s : Option.getOptionsForHierarchy(this, AbstractClusterer.class)) {
+      options.add(s);
+    }
 
     if (getDebug()) {
       options.add("-output-debug-info");

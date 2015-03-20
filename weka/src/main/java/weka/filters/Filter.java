@@ -1389,7 +1389,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = Option.listOptionsForClassHierarchy( this.getClass(), Filter.class );
+    Vector<Option> newVector = Option.listOptionsForClassHierarchy(this.getClass(), Filter.class);
 
     newVector.addElement(new Option(
       "\tIf set, filter is run in debug mode and\n"
@@ -1424,7 +1424,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   @Override
   public void setOptions(String[] options) throws Exception {
 
-    Option.setOptionsForHierarchy( options, this, Filter.class );
+    Option.setOptionsForHierarchy(options, this, Filter.class);
     setDebug(Utils.getFlag("output-debug-info", options));
     setDoNotCheckCapabilities( Utils.getFlag( "do-not-check-capabilities", options ) );
   }
