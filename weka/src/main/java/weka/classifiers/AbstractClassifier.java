@@ -52,7 +52,8 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   /**
    * The number of decimal places used when printing numbers in the model.
    */
-  protected int m_numDecimalPlaces = 2;
+  public static int NUM_DECIMAL_PLACES_DEFAULT = 2;
+  protected int m_numDecimalPlaces = NUM_DECIMAL_PLACES_DEFAULT;
 
   /**
    * Creates a new instance of a classifier given it's class name and (optional)
@@ -252,8 +253,10 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
     if (getDoNotCheckCapabilities()) {
       options.add("-do-not-check-capabilities");
     }
-    options.add("-num-decimal-places");
-    options.add("" + getNumDecimalPlaces());
+    if (getNumDecimalPlaces() != NUM_DECIMAL_PLACES_DEFAULT) {
+      options.add("-num-decimal-places");
+      options.add("" + getNumDecimalPlaces());
+    }
 
     return options.toArray(new String[0]);
   }
