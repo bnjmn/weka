@@ -21,6 +21,8 @@
 
 package weka.core;
 
+import weka.gui.ProgrammaticProperty;
+
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
@@ -343,6 +345,23 @@ public class CheckGOE extends Check {
         }
         if ((desc[i].getReadMethod() == null)
           || (desc[i].getWriteMethod() == null)) {
+          continue;
+        }
+
+        OptionMetadata m = desc[i].getReadMethod().getAnnotation(OptionMetadata.class);
+        if (m == null) {
+          m = desc[i].getWriteMethod().getAnnotation(OptionMetadata.class);
+        }
+        if (m != null) {
+          continue;
+        }
+
+        // programatic properties don't need tip texts
+        ProgrammaticProperty p = desc[i].getReadMethod().getAnnotation(ProgrammaticProperty.class);
+        if (p == null) {
+          p = desc[i].getWriteMethod().getAnnotation(ProgrammaticProperty.class);
+        }
+        if (p != null) {
           continue;
         }
 
