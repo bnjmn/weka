@@ -450,12 +450,14 @@ public class PropertySheetPanel extends JPanel implements
     for (MethodDescriptor m_Method : m_Methods) {
       String name = m_Method.getDisplayName();
       Method meth = m_Method.getMethod();
+      OptionMetadata o = meth.getAnnotation(OptionMetadata.class);
 
-      if (name.endsWith("TipText")) {
-        if (meth.getReturnType().equals(String.class)) {
+      if (name.endsWith("TipText") || o != null) {
+        if (meth.getReturnType().equals(String.class) || o != null) {
           try {
-            String tempTip = (String) (meth.invoke(m_Target, args));
+            String tempTip = o != null ? o.description() : (String) (meth.invoke(m_Target, args));
             // int ci = tempTip.indexOf('.');
+            name = o != null ? o.displayName() : name;
 
             if (firstTip) {
               optionsBuff.append("OPTIONS\n");
