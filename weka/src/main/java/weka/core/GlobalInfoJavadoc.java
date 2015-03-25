@@ -26,10 +26,10 @@ import java.lang.reflect.Method;
  * Generates Javadoc comments from the class's globalInfo method. Can 
  * automatically update the comments if they're surrounded by
  * the GLOBALINFO_STARTTAG and GLOBALINFO_ENDTAG (the indention is determined via
- * the GLOBALINFO_STARTTAG). <p>
+ * the GLOBALINFO_STARTTAG). <br><br>
  * 
  <!-- options-start -->
- * Valid options are: <p>
+ * Valid options are: <br>
  * 
  * <pre> -W &lt;classname&gt;
  *  The class to load.</pre>
@@ -102,7 +102,7 @@ public class GlobalInfoJavadoc
       
       // retrieve global info
       result = toHTML((String) method.invoke(getInstance(), (Object[]) null));
-      result = result.trim() + "\n<p>\n";
+      result = result.trim() + "\n<br><br>\n";
       
       // stars?
       if (getUseStars()) 

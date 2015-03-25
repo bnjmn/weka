@@ -27,7 +27,7 @@ import java.util.Vector;
  * Applies all known Javadoc-derived classes to a source file.
  * 
  * <!-- options-start --> Valid options are:
- * <p>
+ * <br><br>
  * 
  * <pre>
  * -W &lt;classname&gt;

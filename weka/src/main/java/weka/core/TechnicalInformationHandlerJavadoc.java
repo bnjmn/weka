@@ -27,10 +27,10 @@ import java.util.Vector;
 /**
  * Generates Javadoc comments from the TechnicalInformationHandler's data.
  * Update the BibTex references and the plaintext techincal information.
- * <p>
+ * <br><br>
  * 
  * <!-- options-start --> Valid options are:
- * <p>
+ * <br>
  * 
  * <pre>
  * -W &lt;classname&gt;
@@ -210,7 +210,7 @@ public class TechnicalInformationHandlerJavadoc extends Javadoc {
       result += "<pre>\n";
       result += toHTML(handler.getTechnicalInformation().toBibTex())
         .replaceAll("<br>", "") + "\n";
-      result += "</pre>\n<p>\n";
+      result += "</pre>\n<br><br>\n";
       break;
     }
 
