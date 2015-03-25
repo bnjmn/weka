@@ -15,7 +15,7 @@
 
 /*
  * Javadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -289,7 +289,7 @@ public abstract class Javadoc implements OptionHandler, RevisionHandler {
     result = result.replaceAll("<", "&lt;");
     result = result.replaceAll(">", "&gt;");
     result = result.replaceAll("@", "&#64;");
-    result = result.replaceAll("\n", "<br/>\n");
+    result = result.replaceAll("\n", "<br>\n");
 
     return result;
   }

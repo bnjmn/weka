@@ -15,7 +15,7 @@
 
 /*
  * OptionHandlerJavadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -29,10 +29,10 @@ import java.util.Vector;
  * automatically update the option comments if they're surrounded by the
  * OPTIONS_STARTTAG and OPTIONS_ENDTAG (the indention is determined via the
  * OPTIONS_STARTTAG).
- * <p/>
+ * <p>
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * <p>
  * 
  * <pre>
  * -W &lt;classname&gt;
@@ -191,7 +191,7 @@ public class OptionHandlerJavadoc extends Javadoc {
 
       // prolog?
       if (getProlog()) {
-        result = "Valid options are: <p/>\n\n";
+        result = "Valid options are: <p>\n\n";
       }
 
       // options
@@ -200,7 +200,7 @@ public class OptionHandlerJavadoc extends Javadoc {
         Option option = enm.nextElement();
         optionStr = toHTML(option.synopsis()) + "\n"
           + toHTML(option.description().replaceAll("\\t", " "));
-        result += "<pre> " + optionStr.replaceAll("<br/>", "") + "</pre>\n\n";
+        result += "<pre> " + optionStr.replaceAll("<br>", "") + "</pre>\n\n";
       }
 
       // stars?

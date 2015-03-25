@@ -15,7 +15,7 @@
 
 /*
  * AllJavadoc.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.core;
@@ -27,7 +27,7 @@ import java.util.Vector;
  * Applies all known Javadoc-derived classes to a source file.
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * <p>
  * 
  * <pre>
  * -W &lt;classname&gt;
