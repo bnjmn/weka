@@ -515,7 +515,7 @@ public class MatrixPanel extends JPanel {
     this.add(jp, BorderLayout.CENTER);
 
     /** Setting up the initial color list **/
-    for (int i = 0; i < m_defaultColors.length - 1; i++) {
+    for (int i = 0; i < m_defaultColors.length; i++) {
       m_colorList.add(m_defaultColors[i]);
     }
 
