@@ -337,7 +337,7 @@ public class DL4JHomogenousMultiLayerClassifier extends AbstractClassifier {
    * @return the activation function to use
    */
   @OptionMetadata(displayName = "Activation function",
-    description = "The optimization strategy to use: 0 = sigmoid, 1 = linear, "
+    description = "The activation function to use: 0 = sigmoid, 1 = linear, "
       + "2 = tanh, 3 = exp, 4 = softmax, 5 = hard tanh, 6 = rectified linear,"
       + "7 = round linear, 8 = maxout.\n(default = 0",
     commandLineParamName = "activation",
