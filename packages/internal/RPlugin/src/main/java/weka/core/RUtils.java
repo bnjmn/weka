@@ -87,7 +87,7 @@ public class RUtils {
             d[j] = insts.instance(j).value(i);
           }
         }
-        session.assign(requester, cleanse(att.name()), d);
+        session.assign(requester, cleanse("v_" + att.name()), d);
       } else if (att.isNominal()) {
         int[] d = new int[insts.numInstances()];
         String[] labels = new String[att.numValues()];
@@ -103,19 +103,18 @@ public class RUtils {
             d[j] = (int) insts.instance(j).value(i);
           }
         }
-        session.assign(requester, cleanse(att.name()), d);
-        session.assign(requester, cleanse(att.name() + "_labels"), labels);
-        session.assign(requester, cleanse(att.name() + "_levels"), levels);
+        session.assign(requester, cleanse("v_" + att.name()), d);
+        session.assign(requester, cleanse("v_" + att.name() + "_labels"), labels);
+        session.assign(requester, cleanse("v_" + att.name() + "_levels"), levels);
         /*
          * System.err.println("Evaluating : " + quote(att.name() + "_factor") +
          * "=factor(" + quote(att.name()) + ",labels=" + quote(att.name() +
          * "_levels") + ")");
          */
 
-        session.parseAndEval(requester, cleanse(att.name() + "_factor")
-          + "=factor(" + cleanse(att.name()) + ",levels="
-          + cleanse(att.name() + "_levels") + ",labels="
-          + cleanse(att.name() + "_labels") + ")");
+        session.parseAndEval( requester,
+          cleanse( "v_" + att.name() + "_factor" ) + "=factor(" + cleanse( "v_" + att.name() ) + ",levels=" + cleanse(
+            "v_" + att.name() + "_levels" ) + ",labels=" + cleanse( "v_" + att.name() + "_labels" ) + ")" );
       } else if (att.isString()) {
         String[] d = new String[insts.numInstances()];
         for (int j = 0; j < insts.numInstances(); j++) {
@@ -126,7 +125,7 @@ public class RUtils {
             d[j] = insts.instance(j).stringValue(i);
           }
         }
-        session.assign(requester, cleanse(att.name()), d);
+        session.assign(requester, cleanse("v_" + att.name()), d);
       }
     }
 
@@ -143,10 +142,10 @@ public class RUtils {
       Attribute att = insts.attribute(i);
 
       if (att.isNumeric() || att.isString()) {
-        temp.append(cleanse(att.name()) + "=" + cleanse(att.name()));
+        temp.append("\"" + cleanse(att.name()) + "\"" +  "=" + cleanse("v_" + att.name()));
       } else if (att.isNominal()) {
         temp
-          .append(cleanse(att.name()) + "=" + cleanse(att.name() + "_factor"));
+          .append("\"" + cleanse(att.name()) +"\"" + "=" + cleanse("v_" + att.name() + "_factor"));
       }
 
       if (i < insts.numAttributes() - 1) {
@@ -163,9 +162,9 @@ public class RUtils {
       Attribute att = insts.attribute(i);
 
       if (att.isNumeric() || att.isString()) {
-        temp.append(cleanse(att.name()));
+        temp.append(cleanse("v_" + att.name()));
       } else if (att.isNominal()) {
-        temp.append(cleanse(att.name() + "_factor"));
+        temp.append(cleanse("v_" + att.name() + "_factor"));
       }
 
       if (i < insts.numAttributes() - 1) {
