@@ -1,4 +1,4 @@
-@relation 'FilterTest-weka.filters.supervised.attribute.AddClassification-Wweka.classifiers.rules.ZeroR -num-decimal-places 2'
+@relation FilterTest-weka.filters.supervised.attribute.AddClassification-Wweka.classifiers.rules.ZeroR
 
 @attribute NominalAtt1 {r,g,b}
 @attribute NumericAtt1 numeric
