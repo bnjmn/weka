@@ -15,15 +15,11 @@
 
 /*
  * BayesNet.java
- * Copyright (C) 2005-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2005-2012,2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.datagenerators.classifiers.classification;
-
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
 
 import weka.classifiers.bayes.net.BayesNetGenerator;
 import weka.core.Instance;
@@ -33,57 +29,48 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.datagenerators.ClassificationGenerator;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
- * <!-- globalinfo-start --> Generates random instances based on a Bayes
- * network.
- * <p/>
- * <!-- globalinfo-end -->
+ <!-- globalinfo-start -->
+ * Generates random instances based on a Bayes network.
+ * <br><br>
+ <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are: <p>
  * 
- * <pre>
- * -h
- *  Prints this help.
- * </pre>
+ * <pre> -h
+ *  Prints this help.</pre>
  * 
- * <pre>
- * -o &lt;file&gt;
+ * <pre> -o &lt;file&gt;
  *  The name of the output file, otherwise the generated data is
- *  printed to stdout.
- * </pre>
+ *  printed to stdout.</pre>
  * 
- * <pre>
- * -r &lt;name&gt;
- *  The name of the relation.
- * </pre>
+ * <pre> -r &lt;name&gt;
+ *  The name of the relation.</pre>
  * 
- * <pre>
- * -d
- *  Whether to print debug informations.
- * </pre>
+ * <pre> -d
+ *  Whether to print debug informations.</pre>
  * 
- * <pre>
- * -S
- *  The seed for random function (default 1)
- * </pre>
+ * <pre> -S
+ *  The seed for random function (default 1)</pre>
  * 
- * <pre>
- * -n &lt;num&gt;
- *  The number of examples to generate (default 100)
- * </pre>
+ * <pre> -n &lt;num&gt;
+ *  The number of examples to generate (default 100)</pre>
  * 
- * <pre>
- * -A &lt;num&gt;
- *  The number of arcs to use. (default 20)
- * </pre>
+ * <pre> -A &lt;num&gt;
+ *  The number of arcs to use. (default 20)</pre>
  * 
- * <pre>
- * -C &lt;num&gt;
- *  The cardinality of the attributes and the class. (default 2)
- * </pre>
+ * <pre> -N &lt;num&gt;
+ *  The number of attributes to generate. (default 10)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -C &lt;num&gt;
+ *  The cardinality of the attributes and the class. (default 2)</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -131,6 +118,9 @@ public class BayesNet extends ClassificationGenerator {
     result.add(new Option("\tThe number of arcs to use. (default "
       + defaultNumArcs() + ")", "A", 1, "-A <num>"));
 
+    result.add(new Option("\tThe number of attributes to generate. (default "
+      + defaultNumAttributes() + ")", "N", 1, "-N <num>"));
+
     result.add(new Option(
       "\tThe cardinality of the attributes and the class. (default "
         + defaultCardinality() + ")", "C", 1, "-C <num>"));
@@ -142,51 +132,38 @@ public class BayesNet extends ClassificationGenerator {
    * Parses a list of options for this object.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   * Valid options are: <p>
    * 
-   * <pre>
-   * -h
-   *  Prints this help.
-   * </pre>
+   * <pre> -h
+   *  Prints this help.</pre>
    * 
-   * <pre>
-   * -o &lt;file&gt;
+   * <pre> -o &lt;file&gt;
    *  The name of the output file, otherwise the generated data is
-   *  printed to stdout.
-   * </pre>
+   *  printed to stdout.</pre>
    * 
-   * <pre>
-   * -r &lt;name&gt;
-   *  The name of the relation.
-   * </pre>
+   * <pre> -r &lt;name&gt;
+   *  The name of the relation.</pre>
    * 
-   * <pre>
-   * -d
-   *  Whether to print debug informations.
-   * </pre>
+   * <pre> -d
+   *  Whether to print debug informations.</pre>
    * 
-   * <pre>
-   * -S
-   *  The seed for random function (default 1)
-   * </pre>
+   * <pre> -S
+   *  The seed for random function (default 1)</pre>
    * 
-   * <pre>
-   * -n &lt;num&gt;
-   *  The number of examples to generate (default 100)
-   * </pre>
+   * <pre> -n &lt;num&gt;
+   *  The number of examples to generate (default 100)</pre>
    * 
-   * <pre>
-   * -A &lt;num&gt;
-   *  The number of arcs to use. (default 20)
-   * </pre>
+   * <pre> -A &lt;num&gt;
+   *  The number of arcs to use. (default 20)</pre>
    * 
-   * <pre>
-   * -C &lt;num&gt;
-   *  The cardinality of the attributes and the class. (default 2)
-   * </pre>
+   * <pre> -N &lt;num&gt;
+   *  The number of attributes to generate. (default 10)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -C &lt;num&gt;
+   *  The cardinality of the attributes and the class. (default 2)</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -201,13 +178,24 @@ public class BayesNet extends ClassificationGenerator {
     list = new Vector<String>();
 
     list.add("-N");
-    list.add("" + getNumAttributes());
+    tmpStr = Utils.getOption('N', options);
+    if (tmpStr.length() != 0) {
+      list.add(tmpStr);
+    } else {
+      list.add("" + defaultNumAttributes());
+    }
 
+    // handled via -n option
     list.add("-M");
     list.add("" + getNumExamples());
 
     list.add("-S");
-    list.add("" + getSeed());
+    tmpStr = Utils.getOption('S', options);
+    if (tmpStr.length() != 0) {
+      list.add(tmpStr);
+    } else {
+      list.add("" + defaultSeed());
+    }
 
     list.add("-A");
     tmpStr = Utils.getOption('A', options);
@@ -242,6 +230,12 @@ public class BayesNet extends ClassificationGenerator {
 
     // determine options from generator
     options = getGenerator().getOptions();
+
+    result.add("-N");
+    result.add("" + getNumAttributes());
+
+    result.add("-S");
+    result.add("" + getSeed());
 
     try {
       result.add("-A");
@@ -534,6 +528,38 @@ public class BayesNet extends ClassificationGenerator {
     }
 
     return result;
+  }
+
+  /**
+   * Gets the random number seed.
+   *
+   * @return the random number seed.
+   */
+  @Override
+  public int getSeed() {
+    int result;
+
+    result = -1;
+    try {
+      result = Integer.parseInt(Utils.getOption('S', getGenerator()
+        .getOptions()));
+    } catch (Exception e) {
+      e.printStackTrace();
+      result = -1;
+    }
+
+    return result;
+  }
+
+  /**
+   * Sets the random number seed.
+   *
+   * @param newSeed the new random number seed.
+   */
+  @Override
+  public void setSeed(int newSeed) {
+    super.setSeed(newSeed);
+    setGeneratorOption("S", "" + newSeed);
   }
 
   /**
