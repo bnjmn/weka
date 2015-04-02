@@ -1837,7 +1837,7 @@ public class PackageManager extends JPanel {
     topPanel.setLayout(new BorderLayout());
     // topPanel.setBorder(BorderFactory.createTitledBorder("Packages"));
     topPanel.add(butPanel, BorderLayout.NORTH);
-    m_allBut.setSelected(true);
+    m_availableBut.setSelected(true);
 
     m_allBut.addActionListener(new ActionListener() {
       @Override
@@ -2282,7 +2282,21 @@ public class PackageManager extends JPanel {
             category = p.getPackageMetaDataElement("Category").toString();
           }
 
+          //String installedV = "";
           String installedV = "";
+          if (p.isInstalled()) {
+            try {
+              Package installed =
+                WekaPackageManager.getInstalledPackageInfo(p.getName());
+              installedV =
+                installed.getPackageMetaDataElement("Version").toString();
+            } catch (Exception ex) {
+              ex.printStackTrace();
+              displayErrorDialog("An error has occurred while trying to obtain"
+                + " installed package info", ex);
+            }
+          }
+
           List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
           // @SuppressWarnings("unchecked")
           // List<Object> repVersions = (List<Object>) catAndVers.get(1);

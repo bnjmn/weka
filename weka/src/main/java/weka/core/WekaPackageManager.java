@@ -20,45 +20,18 @@
 
 package weka.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.Set;
-import java.util.StringTokenizer;
+import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.pentaho.packageManagement.DefaultPackageManager;
-import org.pentaho.packageManagement.Dependency;
+import org.pentaho.packageManagement.*;
 import org.pentaho.packageManagement.Package;
-import org.pentaho.packageManagement.PackageConstraint;
-import org.pentaho.packageManagement.PackageManager;
 
 import weka.core.converters.ConverterUtils;
 import weka.gui.GenericObjectEditor;
@@ -777,8 +750,7 @@ public class WekaPackageManager {
               p.println("[Weka] Can't load " + toLoad.getName()
                 + " because the installed "
                 + d.getTarget().getPackage().getName()
-                + " is not compatible (requires: "
-                + d.getTarget() + ")");
+                + " is not compatible (requires: " + d.getTarget() + ")");
             }
             return false;
           }
@@ -797,7 +769,7 @@ public class WekaPackageManager {
    * should be set at startup before allowing this package to be loaded. This is
    * useful for packages that might not be able to function correctly if certain
    * variables are not set correctly.
-   * 
+   *
    * @param toLoad the package to check
    * @return true if good to go
    */
@@ -852,7 +824,7 @@ public class WekaPackageManager {
    * before allowing this package to be loaded. This is useful for checking to
    * see if third-party classes are accessible. An example would be Java3D,
    * which has an installer that installs into the JRE/JDK.
-   * 
+   *
    * @param toLoad the package to check
    * @return true if good to go
    */
@@ -908,7 +880,7 @@ public class WekaPackageManager {
    * example would be a connector package that, for whatever reason, can't
    * include a necessary third-party jar file in its lib folder, and requires
    * the user to download and install this jar file manually.
-   * 
+   *
    * @param toLoad the package to check
    * @param packageRoot the root directory of the package
    * @return true if good to go
@@ -963,7 +935,7 @@ public class WekaPackageManager {
 
   /**
    * Reads the doNotLoad list (if it exists) from the packages directory
-   * 
+   *
    * @return a set of package names that should not be loaded. This will be
    *         empty if the doNotLoadList does not exist on disk.
    */
@@ -1006,7 +978,7 @@ public class WekaPackageManager {
 
   /**
    * Toggle the load status of the supplied list of package names
-   * 
+   *
    * @param packageNames the packages to toggle the load status for
    * @return a list of unknown packages (i.e. any supplied package names that
    *         don't appear to be installed)
@@ -1058,7 +1030,7 @@ public class WekaPackageManager {
 
   /**
    * Load all packages
-   * 
+   *
    * @param verbose true if loading progress should be output
    */
   public static synchronized void loadPackages(boolean verbose) {
@@ -1067,7 +1039,7 @@ public class WekaPackageManager {
 
   /**
    * Load all packages
-   * 
+   *
    * @param verbose true if loading progress should be output
    * @param avoidTriggeringFullClassDiscovery true if we should avoid processing
    *          any properties files that might cause a full class discovery run,
@@ -1170,7 +1142,7 @@ public class WekaPackageManager {
 
   /**
    * Get the underlying package manager implementation
-   * 
+   *
    * @return the underlying concrete package management implementation.
    */
   public static PackageManager getUnderlyingPackageManager() {
@@ -1180,7 +1152,7 @@ public class WekaPackageManager {
   /**
    * Retrieves the size (in KB) of the repository zip archive stored on the
    * server.
-   * 
+   *
    * @return the size of the repository zip archive in KB.
    */
   public static int repoZipArchiveSize() {
@@ -1222,7 +1194,7 @@ public class WekaPackageManager {
 
   /**
    * Get the number of packages that are available at the repository.
-   * 
+   *
    * @return the number of packages that are available (or -1 if this can't be
    *         determined for some reason.
    */
@@ -1271,10 +1243,10 @@ public class WekaPackageManager {
    * Just get a list of the package names. This is faster than calling
    * getAllPackages(), especially if fetching from the online repository, since
    * the full meta data for each package doesn't have to be read.
-   * 
+   *
    * @param local true if the local package list in the cache should be read
    *          rather than the online repository
-   * 
+   *
    * @return a Map<String, String> of all the package names available either
    *         locally or at the repository
    */
@@ -1323,7 +1295,7 @@ public class WekaPackageManager {
 
   /**
    * Establish the local copy of the package meta data if needed
-   * 
+   *
    * @param progress for reporting progress
    * @return any Exception raised or null if all is good
    */
@@ -1351,7 +1323,7 @@ public class WekaPackageManager {
 
   /**
    * Check for new packages on the server and refresh the local cache if needed
-   * 
+   *
    * @param progress to report progress to
    * @return any Exception raised or null if all is good
    */
@@ -1433,7 +1405,7 @@ public class WekaPackageManager {
 
   /**
    * Refresh the local copy of the package meta data
-   * 
+   *
    * @param progress to report progress to
    * @return any Exception raised or null if all is successful
    */
@@ -1494,7 +1466,7 @@ public class WekaPackageManager {
 
   /**
    * Check if a named resource exists in an installed package
-   * 
+   *
    * @param packageName the name of the package in question
    * @param resourceName the name of the resource to check for
    * @return true if the resource exists in the package
@@ -1532,7 +1504,7 @@ public class WekaPackageManager {
   /**
    * Find the most recent version of the package encapsulated in the supplied
    * PackageConstraint argument that satisfies the constraint
-   * 
+   *
    * @param toCheck the PackageConstraint containing the package in question
    * @return the most recent version of the package satisfying the constraint
    * @throws Exception if a version can't be found that satisfies the constraint
@@ -1551,7 +1523,7 @@ public class WekaPackageManager {
     for (Object version : availableVersions) {
       Package candidate =
         PACKAGE_MANAGER.getRepositoryPackageInfo(target.getName(), version);
-      if (toCheck.checkConstraint(candidate)) {
+      if (toCheck.checkConstraint(candidate) && candidate.isCompatibleBaseSystem()) {
         result = candidate;
         break;
       }
@@ -1568,7 +1540,7 @@ public class WekaPackageManager {
 
   /**
    * Install the supplied list of packages
-   * 
+   *
    * @param toInstall packages to install
    * @param progress to report progress to
    * @return true if successful
@@ -1618,7 +1590,7 @@ public class WekaPackageManager {
 
   /**
    * Get the versions of the supplied package available on the server
-   * 
+   *
    * @param packageName the package name to get available versions for
    * @return a list of available versions
    * @throws Exception if a problem occurs
@@ -1631,7 +1603,7 @@ public class WekaPackageManager {
 
   /**
    * Get the package repository URL
-   * 
+   *
    * @return the package repository URL
    */
   public static URL getPackageRepositoryURL() {
@@ -1641,7 +1613,7 @@ public class WekaPackageManager {
 
   /**
    * Get a list of all packages
-   * 
+   *
    * @return a list of all packages
    * @throws Exception if a problem occurs
    */
@@ -1652,7 +1624,7 @@ public class WekaPackageManager {
 
   /**
    * Get a list of all available packages (i.e. those not yet installed(.
-   * 
+   *
    * @return a list of all available packages
    * @throws Exception if a problem occurs
    */
@@ -1663,15 +1635,16 @@ public class WekaPackageManager {
 
   /**
    * Get a list of the most recent version of all available packages (i.e. those
-   * not yet installed) that are compatible with the version of Weka that is
-   * installed.
-   * 
+   * not yet installed or there is a higher version in the repository) that are
+   * compatible with the version of Weka that is installed.
+   *
    * @return a list of packages that are compatible with the installed version
    *         of Weka
    * @throws Exception if a problem occurs
    */
   public static List<Package> getAvailableCompatiblePackages() throws Exception {
-    List<Package> allAvail = getAvailablePackages();
+    // List<Package> allAvail = getAvailablePackages();
+    List<Package> allAvail = getAllPackages();
     List<Package> compatible = new ArrayList<Package>();
 
     for (Package p : allAvail) {
@@ -1685,7 +1658,24 @@ public class WekaPackageManager {
         Package versionedPackage =
           getRepositoryPackageInfo(p.getName(), version.toString());
         if (versionedPackage.isCompatibleBaseSystem()) {
-          compatible.add(p);
+          if (p.isInstalled()) {
+            // see if the latest compatible version is newer than the installed
+            // version
+            Package installed = getInstalledPackageInfo(p.getName());
+            String installedV =
+              installed.getPackageMetaDataElement(
+                VersionPackageConstraint.VERSION_KEY).toString();
+            String versionedV =
+              versionedPackage.getPackageMetaDataElement(
+                VersionPackageConstraint.VERSION_KEY).toString();
+            VersionPackageConstraint.VersionComparison v =
+              VersionPackageConstraint.compare(versionedV, installedV);
+            if (v == VersionPackageConstraint.VersionComparison.GREATERTHAN) {
+              compatible.add(versionedPackage);
+            }
+          } else {
+            compatible.add(versionedPackage);
+          }
           break;
         }
       }
