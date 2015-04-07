@@ -8,7 +8,7 @@ An overview of the libraries used in Weka:
   URL:      http://junit.org/
   
 - java-cup.jar
-  Version:  11b
+  Version:  java-cup-src-11b-20150326
   URL:      http://www2.cs.tum.edu/projects/cup/
   
 - JFlex.jar
