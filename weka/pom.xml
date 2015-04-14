@@ -103,15 +103,22 @@
     </dependency>
 
     <dependency>
-      <groupId>net.sf.squirrel-sql.thirdparty-non-maven</groupId>
-      <artifactId>java-cup</artifactId>
-      <version>0.11a</version>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>java-cup-11b</artifactId>
+      <version>2015.03.26</version>
+      <scope>compile</scope>
+    </dependency>    
+
+    <dependency>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>java-cup-11b-runtime</artifactId>
+      <version>2015.03.26</version>
     </dependency>    
 
     <dependency>
       <groupId>org.pentaho.pentaho-commons</groupId>
       <artifactId>pentaho-package-manager</artifactId>
-      <version>1.0.10</version>
+      <version>1.0.11</version>
     </dependency>
   </dependencies>
 
