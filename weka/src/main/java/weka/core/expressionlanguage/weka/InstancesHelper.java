@@ -21,7 +21,6 @@
 
 package weka.core.expressionlanguage.weka;
 
-import java.io.Serializable;
 import java.util.regex.Pattern;
 
 import weka.core.Utils;
@@ -51,7 +50,7 @@ import weka.core.expressionlanguage.common.Primitives.StringExpression;
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )
  * @version $Revision: 1000 $
  */
-public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclarations, Serializable {
+public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclarations {
 
   // from MathExpression filter and AttributeExpression
   private static final Pattern ATTRIBUTE1 = Pattern.compile("[aA][0-9]+");
@@ -126,7 +125,7 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     throw new SemanticException(IS_MISSING + " is only applicable to a dataset value!");
   }
   
-  private static class isMissing implements BooleanExpression, Serializable {
+  private static class isMissing implements BooleanExpression {
 
     private static final long serialVersionUID = -3805035561340865906L;
 
@@ -224,7 +223,7 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
       dataset.attribute(index).toString() + "' not supported!");
   }
   
-  private abstract class Value implements Node, Serializable {
+  private abstract class Value implements Node {
 
     private static final long serialVersionUID = 5839070716097467627L;
 
@@ -243,7 +242,7 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     }
   }
   
-  private class DoubleValue extends Value implements DoubleExpression, Serializable {
+  private class DoubleValue extends Value implements DoubleExpression {
 
     private static final long serialVersionUID = -1001674545929082424L;
 
@@ -262,7 +261,7 @@ public class InstancesHelper implements VariableDeclarations, Macro, MacroDeclar
     }
   }
   
-  private class StringValue extends Value implements StringExpression, Serializable {
+  private class StringValue extends Value implements StringExpression {
 
     private static final long serialVersionUID = -249974216283801876L;
 

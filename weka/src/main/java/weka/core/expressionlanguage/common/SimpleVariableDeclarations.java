@@ -21,6 +21,7 @@
 
 package weka.core.expressionlanguage.common;
 
+import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -133,7 +134,7 @@ public class SimpleVariableDeclarations implements VariableDeclarations {
    * @author Benjamin Weber ( benweber at student dot ethz dot ch )
    * @version $Revision: 1000 $
    */
-  public static class VariableInitializer {
+  public static class VariableInitializer implements Serializable {
     
     /** The variables that have been declared and used in a program */
     private Map<String, Node> variables = new HashMap<String, Node>();

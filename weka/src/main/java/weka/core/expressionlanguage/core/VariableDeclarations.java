@@ -21,6 +21,8 @@
 
 package weka.core.expressionlanguage.core;
 
+import java.io.Serializable;
+
 /**
  * Interface to expose variables to a program.</p>
  * 
@@ -38,7 +40,7 @@ package weka.core.expressionlanguage.core;
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )
  * @version $Revision: 1000 $
  */
-public interface VariableDeclarations {
+public interface VariableDeclarations extends Serializable {
 
   /**
    * Whether the variable is declared

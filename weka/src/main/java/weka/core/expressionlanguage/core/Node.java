@@ -21,6 +21,8 @@
 
 package weka.core.expressionlanguage.core;
 
+import java.io.Serializable;
+
 /**
  * A node of the AST (abstract syntax tree) for a program</p>
  * 
@@ -29,4 +31,4 @@ package weka.core.expressionlanguage.core;
  * @author Benjamin Weber ( benweber at student dot ethz dot ch )
  * @version $Revision: 1000 $
  */
-public interface Node {}
+public interface Node extends Serializable {}
