@@ -333,16 +333,13 @@
       <param name="packageName" value="discriminantAnalysis"/>
     </antcall>
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="regressionByDiscretization"/>
-    </antcall>
-    <antcall target="${packageCommand}_internal">
       <param name="packageName" value="extraTrees"/>
     </antcall>
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="gaussianProcesses"/>
+      <param name="packageName" value="alternatingModelTrees"/>
     </antcall>
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="alternatingModelTrees"/>
+      <param name="packageName" value="timeSeriesFilters"/>
     </antcall>
   </target>
 
