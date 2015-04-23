@@ -295,7 +295,12 @@ public class Option implements RevisionHandler {
                     .add("-" + parameterDescription.commandLineParamName());
                 }
               } else {
-                options.add(value.toString());
+                if (value.toString().length() > 0) {
+                  options.add(value.toString());
+                } else {
+                  // don't allow empty strings
+                  options.remove(options.size() - 1);
+                }
               }
             }
           }
