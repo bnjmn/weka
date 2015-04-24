@@ -17,9 +17,9 @@
 
     <dependency org="org.apache.spark" name="spark-core_2.10" rev="${dependency.spark.revision}">
       <exclude org="org.eclipse.jetty.orbit"/>
-<!--      <exclude module="hadoop-yarn-common"/>
+      <exclude module="hadoop-yarn-common"/>
       <exclude module="hadoop-yarn-client"/>
-      <exclude module="hadoop-yarn-api"/> -->
+      <exclude module="hadoop-yarn-api"/>
     </dependency>
 
     <dependency org="javax.servlet" name="javax.servlet-api" rev="3.1.0" />

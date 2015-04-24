@@ -151,7 +151,7 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
   public static String addSubdirToPath(String parent, String subdirName) {
 
     String result =
-      parent.toLowerCase().startsWith("hdfs://") ? (parent + "/" + subdirName)
+      parent.toLowerCase().contains("://") ? (parent + "/" + subdirName)
         : parent + File.separator + subdirName;
 
     return result;

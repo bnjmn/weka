@@ -21,7 +21,7 @@
 
 package weka.gui.beans;
 
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -29,7 +29,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.*;
+import javax.swing.JPanel;
 
 import org.apache.log4j.WriterAppender;
 import org.apache.spark.api.java.JavaSparkContext;
@@ -287,34 +287,49 @@ public class AbstractSparkJob extends JPanel implements Startable, BeanCommon,
 
   @Override
   public void start() throws Exception {
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     String jobName = "WekaKF:";
-    if (m_job != null && m_runningJob == null) {
-      m_runningJob = m_job.getClass().newInstance();
-      m_runningJob.setStatusMessagePrefix(statusMessagePrefix());
-      m_runningJob.setOptions(m_job.getOptions());
-      m_runningJob.setEnvironment(m_env);
-      m_runningJob.setLog(m_log);
+    try {
+      Thread.currentThread().setContextClassLoader(
+        this.getClass().getClassLoader());
+      if (m_job != null && m_runningJob == null) {
+        m_runningJob = m_job.getClass().newInstance();
+        m_runningJob.setStatusMessagePrefix(statusMessagePrefix());
+        m_runningJob.setOptions(m_job.getOptions());
+        m_runningJob.setEnvironment(m_env);
+        m_runningJob.setLog(m_log);
+      }
+      jobName += m_runningJob.getJobName();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
     }
-    jobName += m_runningJob.getJobName();
 
     if (m_listenee == null) {
-      for (SuccessListener l : m_successListeners) {
-        jobName += "+" + ((AbstractSparkJob) l).getUnderlyingJob().getJobName();
-      }
-      if (m_log != null) {
-        m_log.logMessage("Setting job name to: " + jobName);
-      }
-      m_runningJob.setJobName(jobName);
+      try {
+        Thread.currentThread().setContextClassLoader(
+          this.getClass().getClassLoader());
 
-      // we are a start point. Assumption is that we're the *only* start point
-      // as things will break down if there are more than one.
-      m_sparkLogAppender = m_runningJob.initJob(null);
-      m_currentContext = m_runningJob.getSparkContext();
-      m_cachingStrategy = m_runningJob.getCachingStrategy();
-      m_outputDirectory = m_runningJob.getSparkJobConfig().getOutputDir();
-      if (m_successListeners.size() == 0 && m_failureListeners.size() == 0) {
-        // no further downstream steps
-        m_last = true;
+        for (SuccessListener l : m_successListeners) {
+          jobName +=
+            "+" + ((AbstractSparkJob) l).getUnderlyingJob().getJobName();
+        }
+        if (m_log != null) {
+          m_log.logMessage("Setting job name to: " + jobName);
+        }
+        m_runningJob.setJobName(jobName);
+
+        // we are a start point. Assumption is that we're the *only* start point
+        // as things will break down if there are more than one.
+        m_sparkLogAppender = m_runningJob.initJob(null);
+        m_currentContext = m_runningJob.getSparkContext();
+        m_cachingStrategy = m_runningJob.getCachingStrategy();
+        m_outputDirectory = m_runningJob.getSparkJobConfig().getOutputDir();
+        if (m_successListeners.size() == 0 && m_failureListeners.size() == 0) {
+          // no further downstream steps
+          m_last = true;
+        }
+      } finally {
+        Thread.currentThread().setContextClassLoader(orig);
       }
       runJob();
     }
@@ -338,8 +353,11 @@ public class AbstractSparkJob extends JPanel implements Startable, BeanCommon,
    * Runs the underlying job
    */
   protected void runJob() {
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
     if (m_runningJob != null) {
       try {
+        Thread.currentThread().setContextClassLoader(
+          this.getClass().getClassLoader());
         if (m_currentContext == null) {
           throw new DistributedWekaException("No spark context available!");
         }
@@ -406,6 +424,7 @@ public class AbstractSparkJob extends JPanel implements Startable, BeanCommon,
               + "Shutting down Spark context...");
           }
           m_runningJob.shutdownJob(m_sparkLogAppender);
+          Thread.currentThread().setContextClassLoader(orig);
         }
         m_runningJob = null;
       }
