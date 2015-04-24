@@ -281,7 +281,7 @@ public class Option implements RevisionHandler {
               options
                 .add(getOptionStringForOptionHandler((OptionHandler) value));
             } else if (value instanceof SelectedTag) {
-              options.add("" + ((SelectedTag)value).getSelectedTag().getID());
+              options.add("" + ((SelectedTag)value).getSelectedTag().getReadable());
             } else {
               // check for boolean/flag
               if (parameterDescription.commandLineParamIsFlag()) {
