@@ -29,7 +29,7 @@ License=GPL 3
 Description=Provides Spark wrappers for the classes in distributedWekaBase. Includes generic Spark 1.1.1 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${user.home}/wekafiles/distributedWekaSpark/lib and copy in the spark-assembly-A.B.C-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
 
 # Changes in this release
-Changes=Added some context classloader jiggery pokery to the knowledge flow steps so that they will execute properly when when weka is being loaded by a child classloader. Now using Spark 1.3.0 libraries
+Changes=Added some context classloader jiggery pokery to the knowledge flow steps so that they will execute properly when when weka is being loaded by a child classloader.
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaSpark1.0.1.zip?download
