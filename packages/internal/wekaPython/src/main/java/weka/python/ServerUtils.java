@@ -202,6 +202,12 @@ public class ServerUtils {
             System.err.println("\nScript error:\n" + outAndErr.get(1));
           }
         }
+
+        if (outAndErr.get(1).contains("Warning:")) {
+          // clear warnings - we really just want to know if there
+          // are major errors
+          outAndErr.set(1, "");
+        }
       } catch (IOException ex) {
         throw new WekaException(ex);
       }

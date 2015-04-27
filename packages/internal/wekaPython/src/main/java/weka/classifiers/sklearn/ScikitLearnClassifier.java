@@ -121,7 +121,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       "\tcopy_X=True, eps=2.2204460492503131e-16, fit_intercept=True,\n"
         + "\tfit_path=True, n_nonzero_coefs=500, normalize=True, precompute='auto',\n"
-        + "   verbose=False"),
+        + "\tverbose=False"),
     LarsCV("linear_model", false, true, false,
       "\tcopy_X=True, cv=None, eps=2.2204460492503131e-16, fit_intercept=True,\n"
         + "\tmax_iter=500, max_n_alphas=1000, n_jobs=1, normalize=True,\n"
