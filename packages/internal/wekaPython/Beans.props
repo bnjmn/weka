@@ -1,2 +1,6 @@
 # Specifies the tools to go into the Plugins toolbar
 weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.PythonScriptExecutor
+weka.gui.beans.KnowledgeFlow.templates=weka/gui/beans/templates/pythonScripting.kfml,\
+ weka/gui/beans/templates/scikitLearn.kfml
+weka.gui.beans.KnowledgeFlow.templates.desc=Running CPython scripts,\
+ Comparing two scikit-learn classifiers

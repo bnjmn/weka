@@ -76,6 +76,7 @@
          <include name="**/*.cup"/>
          <include name="**/*.flex"/>
          <include name="**/*.jflex"/>
+         <include name="**/*.kfml"/>
          <include name="**/*.properties"/>
          <include name="**/*.default"/>
        </fileset>
@@ -217,6 +218,7 @@
          <include name="src/**/*.default"/>
          <include name="src/**/*.cost"/>
          <include name="src/**/*.arff"/>
+         <include name="src/**/*.kfml"/>
          <include name="src/**/*.matrix"/>
        </fileset>
     </copy>
@@ -247,6 +249,7 @@
       <include name="src/**/*.default"/>
       <include name="src/**/*.cost"/>
       <include name="src/**/*.arff"/>
+      <include name="src/**/*.kfml"/>
       <include name="src/**/*.matrix"/>
       <include name="lib/**/*.jar"/>
     </jar>

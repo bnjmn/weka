@@ -65,10 +65,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         + "\tmax_features=None, max_leaf_nodes=None, min_samples_leaf=1,\n"
         + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
         + "\trandom_state=None, splitter='best'"),
-    DecisionTreeRegressor("tree", false, true, false, "\tcriterion='mse', max_depth=None, max_features=None,\n"
-      + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
-      + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
-      + "\tsplitter='best'"),
+    DecisionTreeRegressor("tree", false, true, false,
+      "\tcriterion='mse', max_depth=None, max_features=None,\n"
+        + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
+        + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
+        + "\tsplitter='best'"),
     GaussianNB("naive_bayes", true, false, true, ""),
     MultinomialNB("naive_bayes", true, false, true,
       "alpha=1.0, class_prior=None, fit_prior=True"),
@@ -276,48 +277,52 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     NuSVR("svm", false, true, false,
       "\tC=1.0, cache_size=200, coef0=0.0, degree=3, gamma=0.0, kernel='rbf',\n"
         + "\tmax_iter=-1, nu=0.5, shrinking=True, tol=0.001, verbose=False"),
-    AdaBoostClassifier("ensemble",true, false, true, "\talgorithm='SAMME.R', base_estimator=None,\n"
-      + "\tlearning_rate=1.0, n_estimators=50, random_state=None"),
-    AdaBoostRegressor("ensemble",false,true,false,"\tbase_estimator=None, learning_rate=1.0, loss='linear',\n"
-      + "\tn_estimators=50, random_state=None"),
-    BaggingClassifier("ensemble", true, false, true, "\tbase_estimator=None, bootstrap=True,\n"
-      + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
-      + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-      + "\tverbose=0"),
-    BaggingRegressor("ensemble", false, true, false, "\tbase_estimator=None, bootstrap=True,\n"
-      + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
-      + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-      + "\tverbose=0"),
-    ExtraTreeClassifier("tree", true, false, true, "\tclass_weight=None, criterion='gini', max_depth=None,\n"
-      + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
-      + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
-      + "\trandom_state=None, splitter='random'"),
-    ExtraTreeRegressor("tree", false, true, false,"\tcriterion='mse', max_depth=None, max_features='auto',\n"
-      + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
-      + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
-      + "\tsplitter='random'"),
-    GradientBoostingClassifier("ensemble",true, false, true, "\tinit=None, learning_rate=0.1, loss='deviance',\n"
-      + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
-      + "\tmin_samples_leaf=1, min_samples_split=2,\n"
-      + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
-      + "\trandom_state=None, subsample=1.0, verbose=0,\n"
-      + "\twarm_start=False"),
-    GradientBoostingRegressor("ensemble", false, true, false, "\talpha=0.9, init=None, learning_rate=0.1, loss='ls',\n"
-      + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
-      + "\tmin_samples_leaf=1, min_samples_split=2,\n"
-      + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
-      + "\trandom_state=None, subsample=1.0, verbose=0, warm_start=False"),
-    RandomForestClassifier("ensemble", true, false, true, "\tbootstrap=True, class_weight=None, criterion='gini',\n"
-      + "\tmax_depth=None, max_features='auto', max_leaf_nodes=None,\n"
-      + "\tmin_samples_leaf=1, min_samples_split=2,\n"
-      + "\tmin_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,\n"
-      + "\toob_score=False, random_state=None, verbose=0,\n"
-      + "\twarm_start=False"),
-    RandomForestRegressor("ensemble", false, true, false, "\tbootstrap=True, criterion='mse', max_depth=None,\n"
-      + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
-      + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
-      + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-      + "\tverbose=0, warm_start=False");
+    AdaBoostClassifier("ensemble", true, false, true,
+      "\talgorithm='SAMME.R', base_estimator=None,\n"
+        + "\tlearning_rate=1.0, n_estimators=50, random_state=None"),
+    AdaBoostRegressor("ensemble", false, true, false,
+      "\tbase_estimator=None, learning_rate=1.0, loss='linear',\n"
+        + "\tn_estimators=50, random_state=None"), BaggingClassifier(
+      "ensemble", true, false, true, "\tbase_estimator=None, bootstrap=True,\n"
+        + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
+        + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
+        + "\tverbose=0"), BaggingRegressor("ensemble", false, true, false,
+      "\tbase_estimator=None, bootstrap=True,\n"
+        + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
+        + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
+        + "\tverbose=0"), ExtraTreeClassifier("tree", true, false, true,
+      "\tclass_weight=None, criterion='gini', max_depth=None,\n"
+        + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
+        + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
+        + "\trandom_state=None, splitter='random'"), ExtraTreeRegressor("tree",
+      false, true, false,
+      "\tcriterion='mse', max_depth=None, max_features='auto',\n"
+        + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
+        + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
+        + "\tsplitter='random'"), GradientBoostingClassifier("ensemble", true,
+      false, true, "\tinit=None, learning_rate=0.1, loss='deviance',\n"
+        + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
+        + "\tmin_samples_leaf=1, min_samples_split=2,\n"
+        + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
+        + "\trandom_state=None, subsample=1.0, verbose=0,\n"
+        + "\twarm_start=False"), GradientBoostingRegressor("ensemble", false,
+      true, false, "\talpha=0.9, init=None, learning_rate=0.1, loss='ls',\n"
+        + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
+        + "\tmin_samples_leaf=1, min_samples_split=2,\n"
+        + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
+        + "\trandom_state=None, subsample=1.0, verbose=0, warm_start=False"),
+    RandomForestClassifier("ensemble", true, false, true,
+      "\tbootstrap=True, class_weight=None, criterion='gini',\n"
+        + "\tmax_depth=None, max_features='auto', max_leaf_nodes=None,\n"
+        + "\tmin_samples_leaf=1, min_samples_split=2,\n"
+        + "\tmin_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,\n"
+        + "\toob_score=False, random_state=None, verbose=0,\n"
+        + "\twarm_start=False"), RandomForestRegressor("ensemble", false, true,
+      false, "\tbootstrap=True, criterion='mse', max_depth=None,\n"
+        + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
+        + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
+        + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
+        + "\tverbose=0, warm_start=False");
 
     private String m_module;
     private boolean m_classification;
@@ -714,10 +719,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         getDebug());
 
       StringBuilder learnScript = new StringBuilder();
-      learnScript.append("from sklearn import *").append("\n").
-        append("import numpy as np").append("\n");
+      learnScript.append("from sklearn import *").append("\n")
+        .append("import numpy as np").append("\n");
       learnScript.append(
-        MODEL_ID + m_modelHash + " = " + m_learner.getModule() + "." + m_learner.toString() + "("
+        MODEL_ID + m_modelHash + " = " + m_learner.getModule() + "."
+          + m_learner.toString() + "("
           + (getLearnerOpts().length() > 0 ? getLearnerOpts() : "") + ")")
         .append("\n");
       learnScript.append(MODEL_ID + m_modelHash + ".fit(X,np.ravel(Y))")
@@ -833,6 +839,13 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
           + "(X)").append("\npreds = preds.tolist()\n");
       List<String> outAndErr =
         session.executeScript(predictScript.toString(), getDebug());
+      if (outAndErr.size() == 2 && outAndErr.get(1).length() > 0) {
+        if (m_continueOnSysErr) {
+          System.err.println(outAndErr.get(1));
+        } else {
+          throw new Exception(outAndErr.get(1));
+        }
+      }
 
       List<Object> preds =
         (List<Object>) session.getVariableValueFromPythonAsJson("preds",
