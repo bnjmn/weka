@@ -50,6 +50,9 @@ public class PythonScriptExecutor extends JPanel implements BeanCommon,
   Visible, EventConstraints, Serializable, TrainingSetListener,
   TestSetListener, DataSourceListener, EnvironmentHandler, Startable {
 
+  /** For serialization */
+  private static final long serialVersionUID = 8220123645676178107L;
+
   /** Visual for this bean */
   protected BeanVisual m_visual = new BeanVisual("PythonScriptExecutor",
     BeanVisual.ICON_PATH + "PythonScriptExecutor.gif", BeanVisual.ICON_PATH
@@ -469,7 +472,6 @@ public class PythonScriptExecutor extends JPanel implements BeanCommon,
    *
    * @param session the PythonSession to use
    * @param script the script to execute
-   * @throws Exception if a problem occurs
    */
   protected void executeScript(PythonSession session, String script) {
     try {

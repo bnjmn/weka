@@ -21,12 +21,7 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -37,20 +32,7 @@ import java.io.FileWriter;
 import java.lang.reflect.Constructor;
 import java.util.Properties;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
 
@@ -73,6 +55,9 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
   /** editor setup */
   public final static String PROPERTIES_FILE =
     "weka/gui/scripting/Jython.props";
+
+  /** For serialization */
+  private static final long serialVersionUID = 2816018471336846833L;
 
   protected ModifyListener m_modifyL = null;
   protected Environment m_env = Environment.getSystemWide();
@@ -103,8 +88,9 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
     setLayout(new BorderLayout());
   }
 
+  @SuppressWarnings({"rawtypes", "unchecked"})
   private void setup() {
-    Properties props = null;
+    Properties props;
 
     try {
       props = Utils.readProperties(PROPERTIES_FILE);
@@ -171,8 +157,10 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
           m_executor.getPythonScript(), null);
       } else {
         String message =
-          "Python does not seem to be available:\n\n" + envEvalResults != null ? envEvalResults
-            : envEvalEx.getMessage();
+          "Python does not seem to be available:\n\n"
+            + (envEvalResults != null && envEvalResults.length() > 0 ? envEvalResults
+              : envEvalEx.getMessage());
+        m_scriptEditor.getDocument().insertString(0, message, null);
       }
     } catch (BadLocationException ex) {
       ex.printStackTrace();
@@ -279,11 +267,11 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
           fileChooser.showOpenDialog(PythonScriptExecutorCustomizer.this);
         if (retVal == JFileChooser.APPROVE_OPTION) {
           // boolean ok = m_script.open(fileChooser.getSelectedFile());
-          StringBuffer sb = new StringBuffer();
+          StringBuilder sb = new StringBuilder();
           try {
             BufferedReader br =
               new BufferedReader(new FileReader(fileChooser.getSelectedFile()));
-            String line = null;
+            String line;
             while ((line = br.readLine()) != null) {
               sb.append(line).append("\n");
             }

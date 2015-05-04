@@ -23,7 +23,6 @@ package weka.python;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ServerSocket;
@@ -292,8 +291,9 @@ public class PythonSession {
   public void instancesToPython(Instances instances, String pythonFrameName,
     boolean debug) throws WekaException {
     try {
-      ServerUtils.sendInstances( instances, pythonFrameName, m_localSocket.getOutputStream(),
-        m_localSocket.getInputStream(), m_log, debug );
+      ServerUtils.sendInstances(instances, pythonFrameName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
@@ -335,8 +335,9 @@ public class PythonSession {
   public Instances getDataFrameAsInstances(String frameName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.receiveInstances( frameName, m_localSocket.getOutputStream(), m_localSocket.getInputStream(),
-        m_log, debug );
+      return ServerUtils.receiveInstances(frameName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -354,8 +355,9 @@ public class PythonSession {
   public List<String> executeScript(String pyScript, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.executeUserScript( pyScript, m_localSocket.getOutputStream(), m_localSocket.getInputStream(),
-        m_log, debug );
+      return ServerUtils.executeUserScript(pyScript,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -372,8 +374,9 @@ public class PythonSession {
   public boolean checkIfPythonVariableIsSet(String varName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.checkIfPythonVariableIsSet( varName, m_localSocket.getOutputStream(),
-        m_localSocket.getInputStream(), m_log, debug );
+      return ServerUtils.checkIfPythonVariableIsSet(varName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -393,8 +396,9 @@ public class PythonSession {
   public Object getVariableValueFromPythonAsJson(String varName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.receiveJsonVariableValue( varName, m_localSocket.getOutputStream(),
-        m_localSocket.getInputStream(), m_log, debug );
+      return ServerUtils.receiveJsonVariableValue(varName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -478,8 +482,8 @@ public class PythonSession {
    */
   public List<String> getPythonDebugBuffer(boolean debug) throws WekaException {
     try {
-      return ServerUtils.receiveDebugBuffer( m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug );
+      return ServerUtils.receiveDebugBuffer(m_localSocket.getOutputStream(),
+        m_localSocket.getInputStream(), m_log, debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -596,38 +600,38 @@ public class PythonSession {
 
       String temp = "";
       PythonSession session = PythonSession.acquireSession(temp);
-      String script = "import matplotlib.pyplot as plt\nfig, ax = plt.subplots( nrows=1, ncols=1 )\n"
-        + "ax.plot([0,1,2], [10,20,3])\n";
-      session.executeScript( script, true );
-      BufferedImage img = session.getImageFromPython( "fig", true );
+      String script =
+        "import matplotlib.pyplot as plt\nfig, ax = plt.subplots( nrows=1, ncols=1 )\n"
+          + "ax.plot([0,1,2], [10,20,3])\n";
+      session.executeScript(script, true);
+      BufferedImage img = session.getImageFromPython("fig", true);
 
-/*      Instances headerToWrite = new Instances(new FileReader(args[0]));
-
-      System.err.println("Attempting to send instances...");
-      // session.instancesToPythonPandasDataFrame(headerToWrite, "iris");
-      session.instancesToPythonAsScikietLearn(headerToWrite, "test", true);
-
-      // now try and get them back
-      System.err.println("Attempting to retrieve instances...");
-      System.err.println(session.getDataFrameAsInstances("test", true));
-
-      // now try executing a simple script
-      System.err.println("Executing a script...");
-      session.executeScript("import pandas as pd\n\nif type(test) "
-        + "is pd.DataFrame:\n\tprint test.info()\n", true);
-
-      System.err.println("Executing a script...");
-      session.executeScript("zz = [[1,2,3],[3,4,5]]\n", true);
-      Object jsonVal = session.getVariableValueFromPythonAsJson("zz", true);
-      if (jsonVal instanceof List) {
-        System.err.println("Json var value is a list!");
-      } else {
-        System.err.println("Was expecting the response to be a list, not a "
-          + jsonVal.getClass().toString());
-        System.err.println(jsonVal);
-      }
-
-      Thread.sleep(3000); */
+      /*
+       * Instances headerToWrite = new Instances(new FileReader(args[0]));
+       * 
+       * System.err.println("Attempting to send instances..."); //
+       * session.instancesToPythonPandasDataFrame(headerToWrite, "iris");
+       * session.instancesToPythonAsScikietLearn(headerToWrite, "test", true);
+       * 
+       * // now try and get them back
+       * System.err.println("Attempting to retrieve instances...");
+       * System.err.println(session.getDataFrameAsInstances("test", true));
+       * 
+       * // now try executing a simple script
+       * System.err.println("Executing a script...");
+       * session.executeScript("import pandas as pd\n\nif type(test) " +
+       * "is pd.DataFrame:\n\tprint test.info()\n", true);
+       * 
+       * System.err.println("Executing a script...");
+       * session.executeScript("zz = [[1,2,3],[3,4,5]]\n", true); Object jsonVal
+       * = session.getVariableValueFromPythonAsJson("zz", true); if (jsonVal
+       * instanceof List) { System.err.println("Json var value is a list!"); }
+       * else {
+       * System.err.println("Was expecting the response to be a list, not a " +
+       * jsonVal.getClass().toString()); System.err.println(jsonVal); }
+       * 
+       * Thread.sleep(3000);
+       */
 
     } catch (Exception ex) {
       ex.printStackTrace();

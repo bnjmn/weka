@@ -671,6 +671,7 @@ public class ServerUtils {
    * @return a BufferedImage
    * @throws WekaException if a problem occurs
    */
+  @SuppressWarnings("unchecked")
   protected static BufferedImage getPNGImageFromPython(String varName,
     OutputStream outputStream, InputStream inputStream, Logger log,
     boolean debug) throws WekaException {
@@ -735,6 +736,7 @@ public class ServerUtils {
    * @return the type of the variable in python
    * @throws WekaException if a problem occurs
    */
+  @SuppressWarnings("unchecked")
   protected static PythonSession.PythonVariableType getPythonVariableType(
     String varName, OutputStream outputStream, InputStream inputStream,
     Logger log, boolean debug) throws WekaException {

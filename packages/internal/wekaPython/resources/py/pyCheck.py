@@ -26,6 +26,7 @@ def check_libraries():
     check_library('os')
     check_library('pickle')
     check_library('sklearn')
+    check_library('matplotlib')
 
     check_library('numpy')
     if check_library('pandas', ['DataFrame'], pandas_version_min):
