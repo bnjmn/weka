@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA|object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.7.13-SNAPSHOT">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.7.13-SNAPSHOT">
+   <object class="java.util.Vector" name="0">
+      <object class="weka.gui.beans.BeanInstance" name="0">
+         <object class="int" name="id" primitive="yes">0</object>
+         <object class="int" name="x" primitive="yes">353</object>
+         <object class="int" name="y" primitive="yes">74</object>
+         <object class="java.lang.String" name="custom_name">PythonScriptExecutor</object>
+         <object class="weka.gui.beans.PythonScriptExecutor" name="bean">
+            <object class="boolean" name="debug" primitive="yes">false</object>
+            <object class="java.lang.String" name="pythonScript">import matplotlib.pyplot as plt&#10;from pandas.tools.plotting import scatter_matrix&#10;from pandas.tools.plotting import andrews_curves&#10;from pandas.tools.plotting import parallel_coordinates&#10;from pandas.tools.plotting import radviz&#10;import numpy as np&#10;from sklearn import *&#10;iris=pyData&#10;# Summarize the input data&#10;summary=str(iris.describe(include=&apos;all&apos;))&#10;# Scatter plot&#10;scatter = scatter_matrix(iris,figsize=(6,6),diagonal=&apos;kde&apos;)&#10;fig=scatter[0][0].get_figure()&#10;# Andrew&apos;s curves&#10;fig2=plt.figure()&#10;andrews_curves(iris, &apos;class&apos;)&#10;# Parallel coordinates&#10;fig3=plt.figure()&#10;parallel_coordinates(iris, &apos;class&apos;)&#10;# RadViz&#10;fig4=plt.figure()&#10;radviz(iris, &apos;class&apos;)&#10;# learn a scikit-learn classifier and get predictions&#10;X=iris.iloc[:,[0,1,2,3]].values&#10;Y=iris.iloc[:,[4]].values&#10;dt=tree.DecisionTreeClassifier()&#10;dt.fit(X,Y)&#10;preds=dt.predict_proba(X)</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="java.lang.String" name="variablesToGetFromPython">summary,iris,fig,fig2,fig3,fig4,preds</object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">PythonScriptExecutor</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/PythonScriptExecutor.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/PythonScriptExecutor.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">PythonScriptExecutor</object>
+            <object class="java.lang.String" name="scriptFile"/>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="1">
+         <object class="int" name="id" primitive="yes">1</object>
+         <object class="int" name="x" primitive="yes">73</object>
+         <object class="int" name="y" primitive="yes">74</object>
+         <object class="java.lang.String" name="custom_name">ArffLoader</object>
+         <object class="weka.gui.beans.Loader" name="bean">
+            <object class="weka.core.converters.ArffLoader" name="wrappedAlgorithm">
+               <object class="java.lang.String" name="file">weka/gui/beans/templates/iris.arff</object>
+               <object class="boolean" name="useRelativePath" primitive="yes">false</object>
+            </object>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="2">
+         <object class="int" name="id" primitive="yes">2</object>
+         <object class="int" name="x" primitive="yes">353</object>
+         <object class="int" name="y" primitive="yes">234</object>
+         <object class="java.lang.String" name="custom_name">TextViewer</object>
+         <object class="weka.gui.beans.TextViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TextViewer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultText.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultText_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TextViewer</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="3">
+         <object class="int" name="id" primitive="yes">3</object>
+         <object class="int" name="x" primitive="yes">593</object>
+         <object class="int" name="y" primitive="yes">234</object>
+         <object class="java.lang.String" name="custom_name">ImageViewer</object>
+         <object class="weka.gui.beans.ImageViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">ImageViewer</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/StripChart.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/StripChart_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">ImageViewer</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="4">
+         <object class="int" name="id" primitive="yes">4</object>
+         <object class="int" name="x" primitive="yes">593</object>
+         <object class="int" name="y" primitive="yes">74</object>
+         <object class="java.lang.String" name="custom_name">TextViewer2</object>
+         <object class="weka.gui.beans.TextViewer" name="bean">
+            <object class="null" name="name" null="yes"/>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+            <object class="weka.gui.beans.BeanVisual" name="visual">
+               <object class="null" name="name" null="yes"/>
+               <object class="java.lang.String" name="text">TextViewer2</object>
+               <object class="java.lang.String" name="iconPath">weka/gui/beans/icons/DefaultText.gif</object>
+               <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/DefaultText_animated.gif</object>
+            </object>
+            <object class="java.lang.String" name="customName">TextViewer2</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="5">
+         <object class="int" name="id" primitive="yes">5</object>
+         <object class="int" name="x" primitive="yes">98</object>
+         <object class="int" name="y" primitive="yes">156</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Load the iris data from&#10;the classpath</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="6">
+         <object class="int" name="id" primitive="yes">6</object>
+         <object class="int" name="x" primitive="yes">262</object>
+         <object class="int" name="y" primitive="yes">243</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Collect textual&#10;variables from&#10;Python</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="7">
+         <object class="int" name="id" primitive="yes">7</object>
+         <object class="int" name="x" primitive="yes">495</object>
+         <object class="int" name="y" primitive="yes">240</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">Collect images&#10;from Python</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="8">
+         <object class="int" name="id" primitive="yes">8</object>
+         <object class="int" name="x" primitive="yes">606</object>
+         <object class="int" name="y" primitive="yes">149</object>
+         <object class="weka.gui.beans.Note" name="bean">
+            <object class="java.lang.String" name="noteText">The iris data&#10;back from Python</object>
+            <object class="null" name="name" null="yes"/>
+            <object class="int" name="fontSizeAdjust" primitive="yes">-1</object>
+         </object>
+      </object>
+   </object>
+   <object class="java.util.Vector" name="1">
+      <object class="weka.gui.beans.BeanConnection" name="0">
+         <object class="int" name="source_id" primitive="yes">1</object>
+         <object class="int" name="target_id" primitive="yes">0</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="1">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">2</object>
+         <object class="java.lang.String" name="eventname">text</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="2">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">3</object>
+         <object class="java.lang.String" name="eventname">image</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="3">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">4</object>
+         <object class="java.lang.String" name="eventname">dataSet</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+   </object>
+</object>
