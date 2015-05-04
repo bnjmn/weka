@@ -10,12 +10,15 @@ import math
 import traceback
 import pandas as pd
 import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
 
 _global_python3 = sys.version_info >= (3, 0)
 print(_global_python3)
 
 if _global_python3:
     from io import StringIO
+    from io import BytesIO
 else:
     try:
         from cStringIO import StringIO
@@ -65,8 +68,12 @@ def runServer():
                     send_instances(message)
                 elif command == 'execute_script':
                     execute_script(message)
+                elif command == 'get_variable_type':
+                    send_variable_type(message)
                 elif command == 'get_variable_value':
                     send_variable_value(message)
+                elif command == 'get_image':
+                    send_image_as_png(message)
                 elif command == 'variable_is_set':
                     send_variable_is_set(message)
                 elif command == 'set_variable_value':
@@ -115,7 +122,7 @@ def receive_instances(message):
             csv_data = receive_message(False)
             # TODO handle date stuff
             frame = pd.read_csv(StringIO(csv_data), na_values='?',
-                                quotechar='\'', escapechar='\\')
+                                quotechar='\'', escapechar='\\', index_col=None)
             _local_env[frame_name] = frame
             if message_debug(message) == True:
                 print(frame.info(), '\n')
@@ -283,6 +290,25 @@ def send_variable_is_set(message):
         error = 'object exists json message does not contain a variable_name entry!'
         ack_command_err(error)
 
+def send_variable_type(message):
+    if 'variable_name' in message:
+        var_name = message['variable_name']
+        var_value = get_variable(var_name)
+        if var_value is None:
+            ack_command_err('variable ' + var_name + ' is not set!')
+        else:
+            ok_response = {}
+            ok_response['response'] = 'ok'
+            ok_response['variable_name'] = var_name
+            ok_response['type'] = 'unknown'
+            if type(var_value) is pd.DataFrame:
+                ok_response['type'] = 'dataframe'
+            elif type(var_value) is matplotlib.figure.Figure:
+                ok_response['type'] = 'image'
+            send_response(ok_response, True)
+    else:
+        ack_command_err('send variable type json message does not contain a variable_name entry!')
+
 
 def send_variable_value(message):
     if 'variable_encoding' in message:
@@ -300,15 +326,59 @@ def base64_encode(value):
     # encode to base 64 bytes
     b64 = base64.b64encode(value)
     # get it as a string
-    b64s = b64.decode('utf8')
+    b64s = b64
+    if _global_python3 is True:
+        b64s = b64.decode('utf8')
     return b64s
 
 def base64_decode(value):
-    # from string to bytes
-    b64b = value.encode()
+    b64b = value
+    if _global_python3 is True:
+        # from string to bytes
+        b64b = value.encode()
     # back to non-base64 bytes
     bytes = base64.b64decode(b64b)
     return bytes
+
+def image_as_encoded_string(value):
+    # return image as png data encoded in a string.
+    # assumes image is a matplotlib.figure.Figure
+    encoded = None
+    if _global_python3:
+        sio = BytesIO()
+        value.savefig(sio, format='png')
+        encoded = base64_encode(sio.getvalue())
+    else:
+        sio = StringIO()
+        value.savefig(sio, format='png')
+        encoded = base64_encode(sio.getvalue())
+    return encoded
+
+def send_image_as_png(message):
+    if 'variable_name' in message:
+        var_name = message['variable_name']
+        image = get_variable(var_name)
+        if image is not None:
+            if type(image) is matplotlib.figure.Figure:
+                ok_response = {}
+                ok_response['response'] = 'ok'
+                ok_response['variable_name'] = var_name
+                #encoding = 'plain'
+                #if _global_python3 is True:
+                encoding = 'base64'
+                ok_response['encoding'] = encoding
+                ok_response['image_data'] = image_as_encoded_string(image)
+                if message_debug(message) == True:
+                    print('Sending ' + var_name + ' base64 encoded as png bytes')
+                send_response(ok_response, True)
+            else:
+                ack_command_err(var_name + ' is not a matplot.figure.Figure object')
+        else:
+            ack_command_err(var_name + ' does not exist!')
+    else:
+        ack_command_err('get image json message does not contain a variable_name entry!')
+
+
 
 def send_encoded_variable_value(message):
     if 'variable_name' in message:
@@ -337,8 +407,7 @@ def send_encoded_variable_value(message):
         else:
             ack_command_err(var_name + ' does not exist!')
     else:
-        error = 'get variable value json message does not contain a variable_name entry!'
-        ack_command_err(error)
+        ack_command_err('get variable value json message does not contain a variable_name entry!')
 
 def receive_variable_value(message):
     if 'variable_encoding' in message:

@@ -23,28 +23,21 @@ package weka.python;
 
 import static org.boon.Boon.puts;
 
-import java.io.BufferedWriter;
-import java.io.ByteArrayOutputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.StringReader;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.imageio.ImageIO;
+
+import org.apache.commons.codec.binary.Base64;
 import org.boon.json.JsonFactory;
 import org.boon.json.ObjectMapper;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.core.WekaException;
+import weka.core.*;
 import weka.core.converters.CSVSaver;
 import weka.gui.Logger;
 
@@ -666,7 +659,139 @@ public class ServerUtils {
   }
 
   /**
-   * Check if a named variable has a value in pythong
+   * Get an image from python. Assumes that the image is a
+   * matplotlib.figure.Figure object. Retrieves this as png data and returns a
+   * BufferedImage.
+   *
+   * @param varName the name of the variable containing the image in python
+   * @param outputStream the output stream to talk to the server on
+   * @param inputStream the input stream to receive server responses from
+   * @param log an optional log
+   * @param debug true to output debug info
+   * @return a BufferedImage
+   * @throws WekaException if a problem occurs
+   */
+  protected static BufferedImage getPNGImageFromPython(String varName,
+    OutputStream outputStream, InputStream inputStream, Logger log,
+    boolean debug) throws WekaException {
+
+    ObjectMapper mapper = JsonFactory.create();
+    Map<String, Object> command = new HashMap<String, Object>();
+    command.put("command", "get_image");
+    command.put("variable_name", varName);
+    command.put("debug", debug);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    mapper.writeValue(bos, command);
+    byte[] bytes = bos.toByteArray();
+
+    if (inputStream != null && outputStream != null) {
+      try {
+        if (debug) {
+          outputCommandDebug(command, log);
+        }
+        // write the command
+        writeDelimitedToOutputStream(bytes, outputStream);
+
+        bytes = readDelimitedFromInputStream(inputStream);
+        mapper = JsonFactory.create();
+        Map<String, Object> ack = mapper.readValue(bytes, Map.class);
+        if (!ack.get("response").toString().equals("ok")) {
+          // fatal error
+          throw new WekaException(ack.get("error_message").toString());
+        }
+
+        if (!ack.get("variable_name").toString().equals(varName)) {
+          throw new WekaException(
+            "Server sent back a response for a different " + "variable!");
+        }
+
+        String encoding = ack.get("encoding").toString();
+        String imageData = ack.get("image_data").toString();
+        byte[] imageBytes;
+        if (encoding.equals("base64")) {
+          imageBytes = Base64.decodeBase64(imageData.getBytes());
+        } else {
+          imageBytes = imageData.getBytes();
+        }
+        return ImageIO.read(new BufferedInputStream(new ByteArrayInputStream(
+          imageBytes)));
+      } catch (IOException ex) {
+        throw new WekaException(ex);
+      }
+    } else {
+      outputCommandDebug(command, log);
+    }
+    return null;
+  }
+
+  /**
+   * Get the type of a variable in python
+   *
+   * @param varName the name of the variable to check
+   * @param outputStream the output stream to talk to the server on
+   * @param inputStream the input stream to receive server responses from
+   * @param log an optional log
+   * @param debug true to output debug info
+   * @return the type of the variable in python
+   * @throws WekaException if a problem occurs
+   */
+  protected static PythonSession.PythonVariableType getPythonVariableType(
+    String varName, OutputStream outputStream, InputStream inputStream,
+    Logger log, boolean debug) throws WekaException {
+
+    ObjectMapper mapper = JsonFactory.create();
+    Map<String, Object> command = new HashMap<String, Object>();
+    command.put("command", "get_variable_type");
+    command.put("variable_name", varName);
+    command.put("debug", debug);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    mapper.writeValue(bos, command);
+    byte[] bytes = bos.toByteArray();
+
+    if (inputStream != null && outputStream != null) {
+      try {
+        if (debug) {
+          outputCommandDebug(command, log);
+        }
+        // write the command
+        writeDelimitedToOutputStream(bytes, outputStream);
+
+        bytes = readDelimitedFromInputStream(inputStream);
+        mapper = JsonFactory.create();
+        Map<String, Object> ack = mapper.readValue(bytes, Map.class);
+        if (!ack.get("response").toString().equals("ok")) {
+          // fatal error
+          throw new WekaException(ack.get("error_message").toString());
+        }
+
+        if (!ack.get("variable_name").toString().equals(varName)) {
+          throw new WekaException(
+            "Server sent back a response for a different " + "variable!");
+        }
+
+        String varType = ack.get("type").toString();
+        PythonSession.PythonVariableType pvt =
+          PythonSession.PythonVariableType.Unknown;
+        for (PythonSession.PythonVariableType t : PythonSession.PythonVariableType
+          .values()) {
+          if (t.toString().toLowerCase().equals(varType)) {
+            pvt = t;
+            break;
+          }
+        }
+        return pvt;
+      } catch (IOException ex) {
+        throw new WekaException(ex);
+      }
+    } else {
+      outputCommandDebug(command, log);
+    }
+
+    return PythonSession.PythonVariableType.Unknown;
+  }
+
+  /**
+   * Check if a named variable has a value in python
    *
    * @param varName the name of the variable to check
    * @param outputStream the output stream to talk to the server on
@@ -724,8 +849,8 @@ public class ServerUtils {
   }
 
   /**
-   * Retrieve a pandas data frame from python. The server sends the header information
-   * in json form followed by CSV data (without a header row).
+   * Retrieve a pandas data frame from python. The server sends the header
+   * information in json form followed by CSV data (without a header row).
    *
    * @param frameName the name of the pandas data frame to get from the server
    * @param outputStream the output stream to talk to the server on

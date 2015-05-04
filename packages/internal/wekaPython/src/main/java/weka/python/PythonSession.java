@@ -21,6 +21,7 @@
 
 package weka.python;
 
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
@@ -44,6 +45,10 @@ import weka.gui.Logger;
  * @version $Revision: $
  */
 public class PythonSession {
+
+  public static enum PythonVariableType {
+    DataFrame, Image, String, Unknown;
+  }
 
   /** The command used to start python */
   private String m_pythonCommand;
@@ -253,6 +258,30 @@ public class PythonSession {
   }
 
   /**
+   * Get the type of a variable in python
+   * 
+   * @param varName the name of the variable to get the type for
+   * @param debug true for debugging output
+   * @return the type of the variable. Known types, for which we can do useful
+   *         things with in the Weka environment, are pandas data frames (can be
+   *         converted to instances), pyplot figure/images (retrieve as png) and
+   *         textual data. Any variable of type unknown should be able to be
+   *         retrieved in string form.
+   * @throws WekaException if a problem occurs
+   */
+  public PythonVariableType
+    getPythonVariableType(String varName, boolean debug) throws WekaException {
+
+    try {
+      return ServerUtils.getPythonVariableType(varName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
+    } catch (Exception ex) {
+      throw new WekaException(ex);
+    }
+  }
+
+  /**
    * Transfer Weka instances into python as a named pandas data frame
    *
    * @param instances the instances to transfer
@@ -263,9 +292,8 @@ public class PythonSession {
   public void instancesToPython(Instances instances, String pythonFrameName,
     boolean debug) throws WekaException {
     try {
-      ServerUtils.sendInstances(instances, pythonFrameName,
-        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug);
+      ServerUtils.sendInstances( instances, pythonFrameName, m_localSocket.getOutputStream(),
+        m_localSocket.getInputStream(), m_log, debug );
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
@@ -296,7 +324,7 @@ public class PythonSession {
   /**
    * Retrieve a pandas data frame from Python and convert it to a set of
    * instances. The resulting set of instances will not have a class index set.
-   * 
+   *
    * @param frameName the name of the pandas data frame to extract and convert
    *          to instances
    * @param debug true for debugging output
@@ -307,9 +335,8 @@ public class PythonSession {
   public Instances getDataFrameAsInstances(String frameName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.receiveInstances(frameName,
-        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug);
+      return ServerUtils.receiveInstances( frameName, m_localSocket.getOutputStream(), m_localSocket.getInputStream(),
+        m_log, debug );
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -317,7 +344,7 @@ public class PythonSession {
 
   /**
    * Execute an arbitrary script in python
-   * 
+   *
    * @param pyScript the script to execute
    * @param debug true for debugging output
    * @return a List of strings - index 0 contains std out from the script and
@@ -327,9 +354,8 @@ public class PythonSession {
   public List<String> executeScript(String pyScript, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.executeUserScript(pyScript,
-        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug);
+      return ServerUtils.executeUserScript( pyScript, m_localSocket.getOutputStream(), m_localSocket.getInputStream(),
+        m_log, debug );
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -346,9 +372,8 @@ public class PythonSession {
   public boolean checkIfPythonVariableIsSet(String varName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.checkIfPythonVariableIsSet(varName,
-        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug);
+      return ServerUtils.checkIfPythonVariableIsSet( varName, m_localSocket.getOutputStream(),
+        m_localSocket.getInputStream(), m_log, debug );
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -359,7 +384,7 @@ public class PythonSession {
    * to Json. If successful, then the resulting Object is either a Map or List
    * containing more Maps and Lists that represent the Json structure of the
    * serialized variable
-   * 
+   *
    * @param varName the name of the variable to retrieve
    * @param debug true for debugging output
    * @return a Map/List based structure
@@ -368,9 +393,8 @@ public class PythonSession {
   public Object getVariableValueFromPythonAsJson(String varName, boolean debug)
     throws WekaException {
     try {
-      return ServerUtils.receiveJsonVariableValue(varName,
-        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
-        debug);
+      return ServerUtils.receiveJsonVariableValue( varName, m_localSocket.getOutputStream(),
+        m_localSocket.getInputStream(), m_log, debug );
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -380,7 +404,7 @@ public class PythonSession {
    * Attempt to retrieve the value of a variable in python using pickle
    * serialization. If successful, then the result is a string containing the
    * pickled object.
-   * 
+   *
    * @param varName the name of the variable to retrieve
    * @param debug true for debugging output
    * @return a string containing the pickled variable value
@@ -400,7 +424,7 @@ public class PythonSession {
   /**
    * Attempt to retrieve the value of a variable in python as a plain string
    * (i.e. executes a 'str(varName)' in python).
-   * 
+   *
    * @param varName the name of the variable to retrieve
    * @param debug true for debugging output
    * @return the value of the variable as a plain string
@@ -420,7 +444,7 @@ public class PythonSession {
   /**
    * Push a pickled python variable value back into python. Deserializes the
    * value in python.
-   * 
+   *
    * @param varName the name of the variable in python that will hold the
    *          deserialized value
    * @param varValue the pickled string value of the variable
@@ -445,7 +469,7 @@ public class PythonSession {
    * buffers. Note that the buffers will potentially also contain output from
    * the execution of arbitrary scripts too. Calling this method also resets the
    * buffers.
-   * 
+   *
    * @param debug true for debugging output (from the execution of this specific
    *          command)
    * @return the contents of the sys out and sys err streams. Element 0 in the
@@ -454,8 +478,30 @@ public class PythonSession {
    */
   public List<String> getPythonDebugBuffer(boolean debug) throws WekaException {
     try {
-      return ServerUtils.receiveDebugBuffer(m_localSocket.getOutputStream(),
-        m_localSocket.getInputStream(), m_log, debug);
+      return ServerUtils.receiveDebugBuffer( m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug );
+    } catch (IOException ex) {
+      throw new WekaException(ex);
+    }
+  }
+
+  /**
+   * Retrieve an image from python. Assumes that the image in python is stored
+   * as a matplotlib.figure.Figure object. Returns a BufferedImage containing
+   * the image.
+   *
+   * @param varName the name of the variable in python that contains the image
+   * @param debug true to output debugging info
+   * @return a BufferedImage
+   * @throws WekaException if the variable doesn't exist, doesn't contain a
+   *           Figure object or there is a comms error.
+   */
+  public BufferedImage getImageFromPython(String varName, boolean debug)
+    throws WekaException {
+    try {
+      return ServerUtils.getPNGImageFromPython(varName,
+        m_localSocket.getOutputStream(), m_localSocket.getInputStream(), m_log,
+        debug);
     } catch (IOException ex) {
       throw new WekaException(ex);
     }
@@ -487,6 +533,9 @@ public class PythonSession {
           }
           ServerUtils.sendServerShutdown(m_localSocket.getOutputStream());
           m_localSocket.close();
+          if (m_serverProcess != null) {
+            m_serverProcess.destroy();
+          }
         }
 
         if (m_serverSocket != null) {
@@ -502,7 +551,7 @@ public class PythonSession {
   /**
    * Initialize the session. This needs to be called exactly once in order to
    * run checks and launch the server. Creates a session singleton.
-   * 
+   *
    * @param pythonCommand the python command
    * @param debug true for debugging output
    * @return true if the server launched successfully
@@ -547,12 +596,12 @@ public class PythonSession {
 
       String temp = "";
       PythonSession session = PythonSession.acquireSession(temp);
+      String script = "import matplotlib.pyplot as plt\nfig, ax = plt.subplots( nrows=1, ncols=1 )\n"
+        + "ax.plot([0,1,2], [10,20,3])\n";
+      session.executeScript( script, true );
+      BufferedImage img = session.getImageFromPython( "fig", true );
 
-      Instances headerToWrite = new Instances(new FileReader(args[0]));
-      /*
-       * System.err.println("Attempting to send header...");
-       * session.headerToPython(headerToWrite);
-       */
+/*      Instances headerToWrite = new Instances(new FileReader(args[0]));
 
       System.err.println("Attempting to send instances...");
       // session.instancesToPythonPandasDataFrame(headerToWrite, "iris");
@@ -578,7 +627,7 @@ public class PythonSession {
         System.err.println(jsonVal);
       }
 
-      Thread.sleep(3000);
+      Thread.sleep(3000); */
 
     } catch (Exception ex) {
       ex.printStackTrace();
