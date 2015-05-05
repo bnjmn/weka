@@ -166,7 +166,7 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   @Override
   public void setOptions(String[] options) throws Exception {
 
-    Option.setOptions(options, this, AbstractClusterer.class);
+    Option.setOptionsForHierarchy(options, this, AbstractClusterer.class);
     setDebug(Utils.getFlag("output-debug-info", options));
     setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
       options));
