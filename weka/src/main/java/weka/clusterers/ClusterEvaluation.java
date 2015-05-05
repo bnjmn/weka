@@ -32,6 +32,7 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
+import weka.core.BatchPredictor;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -283,6 +284,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       filter.setInputFormat(testRaw);
     }
 
+    Instances forBatchPredictors = filter != null
+      ? new Instances(filter.getOutputFormat(), 0)
+      : new Instances(source.getStructure(), 0);
     i = 0;
     while (source.hasMoreElements(testRaw)) {
       // next instance
@@ -293,23 +297,37 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
         inst = filter.output();
       }
 
-      cnum = -1;
-      try {
-        if (m_Clusterer instanceof DensityBasedClusterer) {
-          loglk += ((DensityBasedClusterer) m_Clusterer)
-            .logDensityForInstance(inst);
-          cnum = m_Clusterer.clusterInstance(inst);
-          clusterAssignments.add((double) cnum);
-        } else {
-          cnum = m_Clusterer.clusterInstance(inst);
-          clusterAssignments.add((double) cnum);
+      if (m_Clusterer instanceof BatchPredictor) {
+        forBatchPredictors.add(inst);
+      } else {
+        cnum = -1;
+        try {
+          if (m_Clusterer instanceof DensityBasedClusterer) {
+            loglk +=
+              ((DensityBasedClusterer) m_Clusterer).logDensityForInstance(inst);
+            cnum = m_Clusterer.clusterInstance(inst);
+            clusterAssignments.add((double) cnum);
+          } else {
+            cnum = m_Clusterer.clusterInstance(inst);
+            clusterAssignments.add((double) cnum);
+          }
+        } catch (Exception e) {
+          clusterAssignments.add(-1.0);
+          unclusteredInstances++;
         }
-      } catch (Exception e) {
-        clusterAssignments.add(-1.0);
-        unclusteredInstances++;
-      }
 
-      if (cnum != -1) {
+        if (cnum != -1) {
+          instanceStats[cnum]++;
+        }
+      }
+    }
+
+    if (m_Clusterer instanceof BatchPredictor) {
+      double[][] dists = ((BatchPredictor)m_Clusterer).
+        distributionsForInstances(forBatchPredictors);
+      for (double[] d : dists) {
+        cnum = Utils.maxIndex(d);
+        clusterAssignments.add((double) cnum);
         instanceStats[cnum]++;
       }
     }
@@ -976,22 +994,38 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     if (fileName.length() != 0) {
       DataSource source = new DataSource(fileName);
       Instances structure = source.getStructure();
+      Instances forBatchPredictors = clusterer instanceof BatchPredictor
+        ? new Instances(source.getStructure(), 0) : null;
+
       Instance inst;
       while (source.hasMoreElements(structure)) {
         inst = source.nextElement(structure);
-        try {
-          cnum = clusterer.clusterInstance(inst);
+        if (forBatchPredictors != null) {
+          forBatchPredictors.add(inst);
+        } else {
+          try {
+            cnum = clusterer.clusterInstance(inst);
 
-          if (clusterer instanceof DensityBasedClusterer) {
-            loglk += ((DensityBasedClusterer) clusterer)
-              .logDensityForInstance(inst);
-            // temp = Utils.sum(dist);
+            if (clusterer instanceof DensityBasedClusterer) {
+              loglk +=
+                ((DensityBasedClusterer) clusterer).logDensityForInstance(inst);
+              // temp = Utils.sum(dist);
+            }
+            instanceStats[cnum]++;
+          } catch (Exception e) {
+            unclusteredInstances++;
           }
-          instanceStats[cnum]++;
-        } catch (Exception e) {
-          unclusteredInstances++;
+          i++;
         }
-        i++;
+      }
+
+      if (forBatchPredictors != null) {
+        double[][] dists = ((BatchPredictor) clusterer).
+          distributionsForInstances(forBatchPredictors);
+        for (double[] d : dists) {
+          cnum = Utils.maxIndex(d);
+          instanceStats[cnum]++;
+        }
       }
 
       /*
@@ -1058,22 +1092,40 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     }
 
     structure = source.getStructure();
+    Instances forBatchPredictors = clusterer instanceof BatchPredictor
+      ? new Instances(source.getStructure(), 0) : null;
     while (source.hasMoreElements(structure)) {
       inst = source.nextElement(structure);
-      try {
-        cnum = clusterer.clusterInstance(inst);
+      if (forBatchPredictors != null) {
+        forBatchPredictors.add(inst);
+      } else {
+        try {
+          cnum = clusterer.clusterInstance(inst);
 
-        text.append(i + " " + cnum + " "
-          + attributeValuesString(inst, attributesToOutput) + "\n");
-      } catch (Exception e) {
+          text.append(i + " " + cnum + " " + attributeValuesString(inst,
+            attributesToOutput) + "\n");
+        } catch (Exception e) {
         /*
          * throw new Exception('\n' + "Unable to cluster instance\n" +
          * e.getMessage());
          */
-        text.append(i + " Unclustered "
-          + attributeValuesString(inst, attributesToOutput) + "\n");
+          text.append(i + " Unclustered " + attributeValuesString(inst,
+            attributesToOutput) + "\n");
+        }
+        i++;
       }
-      i++;
+    }
+
+    if (forBatchPredictors != null) {
+      double[][] dists = ((BatchPredictor)clusterer).
+        distributionsForInstances(forBatchPredictors);
+      for (double[] d : dists) {
+        cnum = Utils.maxIndex(d);
+        text.append(i + " " + cnum + " "
+          + attributeValuesString(forBatchPredictors.instance(i),
+          attributesToOutput) + "\n");
+        i++;
+      }
     }
 
     return text.toString();
