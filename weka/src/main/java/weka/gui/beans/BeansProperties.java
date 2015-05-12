@@ -34,6 +34,8 @@ import java.util.TreeSet;
 import javax.swing.JOptionPane;
 
 import weka.core.Utils;
+import weka.core.metastore.MetaStore;
+import weka.core.metastore.XMLFileBasedMetaStore;
 
 /**
  * Utility class encapsulating various properties for the KnowledgeFlow and
@@ -83,14 +85,14 @@ public class BeansProperties implements Serializable {
   private static boolean s_pluginManagerIntialized = false;
 
   /** Default metastore for configurations etc. */
-  protected static KFMetaStore s_kfMetaStore = new XMLFileBasedKFMetaStore();
+  protected static MetaStore s_kfMetaStore = new XMLFileBasedMetaStore();
 
   /**
    * Get the metastore
    * 
    * @return the metastore
    */
-  public static KFMetaStore getMetaStore() {
+  public static MetaStore getMetaStore() {
     return s_kfMetaStore;
   }
 
