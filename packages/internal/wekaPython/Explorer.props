@@ -1,0 +1,4 @@
+# Explorer.props file. Adds the ExplorerTSPanel to the Tabs key.
+
+Tabs=weka.gui.explorer.PythonExplorerPanel
+TabsPolicy=append
