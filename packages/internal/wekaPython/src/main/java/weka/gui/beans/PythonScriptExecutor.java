@@ -103,7 +103,7 @@ public class PythonScriptExecutor extends JPanel implements BeanCommon,
     return "A Knowledge Flow component that executes a user-supplied CPython "
       + "script. The script may be supplied via the GUI editor for the step "
       + "or from a file at run time. Incoming instances will be transferred to "
-      + "pandas data frame (called pyData) in the Python environment.";
+      + "pandas data frame (called py_data) in the Python environment.";
   }
 
   /**
@@ -395,7 +395,7 @@ public class PythonScriptExecutor extends JPanel implements BeanCommon,
 
   /**
    * Accept and process incoming instances. Transfers instances into Python as a
-   * pandas dataframe called "pyData". Then executes the user's script and
+   * pandas dataframe called "py_data". Then executes the user's script and
    * retrieves any named variables from pythong
    *
    * @param insts the instances to transfer
@@ -411,7 +411,7 @@ public class PythonScriptExecutor extends JPanel implements BeanCommon,
 
         log("Converting incoming instances to pandas data frame",
           "Converting incoming instances to pandas data frame...", null);
-        session.instancesToPython(insts, "pyData", getDebug());
+        session.instancesToPython(insts, "py_data", getDebug());
 
         // now execute the user's script
         String script = m_pyScript;

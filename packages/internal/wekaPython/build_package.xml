@@ -180,6 +180,8 @@
           todir="${dist}/${package}"/>
     <copy file="Beans.props"
           todir="${dist}/${package}"/>
+    <copy file="Explorer.props"
+          todir="${dist}/${package}"/>
     <mkdir dir="${dist}/${package}/lib"/>
     <copy todir="${dist}/${package}/lib" >
        <fileset dir="${lib}">

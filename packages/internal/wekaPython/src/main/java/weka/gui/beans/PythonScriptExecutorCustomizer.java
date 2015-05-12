@@ -29,18 +29,16 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.lang.reflect.Constructor;
 import java.util.Properties;
 
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
-import javax.swing.text.DefaultStyledDocument;
 
+import jsyntaxpane.DefaultSyntaxKit;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Utils;
 import weka.gui.PropertySheetPanel;
-import weka.gui.visualize.VisualizeUtils;
 import weka.python.PythonSession;
 
 /**
@@ -65,7 +63,8 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
   protected Window m_parent;
 
   protected PythonScriptExecutor m_executor;
-  protected JTextPane m_scriptEditor;
+  // protected JTextPane m_scriptEditor;
+  protected JEditorPane m_scriptEditor;
 
   /** If loading a user script from a file at runtime - overrides in editor one */
   protected FileEnvironmentField m_scriptLoader;
@@ -88,52 +87,12 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
     setLayout(new BorderLayout());
   }
 
-  @SuppressWarnings({"rawtypes", "unchecked"})
+  @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setup() {
-    Properties props;
-
-    try {
-      props = Utils.readProperties(PROPERTIES_FILE);
-    } catch (Exception ex) {
-      ex.printStackTrace();
-      props = new Properties();
-    }
-    final Properties propsCopy = props;
-
-    // check for SyntaxDocument
-    boolean syntaxDocAvailable = true;
-    try {
-      Class.forName("weka.gui.scripting.SyntaxDocument");
-    } catch (Exception ex) {
-      syntaxDocAvailable = false;
-    }
-
-    m_scriptEditor = new JTextPane();
-
-    if (props.getProperty("Syntax", "false").equals("true")
-      && syntaxDocAvailable) {
-      try {
-        Class syntaxClass = Class.forName("weka.gui.scripting.SyntaxDocument");
-        Constructor constructor = syntaxClass.getConstructor(Properties.class);
-        Object doc = constructor.newInstance(props);
-        m_scriptEditor.setDocument((DefaultStyledDocument) doc);
-        m_scriptEditor.setBackground(VisualizeUtils.processColour(
-          props.getProperty("BackgroundColor", "white"), Color.WHITE));
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
-    } else {
-      m_scriptEditor.setForeground(VisualizeUtils.processColour(
-        props.getProperty("ForegroundColor", "black"), Color.BLACK));
-      m_scriptEditor.setBackground(VisualizeUtils.processColour(
-        props.getProperty("BackgroundColor", "white"), Color.WHITE));
-      m_scriptEditor.setFont(new Font(props.getProperty("FontName",
-        "monospaced"), Font.PLAIN, Integer.parseInt(props.getProperty(
-        "FontSize", "12"))));
-    }
+    DefaultSyntaxKit.initKit();
+    m_scriptEditor = new JEditorPane();
 
     // check python availability
-
     m_pyAvailable = true;
     String envEvalResults = null;
     Exception envEvalEx = null;
@@ -151,10 +110,23 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
       }
     }
 
+    JPanel editorPan = new JPanel();
+    editorPan.setLayout(new BorderLayout());
+
+    JPanel topHolder = new JPanel(new BorderLayout());
+    JScrollPane editorScroller = new JScrollPane(m_scriptEditor);
+    m_scriptEditor.setContentType("text/python");
+    editorScroller.setBorder(BorderFactory.createTitledBorder("Python Script"));
+    topHolder.add(editorScroller, BorderLayout.NORTH);
+    editorPan.add(topHolder, BorderLayout.NORTH);
+    add(editorPan, BorderLayout.CENTER);
+    Dimension d = new Dimension(450, 200);
+    m_scriptEditor.setMinimumSize(d);
+    m_scriptEditor.setPreferredSize(d);
+
     try {
       if (m_pyAvailable) {
-        m_scriptEditor.getDocument().insertString(0,
-          m_executor.getPythonScript(), null);
+        m_scriptEditor.setText(m_executor.getPythonScript());
       } else {
         String message =
           "Python does not seem to be available:\n\n"
@@ -165,19 +137,6 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
     } catch (BadLocationException ex) {
       ex.printStackTrace();
     }
-
-    JPanel editorPan = new JPanel();
-    editorPan.setLayout(new BorderLayout());
-
-    JPanel topHolder = new JPanel(new BorderLayout());
-    JScrollPane editorScroller = new JScrollPane(m_scriptEditor);
-    editorScroller.setBorder(BorderFactory.createTitledBorder("Python Script"));
-    topHolder.add(editorScroller, BorderLayout.NORTH);
-    editorPan.add(topHolder, BorderLayout.NORTH);
-    add(editorPan, BorderLayout.CENTER);
-    Dimension d = new Dimension(450, 200);
-    m_scriptEditor.setMinimumSize(d);
-    m_scriptEditor.setPreferredSize(d);
 
     JPanel varsPanel = new JPanel(new GridLayout(0, 2));
     JLabel varsLab =
@@ -230,28 +189,10 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
     newItem.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
       KeyEvent.CTRL_MASK));
 
-    final boolean syntaxAvail = syntaxDocAvailable;
-    final Properties propsC = props;
     newItem.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        if (propsCopy.getProperty("Syntax", "false").equals("true")
-          && syntaxAvail) {
-          try {
-            Class syntaxClass =
-              Class.forName("weka.gui.scripting.SyntaxDocument");
-            Constructor constructor =
-              syntaxClass.getConstructor(Properties.class);
-            Object doc = constructor.newInstance(propsC);
-            m_scriptEditor.setDocument((DefaultStyledDocument) doc);
-            m_scriptEditor.setBackground(VisualizeUtils.processColour(
-              propsC.getProperty("BackgroundColor", "white"), Color.WHITE));
-          } catch (Exception ex) {
-            ex.printStackTrace();
-          }
-        } else {
-          m_scriptEditor.setText("");
-        }
+        m_scriptEditor.setText("");
       }
     });
 
@@ -275,7 +216,9 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
             while ((line = br.readLine()) != null) {
               sb.append(line).append("\n");
             }
-            m_scriptEditor.getDocument().insertString(0, sb.toString(), null);
+            // m_scriptEditor.getDocument().insertString(0, sb.toString(),
+            // null);
+            m_scriptEditor.setText(sb.toString());
             br.close();
           } catch (Exception ex) {
             JOptionPane.showMessageDialog(PythonScriptExecutorCustomizer.this,

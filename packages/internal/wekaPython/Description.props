@@ -17,7 +17,7 @@ Title=Class for building and using a decision table/naive Bayes hybrid classifie
 Category=Classification
 
 # Author (required)
-Author=Mark Hal
+Author=Mark Hall
 
 # Maintainer (required)
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
@@ -26,7 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Integration with CPython for Weka. Python version 2.7.x or higher is required. Also requires the following packages to be installed in python: numpy, pandas and scikit-learn. At present, this package provides a wrapper classifier for scikit-learn classifiers and regressors.
+Description=Integration with CPython for Weka. Python version 2.7.x or higher is required. Also requires the following packages to be installed in python: numpy, pandas, matplotlib and scikit-learn. This package provides a wrapper classifier and clusterer that, between them, cover 60+ scikit-learn algorithms. It also provides a general scripting step for the Knowlege Flow along with scripting plugin environments for the Explorer and Knowledge Flow.
 
 # Changes=
 

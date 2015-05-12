@@ -24,7 +24,16 @@ package weka.python;
 import static org.boon.Boon.puts;
 
 import java.awt.image.BufferedImage;
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.StringReader;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -37,7 +46,11 @@ import org.apache.commons.codec.binary.Base64;
 import org.boon.json.JsonFactory;
 import org.boon.json.ObjectMapper;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.core.WekaException;
 import weka.core.converters.CSVSaver;
 import weka.gui.Logger;
 
@@ -158,6 +171,9 @@ public class ServerUtils {
   protected static List<String> executeUserScript(String script,
     OutputStream outputStream, InputStream inputStream, Logger log,
     boolean debug) throws WekaException {
+    if (!script.endsWith("\n")) {
+      script += "\n";
+    }
     List<String> outAndErr = new ArrayList<String>();
 
     ObjectMapper objectMapper = JsonFactory.create();
@@ -435,6 +451,69 @@ public class ServerUtils {
     } else {
       throw new IOException("Server did not send a pid_response");
     }
+  }
+
+  /**
+   * Receives the current list of variables from Python
+   *
+   * @param outputStream the output stream to
+   * @param inputStream the input stream to read from
+   * @param log the log to use
+   * @param debug true if debugging info is to be output
+   * @return a list of variables set in python. Each entry in the list is a two
+   * element array, where the first element holds the variable name and the second
+   * the python type
+   * @throws WekaException if a problem occurs
+   */
+  @SuppressWarnings("unchecked")
+  protected static List<String[]> receiveVariableList(
+    OutputStream outputStream, InputStream inputStream, Logger log,
+    boolean debug) throws WekaException {
+
+    List<String[]> results = new ArrayList<String[]>();
+    ObjectMapper mapper = JsonFactory.create();
+    Map<String, Object> command = new HashMap<String, Object>();
+    command.put("command", "get_variable_list");
+    command.put("debug", debug);
+    ByteArrayOutputStream bos = new ByteArrayOutputStream();
+    mapper.writeValue(bos, command);
+    byte[] bytes = bos.toByteArray();
+    if (inputStream != null && outputStream != null) {
+      try {
+        if (debug) {
+          outputCommandDebug(command, log);
+        }
+
+        // write the command
+        writeDelimitedToOutputStream(bytes, outputStream);
+
+        bytes = readDelimitedFromInputStream(inputStream);
+        Map<String, Object> ack = mapper.readValue(bytes, Map.class);
+        if (!ack.get("response").toString().equals("ok")) {
+          // fatal error
+          throw new WekaException(ack.get("error_message").toString());
+        }
+
+        Object l = ack.get("variable_list");
+        if (!(l instanceof List)) {
+          throw new WekaException("Was expecting the variable list to be a List "
+            + "object!");
+        }
+        List<Map<String, String>> vList = (List<Map<String, String>>) l;
+        for (Map<String, String> v : vList) {
+          String[] vEntry = new String[2];
+          vEntry[0] = v.get("name");
+          vEntry[1] = v.get("type");
+          results.add(vEntry);
+        }
+      } catch (IOException ex) {
+        throw new WekaException(ex);
+      }
+    } else if (debug) {
+      outputCommandDebug(command, log);
+    }
+
+    return results;
   }
 
   /**

@@ -23,6 +23,7 @@ package weka.python;
 
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.net.ServerSocket;
@@ -446,6 +447,26 @@ public class PythonSession {
   }
 
   /**
+   * Get a list of variables that are set in python. Returns a list of two
+   * element string arrays. Each entry in the list is a variable. The first
+   * element of the array is the name of the variable and the second is its type
+   * in python.
+   *
+   * @param debug true if debugging info is to be output
+   * @return a list of variables set in python
+   * @throws WekaException if a problem occurs
+   */
+  public List<String[]> getVariableListFromPython(boolean debug)
+    throws WekaException {
+    try {
+      return ServerUtils.receiveVariableList(m_localSocket.getOutputStream(),
+        m_localSocket.getInputStream(), m_log, debug);
+    } catch (IOException ex) {
+      throw new WekaException(ex);
+    }
+  }
+
+  /**
    * Push a pickled python variable value back into python. Deserializes the
    * value in python.
    *
@@ -600,38 +621,28 @@ public class PythonSession {
 
       String temp = "";
       PythonSession session = PythonSession.acquireSession(temp);
+      // String script =
+      // "import matplotlib.pyplot as plt\nfig, ax = plt.subplots( nrows=1, ncols=1 )\n"
+      // + "ax.plot([0,1,2], [10,20,3])\n";
+      // String script = "my_var = 'hello'\n";
       String script =
-        "import matplotlib.pyplot as plt\nfig, ax = plt.subplots( nrows=1, ncols=1 )\n"
-          + "ax.plot([0,1,2], [10,20,3])\n";
+        "from sklearn import datasets\nfrom pandas import DataFrame\ndiabetes = "
+          + "datasets.load_diabetes()\ndd = DataFrame(diabetes.data)\n";
       session.executeScript(script, true);
-      BufferedImage img = session.getImageFromPython("fig", true);
+      Instances iris =
+        new Instances(new FileReader("/Users/mhall/datasets/UCI/iris.arff"));
+      session.instancesToPython(iris, "iris", true);
+      // BufferedImage img = session.getImageFromPython("fig", true);
+      List<String[]> vars = session.getVariableListFromPython(true);
+      for (String[] v : vars) {
+        System.err.println(v[0] + ":" + v[1]);
+      }
 
-      /*
-       * Instances headerToWrite = new Instances(new FileReader(args[0]));
-       * 
-       * System.err.println("Attempting to send instances..."); //
-       * session.instancesToPythonPandasDataFrame(headerToWrite, "iris");
-       * session.instancesToPythonAsScikietLearn(headerToWrite, "test", true);
-       * 
-       * // now try and get them back
-       * System.err.println("Attempting to retrieve instances...");
-       * System.err.println(session.getDataFrameAsInstances("test", true));
-       * 
-       * // now try executing a simple script
-       * System.err.println("Executing a script...");
-       * session.executeScript("import pandas as pd\n\nif type(test) " +
-       * "is pd.DataFrame:\n\tprint test.info()\n", true);
-       * 
-       * System.err.println("Executing a script...");
-       * session.executeScript("zz = [[1,2,3],[3,4,5]]\n", true); Object jsonVal
-       * = session.getVariableValueFromPythonAsJson("zz", true); if (jsonVal
-       * instanceof List) { System.err.println("Json var value is a list!"); }
-       * else {
-       * System.err.println("Was expecting the response to be a list, not a " +
-       * jsonVal.getClass().toString()); System.err.println(jsonVal); }
-       * 
-       * Thread.sleep(3000);
-       */
+      Instances irisResult = session.getDataFrameAsInstances("iris", true);
+      System.err.println(irisResult);
+
+      Instances result = session.getDataFrameAsInstances("dd", true);
+      System.err.println(result);
 
     } catch (Exception ex) {
       ex.printStackTrace();

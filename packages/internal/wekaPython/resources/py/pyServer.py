@@ -1,3 +1,18 @@
+##
+##   This program is free software: you can redistribute it and/or modify
+##   it under the terms of the GNU General Public License as published by
+##   the Free Software Foundation, either version 3 of the License, or
+##   (at your option) any later version.
+##
+##   This program is distributed in the hope that it will be useful,
+##   but WITHOUT ANY WARRANTY; without even the implied warranty of
+##   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+##   GNU General Public License for more details.
+##
+##   You should have received a copy of the GNU General Public License
+##   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+##
+
 __author__ = 'mhall'
 
 import sys
@@ -48,7 +63,7 @@ if len(sys.argv) > 2:
 def runServer():
     if _global_startup_debug == True:
         print('Python server starting...\n')
-    _local_env['headers'] = {}
+    #_local_env['headers'] = {}
     # _local_env['frames'] = {}
     global _global_connection
     _global_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -68,6 +83,8 @@ def runServer():
                     send_instances(message)
                 elif command == 'execute_script':
                     execute_script(message)
+                elif command == 'get_variable_list':
+                    send_variable_list(message)
                 elif command == 'get_variable_type':
                     send_variable_type(message)
                 elif command == 'get_variable_value':
@@ -112,10 +129,11 @@ def send_debug_buffer():
 
 def receive_instances(message):
     if 'header' in message:
-        # store the header
+        # get the frame name
         header = message['header']
         frame_name = header['frame_name']
-        _local_env['headers'][frame_name] = header
+        # could store the header (but don't currently)
+        #_local_env['headers'][frame_name] = header
         num_instances = message['num_instances']
         if num_instances > 0:
             # receive the CSV
@@ -166,7 +184,7 @@ def instances_to_header_message(frame_name, frame):
     header['attributes'] = []
     for att_name in frame.dtypes.index:
         attribute = {}
-        attribute['name'] = att_name
+        attribute['name'] = str(att_name)
         type = frame.dtypes[att_name]
         if type == 'object' or type == 'bool':
             # TODO - how to determine nominal?
@@ -321,6 +339,17 @@ def send_variable_value(message):
     else:
         ack_command_err('send variable value message does not contain an '
                         'encoding field')
+
+def send_variable_list(message):
+    variables = []
+    for key, value in dict(_local_env).items():
+        variable_type = type(value).__name__
+        if not (variable_type == 'classob' or variable_type == 'module' or variable_type == 'function'):
+            variables.append({'name' : key, 'type' : variable_type})
+    ok_response = {}
+    ok_response['response'] = 'ok'
+    ok_response['variable_list'] = variables
+    send_response(ok_response, True)
 
 def base64_encode(value):
     # encode to base 64 bytes
