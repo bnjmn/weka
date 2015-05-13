@@ -53,6 +53,7 @@ import javax.swing.JSplitPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
@@ -432,8 +433,8 @@ public class PythonPanel extends JPanel {
     m_getVarAsText.setToolTipText("Get the value of the selected variable in "
       + "textual form");
     m_getVarAsImage
-      .setToolTipText("Get the value of the selected variable as a"
-        + " png image");
+      .setToolTipText(
+        "Get the value of the selected variable as a" + " png image");
     m_getVarAsInstances
       .setToolTipText("Get the selected variable (must be "
         + "a DataFrame) as a set of instances. Gets passed to the Preprocess panel "
@@ -501,13 +502,11 @@ public class PythonPanel extends JPanel {
       m_executeScriptBut.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          Thread newT = new Thread() {
+          Runnable newT = new Runnable() {
             public void run() {
               PythonSession session;
-              m_executeScriptBut.setEnabled(false);
               try {
                 session = PythonSession.acquireSession(PythonPanel.this);
-                m_logPanel.statusMessage("Executing script...");
                 List<String> outAndErr =
                   session.executeScript(m_scriptEditor.getText(),
                     m_debug.isSelected());
@@ -527,10 +526,13 @@ public class PythonPanel extends JPanel {
               } finally {
                 PythonSession.releaseSession(PythonPanel.this);
                 m_executeScriptBut.setEnabled(true);
+                revalidate();
               }
             }
           };
-          newT.start();
+          m_executeScriptBut.setEnabled(false);
+          m_logPanel.statusMessage("Executing script...");
+          SwingUtilities.invokeLater(newT);
         }
       });
 
