@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>LibLINEAR</artifactId>
-  <version>1.9.5-SNAPSHOT</version>
+  <version>1.9.6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>LibLINEAR</name>
