@@ -195,6 +195,12 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
     /** The filter used to replace missing values. */
     protected ReplaceMissingValues      m_ReplaceMissingValues;
 
+    /** Header of instances for output. */
+    protected Instances m_Header;
+
+    /** Class counts (needed for output) */
+    protected double[] m_Counts;
+
     /**
      * Returns a string describing classifier
      *
@@ -817,6 +823,12 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
             insts = Filter.useFilter(insts, m_Filter);
         }
 
+        // Find out which classes are empty (needed for output of model)
+        m_Counts = new double[insts.numClasses()];
+        for (Instance inst : insts) {
+            m_Counts[(int)inst.classValue()]++;
+        }
+
         double[] vy = new double[insts.numInstances()];
         FeatureNode[][] vx = new FeatureNode[insts.numInstances()][];
         int max_index = 0;
@@ -845,6 +857,9 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
 
         // train model
         m_Model = Linear.train(getProblem(vx, vy, max_index), getParameters());
+
+        // Store header of instances for output
+        m_Header = new Instances(insts, 0);
     }
 
     /**
@@ -853,7 +868,43 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      * @return a string representation
      */
     public String toString() {
-        return "LibLINEAR wrapper";
+
+        StringBuffer sb = new StringBuffer();
+        double[] w = getModel().getFeatureWeights();
+        sb.append("LibLINEAR wrapper" + "\n\n" + getModel() + "\n\n");
+        int numNonEmptyClasses = 0;
+        for (int i = 0; i < m_Counts.length; i++) {
+            if (m_Counts[i] > 0) {
+                numNonEmptyClasses++;
+            }
+        }
+        int start = 0;
+        for (int i = 0; i < ((m_Header.numClasses() == 2) ? 1 : m_Header.numClasses()); i++) {
+            if (m_Counts[(m_Header.numClasses() == 2) ? 1 : i] > 0 ) {
+                sb.append("Model for class " +
+                        ((m_Header.numClasses() == 2) ? m_Header.classAttribute().value(1)
+                                : m_Header.classAttribute().value(i)) + "\n\n");
+                int index = start++;
+                for (int j = 0; j < m_Header.numAttributes(); j++) {
+                    if (j != m_Header.classIndex()) {
+                        if (w[index] >= 0) {
+                            sb.append((j > 0) ? "+" : " ");
+                        }
+                        sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " +
+                                (getNormalize() ? "(normalized)" : "") + m_Header.attribute(j).name() + "\n");
+                    }
+                    index += ((m_Header.numClasses() == 2) ? 1 : numNonEmptyClasses);
+                }
+                if (m_Bias >= 0) {
+                    if (w[index] >= 0) {
+                        sb.append("+");
+                    }
+                    sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " + getModel().getBias() +
+                                "\n\n");
+                }
+            }
+        }
+        return sb.toString();
     }
 
     /**

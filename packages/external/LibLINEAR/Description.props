@@ -2,9 +2,9 @@
 
 PackageName=LibLINEAR
 
-Version=1.9.5
+Version=1.9.6
 
-Date=2015-02-04
+Date=2015-05-13
 
 Title=A wrapper class for the liblinear classifier
 
@@ -18,10 +18,10 @@ License=BSD
 
 Description=A wrapper class for the liblinear classifier. Rong-En Fan, Kai-Wei Chang, Cho-Jui Hsieh, Xiang-Rui Wang, Chih-Jen Lin (2008). LIBLINEAR - A Library for Large Linear Classification.
 
-Changes=Updated to 1.95 version of the Java port of LibLINEAR. Enabled application to regression problems.
+Changes=Now outputs coefficients of model.
 
 # Package URL for obtaining the package archive
-PackageURL=http://prdownloads.sourceforge.net/weka/LibLINEAR1.9.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibLINEAR1.9.6.zip?download
 
 # URL for further information
 URL=http://liblinear.bwaldvogel.de/
