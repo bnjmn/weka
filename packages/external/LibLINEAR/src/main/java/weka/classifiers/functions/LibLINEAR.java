@@ -869,6 +869,9 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      */
     public String toString() {
 
+      if (getModel() == null) {
+        return "LibLINEAR: No model built yet.";
+      }
         StringBuffer sb = new StringBuffer();
         double[] w = getModel().getFeatureWeights();
         sb.append("LibLINEAR wrapper" + "\n\n" + getModel() + "\n\n");
