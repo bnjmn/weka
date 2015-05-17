@@ -283,35 +283,7 @@ public class MatrixPanel extends JPanel {
     m_updateBt.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        // m_selectedAttribs = m_attribList.getSelectedIndices();
-        initInternalFields();
-
-        Plot a = m_plotsPanel;
-        a.setCellSize(m_plotSize.getValue());
-        Dimension d = new Dimension((m_selectedAttribs.length)
-          * (a.cellSize + a.extpad) + 2, (m_selectedAttribs.length)
-          * (a.cellSize + a.extpad) + 2);
-        // System.out.println("Size: "+a.cellSize+" Extpad: "+
-        // a.extpad+" selected: "+
-        // m_selectedAttribs.length+' '+d);
-        a.setPreferredSize(d);
-        a.setSize(a.getPreferredSize());
-        a.setJitter(m_jitter.getValue());
-
-        if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
-          m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
-          m_clearOSIPlottedCells = false;
-        }
-
-        if (m_regenerateOSI) {
-          m_osi = null;
-        }
-        m_js.revalidate();
-        m_cp.setColours(m_colorList);
-        m_cp.setCindex(m_classIndex);
-        m_regenerateOSI = false;
-
-        repaint();
+        updatePanel();
       }
     });
     m_updateBt.setPreferredSize(m_selAttrib.getPreferredSize());
@@ -1258,5 +1230,65 @@ public class MatrixPanel extends JPanel {
         g.drawImage(m_osi, 0, 0, this);
       }
     }
+  }
+
+  /**
+   * Set the point size for the plots
+   *
+   * @param pointSize the point size to use
+   */
+  public void setPointSize(int pointSize) {
+    if (pointSize <= m_pointSize.getMaximum() &&
+      pointSize > m_pointSize.getMinimum()) {
+      m_pointSize.setValue(pointSize);
+    }
+  }
+
+  /**
+   * Set the plot size
+   *
+   * @param plotSize the plot size to use
+   */
+  public void setPlotSize(int plotSize) {
+    if (plotSize >= m_plotSize.getMinimum() &&
+      plotSize <= m_plotSize.getMaximum()) {
+      m_plotSize.setValue(plotSize);
+    }
+  }
+
+  /**
+   * Update the display. Typically called after changing plot size, point size
+   * etc.
+   */
+  public void updatePanel() {
+    // m_selectedAttribs = m_attribList.getSelectedIndices();
+    initInternalFields();
+
+    Plot a = m_plotsPanel;
+    a.setCellSize(m_plotSize.getValue());
+    Dimension d = new Dimension((m_selectedAttribs.length)
+      * (a.cellSize + a.extpad) + 2, (m_selectedAttribs.length)
+      * (a.cellSize + a.extpad) + 2);
+    // System.out.println("Size: "+a.cellSize+" Extpad: "+
+    // a.extpad+" selected: "+
+    // m_selectedAttribs.length+' '+d);
+    a.setPreferredSize(d);
+    a.setSize(a.getPreferredSize());
+    a.setJitter(m_jitter.getValue());
+
+    if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
+      m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
+      m_clearOSIPlottedCells = false;
+    }
+
+    if (m_regenerateOSI) {
+      m_osi = null;
+    }
+    m_js.revalidate();
+    m_cp.setColours(m_colorList);
+    m_cp.setCindex(m_classIndex);
+    m_regenerateOSI = false;
+
+    repaint();
   }
 }
