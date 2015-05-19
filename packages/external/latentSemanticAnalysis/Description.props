@@ -6,10 +6,10 @@
 PackageName=latentSemanticAnalysis
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2015-05-20
 
 # Title (required)
 Title=Performs latent semantic analysis and transformation of the data
@@ -28,8 +28,11 @@ License=GPL 3.0
 # Description (required)
 Description=Performs latent semantic analysis and transformation of the data. Use in conjunction with a Ranker search. A low-rank approximation of the full data is found by specifying the number of singular values to use. The dataset may be transformed to give the relation of either the attributes or the instances (default) to the concept space created by the transformation.
 
+# Changes
+Changes=This release fixes an array index out of bounds exception that can occur when the singular values matrix is not square.
+
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/latentSemanticAnalysis1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/latentSemanticAnalysis1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/latentSemanticAnalysis
