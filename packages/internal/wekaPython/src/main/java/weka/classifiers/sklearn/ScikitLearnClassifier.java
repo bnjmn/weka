@@ -36,6 +36,7 @@ import weka.core.OptionMetadata;
 import weka.core.SelectedTag;
 import weka.core.Tag;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -488,17 +489,31 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     Capabilities result = super.getCapabilities();
     result.disableAll();
 
-    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
-    result.enable(Capabilities.Capability.MISSING_VALUES);
-    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
-    if (m_learner.isClassifier()) {
-      result.enable(Capabilities.Capability.BINARY_CLASS);
-      result.enable(Capabilities.Capability.NOMINAL_CLASS);
+    boolean pythonAvailable = true;
+    if (!PythonSession.pythonAvailable()) {
+      // try initializing
+      try {
+        if (!PythonSession.initSession("python", getDebug())) {
+          pythonAvailable = false;
+        }
+      } catch (WekaException ex) {
+        pythonAvailable = false;
+      }
     }
-    if (m_learner.isRegressor()) {
-      result.enable(Capabilities.Capability.NUMERIC_CLASS);
+
+    if (pythonAvailable) {
+      result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
+      result.enable(Capabilities.Capability.MISSING_VALUES);
+      result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+      if (m_learner.isClassifier()) {
+        result.enable(Capabilities.Capability.BINARY_CLASS);
+        result.enable(Capabilities.Capability.NOMINAL_CLASS);
+      }
+      if (m_learner.isRegressor()) {
+        result.enable(Capabilities.Capability.NUMERIC_CLASS);
+      }
     }
 
     return result;

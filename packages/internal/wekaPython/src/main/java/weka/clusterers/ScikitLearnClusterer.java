@@ -201,12 +201,27 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
     result.disableAll();
-    result.enable(Capabilities.Capability.NO_CLASS);
 
-    // attributes
-    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capabilities.Capability.MISSING_VALUES);
+    boolean pythonAvailable = true;
+    if (!PythonSession.pythonAvailable()) {
+      // try initializing
+      try {
+        if (!PythonSession.initSession("python", getDebug())) {
+          pythonAvailable = false;
+        }
+      } catch (WekaException ex) {
+        pythonAvailable = false;
+      }
+    }
+
+    if (pythonAvailable) {
+      result.enable(Capabilities.Capability.NO_CLASS);
+
+      // attributes
+      result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capabilities.Capability.MISSING_VALUES);
+    }
 
     return result;
   }

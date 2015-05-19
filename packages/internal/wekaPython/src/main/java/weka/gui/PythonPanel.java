@@ -129,6 +129,15 @@ public class PythonPanel extends JPanel {
   private boolean m_pyAvailable = true;
 
   /**
+   * Results from evaluating what packages etc. are installed in the python
+   * environment
+   */
+  private String m_envEvalResults;
+
+  /** Any exception thrown when initializing the python environment */
+  private Exception m_envEvalException;
+
+  /**
    * Inner class for displaying a BufferedImage.
    *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -433,8 +442,8 @@ public class PythonPanel extends JPanel {
     m_getVarAsText.setToolTipText("Get the value of the selected variable in "
       + "textual form");
     m_getVarAsImage
-      .setToolTipText(
-        "Get the value of the selected variable as a" + " png image");
+      .setToolTipText("Get the value of the selected variable as a"
+        + " png image");
     m_getVarAsInstances
       .setToolTipText("Get the selected variable (must be "
         + "a DataFrame) as a set of instances. Gets passed to the Preprocess panel "
@@ -442,17 +451,15 @@ public class PythonPanel extends JPanel {
 
     // check python availability
     m_pyAvailable = true;
-    String envEvalResults = null;
-    Exception envEvalEx = null;
     if (!PythonSession.pythonAvailable()) {
       // try initializing
       try {
         if (!PythonSession.initSession("python", m_debug.isSelected())) {
-          envEvalResults = PythonSession.getPythonEnvCheckResults();
+          m_envEvalResults = PythonSession.getPythonEnvCheckResults();
           m_pyAvailable = false;
         }
       } catch (Exception ex) {
-        envEvalEx = ex;
+        m_envEvalException = ex;
         m_pyAvailable = false;
         ex.printStackTrace();
         logMessage(null, ex);
@@ -460,10 +467,14 @@ public class PythonPanel extends JPanel {
     }
 
     if (!m_pyAvailable) {
-      System.err.println("Python is not available!!\n\n" + envEvalResults);
+      System.err
+        .println("Python is not available!!\n\n" + m_envEvalResults != null ? m_envEvalResults
+          : "");
       if (m_logPanel != null) {
-        logMessage("Python is not available!!", null);
-        logMessage(envEvalResults, null);
+        logMessage("Python is not available!!", m_envEvalException);
+        if (m_envEvalResults != null) {
+          logMessage(m_envEvalResults, null);
+        }
       }
     }
 
@@ -650,16 +661,17 @@ public class PythonPanel extends JPanel {
         }
       });
     } else {
+      m_executeScriptBut.setEnabled(false);
       JTextArea textArea = new JTextArea();
       textArea.setFont(m_scriptEditor.getFont());
       textArea.setEditable(false);
       StringBuilder b = new StringBuilder();
       b.append("The python environment is not available:\n\n");
-      if (envEvalResults != null && envEvalResults.length() > 0) {
-        b.append(envEvalResults).append("\n\n");
+      if (m_envEvalResults != null && m_envEvalResults.length() > 0) {
+        b.append(m_envEvalResults).append("\n\n");
       }
-      if (envEvalEx != null) {
-        b.append(envEvalEx.getMessage());
+      if (m_envEvalException != null) {
+        b.append(m_envEvalException.getMessage());
       }
       textArea.setText(b.toString());
       m_outputTabs.addTab("Python not available", new JScrollPane(textArea));
@@ -730,6 +742,15 @@ public class PythonPanel extends JPanel {
    */
   public void setLogger(Logger log) {
     m_logPanel = log;
+    if (!m_pyAvailable) {
+      m_logPanel.logMessage("Python is not available!!");
+      if (m_envEvalResults != null) {
+        m_logPanel.logMessage(m_envEvalResults);
+      }
+      if (m_envEvalException != null) {
+        m_logPanel.logMessage(m_envEvalException.getMessage());
+      }
+    }
   }
 
   /**
