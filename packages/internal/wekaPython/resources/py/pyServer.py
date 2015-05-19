@@ -24,9 +24,7 @@ import base64
 import math
 import traceback
 import pandas as pd
-import numpy as np
 import matplotlib
-import matplotlib.pyplot as plt
 
 _global_python3 = sys.version_info >= (3, 0)
 print(_global_python3)
@@ -48,11 +46,12 @@ except:
 _global_connection = None
 _global_env = {}
 _local_env = {}
+# _headers = {}
 
 _global_startup_debug = False
 
 # _global_std_out = StringIO()
-#_global_std_err = StringIO()
+# _global_std_err = StringIO()
 sys.stdout = StringIO()
 sys.stderr = StringIO()
 
@@ -60,10 +59,11 @@ if len(sys.argv) > 2:
     if sys.argv[2] == 'debug':
         _global_startup_debug = True
 
+
 def runServer():
     if _global_startup_debug == True:
         print('Python server starting...\n')
-    #_local_env['headers'] = {}
+    # _local_env['headers'] = {}
     # _local_env['frames'] = {}
     global _global_connection
     _global_connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,11 +107,13 @@ def runServer():
     finally:
         _global_connection.close()
 
+
 def message_debug(message):
     if 'debug' in message:
         return message['debug']
     else:
         return False
+
 
 def send_debug_buffer():
     tOut = sys.stdout
@@ -127,20 +129,29 @@ def send_debug_buffer():
     sys.stderr = StringIO()
     send_response(ok_response, True)
 
+
 def receive_instances(message):
     if 'header' in message:
         # get the frame name
         header = message['header']
         frame_name = header['frame_name']
         # could store the header (but don't currently)
-        #_local_env['headers'][frame_name] = header
+        # _headers[frame_name] = header
         num_instances = message['num_instances']
         if num_instances > 0:
             # receive the CSV
             csv_data = receive_message(False)
-            # TODO handle date stuff
-            frame = pd.read_csv(StringIO(csv_data), na_values='?',
-                                quotechar='\'', escapechar='\\', index_col=None)
+            frame = None
+            if 'date_atts' in header:
+                frame = pd.read_csv(StringIO(csv_data), na_values='?',
+                                    quotechar='\'', escapechar='\\',
+                                    index_col=None,
+                                    parse_dates=header['date_atts'],
+                                    infer_datetime_format=True)
+            else:
+                frame = pd.read_csv(StringIO(csv_data), na_values='?',
+                                    quotechar='\'', escapechar='\\',
+                                    index_col=None)
             _local_env[frame_name] = frame
             if message_debug(message) == True:
                 print(frame.info(), '\n')
@@ -172,8 +183,9 @@ def send_instances(message):
     send_response(response, True)
     # now send the CSV data
     s = StringIO()
-    frame.to_csv(path_or_buf=s, na_rep='?', index=False, quotechar='\'',
-                 escapechar='\\', header=False)
+    frame.to_csv(path_or_buf=s, na_rep='?', doublequote=False, index=False,
+                 quotechar='\'',
+                 escapechar='\\', header=False, date_format='"%Y-%m-%d %H:%M:%S"')
     send_response(s.getvalue(), False)
 
 
@@ -200,7 +212,7 @@ def instances_to_header_message(frame_name, frame):
                 attribute['values'] = nom_vals
         elif str(type).startswith('datetime'):
             attribute['type'] = "DATE"
-            # TODO - probably will need to get the format somehow...
+            attribute['format'] = 'yyyy-MM-dd HH:mm:ss'
         else:
             attribute['type'] = 'NUMERIC'
         header['attributes'].append(attribute)
@@ -217,6 +229,7 @@ def send_response(response, isJson):
     else:
         _global_connection.sendall(struct.pack('>L', len(response)))
         _global_connection.sendall(response)
+
 
 def receive_message(isJson):
     size = 0
@@ -243,6 +256,7 @@ def receive_message(isJson):
         return json.loads(data)
     return data
 
+
 def ack_command_err(message):
     err_response = {}
     err_response['response'] = 'error'
@@ -262,6 +276,7 @@ def get_variable(var_name):
     else:
         return None
 
+
 def execute_script(message):
     if 'script' in message:
         script = message['script']
@@ -280,8 +295,8 @@ def execute_script(message):
             traceback.print_exc(file=error)
         sys.stdout = tOut
         sys.stderr = tErr
-        #sys.stdout = sys.__stdout__
-        #sys.stderr = sys.__stderr__
+        # sys.stdout = sys.__stdout__
+        # sys.stderr = sys.__stderr__
         ok_response = {}
         ok_response['response'] = 'ok'
         ok_response['script_out'] = output.getvalue()
@@ -308,6 +323,7 @@ def send_variable_is_set(message):
         error = 'object exists json message does not contain a variable_name entry!'
         ack_command_err(error)
 
+
 def send_variable_type(message):
     if 'variable_name' in message:
         var_name = message['variable_name']
@@ -325,7 +341,8 @@ def send_variable_type(message):
                 ok_response['type'] = 'image'
             send_response(ok_response, True)
     else:
-        ack_command_err('send variable type json message does not contain a variable_name entry!')
+        ack_command_err(
+            'send variable type json message does not contain a variable_name entry!')
 
 
 def send_variable_value(message):
@@ -340,16 +357,19 @@ def send_variable_value(message):
         ack_command_err('send variable value message does not contain an '
                         'encoding field')
 
+
 def send_variable_list(message):
     variables = []
     for key, value in dict(_local_env).items():
         variable_type = type(value).__name__
-        if not (variable_type == 'classob' or variable_type == 'module' or variable_type == 'function'):
-            variables.append({'name' : key, 'type' : variable_type})
+        if not (
+                            variable_type == 'classob' or variable_type == 'module' or variable_type == 'function'):
+            variables.append({'name': key, 'type': variable_type})
     ok_response = {}
     ok_response['response'] = 'ok'
     ok_response['variable_list'] = variables
     send_response(ok_response, True)
+
 
 def base64_encode(value):
     # encode to base 64 bytes
@@ -360,6 +380,7 @@ def base64_encode(value):
         b64s = b64.decode('utf8')
     return b64s
 
+
 def base64_decode(value):
     b64b = value
     if _global_python3 is True:
@@ -368,6 +389,7 @@ def base64_decode(value):
     # back to non-base64 bytes
     bytes = base64.b64decode(b64b)
     return bytes
+
 
 def image_as_encoded_string(value):
     # return image as png data encoded in a string.
@@ -383,6 +405,7 @@ def image_as_encoded_string(value):
         encoded = base64_encode(sio.getvalue())
     return encoded
 
+
 def send_image_as_png(message):
     if 'variable_name' in message:
         var_name = message['variable_name']
@@ -392,21 +415,23 @@ def send_image_as_png(message):
                 ok_response = {}
                 ok_response['response'] = 'ok'
                 ok_response['variable_name'] = var_name
-                #encoding = 'plain'
-                #if _global_python3 is True:
+                # encoding = 'plain'
+                # if _global_python3 is True:
                 encoding = 'base64'
                 ok_response['encoding'] = encoding
                 ok_response['image_data'] = image_as_encoded_string(image)
                 if message_debug(message) == True:
-                    print('Sending ' + var_name + ' base64 encoded as png bytes')
+                    print(
+                        'Sending ' + var_name + ' base64 encoded as png bytes')
                 send_response(ok_response, True)
             else:
-                ack_command_err(var_name + ' is not a matplot.figure.Figure object')
+                ack_command_err(
+                    var_name + ' is not a matplot.figure.Figure object')
         else:
             ack_command_err(var_name + ' does not exist!')
     else:
-        ack_command_err('get image json message does not contain a variable_name entry!')
-
+        ack_command_err(
+            'get image json message does not contain a variable_name entry!')
 
 
 def send_encoded_variable_value(message):
@@ -421,7 +446,7 @@ def send_encoded_variable_value(message):
                 if _global_python3 is True:
                     encoded_object = base64_encode(encoded_object)
             elif encoding == 'json':
-                encoded_object = object # the whole response gets serialized to json
+                encoded_object = object  # the whole response gets serialized to json
             elif encoding == 'string':
                 encoded_object = str(object)
             ok_response = {}
@@ -430,13 +455,16 @@ def send_encoded_variable_value(message):
             ok_response['variable_encoding'] = encoding
             ok_response['variable_value'] = encoded_object
             if message_debug(message) == True:
-                print('Sending ' + encoding + ' value for var ' + var_name + "\n")
+                print(
+                    'Sending ' + encoding + ' value for var ' + var_name + "\n")
 
             send_response(ok_response, True)
         else:
             ack_command_err(var_name + ' does not exist!')
     else:
-        ack_command_err('get variable value json message does not contain a variable_name entry!')
+        ack_command_err(
+            'get variable value json message does not contain a variable_name entry!')
+
 
 def receive_variable_value(message):
     if 'variable_encoding' in message:
@@ -445,6 +473,7 @@ def receive_variable_value(message):
     else:
         ack_command_err('receive variable value message does not contain an '
                         'encoding field')
+
 
 def receive_pickled_variable_value(message):
     if 'variable_name' in message and 'variable_value' in message:
@@ -471,5 +500,6 @@ def is_nan(s):
         return math.isnan(s)
     except:
         return False
+
 
 runServer()

@@ -87,6 +87,16 @@ public class ServerUtils {
       }
     }
 
+    if (header.checkForAttributeType(Attribute.DATE)) {
+      List<Integer> dateAtts = new ArrayList<Integer>();
+      for (int i = 0; i < header.numAttributes(); i++) {
+        if (header.attribute(i).isDate()) {
+          dateAtts.add(i);
+        }
+      }
+      result.put("date_atts", dateAtts);
+    }
+
     return result;
   }
 
@@ -373,6 +383,28 @@ public class ServerUtils {
     command.put("header", simpleHeader);
     command.put("debug", debug);
 
+    if (instances.checkForAttributeType(Attribute.DATE)) {
+      // ensure a single, consistent date format
+      ArrayList<Attribute> newAtts = new ArrayList<Attribute>();
+      for (int i = 0; i < instances.numAttributes(); i++) {
+        if (!instances.attribute(i).isDate()) {
+          newAtts.add((Attribute) instances.attribute(i).copy());
+        } else {
+          Attribute newDate =
+            new Attribute(instances.attribute(i).name(), "yyyy-MM-dd HH:mm:ss");
+          newAtts.add(newDate);
+        }
+      }
+      Instances newInsts =
+        new Instances(instances.relationName(), newAtts,
+          instances.numInstances());
+      for (int i = 0; i < instances.numInstances(); i++) {
+        newInsts.add(instances.instance(i));
+      }
+      newInsts.setClassIndex(instances.classIndex());
+      instances = newInsts;
+    }
+
     if (inputStream != null && outputStream != null) {
       ByteArrayOutputStream bos = new ByteArrayOutputStream();
       mapper.writeValue(bos, command);
@@ -461,8 +493,8 @@ public class ServerUtils {
    * @param log the log to use
    * @param debug true if debugging info is to be output
    * @return a list of variables set in python. Each entry in the list is a two
-   * element array, where the first element holds the variable name and the second
-   * the python type
+   *         element array, where the first element holds the variable name and
+   *         the second the python type
    * @throws WekaException if a problem occurs
    */
   @SuppressWarnings("unchecked")
@@ -496,8 +528,8 @@ public class ServerUtils {
 
         Object l = ack.get("variable_list");
         if (!(l instanceof List)) {
-          throw new WekaException("Was expecting the variable list to be a List "
-            + "object!");
+          throw new WekaException(
+            "Was expecting the variable list to be a List " + "object!");
         }
         List<Map<String, String>> vList = (List<Map<String, String>>) l;
         for (Map<String, String> v : vList) {
