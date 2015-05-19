@@ -489,8 +489,11 @@ implements AttributeTransformer, OptionHandler {
     
     // find actual rank to use
     int maxSingularValues = trainSVD.rank();
-    for (int i = 0; i < m_s.getRowDimension(); i++) {
-      m_sumSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
+    double[] singularDiag = trainSVD.getSingularValues();
+    //    for (int i = 0; i < m_s.getRowDimension(); i++) {
+    for (int i = 0; i < singularDiag.length; i++) {
+      // m_sumSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
+      m_sumSquaredSingularValues += singularDiag[i] * singularDiag[i];
     }
     if (maxSingularValues == 0) { // no nonzero singular values (shouldn't happen)
       // reset values from computation
@@ -505,8 +508,10 @@ implements AttributeTransformer, OptionHandler {
       m_actualRank = maxSingularValues;
     } else if (m_rank < 1.0) { // determine how many singular values to include for desired coverage
       double currentSumOfSquaredSingularValues = 0.0;
-      for (int i = 0; i < m_s.getRowDimension() && m_actualRank == -1; i++) {
-        currentSumOfSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
+      //for (int i = 0; i < m_s.getRowDimension() && m_actualRank == -1; i++) {
+      for (int i = 0; i < singularDiag.length && m_actualRank == -1; i++) {
+        //currentSumOfSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
+        currentSumOfSquaredSingularValues += singularDiag[i] * singularDiag[i];
         if (currentSumOfSquaredSingularValues / m_sumSquaredSingularValues >= m_rank) {
           m_actualRank = i + 1;
         }
