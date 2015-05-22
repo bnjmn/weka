@@ -43,10 +43,14 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.OptionMetadata;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.experiment.InstanceQuery;
+import weka.gui.FilePropertyMetadata;
+
+import javax.swing.JFileChooser;
 
 /**
  * <!-- globalinfo-start --> Reads Instances from a Database. Can read a
@@ -233,7 +237,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
   protected String m_Keys = "";
 
   /** the custom props file to use instead of default one. */
-  protected File m_CustomPropsFile = null;
+  protected File m_CustomPropsFile = new File("${user.home}");
 
   /** Determines whether sparse data is created */
   protected boolean m_CreateSparseData = false;
@@ -443,6 +447,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return the query
    */
+  @OptionMetadata(displayName = "Query", description = "The query to execute",
+    displayOrder = 4)
   public String getQuery() {
     return m_query;
   }
@@ -480,7 +486,13 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return name of the key columns'
    */
-  public String getKeys() {
+  @OptionMetadata(
+    displayName = "Key columns",
+    description = "Specific key columns to use if "
+      + "a primary key cannot be automatically detected. Used in incremental loading.",
+    displayOrder = 5)
+  public
+    String getKeys() {
 
     StringBuffer key = new StringBuffer();
     for (int i = 0; i < m_orderBy.size(); i++) {
@@ -507,7 +519,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
 
   /**
    * Sets the custom properties file to use.
-   * 
+   *
    * @param value the custom props file to load database parameters from, use
    *          null or directory to disable custom properties.
    */
@@ -517,12 +529,20 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
 
   /**
    * Returns the custom properties file in use, if any.
-   * 
+   *
    * @return the custom props file, null if none used
    */
-  public File getCustomPropsFile() {
+  @OptionMetadata(
+    displayName = "DB config file",
+    description = "The custom properties that the user can use to override the default ones.",
+    displayOrder = 8)
+  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+    directoriesOnly = false)
+  public
+  File getCustomPropsFile() {
     return m_CustomPropsFile;
   }
+
 
   /**
    * The tip text for this property.
@@ -557,6 +577,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return the URL
    */
+  @OptionMetadata(displayName = "Database URL",
+    description = "The URL of the database", displayOrder = 1)
   @Override
   public String getUrl() {
 
@@ -597,6 +619,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return name of database user
    */
+  @OptionMetadata(displayName = "Username",
+    description = "The user name for the database", displayOrder = 2)
   @Override
   public String getUser() {
 
@@ -637,6 +661,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return the database password
    */
+  @OptionMetadata(displayName = "Password",
+    description = "The database password", displayOrder = 3)
   public String getPassword() {
     // return m_DataBaseConnection.getPassword();
     return m_Password;
@@ -676,6 +702,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    * 
    * @return true if data is to be encoded as sparse instances
    */
+  @OptionMetadata(displayName = "Create sparse instances", description = "Return sparse "
+    + "rather than normal instances", displayOrder = 6)
   public boolean getSparseData() {
     return m_CreateSparseData;
   }
@@ -806,8 +834,9 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
       return true;
     }
     // check for unique keys
-    rs = dmd.getBestRowIdentifier(null, null, table,
-      DatabaseMetaData.bestRowSession, false);
+    rs =
+      dmd.getBestRowIdentifier(null, null, table,
+        DatabaseMetaData.bestRowSession, false);
     ResultSetMetaData rmd = rs.getMetaData();
     int help = 0;
     while (rs.next()) {
@@ -882,8 +911,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
       orderByString = order.toString();
     }
     if (choice == 0) {
-      limitedQuery = query.replaceFirst("SELECT", "SELECT LIMIT " + offset
-        + " 1");
+      limitedQuery =
+        query.replaceFirst("SELECT", "SELECT LIMIT " + offset + " 1");
       limitedQuery = limitedQuery.concat(orderByString);
       return limitedQuery;
     }
@@ -1006,8 +1035,8 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
             // System.err.println("String --> nominal");
             ResultSet rs1;
 
-            String query = "SELECT COUNT(DISTINCT( " + columnName + " )) FROM "
-              + end;
+            String query =
+              "SELECT COUNT(DISTINCT( " + columnName + " )) FROM " + end;
             if (m_DataBaseConnection.execute(query) == true) {
               rs1 = m_DataBaseConnection.getResultSet();
               rs1.next();
