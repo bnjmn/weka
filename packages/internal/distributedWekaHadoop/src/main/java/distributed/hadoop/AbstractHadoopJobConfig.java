@@ -21,6 +21,9 @@
 
 package distributed.hadoop;
 
+import java.util.Properties;
+
+import weka.core.Utils;
 import distributed.core.DistributedJobConfig;
 
 /**
@@ -30,6 +33,22 @@ import distributed.core.DistributedJobConfig;
  * @version $Revision$
  */
 public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
+
+  /**
+   * Location of properties - mainly to specify whether we are using Hadoop 1 or
+   * 2.
+   */
+  protected static final String HADOOP_PROPS =
+    "distributed/hadoop/Hadoop.props";
+
+  /** Key for checking hadoop version in properties */
+  protected static final String VERSION_KEY = "weka.distributed.hadoop.hadoop2";
+
+  /** Key for checking which weka distributed hadoop package is installed */
+  protected static final String PACKAGE_KEY =
+    "weka.distributed.hadoop.packageName";
+
+  protected static Properties WEKA_HADOOP_PROPS;
 
   /** For serialization */
   private static final long serialVersionUID = -4170580935543278227L;
@@ -47,12 +66,46 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
   public static final String DEFAULT_PORT = "8021";
 
   /**
+   * Load the properties file
+   */
+  protected static void loadProps() {
+    if (WEKA_HADOOP_PROPS == null) {
+      try {
+        WEKA_HADOOP_PROPS = Utils.readProperties(HADOOP_PROPS);
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+    }
+  }
+
+  /**
+   * Returns true if we are running against Hadoop2/Yarn
+   *
+   * @return true if we are running against Hadoop2/Yarn
+   */
+  public static boolean isHadoop2() {
+    loadProps();
+    return WEKA_HADOOP_PROPS.getProperty(VERSION_KEY, "false").equals( "true" );
+  }
+
+  /**
+   * Get the name of the distributed weka for hadoop package that is installed.
+   * Either distributedWekaHadoop or distributedWekaHadoop2
+   *
+   * @return the name of the distributed package installed
+   */
+  public static String getWekaPackageName() {
+    loadProps();
+    return WEKA_HADOOP_PROPS.getProperty(PACKAGE_KEY, "distributedWekaHadoop");
+  }
+
+  /**
    * Get the tool tip text for this property
    * 
    * @return the tool tip text for this property
    */
   public String jobTrackerHostTipText() {
-    return "The host that the job tracker is running on";
+    return "The host that the job tracker/resource manager is running on";
   }
 
   /**
@@ -80,7 +133,7 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @return the tool tip text for this property
    */
   public String jobTrackerPortTipText() {
-    return "The port that the job tracker is listening on";
+    return "The port that the job tracker/resource manager is listening on";
   }
 
   /**

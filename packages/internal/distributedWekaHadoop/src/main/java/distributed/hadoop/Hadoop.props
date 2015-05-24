@@ -1,0 +1,2 @@
+weka.distributed.hadoop.hadoop2=false
+weka.distributed.hadoop.packageName=distributedWekaHadoop

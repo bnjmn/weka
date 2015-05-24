@@ -45,6 +45,7 @@ import weka.core.WekaPackageManager;
 import weka.distributed.DistributedWekaException;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
+import distributed.hadoop.AbstractHadoopJobConfig;
 import distributed.hadoop.HDFSUtils;
 import distributed.hadoop.MapReduceJobConfig;
 
@@ -61,7 +62,8 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
   /** The path to the distributedWekaHadoop.jar */
   public static final String DISTRIBUTED_WEKA_HADOOP_JAR =
     WekaPackageManager.PACKAGES_DIR.toString() + File.separator
-      + "distributedWekaHadoop" + File.separator + "distributedWekaHadoop.jar";
+      + AbstractHadoopJobConfig.getWekaPackageName() + File.separator
+      + "distributedWekaHadoop.jar";
   /** The path to the distributedWekaBase.jar */
   public static final String DISTRIBUTED_WEKA_BASE_JAR =
     WekaPackageManager.PACKAGES_DIR.toString() + File.separator
