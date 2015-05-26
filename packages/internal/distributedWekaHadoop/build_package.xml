@@ -9,9 +9,9 @@
   ===========================================================================
 -->
 
-<import file="build-res/subfloor.xml"/>
-
   <!-- set global properties for this build -->
+  <property file="build.properties"
+            description="Properties customized for your particular project belong in this file." />
   <property name="src" value="src/main/java"/>
   <property name="src-test" value="src/test/java"/>
   <property name="lib" value="lib" />
@@ -51,7 +51,7 @@
   </target>
 
   <!-- Compile the java code from ${src}/weka into ${build}/classes -->
-  <target name="compile" depends="init_compile,resolve" 
+  <target name="compile" depends="init_compile" 
    description="Compile package and deposit class files in build/classes">
     <javac srcdir="${src}" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
@@ -85,14 +85,7 @@
   <target name="docs" 
           depends="init_all" 
           description="Make javadocs into ./doc">
-    <mkdir dir="${doc}"/>
-    <javadoc sourcepath="${src}" 
-             classpathref="project.class.path"
-             destdir="${doc}" 
-             Author="yes" 
-             Public="yes"
-             link="http://weka.sourceforge.net/doc.dev/"
-             maxmemory="256m"/>          
+    <echo message="Nothing to do for docs"/>
   </target> 
 
 
@@ -174,28 +167,6 @@
     </delete>
     <copy file="Description.props"
           todir="${dist}/${package}"/>
-    <mkdir dir="${dist}/${package}/lib"/>
-    <copy todir="${dist}/${package}/lib" >
-       <fileset dir="${lib}">
-         <include name="*.jar"/>
-         <include name="*.zip"/>
-         <exclude name="weka.jar"/>
-         <exclude name="pdm*.jar"/>
-       </fileset>
-    </copy>
-    <mkdir dir="${dist}/${package}/doc"/>
-    <copy todir="${dist}/${package}/doc" >
-       <fileset dir="${doc}">
-         <include name="**/*"/>
-       </fileset>
-    </copy>
-
-    <mkdir dir="${dist}/${package}/build-res"/>
-    <copy todir="${dist}/${package}/build-res" >
-       <fileset dir="build-res">
-         <include name="**/*"/>
-       </fileset>
-    </copy>
 
     <mkdir dir="${dist}/${package}/src"/>
     <copy todir="${dist}/${package}" >
