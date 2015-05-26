@@ -1012,7 +1012,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
         if (index < 0) {
           throw new IOException("Read unknown nominal value " + val.toString()
             + "for attribute " + m_structure.attribute(i).name() + " (line: "
-            + m_rowCount + ")");
+            + m_rowCount + "). Try increasing the size of the memory buffer"
+            + " (-B option) or explicitly specify legal nominal values with "
+            + "the -L option.");
         }
         vals[i] = index;
       }
