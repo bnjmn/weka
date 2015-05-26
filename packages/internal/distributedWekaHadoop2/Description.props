@@ -1,0 +1,64 @@
+# Description file for distributedWekaHadoop2
+# 
+
+# Package name (required)
+PackageName=distributedWekaHadoop2
+
+# Version (required)
+Version=1.0.16
+
+#Date (year-month-day)
+Date=2015-05-27
+
+# Title (required)
+Title=Hadoop 2 wrappers for Weka
+
+# Category (recommended)
+Category=Distributed
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Either this package or distributedWekaHadoop should be installed, but not both. Which one you choose depends on whether you are running Hadoop 1.x or 2.x. This package will cause distributedWekaBase, distributedWekaHadoopCore and distributedWekaHadoopLibs2 to be installed. The later contains client libraries for Apache Hadoop 2.x. If you are running against a different distribution then these libraries will need to be replaced with the client hadoop libraries from your distribution.
+
+# Changes in this release
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop21.0.16.zip?download
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.12), distributedWekaHadoopCore (>=1.0.16), distributedWekaHadoopLibs (>=1.0.0)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+# DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+# DoNotLoadIfFileNotPresentMessage=
