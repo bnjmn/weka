@@ -1,2 +1,0 @@
-# Specifies the tools to go into the Plugins toolbar
-weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.CSVToARFFHadoopJob,weka.gui.beans.WekaClassifierHadoopJob,weka.gui.beans.WekaClassifierEvaluationHadoopJob,weka.gui.beans.CorrelationMatrixHadoopJob,weka.gui.beans.WekaScoringHadoopJob,weka.gui.beans.RandomizedDataChunkHadoopJob,weka.gui.beans.KMeansClustererHadoopJob
