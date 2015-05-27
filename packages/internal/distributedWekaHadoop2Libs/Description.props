@@ -1,0 +1,64 @@
+# Description file for distributedWekaHadoopLibs
+# 
+
+# Package name (required)
+PackageName=distributedWekaHadoop2Libs
+
+# Version (required)
+Version=1.0.0
+
+#Date (year-month-day)
+Date=2015-05-27
+
+# Title (required)
+Title=Hadoop 2.x libraries for distributedWekaHadoop
+
+# Category (recommended)
+Category=Distributed
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Hadoop 2.x libraries for the distributedWekaHadoop package. This package should not be installed by itself - instead install either distributedWekaHadoop or distributedWekaHadoop2. Installing one of these two package will ensure that the correct libs package gets installed too.
+
+# Changes in this release
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop2Libs1.0.0.zip?download
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.7.12)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+# DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+# DoNotLoadIfFileNotPresentMessage=
