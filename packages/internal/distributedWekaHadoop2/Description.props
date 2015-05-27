@@ -44,7 +44,7 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.12), distributedWekaHadoopCore (>=1.0.16), distributedWekaHadoopLibs (>=1.0.0)
+Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.12), distributedWekaHadoopCore (>=1.0.16), distributedWekaHadoop2Libs (>=1.0.0)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
