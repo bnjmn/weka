@@ -1,4 +1,4 @@
-##
+﻿##
 ##   This program is free software: you can redistribute it and/or modify
 ##   it under the terms of the GNU General Public License as published by
 ##   the Free Software Foundation, either version 3 of the License, or
@@ -45,7 +45,7 @@ except:
 
 _global_connection = None
 _global_env = {}
-_local_env = {}
+# _local_env = {}
 # _headers = {}
 
 _global_startup_debug = False
@@ -152,7 +152,7 @@ def receive_instances(message):
                 frame = pd.read_csv(StringIO(csv_data), na_values='?',
                                     quotechar='\'', escapechar='\\',
                                     index_col=None)
-            _local_env[frame_name] = frame
+            _global_env[frame_name] = frame
             if message_debug(message) == True:
                 print(frame.info(), '\n')
         ack_command_ok()
@@ -271,8 +271,8 @@ def ack_command_ok():
 
 
 def get_variable(var_name):
-    if var_name in _local_env:
-        return _local_env[var_name]
+    if var_name in _global_env:
+        return _global_env[var_name]
     else:
         return None
 
@@ -289,7 +289,7 @@ def execute_script(message):
         sys.stdout = output
         sys.stderr = error
         try:
-            exec (script, _global_env, _local_env)
+            exec script in _global_env
         except Exception:
             print('Got an exception executing script')
             traceback.print_exc(file=error)
@@ -360,7 +360,7 @@ def send_variable_value(message):
 
 def send_variable_list(message):
     variables = []
-    for key, value in dict(_local_env).items():
+    for key, value in dict(_global_env).items():
         variable_type = type(value).__name__
         if not (
                             variable_type == 'classob' or variable_type == 'module' or variable_type == 'function'):
@@ -487,7 +487,7 @@ def receive_pickled_variable_value(message):
         else:
             pickled_var_value = str(pickled_var_value)
         object = pickle.loads(pickled_var_value)
-        _local_env[var_name] = object
+        _global_env[var_name] = object
         ack_command_ok()
     else:
         error = 'put variable value json message does not contain a ' \
