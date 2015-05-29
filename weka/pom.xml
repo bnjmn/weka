@@ -307,6 +307,8 @@
           <subpackages>weka:org</subpackages>
           <show>public</show>
           <outputDirectory>${project.basedir}/doc</outputDirectory>
+          <!-- when using Java 8, use this setting to avoid overly strict javadoclet -->
+          <!--additionalparam>-Xdoclint:none</additionalparam-->
         </configuration>
         <executions>
           <execution>
