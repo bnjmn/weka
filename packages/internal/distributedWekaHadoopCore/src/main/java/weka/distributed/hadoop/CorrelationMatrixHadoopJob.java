@@ -61,7 +61,9 @@ import weka.gui.beans.ImageProducer;
 import weka.gui.beans.TextProducer;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
+import distributed.hadoop.AbstractHadoopJobConfig;
 import distributed.hadoop.HDFSUtils;
+import distributed.hadoop.MapReduceJobConfig;
 
 /**
  * Hadoop job for constructing a correlation matrix. Has an option to use the
@@ -533,16 +535,24 @@ public class CorrelationMatrixHadoopJob extends HadoopJob implements
             logMessage("WARNING: unable to parse the number of available nodes - setting to 1");
           }
         }
-        String reduceTasksMaxPerNode =
-          conf.get("mapred.tasktracker.reduce.tasks.maximum");
+        String taskMaxKey =
+          AbstractHadoopJobConfig.isHadoop2() ? MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM
+            : MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM;
+        String reduceTasksMaxPerNode = conf.get(taskMaxKey);
         int reduceMax = 2;
 
         // allow our configuration to override the defaults for the cluster
-        if (!DistributedJobConfig.isEmpty(m_mrConfig
-          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
-          reduceTasksMaxPerNode =
-            environmentSubstitute(m_mrConfig
-              .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"));
+        String userMaxOverride =
+          m_mrConfig
+            .getUserSuppliedProperty(MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        if (DistributedJobConfig.isEmpty(userMaxOverride)) {
+          // try the Hadoop 2 version
+          userMaxOverride =
+            m_mrConfig
+              .getUserSuppliedProperty(MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        }
+        if (!DistributedJobConfig.isEmpty(userMaxOverride)) {
+          reduceTasksMaxPerNode = environmentSubstitute(userMaxOverride);
         }
 
         // num rows in matrix is equal to num attributes in the arff

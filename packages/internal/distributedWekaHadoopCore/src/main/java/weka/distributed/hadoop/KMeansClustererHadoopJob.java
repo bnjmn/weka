@@ -34,6 +34,7 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
+import distributed.hadoop.AbstractHadoopJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -1847,9 +1848,28 @@ public class KMeansClustererHadoopJob extends HadoopJob implements
           } catch (NumberFormatException e) {
           }
         }
-        String reduceTasksMaxPerNode =
-          conf.get("mapred.tasktracker.reduce.tasks.maximum");
+
+        String taskMaxKey =
+          AbstractHadoopJobConfig.isHadoop2() ? MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM
+            : MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM;
+        String reduceTasksMaxPerNode = conf.get(taskMaxKey);
         int reduceMax = 2;
+
+        // allow our configuration to override the defaults for the cluster
+        String userMaxOverride =
+          m_mrConfig
+            .getUserSuppliedProperty(
+              MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        if (DistributedJobConfig.isEmpty(userMaxOverride)) {
+          // try the Hadoop 2 version
+          userMaxOverride =
+            m_mrConfig
+              .getUserSuppliedProperty(MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        }
+        if (!DistributedJobConfig.isEmpty(userMaxOverride)) {
+          reduceTasksMaxPerNode = environmentSubstitute(userMaxOverride);
+        }
+
         if (!DistributedJobConfig.isEmpty(reduceTasksMaxPerNode)) {
           reduceMax =
             Integer.parseInt(environmentSubstitute(reduceTasksMaxPerNode));

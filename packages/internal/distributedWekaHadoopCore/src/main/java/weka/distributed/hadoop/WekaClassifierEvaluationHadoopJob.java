@@ -35,13 +35,19 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
 
-import weka.core.*;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 import weka.distributed.DistributedWekaException;
 import weka.gui.beans.InstancesProducer;
 import weka.gui.beans.TextProducer;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
+import distributed.hadoop.AbstractHadoopJobConfig;
 import distributed.hadoop.HDFSUtils;
+import distributed.hadoop.MapReduceJobConfig;
 
 /**
  * Hadoop job for running an evaluation of a classifier or regressor. Invokes up
@@ -556,16 +562,24 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
         // optimal number of reducers for the fold-based classifier
         // building job
         Configuration conf = new Configuration();
-        String reduceTasksMaxPerNode =
-          conf.get("mapred.tasktracker.reduce.tasks.maximum");
+        String taskMaxKey =
+          AbstractHadoopJobConfig.isHadoop2() ? MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM
+            : MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM;
+        String reduceTasksMaxPerNode = conf.get(taskMaxKey);
 
         // allow our configuration to override the defaults for the cluster
-        if (!DistributedJobConfig.isEmpty(m_mrConfig
-          .getUserSuppliedProperty("mapred.tasktracker.reduce.tasks.maximum"))) {
+        String userMaxOverride =
+          m_mrConfig
+            .getUserSuppliedProperty(MapReduceJobConfig.HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        if (DistributedJobConfig.isEmpty(userMaxOverride)) {
+          // try the Hadoop 2 version
+          userMaxOverride =
+            m_mrConfig
+              .getUserSuppliedProperty(MapReduceJobConfig.HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM);
+        }
+        if (!DistributedJobConfig.isEmpty(userMaxOverride)) {
           reduceTasksMaxPerNode =
-            environmentSubstitute(m_mrConfig
-              .getUserSuppliedProperty(
-                "mapred.tasktracker.reduce.tasks.maximum"));
+            environmentSubstitute(userMaxOverride);
         }
 
         int reduceMax = 2;
@@ -590,8 +604,7 @@ public class WekaClassifierEvaluationHadoopJob extends HadoopJob implements
 
         String outputModelPath =
           environmentSubstitute(m_classifierJob.m_mrConfig
-            .getUserSuppliedProperty(
-              WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
+            .getUserSuppliedProperty(WekaClassifierHadoopReducer.CLASSIFIER_WRITE_PATH));
         if (DistributedJobConfig.isEmpty(outputModelPath)) {
           throw new Exception("The output model path is not set!");
         }
