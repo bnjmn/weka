@@ -470,6 +470,7 @@ public class PackageManager extends JPanel {
       m_availableBut.setEnabled(true);
       m_allBut.setEnabled(true);
 
+      m_availablePackages = null;
       updateTable();
 
       try {
