@@ -9,7 +9,7 @@ PackageName=consistencySubsetEval
 Version=1.0.5
 
 #Date
-Date=2014-10-16
+Date=2015-06-08
 
 # Title (required)
 Title=Evaluates the worth of a subset of attributes by the level of consistency in the class values when the training instances are projected onto the subset of attributes.
