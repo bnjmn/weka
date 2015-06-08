@@ -177,6 +177,15 @@ public abstract class ASEvaluation
   }
 
   /**
+   * Tells the evaluator that the attribute selection process is complete. It
+   * can then clean up data structures, references to training data as necessary
+   * in order to save memory
+   */
+  public void clean() {
+    // subclasses to override
+  }
+
+  /**
    * runs the evaluator with the given commandline options
    * 
    * @param evaluator the evaluator to run

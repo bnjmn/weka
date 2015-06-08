@@ -739,8 +739,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
         m_IRClassVal--;
       } catch (NumberFormatException e) {
         // now try as a named class label
-        m_IRClassVal = m_trainInstances.classAttribute().indexOfValue(
-          m_IRClassValS);
+        m_IRClassVal =
+          m_trainInstances.classAttribute().indexOfValue(m_IRClassValS);
       }
     }
   }
@@ -894,8 +894,9 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       text.append("\n");
       String IRClassL = "";
       if (m_IRClassVal >= 0) {
-        IRClassL = "(class value: "
-          + m_trainInstances.classAttribute().value(m_IRClassVal) + ")";
+        IRClassL =
+          "(class value: "
+            + m_trainInstances.classAttribute().value(m_IRClassVal) + ")";
       }
       switch (m_evaluationMeasure) {
       case EVAL_DEFAULT:
@@ -999,12 +1000,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
   }
 
   @Override
-  public int[] postProcess(int[] attributeSet) {
-
-    // save memory
+  public void clean() {
     m_trainInstances = new Instances(m_trainInstances, 0);
-
-    return attributeSet;
   }
 
   /**

@@ -888,8 +888,9 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
       if (counts[ni - 1][nj - 1] > 0.0 && total_missing != sum) {
         for (i = 0; i < ni - 1; i++) {
           for (j = 0; j < nj - 1; j++) {
-            temp = (counts_copy[i][j] / (sum - total_missing))
-              * counts_copy[ni - 1][nj - 1];
+            temp =
+              (counts_copy[i][j] / (sum - total_missing))
+                * counts_copy[ni - 1][nj - 1];
 
             counts[i][j] += temp;
             sumi[i] += temp;
@@ -958,14 +959,15 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
     int i, ii, k;
     double temp;
     Instance inst;
-    int mx = (int) m_trainInstances
-      .meanOrMode(m_trainInstances.attribute(att1));
+    int mx =
+      (int) m_trainInstances.meanOrMode(m_trainInstances.attribute(att1));
     double my = m_trainInstances.meanOrMode(m_trainInstances.attribute(att2));
     double stdv_num = 0.0;
     double diff1, diff2;
     double r = 0.0, rr;
-    int nx = (!m_missingSeparate) ? m_trainInstances.attribute(att1)
-      .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
+    int nx =
+      (!m_missingSeparate) ? m_trainInstances.attribute(att1).numValues()
+        : m_trainInstances.attribute(att1).numValues() + 1;
 
     double[] prior_nom = new double[nx];
     double[] stdvs_nom = new double[nx];
@@ -1074,17 +1076,19 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
     int i, j, ii, jj, z;
     double temp1, temp2;
     Instance inst;
-    int mx = (int) m_trainInstances
-      .meanOrMode(m_trainInstances.attribute(att1));
-    int my = (int) m_trainInstances
-      .meanOrMode(m_trainInstances.attribute(att2));
+    int mx =
+      (int) m_trainInstances.meanOrMode(m_trainInstances.attribute(att1));
+    int my =
+      (int) m_trainInstances.meanOrMode(m_trainInstances.attribute(att2));
     double diff1, diff2;
     double r = 0.0, rr;
-    int nx = (!m_missingSeparate) ? m_trainInstances.attribute(att1)
-      .numValues() : m_trainInstances.attribute(att1).numValues() + 1;
+    int nx =
+      (!m_missingSeparate) ? m_trainInstances.attribute(att1).numValues()
+        : m_trainInstances.attribute(att1).numValues() + 1;
 
-    int ny = (!m_missingSeparate) ? m_trainInstances.attribute(att2)
-      .numValues() : m_trainInstances.attribute(att2).numValues() + 1;
+    int ny =
+      (!m_missingSeparate) ? m_trainInstances.attribute(att2).numValues()
+        : m_trainInstances.attribute(att2).numValues() + 1;
 
     double[][] prior_nom = new double[nx][ny];
     double[] sumx = new double[nx];
@@ -1370,7 +1374,6 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
     int j = 0;
 
     if (!m_locallyPredictive) {
-      m_trainInstances = new Instances(m_trainInstances, 0);
       return attributeSet;
     }
 
@@ -1398,8 +1401,15 @@ public class CfsSubsetEval extends ASEvaluation implements SubsetEvaluator,
       }
     }
 
-    m_trainInstances = new Instances(m_trainInstances, 0);
     return newSet;
+  }
+
+  @Override
+  public void clean() {
+    if (m_trainInstances != null) {
+      // save memory
+      m_trainInstances = new Instances(m_trainInstances, 0);
+    }
   }
 
   protected void resetOptions() {

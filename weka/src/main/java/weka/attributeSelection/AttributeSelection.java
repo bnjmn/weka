@@ -644,8 +644,13 @@ public class AttributeSelection implements Serializable, RevisionHandler {
     }
 
     if ((m_searchMethod instanceof RankedOutputSearch) && m_doRank == true) {
-      m_attributeRanking = ((RankedOutputSearch) m_searchMethod)
-        .rankedAttributes();
+      try {
+        m_attributeRanking =
+          ((RankedOutputSearch) m_searchMethod).rankedAttributes();
+      } catch (Exception ex) {
+        ex.printStackTrace();
+        throw ex;
+      }
       m_selectionResults.append(printSelectionResults());
       m_selectionResults.append("Ranked attributes:\n");
 
@@ -770,6 +775,7 @@ public class AttributeSelection implements Serializable, RevisionHandler {
 
     // Save space
     m_trainInstances = new Instances(m_trainInstances, 0);
+    m_ASEvaluator.clean();
   }
 
   /**
