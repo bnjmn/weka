@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoopCore
 
 # Version (required)
-Version=1.0.16
+Version=1.0.17
 
 #Date (year-month-day)
-Date=2015-05-27
+Date=2015-06-11
 
 # Title (required)
 Title=Core Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. This is the core of the distributedWekaHadoop package. To install all necessary componets for distributedWekaHadoop install either the distributedWekaHadoop or distributedWekaHadoop2 package, for Hadoop 1.x or 2.x respectively. This will ensure that the core package gets installed along with the appropriate libs package for either Hadoop 1.x or 2.x.
 
 # Changes in this release
-Changes=This release separates the Hadoop client libraries from the core distributed Weka Hadoop wrapper classes.
+Changes=No longer sets some deprecated config properties when running against Hadoop 2.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopCore1.0.16.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopCore1.0.17.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
