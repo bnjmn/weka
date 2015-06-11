@@ -81,10 +81,10 @@ public class KMeansHadoopMapper extends
    * Helper method for loading serialized k-means map tasks from the distributed
    * cache
    * 
-   * @param prefix
-   * @param numRuns
-   * @return
-   * @throws Exception
+   * @param prefix filename prefix
+   * @param numRuns the number of runs of k-means being performed in parallel
+   * @return an array of KMeansMapTasks (one for each run)
+   * @throws Exception if a problem occurs
    */
   protected static KMeansMapTask[] loadMapsFromRunFiles(String prefix,
     int numRuns) throws Exception {
