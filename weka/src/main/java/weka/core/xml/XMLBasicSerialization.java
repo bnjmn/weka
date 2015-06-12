@@ -44,7 +44,6 @@ import org.w3c.dom.Element;
 
 import weka.core.RevisionUtils;
 import weka.core.Utils;
-import weka.knowledgeflow.LoggingLevel;
 
 /**
  * This serializer contains some read/write methods for common classes that are
@@ -126,8 +125,6 @@ public class XMLBasicSerialization extends XMLSerialization {
     m_CustomMethods.register(this, weka.core.Matrix.class, "MatrixOld");
     m_CustomMethods.register(this, weka.classifiers.CostMatrix.class,
       "CostMatrix");
-    m_CustomMethods.register(this, weka.knowledgeflow.LoggingLevel.class,
-      "LoggingLevel");
   }
 
   /**
@@ -186,57 +183,6 @@ public class XMLBasicSerialization extends XMLSerialization {
     Integer blue = (Integer) readFromXML(bluechild);
 
     return new Color(red, green, blue);
-  }
-
-  /**
-   * adds the given LoggingLevel to a DOM structure.
-   *
-   * @param parent the parent of this object, e.g. the class this object is a
-   *          member of
-   * @param o the Object to describe in XML
-   * @param name the name of the object
-   * @return the node that was created
-   * @throws Exception if the DOM creation fails
-   * @see weka.knowledgeflow.LoggingLevel
-   */
-  public Element writeLoggingLevel(Element parent, Object o, String name)
-    throws Exception {
-
-    Element node;
-    LoggingLevel loggingLevel;
-
-    if (DEBUG) {
-      trace(new Throwable(), name);
-    }
-
-    m_CurrentNode = parent;
-    loggingLevel = (LoggingLevel) o;
-    node = addElement(parent, name, o.getClass().getName(), false);
-    invokeWriteToXML(node, loggingLevel.toString(), VAL_VALUE);
-
-    return node;
-  }
-
-  /**
-   * builds the LoggingLevel from the given DOM node.
-   *
-   * @param node the associated XML node
-   * @return the instance created from the XML description
-   * @throws Exception if instantiation fails
-   * @see weka.knowledgeflow.LoggingLevel
-   */
-  public Object readLoggingLevel(Element node) throws Exception {
-    Vector<Element> children;
-
-    if (DEBUG) {
-      trace(new Throwable(), node.getAttribute(ATT_NAME));
-    }
-
-    children = XMLDocument.getChildTags(node);
-    Element child = children.get(0);
-    Object logString = invokeReadFromXML(child);
-
-    return LoggingLevel.stringToLevel(logString.toString());
   }
 
   /**
