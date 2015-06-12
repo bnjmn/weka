@@ -21,6 +21,7 @@
 
 package weka.core.xml;
 
+import java.awt.Color;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.Collection;
@@ -28,6 +29,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.Map;
 import java.util.Properties;
@@ -42,12 +44,14 @@ import org.w3c.dom.Element;
 
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.knowledgeflow.LoggingLevel;
 
 /**
  * This serializer contains some read/write methods for common classes that are
  * not beans-conform. Currently supported are:
  * <ul>
  * <li>java.util.HashMap</li>
+ * <li>java.util.LinkedHashMap</li>
  * <li>java.util.HashSet</li>
  * <li>java.util.Hashtable</li>
  * <li>java.util.LinkedList</li>
@@ -57,6 +61,7 @@ import weka.core.Utils;
  * <li>java.util.TreeSet</li>
  * <li>java.util.Vector</li>
  * <li>javax.swing.DefaultListModel</li>
+ * <li>java.awt.Color</li>
  * </ul>
  * 
  * Weka classes:
@@ -111,19 +116,132 @@ public class XMLBasicSerialization extends XMLSerialization {
     m_CustomMethods.register(this, Properties.class, "Map");
     m_CustomMethods.register(this, Stack.class, "Collection");
     m_CustomMethods.register(this, TreeMap.class, "Map");
+    m_CustomMethods.register(this, LinkedHashMap.class, "Map");
     m_CustomMethods.register(this, TreeSet.class, "Collection");
     m_CustomMethods.register(this, Vector.class, "Collection");
+    m_CustomMethods.register(this, Color.class, "Color");
 
     // Weka classes
     m_CustomMethods.register(this, weka.core.matrix.Matrix.class, "Matrix");
     m_CustomMethods.register(this, weka.core.Matrix.class, "MatrixOld");
     m_CustomMethods.register(this, weka.classifiers.CostMatrix.class,
-      "CostMatrixOld");
+      "CostMatrix");
+    m_CustomMethods.register(this, weka.knowledgeflow.LoggingLevel.class,
+      "LoggingLevel");
+  }
+
+  /**
+   * adds the given Color to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see java.awt.Color
+   */
+  public Element writeColor(Element parent, Object o, String name)
+    throws Exception {
+    Element node;
+    Color c;
+
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+    c = (Color) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
+
+    invokeWriteToXML(node, c.getRed(), "red");
+    invokeWriteToXML(node, c.getGreen(), "green");
+    invokeWriteToXML(node, c.getBlue(), "blue");
+
+    return node;
+  }
+
+  /**
+   * builds the Color object from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see java.awt.Color
+   */
+  public Object readColor(Element node) throws Exception {
+
+    Vector<Element> children;
+
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    children = XMLDocument.getChildTags(node);
+    Element redchild = children.get(0);
+    Element greenchild = children.get(1);
+    Element bluechild = children.get(2);
+    Integer red = (Integer) readFromXML(redchild);
+    Integer green = (Integer) readFromXML(greenchild);
+    Integer blue = (Integer) readFromXML(bluechild);
+
+    return new Color(red, green, blue);
+  }
+
+  /**
+   * adds the given LoggingLevel to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.knowledgeflow.LoggingLevel
+   */
+  public Element writeLoggingLevel(Element parent, Object o, String name)
+    throws Exception {
+
+    Element node;
+    LoggingLevel loggingLevel;
+
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+    loggingLevel = (LoggingLevel) o;
+    node = addElement(parent, name, o.getClass().getName(), false);
+    invokeWriteToXML(node, loggingLevel.toString(), VAL_VALUE);
+
+    return node;
+  }
+
+  /**
+   * builds the LoggingLevel from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.knowledgeflow.LoggingLevel
+   */
+  public Object readLoggingLevel(Element node) throws Exception {
+    Vector<Element> children;
+
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    children = XMLDocument.getChildTags(node);
+    Element child = children.get(0);
+    Object logString = invokeReadFromXML(child);
+
+    return LoggingLevel.stringToLevel(logString.toString());
   }
 
   /**
    * adds the given DefaultListModel to a DOM structure.
-   * 
+   *
    * @param parent the parent of this object, e.g. the class this object is a
    *          member of
    * @param o the Object to describe in XML
@@ -158,7 +276,7 @@ public class XMLBasicSerialization extends XMLSerialization {
 
   /**
    * builds the DefaultListModel from the given DOM node.
-   * 
+   *
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -286,8 +404,8 @@ public class XMLBasicSerialization extends XMLSerialization {
     }
 
     // populate collection
-    coll = Utils
-      .cast(Class.forName(node.getAttribute(ATT_CLASS)).newInstance());
+    coll =
+      Utils.cast(Class.forName(node.getAttribute(ATT_CLASS)).newInstance());
     coll.addAll(v);
 
     return coll;
@@ -390,8 +508,89 @@ public class XMLBasicSerialization extends XMLSerialization {
   }
 
   /**
+   * adds the given CostMatrix to a DOM structure.
+   *
+   * @param parent the parent of this object, e.g. the class this object is a
+   *          member of
+   * @param o the Object to describe in XML
+   * @param name the name of the object
+   * @return the node that was created
+   * @throws Exception if the DOM creation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Element writeCostMatrix(Element parent, Object o, String name)
+    throws Exception {
+    weka.classifiers.CostMatrix matrix = (weka.classifiers.CostMatrix) o;
+    Element node;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), name);
+    }
+
+    m_CurrentNode = parent;
+    node = addElement(parent, name, o.getClass().getName(), false);
+    Object[][] m = new Object[matrix.size()][matrix.size()];
+    for (int i = 0; i < matrix.size(); i++) {
+      for (int j = 0; j < matrix.size(); j++) {
+        m[i][j] = matrix.getCell(i, j);
+      }
+    }
+
+    invokeWriteToXML(node, m, VAL_CELLS);
+
+    return node;
+  }
+
+  /**
+   * builds the Matrix from the given DOM node.
+   *
+   * @param node the associated XML node
+   * @return the instance created from the XML description
+   * @throws Exception if instantiation fails
+   * @see weka.classifiers.CostMatrix
+   */
+  public Object readCostMatrix(Element node) throws Exception {
+    weka.classifiers.CostMatrix matrix;
+    Vector<Element> children;
+    Element child;
+    int i;
+    String name;
+    Object o;
+
+    // for debugging only
+    if (DEBUG) {
+      trace(new Throwable(), node.getAttribute(ATT_NAME));
+    }
+
+    m_CurrentNode = node;
+
+    matrix = null;
+    children = XMLDocument.getChildTags(node);
+
+    for (i = 0; i < children.size(); i++) {
+      child = children.get(i);
+      name = child.getAttribute(ATT_NAME);
+
+      if (name.equals(VAL_CELLS)) {
+        o = invokeReadFromXML(child);
+
+        Object[][] m = (Object[][]) o;
+        matrix = new weka.classifiers.CostMatrix(m.length);
+        for (int j = 0; j < matrix.size(); j++) {
+          for (int k = 0; k < matrix.size(); k++) {
+            matrix.setCell(j, k, m[j][k]);
+          }
+        }
+      }
+    }
+
+    return matrix;
+  }
+
+  /**
    * adds the given Matrix to a DOM structure.
-   * 
+   *
    * @param parent the parent of this object, e.g. the class this object is a
    *          member of
    * @param o the Object to describe in XML
@@ -423,7 +622,7 @@ public class XMLBasicSerialization extends XMLSerialization {
 
   /**
    * builds the Matrix from the given DOM node.
-   * 
+   *
    * @param node the associated XML node
    * @return the instance created from the XML description
    * @throws Exception if instantiation fails
@@ -571,8 +770,8 @@ public class XMLBasicSerialization extends XMLSerialization {
     matrixNew = (weka.core.matrix.Matrix) readMatrix(node);
     writer = new StringWriter();
     matrixNew.write(writer);
-    matrix = new weka.classifiers.CostMatrix(
-      new StringReader(writer.toString()));
+    matrix =
+      new weka.classifiers.CostMatrix(new StringReader(writer.toString()));
 
     return matrix;
   }
