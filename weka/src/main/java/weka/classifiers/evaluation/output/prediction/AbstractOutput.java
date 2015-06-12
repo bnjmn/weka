@@ -257,7 +257,9 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
    * @param value the header
    */
   public void setHeader(Instances value) {
-    m_Header = new Instances(value, 0);
+    if (value != null) {
+      m_Header = new Instances(value, 0);
+    }
   }
 
   /**
