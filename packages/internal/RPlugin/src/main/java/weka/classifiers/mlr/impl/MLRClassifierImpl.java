@@ -361,30 +361,32 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    */
   protected void loadBaseLearnerLibrary() throws Exception {
     String libString = MLRClassifier.TAGS_LEARNER[m_rLearner].getIDStr();
-    if (libString.indexOf('.') > 0) {
-      libString = libString.substring(libString.indexOf('.') + 1, libString.length());
-    }
+    if (!libString.equals("" + MLRClassifier.TAGS_LEARNER[m_rLearner].getID())) {
+      if (libString.indexOf('.') > 0) {
+        libString = libString.substring(libString.indexOf('.') + 1, libString.length());
+      }
 
-    String[] libs = libString.split(",");
+      String[] libs = libString.split(",");
 
-    RSession eng = null;
-    eng = RSession.acquireSession(this);
-    eng.setLog(this, m_logger);
-    for (String lib : libs) {
-      if (!eng.loadLibrary(this, lib)) {
-        System.err.println("Attempting to install learner library: " + lib);
-        
-        eng.installLibrary(this, lib);
+      RSession eng = null;
+      eng = RSession.acquireSession(this);
+      eng.setLog(this, m_logger);
+      for (String lib : libs) {
+        if (!eng.loadLibrary(this, lib)) {
+          System.err.println("Attempting to install learner library: " + lib);
+
+          eng.installLibrary(this, lib);
         /*
          * if (!eng.installLibrary(this, lib)) {
          * System.err.println("Unable to continue - " +
          * "failed to install learner library: " + lib);
          * m_baseLearnerLibraryAvailable = false; return; }
          */
-        
-        // try loading again
-        if (!eng.loadLibrary(this, lib)) {
-          return;
+
+          // try loading again
+          if (!eng.loadLibrary(this, lib)) {
+            return;
+          }
         }
       }
     }
