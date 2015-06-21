@@ -116,6 +116,7 @@ public class CloseableTabTitle extends JPanel {
     m_tabButton = new TabButton();
     add(m_tabButton);
     m_callback = callback;
+    m_tabLabel.setEnabled(false);
   }
 
   /**
