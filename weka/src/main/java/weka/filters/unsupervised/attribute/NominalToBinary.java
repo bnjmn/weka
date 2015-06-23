@@ -207,12 +207,12 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
         + "\tnot only if there are more than 2 values.", "A", 0, "-A"));
 
     newVector.addElement(new Option(
-      "\tSpecifies list of columns to act on. First and last are \n"
-        + "\tvalid indexes.\n" + "\t(default: first-last)", "R", 1,
-      "-R <col1,col2-col4,...>"));
+            "\tSpecifies list of columns to act on. First and last are \n"
+                    + "\tvalid indexes.\n" + "\t(default: first-last)", "R", 1,
+            "-R <col1,col2-col4,...>"));
 
     newVector.addElement(new Option(
-      "\tInvert matching sense of column indexes.", "V", 0, "-V"));
+            "\tInvert matching sense of column indexes.", "V", 0, "-V"));
 
     return newVector.elements();
   }
@@ -449,7 +449,6 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     ArrayList<String> vals;
 
     // Compute new attributes
-    // Compute new attributes
     m_needToTransform = false;
     for (int i = 0; i < getInputFormat().numAttributes(); i++) {
       Attribute att = getInputFormat().attribute(i);
@@ -475,7 +474,11 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
       } else {
         if ((att.numValues() <= 2) && (!m_TransformAll)) {
           if (m_Numeric) {
-            newAtts.add(new Attribute(att.name()));
+            String value = "";
+            if (att.numValues() == 2) {
+              value = "=" + att.value(1);
+            }
+            newAtts.add(new Attribute(att.name() + value));
           } else {
             newAtts.add((Attribute) att.copy());
           }

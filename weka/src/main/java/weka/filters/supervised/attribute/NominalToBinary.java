@@ -499,7 +499,11 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       } else {
         if ((att.numValues() <= 2) && (!m_TransformAll)) {
           if (m_Numeric) {
-            newAtts.add(new Attribute(att.name()));
+            String value = "";
+            if (att.numValues() == 2) {
+              value = "=" + att.value(1);
+            }
+            newAtts.add(new Attribute(att.name() + value));
           } else {
             newAtts.add((Attribute) att.copy());
           }
