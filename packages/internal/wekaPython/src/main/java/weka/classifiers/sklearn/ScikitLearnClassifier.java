@@ -426,6 +426,17 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
   /** Holds the python serialized model */
   protected String m_pickledModel;
 
+  /**
+   * If true, then the pickled model is not fetched from Python. Not fetching
+   * the model means that this classifier can't be serialized and used later.
+   * However, execution will be faster when running a cross-validation, and it
+   * is not necessary to fetch the model as it exists in the python environment
+   * for the duration of the virtual machine. In some cases, the size of the
+   * pickled model may exceed the current limits for transfer (Integer.MAX_VALUE
+   * bytes, about 2.1Gb).
+   */
+  protected boolean m_dontFetchModelFromPython;
+
   /** Holds the textual description of the scikit learner */
   protected String m_learnerToString = "";
 
@@ -655,13 +666,48 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
   @OptionMetadata(
     displayName = "Try to continue after sys err output from script",
     description = "Try to continue after sys err output from script.\nSome schemes"
-      + "report warnings to the system error stream.", displayOrder = 5,
+      + " report warnings to the system error stream.", displayOrder = 5,
     commandLineParamName = "continue-on-err",
     commandLineParamSynopsis = "-continue-on-err",
     commandLineParamIsFlag = true)
   public
     boolean getContinueOnSysErr() {
     return m_continueOnSysErr;
+  }
+
+  /**
+   * If true then don't retrieve the model from python. This can speed up
+   * cross-validation but will prevent the trained classifier from being used
+   * after deserialization. May also be necessary if a model in python is very
+   * large and exceeds the current transfer size (Integer.MAX_VALUE bytes, about
+   * 2.1Gb).
+   *
+   * @param dontFetchModelFromPython true to not fetch the model from python.
+   */
+  public void setDontFetchModelFromPython(boolean dontFetchModelFromPython) {
+    m_dontFetchModelFromPython = dontFetchModelFromPython;
+  }
+
+  /**
+   * If true then don't retrieve the model from python. This can speed up
+   * cross-validation but will prevent the trained classifier from being used
+   * after deserialization. May also be necessary if a model in python is very
+   * large and exceeds the current transfer size (Integer.MAX_VALUE bytes, about
+   * 2.1Gb).
+   *
+   * @return true if not fetching the model from python.
+   */
+  @OptionMetadata(displayName = "Don't retrieve model from python",
+    description = "Don't retrieve the model from python - speeds up "
+      + "cross-validation,\nbut prevents this classifier from being "
+      + "used after deserialization.\nSome models in python (e.g. large "
+      + "random forests) may exceed the maximum size for transfer\n("
+      + "currently Integer.MAX_VALUE bytes)", displayOrder = 6,
+    commandLineParamName = "dont-fetch-model",
+    commandLineParamSynopsis = "-dont-fetch-model",
+    commandLineParamIsFlag = true)
+  public boolean getDontFetchModelFromPython() {
+    return m_dontFetchModelFromPython;
   }
 
   /**
@@ -672,6 +718,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
    */
   @Override
   public void buildClassifier(Instances data) throws Exception {
+    m_pickledModel = null;
     getCapabilities().testWithFail(data);
     m_zeroR = null;
     if (!PythonSession.pythonAvailable()) {
@@ -730,8 +777,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     try {
       PythonSession session = PythonSession.acquireSession(this);
       // transfer the data over to python
-      session.instancesToPythonAsScikietLearn(data, TRAINING_DATA_ID,
-        getDebug());
+      session.instancesToPythonAsScikitLearn( data, TRAINING_DATA_ID, getDebug() );
 
       StringBuilder learnScript = new StringBuilder();
       learnScript.append("from sklearn import *").append("\n")
@@ -758,10 +804,12 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         session.getVariableValueFromPythonAsPlainString(MODEL_ID + m_modelHash,
           getDebug());
 
-      // retrieve the model from python
-      m_pickledModel =
-        session.getVariableValueFromPythonAsPickledObject(MODEL_ID
-          + m_modelHash, getDebug());
+      if (!getDontFetchModelFromPython()) {
+        // retrieve the model from python
+        m_pickledModel =
+          session.getVariableValueFromPythonAsPickledObject(MODEL_ID
+            + m_modelHash, getDebug());
+      }
 
       // release session
     } finally {
@@ -832,7 +880,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     double[][] results = null;
     try {
       PythonSession session = PythonSession.acquireSession(this);
-      session.instancesToPythonAsScikietLearn(insts, TEST_DATA_ID, getDebug());
+      session.instancesToPythonAsScikitLearn( insts, TEST_DATA_ID, getDebug() );
       StringBuilder predictScript = new StringBuilder();
 
       // check if model exists in python. If not, then transfer it over
