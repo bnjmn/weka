@@ -27,7 +27,6 @@ import pandas as pd
 import matplotlib
 
 _global_python3 = sys.version_info >= (3, 0)
-print(_global_python3)
 
 if _global_python3:
     from io import StringIO
