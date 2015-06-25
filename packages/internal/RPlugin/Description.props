@@ -8,7 +8,7 @@ PackageName=RPlugin
 Version=1.1.8
 
 #Date (year-month-day)
-Date=2015-06-24
+Date=2015-06-25
 
 # Title (required)
 Title=Execute R Scripts
@@ -35,7 +35,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.8.zip?download
 URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
 
 # Changes in this release
-Changes=Fixed a bug that resulted in parse errors in R when transferring data with attribute names that contained equals signs or question marks.
+Changes=Fixed a bug that resulted in parse errors in R when transferring data with attribute names that contained equals signs, question marks, greater than and less than signs..
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
