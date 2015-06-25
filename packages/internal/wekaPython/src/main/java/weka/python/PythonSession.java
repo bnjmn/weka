@@ -311,7 +311,7 @@ public class PythonSession {
    * @param debug true for debugging output
    * @throws WekaException if a problem occurs
    */
-  public void instancesToPythonAsScikietLearn(Instances instances,
+  public void instancesToPythonAsScikitLearn(Instances instances,
     String pythonFrameName, boolean debug) throws WekaException {
     try {
       ServerUtils.sendInstancesScikitLearn(instances, pythonFrameName,

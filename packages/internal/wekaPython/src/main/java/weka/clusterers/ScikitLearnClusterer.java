@@ -357,8 +357,7 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
     try {
       PythonSession session = PythonSession.acquireSession(this);
 
-      session.instancesToPythonAsScikietLearn(data, TRAINING_DATA_ID,
-        getDebug());
+      session.instancesToPythonAsScikitLearn( data, TRAINING_DATA_ID, getDebug() );
 
       // learn the clusterer and predict the training data + get the
       // set of unique clusters (so that we know how many clusters were
@@ -481,7 +480,7 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
 
     try {
       PythonSession session = PythonSession.acquireSession(this);
-      session.instancesToPythonAsScikietLearn(insts, TEST_DATA_ID, getDebug());
+      session.instancesToPythonAsScikitLearn( insts, TEST_DATA_ID, getDebug() );
       StringBuilder predictScript = new StringBuilder();
 
       // check if model exists in python. If not, then transfer it over
