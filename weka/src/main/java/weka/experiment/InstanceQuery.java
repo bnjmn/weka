@@ -25,6 +25,7 @@ import java.io.File;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.Time;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Enumeration;
@@ -431,6 +432,9 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler,
       case TIME:
         attributeTypes[i - 1] = Attribute.DATE;
         break;
+      case TIMESTAMP:
+        attributeTypes[i - 1] = Attribute.DATE;
+        break;
       default:
         // System.err.println("Unknown column type");
         attributeTypes[i - 1] = Attribute.STRING;
@@ -574,6 +578,14 @@ public class InstanceQuery extends DatabaseUtils implements OptionHandler,
           } else {
             // TODO: Do a value check here.
             vals[i - 1] = time.getTime();
+          }
+          break;
+        case TIMESTAMP:
+          Timestamp ts = rs.getTimestamp(i);
+          if (rs.wasNull()) {
+            vals[i - 1] = Utils.missingValue();
+          } else {
+            vals[i - 1] = ts.getTime();
           }
           break;
         default:

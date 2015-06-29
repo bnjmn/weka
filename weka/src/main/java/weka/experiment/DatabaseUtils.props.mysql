@@ -26,6 +26,7 @@ jdbcURL=jdbc:mysql://server_name:3306/database_name
 # date, getDate() = 8;        --> date
 # text, getString() = 9;      --> string
 # time, getTime() = 10;       --> date
+# timestamp, getTime() = 11;  --> date
 
 # other options
 CREATE_DOUBLE=DOUBLE
