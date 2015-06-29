@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    ReplaceWithMissingValue.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.filters.unsupervised.attribute;
 
 import weka.core.*;
@@ -11,9 +32,31 @@ import java.util.Vector;
 
 /**
  * <!-- globalinfo-start -->
+ * A filter that can be used to introduce missing values in a dataset. The specified probability is used to flip a biased coin to decide whether to replace a particular attribute value in an instance with a missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). This filter only modifies the first batch of data that is processed.
+ * <br><br>
  * <!-- globalinfo-end -->
  *
  * <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of columns to modify. First and last are valid indexes.
+ *  (default: first-last)</pre>
+ * 
+ * <pre> -V
+ *  Invert matching sense of column indexes.</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Specify the random number seed (default 1)</pre>
+ * 
+ * <pre> -P &lt;double&gt;
+ *  Specify the probability  (default 0.1)</pre>
+ * 
+ * <pre> -unset-class-temporarily
+ *  Unsets the class index temporarily before the filter is
+ *  applied to the data.
+ *  (default: no)</pre>
+ * 
  * <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -75,7 +118,27 @@ public class ReplaceWithMissingValue extends SimpleBatchFilter implements Unsupe
    * Parses a given list of options.
    * <p/>
    *
-   * <!-- options-start --> Valid options are:
+   * <!-- options-start -->
+   * Valid options are: <p>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of columns to modify. First and last are valid indexes.
+   *  (default: first-last)</pre>
+   * 
+   * <pre> -V
+   *  Invert matching sense of column indexes.</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Specify the random number seed (default 1)</pre>
+   * 
+   * <pre> -P &lt;double&gt;
+   *  Specify the probability  (default 0.1)</pre>
+   * 
+   * <pre> -unset-class-temporarily
+   *  Unsets the class index temporarily before the filter is
+   *  applied to the data.
+   *  (default: no)</pre>
+   * 
    * <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -377,7 +440,7 @@ public class ReplaceWithMissingValue extends SimpleBatchFilter implements Unsupe
   public String globalInfo() {
     return "A filter that can be used to introduce missing values in a dataset. The specified probability is used to" +
             " flip a biased coin to decide whether to replace a particular attribute value in an instance with a" +
-            " missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values. " +
+            " missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). " +
             "This filter only modifies the first batch of data that is processed.";
   }
 
@@ -440,3 +503,4 @@ public class ReplaceWithMissingValue extends SimpleBatchFilter implements Unsupe
     runFilter(new ReplaceWithMissingValue(), argv);
   }
 }
+
