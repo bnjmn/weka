@@ -36,7 +36,7 @@ import weka.core.Utils;
 
 /**
  * <!-- globalinfo-start --> The RBF kernel. K(x, y) = e^-(gamma * &lt;x-y,
- * x-y&gt;^2)
+ * x-y&gt;)
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -120,7 +120,7 @@ public class RBFKernel extends CachedKernel {
    */
   @Override
   public String globalInfo() {
-    return "The RBF kernel. K(x, y) = e^-(gamma * <x-y, x-y>^2)";
+    return "The RBF kernel. K(x, y) = e^-(gamma * <x-y, x-y>)";
   }
 
   /**
