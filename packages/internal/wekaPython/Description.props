@@ -34,7 +34,7 @@ Description=Integration with CPython for Weka. Python version 2.7.x or higher is
 PackageURL=http://prdownloads.sourceforge.net/weka/wekaPython1.0.0.zip?download
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.packages/wekaPython
+URL=http://markahall.blogspot.co.nz/2015/06/cpython-integration-in-weka.html
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
