@@ -9,7 +9,7 @@ PackageName=wekaPython
 Version=1.0.0
 
 #Date
-Date=2015-MM-YY
+Date=2015-07-01
 
 # Title (required)
 Title=Class for building and using a decision table/naive Bayes hybrid classifier.
@@ -44,3 +44,7 @@ URL=http://weka.sourceforge.net/doc.packages/wekaPython
 
 # Dependencies
 Depends=weka (>=3.7.13-SNAPSHOT)
+
+MessageToDisplayOnInstallation=This package requires python (2.7.x or 3.x) to be installed on your\n\
+ computer before it can be used. The python command must be in the PATH. Within python it requires the:\n\
+ following packages: numpy, pandas, matplotlib and scikit-learn.
