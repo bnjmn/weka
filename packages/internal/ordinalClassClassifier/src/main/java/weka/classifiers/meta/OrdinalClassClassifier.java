@@ -29,6 +29,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.classifiers.rules.ZeroR;
+import weka.core.*;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -170,7 +171,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * @see OptionHandler
  */
 public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
-  OptionHandler, TechnicalInformationHandler {
+  OptionHandler, TechnicalInformationHandler, BatchPredictor {
 
   /** for serialization */
   static final long serialVersionUID = -3461971774059603636L;
@@ -321,30 +322,11 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
   }
 
   /**
-   * Returns the distribution for an instance.
-   * 
-   * @param inst the instance to compute the distribution for
-   * @return the class distribution for the given instance
-   * @throws Exception if the distribution can't be computed successfully
+   * Compute class probabilities based on base classifiers class probabilities.
    */
-  @Override
-  public double[] distributionForInstance(Instance inst) throws Exception {
+  protected double[] computeProbabilities(double[][] distributions, int numClasses) {
 
-    if (m_Classifiers.length == 1) {
-      return m_Classifiers[0].distributionForInstance(inst);
-    }
-
-    double[] probs = new double[inst.numClasses()];
-
-    double[][] distributions = new double[m_ClassFilters.length][0];
-    for (int i = 0; i < m_ClassFilters.length; i++) {
-      m_ClassFilters[i].input(inst);
-      m_ClassFilters[i].batchFinished();
-
-      distributions[i] = m_Classifiers[i]
-        .distributionForInstance(m_ClassFilters[i].output());
-
-    }
+    double[] probs = new double[numClasses];
 
     // Use Schapire et al.'s smoothing heuristic?
     if (getUseSmoothing()) {
@@ -398,20 +380,46 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
       }
     }
 
-    for (int i = 0; i < inst.numClasses(); i++) {
+    for (int i = 0; i < numClasses; i++) {
       if (i == 0) {
         probs[i] = 1.0 - distributions[0][1];
-      } else if (i == inst.numClasses() - 1) {
+      } else if (i == numClasses - 1) {
         probs[i] = distributions[i - 1][1];
       } else {
         probs[i] = distributions[i - 1][1] - distributions[i][1];
         if (!(probs[i] >= 0)) {
           System.err.println("Warning: estimated probability " + probs[i]
-            + ". Rounding to 0.");
+                  + ". Rounding to 0.");
           probs[i] = 0;
         }
       }
     }
+
+    return probs;
+  }
+
+  /**
+   * Returns the distribution for an instance.
+   * 
+   * @param inst the instance to compute the distribution for
+   * @return the class distribution for the given instance
+   * @throws Exception if the distribution can't be computed successfully
+   */
+  @Override
+  public double[] distributionForInstance(Instance inst) throws Exception {
+
+    if (m_Classifiers.length == 1) {
+      return m_Classifiers[0].distributionForInstance(inst);
+    }
+
+    double[][] distributions = new double[m_ClassFilters.length][0];
+    for (int i = 0; i < m_ClassFilters.length; i++) {
+      m_ClassFilters[i].input(inst);
+      m_ClassFilters[i].batchFinished();
+      distributions[i] = m_Classifiers[i].distributionForInstance(m_ClassFilters[i].output());
+    }
+
+    double[] probs = computeProbabilities(distributions, inst.numClasses());
 
     if (Utils.gr(Utils.sum(probs), 0)) {
       Utils.normalize(probs);
@@ -419,6 +427,71 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
     } else {
       return m_ZeroR.distributionForInstance(inst);
     }
+  }
+
+  /**
+   * Dummy method to satisfy BatchPredictor interface.
+   */
+  public void setBatchSize(String i) {
+  }
+
+  /**
+   * Dummy method to satisfy BatchPredictor interface.
+   */
+  public String getBatchSize() {
+    return "";
+  }
+
+  /**
+   * Returns the distributions for a set of instances. Calls
+   * base classifier's distributionForInstance() if it does not support
+   * distributionForInstances().
+   *
+   * @param insts the instances to compute the distribution for
+   * @return the class distributions for the given instances
+   * @throws Exception if the distribution can't be computed successfully
+   */
+  @Override
+  public double[][] distributionsForInstances(Instances insts) throws Exception {
+
+    if (m_Classifiers.length == 1) {
+      if (m_Classifier instanceof BatchPredictor) {
+        return ((weka.core.BatchPredictor)m_Classifiers[0]).distributionsForInstances(insts);
+      }
+      double[][] dists = new double[insts.numInstances()][];
+      for (int i = 0; i < dists.length; i++) {
+        dists[i] = m_Classifiers[0].distributionForInstance(insts.instance(i));
+      }
+      return dists;
+    }
+
+    double[][][] distributions = new double[insts.numInstances()][m_ClassFilters.length][0];
+    for (int i = 0; i < m_ClassFilters.length; i++) {
+      if (m_Classifier instanceof BatchPredictor) {
+        Instances filtered = Filter.useFilter(insts, m_ClassFilters[i]);
+        double[][] currentDist = ((BatchPredictor) m_Classifiers[i]).distributionsForInstances(filtered);
+        for (int j = 0; j < currentDist.length; j++) {
+          distributions[j][i] = currentDist[j];
+        }
+      } else {
+        for (int j = 0; j < insts.numInstances(); j++) {
+          m_ClassFilters[i].input(insts.instance(j));
+          m_ClassFilters[i].batchFinished();
+          distributions[j][i] = m_Classifiers[i].distributionForInstance(m_ClassFilters[i].output());
+        }
+      }
+    }
+
+    double[][] probs = new double[insts.numInstances()][];
+    for (int i = 0; i < probs.length; i++) {
+      probs[i] = computeProbabilities(distributions[i], insts.numClasses());
+      if (Utils.gr(Utils.sum(probs[i]), 0)) {
+        Utils.normalize(probs[i]);
+      } else {
+        probs[i] = m_ZeroR.distributionForInstance(insts.instance(i));
+      }
+    }
+    return probs;
   }
 
   /**
