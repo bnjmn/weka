@@ -14,7 +14,7 @@ Date=2015-07-01
 # Title (required)
 Title=Class for building and using a decision table/naive Bayes hybrid classifier.
 
-Category=Classification
+Category=Python integration
 
 # Author (required)
 Author=Mark Hall
