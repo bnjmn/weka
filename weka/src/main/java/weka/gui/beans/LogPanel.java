@@ -296,6 +296,11 @@ public class LogPanel extends JPanel implements Logger {
             SwingUtilities.invokeLater(new Runnable() {
               @Override
               public void run() {
+                String currentStatus = m_tableModel.getValueAt(rowNum.intValue(), 3).toString();
+                if (currentStatus.startsWith("INTERRUPTED") || currentStatus.startsWith("ERROR")) {
+                  // leave these in place until the status area is cleared.
+                  return;
+                }
                 // ERROR overrides INTERRUPTED
                 if (!(stepStatusCopy.startsWith("INTERRUPTED") && ((String) m_tableModel
                   .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
@@ -313,6 +318,11 @@ public class LogPanel extends JPanel implements Logger {
             ex.printStackTrace();
           }
         } else {
+          String currentStatus = m_tableModel.getValueAt(rowNum.intValue(), 3).toString();
+          if (currentStatus.startsWith("INTERRUPTED") || currentStatus.startsWith("ERROR")) {
+            // leave these in place until the status area is cleared.
+            return;
+          }
           if (!(stepStatusCopy.startsWith("INTERRUPTED") && ((String) m_tableModel
             .getValueAt(rowNum.intValue(), 3)).startsWith("ERROR"))) {
             m_tableModel.setValueAt(stepNameCopy, rowNum.intValue(), 0);
