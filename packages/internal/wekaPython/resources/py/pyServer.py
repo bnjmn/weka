@@ -288,7 +288,7 @@ def execute_script(message):
         sys.stdout = output
         sys.stderr = error
         try:
-            exec script in _global_env
+            exec (script, _global_env)
         except Exception:
             print('Got an exception executing script')
             traceback.print_exc(file=error)
