@@ -6,7 +6,7 @@
 PackageName=ordinalClassClassifier
 
 # Version (required)
-Version=1.0.4
+Version=1.0.3
 
 #Date
 Date=2015-07-01
@@ -31,7 +31,7 @@ Description=Meta classifier that allows standard classification algorithms to be
 Changes=Now implements BatchPredictor interface to speed up predictions for batches of data when base learner does not run on JVM.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/ordinalClassClassifier1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/ordinalClassClassifier1.0.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ordinalClassClassifier
