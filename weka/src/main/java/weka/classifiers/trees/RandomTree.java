@@ -49,11 +49,11 @@ import weka.core.WeightedInstancesHandler;
 /**
  <!-- globalinfo-start -->
  * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning. Also has an option to allow estimation of class probabilities (or target mean in the regression case) based on a hold-out set (backfitting).
- * <p/>
+ * <br><br>
  <!-- globalinfo-end -->
  * 
  <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
  * 
  * <pre> -K &lt;number of attributes&gt;
  *  Number of attributes to randomly investigate. (default 0)
@@ -81,6 +81,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -U
  *  Allow unclassified instances.</pre>
  * 
+ * <pre> -B
+ *  Break ties randomly when several attributes look equally good.</pre>
+ * 
  * <pre> -output-debug-info
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -88,6 +91,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
  *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
  * 
  <!-- options-end -->
  * 
@@ -124,6 +130,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
   /** Whether unclassified instances are allowed */
   protected boolean m_AllowUnclassifiedInstances = false;
+
+  /** Whether to break ties randomly. */
+  protected boolean m_BreakTiesRandomly = false;
 
   /** a ZeroR model in case no model can be built from the data */
   protected Classifier m_zeroR;
@@ -292,6 +301,15 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   }
 
   /**
+   * Set the maximum depth of the tree, 0 for unlimited.
+   *
+   * @param value the maximum depth.
+   */
+  public void setMaxDepth(int value) {
+    m_MaxDepth = value;
+  }
+
+  /**
    * Returns the tip text for this property
    * 
    * @return tip text for this property suitable for displaying in the
@@ -333,9 +351,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   }
 
   /**
-   * Get the value of NumFolds.
+   * Gets whether tree is allowed to abstain from making a prediction.
    * 
-   * @return Value of NumFolds.
+   * @return true if tree is allowed to abstain from making a prediction.
    */
   public boolean getAllowUnclassifiedInstances() {
 
@@ -345,22 +363,41 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   /**
    * Set the value of AllowUnclassifiedInstances.
    * 
-   * @param newAllowUnclassifiedInstances Value to assign to
-   *          AllowUnclassifiedInstances.
+   * @param newAllowUnclassifiedInstances true if tree is allowed to abstain from making a prediction
    */
-  public void setAllowUnclassifiedInstances(
-    boolean newAllowUnclassifiedInstances) {
+  public void setAllowUnclassifiedInstances(boolean newAllowUnclassifiedInstances) {
 
     m_AllowUnclassifiedInstances = newAllowUnclassifiedInstances;
   }
 
   /**
-   * Set the maximum depth of the tree, 0 for unlimited.
-   * 
-   * @param value the maximum depth.
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
    */
-  public void setMaxDepth(int value) {
-    m_MaxDepth = value;
+  public String breakTiesRandomlyTipText() {
+    return "Break ties randomly when several attributes look equally good.";
+  }
+
+  /**
+   * Get whether to break ties randomly.
+   *
+   * @return true if ties are to be broken randomly.
+   */
+  public boolean getBreakTiesRandomly() {
+
+    return m_BreakTiesRandomly;
+  }
+
+  /**
+   * Set whether to break ties randomly.
+   *
+   * @param newBreakTiesRandomly true if ties are to be broken randomly
+   */
+  public void setBreakTiesRandomly(boolean newBreakTiesRandomly) {
+
+    m_BreakTiesRandomly = newBreakTiesRandomly;
   }
 
   /**
@@ -398,7 +435,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       + "(default 0, no backfitting).", "N", 1, "-N <num>"));
     newVector.addElement(new Option("\tAllow unclassified instances.", "U", 0,
       "-U"));
-
+    newVector.addElement(new Option("\t" + breakTiesRandomlyTipText(), "B", 0,
+            "-B"));
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -439,6 +477,10 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       result.add("-U");
     }
 
+    if (getBreakTiesRandomly()) {
+      result.add("-B");
+    }
+
     Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
@@ -449,7 +491,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * <p/>
    * 
    <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
    * 
    * <pre> -K &lt;number of attributes&gt;
    *  Number of attributes to randomly investigate. (default 0)
@@ -477,6 +519,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * <pre> -U
    *  Allow unclassified instances.</pre>
    * 
+   * <pre> -B
+   *  Break ties randomly when several attributes look equally good.</pre>
+   * 
    * <pre> -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
@@ -484,6 +529,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * <pre> -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
    *  (use with caution).</pre>
+   * 
+   * <pre> -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
    * 
    <!-- options-end -->
    * 
@@ -536,6 +584,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     }
 
     setAllowUnclassifiedInstances(Utils.getFlag('U', options));
+
+    setBreakTiesRandomly(Utils.getFlag('B', options));
 
     super.setOptions(options);
 
@@ -1341,7 +1391,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
           gainFound = true;
         }
 
-        if ((currVal > val) || ((currVal == val) && (attIndex < bestIndex))) {
+        if ((currVal > val) || ((!getBreakTiesRandomly()) && (currVal == val) && (attIndex < bestIndex))) {
           val = currVal;
           bestIndex = attIndex;
           split = currSplit;

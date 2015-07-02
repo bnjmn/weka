@@ -46,12 +46,12 @@ import weka.core.WeightedInstancesHandler;
 
 /**
  <!-- globalinfo-start -->
- * Class for constructing a forest of random trees.<br/>
- * <br/>
- * For more information see: <br/>
- * <br/>
+ * Class for constructing a forest of random trees.<br>
+ * <br>
+ * For more information see: <br>
+ * <br>
  * Leo Breiman (2001). Random Forests. Machine Learning. 45(1):5-32.
- * <p/>
+ * <br><br>
  <!-- globalinfo-end -->
  * 
  <!-- technical-bibtex-start -->
@@ -67,11 +67,11 @@ import weka.core.WeightedInstancesHandler;
  *    year = {2001}
  * }
  * </pre>
- * <p/>
+ * <br><br>
  <!-- technical-bibtex-end -->
  * 
  <!-- options-start -->
- * Valid options are: <p/>
+ * Valid options are: <p>
  * 
  * <pre> -I &lt;number of trees&gt;
  *  Number of trees to build.
@@ -99,6 +99,9 @@ import weka.core.WeightedInstancesHandler;
  *  Number of execution slots.
  *  (default 1 - i.e. no parallelism)</pre>
  * 
+ * <pre> -B
+ *  Break ties randomly when several attributes look equally good.</pre>
+ * 
  * <pre> -output-debug-info
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console</pre>
@@ -106,6 +109,9 @@ import weka.core.WeightedInstancesHandler;
  * <pre> -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
  *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
  * 
  <!-- options-end -->
  * 
@@ -148,6 +154,9 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
 
   /** Don't calculate the out of bag error */
   protected boolean m_dontCalculateOutOfBagError;
+
+  /** Whether to break ties randomly. */
+  protected boolean m_BreakTiesRandomly = false;
 
   /**
    * Returns a string describing classifier
@@ -406,6 +415,36 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String breakTiesRandomlyTipText() {
+    return "Break ties randomly when several attributes look equally good.";
+  }
+
+  /**
+   * Get whether to break ties randomly.
+   *
+   * @return true if ties are to be broken randomly.
+   */
+  public boolean getBreakTiesRandomly() {
+
+    return m_BreakTiesRandomly;
+  }
+
+  /**
+   * Set whether to break ties randomly.
+   *
+   * @param newBreakTiesRandomly true if ties are to be broken randomly
+   */
+  public void setBreakTiesRandomly(boolean newBreakTiesRandomly) {
+
+    m_BreakTiesRandomly = newBreakTiesRandomly;
+  }
+
+  /**
    * Returns an enumeration of the additional measure names.
    * 
    * @return an enumeration of the measure names
@@ -470,6 +509,9 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
       + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
       "-num-slots <num>"));
 
+    newVector.addElement(new Option("\t" + breakTiesRandomlyTipText(), "B", 0,
+            "-B"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -506,6 +548,10 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
       result.add("-print");
     }
 
+    if (getBreakTiesRandomly()) {
+      result.add("-B");
+    }
+
     result.add("-num-slots");
     result.add("" + getNumExecutionSlots());
 
@@ -519,7 +565,7 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * <p/>
    * 
    <!-- options-start -->
-   * Valid options are: <p/>
+   * Valid options are: <p>
    * 
    * <pre> -I &lt;number of trees&gt;
    *  Number of trees to build.
@@ -547,6 +593,9 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    *  Number of execution slots.
    *  (default 1 - i.e. no parallelism)</pre>
    * 
+   * <pre> -B
+   *  Break ties randomly when several attributes look equally good.</pre>
+   * 
    * <pre> -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console</pre>
@@ -554,6 +603,9 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
    * <pre> -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
    *  (use with caution).</pre>
+   * 
+   * <pre> -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
    * 
    <!-- options-end -->
    * 
@@ -603,6 +655,8 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
       setNumExecutionSlots(1);
     }
 
+    setBreakTiesRandomly(Utils.getFlag('B', options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -650,6 +704,7 @@ public class RandomForest extends AbstractClassifier implements OptionHandler,
     rTree.setKValue(m_KValue);
     rTree.setMaxDepth(getMaxDepth());
     rTree.setDoNotCheckCapabilities(true);
+    rTree.setBreakTiesRandomly(getBreakTiesRandomly());
 
     // set up the bagger and build the forest
     m_bagger.setClassifier(rTree);
