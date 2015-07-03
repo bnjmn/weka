@@ -385,7 +385,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       + "\t-L to specify a default label to use in the case\n"
       + "\twhere a label is encountered, for a given attribute,\n"
       + "\t that is not in the set supplied via the -L option.\n"
-      + "Use the same format [index range | name list]:<default label>.",
+      + "\tUse the same format [index range | name list]:<default label>.",
       "default-label", 1, "-default-label <spec>"));
 
     result.add(new Option(
