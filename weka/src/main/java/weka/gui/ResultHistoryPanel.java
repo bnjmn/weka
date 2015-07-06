@@ -22,6 +22,7 @@
 package weka.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Point;
 import java.awt.event.InputEvent;
@@ -78,10 +79,12 @@ public class ResultHistoryPanel extends JPanel {
   protected JList m_List = new JList(m_Model);
 
   /** A Hashtable mapping names to result buffers */
-  protected Hashtable<String, StringBuffer> m_Results = new Hashtable<String, StringBuffer>();
+  protected Hashtable<String, StringBuffer> m_Results =
+    new Hashtable<String, StringBuffer>();
 
   /** A Hashtable mapping names to output text components */
-  protected Hashtable<String, JTextArea> m_FramedOutput = new Hashtable<String, JTextArea>();
+  protected Hashtable<String, JTextArea> m_FramedOutput =
+    new Hashtable<String, JTextArea>();
 
   /** A hashtable mapping names to arbitrary objects */
   protected Hashtable<String, Object> m_Objs = new Hashtable<String, Object>();
@@ -432,6 +435,14 @@ public class ResultHistoryPanel extends JPanel {
     m_HandleRightClicks = tf;
   }
 
+  @Override
+  public void setBackground(Color c) {
+    super.setBackground(c);
+    if (m_List != null) {
+      m_List.setBackground(c);
+    }
+  }
+
   /**
    * Tests out the result history from the command line.
    * 
@@ -440,8 +451,8 @@ public class ResultHistoryPanel extends JPanel {
   public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Classifier");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Classifier");
       jf.getContentPane().setLayout(new BorderLayout());
       final ResultHistoryPanel jd = new ResultHistoryPanel(null);
       jd.addResult("blah", new StringBuffer("Nothing to see here"));
