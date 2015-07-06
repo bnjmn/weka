@@ -21,6 +21,35 @@
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
+import weka.core.CustomDisplayStringProvider;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.WekaPackageManager;
+import weka.core.logging.Logger;
+import weka.gui.CheckBoxList.CheckBoxListModel;
+import weka.gui.beans.PluginManager;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.ToolTipManager;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -56,36 +85,6 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.ToolTipManager;
-import javax.swing.event.TreeSelectionEvent;
-import javax.swing.event.TreeSelectionListener;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
-import weka.core.Capabilities;
-import weka.core.Capabilities.Capability;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.CustomDisplayStringProvider;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.WekaPackageManager;
-import weka.core.logging.Logger;
-import weka.gui.CheckBoxList.CheckBoxListModel;
-import weka.gui.beans.PluginManager;
 
 /**
  * A PropertyEditor for objects. It can be used either in a static or a dynamic
@@ -167,6 +166,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
   /** whether the Weka Editors were already registered. */
   protected static boolean m_EditorsRegistered;
+
+  /** whether to display the global info tool tip in the tree. */
+  protected static boolean m_ShowGlobalInfoToolTip;
 
   /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
@@ -1073,6 +1075,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       e.printStackTrace();
     }
 
+    // show the tool tip?
+    m_ShowGlobalInfoToolTip = props.getProperty(
+      "ShowGlobalInfoToolTip", "true").equals("true");
+
     enm = props.propertyNames();
     while (enm.hasMoreElements()) {
       name = enm.nextElement().toString();
@@ -1774,7 +1780,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         }
         tree.add(child);
 
-        if (hpp.isLeafReached()) {
+        if (hpp.isLeafReached() && m_ShowGlobalInfoToolTip) {
           String algName = hpp.fullValue();
           try {
             Object alg = Class.forName(algName).newInstance();
