@@ -435,11 +435,29 @@ public class ResultHistoryPanel extends JPanel {
     m_HandleRightClicks = tf;
   }
 
+  /**
+   * Set the background color for this component and the list
+   *
+   * @param c the background color to use
+   */
   @Override
   public void setBackground(Color c) {
     super.setBackground(c);
     if (m_List != null) {
       m_List.setBackground(c);
+    }
+  }
+
+  /**
+   * Set the font to use in the list
+   *
+   * @param f the font to use
+   */
+  @Override
+  public void setFont(Font f) {
+    super.setFont(f);
+    if (m_List != null) {
+      m_List.setFont(f);
     }
   }
 
