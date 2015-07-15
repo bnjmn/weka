@@ -21,14 +21,16 @@
 
 package weka.gui;
 
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 
 import weka.core.Environment;
@@ -203,7 +205,6 @@ public class FileEnvironmentField extends EnvironmentField {
       }
     }
     File tmp2 = new File((new File(tmpString)).getAbsolutePath());
-
     JFileChooser embeddedEditor = (JFileChooser) m_fileEditor.getCustomEditor();
     if (tmp2.isDirectory()) {
       embeddedEditor.setCurrentDirectory(tmp2);
