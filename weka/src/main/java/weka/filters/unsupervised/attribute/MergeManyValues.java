@@ -22,6 +22,7 @@
 package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -73,7 +74,7 @@ import weka.filters.UnsupervisedFilter;
  * @author Kathryn Hempstalk (kah18 at cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MergeManyValues extends Filter implements UnsupervisedFilter,
+public class MergeManyValues extends PotentialClassIgnorer implements UnsupervisedFilter,
   StreamableFilter, OptionHandler {
 
   /** for serialization */
@@ -119,6 +120,11 @@ public class MergeManyValues extends Filter implements UnsupervisedFilter,
       "\tSets the merge range. 'first and 'last' are accepted as well.'\n"
         + "\tE.g.: first-5,7,9,20-last\n" + "\t(default: 1,2)", "R", 1,
       "-R <range>"));
+
+    Enumeration<Option> superOpts = super.listOptions();
+    while (superOpts.hasMoreElements()) {
+      newVector.add(superOpts.nextElement());
+    }
 
     return newVector.elements();
   }
@@ -182,6 +188,8 @@ public class MergeManyValues extends Filter implements UnsupervisedFilter,
       setInputFormat(getInputFormat());
     }
 
+    super.setOptions(options);
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -203,6 +211,9 @@ public class MergeManyValues extends Filter implements UnsupervisedFilter,
 
     result.add("-R");
     result.add(getMergeValueRange());
+
+    String[] superOpts = super.getOptions();
+    result.addAll(Arrays.asList(superOpts));
 
     return result.toArray(new String[result.size()]);
   }
@@ -242,19 +253,19 @@ public class MergeManyValues extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
 
-    m_AttIndex.setUpper(instanceInfo.numAttributes() - 1);
+    m_AttIndex.setUpper(inputFormatPeek().numAttributes() - 1);
 
-    m_MergeRange.setUpper(instanceInfo.attribute(m_AttIndex.getIndex())
+    m_MergeRange.setUpper(inputFormatPeek().attribute(m_AttIndex.getIndex())
       .numValues() - 1);
-    if ((instanceInfo.classIndex() > -1)
-      && (instanceInfo.classIndex() == m_AttIndex.getIndex())) {
+    if ((inputFormatPeek().classIndex() > -1)
+      && (inputFormatPeek().classIndex() == m_AttIndex.getIndex())) {
       throw new Exception("Cannot process class attribute.");
     }
-    if (!instanceInfo.attribute(m_AttIndex.getIndex()).isNominal()) {
+    if (!inputFormatPeek().attribute(m_AttIndex.getIndex()).isNominal()) {
       throw new UnsupportedAttributeTypeException(
         "Chosen attribute not nominal.");
     }
-    if (instanceInfo.attribute(m_AttIndex.getIndex()).numValues() < 2) {
+    if (inputFormatPeek().attribute(m_AttIndex.getIndex()).numValues() < 2) {
       throw new UnsupportedAttributeTypeException(
         "Chosen attribute has less than " + "two values.");
     }
