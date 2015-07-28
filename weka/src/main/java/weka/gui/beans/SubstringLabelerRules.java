@@ -329,7 +329,7 @@ public class SubstringLabelerRules implements EnvironmentHandler {
    * @throws Exception if the output structure has not yet been determined
    * @return the output instance
    */
-  protected Instance makeOutputInstance(Instance inputI, boolean batch)
+  public Instance makeOutputInstance(Instance inputI, boolean batch)
     throws Exception {
 
     if (m_outputStructure == null) {
