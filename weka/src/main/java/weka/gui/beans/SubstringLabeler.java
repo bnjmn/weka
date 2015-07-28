@@ -479,7 +479,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     m_matches = new SubstringLabelerRules(m_matchDetails, m_attName,
       getConsumeNonMatching(), getNominalBinary(), inputStructure,
       statusMessagePrefix(), m_log, m_env);
-    m_matches.makeOutputStructure();
+    // m_matches.makeOutputStructure();
   }
 
   protected transient StreamThroughput m_throughput;

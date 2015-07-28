@@ -103,7 +103,7 @@ public class SubstringLabelerRules implements EnvironmentHandler {
   public SubstringLabelerRules(String matchDetails, String newAttName,
     boolean consumeNonMatching, boolean nominalBinary,
     Instances inputStructure, String statusMessagePrefix, Logger log,
-    Environment env) {
+    Environment env) throws Exception {
     m_matchRules = matchRulesFromInternal(matchDetails, inputStructure,
       statusMessagePrefix, log, env);
 
@@ -113,6 +113,8 @@ public class SubstringLabelerRules implements EnvironmentHandler {
     m_consumeNonMatching = consumeNonMatching;
     m_nominalBinary = nominalBinary;
     m_env = env;
+
+    makeOutputStructure();
   }
 
   /**
@@ -125,7 +127,7 @@ public class SubstringLabelerRules implements EnvironmentHandler {
    * @param inputStructure the incoming instances structure
    */
   public SubstringLabelerRules(String matchDetails, String newAttName,
-    Instances inputStructure) {
+    Instances inputStructure) throws Exception {
     this(matchDetails, newAttName, false, false, inputStructure, "", null,
       Environment.getSystemWide());
   }
