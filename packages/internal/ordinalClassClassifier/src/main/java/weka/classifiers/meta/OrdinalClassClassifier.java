@@ -429,6 +429,10 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
     }
   }
 
+    public String batchSizeTipText() {
+	return "Preferred batch size for prediction";
+    }
+
   /**
    * Dummy method to satisfy BatchPredictor interface.
    */
