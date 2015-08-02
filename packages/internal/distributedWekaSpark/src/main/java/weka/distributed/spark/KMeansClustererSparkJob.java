@@ -1555,9 +1555,10 @@ public class KMeansClustererSparkJob extends SparkJob implements
     // oversample for > 1 cluster per run, so that we have some options if there
     // are duplicates in the list. numClusters == 1 will be used when seeding
     // the k-means|| initialization process
+    int oversampleFactor = numClusters > 1 ? 2 : 1;
     List<Instance> centerList =
-      dataset.takeSample(true, numClusters > 1 ? 2 : 1 * numRuns * numClusters,
-        seed);
+      dataset.takeSample(true, oversampleFactor * numRuns * numClusters,
+                         seed);
 
     // make sure that start points and header have been through any filters
     KMeansMapTask forFilteringOnly = new KMeansMapTask();
