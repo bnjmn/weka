@@ -208,7 +208,8 @@ public class SubstringReplacer extends JPanel implements BeanCommon, Visible,
       // System.err.println("got : " + inst.toString());
       if (inst != null) {
         m_throughput.updateStart();
-        m_mr.applyRules(inst);
+        inst = m_mr.makeOutputInstance(inst);
+        // m_mr.applyRules(inst);
         // for (SubstringReplacerMatchRule mr : m_mr) {
         // mr.apply(inst);
         // }

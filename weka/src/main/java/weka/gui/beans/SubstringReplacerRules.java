@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
 
+import weka.core.DenseInstance;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -51,6 +52,9 @@ public class SubstringReplacerRules implements EnvironmentHandler {
   /** The input structure */
   protected Instances m_inputStructure;
 
+  /** The output structure */
+  protected Instances m_outputStructure;
+
   /** An optional prefix for status log messages */
   protected String m_statusMessagePrefix = "";
 
@@ -72,10 +76,12 @@ public class SubstringReplacerRules implements EnvironmentHandler {
   public SubstringReplacerRules(String matchDetails, Instances inputStructure,
     String statusMessagePrefix, Logger log, Environment env) {
 
-    m_matchRules = matchRulesFromInternal(matchDetails, inputStructure,
-      statusMessagePrefix, log, env);
+    m_matchRules =
+      matchRulesFromInternal(matchDetails, inputStructure, statusMessagePrefix,
+        log, env);
 
     m_inputStructure = new Instances(inputStructure);
+    m_outputStructure = new Instances(inputStructure).stringFreeStructure();
     m_env = env;
     m_statusMessagePrefix = statusMessagePrefix;
   }
@@ -107,7 +113,8 @@ public class SubstringReplacerRules implements EnvironmentHandler {
     String matchReplaceDetails, Instances inputStructure,
     String statusMessagePrefix, Logger log, Environment env) {
 
-    List<SubstringReplacerMatchRule> matchRules = new ArrayList<SubstringReplacerMatchRule>();
+    List<SubstringReplacerMatchRule> matchRules =
+      new ArrayList<SubstringReplacerMatchRule>();
 
     String[] mrParts = matchReplaceDetails.split("@@match-replace@@");
     for (String p : mrParts) {
@@ -125,6 +132,38 @@ public class SubstringReplacerRules implements EnvironmentHandler {
     for (SubstringReplacerMatchRule mr : m_matchRules) {
       mr.apply(inst);
     }
+  }
+
+  /**
+   * Make an output instance given an input one
+   *
+   * @param inputI the input instance to process
+   * @return the output instance with substrings replaced
+   */
+  public Instance makeOutputInstance(Instance inputI) {
+    double[] vals = new double[m_outputStructure.numAttributes()];
+    String[] stringVals = new String[m_outputStructure.numAttributes()];
+    for (int i = 0; i < inputI.numAttributes(); i++) {
+      if (inputI.attribute(i).isString() && !inputI.isMissing(i)) {
+        stringVals[i] = inputI.stringValue(i);
+      } else {
+        vals[i] = inputI.value(i);
+      }
+    }
+
+    for (SubstringReplacerMatchRule mr : m_matchRules) {
+      mr.apply(stringVals);
+    }
+
+    for (int i = 0; i < m_outputStructure.numAttributes(); i++) {
+      if (m_outputStructure.attribute(i).isString() && stringVals[i] != null) {
+        m_outputStructure.attribute(i).setStringValue(stringVals[i]);
+      }
+    }
+
+    Instance result = new DenseInstance(inputI.weight(), vals);
+    result.setDataset(m_outputStructure);
+    return result;
   }
 
   /**
@@ -338,8 +377,8 @@ public class SubstringReplacerRules implements EnvironmentHandler {
 
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
-      tempRangeS = tempRangeS.replace("/first", "first").replace("/last",
-        "last");
+      tempRangeS =
+        tempRangeS.replace("/first", "first").replace("/last", "last");
       Range tempR = new Range();
       tempR.setRanges(attsToApplyToS);
       try {
@@ -366,8 +405,9 @@ public class SubstringReplacerRules implements EnvironmentHandler {
               indexes.add(new Integer(structure.attribute(att).index()));
             } else {
               if (m_logger != null) {
-                String msg = m_statusMessagePrefix + "Can't find attribute '"
-                  + att + "in the incoming instances - ignoring";
+                String msg =
+                  m_statusMessagePrefix + "Can't find attribute '" + att
+                    + "in the incoming instances - ignoring";
                 m_logger.logMessage(msg);
               }
             }
@@ -388,9 +428,10 @@ public class SubstringReplacerRules implements EnvironmentHandler {
           indexes.add(m_selectedAtt);
         } else {
           if (m_logger != null) {
-            String msg = m_statusMessagePrefix + "Attribute '"
-              + structure.attribute(m_selectedAtt).name()
-              + "is not a string attribute - " + "ignoring";
+            String msg =
+              m_statusMessagePrefix + "Attribute '"
+                + structure.attribute(m_selectedAtt).name()
+                + "is not a string attribute - " + "ignoring";
             m_logger.logMessage(msg);
           }
         }
@@ -436,6 +477,23 @@ public class SubstringReplacerRules implements EnvironmentHandler {
     }
 
     /**
+     * Apply this rule to the supplied array of strings. This array is expected
+     * to contain string values from an instance at the same index that they
+     * occur in the original instance. Null elements indicate non-string or
+     * missing values from the original instance
+     * 
+     * @param stringVals an array of strings containing string values from an
+     *          input instance
+     */
+    public void apply(String[] stringVals) {
+      for (int i = 0; i < m_selectedAtts.length; i++) {
+        if (stringVals[m_selectedAtts[i]] != null) {
+          stringVals[m_selectedAtts[i]] = apply(stringVals[m_selectedAtts[i]]);
+        }
+      }
+    }
+
+    /**
      * Apply this rule to the supplied string
      * 
      * @param source the string to apply to
@@ -463,7 +521,7 @@ public class SubstringReplacerRules implements EnvironmentHandler {
     /**
      * Return a textual description of this rule
      * 
-     * @param a textual description of this rule
+     * @return textual description of this rule
      */
     @Override
     public String toString() {
