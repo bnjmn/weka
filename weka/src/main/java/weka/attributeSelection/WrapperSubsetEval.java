@@ -173,7 +173,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
   public static final int EVAL_FMEASURE = 5;
   public static final int EVAL_AUC = 6;
   public static final int EVAL_AUPRC = 7;
-  public static final int EVAL_PLUGIN = 8;
+  public static final int EVAL_CORRELATION = 8;
+  public static final int EVAL_PLUGIN = 9;
 
   /**
    * Small subclass of Tag to store info about a plugin metric
@@ -249,7 +250,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       }
     }
 
-    TAGS_EVALUATION = new Tag[7 + totalPluginCount];
+    TAGS_EVALUATION = new Tag[8 + totalPluginCount];
     TAGS_EVALUATION[0] =
       new Tag(EVAL_DEFAULT, "default",
         "Default: accuracy (discrete class); RMSE (numeric class)");
@@ -269,9 +270,12 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     TAGS_EVALUATION[6] =
       new Tag(EVAL_AUPRC, "auprc",
         "AUPRC (area under the precision-recall curve - discrete class only)");
+    TAGS_EVALUATION[7] =
+      new Tag(EVAL_CORRELATION, "corr-coeff",
+        "Correlation coefficient - numeric class only");
 
     if (PLUGIN_METRICS != null) {
-      int index = 7;
+      int index = 8;
       for ( AbstractEvaluationMetric m : PLUGIN_METRICS ) {
         for ( String stat : m.getStatisticNames() ) {
           TAGS_EVALUATION[index++] = new PluginTag( m, stat );
@@ -761,7 +765,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     // adjustment for class based on selected evaluation metric
     result.disable(Capability.NUMERIC_CLASS);
     result.disable(Capability.DATE_CLASS);
-    boolean pluginMetricNominalClass = true;
+    boolean pluginMetricNominalClass = false;
     if (m_evaluationMeasure.getID() == EVAL_PLUGIN) {
       String metricName = ((PluginTag) m_evaluationMeasure).getMetricName();
       for (AbstractEvaluationMetric m : PLUGIN_METRICS) {
@@ -899,6 +903,9 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
           repError[i] = m_Evaluation.areaUnderPRC(m_IRClassVal);
         }
         break;
+      case EVAL_CORRELATION:
+        repError[i] = m_Evaluation.correlationCoefficient();
+        break;
       case EVAL_PLUGIN:
         if (m_evaluationMeasure.getID() == EVAL_PLUGIN) {
           metricName = ((PluginTag) m_evaluationMeasure).getMetricName();
@@ -1031,6 +1038,9 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
         text
           .append("\tSubset evaluation: area under the precision-recall curve "
             + (m_IRClassVal >= 0 ? IRClassL : "") + "\n");
+        break;
+      case EVAL_CORRELATION:
+        text.append("\tSubset evaluation: correlation coefficient\n");
         break;
       case EVAL_PLUGIN:
         text
