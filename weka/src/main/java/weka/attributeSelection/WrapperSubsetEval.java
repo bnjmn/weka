@@ -270,11 +270,11 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
         + "\t(standard deviation---expressed as a percentage of the mean).\n"
         + "\t(default: 0.01 (1%))", "T", 1, "-T <num>"));
 
-    newVector
-      .addElement(new Option(
-        "\tPerformance evaluation measure to use for selecting attributes.\n"
-          + "\t(Default = accuracy for discrete class and rmse for numeric class)",
-        "E", 1, "-E <acc | rmse | mae | f-meas | auc | auprc>"));
+    newVector.addElement(new Option(
+      "\tPerformance evaluation measure to use for selecting attributes.\n"
+        + "\t(Default = default: accuracy for discrete class and rmse for "
+        + "numeric class)", "E", 1,
+      "-E <default | acc | rmse | mae | f-meas | auc | auprc>"));
 
     newVector
       .addElement(new Option(
@@ -395,7 +395,9 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
 
     optionString = Utils.getOption('E', options);
     if (optionString.length() != 0) {
-      if (optionString.equals("acc")) {
+      if (optionString.equals("default")) {
+        setEvaluationMeasure(new SelectedTag(EVAL_DEFAULT, TAGS_EVALUATION));
+      } else if (optionString.equals("acc")) {
         setEvaluationMeasure(new SelectedTag(EVAL_ACCURACY, TAGS_EVALUATION));
       } else if (optionString.equals("rmse")) {
         setEvaluationMeasure(new SelectedTag(EVAL_RMSE, TAGS_EVALUATION));
@@ -631,6 +633,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     options[current++] = "-E";
     switch (m_evaluationMeasure) {
     case EVAL_DEFAULT:
+      options[current++] = "default";
+      break;
     case EVAL_ACCURACY:
       options[current++] = "acc";
       break;
