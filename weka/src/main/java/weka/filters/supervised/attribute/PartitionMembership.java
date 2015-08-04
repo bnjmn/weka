@@ -27,39 +27,26 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.trees.J48;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.PartitionGenerator;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> A filter that uses a PartitionGenerator to generate
- * partition membership values; filtered instances are composed of these values
- * plus the class attribute (if set in the input data) and rendered as sparse
- * instances.
- * <p/>
+ * <!-- globalinfo-start -->
+ * * A filter that uses a PartitionGenerator to generate partition membership values; filtered instances are composed of these values plus the class attribute (if set in the input data) and rendered as sparse instances. See Section 3 of<br>
+ * * Eibe Frank, Bernhard Pfahringer: Propositionalisation of Multi-instance Data Using Random Forests. In: AI 2013: Advances in Artificial Intelligence, 362-373, 2013.
+ * * <br><br>
  * <!-- globalinfo-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- * -W &lt;name of partition generator&gt;
- *  Full name of partition generator to use, e.g.:
- *   weka.classifiers.trees.J48
- *  Additional options after the '--'.
- *  (default: weka.classifiers.trees.J48)
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p>
+ * * 
+ * * <pre> -W &lt;name of partition generator&gt;
+ * *  Full name of partition generator to use, e.g.:
+ * *   weka.classifiers.trees.J48
+ * *  Additional options after the '--'.
+ * *  (default: weka.classifiers.trees.J48)</pre>
+ * * 
  * <!-- options-end -->
  * 
  * Options after the -- are passed on to the clusterer.
@@ -69,7 +56,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class PartitionMembership extends Filter implements SupervisedFilter,
-  OptionHandler, RevisionHandler {
+  OptionHandler, RevisionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 333532554667754026L;
@@ -232,11 +219,11 @@ public class PartitionMembership extends Filter implements SupervisedFilter,
     Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-      "\tFull name of partition generator to use, e.g.:\n"
-        + "\t\tweka.classifiers.trees.J48\n"
-        + "\tAdditional options after the '--'.\n"
-        + "\t(default: weka.classifiers.trees.J48)", "W", 1,
-      "-W <name of partition generator>"));
+            "\tFull name of partition generator to use, e.g.:\n"
+                    + "\t\tweka.classifiers.trees.J48\n"
+                    + "\tAdditional options after the '--'.\n"
+                    + "\t(default: weka.classifiers.trees.J48)", "W", 1,
+            "-W <name of partition generator>"));
 
     return newVector.elements();
   }
@@ -245,17 +232,15 @@ public class PartitionMembership extends Filter implements SupervisedFilter,
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   * -W &lt;name of partition generator&gt;
-   *  Full name of partition generator to use, e.g.:
-   *   weka.classifiers.trees.J48
-   *  Additional options after the '--'.
-   *  (default: weka.classifiers.trees.J48)
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p>
+   * * 
+   * * <pre> -W &lt;name of partition generator&gt;
+   * *  Full name of partition generator to use, e.g.:
+   * *   weka.classifiers.trees.J48
+   * *  Additional options after the '--'.
+   * *  (default: weka.classifiers.trees.J48)</pre>
+   * * 
    * <!-- options-end -->
    * 
    * Options after the -- are passed on to the clusterer.
@@ -316,7 +301,30 @@ public class PartitionMembership extends Filter implements SupervisedFilter,
     return "A filter that uses a PartitionGenerator to generate partition "
       + "membership values; filtered instances are composed of these values "
       + "plus the class attribute (if set in the input data) and rendered "
-      + "as sparse instances.";
+      + "as sparse instances. See Section 3 of\n" + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns an instance of a TechnicalInformation object, containing detailed
+   * information about the technical background of this class, e.g., paper
+   * reference or book this class is based on.
+   *
+   * @return the technical information about this class
+   */
+  @Override
+  public TechnicalInformation getTechnicalInformation() {
+    TechnicalInformation result;
+
+    result = new TechnicalInformation(TechnicalInformation.Type.INPROCEEDINGS);
+    result.setValue(TechnicalInformation.Field.AUTHOR, "Eibe Frank and Bernhard Pfahringer");
+    result.setValue(TechnicalInformation.Field.TITLE,
+                    "Propositionalisation of Multi-instance Data Using Random Forests");
+    result.setValue(TechnicalInformation.Field.BOOKTITLE, "AI 2013: Advances in Artificial Intelligence");
+    result.setValue(TechnicalInformation.Field.YEAR, "2013");
+    result.setValue(TechnicalInformation.Field.PUBLISHER, "Springer");
+    result.setValue(TechnicalInformation.Field.PAGES, "362-373");
+
+    return result;
   }
 
   /**
@@ -361,3 +369,4 @@ public class PartitionMembership extends Filter implements SupervisedFilter,
     return RevisionUtils.extract("$Revision$");
   }
 }
+
