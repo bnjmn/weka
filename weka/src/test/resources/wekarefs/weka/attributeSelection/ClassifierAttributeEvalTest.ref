@@ -5,13 +5,67 @@
 Search Method:
 	Attribute ranking.
 
+Attribute Evaluator (supervised, Class (numeric): 7 Class):
+	Classifier feature evaluator 
+
+	Using 	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.ZeroR
+	Scheme options: 
+	Subset evaluation: RMSE
+	Number of folds for accuracy estimation: 5
+
+
+Ranked attributes:
+  0  6 Relational1
+  0  5 Date1
+  0  2 Nominal2
+  0  3 Numeric1
+  0  4 String1
+  0  1 Nominal1
+
+Selected attributes: 6,5,2,3,4,1 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
 Attribute Evaluator (supervised, Class (nominal): 7 Class):
 	Classifier feature evaluator 
 
 	Using 	Wrapper Subset Evaluator
 	Learning scheme: weka.classifiers.rules.ZeroR
 	Scheme options: 
-	Subset evaluation: classification accuracy
+	Subset evaluation: RMSE
+	Number of folds for accuracy estimation: 5
+
+
+Ranked attributes:
+  0  6 Relational1
+  0  5 Date1
+  0  2 Nominal2
+  0  3 Numeric1
+  0  4 String1
+  0  1 Nominal1
+
+Selected attributes: 6,5,2,3,4,1 : 6
+
+
+
+=== Attribute Selection on all input data ===
+
+Search Method:
+	Attribute ranking.
+
+Attribute Evaluator (supervised, Class (numeric): 7 Class):
+	Classifier feature evaluator 
+
+	Using 	Wrapper Subset Evaluator
+	Learning scheme: weka.classifiers.rules.ZeroR
+	Scheme options: 
+	Subset evaluation: RMSE
 	Number of folds for accuracy estimation: 5
 
 
