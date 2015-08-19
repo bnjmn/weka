@@ -266,8 +266,8 @@ public class AttributeSelection implements Serializable, RevisionHandler {
     }
 
     if (m_transformer != null) {
-      Instances transformed = new Instances(m_transformer.transformedHeader(),
-        in.numInstances());
+      Instances transformed =
+        new Instances(m_transformer.transformedHeader(), in.numInstances());
       for (int i = 0; i < in.numInstances(); i++) {
         transformed.add(m_transformer.convertInstance(in.instance(i)));
       }
@@ -341,8 +341,8 @@ public class AttributeSelection implements Serializable, RevisionHandler {
         searchName = Utils.getOption('s', optionsTmp);
         if (searchName.length() != 0) {
           String[] searchOptions = Utils.splitOptions(searchName);
-          searchMethod = (ASSearch) Class.forName(searchOptions[0])
-            .newInstance();
+          searchMethod =
+            (ASSearch) Class.forName(searchOptions[0]).newInstance();
         }
 
         if (helpRequested) {
@@ -425,19 +425,16 @@ public class AttributeSelection implements Serializable, RevisionHandler {
       for (int element : s) {
         if (m_rankResults[1][element] > 0) {
           CvString.append(Utils.doubleToString(
-            /*
-             * Math. abs(
-             */m_rankResults[0][element]/* ) */, 6, 3)
+          /*
+           * Math. abs(
+           */m_rankResults[0][element]/* ) */, 6, 3)
             + " +-"
             + Utils.doubleToString(m_rankResults[2][element], 6, 3)
             + "   "
             + Utils
               .doubleToString(m_rankResults[1][element], fieldWidth + 2, 1)
-            + " +-"
-            + Utils.doubleToString(m_rankResults[3][element], 5, 2)
-            + "  "
-            + Utils.doubleToString((element + 1), fieldWidth, 0)
-            + " "
+            + " +-" + Utils.doubleToString(m_rankResults[3][element], 5, 2)
+            + "  " + Utils.doubleToString((element + 1), fieldWidth, 0) + " "
             + m_trainInstances.attribute(element).name() + "\n");
         }
       }
@@ -470,6 +467,31 @@ public class AttributeSelection implements Serializable, RevisionHandler {
    * @exception Exception if an error occurs
    */
   public void selectAttributesCVSplit(Instances split) throws Exception {
+
+    m_ASEvaluator.buildEvaluator(split);
+    // Do the search
+    int[] attributeSet = m_searchMethod.search(m_ASEvaluator, split);
+    // Do any postprocessing that a attribute selection method might
+    // require
+    attributeSet = m_ASEvaluator.postProcess(attributeSet);
+    updateStatsForModelCVSplit(split, m_ASEvaluator, m_searchMethod,
+      attributeSet, m_doRank);
+  }
+
+  /**
+   * Update the attribute selection stats for a cross-validation fold of the
+   * data.
+   *
+   * @param split the instances in this split/fold of the data
+   * @param evaluator the evaluator that was used
+   * @param search the search that was used
+   * @param attributeSet the final subset produced for the split
+   * @param doRank whether to produce a ranking
+   * @throws Exception if a problem occurs
+   */
+  public void updateStatsForModelCVSplit(Instances split,
+    ASEvaluation evaluator, ASSearch search, int[] attributeSet, boolean doRank)
+    throws Exception {
     double[][] attributeRanking = null;
 
     // if the train instances are null then set equal to this split.
@@ -487,23 +509,16 @@ public class AttributeSelection implements Serializable, RevisionHandler {
       m_rankResults = new double[4][split.numAttributes()];
     }
 
-    m_ASEvaluator.buildEvaluator(split);
-    // Do the search
-    int[] attributeSet = m_searchMethod.search(m_ASEvaluator, split);
-    // Do any postprocessing that a attribute selection method might
-    // require
-    attributeSet = m_ASEvaluator.postProcess(attributeSet);
-
-    if ((m_searchMethod instanceof RankedOutputSearch) && (m_doRank == true)) {
-      attributeRanking = ((RankedOutputSearch) m_searchMethod)
-        .rankedAttributes();
-
+    if ((search instanceof RankedOutputSearch) && doRank) {
+      attributeRanking = ((RankedOutputSearch) search).rankedAttributes();
       // System.out.println(attributeRanking[0][1]);
       for (int j = 0; j < attributeRanking.length; j++) {
         // merit
-        m_rankResults[0][(int) attributeRanking[j][0]] += attributeRanking[j][1];
+        m_rankResults[0][(int) attributeRanking[j][0]] +=
+          attributeRanking[j][1];
         // squared merit
-        m_rankResults[2][(int) attributeRanking[j][0]] += (attributeRanking[j][1] * attributeRanking[j][1]);
+        m_rankResults[2][(int) attributeRanking[j][0]] +=
+          (attributeRanking[j][1] * attributeRanking[j][1]);
         // rank
         m_rankResults[1][(int) attributeRanking[j][0]] += (j + 1);
         // squared rank
@@ -600,8 +615,8 @@ public class AttributeSelection implements Serializable, RevisionHandler {
     // Initialize the attribute evaluator
     m_ASEvaluator.buildEvaluator(m_trainInstances);
     if (m_ASEvaluator instanceof AttributeTransformer) {
-      m_trainInstances = ((AttributeTransformer) m_ASEvaluator)
-        .transformedHeader();
+      m_trainInstances =
+        ((AttributeTransformer) m_ASEvaluator).transformedHeader();
       m_transformer = (AttributeTransformer) m_ASEvaluator;
     }
     int fieldWidth = (int) (Math.log(m_trainInstances.numAttributes()) + 1.0);
@@ -623,12 +638,12 @@ public class AttributeSelection implements Serializable, RevisionHandler {
         Object retType = meth.getReturnType();
         if (retType.equals(ASEvaluation.class)) {
           Class<?> args[] = {};
-          ASEvaluation tempEval = (ASEvaluation) (meth.invoke(m_searchMethod,
-            (Object[]) args));
+          ASEvaluation tempEval =
+            (ASEvaluation) (meth.invoke(m_searchMethod, (Object[]) args));
           if (tempEval instanceof AttributeTransformer) {
             // grab the transformed data header
-            m_trainInstances = ((AttributeTransformer) tempEval)
-              .transformedHeader();
+            m_trainInstances =
+              ((AttributeTransformer) tempEval).transformedHeader();
             m_transformer = (AttributeTransformer) tempEval;
           }
         }
@@ -655,20 +670,22 @@ public class AttributeSelection implements Serializable, RevisionHandler {
       m_selectionResults.append("Ranked attributes:\n");
 
       // retrieve the number of attributes to retain
-      m_numToSelect = ((RankedOutputSearch) m_searchMethod)
-        .getCalculatedNumToSelect();
+      m_numToSelect =
+        ((RankedOutputSearch) m_searchMethod).getCalculatedNumToSelect();
 
       // determine fieldwidth for merit
       int f_p = 0;
       int w_p = 0;
 
       for (int i = 0; i < m_numToSelect; i++) {
-        double precision = (Math.abs(m_attributeRanking[i][1]) - (int) (Math
-          .abs(m_attributeRanking[i][1])));
+        double precision =
+          (Math.abs(m_attributeRanking[i][1]) - (int) (Math
+            .abs(m_attributeRanking[i][1])));
         double intPart = (int) (Math.abs(m_attributeRanking[i][1]));
 
         if (precision > 0) {
-          precision = Math.abs((Math.log(Math.abs(precision)) / Math.log(10))) + 3;
+          precision =
+            Math.abs((Math.log(Math.abs(precision)) / Math.log(10))) + 3;
         }
         if (precision > f_p) {
           f_p = (int) precision;
@@ -681,8 +698,10 @@ public class AttributeSelection implements Serializable, RevisionHandler {
         } else if ((Math
           .abs((Math.log(Math.abs(m_attributeRanking[i][1])) / Math.log(10))) + 1) > w_p) {
           if (m_attributeRanking[i][1] > 0) {
-            w_p = (int) Math
-              .abs((Math.log(Math.abs(m_attributeRanking[i][1])) / Math.log(10))) + 1;
+            w_p =
+              (int) Math
+                .abs(
+                  (Math.log(Math.abs(m_attributeRanking[i][1])) / Math.log(10))) + 1;
           }
         }
       }
@@ -733,8 +752,8 @@ public class AttributeSelection implements Serializable, RevisionHandler {
       // one more for the class
       {
         m_selectedAttributeSet = new int[attributeSet.length + 1];
-        m_selectedAttributeSet[attributeSet.length] = m_trainInstances
-          .classIndex();
+        m_selectedAttributeSet[attributeSet.length] =
+          m_trainInstances.classIndex();
       } else {
         m_selectedAttributeSet = new int[attributeSet.length];
       }
@@ -878,8 +897,8 @@ public class AttributeSelection implements Serializable, RevisionHandler {
       } else {
         try {
           searchClassName = new String("weka.attributeSelection.Ranker");
-          searchMethod = (ASSearch) Class.forName(searchClassName)
-            .newInstance();
+          searchMethod =
+            (ASSearch) Class.forName(searchClassName).newInstance();
         } catch (Exception e) {
           throw new Exception("Can't create Ranker object");
         }
