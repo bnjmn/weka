@@ -15,12 +15,34 @@
 
 /*
  *    SetupPanel.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.gui.experiment;
 
+import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.experiment.Experiment;
+import weka.experiment.PropertyNode;
+import weka.experiment.RemoteExperiment;
+import weka.experiment.ResultListener;
+import weka.experiment.ResultProducer;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -45,29 +67,6 @@ import java.io.FileOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.filechooser.FileFilter;
-
-import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.experiment.Experiment;
-import weka.experiment.PropertyNode;
-import weka.experiment.RemoteExperiment;
-import weka.experiment.ResultListener;
-import weka.experiment.ResultProducer;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
-
 /**
  * This panel controls the configuration of an experiment.
  * <p>
@@ -80,13 +79,16 @@ import weka.gui.PropertyPanel;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class SetupPanel extends JPanel {
+public class SetupPanel extends AbstractSetupPanel {
 
   /** for serialization */
   private static final long serialVersionUID = 6552671886903170033L;
 
   /** The experiment being configured */
   protected Experiment m_Exp;
+
+  /** The panel which switched between simple and advanced setup modes */
+  protected SetupModePanel m_modePanel = null;
 
   /** Click to load an experiment */
   protected JButton m_OpenBut = new JButton("Open...");
@@ -451,6 +453,15 @@ public class SetupPanel extends JPanel {
   }
 
   /**
+   * Returns the name of the panel.
+   *
+   * @return		the name
+   */
+  public String getName() {
+    return "Advanced";
+  }
+
+  /**
    * Deletes the notes frame.
    */
   protected void removeNotesFrame() {
@@ -458,11 +469,20 @@ public class SetupPanel extends JPanel {
   }
 
   /**
+   * Sets the panel used to switch between simple and advanced modes.
+   *
+   * @param modePanel the panel
+   */
+  public void setModePanel(SetupModePanel modePanel) {
+    m_modePanel = modePanel;
+  }
+
+  /**
    * Sets the experiment to configure.
    * 
    * @param exp a value of type 'Experiment'
    */
-  public void setExperiment(Experiment exp) {
+  public boolean setExperiment(Experiment exp) {
 
     boolean iteratorOn = exp.getUsePropertyIterator();
     Object propArray = exp.getPropertyArray();
@@ -496,6 +516,8 @@ public class SetupPanel extends JPanel {
     m_DatasetListPanel.setExperiment(m_Exp);
     m_DistributeExperimentPanel.setExperiment(m_Exp);
     m_Support.firePropertyChange("", null, null);
+
+    return true;
   }
 
   /**
@@ -690,5 +712,12 @@ public class SetupPanel extends JPanel {
       ex.printStackTrace();
       System.err.println(ex.getMessage());
     }
+  }
+
+  /**
+   * Hook method for cleaning up the interface after a switch.
+   */
+  public void cleanUpAfterSwitch() {
+    removeNotesFrame();
   }
 }

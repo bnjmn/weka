@@ -187,6 +187,10 @@ weka.experiment.ResultMatrix=\
 weka.experiment.Tester=\
  weka.experiment
 
+# List of Experimenter setup panels
+weka.gui.experiment.AbstractSetupPanel=\
+  weka.gui.experiment
+
 # List of file loaders
 weka.core.converters.AbstractFileLoader=\
  weka.core.converters

@@ -21,18 +21,18 @@
 
 package weka.gui.experiment;
 
+import weka.core.Utils;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.Tester;
+
 import java.io.File;
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Properties;
 import java.util.Vector;
-
-import weka.core.Utils;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
 
 /**
  * This class offers get methods for the default Experimenter settings in the
@@ -81,6 +81,15 @@ public class ExperimenterDefaults implements Serializable {
    */
   public final static Properties getProperties() {
     return PROPERTIES;
+  }
+
+  /**
+   * returns the class name of the default setup panel.
+   *
+   * @return the class name
+   */
+  public final static String getSetupPanel() {
+    return get("SetupPanel", SimpleSetupPanel.class.getName());
   }
 
   /**

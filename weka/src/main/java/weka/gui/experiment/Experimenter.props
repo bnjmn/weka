@@ -4,6 +4,9 @@
 #
 # $Revision$
 
+# the default setup panel (classname)
+SetupPanel=weka.gui.experiment.SimpleSetupPanel
+
 # the default extension in the file-dialog
 # possible values: 
 #   .exp 
