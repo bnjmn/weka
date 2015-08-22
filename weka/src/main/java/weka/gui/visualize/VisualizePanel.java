@@ -2130,6 +2130,21 @@ public class VisualizePanel extends PrintablePanel {
   }
 
   /**
+   * Set the index for colouring.
+   *
+   * @param index the index of the attribute to use for colouring
+   * @param enableCombo false if the colouring combo box should be disabled
+   */
+  public void setColourIndex(int index, boolean enableCombo) {
+    if (index >= 0) {
+      m_ColourCombo.setSelectedIndex(index);
+    } else {
+      m_ColourCombo.setSelectedIndex(0);
+    }
+    m_ColourCombo.setEnabled(enableCombo);
+  }
+
+  /**
    * Sets the index used for colouring. If this method is called then the
    * supplied index is used and the combo box for selecting colouring attribute
    * is disabled.
@@ -2137,12 +2152,7 @@ public class VisualizePanel extends PrintablePanel {
    * @param index the index of the attribute to use for colouring
    */
   public void setColourIndex(int index) {
-    if (index >= 0) {
-      m_ColourCombo.setSelectedIndex(index);
-    } else {
-      m_ColourCombo.setSelectedIndex(0);
-    }
-    m_ColourCombo.setEnabled(false);
+    setColourIndex(index, false);
   }
 
   /**
