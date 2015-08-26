@@ -22,6 +22,7 @@
 package weka.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -90,10 +91,12 @@ import weka.classifiers.evaluation.ThresholdCurve;
 import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.Null;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
+import weka.classifiers.rules.ZeroR;
 import weka.core.Attribute;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
 import weka.core.Drawable;
 import weka.core.Environment;
 import weka.core.Instance;
@@ -101,18 +104,23 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.SerializedObject;
+import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.converters.ArffLoader;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.converters.IncrementalConverter;
 import weka.core.converters.Loader;
 import weka.core.pmml.PMMLFactory;
 import weka.core.pmml.PMMLModel;
+import weka.gui.AbstractPerspective;
 import weka.gui.CostMatrixEditor;
 import weka.gui.EvaluationMetricSelectionDialog;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
+import weka.gui.Perspective;
+import weka.gui.PerspectiveInfo;
 import weka.gui.PropertyDialog;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
@@ -150,7 +158,10 @@ import weka.gui.visualize.plugins.VisualizePlugin;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ClassifierPanel extends JPanel implements
+@PerspectiveInfo(ID = "weka.gui.explorer.classifierpanel", title = "Classify",
+  toolTipText = "Classify instances",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class ClassifierPanel extends AbstractPerspective implements
   CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization. */
@@ -341,6 +352,12 @@ public class ClassifierPanel extends JPanel implements
   /** The user's list of selected evaluation metrics */
   protected List<String> m_selectedEvalMetrics = Evaluation
     .getAllEvaluationMetricNames();
+
+  /**
+   * Whether start-up settings have been applied (i.e. initial classifier to
+   * use)
+   */
+  protected boolean m_initialSettingsSet;
 
   /* Register the property editors we need */
   static {
@@ -1012,9 +1029,21 @@ public class ClassifierPanel extends JPanel implements
   protected void setTestSet() {
 
     if (m_SetTestFrame == null) {
+      PreprocessPanel preprocessPanel = null;
+      if (m_Explorer != null) {
+        preprocessPanel = m_Explorer.getPreprocessPanel();
+      } else if (getMainApplication() != null) {
+        Perspective p =
+          getMainApplication().getPerspectiveManager().getPerspective(
+            PreprocessPanel.PreprocessDefaults.ID);
+        preprocessPanel = (PreprocessPanel) p;
+      } else {
+        throw new IllegalStateException("We don't have access to a "
+          + "PreprocessPanel!");
+      }
+
       final SetInstancesPanel sp =
-        new SetInstancesPanel(true, true,
-          m_Explorer.getPreprocessPanel().m_FileChooser);
+        new SetInstancesPanel(true, true, preprocessPanel.m_FileChooser);
 
       if (m_TestLoader != null) {
         try {
@@ -1170,6 +1199,11 @@ public class ClassifierPanel extends JPanel implements
 
           try {
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
+              if (m_ClassifierEditor.getValue() instanceof BatchPredictor
+                && m_TestLoader instanceof ArffLoader) {
+                // we're not really streaming test instances in this case...
+                ((ArffLoader) m_TestLoader).setRetainStringVals(true);
+              }
               m_TestLoader.reset();
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
@@ -2755,6 +2789,10 @@ public class ClassifierPanel extends JPanel implements
               (m_TestLoader instanceof IncrementalConverter);
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
               m_TestLoader.reset();
+              if (classifierToUse instanceof BatchPredictor
+                && m_TestLoader instanceof ArffLoader) {
+                ((ArffLoader) m_TestLoader).setRetainStringVals(true);
+              }
               source = new DataSource(m_TestLoader);
               userTestStructure = source.getStructure();
               userTestStructure.setClassIndex(m_TestClassIndex);
@@ -2964,16 +3002,15 @@ public class ClassifierPanel extends JPanel implements
                   batchInst.delete();
                 }
               } else {
-
                 plotInstances.process(instance, classifierToUse, eval);
                 if (outputPredictionsText) {
                   classificationOutput.printClassification(classifierToUse,
                     instance, jj);
                 }
-                if ((++jj % 100) == 0) {
-                  m_Log.statusMessage("Evaluating on test data. Processed "
-                    + jj + " instances...");
-                }
+              }
+              if ((++jj % 100) == 0) {
+                m_Log.statusMessage("Evaluating on test data. Processed " + jj
+                  + " instances...");
               }
             }
 
@@ -3215,6 +3252,270 @@ public class ClassifierPanel extends JPanel implements
   @Override
   public String getTabTitleToolTip() {
     return "Classify instances";
+  }
+
+  @Override
+  public boolean requiresLog() {
+    return true;
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new ClassifierPanelDefaults();
+  }
+
+  @Override
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if (m_isActive) {
+      // make sure initial settings get applied
+      settingsChanged();
+    }
+  }
+
+  @Override
+  public void settingsChanged() {
+    if (getMainApplication() != null) {
+      if (!m_initialSettingsSet) {
+        Object initialC =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.CLASSIFIER_KEY,
+            ClassifierPanelDefaults.CLASSIFIER, Environment.getSystemWide());
+        m_ClassifierEditor.setValue(initialC);
+
+        TestMode initialTestMode =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.TEST_MODE_KEY,
+            ClassifierPanelDefaults.TEST_MODE, Environment.getSystemWide());
+
+        m_CVBut.setSelected(initialTestMode == TestMode.CROSS_VALIDATION);
+        m_PercentBut.setSelected(initialTestMode == TestMode.PERCENTAGE_SPLIT);
+        m_TrainBut.setSelected(initialTestMode == TestMode.USE_TRAINING_SET);
+        m_TestSplitBut
+          .setSelected(initialTestMode == TestMode.SEPARATE_TEST_SET);
+        m_CVText.setEnabled(m_CVBut.isSelected());
+        m_PercentText.setEnabled(m_PercentBut.isSelected());
+        m_CVText.setText(""
+          + getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(),
+            ClassifierPanelDefaults.CROSS_VALIDATION_FOLDS_KEY,
+            ClassifierPanelDefaults.CROSS_VALIDATION_FOLDS,
+            Environment.getSystemWide()));
+        m_PercentText.setText(""
+          + getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClassifierPanelDefaults.PERCENTAGE_SPLIT_KEY,
+            ClassifierPanelDefaults.PERCENTAGE_SPLIT,
+            Environment.getSystemWide()));
+
+        // TODO these widgets will disapear, as the "More options" dialog will
+        // not be necessary
+        m_OutputModelBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_MODEL_KEY,
+            ClassifierPanelDefaults.OUTPUT_MODEL, Environment.getSystemWide()));
+        m_OutputPerClassBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_PER_CLASS_STATS_KEY,
+            ClassifierPanelDefaults.OUTPUT_PER_CLASS_STATS,
+            Environment.getSystemWide()));
+        m_OutputEntropyBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_ENTROPY_EVAL_METRICS_KEY,
+            ClassifierPanelDefaults.OUTPUT_ENTROPY_EVAL_METRICS,
+            Environment.getSystemWide()));
+        m_OutputConfusionBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.OUTPUT_CONFUSION_MATRIX_KEY,
+            ClassifierPanelDefaults.OUTPUT_CONFUSION_MATRIX,
+            Environment.getSystemWide()));
+        m_StorePredictionsBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClassifierPanelDefaults.STORE_PREDICTIONS_FOR_VIS_KEY,
+            ClassifierPanelDefaults.STORE_PREDICTIONS_FOR_VIS,
+            Environment.getSystemWide()));
+        m_errorPlotPointSizeProportionalToMargin
+          .setSelected(getMainApplication().getApplicationSettings()
+            .getSetting(getPerspectiveID(),
+              ClassifierPanelDefaults.ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY,
+              ClassifierPanelDefaults.ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN,
+              Environment.getSystemWide()));
+      }
+      m_initialSettingsSet = true;
+
+      Font outputFont =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), ClassifierPanelDefaults.OUTPUT_FONT_KEY,
+          ClassifierPanelDefaults.OUTPUT_FONT, Environment.getSystemWide());
+      m_OutText.setFont(outputFont);
+      m_History.setFont(outputFont);
+      Color textColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), ClassifierPanelDefaults.OUTPUT_TEXT_COLOR_KEY,
+          ClassifierPanelDefaults.OUTPUT_TEXT_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setForeground(textColor);
+      m_History.setForeground(textColor);
+      Color outputBackgroundColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          ClassifierPanelDefaults.OUTPUT_BACKGROUND_COLOR_KEY,
+          ClassifierPanelDefaults.OUTPUT_BACKGROUND_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setBackground(outputBackgroundColor);
+      m_History.setBackground(outputBackgroundColor);
+    }
+  }
+
+  public static enum TestMode {
+    CROSS_VALIDATION, PERCENTAGE_SPLIT, USE_TRAINING_SET, SEPARATE_TEST_SET;
+  }
+
+  /**
+   * Default settings for the classifier panel
+   */
+  protected static final class ClassifierPanelDefaults extends Defaults {
+    public static final String ID = "weka.gui.explorer.classifierpanel";
+
+    protected static final Settings.SettingKey CLASSIFIER_KEY =
+      new Settings.SettingKey(ID + ".initialClassifier", "Initial classifier",
+        "On startup, set this classifier as the default one");
+    protected static final Classifier CLASSIFIER = new ZeroR();
+
+    protected static final Settings.SettingKey TEST_MODE_KEY =
+      new Settings.SettingKey(ID + ".initialTestMode", "Default test mode", "");
+    protected static final TestMode TEST_MODE = TestMode.CROSS_VALIDATION;
+
+    protected static final Settings.SettingKey CROSS_VALIDATION_FOLDS_KEY =
+      new Settings.SettingKey(ID + ".crossValidationFolds",
+        "Default cross validation folds", "");
+    protected static final int CROSS_VALIDATION_FOLDS = 10;
+
+    protected static final Settings.SettingKey PERCENTAGE_SPLIT_KEY =
+      new Settings.SettingKey(ID + ".percentageSplit",
+        "Default percentage split", "");
+    protected static final int PERCENTAGE_SPLIT = 66;
+
+    protected static final Settings.SettingKey OUTPUT_MODEL_KEY =
+      new Settings.SettingKey(ID + ".outputModel", "Output model obtained from"
+        + " the full training set", "");
+    protected static final boolean OUTPUT_MODEL = true;
+
+    protected static final Settings.SettingKey OUTPUT_PER_CLASS_STATS_KEY =
+      new Settings.SettingKey(ID + ".outputPerClassStats",
+        "Output per-class statistics", "");
+    protected static final boolean OUTPUT_PER_CLASS_STATS = true;
+
+    protected static final Settings.SettingKey OUTPUT_ENTROPY_EVAL_METRICS_KEY =
+      new Settings.SettingKey(ID + ".outputEntropyMetrics", "Output entropy "
+        + "evaluation metrics", "");
+    protected static final boolean OUTPUT_ENTROPY_EVAL_METRICS = false;
+
+    protected static final Settings.SettingKey OUTPUT_CONFUSION_MATRIX_KEY =
+      new Settings.SettingKey(ID + ".outputConfusionMatrix",
+        "Output confusion " + "matrix", "");
+    protected static final boolean OUTPUT_CONFUSION_MATRIX = true;
+
+    protected static final Settings.SettingKey STORE_PREDICTIONS_FOR_VIS_KEY =
+      new Settings.SettingKey(ID + ".storePredsForVis", "Store predictions for"
+        + " visualization", "");
+    protected static final boolean STORE_PREDICTIONS_FOR_VIS = true;
+
+    /*
+     * protected static final Settings.SettingKey OUTPUT_PREDICTIONS_KEY = new
+     * Settings.SettingKey(ID + ".outputPredictions", "Output predictions", "");
+     * protected static final boolean OUTPUT_PREDICTIONS = false;
+     */
+
+    protected static final Settings.SettingKey PREDICTION_FORMATTER_KEY =
+      new Settings.SettingKey(ID + ".predictionFormatter",
+        "Prediction formatter", "");
+    protected static final AbstractOutput PREDICTION_FORMATTER = new Null();
+
+    protected static final Settings.SettingKey ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY =
+      new Settings.SettingKey(
+        ID + ".errorPlotPointSizePropToMargin",
+        "Error plot point size proportional to margin",
+        "In classifier error plots the point size will be set proportional to "
+          + "the absolute value of the prediction margin (affects classification "
+          + "only)");
+    protected static final boolean ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN = false;
+
+    protected static final Settings.SettingKey COST_SENSITIVE_EVALUATION_KEY =
+      new Settings.SettingKey(ID + ".costSensitiveEval",
+        "Cost sensitive evaluation",
+        "Evaluate errors with respect to a cost matrix");
+    protected static final boolean COST_SENSITIVE_EVALUATION = false;
+
+    protected static final Settings.SettingKey COST_MATRIX_KEY =
+      new Settings.SettingKey(ID + ".costMatrix",
+        "Cost matrix for cost sensitive " + "evaluation", "");
+    protected static final CostMatrix COST_MATRIX = new CostMatrix(1);
+
+    protected static final Settings.SettingKey RANDOM_SEED_KEY =
+      new Settings.SettingKey(ID + ".randomSeed",
+        "Random seed for XVal / % Split", "The seed for randomization");
+    protected static final int RANDOM_SEED = 1;
+
+    protected static final Settings.SettingKey PRESERVE_ORDER_FOR_PERCENT_SPLIT_KEY =
+      new Settings.SettingKey(ID + ".preserveOrder",
+        "Preserve order for % Split",
+        "Preserves the order in a percentage split");
+    protected static final boolean PRESERVE_ORDER_FOR_PERCENT_SPLIT = false;
+
+    protected static final Settings.SettingKey SOURCE_CODE_CLASS_NAME_KEY =
+      new Settings.SettingKey(ID + ".sourceCodeClassName", "Source code class "
+        + "name", "Default classname of a Sourcable classifier");
+    protected static final String SOURCE_CODE_CLASS_NAME = "WekaClassifier";
+
+    protected static final Settings.SettingKey OUTPUT_FONT_KEY =
+      new Settings.SettingKey(ID + ".outputFont", "Font for text output",
+        "Font to " + "use in the output area");
+    protected static final Font OUTPUT_FONT = new Font("Monospaced",
+      Font.PLAIN, 12);
+
+    protected static final Settings.SettingKey OUTPUT_TEXT_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputFontColor", "Output text color",
+        "Color " + "of output text");
+    protected static final Color OUTPUT_TEXT_COLOR = Color.black;
+
+    protected static final Settings.SettingKey OUTPUT_BACKGROUND_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputBackgroundColor",
+        "Output background color", "Output background color");
+    protected static final Color OUTPUT_BACKGROUND_COLOR = Color.white;
+    private static final long serialVersionUID = 7109938811150596359L;
+
+    public ClassifierPanelDefaults() {
+      super(ID);
+
+      m_defaults.put(CLASSIFIER_KEY, CLASSIFIER);
+      m_defaults.put(TEST_MODE_KEY, TEST_MODE);
+      m_defaults.put(CROSS_VALIDATION_FOLDS_KEY, CROSS_VALIDATION_FOLDS);
+      m_defaults.put(PERCENTAGE_SPLIT_KEY, PERCENTAGE_SPLIT);
+      m_defaults.put(OUTPUT_MODEL_KEY, OUTPUT_MODEL);
+      m_defaults.put(OUTPUT_PER_CLASS_STATS_KEY, OUTPUT_PER_CLASS_STATS);
+      m_defaults.put(OUTPUT_ENTROPY_EVAL_METRICS_KEY,
+        OUTPUT_ENTROPY_EVAL_METRICS);
+      m_defaults.put(OUTPUT_CONFUSION_MATRIX_KEY, OUTPUT_CONFUSION_MATRIX);
+      m_defaults.put(STORE_PREDICTIONS_FOR_VIS_KEY, STORE_PREDICTIONS_FOR_VIS);
+      // m_defaults.put(OUTPUT_PREDICTIONS_KEY, OUTPUT_PREDICTIONS);
+      m_defaults.put(PREDICTION_FORMATTER_KEY, PREDICTION_FORMATTER);
+      m_defaults.put(ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN_KEY,
+        ERROR_PLOT_POINT_SIZE_PROP_TO_MARGIN);
+      m_defaults.put(COST_SENSITIVE_EVALUATION_KEY, COST_SENSITIVE_EVALUATION);
+      m_defaults.put(COST_MATRIX_KEY, COST_MATRIX);
+      m_defaults.put(RANDOM_SEED_KEY, RANDOM_SEED);
+      m_defaults.put(PRESERVE_ORDER_FOR_PERCENT_SPLIT_KEY,
+        PRESERVE_ORDER_FOR_PERCENT_SPLIT);
+      m_defaults.put(SOURCE_CODE_CLASS_NAME_KEY, SOURCE_CODE_CLASS_NAME);
+      m_defaults.put(OUTPUT_FONT_KEY, OUTPUT_FONT);
+      m_defaults.put(OUTPUT_TEXT_COLOR_KEY, OUTPUT_TEXT_COLOR);
+      m_defaults.put(OUTPUT_BACKGROUND_COLOR_KEY, OUTPUT_BACKGROUND_COLOR);
+    }
   }
 
   /**
