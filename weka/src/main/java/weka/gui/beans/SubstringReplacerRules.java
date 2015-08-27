@@ -537,7 +537,12 @@ public class SubstringReplacerRules implements EnvironmentHandler {
       return buff.toString();
     }
 
-    protected String toStringInternal() {
+    /**
+     * Return the internally encoded representation of this rule
+     *
+     * @return the internally (parseable) representation of this rule
+     */
+    public String toStringInternal() {
 
       // return a string in internal format that is
       // easy to parse all the data out of
