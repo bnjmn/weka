@@ -146,7 +146,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
 
   /**
    * Set internally encoded list of match rules
-   * 
+   *
    * @param details the list of match rules
    */
   public void setMatchDetails(String details) {
@@ -155,7 +155,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
 
   /**
    * Get the internally encoded list of match rules
-   * 
+   *
    * @return the match rules
    */
   public String getMatchDetails() {
@@ -165,7 +165,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
   /**
    * Set whether the new attribute created should be a nominal binary attribute
    * rather than a numeric binary attribute.
-   * 
+   *
    * @param nom true if the attribute should be a nominal binary one
    */
   public void setNominalBinary(boolean nom) {
@@ -175,7 +175,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
   /**
    * Get whether the new attribute created should be a nominal binary attribute
    * rather than a numeric binary attribute.
-   * 
+   *
    * @return true if the attribute should be a nominal binary one
    */
   public boolean getNominalBinary() {
@@ -186,7 +186,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    * Set whether instances that do not match any of the rules should be
    * "consumed" rather than output with a missing value set for the new
    * attribute.
-   * 
+   *
    * @param consume true if non matching instances should be consumed by the
    *          component.
    */
@@ -198,7 +198,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
    * Get whether instances that do not match any of the rules should be
    * "consumed" rather than output with a missing value set for the new
    * attribute.
-   * 
+   *
    * @return true if non matching instances should be consumed by the component.
    */
   public boolean getConsumeNonMatching() {
@@ -605,7 +605,7 @@ public class SubstringLabeler extends JPanel implements BeanCommon, Visible,
     }
 
     // notify listeners
-    DataSetEvent d = new DataSetEvent(this, m_matches.getInputStructure());
+    DataSetEvent d = new DataSetEvent(this, m_matches.getOutputStructure());
     notifyDataListeners(d);
 
     m_busy = false;
