@@ -25,7 +25,19 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.BatchPredictor;
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SerializedObject;
+import weka.core.Utils;
 
 /**
  * Abstract classifier. All schemes for numeric or nominal prediction in Weka
@@ -36,8 +48,8 @@ import weka.core.*;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class AbstractClassifier implements Classifier, Cloneable,
-  Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler,
+public abstract class AbstractClassifier implements Classifier, BatchPredictor,
+  Cloneable, Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler,
   CapabilitiesIgnorer {
 
   /** for serialization */
@@ -54,6 +66,9 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
    */
   public static int NUM_DECIMAL_PLACES_DEFAULT = 2;
   protected int m_numDecimalPlaces = NUM_DECIMAL_PLACES_DEFAULT;
+
+  /** Default preferred batch size for batch predictions */
+  protected String m_BatchSize = "100";
 
   /**
    * Creates a new instance of a classifier given it's class name and (optional)
@@ -212,9 +227,10 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
    */
   @Override
   public Enumeration<Option> listOptions() {
-    
+
     Vector<Option> newVector =
-      Option.listOptionsForClassHierarchy(this.getClass(), AbstractClassifier.class);
+      Option.listOptionsForClassHierarchy(this.getClass(),
+        AbstractClassifier.class);
 
     newVector.addElement(new Option(
       "\tIf set, classifier is run in debug mode and\n"
@@ -243,7 +259,8 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
   public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
-    for (String s : Option.getOptionsForHierarchy(this, AbstractClassifier.class)) {
+    for (String s : Option.getOptionsForHierarchy(this,
+      AbstractClassifier.class)) {
       options.add(s);
     }
 
@@ -377,6 +394,61 @@ public abstract class AbstractClassifier implements Classifier, Cloneable,
    */
   public void setNumDecimalPlaces(int num) {
     m_numDecimalPlaces = num;
+  }
+
+  /**
+   * Set the preferred batch size for batch prediction.
+   * 
+   * @param size the batch size to use
+   */
+  @Override
+  public void setBatchSize(String size) {
+    m_BatchSize = size;
+  }
+
+  /**
+   * Get the preferred batch size for batch prediction.
+   *
+   * @return the preferred batch size
+   */
+  @Override
+  public String getBatchSize() {
+    return m_BatchSize;
+  }
+
+  /**
+   * Return true if this classifier can generate batch predictions in an
+   * efficient manner. Default implementation here returns false. Subclasses to
+   * override as appropriate.
+   * 
+   * @return true if this classifier can generate batch predictions in an
+   *         efficient manner.
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return false;
+  }
+
+  /**
+   * Batch prediction method. This default implementation simply calls
+   * distributionForInstance() for each instance in the batch. If subclasses can
+   * produce batch predictions in a more efficient manner than this they should
+   * override this method and also return true from
+   * implementsMoreEfficientBatchPrediction()
+   * 
+   * @param batch the instances to get predictions for
+   * @return an array of probability distributions, one for each instance in the
+   *         batch
+   * @throws Exception if a problem occurs.
+   */
+  @Override
+  public double[][] distributionsForInstances(Instances batch) throws Exception {
+    double[][] batchPreds = new double[batch.numInstances()][];
+    for (int i = 0; i < batch.numInstances(); i++) {
+      batchPreds[i] = distributionForInstance(batch.instance(i));
+    }
+
+    return batchPreds;
   }
 
   /**

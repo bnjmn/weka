@@ -1172,7 +1172,9 @@ public class ClassifierPanel extends JPanel implements
           try {
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
               if (m_TestLoader instanceof ArffLoader
-                && m_ClassifierEditor.getValue() instanceof BatchPredictor) {
+                && m_ClassifierEditor.getValue() instanceof BatchPredictor
+                && ((BatchPredictor) m_ClassifierEditor.getValue())
+                  .implementsMoreEfficientBatchPrediction()) {
                 ((ArffLoader) m_TestLoader).setRetainStringVals(true);
               }
               m_TestLoader.reset();
@@ -1438,7 +1440,9 @@ public class ClassifierPanel extends JPanel implements
               }
 
               testTimeStart = System.currentTimeMillis();
-              if (classifier instanceof BatchPredictor) {
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
                 Instances toPred = new Instances(inst);
                 for (int i = 0; i < toPred.numInstances(); i++) {
                   toPred.instance(i).setClassMissing();
@@ -1539,7 +1543,9 @@ public class ClassifierPanel extends JPanel implements
                 m_Log.statusMessage("Evaluating model for fold " + (fold + 1)
                   + "...");
 
-                if (classifier instanceof BatchPredictor) {
+                if (classifier instanceof BatchPredictor
+                  && ((BatchPredictor) classifier)
+                    .implementsMoreEfficientBatchPrediction()) {
                   Instances toPred = new Instances(test);
                   for (int i = 0; i < toPred.numInstances(); i++) {
                     toPred.instance(i).setClassMissing();
@@ -1621,7 +1627,9 @@ public class ClassifierPanel extends JPanel implements
               }
 
               testTimeStart = System.currentTimeMillis();
-              if (classifier instanceof BatchPredictor) {
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
                 Instances toPred = new Instances(test);
                 for (int i = 0; i < toPred.numInstances(); i++) {
                   toPred.instance(i).setClassMissing();
@@ -1680,7 +1688,9 @@ public class ClassifierPanel extends JPanel implements
               int jj = 0;
               Instances batchInst = null;
               int batchSize = 100;
-              if (classifier instanceof BatchPredictor) {
+              if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()) {
                 batchInst = new Instances(userTestStructure, 0);
                 String batchSizeS =
                   ((BatchPredictor) classifier).getBatchSize();
@@ -1702,7 +1712,9 @@ public class ClassifierPanel extends JPanel implements
               while (source.hasMoreElements(userTestStructure)) {
                 instance = source.nextElement(userTestStructure);
 
-                if (classifier instanceof BatchPredictor) {
+                if (classifier instanceof BatchPredictor
+                  && ((BatchPredictor) classifier)
+                    .implementsMoreEfficientBatchPrediction()) {
                   batchInst.add(instance);
                   if (batchInst.numInstances() == batchSize) {
                     Instances toPred = new Instances(batchInst);
@@ -1739,6 +1751,8 @@ public class ClassifierPanel extends JPanel implements
               }
 
               if (classifier instanceof BatchPredictor
+                && ((BatchPredictor) classifier)
+                  .implementsMoreEfficientBatchPrediction()
                 && batchInst.numInstances() > 0) {
                 // finish the last batch
 
@@ -2760,7 +2774,9 @@ public class ClassifierPanel extends JPanel implements
               (m_TestLoader instanceof IncrementalConverter);
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
               if (m_TestLoader instanceof ArffLoader
-                && classifierToUse instanceof BatchPredictor) {
+                && classifierToUse instanceof BatchPredictor
+                && ((BatchPredictor) classifierToUse)
+                  .implementsMoreEfficientBatchPrediction()) {
                 ((ArffLoader) m_TestLoader).setRetainStringVals(true);
               }
               m_TestLoader.reset();
@@ -2927,7 +2943,9 @@ public class ClassifierPanel extends JPanel implements
 
             int batchSize = 100;
             Instances batchInst = null;
-            if (classifierToUse instanceof BatchPredictor) {
+            if (classifierToUse instanceof BatchPredictor
+              && ((BatchPredictor) classifierToUse)
+                .implementsMoreEfficientBatchPrediction()) {
               batchInst = new Instances(userTestStructure, 0);
               String batchSizeS =
                 ((BatchPredictor) classifierToUse).getBatchSize();
@@ -2949,7 +2967,9 @@ public class ClassifierPanel extends JPanel implements
             while (source.hasMoreElements(userTestStructure)) {
               instance = source.nextElement(userTestStructure);
 
-              if (classifierToUse instanceof BatchPredictor) {
+              if (classifierToUse instanceof BatchPredictor
+                && ((BatchPredictor) classifierToUse)
+                  .implementsMoreEfficientBatchPrediction()) {
                 batchInst.add(instance);
                 if (batchInst.numInstances() == batchSize) {
                   Instances toPred = new Instances(batchInst);
@@ -2987,6 +3007,8 @@ public class ClassifierPanel extends JPanel implements
             }
 
             if (classifierToUse instanceof BatchPredictor
+              && ((BatchPredictor) classifierToUse)
+                .implementsMoreEfficientBatchPrediction()
               && batchInst.numInstances() > 0) {
               // finish the last batch
 

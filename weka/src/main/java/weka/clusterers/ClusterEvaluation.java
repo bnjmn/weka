@@ -284,9 +284,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       filter.setInputFormat(testRaw);
     }
 
-    Instances forBatchPredictors = filter != null
-      ? new Instances(filter.getOutputFormat(), 0)
-      : new Instances(source.getStructure(), 0);
+    Instances forBatchPredictors =
+      filter != null ? new Instances(filter.getOutputFormat(), 0)
+        : new Instances(source.getStructure(), 0);
     i = 0;
     while (source.hasMoreElements(testRaw)) {
       // next instance
@@ -297,7 +297,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
         inst = filter.output();
       }
 
-      if (m_Clusterer instanceof BatchPredictor) {
+      if (m_Clusterer instanceof BatchPredictor
+        && ((BatchPredictor) m_Clusterer)
+          .implementsMoreEfficientBatchPrediction()) {
         forBatchPredictors.add(inst);
       } else {
         cnum = -1;
@@ -322,9 +324,12 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       }
     }
 
-    if (m_Clusterer instanceof BatchPredictor) {
-      double[][] dists = ((BatchPredictor)m_Clusterer).
-        distributionsForInstances(forBatchPredictors);
+    if (m_Clusterer instanceof BatchPredictor
+      && ((BatchPredictor) m_Clusterer)
+        .implementsMoreEfficientBatchPrediction()) {
+      double[][] dists =
+        ((BatchPredictor) m_Clusterer)
+          .distributionsForInstances(forBatchPredictors);
       for (double[] d : dists) {
         cnum = Utils.maxIndex(d);
         clusterAssignments.add((double) cnum);
@@ -339,8 +344,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     for (i = 0; i < clusterAssignments.size(); i++) {
       m_clusterAssignments[i] = clusterAssignments.get(i);
     }
-    int numInstFieldWidth = (int) ((Math.log(clusterAssignments.size()) / Math
-      .log(10)) + 1);
+    int numInstFieldWidth =
+      (int) ((Math.log(clusterAssignments.size()) / Math.log(10)) + 1);
 
     if (outputModel) {
       m_clusteringResults.append(m_Clusterer.toString());
@@ -423,8 +428,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     m_clusteringResults.append("\n\nClass attribute: "
       + inst.classAttribute().name() + "\n");
     m_clusteringResults.append("Classes to Clusters:\n");
-    String matrixString = toMatrixString(counts, clusterTotals, new Instances(
-      inst, 0));
+    String matrixString =
+      toMatrixString(counts, clusterTotals, new Instances(inst, 0));
     m_clusteringResults.append(matrixString).append("\n");
 
     int Cwidth = 1 + (int) (Math.log(m_numClusters) / Math.log(10));
@@ -478,8 +483,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       }
     }
 
-    int Cwidth = 1 + Math.max((int) (Math.log(maxval) / Math.log(10)),
-      (int) (Math.log(m_numClusters) / Math.log(10)));
+    int Cwidth =
+      1 + Math.max((int) (Math.log(maxval) / Math.log(10)),
+        (int) (Math.log(m_numClusters) / Math.log(10)));
 
     ms.append("\n");
 
@@ -592,16 +598,16 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     StringBuffer text = new StringBuffer();
     int theClass = -1; // class based evaluation of clustering
     boolean forceBatch = Utils.getFlag("force-batch-training", options);
-    boolean updateable = (clusterer instanceof UpdateableClusterer)
-      && !forceBatch;
+    boolean updateable =
+      (clusterer instanceof UpdateableClusterer) && !forceBatch;
     DataSource source = null;
     Instance inst;
 
     if (Utils.getFlag('h', options) || Utils.getFlag("help", options)) {
 
       // global info requested as well?
-      boolean globalInfo = Utils.getFlag("synopsis", options)
-        || Utils.getFlag("info", options);
+      boolean globalInfo =
+        Utils.getFlag("synopsis", options) || Utils.getFlag("info", options);
 
       throw new Exception("Help requested."
         + makeOptionString(clusterer, globalInfo));
@@ -744,9 +750,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     if (objectInputFileName.length() != 0) {
       // Load the clusterer from file
       // clusterer = (Clusterer) SerializationHelper.read(objectInputFileName);
-      java.io.ObjectInputStream ois = new java.io.ObjectInputStream(
-        new java.io.BufferedInputStream(new java.io.FileInputStream(
-          objectInputFileName)));
+      java.io.ObjectInputStream ois =
+        new java.io.ObjectInputStream(new java.io.BufferedInputStream(
+          new java.io.FileInputStream(objectInputFileName)));
       clusterer = (Clusterer) ois.readObject();
       // try and get the training header
       try {
@@ -786,8 +792,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
           }
           ((UpdateableClusterer) clusterer).updateFinished();
         } else {
-          Instances clusterTrain = Filter.useFilter(source.getDataSet(),
-            removeClass);
+          Instances clusterTrain =
+            Filter.useFilter(source.getDataSet(), removeClass);
           clusterer.buildClusterer(clusterTrain);
           trainHeader = clusterTrain;
         }
@@ -857,8 +863,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
 
   private static void saveClusterer(String fileName, Clusterer clusterer,
     Instances header) throws Exception {
-    java.io.ObjectOutputStream oos = new java.io.ObjectOutputStream(
-      new java.io.BufferedOutputStream(new java.io.FileOutputStream(fileName)));
+    java.io.ObjectOutputStream oos =
+      new java.io.ObjectOutputStream(new java.io.BufferedOutputStream(
+        new java.io.FileOutputStream(fileName)));
 
     oos.writeObject(clusterer);
     if (header != null) {
@@ -962,8 +969,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
           + "cross-validation!");
       }
     }
-    CvAv = crossValidateModel((DensityBasedClusterer) clusterer, data,
-      numFolds, random);
+    CvAv =
+      crossValidateModel((DensityBasedClusterer) clusterer, data, numFolds,
+        random);
 
     CvString.append("\n" + numFolds + " fold CV Log Likelihood: "
       + Utils.doubleToString(CvAv, 6, 4) + "\n");
@@ -994,8 +1002,10 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     if (fileName.length() != 0) {
       DataSource source = new DataSource(fileName);
       Instances structure = source.getStructure();
-      Instances forBatchPredictors = clusterer instanceof BatchPredictor
-        ? new Instances(source.getStructure(), 0) : null;
+      Instances forBatchPredictors =
+        (clusterer instanceof BatchPredictor && ((BatchPredictor) clusterer)
+          .implementsMoreEfficientBatchPrediction()) ? new Instances(
+          source.getStructure(), 0) : null;
 
       Instance inst;
       while (source.hasMoreElements(structure)) {
@@ -1020,8 +1030,9 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
       }
 
       if (forBatchPredictors != null) {
-        double[][] dists = ((BatchPredictor) clusterer).
-          distributionsForInstances(forBatchPredictors);
+        double[][] dists =
+          ((BatchPredictor) clusterer)
+            .distributionsForInstances(forBatchPredictors);
         for (double[] d : dists) {
           cnum = Utils.maxIndex(d);
           instanceStats[cnum]++;
@@ -1092,8 +1103,10 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     }
 
     structure = source.getStructure();
-    Instances forBatchPredictors = clusterer instanceof BatchPredictor
-      ? new Instances(source.getStructure(), 0) : null;
+    Instances forBatchPredictors =
+      (clusterer instanceof BatchPredictor && ((BatchPredictor) clusterer)
+        .implementsMoreEfficientBatchPrediction()) ? new Instances(
+        source.getStructure(), 0) : null;
     while (source.hasMoreElements(structure)) {
       inst = source.nextElement(structure);
       if (forBatchPredictors != null) {
@@ -1102,28 +1115,32 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
         try {
           cnum = clusterer.clusterInstance(inst);
 
-          text.append(i + " " + cnum + " " + attributeValuesString(inst,
-            attributesToOutput) + "\n");
+          text.append(i + " " + cnum + " "
+            + attributeValuesString(inst, attributesToOutput) + "\n");
         } catch (Exception e) {
-        /*
-         * throw new Exception('\n' + "Unable to cluster instance\n" +
-         * e.getMessage());
-         */
-          text.append(i + " Unclustered " + attributeValuesString(inst,
-            attributesToOutput) + "\n");
+          /*
+           * throw new Exception('\n' + "Unable to cluster instance\n" +
+           * e.getMessage());
+           */
+          text.append(i + " Unclustered "
+            + attributeValuesString(inst, attributesToOutput) + "\n");
         }
         i++;
       }
     }
 
     if (forBatchPredictors != null) {
-      double[][] dists = ((BatchPredictor)clusterer).
-        distributionsForInstances(forBatchPredictors);
+      double[][] dists =
+        ((BatchPredictor) clusterer)
+          .distributionsForInstances(forBatchPredictors);
       for (double[] d : dists) {
         cnum = Utils.maxIndex(d);
-        text.append(i + " " + cnum + " "
+        text.append(i
+          + " "
+          + cnum
+          + " "
           + attributeValuesString(forBatchPredictors.instance(i),
-          attributesToOutput) + "\n");
+            attributesToOutput) + "\n");
         i++;
       }
     }
@@ -1139,7 +1156,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
    * @param attRange the range of the attributes to list
    * @return a string listing values of the attributes in the range
    */
-  private static String attributeValuesString(Instance instance, Range attRange) {
+  private static String
+    attributeValuesString(Instance instance, Range attRange) {
     StringBuffer text = new StringBuffer();
     if (attRange != null) {
       boolean firstOutput = true;
@@ -1168,7 +1186,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
    * @param clusterer the clusterer to include options for
    * @return a string detailing the valid command line options
    */
-  private static String makeOptionString(Clusterer clusterer, boolean globalInfo) {
+  private static String
+    makeOptionString(Clusterer clusterer, boolean globalInfo) {
     StringBuffer optionsText = new StringBuffer("");
     // General options
     optionsText.append("\n\nGeneral options:\n\n");
@@ -1248,8 +1267,8 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     MethodDescriptor[] methods;
     methods = bi.getMethodDescriptors();
     Object[] args = {};
-    String result = "\nSynopsis for " + clusterer.getClass().getName()
-      + ":\n\n";
+    String result =
+      "\nSynopsis for " + clusterer.getClass().getName() + ":\n\n";
 
     for (MethodDescriptor method : methods) {
       String name = method.getDisplayName();
@@ -1315,10 +1334,10 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     }
 
     // TODO: better comparison? via members?
-    String clusteringResults1 = m_clusteringResults.toString().replaceAll(
-      "Elapsed time.*", "");
-    String clusteringResults2 = cmp.m_clusteringResults.toString().replaceAll(
-      "Elapsed time.*", "");
+    String clusteringResults1 =
+      m_clusteringResults.toString().replaceAll("Elapsed time.*", "");
+    String clusteringResults2 =
+      cmp.m_clusteringResults.toString().replaceAll("Elapsed time.*", "");
     if (!clusteringResults1.equals(clusteringResults2)) {
       return false;
     }

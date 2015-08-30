@@ -57,4 +57,12 @@ public interface BatchPredictor {
    * @throws Exception if a problem occurs
    */
   double[][] distributionsForInstances(Instances insts) throws Exception;
+
+  /**
+   * Returns true if this BatchPredictor can generate batch predictions
+   * in an efficient manner.
+   *
+   * @return true if batch predictions can be generated efficiently
+   */
+  boolean implementsMoreEfficientBatchPrediction();
 }

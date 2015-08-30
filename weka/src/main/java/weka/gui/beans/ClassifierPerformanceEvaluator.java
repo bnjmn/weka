@@ -70,9 +70,12 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
   private transient long m_currentBatchIdentifier;
   private transient int m_setsComplete;
 
-  private final Vector<TextListener> m_textListeners = new Vector<TextListener>();
-  private final Vector<ThresholdDataListener> m_thresholdListeners = new Vector<ThresholdDataListener>();
-  private final Vector<VisualizableErrorListener> m_visualizableErrorListeners = new Vector<VisualizableErrorListener>();
+  private final Vector<TextListener> m_textListeners =
+    new Vector<TextListener>();
+  private final Vector<ThresholdDataListener> m_thresholdListeners =
+    new Vector<ThresholdDataListener>();
+  private final Vector<VisualizableErrorListener> m_visualizableErrorListeners =
+    new Vector<VisualizableErrorListener>();
 
   protected transient ThreadPoolExecutor m_executorPool;
   protected transient List<EvaluationTask> m_tasks;
@@ -203,8 +206,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
       m_executorPool.shutdownNow();
     }
 
-    m_executorPool = new ThreadPoolExecutor(m_executionSlots, m_executionSlots,
-      120, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+    m_executorPool =
+      new ThreadPoolExecutor(m_executionSlots, m_executionSlots, 120,
+        TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
   }
 
   /**
@@ -244,8 +248,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
     ClassifierErrorsPlotInstances plotInstances) throws Exception {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
-      Instances mappedClassifierHeader = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getModelHeader(new Instances(inst, 0));
+      Instances mappedClassifierHeader =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getModelHeader(new Instances(inst, 0));
 
       eval = new Evaluation(new Instances(mappedClassifierHeader, 0));
 
@@ -255,11 +260,13 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
         // the structure expected by the mapped classifier - this is only
         // to ensure that the ClassifierPlotInstances object is configured
         // in accordance with what the embeded classifier was trained with
-        Instances mappedClassifierDataset = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-          .getModelHeader(new Instances(mappedClassifierHeader, 0));
+        Instances mappedClassifierDataset =
+          ((weka.classifiers.misc.InputMappedClassifier) classifier)
+            .getModelHeader(new Instances(mappedClassifierHeader, 0));
         for (int zz = 0; zz < inst.numInstances(); zz++) {
-          Instance mapped = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-            .constructMappedInstance(inst.instance(zz));
+          Instance mapped =
+            ((weka.classifiers.misc.InputMappedClassifier) classifier)
+              .constructMappedInstance(inst.instance(zz));
           mappedClassifierDataset.add(mapped);
         }
 
@@ -335,8 +342,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
       }
       try {
 
-        ClassifierErrorsPlotInstances plotInstances = ExplorerDefaults
-          .getClassifierErrorsPlotInstances();
+        ClassifierErrorsPlotInstances plotInstances =
+          ExplorerDefaults.getClassifierErrorsPlotInstances();
         Evaluation eval = null;
 
         if (m_trainData == null || m_trainData.numInstances() == 0) {
@@ -347,8 +354,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           plotInstances.setEvaluation(eval);
           plotInstances
             .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
-          eval = adjustForInputMappedClassifier(eval, m_classifier, m_testData,
-            plotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, m_classifier, m_testData,
+              plotInstances);
 
           eval.useNoPriors();
           eval.setMetricsToDisplay(m_metricsList);
@@ -360,16 +368,20 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
           plotInstances.setEvaluation(eval);
           plotInstances
             .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
-          eval = adjustForInputMappedClassifier(eval, m_classifier,
-            m_trainData, plotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, m_classifier, m_trainData,
+              plotInstances);
           eval.setMetricsToDisplay(m_metricsList);
         }
 
         plotInstances.setUp();
 
-        if (m_classifier instanceof BatchPredictor) {
-          double[][] predictions = ((BatchPredictor) m_classifier)
-            .distributionsForInstances(m_testData);
+        if (m_classifier instanceof BatchPredictor
+          && ((BatchPredictor) m_classifier)
+            .implementsMoreEfficientBatchPrediction()) {
+          double[][] predictions =
+            ((BatchPredictor) m_classifier)
+              .distributionsForInstances(m_testData);
           plotInstances.process(m_testData, predictions, eval);
         } else {
 
@@ -482,20 +494,20 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
 
     if (m_aggregatedPlotInstances == null) {
       // get these first so that the post-processing does not scale the sizes!!
-      m_aggregatedPlotShapes = (ArrayList<Integer>) plotInstances
-        .getPlotShapes().clone();
-      m_aggregatedPlotSizes = (ArrayList<Object>) plotInstances.getPlotSizes()
-        .clone();
+      m_aggregatedPlotShapes =
+        (ArrayList<Integer>) plotInstances.getPlotShapes().clone();
+      m_aggregatedPlotSizes =
+        (ArrayList<Object>) plotInstances.getPlotSizes().clone();
 
       // this calls the post-processing, so do this last
-      m_aggregatedPlotInstances = new Instances(
-        plotInstances.getPlotInstances());
+      m_aggregatedPlotInstances =
+        new Instances(plotInstances.getPlotInstances());
     } else {
       // get these first so that post-processing does not scale sizes
-      ArrayList<Object> tmpSizes = (ArrayList<Object>) plotInstances
-        .getPlotSizes().clone();
-      ArrayList<Integer> tmpShapes = (ArrayList<Integer>) plotInstances
-        .getPlotShapes().clone();
+      ArrayList<Object> tmpSizes =
+        (ArrayList<Object>) plotInstances.getPlotSizes().clone();
+      ArrayList<Integer> tmpShapes =
+        (ArrayList<Integer>) plotInstances.getPlotShapes().clone();
 
       Instances temp = plotInstances.getPlotInstances();
       for (int i = 0; i < temp.numInstances(); i++) {
@@ -516,7 +528,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
     // if (ce.getSetNumber() == ce.getMaxSetNumber()) {
     if (m_setsComplete == maxSetNum) {
       try {
-        AggregateableClassifierErrorsPlotInstances aggPlot = new AggregateableClassifierErrorsPlotInstances();
+        AggregateableClassifierErrorsPlotInstances aggPlot =
+          new AggregateableClassifierErrorsPlotInstances();
         aggPlot.setInstances(testData);
         aggPlot.setPlotInstances(m_aggregatedPlotInstances);
         aggPlot.setPlotShapes(m_aggregatedPlotShapes);
@@ -531,31 +544,34 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
         textTitle += classifier.getClass().getName();
         String textOptions = "";
         if (classifier instanceof OptionHandler) {
-          textOptions = Utils.joinOptions(((OptionHandler) classifier)
-            .getOptions());
+          textOptions =
+            Utils.joinOptions(((OptionHandler) classifier).getOptions());
         }
-        textTitle = textTitle.substring(textTitle.lastIndexOf('.') + 1,
-          textTitle.length());
+        textTitle =
+          textTitle.substring(textTitle.lastIndexOf('.') + 1,
+            textTitle.length());
         if (evalLabel != null && evalLabel.length() > 0) {
           if (!textTitle.toLowerCase().startsWith(evalLabel.toLowerCase())) {
             textTitle = evalLabel + " : " + textTitle;
           }
         }
-        String resultT = "=== Evaluation result ===\n\n"
-          + "Scheme: "
-          + textTitle
-          + "\n"
-          + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n" : "")
-          + "Relation: " + testData.relationName() + "\n\n"
-          + m_eval.toSummaryString();
+        String resultT =
+          "=== Evaluation result ===\n\n"
+            + "Scheme: "
+            + textTitle
+            + "\n"
+            + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n"
+              : "") + "Relation: " + testData.relationName() + "\n\n"
+            + m_eval.toSummaryString();
 
         if (testData.classAttribute().isNominal()) {
-          resultT += "\n" + m_eval.toClassDetailsString() + "\n"
-            + m_eval.toMatrixString();
+          resultT +=
+            "\n" + m_eval.toClassDetailsString() + "\n"
+              + m_eval.toMatrixString();
         }
 
-        TextEvent te = new TextEvent(ClassifierPerformanceEvaluator.this,
-          resultT, textTitle);
+        TextEvent te =
+          new TextEvent(ClassifierPerformanceEvaluator.this, resultT, textTitle);
         notifyTextListeners(te);
 
         // set up visualizable errors
@@ -569,8 +585,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
            * PlotData2D errorD = m_PlotInstances.getPlotData( textTitle + " " +
            * textOptions);
            */
-          VisualizableErrorEvent vel = new VisualizableErrorEvent(
-            ClassifierPerformanceEvaluator.this, errorD);
+          VisualizableErrorEvent vel =
+            new VisualizableErrorEvent(ClassifierPerformanceEvaluator.this,
+              errorD);
           notifyVisualizableErrorListeners(vel);
           m_PlotInstances.cleanUp();
         }
@@ -599,8 +616,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
             }
           }
 
-          htmlTitle += " " + newOptions + "<br>" + " (class: "
-            + testData.classAttribute().value(0) + ")" + "</font></html>";
+          htmlTitle +=
+            " " + newOptions + "<br>" + " (class: "
+              + testData.classAttribute().value(0) + ")" + "</font></html>";
           pd.setPlotName(textTitle + " (class: "
             + testData.classAttribute().value(0) + ")");
           pd.setPlotNameHTML(htmlTitle);
@@ -611,8 +629,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
 
           pd.setConnectPoints(connectPoints);
 
-          ThresholdDataEvent rde = new ThresholdDataEvent(
-            ClassifierPerformanceEvaluator.this, pd, testData.classAttribute());
+          ThresholdDataEvent rde =
+            new ThresholdDataEvent(ClassifierPerformanceEvaluator.this, pd,
+              testData.classAttribute());
           notifyThresholdListeners(rde);
         }
         if (m_logger != null) {
@@ -674,8 +693,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
             .classIndex());
           m_PlotInstances.setEvaluation(eval);
 
-          eval = adjustForInputMappedClassifier(eval, ce.getClassifier(), ce
-            .getTestSet().getDataSet(), m_PlotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, ce.getClassifier(), ce
+              .getTestSet().getDataSet(), m_PlotInstances);
           eval.useNoPriors();
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
@@ -689,8 +709,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
             .classIndex());
           m_PlotInstances.setEvaluation(eval);
 
-          eval = adjustForInputMappedClassifier(eval, ce.getClassifier(), ce
-            .getTrainSet().getDataSet(), m_PlotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, ce.getClassifier(), ce
+              .getTrainSet().getDataSet(), m_PlotInstances);
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
         }
@@ -702,9 +723,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
 
         m_aggregatedPlotInstances = null;
 
-        String msg = "[ClassifierPerformanceEvaluator] "
-          + statusMessagePrefix() + " starting executor pool ("
-          + getExecutionSlots() + " slots)...";
+        String msg =
+          "[ClassifierPerformanceEvaluator] " + statusMessagePrefix()
+            + " starting executor pool (" + getExecutionSlots() + " slots)...";
 
         // start the execution pool
         startExecutorPool();
@@ -720,12 +741,14 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
 
       // if m_tasks == null then we've been stopped
       if (m_setsComplete < ce.getMaxSetNumber() && m_tasks != null) {
-        EvaluationTask newTask = new EvaluationTask(classifier, ce
-          .getTrainSet().getDataSet(), ce.getTestSet().getDataSet(),
-          ce.getSetNumber(), ce.getMaxSetNumber(), ce.getLabel());
-        String msg = "[ClassifierPerformanceEvaluator] "
-          + statusMessagePrefix() + " scheduling " + " evaluation of fold "
-          + ce.getSetNumber() + " for execution...";
+        EvaluationTask newTask =
+          new EvaluationTask(classifier, ce.getTrainSet().getDataSet(), ce
+            .getTestSet().getDataSet(), ce.getSetNumber(),
+            ce.getMaxSetNumber(), ce.getLabel());
+        String msg =
+          "[ClassifierPerformanceEvaluator] " + statusMessagePrefix()
+            + " scheduling " + " evaluation of fold " + ce.getSetNumber()
+            + " for execution...";
         if (m_logger != null) {
           m_logger.logMessage(msg);
         } else {
@@ -876,7 +899,8 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
    * 
    * @param cl a <code>ThresholdDataListener</code> value
    */
-  public synchronized void removeThresholdDataListener(ThresholdDataListener cl) {
+  public synchronized void
+    removeThresholdDataListener(ThresholdDataListener cl) {
     m_thresholdListeners.remove(cl);
   }
 
@@ -949,8 +973,9 @@ public class ClassifierPerformanceEvaluator extends AbstractEvaluator implements
   private void notifyVisualizableErrorListeners(VisualizableErrorEvent re) {
     Vector<VisualizableErrorListener> l;
     synchronized (this) {
-      l = (Vector<VisualizableErrorListener>) m_visualizableErrorListeners
-        .clone();
+      l =
+        (Vector<VisualizableErrorListener>) m_visualizableErrorListeners
+          .clone();
     }
     if (l.size() > 0) {
       for (int i = 0; i < l.size(); i++) {

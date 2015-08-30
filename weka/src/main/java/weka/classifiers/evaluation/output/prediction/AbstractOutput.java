@@ -563,10 +563,12 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       inst = (Instance) inst.copy();
-      inst = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .constructMappedInstance(inst);
-      int mappedClass = ((weka.classifiers.misc.InputMappedClassifier) classifier)
-        .getMappedClassIndex();
+      inst =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .constructMappedInstance(inst);
+      int mappedClass =
+        ((weka.classifiers.misc.InputMappedClassifier) classifier)
+          .getMappedClassIndex();
       withMissing.setMissing(mappedClass);
     } else {
       withMissing.setMissing(withMissing.classIndex());
@@ -632,10 +634,11 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     i = 0;
     testset.reset();
 
-    if (classifier instanceof BatchPredictor) {
+    if (classifier instanceof BatchPredictor
+      && ((BatchPredictor) classifier).implementsMoreEfficientBatchPrediction()) {
       test = testset.getDataSet(m_Header.classIndex());
-      double[][] predictions = ((BatchPredictor) classifier)
-        .distributionsForInstances(test);
+      double[][] predictions =
+        ((BatchPredictor) classifier).distributionsForInstances(test);
       for (i = 0; i < test.numInstances(); i++) {
         printClassification(predictions[i], test.instance(i), i);
       }
@@ -661,9 +664,10 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     throws Exception {
     int i;
 
-    if (classifier instanceof BatchPredictor) {
-      double[][] predictions = ((BatchPredictor) classifier)
-        .distributionsForInstances(testset);
+    if (classifier instanceof BatchPredictor
+      && ((BatchPredictor) classifier).implementsMoreEfficientBatchPrediction()) {
+      double[][] predictions =
+        ((BatchPredictor) classifier).distributionsForInstances(testset);
       for (i = 0; i < testset.numInstances(); i++) {
         printClassification(predictions[i], testset.instance(i), i);
       }
@@ -752,8 +756,9 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       options = Utils.splitOptions(cmdline);
       classname = options[0];
       options[0] = "";
-      result = (AbstractOutput) Utils.forName(AbstractOutput.class, classname,
-        options);
+      result =
+        (AbstractOutput) Utils
+          .forName(AbstractOutput.class, classname, options);
     } catch (Exception e) {
       result = null;
     }
