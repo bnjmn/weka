@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -47,10 +48,12 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class SubstringLabelerRules implements EnvironmentHandler {
+public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
 
   /** Separator for match rules in the internal representation */
   public static final String MATCH_RULE_SEPARATOR = "@@match-rule@@";
+
+  private static final long serialVersionUID = 1392983905562573599L;
 
   /** The list of rules */
   protected List<SubstringLabelerMatchRule> m_matchRules;

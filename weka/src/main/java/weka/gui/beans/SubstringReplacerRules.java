@@ -26,6 +26,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Pattern;
+import java.io.Serializable;
 
 import weka.core.DenseInstance;
 import weka.core.Environment;
@@ -42,8 +43,10 @@ import weka.gui.Logger;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class SubstringReplacerRules implements EnvironmentHandler {
+public class SubstringReplacerRules implements EnvironmentHandler, Serializable {
 
+  private static final long serialVersionUID = -7151320452496749698L;
+  
   /** Environment variables */
   protected transient Environment m_env = Environment.getSystemWide();
 
