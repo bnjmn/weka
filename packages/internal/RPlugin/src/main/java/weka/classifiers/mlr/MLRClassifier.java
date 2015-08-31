@@ -70,7 +70,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   // Classification
   public static final int R_CLASSIF_ADA = 0;
   public static final int R_CLASSIF_BDK = 1; // new in 2.4(?): kohonen, bdk
-  public static final int R_CLASSIF_BINOMIAL = 2; // new in 2.4(?): stats, binomial
+  public static final int R_CLASSIF_BINOMIAL = 2; // new in 2.4(?): stats,
+                                                  // binomial
   public static final int R_CLASSIF_BLACKBOOST = 3;
   public static final int R_CLASSIF_BOOSTING = 4;
   public static final int R_CLASSIF_BST = 5; // new in 2.4(?): bst, bst
@@ -81,14 +82,21 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   public static final int R_CLASSIF_GEODA = 10; // new: DiscriMiner, geoDA
   public static final int R_CLASSIF_GLMBOOST = 11;
   public static final int R_CLASSIF_GLMNET = 12; // new: glmnet, glmnet
-  public static final int R_CLASSIF_HDRDA = 13; // new in 2.4(?): sparsediscrim, hdrda
+  public static final int R_CLASSIF_HDRDA = 13; // new in 2.4(?): sparsediscrim,
+                                                // hdrda
   public static final int R_CLASSIF_KKNN = 14;
   public static final int R_CLASSIF_KNN = 15; // new in 2.4(?): class, knn
   public static final int R_CLASSIF_KSVM = 16;
   public static final int R_CLASSIF_LDA = 17;
-  public static final int R_CLASSIF_LIBLINEARBINARY = 18; // new in 2.4(?): LiblineaR, LiblineaRBinary
-  public static final int R_CLASSIF_LIBLINEARLOGREG = 19; // new in 2.4(?): LiblineaR, LiblineaRLogReg
-  public static final int R_CLASSIF_LIBLINEARMULTICLASS = 20; // new in 2.4(?): LiblineaR, LiblineaRMultiClass
+  public static final int R_CLASSIF_LIBLINEARBINARY = 18; // new in 2.4(?):
+                                                          // LiblineaR,
+                                                          // LiblineaRBinary
+  public static final int R_CLASSIF_LIBLINEARLOGREG = 19; // new in 2.4(?):
+                                                          // LiblineaR,
+                                                          // LiblineaRLogReg
+  public static final int R_CLASSIF_LIBLINEARMULTICLASS = 20; // new in 2.4(?):
+                                                              // LiblineaR,
+                                                              // LiblineaRMultiClass
   public static final int R_CLASSIF_LINDA = 21; // new: DiscriMiner, linDA
   public static final int R_CLASSIF_LOGREG = 22;
   public static final int R_CLASSIF_LQA = 23; // new in 2.2: lqa, lqa
@@ -106,13 +114,19 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   public static final int R_CLASSIF_QDA = 35;
   public static final int R_CLASSIF_QUADA = 36; // new: DiscriMiner, quaDA
   public static final int R_CLASSIF_RANDOM_FOREST = 37;
-  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 38; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 38; // new in 2.2:
+                                                            // randomForestSRC,
+                                                            // randomForestSRC
   public static final int R_CLASSIF_RDA = 39;
-  public static final int R_CLASSIF_RFERNS = 40; // new in 2.4(?): rFerns, rFerns
+  public static final int R_CLASSIF_RFERNS = 40; // new in 2.4(?): rFerns,
+                                                 // rFerns
   public static final int R_CLASSIF_RPART = 41;
   public static final int R_CLASSIF_RRLDA = 42; // new in 2.4(?): rrlda, rrlda
   public static final int R_CLASSIF_SDA = 43; // new in 2.2: sda, sda
-  public static final int R_CLASSIF_SPARSELDA = 44; // new in 2.4(?): sparseLDA, MASS, elasticnet, sparseLDA NOTE: result probably not correct
+  public static final int R_CLASSIF_SPARSELDA = 44; // new in 2.4(?): sparseLDA,
+                                                    // MASS, elasticnet,
+                                                    // sparseLDA NOTE: result
+                                                    // probably not correct
   public static final int R_CLASSIF_SVM = 45;
   public static final int R_CLASSIF_XYF = 46; // new in 2.3: kohonen, xyf
 
@@ -146,11 +160,14 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   public static final int R_REGR_MARS = 73;
   public static final int R_REGR_MOB = 74; // new: party, mob
   public static final int R_REGR_NNET = 75;
-  public static final int R_REGR_NODEHARVEST = 76; // new in 2.4(?): nodeHarvest, nodeHarvest
+  public static final int R_REGR_NODEHARVEST = 76; // new in 2.4(?):
+                                                   // nodeHarvest, nodeHarvest
   public static final int R_REGR_PCR = 77; // new: pls, pcr
   public static final int R_REGR_PLSR = 78; // new in 2.2: pls, pls
   public static final int R_REGR_RANDOM_FOREST = 79;
-  public static final int R_REGR_RANDOM_FOREST_SRC = 80; // new in 2.2: randomForestSRC, randomForestSRC
+  public static final int R_REGR_RANDOM_FOREST_SRC = 80; // new in 2.2:
+                                                         // randomForestSRC,
+                                                         // randomForestSRC
   public static final int R_REGR_RIDGE = 81;
   public static final int R_REGR_RPART = 82;
   public static final int R_REGR_RSM = 83;
@@ -160,102 +177,109 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   public static final int R_REGR_XYF = 87; // new in 2.4(?): kohonen, xyf
 
   /** Tags for the various types of learner */
-  public static final Tag[] TAGS_LEARNER = {
-          new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
-          new Tag(R_CLASSIF_BDK, "a.kohonen,class", "classif.bdk", false),
-          new Tag(R_CLASSIF_BINOMIAL, "", "classif.binomial"),
-          new Tag(R_CLASSIF_BLACKBOOST, "a.mboost", "classif.blackboost", false),
-          new Tag(R_CLASSIF_BOOSTING, "adabag", "classif.boosting", false),
-          new Tag(R_CLASSIF_BST, "a.bst", "classif.bst", false),
-          new Tag(R_CLASSIF_CFOREST, "a.party", "classif.cforest", false),
-          new Tag(R_CLASSIF_CTREE, "b.party", "classif.ctree", false),
-          new Tag(R_CLASSIF_FNN, "a.FNN", "classif.fnn", false),
-          new Tag(R_CLASSIF_GBM, "a.gbm", "classif.gbm", false),
-          new Tag(R_CLASSIF_GEODA, "a.DiscriMiner", "classif.geoDA", false),
-          new Tag(R_CLASSIF_GLMBOOST, "b.mboost", "classif.glmboost", false),
-          new Tag(R_CLASSIF_GLMNET, "a.glmnet", "classif.glmnet", false),
-          new Tag(R_CLASSIF_HDRDA, "sparsediscrim", "classif.hdrda", false),
-          new Tag(R_CLASSIF_KKNN, "a.kknn", "classif.kknn", false),
-          new Tag(R_CLASSIF_KNN, "a.class", "classif.knn", false),
-          new Tag(R_CLASSIF_KSVM, "a.kernlab", "classif.ksvm", false),
-          new Tag(R_CLASSIF_LDA, "a.MASS", "classif.lda", false),
-          new Tag(R_CLASSIF_LIBLINEARBINARY, "a.LiblineaR", "classif.LiblineaRBinary", false),
-          new Tag(R_CLASSIF_LIBLINEARLOGREG, "b.LiblineaR", "classif.LiblineaRLogReg", false),
-          new Tag(R_CLASSIF_LIBLINEARMULTICLASS, "c.LiblineaR", "classif.LiblineaRMultiClass", false),
-          new Tag(R_CLASSIF_LINDA, "b.DiscriMiner", "classif.linDA", false),
-          new Tag(R_CLASSIF_LOGREG, "", "classif.logreg", false),
-          new Tag(R_CLASSIF_LQA, "lqa", "classif.lqa", false),
-          new Tag(R_CLASSIF_LSSVM, "b.kernlab", "classif.lssvm", false),
-          new Tag(R_CLASSIF_LVQ1, "b.class", "classif.lvq1", false),
-          new Tag(R_CLASSIF_MDA, "a.mda", "classif.mda", false),
-          new Tag(R_CLASSIF_MULTINOM, "a.nnet", "classif.multinom", false),
-          new Tag(R_CLASSIF_NAIVE_BAYES, "a.e1071", "classif.naiveBayes", false),
-          new Tag(R_CLASSIF_NNET, "b.nnet", "classif.nnet", false),
-          new Tag(R_CLASSIF_NODEHARVEST, "a.nodeHarvest", "classif.nodeHarvest", false),
-          new Tag(R_CLASSIF_PAMR, "pamr", "classif.pamr", false),
-          new Tag(R_CLASSIF_PLR, "stepPlr", "classif.plr", false),
-          new Tag(R_CLASSIF_PLSDACARET, "caret,pls", "classif.plsdaCaret", false),
-          new Tag(R_CLASSIF_PROBIT, "", "classif.probit", false),
-          new Tag(R_CLASSIF_QDA, "b.MASS", "classif.qda", false),
-          new Tag(R_CLASSIF_QUADA, "d.DiscriMiner", "classif.quaDA", false),
-          new Tag(R_CLASSIF_RANDOM_FOREST, "a.randomForest", "classif.randomForest",
-                  false),
-          new Tag(R_CLASSIF_RANDOM_FOREST_SRC, "a.randomForestSRC", "classif.randomForestSRC",
-                  false),
-          new Tag(R_CLASSIF_RDA, "b.klaR", "classif.rda", false),
-          new Tag(R_CLASSIF_RFERNS, "rFerns", "classif.rFerns", false),
-          new Tag(R_CLASSIF_RPART, "a.rpart", "classif.rpart", false),
-          new Tag(R_CLASSIF_RRLDA, "rrlda", "classif.rrlda", false),
-          new Tag(R_CLASSIF_SDA, "sda", "classif.sda", false),
-          new Tag(R_CLASSIF_SPARSELDA, "sparseLDA, MASS, elasticnet", "classif.sparseLDA", false),
-          new Tag(R_CLASSIF_SVM, "b.e1071", "classif.svm", false),
-          new Tag(R_CLASSIF_XYF, "b.kohonen,class", "classif.xyf", false),
+  public static final Tag[] TAGS_LEARNER =
+    {
+      new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
+      new Tag(R_CLASSIF_BDK, "a.kohonen,class", "classif.bdk", false),
+      new Tag(R_CLASSIF_BINOMIAL, "", "classif.binomial"),
+      new Tag(R_CLASSIF_BLACKBOOST, "a.mboost", "classif.blackboost", false),
+      new Tag(R_CLASSIF_BOOSTING, "adabag", "classif.boosting", false),
+      new Tag(R_CLASSIF_BST, "a.bst", "classif.bst", false),
+      new Tag(R_CLASSIF_CFOREST, "a.party", "classif.cforest", false),
+      new Tag(R_CLASSIF_CTREE, "b.party", "classif.ctree", false),
+      new Tag(R_CLASSIF_FNN, "a.FNN", "classif.fnn", false),
+      new Tag(R_CLASSIF_GBM, "a.gbm", "classif.gbm", false),
+      new Tag(R_CLASSIF_GEODA, "a.DiscriMiner", "classif.geoDA", false),
+      new Tag(R_CLASSIF_GLMBOOST, "b.mboost", "classif.glmboost", false),
+      new Tag(R_CLASSIF_GLMNET, "a.glmnet", "classif.glmnet", false),
+      new Tag(R_CLASSIF_HDRDA, "sparsediscrim", "classif.hdrda", false),
+      new Tag(R_CLASSIF_KKNN, "a.kknn", "classif.kknn", false),
+      new Tag(R_CLASSIF_KNN, "a.class", "classif.knn", false),
+      new Tag(R_CLASSIF_KSVM, "a.kernlab", "classif.ksvm", false),
+      new Tag(R_CLASSIF_LDA, "a.MASS", "classif.lda", false),
+      new Tag(R_CLASSIF_LIBLINEARBINARY, "a.LiblineaR",
+        "classif.LiblineaRBinary", false),
+      new Tag(R_CLASSIF_LIBLINEARLOGREG, "b.LiblineaR",
+        "classif.LiblineaRLogReg", false),
+      new Tag(R_CLASSIF_LIBLINEARMULTICLASS, "c.LiblineaR",
+        "classif.LiblineaRMultiClass", false),
+      new Tag(R_CLASSIF_LINDA, "b.DiscriMiner", "classif.linDA", false),
+      new Tag(R_CLASSIF_LOGREG, "", "classif.logreg", false),
+      new Tag(R_CLASSIF_LQA, "lqa", "classif.lqa", false),
+      new Tag(R_CLASSIF_LSSVM, "b.kernlab", "classif.lssvm", false),
+      new Tag(R_CLASSIF_LVQ1, "b.class", "classif.lvq1", false),
+      new Tag(R_CLASSIF_MDA, "a.mda", "classif.mda", false),
+      new Tag(R_CLASSIF_MULTINOM, "a.nnet", "classif.multinom", false),
+      new Tag(R_CLASSIF_NAIVE_BAYES, "a.e1071", "classif.naiveBayes", false),
+      new Tag(R_CLASSIF_NNET, "b.nnet", "classif.nnet", false),
+      new Tag(R_CLASSIF_NODEHARVEST, "a.nodeHarvest", "classif.nodeHarvest",
+        false),
+      new Tag(R_CLASSIF_PAMR, "pamr", "classif.pamr", false),
+      new Tag(R_CLASSIF_PLR, "stepPlr", "classif.plr", false),
+      new Tag(R_CLASSIF_PLSDACARET, "caret,pls", "classif.plsdaCaret", false),
+      new Tag(R_CLASSIF_PROBIT, "", "classif.probit", false),
+      new Tag(R_CLASSIF_QDA, "b.MASS", "classif.qda", false),
+      new Tag(R_CLASSIF_QUADA, "d.DiscriMiner", "classif.quaDA", false),
+      new Tag(R_CLASSIF_RANDOM_FOREST, "a.randomForest",
+        "classif.randomForest", false),
+      new Tag(R_CLASSIF_RANDOM_FOREST_SRC, "a.randomForestSRC",
+        "classif.randomForestSRC", false),
+      new Tag(R_CLASSIF_RDA, "b.klaR", "classif.rda", false),
+      new Tag(R_CLASSIF_RFERNS, "rFerns", "classif.rFerns", false),
+      new Tag(R_CLASSIF_RPART, "a.rpart", "classif.rpart", false),
+      new Tag(R_CLASSIF_RRLDA, "rrlda", "classif.rrlda", false),
+      new Tag(R_CLASSIF_SDA, "sda", "classif.sda", false),
+      new Tag(R_CLASSIF_SPARSELDA, "sparseLDA, MASS, elasticnet",
+        "classif.sparseLDA", false),
+      new Tag(R_CLASSIF_SVM, "b.e1071", "classif.svm", false),
+      new Tag(R_CLASSIF_XYF, "b.kohonen,class", "classif.xyf", false),
 
-          new Tag(R_REGR_BCART, "a.tgp", "regr.bcart", false),
-          new Tag(R_REGR_BDK, "c.kohonen,class", "regr.bdk", false),
-          new Tag(R_REGR_BGP, "b.tgp", "regr.bgp", false),
-          new Tag(R_REGR_BGPLLM, "c.tgp", "regr.bgpllm", false),
-          new Tag(R_REGR_BLACKBOOST, "c.mboost", "regr.blackboost", false),
-          new Tag(R_REGR_BLM, "d.tgp", "regr.blm", false),
-          new Tag(R_REGR_BRNN, "brnn", "regr.brnn", false),
-          new Tag(R_REGR_BST, "b.bst", "regr.bst", false),
-          new Tag(R_REGR_BTGP, "e.tgp", "regr.btgp", false),
-          new Tag(R_REGR_BTGPLLM, "f.tgp", "regr.btgpllm", false),
-          new Tag(R_REGR_BTLM, "g.tgp", "regr.btlm", false),
-          new Tag(R_REGR_CFOREST, "c.party", "regr.cforest", false),
-          new Tag(R_REGR_CRS, "crs", "regr.crs", false),
-          new Tag(R_REGR_CTREE, "d.party", "regr.ctree", false),
-          new Tag(R_REGR_CUBIST, "Cubist", "regr.cubist", false),
-          new Tag(R_REGR_EARTH, "earth", "regr.earth", false),
-          new Tag(R_REGR_ELMNN, "elmNN", "regr.elmNN", false),
-          new Tag(R_REGR_FNN, "b.FNN", "regr.fnn", false),
-          new Tag(R_REGR_FRBS, "frbs", "regr.frbs", false),
-          new Tag(R_REGR_GBM, "b.gbm", "regr.gbm", false),
-          new Tag(R_REGR_GLMNET, "b.glmnet", "regr.glmnet", false),
-          new Tag(R_REGR_KKNN, "b.kknn", "regr.kknn", false),
-          new Tag(R_REGR_KM, "DiceKriging", "regr.km", false),
-          new Tag(R_REGR_KSVM, "c.kernlab", "regr.ksvm", false),
-          new Tag(R_REGR_LASSO, "a.penalized", "regr.penalized.lasso", false),
-          new Tag(R_REGR_LM, "", "regr.lm", false),
-          new Tag(R_REGR_MARS, "b.mda", "regr.mars", false),
-          new Tag(R_REGR_MOB, "e.party", "regr.mob", false),
-          new Tag(R_REGR_NNET, "c.nnet", "regr.nnet", false),
-          new Tag(R_REGR_NODEHARVEST, "b.nodeHarvest", "regr.nodeHarvest", false),
-          new Tag(R_REGR_PCR, "a.pls", "regr.pcr", false),
-          new Tag(R_REGR_PLSR, "b.pls", "regr.plsr", false),
-          new Tag(R_REGR_RANDOM_FOREST, "b.randomForest", "regr.randomForest", false),
-          new Tag(R_REGR_RANDOM_FOREST_SRC, "b.randomForestSRC", "regr.randomForestSRC",
-                  false),
-          new Tag(R_REGR_RIDGE, "b.penalized", "regr.penalized.ridge", false),
-          new Tag(R_REGR_RPART, "b.rpart", "regr.rpart", false),
-          new Tag(R_REGR_RSM, "a.rsm", "regr.rsm", false),
-          new Tag(R_REGR_RVM, "d.kernlab", "regr.rvm", false),
-          new Tag(R_REGR_SLIM, "flare", "regr.slim", false),
-          new Tag(R_REGR_SVM, "c.e1071", "regr.svm", false),
-          new Tag(R_REGR_XYF, "d.kohonen,class", "regr.xyf", false)
-  };
+      new Tag(R_REGR_BCART, "a.tgp", "regr.bcart", false),
+      new Tag(R_REGR_BDK, "c.kohonen,class", "regr.bdk", false),
+      new Tag(R_REGR_BGP, "b.tgp", "regr.bgp", false),
+      new Tag(R_REGR_BGPLLM, "c.tgp", "regr.bgpllm", false),
+      new Tag(R_REGR_BLACKBOOST, "c.mboost", "regr.blackboost", false),
+      new Tag(R_REGR_BLM, "d.tgp", "regr.blm", false),
+      new Tag(R_REGR_BRNN, "brnn", "regr.brnn", false),
+      new Tag(R_REGR_BST, "b.bst", "regr.bst", false),
+      new Tag(R_REGR_BTGP, "e.tgp", "regr.btgp", false),
+      new Tag(R_REGR_BTGPLLM, "f.tgp", "regr.btgpllm", false),
+      new Tag(R_REGR_BTLM, "g.tgp", "regr.btlm", false),
+      new Tag(R_REGR_CFOREST, "c.party", "regr.cforest", false),
+      new Tag(R_REGR_CRS, "crs", "regr.crs", false),
+      new Tag(R_REGR_CTREE, "d.party", "regr.ctree", false),
+      new Tag(R_REGR_CUBIST, "Cubist", "regr.cubist", false),
+      new Tag(R_REGR_EARTH, "earth", "regr.earth", false),
+      new Tag(R_REGR_ELMNN, "elmNN", "regr.elmNN", false),
+      new Tag(R_REGR_FNN, "b.FNN", "regr.fnn", false),
+      new Tag(R_REGR_FRBS, "frbs", "regr.frbs", false),
+      new Tag(R_REGR_GBM, "b.gbm", "regr.gbm", false),
+      new Tag(R_REGR_GLMNET, "b.glmnet", "regr.glmnet", false),
+      new Tag(R_REGR_KKNN, "b.kknn", "regr.kknn", false),
+      new Tag(R_REGR_KM, "DiceKriging", "regr.km", false),
+      new Tag(R_REGR_KSVM, "c.kernlab", "regr.ksvm", false),
+      new Tag(R_REGR_LASSO, "a.penalized", "regr.penalized.lasso", false),
+      new Tag(R_REGR_LM, "", "regr.lm", false),
+      new Tag(R_REGR_MARS, "b.mda", "regr.mars", false),
+      new Tag(R_REGR_MOB, "e.party", "regr.mob", false),
+      new Tag(R_REGR_NNET, "c.nnet", "regr.nnet", false),
+      new Tag(R_REGR_NODEHARVEST, "b.nodeHarvest", "regr.nodeHarvest", false),
+      new Tag(R_REGR_PCR, "a.pls", "regr.pcr", false),
+      new Tag(R_REGR_PLSR, "b.pls", "regr.plsr", false),
+      new Tag(R_REGR_RANDOM_FOREST, "b.randomForest", "regr.randomForest",
+        false),
+      new Tag(R_REGR_RANDOM_FOREST_SRC, "b.randomForestSRC",
+        "regr.randomForestSRC", false),
+      new Tag(R_REGR_RIDGE, "b.penalized", "regr.penalized.ridge", false),
+      new Tag(R_REGR_RPART, "b.rpart", "regr.rpart", false),
+      new Tag(R_REGR_RSM, "a.rsm", "regr.rsm", false),
+      new Tag(R_REGR_RVM, "d.kernlab", "regr.rvm", false),
+      new Tag(R_REGR_SLIM, "flare", "regr.slim", false),
+      new Tag(R_REGR_SVM, "c.e1071", "regr.svm", false),
+      new Tag(R_REGR_XYF, "d.kohonen,class", "regr.xyf", false) };
 
-  protected static final String IMPL = "weka.classifiers.mlr.impl.MLRClassifierImpl";
+  protected static final String IMPL =
+    "weka.classifiers.mlr.impl.MLRClassifierImpl";
 
   protected Object m_delegate;
 
@@ -344,8 +368,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     }
 
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "setLaunchedFromCommandLine", new Class[] { Boolean.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setLaunchedFromCommandLine",
+          new Class[] { Boolean.class });
 
       m.invoke(m_delegate, new Object[] { new Boolean(l) });
     } catch (Exception ex) {
@@ -359,8 +384,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("debugTipText",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("debugTipText", new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -381,8 +406,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("setDebug",
-        new Class[] { Boolean.TYPE });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setDebug",
+          new Class[] { Boolean.TYPE });
 
       m.invoke(m_delegate, new Object[] { new Boolean(d) });
     } catch (Exception ex) {
@@ -401,8 +427,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("getDebug",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getDebug", new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return ((Boolean) result).booleanValue();
@@ -424,8 +450,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("batchSizeTipText",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("batchSizeTipText",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -447,8 +474,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("getBatchSize",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getBatchSize", new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -470,13 +497,25 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("setBatchSize",
-        new Class[] { String.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setBatchSize",
+          new Class[] { String.class });
 
       m.invoke(m_delegate, new Object[] { size });
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+  /**
+   * Returns true, as R schemes have to predict in batches and we push entire
+   * test sets over into R
+   *
+   * @return true
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return true;
   }
 
   /**
@@ -490,8 +529,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("RLearnerTipText",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("RLearnerTipText",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -511,8 +551,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("setRLearner",
-        new Class[] { SelectedTag.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setRLearner",
+          new Class[] { SelectedTag.class });
 
       m.invoke(m_delegate, new Object[] { learner });
     } catch (Exception ex) {
@@ -530,8 +571,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("getRLearner",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getRLearner", new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return (SelectedTag) result;
@@ -552,8 +593,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "learnerParamsTipText", new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("learnerParamsTipText",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -575,8 +617,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("setLearnerParams",
-        new Class[] { String.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setLearnerParams",
+          new Class[] { String.class });
 
       m.invoke(m_delegate, new Object[] { learnerParams });
     } catch (Exception ex) {
@@ -595,8 +638,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("getLearnerParams",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getLearnerParams",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -617,8 +661,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "dontReplaceMissingValuesTipText", new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod(
+          "dontReplaceMissingValuesTipText", new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -639,8 +684,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "setDontReplaceMissingValues", new Class[] { Boolean.TYPE });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setDontReplaceMissingValues",
+          new Class[] { Boolean.TYPE });
 
       m.invoke(m_delegate, new Object[] { new Boolean(d) });
     } catch (Exception ex) {
@@ -659,8 +705,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "getDontReplaceMissingValues", new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getDontReplaceMissingValues",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return ((Boolean) result).booleanValue();
@@ -681,8 +728,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "logMessagesFromRTipText", new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("logMessagesFromRTipText",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return result.toString();
@@ -702,8 +750,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("setLogMessagesFromR",
-        new Class[] { Boolean.TYPE });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("setLogMessagesFromR",
+          new Class[] { Boolean.TYPE });
 
       m.invoke(m_delegate, new Object[] { new Boolean(l) });
     } catch (Exception ex) {
@@ -721,8 +770,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("getLogMessagesFromR",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("getLogMessagesFromR",
+          new Class[] {});
 
       Object result = m.invoke(m_delegate, new Object[] {});
       return ((Boolean) result).booleanValue();
@@ -745,8 +795,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
     }
     try {
       // m_delegate.buildClassifier(data);
-      Method m = m_delegate.getClass().getDeclaredMethod("buildClassifier",
-        new Class[] { Instances.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("buildClassifier",
+          new Class[] { Instances.class });
       m.invoke(m_delegate, new Object[] { data });
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
@@ -783,8 +834,9 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
       init();
     }
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "distributionForInstance", new Class[] { Instance.class });
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("distributionForInstance",
+          new Class[] { Instance.class });
 
       Object result = m.invoke(m_delegate, new Object[] { inst });
 
@@ -807,8 +859,8 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
 
   public void closeREngine() {
     try {
-      Method m = m_delegate.getClass().getDeclaredMethod("closeREngine",
-        new Class[] {});
+      Method m =
+        m_delegate.getClass().getDeclaredMethod("closeREngine", new Class[] {});
 
       m.invoke(m_delegate, new Object[] {});
     } catch (Exception e) {

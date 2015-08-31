@@ -23,11 +23,11 @@ package weka.classifiers.mlr.impl;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.Arrays;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPGenericVector;
@@ -208,11 +208,12 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       eng.parseAndEval(this, learnString);
 
       // Get list of properties
-      List<String> props = Arrays.asList(eng.parseAndEval(this, "l$properties").asStrings());
+      List<String> props =
+        Arrays.asList(eng.parseAndEval(this, "l$properties").asStrings());
 
       if (props.contains("numerics")) {
         result.enable(Capability.NUMERIC_ATTRIBUTES);
-      }          
+      }
       if (props.contains("factors")) {
         result.enable(Capability.NOMINAL_ATTRIBUTES);
       }
@@ -363,7 +364,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     String libString = MLRClassifier.TAGS_LEARNER[m_rLearner].getIDStr();
     if (!libString.equals("" + MLRClassifier.TAGS_LEARNER[m_rLearner].getID())) {
       if (libString.indexOf('.') > 0) {
-        libString = libString.substring(libString.indexOf('.') + 1, libString.length());
+        libString =
+          libString.substring(libString.indexOf('.') + 1, libString.length());
       }
 
       String[] libs = libString.split(",");
@@ -376,12 +378,12 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
           System.err.println("Attempting to install learner library: " + lib);
 
           eng.installLibrary(this, lib);
-        /*
-         * if (!eng.installLibrary(this, lib)) {
-         * System.err.println("Unable to continue - " +
-         * "failed to install learner library: " + lib);
-         * m_baseLearnerLibraryAvailable = false; return; }
-         */
+          /*
+           * if (!eng.installLibrary(this, lib)) {
+           * System.err.println("Unable to continue - " +
+           * "failed to install learner library: " + lib);
+           * m_baseLearnerLibraryAvailable = false; return; }
+           */
 
           // try loading again
           if (!eng.loadLibrary(this, lib)) {
@@ -450,7 +452,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
         }
       }
       if (!found) {
-        throw new IllegalArgumentException("MLR learner " + learnerS + " not found.");
+        throw new IllegalArgumentException("MLR learner " + learnerS
+          + " not found.");
       }
     }
 
@@ -577,6 +580,17 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   @Override
   public void setBatchSize(String size) {
     m_batchPredictSize = size;
+  }
+
+  /**
+   * Returns true, as R schemes have to predict in batches and we push entire
+   * test sets over into R
+   *
+   * @return true
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return true;
   }
 
   /**
@@ -736,8 +750,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     if (modifiedIndices.size() > 0) {
       m_originalTrainingHeader = new Instances(data, 0);
 
-      m_testHeader = new Instances(data.relationName(), atts,
-        data.numInstances());
+      m_testHeader =
+        new Instances(data.relationName(), atts, data.numInstances());
 
       m_testHeader.setClassIndex(data.classIndex());
 
@@ -746,8 +760,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
         double[] vals = current.toDoubleArray();
         for (int j : modifiedIndices) {
           if (!current.isMissing(j)) {
-            double newIndex = m_testHeader.attribute(j).indexOfValue(
-              current.stringValue(j));
+            double newIndex =
+              m_testHeader.attribute(j).indexOfValue(current.stringValue(j));
 
             vals[j] = newIndex;
           }
@@ -798,19 +812,21 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     // Are we working with MLR 2?
     if (output.indexOf("Properties:") >= 0) {
-        // Get list of properties
-        List<String> props = Arrays.asList(output.replaceFirst("(.|\\s)*Properties: ", "").
-                                           replaceFirst("\\s(.|\\s)*", "").split(","));
-        return props.contains("prob");
+      // Get list of properties
+      List<String> props =
+        Arrays.asList(output.replaceFirst("(.|\\s)*Properties: ", "")
+          .replaceFirst("\\s(.|\\s)*", "").split(","));
+      return props.contains("prob");
     } else {
 
       // Need to parse MLR 1 output
       if (output.indexOf("Supports probabilities:") > 0) {
-        result = output
-          .substring(output.indexOf("Supports probabilities:") + 23,
-                     output.length()).trim().toLowerCase().startsWith("true");
+        result =
+          output
+            .substring(output.indexOf("Supports probabilities:") + 23,
+              output.length()).trim().toLowerCase().startsWith("true");
       }
-      
+
       return result;
     }
   }
@@ -919,8 +935,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     RUtils.instancesToDataFrame(eng, this, data, "mlr_data");
 
     try {
-      String mlrIdentifier = MLRClassifier.TAGS_LEARNER[m_rLearner]
-        .getReadable();
+      String mlrIdentifier =
+        MLRClassifier.TAGS_LEARNER[m_rLearner].getReadable();
 
       if (data.classAttribute().isNumeric()
         && mlrIdentifier.startsWith("classif")) {
@@ -936,11 +952,13 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       // make classification/regression task
       String taskString = null;
       if (data.classAttribute().isNominal()) {
-        taskString = "task <- makeClassifTask(data = mlr_data, target = \""
-          + RUtils.cleanse(data.classAttribute().name()) + "\")";
+        taskString =
+          "task <- makeClassifTask(data = mlr_data, target = \""
+            + RUtils.cleanse(data.classAttribute().name()) + "\")";
       } else {
-        taskString = "task <- makeRegrTask(data = mlr_data, target = \""
-          + RUtils.cleanse(data.classAttribute().name()) + "\")";
+        taskString =
+          "task <- makeRegrTask(data = mlr_data, target = \""
+            + RUtils.cleanse(data.classAttribute().name()) + "\")";
       }
 
       if (m_Debug) {
@@ -953,15 +971,17 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       m_schemeProducesProbs = schemeProducesProbabilities(mlrIdentifier, eng);
 
-      String probs = (data.classAttribute().isNominal() && m_schemeProducesProbs) ? ", predict.type = \"prob\""
-        : "";
+      String probs =
+        (data.classAttribute().isNominal() && m_schemeProducesProbs) ? ", predict.type = \"prob\""
+          : "";
       String learnString = null;
       if (m_schemeOptions != null && m_schemeOptions.length() > 0) {
-        learnString = "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs
-          + ", " + m_schemeOptions + ")";
+        learnString =
+          "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs + ", "
+            + m_schemeOptions + ")";
       } else {
-        learnString = "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs
-          + ")";
+        learnString =
+          "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs + ")";
       }
 
       if (m_Debug) {
@@ -980,8 +1000,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       checkForErrors();
 
       // get the model for serialization
-      REXP serializedRModel = eng.parseAndEval(this, "serialize(weka_r_model"
-        + m_modelHash + ", NULL)");
+      REXP serializedRModel =
+        eng.parseAndEval(this, "serialize(weka_r_model" + m_modelHash
+          + ", NULL)");
 
       checkForErrors();
 
@@ -1033,13 +1054,15 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     int numRows) throws Exception {
     RList frame = r.asList();
 
-    double[][] result = classAtt.isNumeric() ? new double[numRows][1]
-      : new double[numRows][classAtt.numValues()];
+    double[][] result =
+      classAtt.isNumeric() ? new double[numRows][1]
+        : new double[numRows][classAtt.numValues()];
 
     String attributeNames[] = null;
 
-    attributeNames = ((REXPString) ((REXPGenericVector) r)._attr().asList()
-      .get("names")).asStrings();
+    attributeNames =
+      ((REXPString) ((REXPGenericVector) r)._attr().asList().get("names"))
+        .asStrings();
 
     if (classAtt.isNominal()) {
       if (m_schemeProducesProbs) {
@@ -1177,8 +1200,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
         for (int j = 0; j < inst.numAttributes(); j++) {
           if (inst.attribute(j).isNominal() && !inst.isMissing(j)) {
-            int index = m_testHeader.attribute(j).indexOfValue(
-              inst.stringValue(j));
+            int index =
+              m_testHeader.attribute(j).indexOfValue(inst.stringValue(j));
             if (index < 0) {
               // replace with missing value
               inst = (Instance) inst.copy();
@@ -1269,8 +1292,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       toPush.compactify();
       RUtils.instancesToDataFrame(eng, this, toPush, "weka_r_test");
 
-      String testB = "p <- predict(weka_r_model" + m_modelHash
-        + ", newdata = weka_r_test)";
+      String testB =
+        "p <- predict(weka_r_model" + m_modelHash + ", newdata = weka_r_test)";
 
       if (m_Debug) {
         System.err.println("Excuting prediction: ");
@@ -1286,8 +1309,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       REXP result = eng.parseAndEval(this, "p");
 
-      probs = frameToPreds(eng, result, insts.classAttribute(),
-        insts.numInstances());
+      probs =
+        frameToPreds(eng, result, insts.classAttribute(), insts.numInstances());
 
       eng.parseAndEval(this, "remove(p)");
     } catch (Exception ex) {
@@ -1343,8 +1366,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       for (int j = 0; j < inst.numAttributes(); j++) {
         if (inst.attribute(j).isNominal() && !inst.isMissing(j)) {
-          int index = m_testHeader.attribute(j).indexOfValue(
-            inst.stringValue(j));
+          int index =
+            m_testHeader.attribute(j).indexOfValue(inst.stringValue(j));
           if (index < 0) {
             // replace with missing value
             inst = (Instance) inst.copy();
@@ -1440,8 +1463,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       RUtils.instancesToDataFrame(eng, this, m_testHeader, "weka_r_test");
 
-      String testB = "p <- predict(weka_r_model" + m_modelHash
-        + ", newdata = weka_r_test)";
+      String testB =
+        "p <- predict(weka_r_model" + m_modelHash + ", newdata = weka_r_test)";
 
       if (m_Debug) {
         System.err.println("Excuting prediction: ");
