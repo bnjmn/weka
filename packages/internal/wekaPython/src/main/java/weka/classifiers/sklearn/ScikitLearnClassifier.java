@@ -646,6 +646,16 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
   }
 
   /**
+   * Returns true, as we send entire test sets over to python for prediction
+   *
+   * @return true
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return true;
+  }
+
+  /**
    * Set whether to try and continue after seeing output on the sys error
    * stream. Some schemes write warnings (rather than errors) to sys error.
    *
@@ -777,7 +787,8 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     try {
       PythonSession session = PythonSession.acquireSession(this);
       // transfer the data over to python
-      session.instancesToPythonAsScikitLearn( data, TRAINING_DATA_ID, getDebug() );
+      session
+        .instancesToPythonAsScikitLearn(data, TRAINING_DATA_ID, getDebug());
 
       StringBuilder learnScript = new StringBuilder();
       learnScript.append("from sklearn import *").append("\n")
@@ -880,7 +891,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     double[][] results = null;
     try {
       PythonSession session = PythonSession.acquireSession(this);
-      session.instancesToPythonAsScikitLearn( insts, TEST_DATA_ID, getDebug() );
+      session.instancesToPythonAsScikitLearn(insts, TEST_DATA_ID, getDebug());
       StringBuilder predictScript = new StringBuilder();
 
       // check if model exists in python. If not, then transfer it over

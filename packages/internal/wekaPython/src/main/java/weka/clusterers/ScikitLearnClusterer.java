@@ -191,7 +191,6 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
     return b.toString();
   }
 
-
   /**
    * Get the capabilities of this learner
    *
@@ -294,6 +293,16 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
   }
 
   /**
+   * Return true as we send entire test sets over to python for prediction
+   *
+   * @return true
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return true;
+  }
+
+  /**
    * Set whether to try and continue after seeing output on the sys error
    * stream.
    *
@@ -357,7 +366,8 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
     try {
       PythonSession session = PythonSession.acquireSession(this);
 
-      session.instancesToPythonAsScikitLearn( data, TRAINING_DATA_ID, getDebug() );
+      session
+        .instancesToPythonAsScikitLearn(data, TRAINING_DATA_ID, getDebug());
 
       // learn the clusterer and predict the training data + get the
       // set of unique clusters (so that we know how many clusters were
@@ -480,7 +490,7 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
 
     try {
       PythonSession session = PythonSession.acquireSession(this);
-      session.instancesToPythonAsScikitLearn( insts, TEST_DATA_ID, getDebug() );
+      session.instancesToPythonAsScikitLearn(insts, TEST_DATA_ID, getDebug());
       StringBuilder predictScript = new StringBuilder();
 
       // check if model exists in python. If not, then transfer it over

@@ -21,7 +21,10 @@
 
 package weka.gui.beans;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.GridLayout;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -29,15 +32,28 @@ import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
 import java.io.FileWriter;
-import java.util.Properties;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JEditorPane;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.KeyStroke;
+import javax.swing.SwingConstants;
 import javax.swing.text.BadLocationException;
 
 import jsyntaxpane.DefaultSyntaxKit;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
-import weka.core.Utils;
+import weka.gui.EnvironmentField;
+import weka.gui.FileEnvironmentField;
 import weka.gui.PropertySheetPanel;
 import weka.python.PythonSession;
 

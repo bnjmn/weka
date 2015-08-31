@@ -6,10 +6,10 @@
 PackageName=wekaPython
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2015-07-01
+Date=2015-08-31
 
 # Title (required)
 Title=Class for building and using a decision table/naive Bayes hybrid classifier.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Integration with CPython for Weka. Python version 2.7.x or higher is required. Also requires the following packages to be installed in python: numpy, pandas, matplotlib and scikit-learn. This package provides a wrapper classifier and clusterer that, between them, cover 60+ scikit-learn algorithms. It also provides a general scripting step for the Knowlege Flow along with scripting plugin environments for the Explorer and Knowledge Flow.
 
-# Changes=
+Changes=Small changes to ScikitLearnClassifier and ScikitLearnClusterer to accomodate the extra method now in the BatchPredictor interface.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaPython1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaPython1.0.1.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2015/06/cpython-integration-in-weka.html
