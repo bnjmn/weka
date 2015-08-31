@@ -397,6 +397,18 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String batchSizeTipText() {
+    return "The preferred number of instances to process if batch prediction is "
+      + "being performed. More or fewer instances may be provided, but this gives "
+      + "implementations a chance to specify a preferred batch size.";
+  }
+
+  /**
    * Set the preferred batch size for batch prediction.
    * 
    * @param size the batch size to use
