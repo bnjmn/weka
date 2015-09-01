@@ -21,13 +21,13 @@
 
 package weka.gui.beans;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 import java.util.regex.Pattern;
-import java.io.Serializable;
 
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -107,8 +107,9 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
     boolean consumeNonMatching, boolean nominalBinary,
     Instances inputStructure, String statusMessagePrefix, Logger log,
     Environment env) throws Exception {
-    m_matchRules = matchRulesFromInternal(matchDetails, inputStructure,
-      statusMessagePrefix, log, env);
+    m_matchRules =
+      matchRulesFromInternal(matchDetails, inputStructure, statusMessagePrefix,
+        log, env);
 
     m_inputStructure = new Instances(inputStructure, 0);
     m_attName = newAttName;
@@ -240,13 +241,14 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
     String matchDetails, Instances inputStructure, String statusMessagePrefix,
     Logger log, Environment env) {
 
-    List<SubstringLabelerMatchRule> matchRules = new ArrayList<SubstringLabelerMatchRule>();
+    List<SubstringLabelerMatchRule> matchRules =
+      new ArrayList<SubstringLabelerMatchRule>();
 
     String[] matchParts = matchDetails.split(MATCH_RULE_SEPARATOR);
     for (String p : matchParts) {
       SubstringLabelerMatchRule m = new SubstringLabelerMatchRule(p.trim());
-      m.m_statusMessagePrefix = statusMessagePrefix == null ? ""
-        : statusMessagePrefix;
+      m.m_statusMessagePrefix =
+        statusMessagePrefix == null ? "" : statusMessagePrefix;
       m.m_logger = log;
       m.init(env, inputStructure);
       matchRules.add(m);
@@ -291,8 +293,8 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
         }
       }
 
-      m_outputStructure = (Instances) (new SerializedObject(m_inputStructure)
-        .getObject());
+      m_outputStructure =
+        (Instances) (new SerializedObject(m_inputStructure).getObject());
       Attribute newAtt = null;
       if (m_hasLabels) {
         newAtt = new Attribute(m_attName, labelVec);
@@ -370,8 +372,8 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
 
       if (label != null) {
         if (m_hasLabels) {
-          vals[newAttIndex] = m_outputStructure.attribute(m_attName)
-            .indexOfValue(label);
+          vals[newAttIndex] =
+            m_outputStructure.attribute(m_attName).indexOfValue(label);
         } else {
           vals[newAttIndex] = 1;
         }
@@ -399,10 +401,12 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
    * 
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
-  public static class SubstringLabelerMatchRule {
+  public static class SubstringLabelerMatchRule implements Serializable {
 
     /** Separator for parts of the match specification */
     public static final String MATCH_PART_SEPARATOR = "@@MR@@";
+
+    private static final long serialVersionUID = 6518104085439241523L;
 
     /** The substring literal/regex to use for matching */
     protected String m_match = "";
@@ -620,8 +624,8 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
 
       // Try a range first for the attributes
       String tempRangeS = attsToApplyToS;
-      tempRangeS = tempRangeS.replace("/first", "first").replace("/last",
-        "last");
+      tempRangeS =
+        tempRangeS.replace("/first", "first").replace("/last", "last");
       Range tempR = new Range();
       tempR.setRanges(attsToApplyToS);
       try {
@@ -648,8 +652,9 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
               indexes.add(new Integer(structure.attribute(att).index()));
             } else {
               if (m_logger != null) {
-                String msg = m_statusMessagePrefix + "Can't find attribute '"
-                  + att + "in the incoming instances - ignoring";
+                String msg =
+                  m_statusMessagePrefix + "Can't find attribute '" + att
+                    + "in the incoming instances - ignoring";
                 m_logger.logMessage(msg);
               }
             }
@@ -670,9 +675,10 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
           indexes.add(m_selectedAtt);
         } else {
           if (m_logger != null) {
-            String msg = m_statusMessagePrefix + "Attribute '"
-              + structure.attribute(m_selectedAtt).name()
-              + "is not a string attribute - " + "ignoring";
+            String msg =
+              m_statusMessagePrefix + "Attribute '"
+                + structure.attribute(m_selectedAtt).name()
+                + "is not a string attribute - " + "ignoring";
             m_logger.logMessage(msg);
           }
         }
@@ -763,7 +769,12 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
       return buff.toString();
     }
 
-    protected String toStringInternal() {
+    /**
+     * Get the internal representation of this rule
+     *
+     * @return a string formatted in the internal representation
+     */
+    public String toStringInternal() {
 
       // return a string in internal format that is
       // easy to parse all the data out of

@@ -174,7 +174,9 @@ public class SubstringReplacerRules implements EnvironmentHandler, Serializable 
    * 
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
-  public static class SubstringReplacerMatchRule {
+  public static class SubstringReplacerMatchRule implements Serializable {
+
+    private static final long serialVersionUID = 5792838913737819728L;
 
     /** The substring literal/regex to use for matching */
     protected String m_match = "";
