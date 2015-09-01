@@ -962,6 +962,15 @@ public class PropertySheetPanel extends JPanel implements
   }
 
   /**
+   * Returns true if the object being edited has a customizer
+   *
+   * @return true if the object being edited has a customizer
+   */
+  public boolean hasCustomizer() {
+    return m_Customizer != null;
+  }
+
+  /**
    * Updates the propertysheet when a value has been changed (from outside the
    * propertysheet?).
    *
