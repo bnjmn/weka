@@ -436,7 +436,6 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * @return true if this classifier can generate batch predictions in an
    *         efficient manner.
    */
-  @Override
   public boolean implementsMoreEfficientBatchPrediction() {
     return false;
   }
