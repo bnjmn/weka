@@ -8,7 +8,7 @@ PackageName=RPlugin
 Version=1.1.9
 
 #Date (year-month-day)
-Date=2015-08-31
+Date=2015-09-02
 
 # Title (required)
 Title=Execute R Scripts
@@ -44,7 +44,7 @@ Changes=Small change to MLRClassifier to accomodate the extra method now in the 
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.5)
+Depends=weka (>=3.7.13-SNAPSHOT)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
