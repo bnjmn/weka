@@ -291,6 +291,7 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
       }
       eng = RSession.acquireSession(this);
       eng.setLog(this, m_logWrapper);
+      eng.clearConsoleBuffer(this);
     } catch (Exception ex) {
       stop();
       if (m_logWrapper != null) {
