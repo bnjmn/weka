@@ -186,11 +186,11 @@ public class RScriptExecutorCustomizer extends JPanel implements
 
     JScrollPane editorScroller = new JScrollPane(m_scriptEditor);
     editorScroller.setBorder(BorderFactory.createTitledBorder("R Script"));
-    editorPan.add(editorScroller, BorderLayout.NORTH);
+    editorPan.add(editorScroller, BorderLayout.CENTER);
     add(editorPan, BorderLayout.CENTER);
     Dimension d = new Dimension(450, 100);
-    m_scriptEditor.setMinimumSize(d);
-    m_scriptEditor.setPreferredSize(d);
+    editorScroller.setMinimumSize(d);
+    // m_scriptEditor.setPreferredSize(d);
 
     JPanel scriptLoaderP = new JPanel();
     scriptLoaderP.setLayout(new GridLayout(0, 2));
