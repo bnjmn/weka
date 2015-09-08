@@ -588,7 +588,6 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    *
    * @return true
    */
-  @Override
   public boolean implementsMoreEfficientBatchPrediction() {
     return true;
   }

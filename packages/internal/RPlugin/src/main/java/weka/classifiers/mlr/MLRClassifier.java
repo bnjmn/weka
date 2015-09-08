@@ -513,7 +513,6 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
    *
    * @return true
    */
-  @Override
   public boolean implementsMoreEfficientBatchPrediction() {
     return true;
   }
