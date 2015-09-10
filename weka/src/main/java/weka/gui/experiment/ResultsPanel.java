@@ -138,7 +138,7 @@ public class ResultsPanel extends JPanel {
    * 
    * @see Tester
    */
-  protected static DefaultComboBoxModel m_TesterClassesModel = new DefaultComboBoxModel(
+  protected DefaultComboBoxModel m_TesterClassesModel = new DefaultComboBoxModel(
     FOR_JFC_1_1_DCBM_BUG);
 
   /**
@@ -148,38 +148,13 @@ public class ResultsPanel extends JPanel {
    * @see Tester
    */
   protected static Vector<Class<?>> m_Testers = null;
-
-  /**
-   * determine all classes implementing the Tester interface (in the same
-   * package!).
-   * 
-   * @see Tester
-   */
-  static {
-    Vector<String> classes = GenericObjectEditor.getClassnames(Tester.class
-      .getName());
-
-    // set names and classes
-    m_Testers = new Vector<Class<?>>();
-    m_TesterClassesModel = new DefaultComboBoxModel();
-    for (int i = 0; i < classes.size(); i++) {
-      try {
-        Class<?> cls = Class.forName(classes.get(i).toString());
-        Tester tester = (Tester) cls.newInstance();
-        m_Testers.add(cls);
-        m_TesterClassesModel.addElement(tester.getDisplayName());
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-  }
-
+  
   /**
    * Lists all the available classes implementing the Tester-Interface.
    * 
    * @see Tester
    */
-  protected JComboBox m_TesterClasses = new JComboBox(m_TesterClassesModel);
+  protected JComboBox m_TesterClasses;
 
   /** Label for the dataset and result key buttons. */
   protected JLabel m_DatasetAndResultKeysLabel = new JLabel(
@@ -296,6 +271,25 @@ public class ResultsPanel extends JPanel {
    * Creates the results panel with no initial experiment.
    */
   public ResultsPanel() {
+
+    Vector<String> classes = GenericObjectEditor.getClassnames(Tester.class
+      .getName());
+
+    // set names and classes
+    m_Testers = new Vector<Class<?>>();
+    m_TesterClassesModel = new DefaultComboBoxModel();
+    for (int i = 0; i < classes.size(); i++) {
+      try {
+        Class<?> cls = Class.forName(classes.get(i).toString());
+        Tester tester = (Tester) cls.newInstance();
+        m_Testers.add(cls);
+        m_TesterClassesModel.addElement(tester.getDisplayName());
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    }
+
+    m_TesterClasses = new JComboBox(m_TesterClassesModel);
 
     // defaults
     m_TTester.setSignificanceLevel(ExperimenterDefaults.getSignificance());
