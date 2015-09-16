@@ -43,6 +43,7 @@ import javax.swing.border.TitledBorder;
 
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.Utils;
 import weka.gui.visualize.PrintableComponent;
 import weka.gui.visualize.VisualizeUtils;
 
@@ -211,6 +212,8 @@ public class StripChart extends JPanel implements ChartListener,
    */
   private int m_refreshWidth = 1;
 
+  private int m_userRefreshWidth = 1;
+
   /**
    * Plot every m_refreshFrequency'th point
    */
@@ -276,7 +279,7 @@ public class StripChart extends JPanel implements ChartListener,
   public void setXLabelFreq(int freq) {
     m_xValFreq = freq;
     if (getGraphics() != null) {
-      setRefreshWidth();
+      setRefreshGap();
     }
   }
 
@@ -291,7 +294,7 @@ public class StripChart extends JPanel implements ChartListener,
 
   /**
    * GUI Tip text
-   * 
+   *
    * @return a <code>String</code> value
    */
   public String refreshFreqTipText() {
@@ -306,7 +309,7 @@ public class StripChart extends JPanel implements ChartListener,
   public void setRefreshFreq(int freq) {
     m_refreshFrequency = freq;
     if (getGraphics() != null) {
-      setRefreshWidth();
+      setRefreshGap();
     }
   }
 
@@ -319,8 +322,38 @@ public class StripChart extends JPanel implements ChartListener,
     return m_refreshFrequency;
   }
 
-  private void setRefreshWidth() {
-    m_refreshWidth = 1;
+  /**
+   * GUI Tip text
+   *
+   * @return a <code>String</code> value
+   */
+  public String refreshWidthTipText() {
+    return "The number of pixels to shift the plot by every time a point"
+      + " is plotted.";
+  }
+
+  /**
+   * Set how many pixels to shift the plot by every time a point is plotted
+   *
+   * @param width the number of pixels to shift the plot by
+   */
+  public void setRefreshWidth(int width) {
+    if (width > 0) {
+      m_userRefreshWidth = width;
+    }
+  }
+
+  /**
+   * Get how many pixels to shift the plot by every time a point is plotted
+   *
+   * @return the number of pixels to shift the plot by
+   */
+  public int getRefreshWidth() {
+    return m_userRefreshWidth;
+  }
+
+  private void setRefreshGap() {
+    m_refreshWidth = m_userRefreshWidth;
     if (m_labelMetrics == null) {
       getGraphics().setFont(m_labelFont);
       m_labelMetrics = getGraphics().getFontMetrics(m_labelFont);
@@ -476,7 +509,7 @@ public class StripChart extends JPanel implements ChartListener,
       m.setColor(m_BackgroundColor);
       m.fillRect(0, 0, iwidth, iheight);
       m_previousY[0] = -1;
-      setRefreshWidth();
+      setRefreshGap();
       if (m_updateHandler == null) {
         System.err.println("Starting handler");
         startHandler();
@@ -551,6 +584,9 @@ public class StripChart extends JPanel implements ChartListener,
 
     double pos;
     for (int i = 0; i < dataPoint.length - 1; i++) {
+      if (Utils.isMissingValue(dataPoint[i])) {
+        continue;
+      }
       osg.setColor(m_colorList[(i % m_colorList.length)]);
       pos = convertToPanelY(dataPoint[i]);
       osg.drawLine(m_iwidth - m_refreshWidth, (int) m_previousY[i],
