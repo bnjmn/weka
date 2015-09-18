@@ -113,7 +113,11 @@ public class WekaScoringMapTask implements Serializable {
      * @return return true if the underlying model is a BatchPredictor
      */
     public boolean isBatchPredicor() {
-      return getModel() == null ? false : getModel() instanceof BatchPredictor;
+      if (!(getModel() instanceof BatchPredictor)) {
+        return false;
+      }
+      return (((BatchPredictor) getModel())
+        .implementsMoreEfficientBatchPrediction());
     }
 
     /**
@@ -414,6 +418,21 @@ public class WekaScoringMapTask implements Serializable {
     }
 
     buildAttributeMap(modelHeader, dataHeader);
+  }
+
+  /**
+   * Update the underlying model for this scoring task
+   * 
+   * @param model the new model to use
+   * @throws DistributedWekaException if the task has not yet been initialized
+   *           by calling setModel().
+   */
+  public void updateModel(Object model) throws DistributedWekaException {
+    if (m_model == null) {
+      throw new DistributedWekaException("Must set a model before it can be "
+        + "updated!");
+    }
+    m_model.setModel(model);
   }
 
   /**
