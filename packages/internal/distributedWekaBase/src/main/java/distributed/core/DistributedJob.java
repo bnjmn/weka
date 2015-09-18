@@ -33,6 +33,7 @@ import weka.core.*;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.DistributedWekaException;
 import weka.gui.Logger;
+import weka.gui.ProgrammaticProperty;
 
 /**
  * Abstract base class for all distributed jobs.
@@ -218,6 +219,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    *
    * @param jobName the name to use
    */
+  @ProgrammaticProperty
   public void setJobName(String jobName) {
     m_jobName = environmentSubstitute(jobName);
   }
@@ -255,6 +257,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    *
    * @param status the status of the job
    */
+  @ProgrammaticProperty
   public void setJobStatus(JobStatus status) {
     m_status = status;
   }
