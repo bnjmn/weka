@@ -64,6 +64,7 @@ public class CSVToInstanceFlatMapFunction implements
     m_rowHelper = new CSVToARFFHeaderMapTask();
     try {
       m_header = CSVToARFFHeaderReduceTask.stripSummaryAtts(m_header);
+      m_header = m_header.stringFreeStructure();
       m_rowHelper.setOptions(Utils.splitOptions(m_csvOpts));
       m_rowHelper.initParserOnly(CSVToARFFHeaderMapTask
         .instanceHeaderToAttributeNameList(m_header));
@@ -73,10 +74,17 @@ public class CSVToInstanceFlatMapFunction implements
 
     while (split.hasNext()) {
       // accumulate String atts in memory
-      Instance inst =
-        DistributedJob
-          .parseInstance(split.next(), m_rowHelper, m_header, false);
-      m_list.add(inst);
+      String nextS = split.next();
+      try {
+        Instance inst =
+          DistributedJob.parseInstance(nextS, m_rowHelper, m_header, false);
+        m_list.add(inst);
+      } catch (IOException ex) {
+        System.err
+          .println("[CSVToInstanceFlatMapFunction] Problem parsing row (discarded): "
+            + nextS);
+        // throw new DistributedWekaException(ex);
+      }
     }
 
     return m_list;
