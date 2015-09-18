@@ -28,7 +28,7 @@
                <object class="java.lang.String" name="animatedIconPath">weka/gui/beans/icons/ARFFHeaderSparkJob.gif</object>
             </object>
             <object class="java.lang.String" name="customName">ArffHeaderSparkJob</object>
-            <object class="java.lang.String" name="jobOptions">-names-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -master local[*] -input-file ${user.home}/wekafiles/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compute-quartiles -compression 50.0</object>
+            <object class="java.lang.String" name="jobOptions">-names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -master local[*] -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E &apos; -F , -compute-quartiles -compression 50.0</object>
          </object>
       </object>
       <object class="weka.gui.beans.BeanInstance" name="1">
