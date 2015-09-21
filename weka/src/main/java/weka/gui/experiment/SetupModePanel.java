@@ -150,8 +150,10 @@ public class SetupModePanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void addPropertyChangeListener(PropertyChangeListener l) {
-    for (AbstractSetupPanel panel: m_Panels)
-      panel.addPropertyChangeListener(l);
+    if (m_Panels != null) {
+      for (AbstractSetupPanel panel : m_Panels)
+        panel.addPropertyChangeListener(l);
+    }
   }
 
   /**
@@ -160,8 +162,10 @@ public class SetupModePanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
-    for (AbstractSetupPanel panel: m_Panels)
-      panel.removePropertyChangeListener(l);
+    if (m_Panels != null) {
+      for (AbstractSetupPanel panel : m_Panels)
+        panel.removePropertyChangeListener(l);
+    }
   }
 
   /**

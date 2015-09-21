@@ -895,7 +895,9 @@ public class SimpleSetupPanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void addPropertyChangeListener(PropertyChangeListener l) {
-    m_Support.addPropertyChangeListener(l);
+    if (m_Support != null && l != null) {
+      m_Support.addPropertyChangeListener(l);
+    }
   }
 
   /**
@@ -904,7 +906,9 @@ public class SimpleSetupPanel
    * @param l a value of type 'PropertyChangeListener'
    */
   public void removePropertyChangeListener(PropertyChangeListener l) {
-    m_Support.removePropertyChangeListener(l);
+    if (m_Support != null && l != null) {
+      m_Support.removePropertyChangeListener(l);
+    }
   }
 
   /**

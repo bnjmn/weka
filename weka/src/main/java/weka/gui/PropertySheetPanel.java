@@ -385,7 +385,10 @@ public class PropertySheetPanel extends JPanel implements
    */
   @Override
   public void addPropertyChangeListener(PropertyChangeListener l) {
-    support.addPropertyChangeListener(l);
+
+    if (support != null && l != null) {
+      support.addPropertyChangeListener(l);
+    }
   }
 
   /**
@@ -395,7 +398,10 @@ public class PropertySheetPanel extends JPanel implements
    */
   @Override
   public void removePropertyChangeListener(PropertyChangeListener l) {
-    support.removePropertyChangeListener(l);
+
+    if (support != null && l != null) {
+      support.removePropertyChangeListener(l);
+    }
   }
 
   /**

@@ -384,7 +384,10 @@ public class BeanVisual extends JPanel {
    */
   @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
-    m_pcs.addPropertyChangeListener(pcl);
+
+    if (m_pcs != null && pcl != null) {
+      m_pcs.addPropertyChangeListener(pcl);
+    }
   }
 
   /**
@@ -394,7 +397,10 @@ public class BeanVisual extends JPanel {
    */
   @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
-    m_pcs.removePropertyChangeListener(pcl);
+
+    if (m_pcs != null && pcl != null) {
+      m_pcs.removePropertyChangeListener(pcl);
+    }
   }
 
   @Override
