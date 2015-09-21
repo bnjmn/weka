@@ -89,7 +89,7 @@ import weka.core.Environment;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.core.WekaPackageManager;
-import weka.gui.beans.FileEnvironmentField;
+import weka.gui.FileEnvironmentField;
 
 /**
  * A GUI interface the the package management system.

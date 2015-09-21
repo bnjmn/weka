@@ -305,12 +305,16 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
 
   @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.addPropertyChangeListener(pcl);
+    if (m_support != null && pcl != null) {
+      m_support.addPropertyChangeListener(pcl);
+    }
   }
 
   @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.removePropertyChangeListener(pcl);
+    if (m_support != null && pcl != null) {
+      m_support.removePropertyChangeListener(pcl);
+    }
   }
 
   @Override
