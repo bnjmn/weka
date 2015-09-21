@@ -53,6 +53,13 @@ public class ItemSet implements Serializable, RevisionHandler {
   /** Counter for how many transactions contain this item set. */
   protected int m_counter;
 
+  /**
+   * Holds support of consequence only in the case where this ItemSet is
+   * a consequence of a rule (as m_counter in this case actually holds the
+   * support of the rule as a whole, i.e. premise and consequence)
+   */
+  protected int m_secondaryCounter;
+
   /** The total number of transactions */
   protected int m_totalTransactions;
 

@@ -180,6 +180,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         Hashtable<ItemSet, Integer> hashtableForConsequence = hashtables.get(0);
         int consequenceUnconditionedCounter = hashtableForConsequence.get(
           consequence).intValue();
+        consequence.m_secondaryCounter = consequenceUnconditionedCounter;
 
         premises.add(premise);
         consequences.add(consequence);
@@ -293,6 +294,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         premise.m_counter = hashtableForPremise.get(premise).intValue();
         consequenceUnconditionedCounter = hashtableForConsequence.get(
           consequence).intValue();
+        consequence.m_secondaryCounter = consequenceUnconditionedCounter;
 
         if (significanceLevel != -1) {
           contingencyTable[0][0] = (consequence.m_counter);
@@ -440,6 +442,7 @@ public class AprioriItemSet extends ItemSet implements Serializable,
         // if (rules.length > 3) {
         int consequenceUnconditionedCounter = hashtableForConsequence.get(
           current).intValue();
+        current.m_secondaryCounter = consequenceUnconditionedCounter;
 
         double tempLift = liftForRule(newPremise, current,
           consequenceUnconditionedCounter);

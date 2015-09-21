@@ -1889,10 +1889,7 @@ public class Apriori extends AbstractAssociator implements OptionHandler,
         int totalTrans = premiseSet.m_totalTransactions;
         int totalSupport = consequenceSet.m_counter;
         int premiseSupport = premiseSet.m_counter;
-        // reconstruct consequenceSupport using Lift:
-        double lift = ((Double) m_allTheRules[3].get(i)).doubleValue();
-        double conf = ((Double) m_allTheRules[2].get(i)).doubleValue();
-        int consequenceSupport = (int) ((totalTrans * conf) / lift);
+        int consequenceSupport = consequenceSet.m_secondaryCounter;
 
         // map the primary metric
         DefaultAssociationRule.METRIC_TYPE metric = null;
