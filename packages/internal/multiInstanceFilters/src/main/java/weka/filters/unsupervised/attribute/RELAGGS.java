@@ -123,7 +123,7 @@ public class RELAGGS extends SimpleBatchFilter implements
    * stores the attribute statistics
    * <code>att_index-att_index_in_rel_att &lt;-&gt; AttributeStats</code>
    */
-  protected Hashtable<String, AttributeStats> m_AttStats = new Hashtable<String, AttributeStats>();
+  protected Hashtable<String, AttributeStats> m_AttStats = null;
 
   /**
    * Returns a string describing this filter
@@ -524,7 +524,7 @@ public class RELAGGS extends SimpleBatchFilter implements
     result = getOutputFormat();
 
     // initialize attribute statistics
-    m_AttStats.clear();
+    m_AttStats = new Hashtable<String, AttributeStats>();
 
     // collect data for all relational attributes
     for (i = 0; i < instances.numAttributes(); i++) {
@@ -560,14 +560,11 @@ public class RELAGGS extends SimpleBatchFilter implements
     // convert data
     for (k = 0; k < instances.numInstances(); k++) {
       inst = instances.instance(k);
-      newInst = new DenseInstance(result.numAttributes());
-      newInst.setWeight(inst.weight());
-
+      double[] values = new double[result.numAttributes()];
       l = 0;
       for (i = 0; i < instances.numAttributes(); i++) {
         if (!instances.attribute(i).isRelationValued()) {
-          newInst.setValue(l, inst.value(i));
-          l++;
+          values[l++] = inst.value(i);
         } else {
           if (!m_SelectedRange.isInRange(i)) {
             continue;
@@ -580,27 +577,21 @@ public class RELAGGS extends SimpleBatchFilter implements
             stats = m_AttStats.get(k + "-" + i + "-" + n);
 
             if (att.isNumeric()) {
-              newInst.setValue(l, stats.numericStats.min);
-              l++;
-              newInst.setValue(l, stats.numericStats.max);
-              l++;
-              newInst.setValue(l, stats.numericStats.mean);
-              l++;
-              newInst.setValue(l, stats.numericStats.stdDev);
-              l++;
-              newInst.setValue(l, stats.numericStats.sum);
-              l++;
-            } else if (att.isNominal() && att.numValues() <= m_MaxCardinality) {
+              values[l++] = stats.numericStats.min;
+              values[l++] = stats.numericStats.max;
+              values[l++] = stats.numericStats.mean;
+              values[l++] = stats.numericStats.stdDev;
+              values[l++] = stats.numericStats.sum;
+          } else if (att.isNominal() && att.numValues() <= m_MaxCardinality) {
               for (m = 0; m < att.numValues(); m++) {
-                newInst.setValue(l, stats.nominalCounts[m]);
-                l++;
+                values[l++] =  stats.nominalCounts[m];
               }
             }
           }
         }
       }
 
-      result.add(newInst);
+      result.add(new DenseInstance(inst.weight(), values));
     }
 
     return result;
