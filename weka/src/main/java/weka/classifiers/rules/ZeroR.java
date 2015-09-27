@@ -121,10 +121,6 @@ public class ZeroR extends AbstractClassifier implements
     // can classifier handle the data?
     getCapabilities().testWithFail(instances);
 
-    // remove instances with missing class
-    instances = new Instances(instances);
-    instances.deleteWithMissingClass();
-
     double sumOfWeights = 0;
 
     m_Class = instances.classAttribute();
@@ -141,14 +137,13 @@ public class ZeroR extends AbstractClassifier implements
       sumOfWeights = instances.numClasses();
       break;
     }
-    Enumeration<Instance> enu = instances.enumerateInstances();
-    while (enu.hasMoreElements()) {
-      Instance instance = enu.nextElement();
-      if (!instance.classIsMissing()) {
+    for (Instance instance : instances) {
+      double classValue = instance.classValue();
+      if (!Utils.isMissingValue(classValue)) {
         if (instances.classAttribute().isNominal()) {
-          m_Counts[(int) instance.classValue()] += instance.weight();
+          m_Counts[(int) classValue] += instance.weight();
         } else {
-          m_ClassValue += instance.weight() * instance.classValue();
+          m_ClassValue += instance.weight() * classValue;
         }
         sumOfWeights += instance.weight();
       }
