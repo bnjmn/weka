@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Vector;
 
 import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
 import weka.core.DenseInstance;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -43,15 +44,13 @@ import weka.core.SerializedObject;
 import weka.core.Utils;
 
 /**
- <!-- globalinfo-start --> 
-  * Loads all text files in a directory and uses the
+ * <!-- globalinfo-start --> Loads all text files in a directory and uses the
  * subdirectory names as class labels. The content of the text files will be
  * stored in a String attribute, the filename can be stored as well.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start --> 
- * Valid options are:
+ * <!-- options-start --> Valid options are:
  * <p/>
  * 
  * <pre>
@@ -83,7 +82,7 @@ import weka.core.Utils;
  *  Retain all string attribute values when reading incrementally.
  * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * Based on code from the TextDirectoryToArff tool:
  * <ul>
@@ -104,7 +103,7 @@ import weka.core.Utils;
  * @see Loader
  */
 public class TextDirectoryLoader extends AbstractLoader implements
-  BatchConverter, IncrementalConverter, OptionHandler {
+  BatchConverter, IncrementalConverter, OptionHandler, CommandlineRunnable {
 
   /** for serialization */
   private static final long serialVersionUID = 2592118773712247647L;
@@ -177,8 +176,7 @@ public class TextDirectoryLoader extends AbstractLoader implements
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are:
+   * <!-- options-start --> Valid options are:
    * <p/>
    * 
    * <pre>
@@ -205,7 +203,7 @@ public class TextDirectoryLoader extends AbstractLoader implements
    *  (default: use the default character set)
    * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the options
    * @throws Exception if options cannot be set
@@ -652,9 +650,20 @@ public class TextDirectoryLoader extends AbstractLoader implements
    * @param args should contain the name of an input file.
    */
   public static void main(String[] args) {
+    TextDirectoryLoader loader = new TextDirectoryLoader();
+    loader.run(loader, args);
+  }
+
+  @Override
+  public void run(Object toRun, String[] args) throws IllegalArgumentException {
+    if (!(toRun instanceof TextDirectoryLoader)) {
+      throw new IllegalArgumentException("Object to execute is not a "
+        + "TextDirectoryLoader!");
+    }
+
+    TextDirectoryLoader loader = (TextDirectoryLoader) toRun;
     if (args.length > 0) {
       try {
-        TextDirectoryLoader loader = new TextDirectoryLoader();
         loader.setOptions(args);
         // System.out.println(loader.getDataSet());
         Instances structure = loader.getStructure();
