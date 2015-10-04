@@ -176,7 +176,11 @@ public class JSONNode extends DefaultMutableTreeNode {
     if (m_Value == null) {
       return defValue;
     } else {
-      return m_Value;
+      if (m_Value instanceof String) {
+        return unescape(m_Value.toString());
+      } else {
+        return m_Value;
+      }
     }
   }
 
@@ -431,7 +435,7 @@ public class JSONNode extends DefaultMutableTreeNode {
 
   /**
    * Escapes ", /, \b, \f, \n, \r, \t.
-   * 
+   *
    * @param s the string to process
    * @return the processed
    */
@@ -470,6 +474,53 @@ public class JSONNode extends DefaultMutableTreeNode {
     }
 
     return result.toString();
+  }
+
+  /**
+   * Un-escapes ", /, \b, \f, \n, \r, \t.
+   *
+   * @param s the string to process
+   * @return the processed string
+   */
+  protected String unescape(String s) {
+    StringBuilder newStringBuffer;
+    int index;
+
+    // replace each of the following characters with the backquoted version
+    String charsFind[] =
+      { "\\\\", "\\'", "\\t", "\\n", "\\r", "\\b", "\\f", "\\\"", "\\%",
+        "\\u001E" };
+    char charsReplace[] =
+      { '\\', '\'', '\t', '\n', '\r', '\b', '\f', '"', '%', '\u001E' };
+    int pos[] = new int[charsFind.length];
+    int curPos;
+
+    String str = new String(s);
+    newStringBuffer = new StringBuilder();
+    while (str.length() > 0) {
+      // get positions and closest character to replace
+      curPos = str.length();
+      index = -1;
+      for (int i = 0; i < pos.length; i++) {
+        pos[i] = str.indexOf(charsFind[i]);
+        if ((pos[i] > -1) && (pos[i] < curPos)) {
+          index = i;
+          curPos = pos[i];
+        }
+      }
+
+      // replace character if found, otherwise finished
+      if (index == -1) {
+        newStringBuffer.append(str);
+        str = "";
+      } else {
+        newStringBuffer.append(str.substring(0, pos[index]));
+        newStringBuffer.append(charsReplace[index]);
+        str = str.substring(pos[index] + charsFind[index].length());
+      }
+    }
+
+    return newStringBuffer.toString();
   }
 
   /**
