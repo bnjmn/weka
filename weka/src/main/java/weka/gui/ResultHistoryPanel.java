@@ -353,6 +353,17 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
+   * Set the selected list entry. Note, does not update the single
+   * click display to the corresponding named result - use setSingle()
+   * to set the selected list entry and view the corresponding result
+   *
+   * @param name the name of the list entry to be selected
+   */
+  public void setSelectedListValue(String name) {
+    m_List.setSelectedValue(name, true);
+  }
+
+  /**
    * Opens the named result in a separate frame.
    * 
    * @param name the name of the result to open.
