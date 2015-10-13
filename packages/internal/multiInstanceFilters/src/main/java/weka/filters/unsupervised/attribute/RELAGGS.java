@@ -26,28 +26,16 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.AttributeStats;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 
 /**
  * <!-- globalinfo-start --> A propositionalization filter inspired by the
  * RELAGGS algorithm.<br/>
- * It processes all relational attributes that fall into the user defined range
- * (all others are skipped, i.e., not added to the output). Currently, the
+ * It processes all relational attributes that fall into the user defined range. Currently, the
  * filter only processes one level of nesting.<br/>
  * The class attribute is not touched.<br/>
  * <br/>
@@ -135,8 +123,7 @@ public class RELAGGS extends SimpleBatchFilter implements
   public String globalInfo() {
     return "A propositionalization filter inspired by the RELAGGS algorithm.\n"
       + "It processes all relational attributes that fall into the user defined "
-      + "range (all others are skipped, i.e., not added to the output). "
-      + "Currently, the filter only processes one level of nesting.\n"
+      + "range. Currently, the filter only processes one level of nesting.\n"
       + "The class attribute is not touched.\n" + "\n"
       + "For more information see:\n\n" + getTechnicalInformation().toString();
   }
@@ -388,6 +375,7 @@ public class RELAGGS extends SimpleBatchFilter implements
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capability.DATE_ATTRIBUTES);
     result.enable(Capability.RELATIONAL_ATTRIBUTES);
+    result.enable(Capability.STRING_ATTRIBUTES);
     result.enable(Capability.MISSING_VALUES);
 
     // class
@@ -428,6 +416,8 @@ public class RELAGGS extends SimpleBatchFilter implements
 
     m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
 
+    ArrayList<Integer> indicesOfUnmodifiedInputAttributes = new ArrayList<Integer>();
+    ArrayList<Integer> indicesOfUnmodifiedOutputAttributes = new ArrayList<Integer>();
     atts = new ArrayList<Attribute>();
     clsIndex = -1;
     for (i = 0; i < inputFormat.numAttributes(); i++) {
@@ -435,19 +425,23 @@ public class RELAGGS extends SimpleBatchFilter implements
       if (i == inputFormat.classIndex()) {
         clsIndex = atts.size();
         atts.add((Attribute) inputFormat.attribute(i).copy());
+        indicesOfUnmodifiedInputAttributes.add(i);
+        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
       if (!inputFormat.attribute(i).isRelationValued()) {
         atts.add((Attribute) inputFormat.attribute(i).copy());
+        indicesOfUnmodifiedInputAttributes.add(i);
+        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
       if (!m_SelectedRange.isInRange(i)) {
-        if (getDebug()) {
-          System.out.println("Attribute " + (i + 1) + " ("
-            + inputFormat.attribute(i).name() + ") skipped.");
-        }
+        Attribute relAtt = inputFormat.attribute(i);
+        atts.add(new Attribute(relAtt.name(), new Instances(relAtt.relation(), 0), atts.size()));
+        indicesOfUnmodifiedInputAttributes.add(i);
+        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
@@ -491,9 +485,19 @@ public class RELAGGS extends SimpleBatchFilter implements
     result = new Instances(inputFormat.relationName(), atts, 0);
     result.setClassIndex(clsIndex);
 
-    // neither string nor relational attributes need to be copied to the
-    // output:
-    initOutputLocators(result, new int[0]);
+    // Set up input locators
+    int[] indices = new int[indicesOfUnmodifiedInputAttributes.size()];
+    for (i = 0; i < indices.length; i++) {
+      indices[i] = indicesOfUnmodifiedInputAttributes.get(i);
+    }
+    initInputLocators(inputFormat, indices);
+
+    // Set up output locators
+    indices = new int[indicesOfUnmodifiedOutputAttributes.size()];
+    for (i = 0; i < indices.length; i++) {
+      indices[i] = indicesOfUnmodifiedOutputAttributes.get(i);
+    }
+    initOutputLocators(result, indices);
 
     return result;
   }
@@ -546,8 +550,6 @@ public class RELAGGS extends SimpleBatchFilter implements
 
         for (n = 0; n < relInstances.numAttributes(); n++) {
           att = relInstances.attribute(n);
-          stats = null;
-
           if (att.isNumeric()
             || (att.isNominal() && att.numValues() <= m_MaxCardinality)) {
             stats = relInstances.attributeStats(n);
@@ -560,15 +562,16 @@ public class RELAGGS extends SimpleBatchFilter implements
     // convert data
     for (k = 0; k < instances.numInstances(); k++) {
       inst = instances.instance(k);
+
+      // First copy string and relational values from input to output
+      copyValues(inst, true, inst.dataset(), result);
+
       double[] values = new double[result.numAttributes()];
       l = 0;
       for (i = 0; i < instances.numAttributes(); i++) {
-        if (!instances.attribute(i).isRelationValued()) {
+        if (!instances.attribute(i).isRelationValued() || !m_SelectedRange.isInRange(i)) {
           values[l++] = inst.value(i);
         } else {
-          if (!m_SelectedRange.isInRange(i)) {
-            continue;
-          }
 
           // replace relational data with statistics
           relInstances = inst.relationalValue(i);
