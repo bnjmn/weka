@@ -62,6 +62,9 @@ public class AllTests extends WekaTestSuite {
     // tokenizers
     suite.addTest(weka.core.tokenizers.AllTests.suite());
 
+    suite
+      .addTestSuite(weka.core.expressionlanguage.ExpressionLanguageTest.class);
+
     return suite;
   }
 
