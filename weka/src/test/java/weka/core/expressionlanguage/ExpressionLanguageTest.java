@@ -1086,7 +1086,7 @@ public class ExpressionLanguageTest extends TestCase {
           );
       assertEquals(
           badRandom(value, value*value, 1/value),
-          evaluateDouble("java('weka.core.expressionlanguage.ExpressionLanguageTest', 'double random(double, double, double)', A, A^2, 1/A)", value)
+          evaluateDouble("java('weka.core.expressionlanguage.ExpressionLanguageTest', 'double badRandom(double, double, double)', A, A^2, 1/A)", value)
           );
     }
 
@@ -1101,7 +1101,7 @@ public class ExpressionLanguageTest extends TestCase {
    * different random numbers.</p>
    * 
    * This is used to test calling java code in the
-   * {@link testCallingJavaFunctions} test.</p>
+   * testCallingJavaFunctions() test.</p>
    * 
    * Warning: This function should not be used other than for highly unimportant
    * functionality.
