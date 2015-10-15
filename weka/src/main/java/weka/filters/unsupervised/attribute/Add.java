@@ -387,13 +387,13 @@ public class Add extends Filter implements UnsupervisedFilter,
     Instance inst = (Instance) instance.copy();
 
     // First copy string values from input to output
-    copyValues(inst, true, inst.dataset(), getOutputFormat());
+    copyValues(inst, true, inst.dataset(), outputFormatPeek());
 
     // Insert the new attribute and reassign to output
     inst.setDataset(null);
     inst.insertAttributeAt(m_Insert.getIndex());
-    inst.setDataset(getOutputFormat());
-    push(inst);
+
+    push(inst); // No need to copy instance
     return true;
   }
 

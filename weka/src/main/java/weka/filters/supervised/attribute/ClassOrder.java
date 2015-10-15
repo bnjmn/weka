@@ -348,7 +348,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
       if (!datum.isMissing(m_ClassAttribute)) {
         datum.setClassValue(m_Converter[(int) datum.classValue()]);
       }
-      push(datum);
+      push(datum, false); // No need to copy instance
       return true;
     }
 
@@ -461,7 +461,7 @@ public class ClassOrder extends Filter implements SupervisedFilter,
         if (!datum.isMissing(datum.classIndex())) {
           datum.setClassValue(m_Converter[(int) datum.classValue()]);
         }
-        push(datum);
+        push(datum, false); // No need to copy instance.
       }
     }
     flushInput();

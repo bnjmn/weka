@@ -334,11 +334,9 @@ public class Reorder extends Filter implements UnsupervisedFilter,
       inst = new DenseInstance(instance.weight(), vals);
     }
 
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
-    inst.setDataset(getOutputFormat());
+    copyValues(inst, false, instance.dataset(), outputFormatPeek());
 
-    push(inst);
+    push(inst); // No need to copy
 
     return true;
   }

@@ -559,10 +559,10 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     } else {
       inst = new DenseInstance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
+
     copyValues(inst, false, instance.dataset(), getOutputFormat());
-    inst.setDataset(getOutputFormat());
-    push(inst);
+
+    push(inst); // No need to copy instance
   }
 
   /**

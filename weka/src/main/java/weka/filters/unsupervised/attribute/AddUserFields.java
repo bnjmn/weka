@@ -601,7 +601,7 @@ public class AddUserFields extends Filter implements OptionHandler,
     Instance inst = (Instance) instance.copy();
 
     // First copy string values from input to output
-    copyValues(inst, true, inst.dataset(), getOutputFormat());
+    copyValues(inst, true, inst.dataset(), outputFormatPeek());
 
     convertInstance(inst);
     return true;
@@ -647,7 +647,7 @@ public class AddUserFields extends Filter implements OptionHandler,
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(outputFormat);
-    push(inst);
+    push(inst, false); // No need to copy instance
   }
 
   /**

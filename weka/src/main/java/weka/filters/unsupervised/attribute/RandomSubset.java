@@ -424,10 +424,8 @@ public class RandomSubset extends SimpleStreamFilter {
     }
 
     result = new DenseInstance(instance.weight(), values);
-    result.setDataset(getOutputFormat());
 
-    copyValues(result, false, instance.dataset(), getOutputFormat());
-    result.setDataset(getOutputFormat());
+    copyValues(result, false, instance.dataset(), outputFormatPeek());
 
     return result;
   }

@@ -695,7 +695,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       if (m_filterType != FILTER_NONE) {
         normalizeInstance(inst, firstCopy);
       }
-      push(inst);
+      push(inst, false); // No need to copy
       return true;
     } else {
       bufferInput(instance);
@@ -767,7 +767,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
       // Push all instances into the output queue
       for (int i = 0; i < fv.size(); i++) {
-        push(fv.get(i));
+        push(fv.get(i), false); // No need to copy
       }
     }
 

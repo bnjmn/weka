@@ -424,8 +424,7 @@ public class NumericToNominal extends SimpleBatchFilter {
       }
 
       // copy possible string, relational values
-      newInst.setDataset(getOutputFormat());
-      copyValues(newInst, false, inst.dataset(), getOutputFormat());
+      copyValues(newInst, false, inst.dataset(), outputFormatPeek());
 
       result.add(newInst);
     }

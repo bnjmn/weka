@@ -450,7 +450,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
       m_UseMissing);
 
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      push((Instance) getInputFormat().instance(i).copy());
+      push((Instance) getInputFormat().instance(i).copy(), false); // No need to copy instance
     }
 
     flushInput();

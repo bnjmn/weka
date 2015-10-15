@@ -130,9 +130,10 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     if (m_removeFilter != null) {
       m_removeFilter.input(instance);
       Instance processed = m_removeFilter.output();
-      processed.setDataset(getOutputFormat());
-      copyValues(processed, false, instance.dataset(), getOutputFormat());
-      push(processed);
+
+      copyValues(processed, false, instance.dataset(), outputFormatPeek());
+
+      push(processed, false); // No need to copy
       return true;
     }
     bufferInput(instance);
@@ -200,7 +201,7 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
       setOutputFormat(outputDataset);
       while ((processed = m_removeFilter.output()) != null) {
         processed.setDataset(outputDataset);
-        push(processed);
+        push(processed, false); // No need to copy
       }
     }
     flushInput();

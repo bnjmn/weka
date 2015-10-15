@@ -787,7 +787,7 @@ public class AddClassification extends SimpleBatchFilter {
       }
 
       // copy string/relational values from input to output
-      copyValues(newInstance, false, oldInstance.dataset(), getOutputFormat());
+      copyValues(newInstance, false, oldInstance.dataset(), outputFormatPeek());
 
       result.add(newInstance);
     }

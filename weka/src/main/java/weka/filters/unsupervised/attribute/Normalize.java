@@ -402,7 +402,7 @@ public class Normalize extends PotentialClassIgnorer implements
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
-    push(inst);
+    push(inst, false); // No need to copy
   }
 
   /**

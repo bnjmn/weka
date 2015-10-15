@@ -286,23 +286,38 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Adds an output instance to the queue. The derived class should use this
-   * method for each output instance it makes available.
+   * method for each output instance it makes available. Note that the instance is only
+   * copied before it is added to the output queue if it has a reference to a dataset.
    *
    * @param instance the instance to be added to the queue.
    */
   protected void push(Instance instance) {
 
+    push(instance, true);
+  }
+
+  /**
+   * Adds an output instance to the queue. The derived class should use this
+   * method for each output instance it makes available. Note that the instance is only
+   * copied before it is added to the output queue if copyInstance has value true and
+   * if the instance has a reference to a dataset.
+   *
+   * @param instance the instance to be added to the queue.
+   * @param copyInstance whether instance is to be copied
+   */
+  protected void push(Instance instance, boolean copyInstance) {
+
     if (instance != null) {
       if (instance.dataset() != null) {
-        instance = (Instance) instance.copy(); // Don't modify incoming
-        // instance!
+        if (copyInstance) {
+          instance = (Instance) instance.copy();
+        }
         copyValues(instance, false);
       }
       instance.setDataset(m_OutputFormat);
       m_OutputQueue.push(instance);
     }
   }
-
   /**
    * Clears the output queue.
    */
@@ -321,8 +336,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      instance = (Instance) instance.copy(); // Don't modify incoming
-      // instance!
+      // No need to copy instance here because copyValues() does not modify the instance and
+      // the add() method makes a copy anyway.
       copyValues(instance, true);
       m_InputFormat.add(instance);
     }
@@ -414,7 +429,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       m_InputRelAtts, destDataset, m_OutputRelAtts);
 
     StringLocator.copyStringValues(instance, instSrcCompat, srcDataset,
-      m_InputStringAtts, getOutputFormat(), m_OutputStringAtts);
+      m_InputStringAtts, destDataset, m_OutputStringAtts);
   }
 
   /**

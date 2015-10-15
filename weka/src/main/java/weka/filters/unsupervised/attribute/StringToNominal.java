@@ -167,7 +167,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
           }
         }
       }
-      push(newInstance);
+      push(newInstance, false); // No need to copy
       return true;
     }
 
@@ -195,7 +195,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
 
       // Convert pending input instances
       for (int i = 0; i < getInputFormat().numInstances(); i++) {
-        push((Instance) getInputFormat().instance(i).copy());
+        push((Instance) getInputFormat().instance(i).copy(), false); // No need to copy
       }
     }
 

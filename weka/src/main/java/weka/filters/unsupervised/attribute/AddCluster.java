@@ -337,11 +337,9 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
       processed = new DenseInstance(original.weight(), instanceVals);
     }
 
-    processed.setDataset(instance.dataset());
-    copyValues(processed, false, instance.dataset(), getOutputFormat());
-    processed.setDataset(getOutputFormat());
+    copyValues(processed, false, instance.dataset(), outputFormatPeek());
 
-    push(processed);
+    push(processed); // No need to copy instance
   }
 
   /**

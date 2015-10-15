@@ -180,7 +180,7 @@ public class ChangeDateFormat extends Filter implements UnsupervisedFilter,
       }
       newInstance.setValue(index, value);
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 

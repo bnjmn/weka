@@ -307,10 +307,10 @@ public class FirstOrder extends Filter implements UnsupervisedFilter,
     } else {
       inst = new DenseInstance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
-    inst.setDataset(getOutputFormat());
-    push(inst);
+
+    copyValues(inst, false, instance.dataset(), outputFormatPeek());
+
+    push(inst); // No need to copy instance
     return true;
   }
 

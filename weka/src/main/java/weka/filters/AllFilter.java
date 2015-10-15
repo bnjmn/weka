@@ -112,7 +112,11 @@ public class AllFilter
       resetQueue();
       m_NewBatch = false;
     }
-    push((Instance)instance.copy());
+    if (instance.dataset() == null) {
+      push((Instance) instance.copy());
+    } else {
+      push(instance); // push() will make a copy anyway.
+    }
     return true;
   }
   

@@ -459,7 +459,7 @@ public class RemoveFolds extends Filter implements UnsupervisedFilter,
     flushInput();
 
     for (int i = 0; i < instances.numInstances(); i++) {
-      push(instances.instance(i));
+      push(instances.instance(i), false); // No need to copy instance because of bufferInput()
     }
 
     m_NewBatch = true;

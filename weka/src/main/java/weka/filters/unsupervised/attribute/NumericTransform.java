@@ -212,7 +212,7 @@ public class NumericTransform extends Filter implements UnsupervisedFilter,
       inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
-    push(inst);
+    push(inst, false); // No need to copy
     return true;
   }
 

@@ -367,15 +367,14 @@ public class AddID extends Filter implements UnsupervisedFilter, OptionHandler {
       inst = (Instance) instance.copy();
 
       // First copy string values from input to output
-      copyValues(inst, true, inst.dataset(), getOutputFormat());
+      copyValues(inst, true, inst.dataset(), outputFormatPeek());
 
       // Insert the new attribute and reassign to output
       inst.setDataset(null);
       inst.insertAttributeAt(m_Index.getIndex());
       inst.setValue(m_Index.getIndex(), m_Counter);
-      inst.setDataset(getOutputFormat());
 
-      push(inst);
+      push(inst); // No need to copy instance
     } catch (Exception e) {
       e.printStackTrace();
     }

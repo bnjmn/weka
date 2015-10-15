@@ -377,7 +377,7 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
     for (int i = 0; i < m_SampleSize; i++) {
       if (m_subSample[i] != null) {
         Instance copy = (Instance) m_subSample[i].copy();
-        push(copy);
+        push(copy, false); // No need to copy instance
       } else {
         // less data in the original than was asked for
         // as a sample.

@@ -184,7 +184,7 @@ public class MergeTwoValues extends Filter implements UnsupervisedFilter,
       newInstance.setValue(m_AttIndex.getIndex(),
         newInstance.value(m_AttIndex.getIndex()) - 1);
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 

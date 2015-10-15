@@ -588,7 +588,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
     for (i = 0; i < getInputFormat().numInstances(); i++) {
       instance = getInputFormat().instance(i);
       if (instance.isMissing(m_AttIndex.getIndex())) {
-        push(instance);
+        push(instance, false); // No need to copy because of bufferInput()
         continue;
       }
       if (m_Values.contains(instance.stringValue(m_AttIndex.getIndex()))) {
@@ -596,7 +596,7 @@ public class RemoveFrequentValues extends Filter implements OptionHandler,
           instance.setValue(m_AttIndex.getIndex(),
             m_NominalMapping[(int) instance.value(m_AttIndex.getIndex())]);
         }
-        push(instance);
+        push(instance, false); // No need to copy because of bufferInput()
       }
     }
   }

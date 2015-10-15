@@ -475,20 +475,20 @@ OptionHandler {
         // Take the first numEligible instances
         // because they have not been selected
         for (int j = 0; j < numEligible; j++) {
-          push(data.instance(selected[j]));
+          push(data.instance(selected[j]), false); // No need to copy instance
         }
       } else {
 
         // Take the elements that have been selected
         for (int j = numEligible; j < data.numInstances(); j++) {
-          push(data.instance(selected[j]));
+          push(data.instance(selected[j]), false); // No need to copy instance
         }
       }
     } else {
 
       // Sampling with replacement
       for (int i = 0; i < sampleSize; i++) {
-        push(data.instance(random.nextInt(numEligible)));
+        push(data.instance(random.nextInt(numEligible)), false); // No need to copy instance
       }
     }
   }

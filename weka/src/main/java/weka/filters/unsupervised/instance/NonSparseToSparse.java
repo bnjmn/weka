@@ -284,11 +284,11 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
       }
       newInstance = new SparseInstance(instance.weight(), values);
       newInstance.setDataset(getOutputFormat());
-      push(newInstance);
+      push(newInstance, false); // No need to copy
     } else {
       newInstance = new SparseInstance(instance);
       newInstance.setDataset(instance.dataset());
-      push(newInstance);
+      push(newInstance, false); // No need to copy
     }
 
     /*

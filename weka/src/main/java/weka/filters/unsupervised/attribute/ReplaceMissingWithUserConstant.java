@@ -697,7 +697,7 @@ public class ReplaceMissingWithUserConstant extends PotentialClassIgnorer
      * copyValues(newInst, false, inst.dataset(), getOutputFormat());
      * newInst.setDataset(getOutputFormat());
      */
-    push(newInst);
+    push(newInst, false); // No need to copy
 
     return true;
   }

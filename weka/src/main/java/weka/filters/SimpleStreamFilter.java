@@ -259,8 +259,7 @@ public abstract class SimpleStreamFilter extends SimpleFilter implements
       if (hasImmediateOutputFormat() || isFirstBatchDone()) {
         Instance processed = process((Instance) instance.copy());
         if (processed != null) {
-          // push(process((Instance) instance.copy()));
-          push(processed);
+          push(processed, false); // No need to copy instance
           return true;
         }
         return false;
@@ -309,7 +308,7 @@ public abstract class SimpleStreamFilter extends SimpleFilter implements
 
     // move data to the output
     for (i = 0; i < inst.numInstances(); i++) {
-      push(inst.instance(i));
+      push(inst.instance(i), false); // No need to copy instance
     }
 
     m_NewBatch = true;

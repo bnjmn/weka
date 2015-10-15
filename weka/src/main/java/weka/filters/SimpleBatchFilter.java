@@ -202,13 +202,13 @@ public abstract class SimpleBatchFilter extends SimpleFilter {
       m_NewBatch = false;
     }
 
-    bufferInput((Instance) instance.copy());
+    bufferInput(instance); // bufferInput() makes a copy of the instance.
 
     if (isFirstBatchDone()) {
       Instances inst = new Instances(getInputFormat());
       inst = process(inst);
       for (int i = 0; i < inst.numInstances(); i++) {
-        push(inst.instance(i));
+        push(inst.instance(i), false); // No need to copy instance
       }
       flushInput();
     }
@@ -263,7 +263,7 @@ public abstract class SimpleBatchFilter extends SimpleFilter {
 
       // move it to the output
       for (i = 0; i < inst.numInstances(); i++) {
-        push(inst.instance(i));
+        push(inst.instance(i), false); // No need to copy instance
       }
     }
 

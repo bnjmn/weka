@@ -564,7 +564,7 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
               if (m_AdjustWeights) {
                 newInst.setWeight(newWeight);
               }
-              push(newInst);
+              push(newInst, false); // No need to copy instance
             }
           }
         } while (!ok);

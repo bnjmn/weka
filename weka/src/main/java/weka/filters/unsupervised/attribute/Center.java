@@ -232,7 +232,7 @@ public class Center
     
     inst.setDataset(instance.dataset());
     
-    push(inst);
+    push(inst, false); // No need to copy instance
   }
   
   /**

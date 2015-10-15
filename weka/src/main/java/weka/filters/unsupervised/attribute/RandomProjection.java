@@ -672,7 +672,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
         }
         newInstance = m_ntob.output();
         newInstance = convertInstance(newInstance);
-        push(newInstance);
+        push(newInstance, false); // No need to copy
         return true;
       } else {
         return false;
@@ -682,7 +682,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
         newInstance = instance;
       }
       newInstance = convertInstance(newInstance);
-      push(newInstance);
+      push(newInstance, false); // No need to copy
       return true;
     }
   }
@@ -713,7 +713,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
             m_ntob.input(instance);
           } else {
             newInstance = convertInstance(instance);
-            push(newInstance);
+            push(newInstance, false); // No need to copy
           }
         }
 
@@ -725,7 +725,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
                 setOutputFormat();
               }
               newInstance = convertInstance(instance);
-              push(newInstance);
+              push(newInstance, false); // No need to copy
             }
             m_ntob = null;
           }
@@ -743,7 +743,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
             setOutputFormat();
           }
           newInstance = convertInstance(instance);
-          push(newInstance);
+          push(newInstance, false); // No need to copy
         }
         m_ntob = null;
       }

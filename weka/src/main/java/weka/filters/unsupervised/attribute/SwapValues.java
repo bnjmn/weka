@@ -177,7 +177,7 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
         newInstance.setValue(m_AttIndex.getIndex(), m_SecondIndex.getIndex());
       }
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy
     return true;
   }
 

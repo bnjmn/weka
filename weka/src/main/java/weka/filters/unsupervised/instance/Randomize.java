@@ -264,7 +264,7 @@ public class Randomize extends Filter implements UnsupervisedFilter,
       getInputFormat().randomize(m_Random);
     }
     for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      push(getInputFormat().instance(i));
+      push(getInputFormat().instance(i), false); // No need to copy because of bufferInput()
     }
     flushInput();
 

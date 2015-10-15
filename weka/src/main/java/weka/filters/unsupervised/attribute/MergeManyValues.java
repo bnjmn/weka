@@ -372,7 +372,7 @@ public class MergeManyValues extends PotentialClassIgnorer implements Unsupervis
       }
     }
 
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 

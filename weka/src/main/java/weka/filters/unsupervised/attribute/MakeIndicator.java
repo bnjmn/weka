@@ -177,7 +177,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
         newInstance.setValue(m_AttIndex.getIndex(), 0);
       }
     }
-    push(newInstance);
+    push(newInstance, false); // No need to copy instance
     return true;
   }
 

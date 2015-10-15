@@ -154,7 +154,7 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
       resetQueue();
       m_NewBatch = false;
     }
-    push((Instance) instance.copy());
+    push((Instance) instance.copy(), false); // No need to copy
     return true;
   }
 

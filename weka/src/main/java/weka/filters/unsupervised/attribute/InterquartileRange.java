@@ -990,7 +990,7 @@ public class InterquartileRange extends SimpleBatchFilter {
       }
 
       // copy possible strings, relational values...
-      copyValues(instNew, false, instOld.dataset(), getOutputFormat());
+      copyValues(instNew, false, instOld.dataset(), outputFormatPeek());
 
       // add to output
       result.add(instNew);

@@ -156,7 +156,7 @@ public class SubsetByExpression extends SimpleBatchFilter {
       inst = process(inst);
       numReturnedFromParser = inst.numInstances();
       for (int i = 0; i < inst.numInstances(); i++) {
-        push(inst.instance(i));
+        push(inst.instance(i), false); // No need to copy instance
       }
       flushInput();
     }

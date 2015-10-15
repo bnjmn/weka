@@ -346,9 +346,9 @@ public class AddValues extends Filter implements UnsupervisedFilter,
     newInstance = new DenseInstance(instance.weight(), values);
 
     // copy string values etc. from input to output
-    copyValues(instance, false, instance.dataset(), getOutputFormat());
+    copyValues(instance, false, instance.dataset(), outputFormatPeek());
 
-    push(newInstance);
+    push(newInstance); // No need to copy instance
 
     return true;
   }

@@ -550,7 +550,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
       instNew.setDataset(result);
 
       // copy possible strings, relational values...
-      copyValues(instNew, false, inst.dataset(), getOutputFormat());
+      copyValues(instNew, false, inst.dataset(), outputFormatPeek());
 
       // Add instance to output
       result.add(instNew);

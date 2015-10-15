@@ -325,20 +325,13 @@ public class MathExpression extends PotentialClassIgnorer implements
    */
   private void convertInstance(Instance instance) throws Exception {
 
-    Instance outInstance;
-    if (instance instanceof SparseInstance) {
-      outInstance = new SparseInstance(instance.weight(), instance.toDoubleArray());
-    } else {
-      outInstance = new DenseInstance(instance.weight(), instance.toDoubleArray());
-    }
-    outInstance.setDataset(instance.dataset());
-    
+    double[] vals = instance.toDoubleArray();
     for (int i = 0; i < instance.numAttributes(); i++) {
 
       if (
           m_SelectCols.isInRange(i)
           && instance.attribute(i).isNumeric()
-          && !instance.isMissing(i)
+          && !Utils.isMissingValue(vals[i])
           && getInputFormat().classIndex() != i
           ) {
 
@@ -346,7 +339,7 @@ public class MathExpression extends PotentialClassIgnorer implements
         m_InstancesHelper.setInstance(instance);
         m_StatsHelper.setStats(m_attStats[i]);
         if (m_CurrentValue.hasVariable("A"))
-          m_CurrentValue.setDouble("A", instance.value(i));
+          m_CurrentValue.setDouble("A", vals[i]);
 
         // compute
         double value = m_CompiledExpression.evaluate();
@@ -356,15 +349,22 @@ public class MathExpression extends PotentialClassIgnorer implements
             m_InstancesHelper.missingAccessed()) {
           System.err
           .println("WARNING:Error in evaluating the expression: missing value set");
-          outInstance.setMissing(i);
+          vals[i] = Utils.missingValue();
         } else {
-          outInstance.setValue(i, value);
+          vals[i] = value;
         }
 
       }
     }
 
-    push(outInstance);
+    Instance outInstance;
+    if (instance instanceof SparseInstance) {
+      outInstance = new SparseInstance(instance.weight(), vals);
+    } else {
+      outInstance = new DenseInstance(instance.weight(), vals);
+    }
+    outInstance.setDataset(instance.dataset());
+    push(outInstance, false); // No need to copy instance
   }
 
   /**

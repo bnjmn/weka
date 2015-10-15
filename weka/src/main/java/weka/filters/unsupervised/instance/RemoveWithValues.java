@@ -407,13 +407,13 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
     }
 
     if (isFirstBatchDone() && m_dontFilterAfterFirstBatch) {
-      push((Instance) instance.copy());
+      push((Instance) instance.copy(), false); // No need to copy
       return true;
     }
 
     if (instance.isMissing(m_AttIndex.getIndex())) {
       if (!getMatchMissingValues()) {
-        push((Instance) instance.copy());
+        push((Instance) instance.copy(), false); // No need to copy
         return true;
       } else {
         return false;
@@ -422,12 +422,12 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
     if (isNumeric()) {
       if (!m_Values.getInvert()) {
         if (instance.value(m_AttIndex.getIndex()) < m_Value) {
-          push((Instance) instance.copy());
+          push((Instance) instance.copy(), false); // No need to copy
           return true;
         }
       } else {
         if (instance.value(m_AttIndex.getIndex()) >= m_Value) {
-          push((Instance) instance.copy());
+          push((Instance) instance.copy(), false); // No need to copy
           return true;
         }
       }
@@ -439,7 +439,7 @@ public class RemoveWithValues extends Filter implements UnsupervisedFilter,
           temp.setValue(m_AttIndex.getIndex(),
             m_NominalMapping[(int) instance.value(m_AttIndex.getIndex())]);
         }
-        push(temp);
+        push(temp, false); // No need to copy
         return true;
       }
     }

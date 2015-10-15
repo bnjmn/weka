@@ -318,11 +318,11 @@ public class RemovePercentage extends Filter implements UnsupervisedFilter,
 
     if (m_Inverse) {
       for (int i = 0; i < cutOff; i++) {
-        push(toFilter.instance(i));
+        push(toFilter.instance(i), false); // No need to copy
       }
     } else {
       for (int i = cutOff; i < toFilter.numInstances(); i++) {
-        push(toFilter.instance(i));
+        push(toFilter.instance(i), false); // No need to copy
       }
     }
     flushInput();

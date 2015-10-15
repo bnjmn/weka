@@ -812,7 +812,7 @@ public class PrincipalComponents extends Filter implements OptionHandler,
     if (isFirstBatchDone()) {
       inst = convertInstance(instance);
       inst.setDataset(getOutputFormat());
-      push(inst);
+      push(inst, false); // No need to copy
       return true;
     } else {
       bufferInput(instance);
@@ -846,7 +846,7 @@ public class PrincipalComponents extends Filter implements OptionHandler,
     for (i = 0; i < insts.numInstances(); i++) {
       inst = convertInstance(insts.instance(i));
       inst.setDataset(getOutputFormat());
-      push(inst);
+      push(inst, false); // No need to copy
     }
 
     flushInput();

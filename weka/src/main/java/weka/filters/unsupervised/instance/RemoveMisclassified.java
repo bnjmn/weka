@@ -371,7 +371,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
       }
 
       for (int i = 0; i < filtered.numInstances(); i++) {
-        push(filtered.instance(i));
+        push(filtered.instance(i), false); // No need to copy
       }
 
       m_firstBatchFinished = true;

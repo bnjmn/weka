@@ -123,9 +123,9 @@ public class SparseToNonSparse
       inst = new DenseInstance(instance.weight(), instance.toDoubleArray());
       inst.setDataset(instance.dataset());
     } else {
-      inst = instance;
+      inst = (Instance)instance.copy();
     }
-    push(inst);
+    push(inst, false); // No need to copy instance
     return true;
   }
   

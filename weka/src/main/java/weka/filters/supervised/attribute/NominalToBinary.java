@@ -222,7 +222,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       m_NewBatch = false;
     }
     if ((m_Indices != null) || (getInputFormat().classAttribute().isNominal())) {
-      convertInstance(instance);
+      convertInstance((Instance)instance.copy());
       return true;
     }
     bufferInput(instance);
@@ -612,7 +612,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
   private void convertInstanceNominal(Instance instance) {
 
     if (!m_needToTransform) {
-      push(instance);
+      push(instance, false); // No need to copy instance
       return;
     }
 
@@ -652,10 +652,10 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     } else {
       inst = new DenseInstance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
-    inst.setDataset(getOutputFormat());
-    push(inst);
+
+    copyValues(inst, false, instance.dataset(), outputFormatPeek());
+
+    push(inst); // No need to copy instance
   }
 
   /**
@@ -667,7 +667,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
   private void convertInstanceNumeric(Instance instance) {
 
     if (!m_needToTransform) {
-      push(instance);
+      push(instance, false); // No need to copy instance
       return;
     }
 
@@ -704,10 +704,10 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     } else {
       inst = new DenseInstance(instance.weight(), vals);
     }
-    inst.setDataset(getOutputFormat());
-    copyValues(inst, false, instance.dataset(), getOutputFormat());
-    inst.setDataset(getOutputFormat());
-    push(inst);
+
+    copyValues(inst, false, instance.dataset(), outputFormatPeek());
+
+    push(inst); // No need to copy instance
   }
 
   /**

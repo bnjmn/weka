@@ -312,12 +312,12 @@ public class RemoveRange extends Filter implements UnsupervisedFilter,
       m_Range.setUpper(getInputFormat().numInstances() - 1);
       for (int i = 0; i < getInputFormat().numInstances(); i++) {
         if (!m_Range.isInRange(i)) {
-          push(getInputFormat().instance(i));
+          push(getInputFormat().instance(i), false); // No need to copy
         }
       }
     } else {
       for (int i = 0; i < getInputFormat().numInstances(); i++) {
-        push(getInputFormat().instance(i));
+        push(getInputFormat().instance(i), false); // No need to copy
       }
     }
 

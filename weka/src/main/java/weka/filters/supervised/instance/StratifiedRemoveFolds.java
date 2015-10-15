@@ -458,7 +458,7 @@ public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
     flushInput();
 
     for (int i = 0; i < instances.numInstances(); i++) {
-      push(instances.instance(i));
+      push(instances.instance(i), false); // No need to copy instance
     }
 
     m_NewBatch = true;
