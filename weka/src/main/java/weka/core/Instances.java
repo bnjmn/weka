@@ -278,9 +278,10 @@ RevisionHandler {
   }
 
   /**
-   * Create a copy of the structure if the data has string or relational
-   * attributes, "cleanses" string types (i.e. doesn't contain references to the
-   * strings seen in the past) and all relational attributes.
+   * Create a copy of the structure. If the data has string or relational
+   * attributes, theses are replaced by empty copies. Other attributes are left
+   * unmodified, but the underlying list structure holding references to the attributes
+   * is shallow-copied, so that other Instances objects with a reference to this list are not affected.
    * 
    * @return a copy of the instance structure.
    */

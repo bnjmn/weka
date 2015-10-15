@@ -162,8 +162,9 @@ public class RelationalLocator extends AttributeLocator {
       if (instance.isMissing(index)) {
         continue;
       }
-      Instances rel = instSrcCompat ? instance.relationalValue(index)
-        : instance.relationalValue(index);
+      int valueIndex = (int)instance.value(index);
+      Instances rel = instSrcCompat ? srcDataset.attribute(index).relation(valueIndex)
+              : destDataset.attribute(index).relation(valueIndex);
       AttributeLocator srcRelAttsNew = srcLoc.getLocator(srcIndices[i]);
       Instances srcDatasetNew = srcRelAttsNew.getData();
       AttributeLocator destRelAttsNew = destLoc.getLocator(destIndices[i]);
