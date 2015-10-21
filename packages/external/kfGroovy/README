@@ -1,7 +1,0 @@
-The lib folder contains a modified version of groovy-all-*.*.*.jar.
-
-More specifically, the compiled version of MacOSXDefaults.groovy in the .jar file has been replaced by the compiled version of the MacOSXDefaults.groovy file given in the folder that contains this README, to avoid Mac-specific menu-bar handling.
-
-The .groovy file was compiled into a class using the groovyc command.
-
-The original .jar file was expanded, the existing MacOSXDefaults.class replaced by the modified MacOSXDefaults.class file, and the .jar file zipped up again.
