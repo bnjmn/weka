@@ -1137,6 +1137,7 @@ public class SGDText extends RandomizableClassifier implements
    */
   public void reset() {
     m_t = 1;
+    m_bias = 0;
     m_dictionary = null;
   }
 
