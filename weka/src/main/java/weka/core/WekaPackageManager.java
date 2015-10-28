@@ -727,6 +727,9 @@ public class WekaPackageManager {
           .getPackageMetaDataElement("Version").toString());
       if (repoP != null) {
         Object disabled = repoP.getPackageMetaDataElement("Disabled");
+        if (disabled == null) {
+          disabled = repoP.getPackageMetaDataElement("Disable");
+        }
         if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
           for (PrintStream p : progress) {
             p.println("[Weka] Skipping package " + toLoad.getName()
