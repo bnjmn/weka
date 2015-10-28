@@ -20,18 +20,46 @@
 
 package weka.core;
 
-import java.io.*;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.PrintStream;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
 import java.net.URLConnection;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.Set;
+import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
-import org.pentaho.packageManagement.*;
+import org.pentaho.packageManagement.DefaultPackageManager;
+import org.pentaho.packageManagement.Dependency;
 import org.pentaho.packageManagement.Package;
+import org.pentaho.packageManagement.PackageConstraint;
+import org.pentaho.packageManagement.PackageManager;
+import org.pentaho.packageManagement.VersionPackageConstraint;
 
 import weka.core.converters.ConverterUtils;
 import weka.gui.GenericObjectEditor;
@@ -111,6 +139,14 @@ public class WekaPackageManager {
 
   /** Packages loaded OK? */
   protected static boolean m_packagesLoaded;
+
+  /** File to check against server for new/updated packages */
+  protected static final String PACKAGE_LIST_WITH_VERSION_FILE =
+    "packageListWithVersion.txt";
+
+  /** File to check against server equivalent for forced refresh */
+  protected static final String FORCED_REFRESH_COUNT_FILE =
+    "forcedRefreshCount.txt";
 
   /** Package loading in progress? */
   public static boolean m_initialPackageLoadingInProcess = false;
@@ -681,6 +717,26 @@ public class WekaPackageManager {
           + " because it is not compatible with Weka "
           + PACKAGE_MANAGER.getBaseSystemVersion().toString());
       }
+      return false;
+    }
+
+    // check to see if this package has been disabled for all users
+    try {
+      Package repoP =
+        getRepositoryPackageInfo(toLoad.getName(), toLoad
+          .getPackageMetaDataElement("Version").toString());
+      if (repoP != null) {
+        Object disabled = repoP.getPackageMetaDataElement("Disabled");
+        if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
+          for (PrintStream p : progress) {
+            p.println("[Weka] Skipping package " + toLoad.getName()
+              + " because it has been marked as disabled at the repository");
+          }
+          return false;
+        }
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
       return false;
     }
 
@@ -1261,8 +1317,8 @@ public class WekaPackageManager {
       }
 
       String packageListS =
-        PACKAGE_MANAGER.getPackageRepositoryURL().toString()
-          + "/packageListWithVersion.txt";
+        PACKAGE_MANAGER.getPackageRepositoryURL().toString() + "/"
+          + PACKAGE_LIST_WITH_VERSION_FILE;
       URLConnection conn = null;
       URL connURL = new URL(packageListS);
 
@@ -1311,14 +1367,82 @@ public class WekaPackageManager {
     Exception problem = null;
     if (INITIAL_CACHE_BUILD_NEEDED) {
       for (PrintStream p : progress) {
-        p.println("Caching repository meta data, please wait...");
+        p.println("Caching repository metadata, please wait...");
       }
 
       problem = refreshCache(progress);
 
       INITIAL_CACHE_BUILD_NEEDED = false;
+    } else {
+      // if no initial build needed then check for a server-side forced
+      // refresh...
+      try {
+        if (checkForForcedCacheRefresh()) {
+          for (PrintStream p : progress) {
+            p.println("Forced repository metadata refresh, please wait...");
+          }
+          problem = refreshCache(progress);
+        }
+      } catch (MalformedURLException ex) {
+        problem = ex;
+      }
     }
+
     return problem;
+  }
+
+  protected static boolean checkForForcedCacheRefresh()
+    throws MalformedURLException {
+
+    int refreshCountServer = getForcedRefreshCount(false);
+    if (refreshCountServer > 0) {
+      // now check local version of this file...
+      int refreshCountLocal = getForcedRefreshCount(true);
+      return refreshCountServer > refreshCountLocal;
+    }
+
+    return false;
+  }
+
+  protected static int getForcedRefreshCount(boolean local)
+    throws MalformedURLException {
+
+    useCacheOrOnlineRepository();
+    if (!local) {
+      PACKAGE_MANAGER.setPackageRepositoryURL(REP_URL);
+    }
+    String refreshCountS =
+      PACKAGE_MANAGER.getPackageRepositoryURL().toString() + "/"
+        + FORCED_REFRESH_COUNT_FILE;
+    int refreshCount = -1;
+    URLConnection conn = null;
+    URL connURL = new URL(refreshCountS);
+
+    try {
+      if (PACKAGE_MANAGER.setProxyAuthentication(connURL)) {
+        conn = connURL.openConnection(PACKAGE_MANAGER.getProxy());
+      } else {
+        conn = connURL.openConnection();
+      }
+
+      conn.setConnectTimeout(30000); // timeout after 30 seconds
+
+      BufferedReader bi =
+        new BufferedReader(new InputStreamReader(conn.getInputStream()));
+
+      String countS = bi.readLine();
+      if (countS != null && countS.length() > 0) {
+        try {
+          refreshCount = Integer.parseInt(countS);
+        } catch (NumberFormatException ne) {
+          // ignore
+        }
+      }
+    } catch (IOException ex) {
+      // ignore
+    }
+
+    return refreshCount;
   }
 
   /**
@@ -1523,7 +1647,8 @@ public class WekaPackageManager {
     for (Object version : availableVersions) {
       Package candidate =
         PACKAGE_MANAGER.getRepositoryPackageInfo(target.getName(), version);
-      if (toCheck.checkConstraint(candidate) && candidate.isCompatibleBaseSystem()) {
+      if (toCheck.checkConstraint(candidate)
+        && candidate.isCompatibleBaseSystem()) {
         result = candidate;
         break;
       }
