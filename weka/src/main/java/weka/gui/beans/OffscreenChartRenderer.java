@@ -95,7 +95,7 @@ public interface OffscreenChartRenderer {
    * @param width the width of the resulting chart in pixels
    * @param height the height of the resulting chart in pixels
    * @param series a list of Instances - one for each series to be plotted
-   * @param attToPlot the name of the attribute to plot (the attribute, with the,
+   * @param attsToPlot the name of the attribute to plot (the attribute, with the,
    * same type, must be present in each series) 
    * @param optionalArgs optional arguments to the renderer (may be null)
    * 
