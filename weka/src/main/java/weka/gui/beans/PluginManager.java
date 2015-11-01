@@ -24,6 +24,7 @@ package weka.gui.beans;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -48,9 +49,10 @@ import java.util.TreeMap;
 public class PluginManager {
 
   /**
-   * Global map that is keyed by plugin base class/interface type. The inner Map
-   * then stores individual plugin instances of the interface type, keyed by
-   * plugin name/short title with values the actual fully qualified class name
+   * Global map of plugin classes that is keyed by plugin base class/interface
+   * type. The inner Map then stores individual plugin instances of the
+   * interface type, keyed by plugin name/short title with values the actual
+   * fully qualified class name
    */
   protected static Map<String, Map<String, String>> PLUGINS =
     new HashMap<String, Map<String, String>>();
@@ -62,6 +64,15 @@ public class PluginManager {
    * disable all concrete implementations of that type
    */
   protected static Set<String> DISABLED = new HashSet<String>();
+
+  /**
+   * Global map of plugin resources (loadable from the classpath). Outer map is
+   * keyed by group ID, i.e. an ID of a logical group of resources (e.g.
+   * knowledge flow template files). The inner map then stores individual
+   * resource paths keyed by their short description.
+   */
+  protected static Map<String, Map<String, String>> RESOURCES =
+    new HashMap<String, Map<String, String>>();
 
   /**
    * Add the supplied list of fully qualified class names to the disabled list
@@ -194,19 +205,136 @@ public class PluginManager {
    */
   public static synchronized void addFromProperties(Properties props,
     boolean maintainInsertionOrder) throws Exception {
-    Set<Object> keys = props.keySet();
-    Iterator<Object> keysI = keys.iterator();
-    while (keysI.hasNext()) {
-      String baseType = (String) keysI.next();
+    java.util.Enumeration<?> keys = props.propertyNames();
+
+    while (keys.hasMoreElements()) {
+      String baseType = (String) keys.nextElement();
       String implementations = props.getProperty(baseType);
-      if (implementations != null && implementations.length() > 0) {
-        String[] parts = implementations.split(",");
-        for (String impl : parts) {
-          PluginManager.addPlugin(baseType, impl.trim(), impl.trim(),
-            maintainInsertionOrder);
+      if (baseType.equalsIgnoreCase("*resources*")) {
+        addPluginResourcesFromProperty(implementations);
+      } else {
+        if (implementations != null && implementations.length() > 0) {
+          String[] parts = implementations.split(",");
+          for (String impl : parts) {
+            PluginManager.addPlugin(baseType, impl.trim(), impl.trim(),
+              maintainInsertionOrder);
+          }
         }
       }
     }
+  }
+
+  /**
+   * Add resources from a list. String format for a list of resources (as might
+   * be supplied from a *resources* entry in an property file:<br>
+   * <br>
+   * 
+   * <pre>
+   * [groupID|description|path],[groupID|description|path],...
+   * </pre>
+   * 
+   * @param resourceList a list of resources to add
+   */
+  protected static synchronized void addPluginResourcesFromProperty(
+    String resourceList) {
+
+    // Format: [groupID|description|path],[...],...
+    String[] resources = resourceList.split(",");
+    for (String r : resources) {
+      r = r.trim();
+      if (!r.startsWith("[") || !r.endsWith("]")) {
+        System.err.println("[PluginManager] Malformed resource in: "
+          + resourceList);
+        continue;
+      }
+
+      r = r.replace("[", "").replace("]", "");
+      String[] rParts = r.split("\\|");
+      if (rParts.length != 3) {
+        System.err
+          .println("[PluginManager] Was expecting 3 pipe separated parts in "
+            + "resource spec: " + r);
+        continue;
+      }
+
+      String groupID = rParts[0].trim();
+      String resourceDesc = rParts[1].trim();
+      String resourcePath = rParts[2].trim();
+      if (groupID.length() == 0 || resourceDesc.length() == 0
+        || resourcePath.length() == 0) {
+        System.err.println("[PluginManager] Empty part in resource spec: " + r);
+        continue;
+      }
+      addPluginResource(groupID, resourceDesc, resourcePath);
+    }
+  }
+
+  /**
+   * Add a resource.
+   * 
+   * @param resourceGroupID the ID of the group under which the resource should
+   *          be stored
+   * @param resourceDescription the description/ID of the resource
+   * @param resourcePath the path to the resource
+   */
+  public static synchronized void addPluginResource(String resourceGroupID,
+    String resourceDescription, String resourcePath) {
+    Map<String, String> groupMap = RESOURCES.get(resourceGroupID);
+    if (groupMap == null) {
+      groupMap = new LinkedHashMap<String, String>();
+      RESOURCES.put(resourceGroupID, groupMap);
+    }
+
+    groupMap.put(resourceDescription, resourcePath);
+  }
+
+  /**
+   * Get an input stream for a named resource under a given resource group ID.
+   * 
+   * @param resourceGroupID the group ID that the resource falls under
+   * @param resourceDescription the description/ID of the resource
+   * @return an InputStream for the resource
+   * @throws IOException if the group ID or resource description/ID are not
+   *           known to the PluginManager, or a problem occurs while trying to
+   *           open an input stream
+   */
+  public static InputStream getPluginResourceAsStream(String resourceGroupID,
+    String resourceDescription) throws IOException {
+    Map<String, String> groupMap = RESOURCES.get(resourceGroupID);
+    if (groupMap == null) {
+      throw new IOException("Unknown resource group ID: " + resourceGroupID);
+    }
+
+    String resourcePath = groupMap.get(resourceDescription);
+    if (resourcePath == null) {
+      throw new IOException("Unknown resource: " + resourceDescription);
+    }
+
+    return PluginManager.class.getClassLoader().getResourceAsStream(
+      resourcePath);
+  }
+
+  /**
+   * Get the number of resources available under a given resource group ID.
+   *
+   * @param resourceGroupID the group ID of the resources
+   * @return the number of resources registered under the supplied group ID
+   */
+  public static int numResourcesForWithGroupID(String resourceGroupID) {
+    Map<String, String> groupMap = RESOURCES.get(resourceGroupID);
+    return groupMap == null ? 0 : groupMap.size();
+  }
+
+  /**
+   * Get a map of resources (description,path) registered under a given resource
+   * group ID.
+   *
+   * @param resourceGroupID the group ID of the resources to get
+   * @return a map of resources registered under the supplied group ID, or null
+   *         if the resourceGroupID is not known to the plugin manager
+   */
+  public static Map<String, String> getResourcesWithGroupID(String resourceGroupID) {
+    return RESOURCES.get(resourceGroupID);
   }
 
   /**
