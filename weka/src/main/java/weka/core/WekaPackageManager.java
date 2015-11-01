@@ -739,7 +739,8 @@ public class WekaPackageManager {
         }
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
+      // Ignore - we will get an exception when checking for an unofficial
+      // package
       return false;
     }
 
