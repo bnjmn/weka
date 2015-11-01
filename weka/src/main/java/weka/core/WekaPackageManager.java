@@ -741,7 +741,7 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       // Ignore - we will get an exception when checking for an unofficial
       // package
-      return false;
+      return true;
     }
 
     load = !m_doNotLoadList.contains(toLoad.getName());
