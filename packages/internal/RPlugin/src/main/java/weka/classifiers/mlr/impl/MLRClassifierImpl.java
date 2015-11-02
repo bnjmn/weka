@@ -295,6 +295,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
         eng.parseAndEval(this, unload);
 
         eng.loadLibrary(this, "mlr");
+        eng.parseAndEval(this, "configureMlr(on.par.without.desc = \"warn\")");
       } catch (Exception ex) {
         ex.printStackTrace();
       } finally {
@@ -349,7 +350,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       System.err.println("MLR loaded successfully.");
     }
-
+    eng.parseAndEval(this, "configureMlr(on.par.without.desc = \"warn\")");
     m_mlrAvailable = true;
     RSession.releaseSession(this);
   }
