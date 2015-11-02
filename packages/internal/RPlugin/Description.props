@@ -35,7 +35,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.10.zip?download
 URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
 
 # Changes in this release
-Changes=Now allows for parameters defined using functions.
+Changes=Now allows for parameters defined using functions to be used with the MLRClassifier.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
