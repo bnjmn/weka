@@ -86,6 +86,14 @@ public class ApproximateAbsoluteError implements LossFunction, OptionHandler {
   }
 
   /**
+   * @return a string to describe the option
+   */
+  public String epsilonTipText() {
+
+    return "The epsilon parameter for the approximate absolute error.";
+  }
+
+  /**
    * Returns the value of the epsilon parameter.
    * @return the value of the epsilon parameter.
    */

@@ -691,7 +691,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
             + " using ReplaceMissingValues.";
   }
 
-  /**¯
+  /**
    * @return a string to describe the option
    */
   public String toleranceTipText() {
@@ -835,10 +835,26 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     m_poolSize = nT;
   }
 
+  /**
+   * @return a string to describe the option
+   */
+  public String lossFunctionTipText() {
+
+    return "The loss function to optimize.";
+  }
+
+  /**
+   * Returns the LossFunction object.
+   * @return the LossFunction object
+   */
   public LossFunction getLossFunction() {
     return m_Loss;
   }
 
+  /**
+   * Sets the loss function.
+   * @param loss the loss function to use.
+   */
   public void setLossFunction(LossFunction loss) {
     this.m_Loss = loss;
   }
@@ -925,6 +941,10 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
    * -E &lt;int&gt;
    *  The number of threads to use, which should be &gt;= size of thread pool. (default 1)
    * </pre>
+   *
+   * <pre> -L &lt;classname and parameters&gt;
+   *  The loss function to use.
+   *  (default: weka.classifiers.functions.loss.SquaredError)</pre>
    *
    * <pre>
    * -S &lt;num&gt;
@@ -1017,7 +1037,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     options.add("-E");
     options.add("" + getNumThreads());
 
-    options.add("-K");
+    options.add("-L");
     options.add("" + getLossFunction().getClass().getName());
     if (getLossFunction() instanceof OptionHandler) {
       options.add(" " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions()));
