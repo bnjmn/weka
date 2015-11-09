@@ -835,6 +835,13 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   }
 
   /**
+   * @return a string to describe the option
+   */
+  public String activationFunctionTipText() {
+
+    return "The activation function to use in the hidden layer.";
+  }
+  /**
    * Returns the ActivationFunction object.
    * @return the ActivationFunction object
    */
