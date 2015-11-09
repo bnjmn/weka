@@ -153,7 +153,8 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
     // For all class values
     double sum = 0;
     for (int i = 0; i < m_numClasses; i++) {
-      sum += m_Loss.loss(sigmoid(-getOutput(i, outputs), null, 0), ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01);
+      sum += m_Loss.loss(m_ActivationFunction.activation(getOutput(i, outputs), null, 0),
+              ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01);
     }
     return inst.weight() * sum;
   }
@@ -164,7 +165,7 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
   protected double[] computeDeltas(Instance inst, double[] outputs) {
 
     // An array we can use to pass parameters
-    double[] sigmoidDerivativeOutput = new double[1];
+    double[] activationDerivativeOutput = new double[1];
 
     // Array for deltas
     double[] deltas = new double[inst.numClasses()];
@@ -172,8 +173,9 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
 
     // Calculate delta from output unit
     for (int i = 0; i < deltas.length; i++) {
-      deltas[i] *= m_Loss.derivative(sigmoid(-getOutput(i, outputs), sigmoidDerivativeOutput, 0),
-              ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01) * sigmoidDerivativeOutput[0];
+      deltas[i] *= m_Loss.derivative(m_ActivationFunction.activation(getOutput(i, outputs),
+                      activationDerivativeOutput, 0),
+              ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01) * activationDerivativeOutput[0];
     }
     return deltas;
   }
@@ -184,7 +186,7 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
   protected double[] postProcessDistribution(double[] dist) {
 
     for (int i = 0; i < m_numClasses; i++) {
-      dist[i] = sigmoid(-dist[i], null, 0);
+      dist[i] = m_ActivationFunction.activation(dist[i], null, 0);
       if (dist[i] < 0) {
         dist[i] = 0;
       } else if (dist[i] > 1) {

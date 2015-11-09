@@ -35,6 +35,8 @@ import java.util.concurrent.Future;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableClassifier;
+import weka.classifiers.functions.activation.ActivationFunction;
+import weka.classifiers.functions.activation.ApproximateSigmoid;
 import weka.classifiers.functions.loss.LossFunction;
 import weka.classifiers.functions.loss.SquaredError;
 import weka.classifiers.rules.ZeroR;
@@ -147,6 +149,9 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
   // The loss function to use
   protected LossFunction m_Loss = new SquaredError();
+
+  // The activation function to use
+  protected ActivationFunction m_ActivationFunction = new ApproximateSigmoid();
 
   // The number of hidden units
   protected int m_numUnits = 2;
@@ -438,14 +443,14 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
           final double[] outputs = new double[m_numUnits];
           final double[] deltaHidden = new double[m_numUnits];
-          final double[] sigmoidDerivativesHidden = new double[m_numUnits];
+          final double[] activationDerivativesHidden = new double[m_numUnits];
           final double[] localGrad = new double[m_MLPParameters.length];
           for (int k = lo; k < hi; k++) {
             final Instance inst = m_data.instance(k);
-            calculateOutputs(inst, outputs, sigmoidDerivativesHidden);
+            calculateOutputs(inst, outputs, activationDerivativesHidden);
             updateGradient(localGrad, inst, outputs, deltaHidden);
             updateGradientForHiddenUnits(localGrad, inst,
-                    sigmoidDerivativesHidden, deltaHidden);
+                    activationDerivativesHidden, deltaHidden);
           }
           return localGrad;
         }
@@ -538,11 +543,11 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
    * Update the gradient for the weights in the hidden layer.
    */
   protected void updateGradientForHiddenUnits(double[] grad, Instance inst,
-                                              double[] sigmoidDerivativesHidden, double[] deltaHidden) {
+                                              double[] activationDerivativesHidden, double[] deltaHidden) {
 
     // Finalize deltaHidden
     for (int i = 0; i < m_numUnits; i++) {
-      deltaHidden[i] *= sigmoidDerivativesHidden[i];
+      deltaHidden[i] *= activationDerivativesHidden[i];
     }
 
     // Update gradient for hidden units
@@ -580,7 +585,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
       for (int j = m_classIndex + 1; j < m_numAttributes; j++) {
         sum += inst.value(j) * m_MLPParameters[offsetW + j];
       }
-      o[i] = sigmoid(-sum, d, i);
+      o[i] = m_ActivationFunction.activation(sum, d, i);
     }
   }
 
@@ -597,36 +602,6 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     }
     result += m_MLPParameters[offsetOW + m_numUnits];
     return result;
-  }
-
-  /**
-   * Computes approximate sigmoid function. Derivative is stored in second
-   * argument at given index if d != null.
-   */
-  protected double sigmoid(double x, double[] d, int index) {
-
-    // Compute approximate sigmoid
-    double y = 1.0 + x / 4096.0;
-    x = y * y;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    x *= x;
-    double output = 1.0 / (1.0 + x);
-
-    // Compute derivative if desired
-    if (d != null) {
-      d[index] = output * (1.0 - output) / y;
-    }
-
-    return output;
   }
 
   /**
@@ -856,7 +831,23 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
    * @param loss the loss function to use.
    */
   public void setLossFunction(LossFunction loss) {
-    this.m_Loss = loss;
+    m_Loss = loss;
+  }
+
+  /**
+   * Returns the ActivationFunction object.
+   * @return the ActivationFunction object
+   */
+  public ActivationFunction getActivationFunction() {
+    return m_ActivationFunction;
+  }
+
+  /**
+   * Sets the loss function.
+   * @param func the loss function to use.
+   */
+  public void setActivationFunction(ActivationFunction func) {
+    m_ActivationFunction = func;
   }
 
   /**
@@ -891,17 +882,30 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
                     + "\t(default: weka.classifiers.functions.loss.SquaredError)",
             "L", 1, "-L <classname and parameters>"));
 
+    newVector.addElement(new Option(
+            "\tThe activation function to use.\n"
+                    + "\t(default: weka.classifiers.functions.activation.ApproximateSigmoid)",
+            "A", 1, "-A <classname and parameters>"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     if (getLossFunction() instanceof OptionHandler) {
       newVector.addElement(new Option(
             "",
-            "", 0, "\nOptions specific to kernel "
+            "", 0, "\nOptions specific to loss function "
             + getLossFunction().getClass().getName() + ":"));
 
       newVector.addAll(Collections.list(((OptionHandler) getLossFunction()).listOptions()));
     }
 
+    if (getActivationFunction() instanceof OptionHandler) {
+      newVector.addElement(new Option(
+              "",
+              "", 0, "\nOptions specific to activation function "
+              + getLossFunction().getClass().getName() + ":"));
+
+      newVector.addAll(Collections.list(((OptionHandler) getActivationFunction()).listOptions()));
+    }
     return newVector.elements();
   }
 
@@ -995,6 +999,8 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
       setNumThreads(1);
     }
 
+    super.setOptions(options);
+
     String tmpStr     = Utils.getOption('L', options);
     String[] tmpOptions = Utils.splitOptions(tmpStr);
     if (tmpOptions.length != 0) {
@@ -1003,7 +1009,13 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
       setLossFunction((LossFunction) Utils.forName(LossFunction.class, tmpStr, tmpOptions));
     }
 
-    super.setOptions(options);
+    tmpStr     = Utils.getOption('A', options);
+    tmpOptions = Utils.splitOptions(tmpStr);
+    if (tmpOptions.length != 0) {
+      tmpStr        = tmpOptions[0];
+      tmpOptions[0] = "";
+      setActivationFunction((ActivationFunction) Utils.forName(ActivationFunction.class, tmpStr, tmpOptions));
+    }
 
     Utils.checkForRemainingOptions(options);
   }
@@ -1037,13 +1049,19 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     options.add("-E");
     options.add("" + getNumThreads());
 
+    Collections.addAll(options, super.getOptions());
+
     options.add("-L");
     options.add("" + getLossFunction().getClass().getName());
     if (getLossFunction() instanceof OptionHandler) {
       options.add(" " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions()));
     }
 
-    Collections.addAll(options, super.getOptions());
+    options.add("-A");
+    options.add("" + getActivationFunction().getClass().getName());
+    if (getActivationFunction() instanceof OptionHandler) {
+      options.add(" " + Utils.joinOptions(((OptionHandler)getActivationFunction()).getOptions()));
+    }
 
     return options.toArray(new String[0]);
   }
