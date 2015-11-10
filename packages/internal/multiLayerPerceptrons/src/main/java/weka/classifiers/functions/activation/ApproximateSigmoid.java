@@ -23,6 +23,8 @@ package weka.classifiers.functions.activation;
 
 /**
  * <!-- globalinfo-start -->
+ * Computes approximate (fast) version of sigmoid activation function f(x) = 1 / (1 + e^(-x))
+ * <br><br>
  * <!-- globalinfo-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -35,7 +37,7 @@ public class ApproximateSigmoid implements ActivationFunction {
    */
   public String globalInfo() {
 
-    return "Computes approximate (i.e., fast) version of sigmoid activation function f(x) = 1 / (1 + e^(-x))";
+    return "Computes approximate (fast) version of sigmoid activation function f(x) = 1 / (1 + e^(-x))";
   }
 
   /**
@@ -67,3 +69,4 @@ public class ApproximateSigmoid implements ActivationFunction {
     return output;
   }
 }
+

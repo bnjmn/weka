@@ -23,6 +23,8 @@ package weka.classifiers.functions.activation;
 
 /**
  * <!-- globalinfo-start -->
+ * Computes sigmoid activation function f(x) = 1 / (1 + e^(-x))
+ * <br><br>
  * <!-- globalinfo-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)

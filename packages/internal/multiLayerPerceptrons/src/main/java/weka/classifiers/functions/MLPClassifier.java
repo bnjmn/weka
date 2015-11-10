@@ -35,6 +35,9 @@ import java.util.concurrent.Future;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableClassifier;
+import weka.classifiers.functions.activation.ActivationFunction;
+import weka.classifiers.functions.activation.ApproximateSigmoid;
+import weka.classifiers.functions.activation.Sigmoid;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.ConjugateGradientOptimization;
@@ -53,7 +56,7 @@ import weka.filters.unsupervised.attribute.Standardize;
 
 /**
  * <!-- globalinfo-start -->
- * Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class by minimizing the given loss function plus a quadratic penalty with the BFGS method. Note that all attributes are standardized, including the target. There are several parameters. The ridge parameter is used to determine the penalty on the size of the weights. The number of hidden units can also be specified. Note that large numbers produce long training times. Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which may be faster for cases with many parameters. To improve speed, an approximate version of the logistic function is used as the activation function. Also, if delta values in the backpropagation step are  within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time. Paralled calculation of loss function and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets. Nominal attributes are processed using the unsupervised NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
+ * Trains a multilayer perceptron with one hidden layer using WEKA's Optimization class by minimizing the given loss function plus a quadratic penalty with the BFGS method. Note that all attributes are standardized, including the target. There are several parameters. The ridge parameter is used to determine the penalty on the size of the weights. The number of hidden units can also be specified. Note that large numbers produce long training times. Finally, it is possible to use conjugate gradient descent rather than BFGS updates, which may be faster for cases with many parameters. To improve speed, an approximate version of the logistic function is used as the default activation function for the hidden layer, but other activation functions can be specified. In the output layer, the sigmoid function is used for classification. If the approximate sigmoid is specified for the hidden layers, it is also used for the output layer. For regression, the identity function is used activation function in the output layer. Also, if delta values in the backpropagation step are within the user-specified tolerance, the gradient is not updated for that particular instance, which saves some additional time. Parallel calculation of loss function and gradient is possible when multiple CPU cores are present. Data is split into batches and processed in separate threads in this case. Note that this only improves runtime for larger datasets. Nominal attributes are processed using the unsupervised NominalToBinary filter and missing values are replaced globally using ReplaceMissingValues.
  * <br><br>
  * <!-- globalinfo-end -->
  * 
@@ -82,6 +85,10 @@ import weka.filters.unsupervised.attribute.Standardize;
  *  The loss function to use.
  *  (default: weka.classifiers.functions.loss.SquaredError)</pre>
  * 
+ * <pre> -A &lt;classname and parameters&gt;
+ *  The activation function to use.
+ *  (default: weka.classifiers.functions.activation.ApproximateSigmoid)</pre>
+ * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
  *  (default 1)</pre>
@@ -107,6 +114,9 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
   /** For serialization */
   private static final long serialVersionUID = -3297474276438394644L;
 
+  // The activation function to use in the output layer (depends on the data)
+  protected ActivationFunction m_OutputActivationFunction = null;
+
   /**
    * Returns default capabilities of the classifier.
    * 
@@ -131,6 +141,12 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
 
     data = super.initializeClassifier(data, random);
 
+    if (m_ActivationFunction instanceof ApproximateSigmoid) {
+      m_OutputActivationFunction = new ApproximateSigmoid();
+    } else {
+      m_OutputActivationFunction = new Sigmoid();
+    }
+
     if (data != null) {
       // Standardize data
       m_Filter = new Standardize();
@@ -153,7 +169,7 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
     // For all class values
     double sum = 0;
     for (int i = 0; i < m_numClasses; i++) {
-      sum += m_Loss.loss(m_ActivationFunction.activation(getOutput(i, outputs), null, 0),
+      sum += m_Loss.loss(m_OutputActivationFunction.activation(getOutput(i, outputs), null, 0),
               ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01);
     }
     return inst.weight() * sum;
@@ -173,7 +189,7 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
 
     // Calculate delta from output unit
     for (int i = 0; i < deltas.length; i++) {
-      deltas[i] *= m_Loss.derivative(m_ActivationFunction.activation(getOutput(i, outputs),
+      deltas[i] *= m_Loss.derivative(m_OutputActivationFunction.activation(getOutput(i, outputs),
                       activationDerivativeOutput, 0),
               ((int) inst.value(m_classIndex) == i) ? 0.99 : 0.01) * activationDerivativeOutput[0];
     }
@@ -193,9 +209,16 @@ public class MLPClassifier extends MLPModel implements WeightedInstancesHandler 
         dist[i] = 1;
       }
     }
-    Utils.normalize(dist);
-
-    return dist;
+    double sum = 0;
+    for (double d : dist) {
+      sum += d;
+    }
+    if (sum > 0) { // We can get underflows for all classes.
+      Utils.normalize(dist, sum);
+      return dist;
+    } else {
+      return null;
+    }
   }
 
   /**

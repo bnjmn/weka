@@ -84,7 +84,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   protected class OptEng extends Optimization {
 
     /**
-     * Returns the squared error given parameter values x.
+     * Returns the loss given parameter values x.
      */
     @Override
     protected double objectiveFunction(double[] x) {
@@ -119,7 +119,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   protected class OptEngCGD extends ConjugateGradientOptimization {
 
     /**
-     * Returns the squared error given parameter values x.
+     * Returns the loss given parameter values x.
      */
     @Override
     protected double objectiveFunction(double[] x) {
@@ -150,7 +150,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   // The loss function to use
   protected LossFunction m_Loss = new SquaredError();
 
-  // The activation function to use
+  // The activation function to use in the hidden layer
   protected ActivationFunction m_ActivationFunction = new ApproximateSigmoid();
 
   // The number of hidden units
@@ -186,7 +186,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   // Tolerance parameter for delta values
   protected double m_tolerance = 1.0e-6;
 
-  // The number of threads to use to calculate gradient and squared error
+  // The number of threads to use to calculate gradient and loss
   protected int m_numThreads = 1;
 
   // The size of the thread pool
@@ -238,16 +238,17 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     m_AttFilter.setInputFormat(data);
     data = Filter.useFilter(data, m_AttFilter);
 
-    // only class? -> build ZeroR model
+    // Indicator that only ZeroR model is available
+    m_numAttributes = -1;
+
+    // only class? -> use ZeroR model
+    m_ZeroR = new ZeroR();
+    m_ZeroR.buildClassifier(data);
     if (data.numAttributes() == 1) {
       System.err
               .println("Cannot build model (only class attribute present in data after removing useless attributes!), "
                       + "using ZeroR model instead!");
-      m_ZeroR = new ZeroR();
-      m_ZeroR.buildClassifier(data);
       return null;
-    } else {
-      m_ZeroR = null;
     }
 
     // Transform nominal attributes
@@ -325,7 +326,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
       m_MLPParameters = opt.findArgmin(m_MLPParameters, b);
     }
     if (m_Debug) {
-      System.out.println("SE (normalized space) after optimization: "
+      System.out.println("Loss (normalized space) after optimization: "
               + opt.getMinFunction());
     }
 
@@ -391,7 +392,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
         SE += futureSE.get();
       }
     } catch (Exception e) {
-      System.out.println("Squared error could not be calculated.");
+      System.out.println("Loss could not be calculated.");
     }
 
     // Calculate sum of squared weights, excluding bias
@@ -622,7 +623,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     inst = m_AttFilter.output();
 
     // default model?
-    if (m_ZeroR != null) {
+    if (m_numAttributes == -1) {
       return m_ZeroR.distributionForInstance(inst);
     }
 
@@ -637,7 +638,12 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     for (int i = 0; i < m_numClasses; i++) {
       dist[i] = getOutput(i, outputs);
     }
-    return postProcessDistribution(dist);
+    dist = postProcessDistribution(dist);
+    if (dist == null) {
+      return m_ZeroR.distributionForInstance(inst);
+    } else {
+      return dist;
+    }
   }
 
   /**
@@ -654,11 +660,14 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
             + " number of hidden units can also be specified. Note that large"
             + " numbers produce long training times. Finally, it is possible to use conjugate gradient"
             + " descent rather than BFGS updates, which may be faster for cases with many parameters."
-            + " To improve speed, an approximate version of the logistic function is used as the"
-            + " activation function. Also, if delta values in the backpropagation step are "
-            + " within the user-specified tolerance, the gradient is not updated for that"
-            + " particular instance, which saves some additional time. Paralled calculation"
-            + " of loss function and gradient is possible when multiple CPU cores are present."
+            + " To improve speed, an approximate version of the logistic function is used as the default"
+            + " activation function for the hidden layer, but other activation functions can be specified."
+            + " In the output layer, the sigmoid function is used for classification. If the approximate"
+            + " sigmoid is specified for the hidden layers, it is also used for the output layer."
+            + " For regression, the identity function is used activation function in the output layer."
+            + " Also, if delta values in the backpropagation step are within the user-specified tolerance, the"
+            + " gradient is not updated for that particular instance, which saves some additional time. Parallel"
+            + " calculation of loss function and gradient is possible when multiple CPU cores are present."
             + " Data is split into batches and processed in separate threads in this case."
             + " Note that this only improves runtime for larger datasets."
             + " Nominal attributes are processed using the unsupervised"
@@ -1084,12 +1093,12 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
   @Override
   public String toString() {
 
-    if (m_ZeroR != null) {
-      return m_ZeroR.toString();
+    if (m_ZeroR == null) {
+      return "Classifier not built yet.";
     }
 
-    if (m_MLPParameters == null) {
-      return "Classifier not built yet.";
+    if (m_numAttributes == -1) {
+      return m_ZeroR.toString();
     }
 
     String s = modelType() + " with ridge value " + getRidge() + " and "

@@ -23,6 +23,8 @@ package weka.classifiers.functions.activation;
 
 /**
  * <!-- globalinfo-start -->
+ * Computes softplus activation function f(x) = ln(1 + e^(x))
+ * <br><br>
  * <!-- globalinfo-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -43,11 +45,12 @@ public class Softplus implements ActivationFunction {
    */
   public double activation(double x, double[] d, int index) {
 
-    double output = Math.log(1.0 + Math.exp(x));
+    double val = Math.exp(x);
+    double output = Math.log(1.0 + val);
 
     // Compute derivative if desired
     if (d != null) {
-      d[index] = 1.0 / (1 + Math.exp(-x));
+      d[index] = val / (1 + val);
     }
 
     return output;
