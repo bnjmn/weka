@@ -27,12 +27,14 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.DictionaryBuilder;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -54,13 +56,13 @@ import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start -->
+ <!-- globalinfo-start -->
  * Converts String attributes into a set of attributes representing word occurrence (depending on the tokenizer) information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
- * <p/>
- * <!-- globalinfo-end -->
- * 
- * <!-- options-start -->
- * Valid options are: <p/>
+ * <br><br>
+ <!-- globalinfo-end -->
+ *
+ <!-- options-start -->
+ * Valid options are: <p>
  * 
  * <pre> -C
  *  Output word counts rather than boolean word presence.
@@ -123,8 +125,17 @@ import weka.filters.UnsupervisedFilter;
  *  The tokenizing algorihtm (classname plus parameters) to use.
  *  (default: weka.core.tokenizers.WordTokenizer)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -dictionary &lt;path to save to&gt;
+ *  The file to save the dictionary to.
+ *  (default is not to save the dictionary)</pre>
  * 
+ * <pre> -binary-dict
+ *  Save the dictionary file as a binary serialized object
+ *  instead of in plain text form. Use in conjunction with
+ *  -dictionary</pre>
+ * 
+ <!-- options-end -->
+ *
  * @author Len Trigg (len@reeltwo.com)
  * @author Stuart Inglis (stuart@reeltwo.com)
  * @author Gordon Paynter (gordon.paynter@ucr.edu)
@@ -134,59 +145,16 @@ import weka.filters.UnsupervisedFilter;
 public class StringToWordVector extends Filter implements UnsupervisedFilter,
   OptionHandler {
 
+  /** Used to build and manage the dictionary + vectorization */
+  protected DictionaryBuilder m_dictionaryBuilder = new DictionaryBuilder();
+
   /** for serialization. */
   static final long serialVersionUID = 8249106275278565424L;
-
-  /** Range of columns to convert to word vectors. */
-  protected Range m_SelectedRange = new Range("first-last");
-
-  /** Contains a mapping of valid words to attribute indexes. */
-  private TreeMap<String, Integer> m_Dictionary = new TreeMap<String, Integer>();
-
-  /**
-   * True if output instances should contain word frequency rather than boolean
-   * 0 or 1.
-   */
-  private boolean m_OutputCounts = false;
-
-  /** A String prefix for the attribute names. */
-  private String m_Prefix = "";
-
-  /**
-   * Contains the number of documents (instances) a particular word appears in.
-   * The counts are stored with the same indexing as given by m_Dictionary.
-   */
-  private int[] m_DocsCounts;
-
-  /**
-   * Contains the number of documents (instances) in the input format from which
-   * the dictionary is created. It is used in IDF transform.
-   */
-  private int m_NumInstances = -1;
-
-  /**
-   * Contains the average length of documents (among the first batch of
-   * instances aka training data). This is used in length normalization of
-   * documents which will be normalized to average document length.
-   */
-  private double m_AvgDocLength = -1;
-
-  /**
-   * The default number of words (per class if there is a class attribute
-   * assigned) to attempt to keep.
-   */
-  private int m_WordsToKeep = 1000;
 
   /**
    * The percentage at which to periodically prune the dictionary.
    */
   private double m_PeriodicPruningRate = -1;
-
-  /**
-   * True if word frequencies should be transformed into log(1+fi) where fi is
-   * the frequency of word i.
-   */
-  private boolean m_TFTransform;
 
   /** The normalization to apply. */
   protected int m_filterType = FILTER_NONE;
@@ -208,29 +176,15 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
     new Tag(FILTER_NORMALIZE_ALL, "Normalize all data"),
     new Tag(FILTER_NORMALIZE_TEST_ONLY, "Normalize test data only"), };
 
+  /** File to save the dictionary to */
+  protected File m_dictionaryFile = new File("-- set me --");
+
   /**
-   * True if word frequencies should be transformed into
-   * fij*log(numOfDocs/numOfDocsWithWordi).
+   * Whether to save the dictionary in serialized form rather than
+   * as plain text
    */
-  private boolean m_IDFTransform;
+  protected boolean m_dictionaryIsBinary;
 
-  /** True if all tokens should be downcased. */
-  private boolean m_lowerCaseTokens;
-
-  /** the stemming algorithm. */
-  private Stemmer m_Stemmer = new NullStemmer();
-
-  /** the minimum (per-class) word frequency. */
-  private int m_minTermFreq = 1;
-
-  /** whether to operate on a per-class basis. */
-  private boolean m_doNotOperateOnPerClassBasis = false;
-
-  /** Stopword handler to use. */
-  private StopwordsHandler m_StopwordsHandler = new Null();
-
-  /** the tokenizer algorithm to use. */
-  private Tokenizer m_Tokenizer = new WordTokenizer();
 
   /**
    * Default constructor. Targets 1000 words in the output.
@@ -240,7 +194,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options
    */
   @Override
@@ -314,9 +268,17 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
         + "\t(even if a class attribute is set).", "O", 0, "-O"));
 
     result.addElement(new Option(
-      "\tThe tokenizing algorihtm (classname plus parameters) to use.\n"
+      "\tThe tokenizing algorithm (classname plus parameters) to use.\n"
         + "\t(default: " + WordTokenizer.class.getName() + ")", "tokenizer", 1,
       "-tokenizer <spec>"));
+
+    result.addElement(new Option("\tThe file to save the dictionary to.\n"
+      + "\t(default is not to save the dictionary)", "dictionary", 1,
+      "-dictionary <path to save to>"));
+
+    result.addElement(new Option("\tSave the dictionary file as a binary "
+      + "serialized object\n\tinstead of in plain text form. Use in conjunction "
+      + "with\n\t-dictionary", "binary-dict", 0, "-binary-dict"));
 
     return result.elements();
   }
@@ -324,9 +286,9 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Parses a given list of options.
    * <p/>
-   * 
-   * <!-- options-start -->
-   * Valid options are: <p/>
+   *
+   <!-- options-start -->
+   * Valid options are: <p>
    * 
    * <pre> -C
    *  Output word counts rather than boolean word presence.
@@ -389,8 +351,17 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    *  The tokenizing algorihtm (classname plus parameters) to use.
    *  (default: weka.core.tokenizers.WordTokenizer)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -dictionary &lt;path to save to&gt;
+   *  The file to save the dictionary to.
+   *  (default is not to save the dictionary)</pre>
    * 
+   * <pre> -binary-dict
+   *  Save the dictionary file as a binary serialized object
+   *  instead of in plain text form. Use in conjunction with
+   *  -dictionary</pre>
+   * 
+   <!-- options-end -->
+   *
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
    */
@@ -498,12 +469,17 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       setTokenizer(tokenizer);
     }
 
+    String dictFile = Utils.getOption("dictionary", options);
+    setDictionaryFileToSaveTo(new File(dictFile));
+
+    setSaveDictionaryInBinaryForm(Utils.getFlag("binary-dict", options));
+
     Utils.checkForRemainingOptions(options);
   }
 
   /**
    * Gets the current settings of the filter.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions
    */
   @Override
@@ -583,54 +559,34 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
     }
     result.add(spec.trim());
 
+    if (m_dictionaryFile != null && m_dictionaryFile.toString().length() > 0 &&
+      !m_dictionaryFile.toString().equalsIgnoreCase("-- set me --")) {
+      result.add("-dictionary");
+      result.add(m_dictionaryFile.toString());
+
+      if (getSaveDictionaryInBinaryForm()) {
+        result.add("-binary-dict");
+      }
+    }
+
+
     return result.toArray(new String[result.size()]);
   }
 
   /**
    * Constructor that allows specification of the target number of words in the
    * output.
-   * 
+   *
    * @param wordsToKeep the number of words in the output vector (per class if
    *          assigned).
    */
   public StringToWordVector(int wordsToKeep) {
-    m_WordsToKeep = wordsToKeep;
-  }
-
-  /**
-   * Used to store word counts for dictionary selection based on a threshold.
-   */
-  private class Count implements Serializable, RevisionHandler {
-
-    /** for serialization. */
-    static final long serialVersionUID = 2157223818584474321L;
-
-    /** the counts. */
-    public int count, docCount;
-
-    /**
-     * the constructor.
-     * 
-     * @param c the count
-     */
-    public Count(int c) {
-      count = c;
-    }
-
-    /**
-     * Returns the revision string.
-     * 
-     * @return the revision
-     */
-    @Override
-    public String getRevision() {
-      return RevisionUtils.extract("$Revision$");
-    }
+    m_dictionaryBuilder.setWordsToKeep(wordsToKeep);
   }
 
   /**
    * Returns the Capabilities of this filter.
-   * 
+   *
    * @return the capabilities of this object
    * @see Capabilities
    */
@@ -653,7 +609,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Sets the format of the input instances.
-   * 
+   *
    * @param instanceInfo an Instances object containing the input instance
    *          structure (any instances contained in the object are ignored -
    *          only the structure is required).
@@ -664,16 +620,19 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
-    m_SelectedRange.setUpper(instanceInfo.numAttributes() - 1);
-    m_AvgDocLength = -1;
-    m_NumInstances = -1;
+
+    m_dictionaryBuilder.reset();
+    m_dictionaryBuilder.setSortDictionary(true);
+    m_dictionaryBuilder.setNormalize(false);
+    m_dictionaryBuilder.setup(instanceInfo);
+
     return false;
   }
 
   /**
    * Input an instance for filtering. Filter requires all training instances be
    * read before producing output.
-   * 
+   *
    * @param instance the input instance.
    * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input structure has been defined.
@@ -689,12 +648,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
       m_NewBatch = false;
     }
     if (isFirstBatchDone()) {
-      ArrayList<Instance> fv = new ArrayList<Instance>();
-      int firstCopy = convertInstancewoDocNorm(instance, fv);
-      Instance inst = fv.get(0);
-      if (m_filterType != FILTER_NONE) {
-        normalizeInstance(inst, firstCopy);
-      }
+      Instance inst = m_dictionaryBuilder.vectorizeInstance(instance);
       push(inst, false); // No need to copy
       return true;
     } else {
@@ -707,7 +661,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * Signify that this batch of input to the filter is finished. If the filter
    * requires all instances prior to filtering, output() may now be called to
    * retrieve the filtered instances.
-   * 
+   *
    * @return true if there are instances pending output.
    * @throws IllegalStateException if no input structure has been defined.
    */
@@ -723,51 +677,32 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
     // input() has already done all the work.
     if (!isFirstBatchDone()) {
 
-      // turn of per-class mode if the class is not nominal (or is all missing)!
-      if (getInputFormat().classIndex() >= 0) {
-        if (!getInputFormat().classAttribute().isNominal()
-          || getInputFormat().attributeStats(getInputFormat().classIndex()).missingCount == getInputFormat()
-            .numInstances()) {
-          m_doNotOperateOnPerClassBasis = true;
-        }
+      long pruneRate = Math.round((m_PeriodicPruningRate / 100.0)
+        * getInputFormat().numInstances());
+      m_dictionaryBuilder.setPeriodicPruning(pruneRate);
+      // m_dictionaryBuilder.setNormalize(m_filterType == FILTER_NORMALIZE_ALL);
+
+      for (int i = 0; i < getInputFormat().numInstances(); i++) {
+        Instance toProcess = getInputFormat().instance(i);
+        m_dictionaryBuilder.processInstance(toProcess);
+      }
+      m_dictionaryBuilder.finalizeDictionary();
+
+      setOutputFormat(m_dictionaryBuilder.getVectorizedFormat());
+
+      m_dictionaryBuilder.setNormalize(m_filterType != FILTER_NONE);
+      Instances converted = m_dictionaryBuilder.vectorizeBatch( getInputFormat(),
+        m_filterType != FILTER_NONE);
+
+      // save the dictionary?
+      if (m_dictionaryFile != null && m_dictionaryFile.toString().length() > 0 &&
+        !m_dictionaryFile.toString().equalsIgnoreCase("-- set me --")) {
+        m_dictionaryBuilder.saveDictionary(m_dictionaryFile, !m_dictionaryIsBinary);
       }
 
-      // Determine the dictionary from the first batch (training data)
-      determineDictionary();
-
-      // Convert all instances w/o normalization
-      ArrayList<Instance> fv = new ArrayList<Instance>();
-      int firstCopy = 0;
-      for (int i = 0; i < m_NumInstances; i++) {
-        firstCopy = convertInstancewoDocNorm(getInputFormat().instance(i), fv);
-      }
-
-      // Need to compute average document length if necessary
-      if (m_filterType != FILTER_NONE) {
-        m_AvgDocLength = 0;
-        for (int i = 0; i < fv.size(); i++) {
-          Instance inst = fv.get(i);
-          double docLength = 0;
-          for (int j = 0; j < inst.numValues(); j++) {
-            if (inst.index(j) >= firstCopy) {
-              docLength += inst.valueSparse(j) * inst.valueSparse(j);
-            }
-          }
-          m_AvgDocLength += Math.sqrt(docLength);
-        }
-        m_AvgDocLength /= m_NumInstances;
-      }
-
-      // Perform normalization if necessary.
-      if (m_filterType == FILTER_NORMALIZE_ALL) {
-        for (int i = 0; i < fv.size(); i++) {
-          normalizeInstance(fv.get(i), firstCopy);
-        }
-      }
-
-      // Push all instances into the output queue
-      for (int i = 0; i < fv.size(); i++) {
-        push(fv.get(i), false); // No need to copy
+      // push all instances into the output queue
+      for (int i = 0; i < converted.numInstances(); i++) {
+        push(converted.instance(i), false);
       }
     }
 
@@ -780,8 +715,64 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   }
 
   /**
+   * Tip text for this property
+   *
+   * @return the tip text for this property
+   */
+  public String dictionaryFileToSaveToTipText() {
+    return "The path to save the dictionary file to - "
+      + "an empty path or a path '-- set me --' means "
+      + "do not save the dictionary.";
+  }
+
+  /**
+   * Set the dictionary file to save the dictionary to. A file with an
+   * empty path or a path "-- set me --" means do not save the dictionary.
+   *
+   * @param toSaveTo the path to save the dictionary to
+   */
+  public void setDictionaryFileToSaveTo(File toSaveTo) {
+    m_dictionaryFile = toSaveTo;
+  }
+
+  /**
+   * Set the dictionary file to save the dictionary to. A file with an
+   * empty path or a path "-- set me --" means do not save the dictionary.
+   *
+   * @return the path to save the dictionary to
+   */
+  public File getDictionaryFileToSaveTo() {
+    return m_dictionaryFile;
+  }
+
+  public String saveDictionaryInBinaryFormTipText() {
+    return "Save the dictionary as a binary serialized java object instead of "
+      + "in plain text form.";
+  }
+
+  /**
+   * Set whether to save the dictionary in binary serialized form rather than
+   * as plain text
+   *
+   * @param saveAsBinary true to save the dictionary in binary form
+   */
+  public void setSaveDictionaryInBinaryForm(boolean saveAsBinary) {
+    m_dictionaryIsBinary = saveAsBinary;
+  }
+
+  /**
+   * Set whether to save the dictionary in binary serialized form rather than
+   * as plain text
+   *
+   * @return true to save the dictionary in binary form
+   */
+  public boolean getSaveDictionaryInBinaryForm() {
+    return m_dictionaryIsBinary;
+  }
+
+  /**
    * Returns a string describing this filter.
-   * 
+   *
    * @return a description of the filter suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -795,26 +786,26 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Gets whether output instances contain 0 or 1 indicating word presence, or
    * word counts.
-   * 
+   *
    * @return true if word counts should be output.
    */
   public boolean getOutputWordCounts() {
-    return m_OutputCounts;
+    return m_dictionaryBuilder.getOutputWordCounts();
   }
 
   /**
    * Sets whether output instances contain 0 or 1 indicating word presence, or
    * word counts.
-   * 
+   *
    * @param outputWordCounts true if word counts should be output.
    */
   public void setOutputWordCounts(boolean outputWordCounts) {
-    m_OutputCounts = outputWordCounts;
+    m_dictionaryBuilder.setOutputWordCounts(outputWordCounts);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -825,25 +816,25 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Get the value of m_SelectedRange.
-   * 
+   *
    * @return Value of m_SelectedRange.
    */
   public Range getSelectedRange() {
-    return m_SelectedRange;
+    return m_dictionaryBuilder.getSelectedRange();
   }
 
   /**
    * Set the value of m_SelectedRange.
-   * 
+   *
    * @param newSelectedRange Value to assign to m_SelectedRange.
    */
   public void setSelectedRange(String newSelectedRange) {
-    m_SelectedRange = new Range(newSelectedRange);
+    m_dictionaryBuilder.setSelectedRange(newSelectedRange);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -856,16 +847,16 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets the current range selection.
-   * 
+   *
    * @return a string containing a comma separated list of ranges
    */
   public String getAttributeIndices() {
-    return m_SelectedRange.getRanges();
+    return m_dictionaryBuilder.getAttributeIndices();
   }
 
   /**
    * Sets which attributes are to be worked on.
-   * 
+   *
    * @param rangeList a string representing the list of attributes. Since the
    *          string will typically come from a user, attributes are indexed
    *          from 1. <br>
@@ -873,24 +864,24 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * @throws IllegalArgumentException if an invalid range list is supplied
    */
   public void setAttributeIndices(String rangeList) {
-    m_SelectedRange.setRanges(rangeList);
+    m_dictionaryBuilder.setAttributeIndices(rangeList);
   }
 
   /**
    * Sets which attributes are to be processed.
-   * 
+   *
    * @param attributes an array containing indexes of attributes to process.
    *          Since the array will typically come from a program, attributes are
    *          indexed from 0.
    * @throws IllegalArgumentException if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int[] attributes) {
-    setAttributeIndices(Range.indicesToRangeList(attributes));
+    m_dictionaryBuilder.setAttributeIndicesArray(attributes);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -902,43 +893,43 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets whether the supplied columns are to be processed or skipped.
-   * 
+   *
    * @return true if the supplied columns will be kept
    */
   public boolean getInvertSelection() {
-    return m_SelectedRange.getInvert();
+    return m_dictionaryBuilder.getInvertSelection();
   }
 
   /**
    * Sets whether selected columns should be processed or skipped.
-   * 
+   *
    * @param invert the new invert setting
    */
   public void setInvertSelection(boolean invert) {
-    m_SelectedRange.setInvert(invert);
+    m_dictionaryBuilder.setInvertSelection(invert);
   }
 
   /**
    * Get the attribute name prefix.
-   * 
+   *
    * @return The current attribute name prefix.
    */
   public String getAttributeNamePrefix() {
-    return m_Prefix;
+    return m_dictionaryBuilder.getAttributeNamePrefix();
   }
 
   /**
    * Set the attribute name prefix.
-   * 
+   *
    * @param newPrefix String to use as the attribute name prefix.
    */
   public void setAttributeNamePrefix(String newPrefix) {
-    m_Prefix = newPrefix;
+    m_dictionaryBuilder.setAttributeNamePrefix(newPrefix);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -949,28 +940,28 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Gets the number of words (per class if there is a class attribute assigned)
    * to attempt to keep.
-   * 
+   *
    * @return the target number of words in the output vector (per class if
    *         assigned).
    */
   public int getWordsToKeep() {
-    return m_WordsToKeep;
+    return m_dictionaryBuilder.getWordsToKeep();
   }
 
   /**
    * Sets the number of words (per class if there is a class attribute assigned)
    * to attempt to keep.
-   * 
+   *
    * @param newWordsToKeep the target number of words in the output vector (per
    *          class if assigned).
    */
   public void setWordsToKeep(int newWordsToKeep) {
-    m_WordsToKeep = newWordsToKeep;
+    m_dictionaryBuilder.setWordsToKeep(newWordsToKeep);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -982,7 +973,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Gets the rate at which the dictionary is periodically pruned, as a
    * percentage of the dataset size.
-   * 
+   *
    * @return the rate at which the dictionary is periodically pruned
    */
   public double getPeriodicPruning() {
@@ -992,7 +983,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Sets the rate at which the dictionary is periodically pruned, as a
    * percentage of the dataset size.
-   * 
+   *
    * @param newPeriodicPruning the rate at which the dictionary is periodically
    *          pruned
    */
@@ -1002,7 +993,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1015,26 +1006,26 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Gets whether if the word frequencies should be transformed into log(1+fij)
    * where fij is the frequency of word i in document(instance) j.
-   * 
+   *
    * @return true if word frequencies are to be transformed.
    */
   public boolean getTFTransform() {
-    return this.m_TFTransform;
+    return m_dictionaryBuilder.getTFTransform();
   }
 
   /**
    * Sets whether if the word frequencies should be transformed into log(1+fij)
    * where fij is the frequency of word i in document(instance) j.
-   * 
+   *
    * @param TFTransform true if word frequencies are to be transformed.
    */
   public void setTFTransform(boolean TFTransform) {
-    this.m_TFTransform = TFTransform;
+    m_dictionaryBuilder.setTFTransform(TFTransform);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1049,11 +1040,11 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * into: <br>
    * fij*log(num of Docs/num of Docs with word i) <br>
    * where fij is the frequency of word i in document(instance) j.
-   * 
+   *
    * @return true if the word frequencies are to be transformed.
    */
   public boolean getIDFTransform() {
-    return this.m_IDFTransform;
+    return m_dictionaryBuilder.getIDFTransform();
   }
 
   /**
@@ -1061,16 +1052,16 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    * into: <br>
    * fij*log(num of Docs/num of Docs with word i) <br>
    * where fij is the frequency of word i in document(instance) j.
-   * 
+   *
    * @param IDFTransform true if the word frequecies are to be transformed
    */
   public void setIDFTransform(boolean IDFTransform) {
-    this.m_IDFTransform = IDFTransform;
+    m_dictionaryBuilder.setIDFTransform(IDFTransform);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1084,18 +1075,17 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * Gets whether if the word frequencies for a document (instance) should be
    * normalized or not.
-   * 
+   *
    * @return true if word frequencies are to be normalized.
    */
   public SelectedTag getNormalizeDocLength() {
-
     return new SelectedTag(m_filterType, TAGS_FILTER);
   }
 
   /**
    * Sets whether if the word frequencies for a document (instance) should be
    * normalized or not.
-   * 
+   *
    * @param newType the new type.
    */
   public void setNormalizeDocLength(SelectedTag newType) {
@@ -1107,7 +1097,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1118,27 +1108,27 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Gets whether if the tokens are to be downcased or not.
-   * 
+   *
    * @return true if the tokens are to be downcased.
    */
   public boolean getLowerCaseTokens() {
-    return this.m_lowerCaseTokens;
+    return m_dictionaryBuilder.getLowerCaseTokens();
   }
 
   /**
    * Sets whether if the tokens are to be downcased or not. (Doesn't affect
    * non-alphabetic characters in tokens).
-   * 
+   *
    * @param downCaseTokens should be true if only lower case tokens are to be
    *          formed.
    */
   public void setLowerCaseTokens(boolean downCaseTokens) {
-    this.m_lowerCaseTokens = downCaseTokens;
+    m_dictionaryBuilder.setLowerCaseTokens(downCaseTokens);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1151,27 +1141,27 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Get the DoNotOperateOnPerClassBasis value.
-   * 
+   *
    * @return the DoNotOperateOnPerClassBasis value.
    */
   public boolean getDoNotOperateOnPerClassBasis() {
-    return m_doNotOperateOnPerClassBasis;
+    return m_dictionaryBuilder.getDoNotOperateOnPerClassBasis();
   }
 
   /**
    * Set the DoNotOperateOnPerClassBasis value.
-   * 
+   *
    * @param newDoNotOperateOnPerClassBasis The new DoNotOperateOnPerClassBasis
    *          value.
    */
   public void setDoNotOperateOnPerClassBasis(
     boolean newDoNotOperateOnPerClassBasis) {
-    this.m_doNotOperateOnPerClassBasis = newDoNotOperateOnPerClassBasis;
+    m_dictionaryBuilder.setDoNotOperateOnPerClassBasis(newDoNotOperateOnPerClassBasis);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1182,25 +1172,25 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Get the MinTermFreq value.
-   * 
+   *
    * @return the MinTermFreq value.
    */
   public int getMinTermFreq() {
-    return m_minTermFreq;
+    return m_dictionaryBuilder.getMinTermFreq();
   }
 
   /**
    * Set the MinTermFreq value.
-   * 
+   *
    * @param newMinTermFreq The new MinTermFreq value.
    */
   public void setMinTermFreq(int newMinTermFreq) {
-    this.m_minTermFreq = newMinTermFreq;
+    m_dictionaryBuilder.setMinTermFreq(newMinTermFreq);
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1212,30 +1202,30 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   /**
    * the stemming algorithm to use, null means no stemming at all (i.e., the
    * NullStemmer is used).
-   * 
+   *
    * @param value the configured stemming algorithm, or null
    * @see NullStemmer
    */
   public void setStemmer(Stemmer value) {
     if (value != null) {
-      m_Stemmer = value;
+      m_dictionaryBuilder.setStemmer(value);
     } else {
-      m_Stemmer = new NullStemmer();
+      m_dictionaryBuilder.setStemmer(new NullStemmer());
     }
   }
 
   /**
    * Returns the current stemming algorithm, null if none is used.
-   * 
+   *
    * @return the current stemming algorithm, null if none set
    */
   public Stemmer getStemmer() {
-    return m_Stemmer;
+    return m_dictionaryBuilder.getStemmer();
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1245,29 +1235,29 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Sets the stopwords handler to use.
-   * 
+   *
    * @param value the stopwords handler, if null, Null is used
    */
   public void setStopwordsHandler(StopwordsHandler value) {
     if (value != null) {
-      m_StopwordsHandler = value;
+      m_dictionaryBuilder.setStopwordsHandler(value);
     } else {
-      m_StopwordsHandler = new Null();
+      m_dictionaryBuilder.setStopwordsHandler(new Null());
     }
   }
 
   /**
    * Gets the stopwords handler.
-   * 
+   *
    * @return the stopwords handler
    */
   public StopwordsHandler getStopwordsHandler() {
-    return m_StopwordsHandler;
+    return m_dictionaryBuilder.getStopwordsHandler();
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1277,25 +1267,25 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * the tokenizer algorithm to use.
-   * 
+   *
    * @param value the configured tokenizing algorithm
    */
   public void setTokenizer(Tokenizer value) {
-    m_Tokenizer = value;
+    m_dictionaryBuilder.setTokenizer(value);
   }
 
   /**
    * Returns the current tokenizer algorithm.
-   * 
+   *
    * @return the current tokenizer algorithm
    */
   public Tokenizer getTokenizer() {
-    return m_Tokenizer;
+    return m_dictionaryBuilder.getTokenizer();
   }
 
   /**
    * Returns the tip text for this property.
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1304,437 +1294,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * sorts an array.
-   * 
-   * @param array the array to sort
-   */
-  private static void sortArray(int[] array) {
-
-    int i, j, h, N = array.length - 1;
-
-    for (h = 1; h <= N / 9; h = 3 * h + 1) {
-      ;
-    }
-
-    for (; h > 0; h /= 3) {
-      for (i = h + 1; i <= N; i++) {
-        int v = array[i];
-        j = i;
-        while (j > h && array[j - h] > v) {
-          array[j] = array[j - h];
-          j -= h;
-        }
-        array[j] = v;
-      }
-    }
-  }
-
-  /**
-   * determines the selected range.
-   */
-  private void determineSelectedRange() {
-
-    Instances inputFormat = getInputFormat();
-
-    // Calculate the default set of fields to convert
-    if (m_SelectedRange == null) {
-      StringBuffer fields = new StringBuffer();
-      for (int j = 0; j < inputFormat.numAttributes(); j++) {
-        if (inputFormat.attribute(j).type() == Attribute.STRING) {
-          fields.append((j + 1) + ",");
-        }
-      }
-      m_SelectedRange = new Range(fields.toString());
-    }
-    m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
-
-    // Prevent the user from converting non-string fields
-    StringBuffer fields = new StringBuffer();
-    for (int j = 0; j < inputFormat.numAttributes(); j++) {
-      if (m_SelectedRange.isInRange(j)
-        && inputFormat.attribute(j).type() == Attribute.STRING) {
-        fields.append((j + 1) + ",");
-      }
-    }
-    m_SelectedRange.setRanges(fields.toString());
-    m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
-
-    // System.err.println("Selected Range: " + getSelectedRange().getRanges());
-  }
-
-  /**
-   * determines the dictionary.
-   */
-  private void determineDictionary() {
-
-    // Operate on a per-class basis if class attribute is set
-    int classInd = getInputFormat().classIndex();
-    int values = 1;
-    if (!m_doNotOperateOnPerClassBasis && (classInd != -1)) {
-      values = getInputFormat().attribute(classInd).numValues();
-    }
-
-    // TreeMap dictionaryArr [] = new TreeMap[values];
-    @SuppressWarnings("unchecked")
-    TreeMap<String, Count>[] dictionaryArr = new TreeMap[values];
-    for (int i = 0; i < values; i++) {
-      dictionaryArr[i] = new TreeMap<String, Count>();
-    }
-
-    // Make sure we know which fields to convert
-    determineSelectedRange();
-
-    // Tokenize all training text into an orderedMap of "words".
-    long pruneRate = Math.round((m_PeriodicPruningRate / 100.0)
-      * getInputFormat().numInstances());
-    for (int i = 0; i < getInputFormat().numInstances(); i++) {
-      Instance instance = getInputFormat().instance(i);
-      int vInd = 0;
-      if (!m_doNotOperateOnPerClassBasis && (classInd != -1)) {
-        vInd = (int) instance.classValue();
-      }
-
-      // Iterate through all relevant string attributes of the current instance
-      Hashtable<String, Integer> h = new Hashtable<String, Integer>();
-      for (int j = 0; j < instance.numAttributes(); j++) {
-        if (m_SelectedRange.isInRange(j) && (instance.isMissing(j) == false)) {
-
-          // Get tokenizer
-          m_Tokenizer.tokenize(instance.stringValue(j));
-
-          // Iterate through tokens, perform stemming, and remove stopwords
-          // (if required)
-          while (m_Tokenizer.hasMoreElements()) {
-            String word = m_Tokenizer.nextElement().intern();
-
-            if (this.m_lowerCaseTokens == true) {
-              word = word.toLowerCase();
-            }
-
-            word = m_Stemmer.stem(word);
-
-            if (m_StopwordsHandler.isStopword(word)) {
-              continue;
-            }
-
-            if (!(h.containsKey(word))) {
-              h.put(word, new Integer(0));
-            }
-
-            Count count = dictionaryArr[vInd].get(word);
-            if (count == null) {
-              dictionaryArr[vInd].put(word, new Count(1));
-            } else {
-              count.count++;
-            }
-          }
-        }
-      }
-
-      // updating the docCount for the words that have occurred in this
-      // instance(document).
-      Enumeration<String> e = h.keys();
-      while (e.hasMoreElements()) {
-        String word = e.nextElement();
-        Count c = dictionaryArr[vInd].get(word);
-        if (c != null) {
-          c.docCount++;
-        } else {
-          System.err.println("Warning: A word should definitely be in the "
-            + "dictionary.Please check the code");
-        }
-      }
-
-      if (pruneRate > 0) {
-        if (i % pruneRate == 0 && i > 0) {
-          for (int z = 0; z < values; z++) {
-            ArrayList<String> d = new ArrayList<String>(1000);
-            Iterator<String> it = dictionaryArr[z].keySet().iterator();
-            while (it.hasNext()) {
-              String word = it.next();
-              Count count = dictionaryArr[z].get(word);
-              if (count.count <= 1) {
-                d.add(word);
-              }
-            }
-            Iterator<String> iter = d.iterator();
-            while (iter.hasNext()) {
-              String word = iter.next();
-              dictionaryArr[z].remove(word);
-            }
-          }
-        }
-      }
-    }
-
-    // Figure out the minimum required word frequency
-    int totalsize = 0;
-    int prune[] = new int[values];
-    for (int z = 0; z < values; z++) {
-      totalsize += dictionaryArr[z].size();
-
-      int array[] = new int[dictionaryArr[z].size()];
-      int pos = 0;
-      Iterator<String> it = dictionaryArr[z].keySet().iterator();
-      while (it.hasNext()) {
-        String word = it.next();
-        Count count = dictionaryArr[z].get(word);
-        array[pos] = count.count;
-        pos++;
-      }
-
-      // sort the array
-      sortArray(array);
-      if (array.length < m_WordsToKeep) {
-        // if there aren't enough words, set the threshold to
-        // minFreq
-        prune[z] = m_minTermFreq;
-      } else {
-        // otherwise set it to be at least minFreq
-        prune[z] = Math.max(m_minTermFreq, array[array.length - m_WordsToKeep]);
-      }
-    }
-
-    // Convert the dictionary into an attribute index
-    // and create one attribute per word
-    ArrayList<Attribute> attributes = new ArrayList<Attribute>(totalsize
-      + getInputFormat().numAttributes());
-
-    // Add the non-converted attributes
-    int classIndex = -1;
-    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (!m_SelectedRange.isInRange(i)) {
-        if (getInputFormat().classIndex() == i) {
-          classIndex = attributes.size();
-        }
-        attributes.add((Attribute) getInputFormat().attribute(i).copy());
-      }
-    }
-
-    // Add the word vector attributes (eliminating duplicates
-    // that occur in multiple classes)
-    TreeMap<String, Integer> newDictionary = new TreeMap<String, Integer>();
-    int index = attributes.size();
-    for (int z = 0; z < values; z++) {
-      Iterator<String> it = dictionaryArr[z].keySet().iterator();
-      while (it.hasNext()) {
-        String word = it.next();
-        Count count = dictionaryArr[z].get(word);
-        if (count.count >= prune[z]) {
-          if (newDictionary.get(word) == null) {
-            newDictionary.put(word, new Integer(index++));
-            attributes.add(new Attribute(m_Prefix + word));
-          }
-        }
-      }
-    }
-
-    // Compute document frequencies
-    m_DocsCounts = new int[attributes.size()];
-    Iterator<String> it = newDictionary.keySet().iterator();
-    while (it.hasNext()) {
-      String word = it.next();
-      int idx = newDictionary.get(word).intValue();
-      int docsCount = 0;
-      for (int j = 0; j < values; j++) {
-        Count c = dictionaryArr[j].get(word);
-        if (c != null) {
-          docsCount += c.docCount;
-        }
-      }
-      m_DocsCounts[idx] = docsCount;
-    }
-
-    // Trim vector and set instance variables
-    attributes.trimToSize();
-    m_Dictionary = newDictionary;
-    m_NumInstances = getInputFormat().numInstances();
-
-    // Set the filter's output format
-    Instances outputFormat = new Instances(getInputFormat().relationName(),
-      attributes, 0);
-    outputFormat.setClassIndex(classIndex);
-    setOutputFormat(outputFormat);
-  }
-
-  /**
-   * Converts the instance w/o normalization.
-   * 
-   * @oaram instance the instance to convert
-   * @param v
-   * @return the conerted instance
-   */
-  private int convertInstancewoDocNorm(Instance instance, ArrayList<Instance> v) {
-
-    // Convert the instance into a sorted set of indexes
-    TreeMap<Integer, Double> contained = new TreeMap<Integer, Double>();
-
-    // Copy all non-converted attributes from input to output
-    int firstCopy = 0;
-    for (int i = 0; i < getInputFormat().numAttributes(); i++) {
-      if (!m_SelectedRange.isInRange(i)) {
-        if (getInputFormat().attribute(i).type() != Attribute.STRING
-          && getInputFormat().attribute(i).type() != Attribute.RELATIONAL) {
-          // Add simple nominal and numeric attributes directly
-          if (instance.value(i) != 0.0) {
-            contained
-              .put(new Integer(firstCopy), new Double(instance.value(i)));
-          }
-        } else {
-          if (instance.isMissing(i)) {
-            contained.put(new Integer(firstCopy),
-              new Double(Utils.missingValue()));
-          } else if (getInputFormat().attribute(i).type() == Attribute.STRING) {
-
-            // If this is a string attribute, we have to first add
-            // this value to the range of possible values, then add
-            // its new internal index.
-            if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
-              // Note that the first string value in a
-              // SparseInstance doesn't get printed.
-              outputFormatPeek().attribute(firstCopy).addStringValue(
-                "Hack to defeat SparseInstance bug");
-            }
-            int newIndex = outputFormatPeek().attribute(firstCopy)
-              .addStringValue(instance.stringValue(i));
-            contained.put(new Integer(firstCopy), new Double(newIndex));
-          } else {
-            // relational
-            if (outputFormatPeek().attribute(firstCopy).numValues() == 0) {
-              Instances relationalHeader = outputFormatPeek().attribute(
-                firstCopy).relation();
-
-              // hack to defeat sparse instances bug
-              outputFormatPeek().attribute(firstCopy).addRelation(
-                relationalHeader);
-            }
-            int newIndex = outputFormatPeek().attribute(firstCopy).addRelation(
-              instance.relationalValue(i));
-            contained.put(new Integer(firstCopy), new Double(newIndex));
-          }
-        }
-        firstCopy++;
-      }
-    }
-
-    for (int j = 0; j < instance.numAttributes(); j++) {
-      // if ((getInputFormat().attribute(j).type() == Attribute.STRING)
-      if (m_SelectedRange.isInRange(j) && (instance.isMissing(j) == false)) {
-
-        m_Tokenizer.tokenize(instance.stringValue(j));
-
-        while (m_Tokenizer.hasMoreElements()) {
-          String word = m_Tokenizer.nextElement();
-          if (this.m_lowerCaseTokens == true) {
-            word = word.toLowerCase();
-          }
-          word = m_Stemmer.stem(word);
-          Integer index = m_Dictionary.get(word);
-          if (index != null) {
-            if (m_OutputCounts) { // Separate if here rather than two lines down
-                                  // to avoid hashtable lookup
-              Double count = contained.get(index);
-              if (count != null) {
-                contained.put(index, new Double(count.doubleValue() + 1.0));
-              } else {
-                contained.put(index, new Double(1));
-              }
-            } else {
-              contained.put(index, new Double(1));
-            }
-          }
-        }
-      }
-    }
-
-    // Doing TFTransform
-    if (m_TFTransform == true) {
-      Iterator<Integer> it = contained.keySet().iterator();
-      for (; it.hasNext();) {
-        Integer index = it.next();
-        if (index.intValue() >= firstCopy) {
-          double val = contained.get(index).doubleValue();
-          val = Math.log(val + 1);
-          contained.put(index, new Double(val));
-        }
-      }
-    }
-
-    // Doing IDFTransform
-    if (m_IDFTransform == true) {
-      Iterator<Integer> it = contained.keySet().iterator();
-      for (; it.hasNext();) {
-        Integer index = it.next();
-        if (index.intValue() >= firstCopy) {
-          double val = contained.get(index).doubleValue();
-          val = val
-            * Math
-              .log(m_NumInstances / (double) m_DocsCounts[index.intValue()]);
-          contained.put(index, new Double(val));
-        }
-      }
-    }
-
-    // Convert the set to structures needed to create a sparse instance.
-    double[] values = new double[contained.size()];
-    int[] indices = new int[contained.size()];
-    Iterator<Integer> it = contained.keySet().iterator();
-    for (int i = 0; it.hasNext(); i++) {
-      Integer index = it.next();
-      Double value = contained.get(index);
-      values[i] = value.doubleValue();
-      indices[i] = index.intValue();
-    }
-
-    Instance inst = new SparseInstance(instance.weight(), values, indices,
-      outputFormatPeek().numAttributes());
-    inst.setDataset(outputFormatPeek());
-
-    v.add(inst);
-
-    return firstCopy;
-  }
-
-  /**
-   * Normalizes given instance to average doc length (only the newly constructed
-   * attributes).
-   * 
-   * @param inst the instance to normalize
-   * @param firstCopy
-   * @throws Exception if avg. doc length not set
-   */
-  private void normalizeInstance(Instance inst, int firstCopy) throws Exception {
-
-    double docLength = 0;
-
-    if (m_AvgDocLength < 0) {
-      throw new Exception("Average document length not set.");
-    }
-
-    // Compute length of document vector
-    for (int j = 0; j < inst.numValues(); j++) {
-      if (inst.index(j) >= firstCopy) {
-        docLength += inst.valueSparse(j) * inst.valueSparse(j);
-      }
-    }
-    docLength = Math.sqrt(docLength);
-
-    // Normalize document vector
-    for (int j = 0; j < inst.numValues(); j++) {
-      if (inst.index(j) >= firstCopy) {
-        double val = inst.valueSparse(j) * m_AvgDocLength / docLength;
-        inst.setValueSparse(j, val);
-        if (val == 0) {
-          System.err.println("setting value " + inst.index(j) + " to zero.");
-          j--;
-        }
-      }
-    }
-  }
-
-  /**
    * Returns the revision string.
-   * 
+   *
    * @return the revision
    */
   @Override
@@ -1744,7 +1305,7 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
 
   /**
    * Main method for testing this class.
-   * 
+   *
    * @param argv should contain arguments to the filter: use -h for help
    */
   public static void main(String[] argv) {

@@ -248,7 +248,10 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>();
+    Vector<Option> newVector =
+      Option.listOptionsForClassHierarchy(this.getClass(),
+        AbstractFileSaver.class);
+    // Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option("\tThe input file", "i", 1,
       "-i <the input file>"));
@@ -279,6 +282,7 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
   @Override
   public void setOptions(String[] options) throws Exception {
 
+    Option.setOptionsForHierarchy(options, this, AbstractFileSaver.class);
     String outputString = Utils.getOption('o', options);
     String inputString = Utils.getOption('i', options);
 
@@ -308,9 +312,9 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
       // add appropriate file extension
       if (!validExt) {
         if (outputString.lastIndexOf('.') != -1) {
-          outputString = (outputString.substring(0,
-            outputString.lastIndexOf('.')))
-            + FILE_EXTENSION;
+          outputString =
+            (outputString.substring(0, outputString.lastIndexOf('.')))
+              + FILE_EXTENSION;
         } else {
           outputString = outputString + FILE_EXTENSION;
         }
@@ -335,6 +339,10 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
     Vector<String> result;
 
     result = new Vector<String>();
+    for (String s : Option
+      .getOptionsForHierarchy(this, AbstractFileSaver.class)) {
+      result.add(s);
+    }
 
     if (m_outputFile != null) {
       result.add("-o");
@@ -395,8 +403,8 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         if (out.lastIndexOf(File.separatorChar) == -1) {
           success = file.createNewFile();
         } else {
-          String outPath = out
-            .substring(0, out.lastIndexOf(File.separatorChar));
+          String outPath =
+            out.substring(0, out.lastIndexOf(File.separatorChar));
           File dir = new File(outPath);
           if (dir.exists()) {
             success = file.createNewFile();
@@ -460,7 +468,8 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         if (relationName.length() == 0) {
           throw new IOException("[Saver] Empty filename!!");
         }
-        String concat = (m_dir + File.separator + relationName + add + FILE_EXTENSION);
+        String concat =
+          (m_dir + File.separator + relationName + add + FILE_EXTENSION);
         if (!concat.toLowerCase().endsWith(FILE_EXTENSION)
           && !concat.toLowerCase().endsWith(
             FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {
@@ -471,7 +480,8 @@ public abstract class AbstractFileSaver extends AbstractSaver implements
         if (relationName.length() > 0) {
           relationName = "_" + relationName;
         }
-        String concat = (m_dir + File.separator + m_prefix + relationName + add);
+        String concat =
+          (m_dir + File.separator + m_prefix + relationName + add);
         if (!concat.toLowerCase().endsWith(FILE_EXTENSION)
           && !concat.toLowerCase().endsWith(
             FILE_EXTENSION + FILE_EXTENSION_COMPRESSED)) {

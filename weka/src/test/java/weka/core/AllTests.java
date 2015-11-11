@@ -65,6 +65,8 @@ public class AllTests extends WekaTestSuite {
     suite
       .addTestSuite(weka.core.expressionlanguage.ExpressionLanguageTest.class);
 
+    suite.addTestSuite(weka.core.DictionaryBuilderTest.class);
+
     return suite;
   }
 
