@@ -110,6 +110,18 @@ import de.bwaldvogel.liblinear.SolverType;
  * <pre> -Z
  *  Turn on normalization of input data (default: off)</pre>
  *
+ * <pre>
+ * -L &lt;double&gt;
+ *  The epsilon parameter in epsilon-insensitive loss function.
+ *  (default 0.1)
+ * </pre>
+ *
+ * <pre>
+ * -I &lt;int&gt;
+ *  The maximum number of iterations to perform.
+ *  (default 0.1)
+ * </pre>
+ *
  * <pre> -P
  *  Use probability estimation (default: off)
  * currently for L2-regularized logistic regression only! </pre>
@@ -175,8 +187,14 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
     /** stopping criteria */
     protected double               m_eps                  = 0.001;
 
+    /** epsilon of epsilon-insensitive cost function **/
+    protected double m_epsilon = 1e-1;
+
     /** cost Parameter C */
     protected double               m_Cost                 = 1;
+
+    /** the maximum number of iterations */
+    protected int m_MaxIts = 1000;
 
     /** bias term value */
     protected double               m_Bias                 = 1;
@@ -200,6 +218,10 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
 
     /** Class counts (needed for output) */
     protected double[] m_Counts;
+
+    /** coefficients used by normalization filter for doing its linear transformation **/
+    protected double m_x1 = 1.0;
+    protected double m_x0 = 0.0;
 
     /**
      * Returns a string describing classifier
@@ -271,6 +293,14 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
 
         result.addElement(new Option("\tAdd Bias term with the given value if >= 0; if < 0, no bias term added (default: 1)", "B", 1, "-B <double>"));
 
+        result.addElement(new Option(
+                "\tThe epsilon parameter in epsilon-insensitive loss function.\n"
+                        + "\t(default 0.1)", "L", 1, "-L <double>"));
+
+        result.addElement(new Option(
+                "\tThe maximum number of iterations to perform.\n"
+                        + "\t(default 1000)", "I", 1, "-I <int>"));
+
         Enumeration en = super.listOptions();
         while (en.hasMoreElements())
             result.addElement(en.nextElement());
@@ -306,6 +336,18 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      *
      * <pre> -Z
      *  Turn on normalization of input data (default: off)</pre>
+     *
+     * <pre>
+     * -L &lt;double&gt;
+     *  The epsilon parameter in epsilon-insensitive loss function.
+     *  (default 0.1)
+     * </pre>
+     *
+     * <pre>
+     * -I &lt;int&gt;
+     *  The maximum number of iterations to perform.
+     *  (default 0.1)
+     * </pre>
      *
      * <pre> -P
      *  Use probability estimation (default: off)
@@ -363,6 +405,20 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
 
         setProbabilityEstimates(Utils.getFlag('P', options));
 
+        tmpStr = Utils.getOption('L', options);
+        if (tmpStr.length() != 0) {
+            setEpsilonParameter(Double.parseDouble(tmpStr));
+        } else {
+            setEpsilonParameter(0.1);
+        }
+
+        tmpStr = Utils.getOption('I', options);
+        if (tmpStr.length() != 0) {
+            setMaximumNumberOfIterations(Integer.parseInt(tmpStr));
+        } else {
+            setMaximumNumberOfIterations(1000);
+        }
+
         super.setOptions(options);
     }
 
@@ -395,6 +451,12 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
         }
 
         if (getProbabilityEstimates()) options.add("-P");
+
+        options.add("-L");
+        options.add("" + getEpsilonParameter());
+
+        options.add("-I");
+        options.add("" + getMaximumNumberOfIterations());
 
         return options.toArray(new String[options.size()]);
     }
@@ -435,6 +497,64 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      */
     public String SVMTypeTipText() {
         return "The type of SVM to use.";
+    }
+
+    /**
+     * Get the value of epsilon parameter of the epsilon insensitive loss
+     * function.
+     *
+     * @return Value of epsilon parameter.
+     */
+    public double getEpsilonParameter() {
+        return m_epsilon;
+    }
+
+    /**
+     * Set the value of epsilon parameter of the epsilon insensitive loss
+     * function.
+     *
+     * @param v Value to assign to epsilon parameter.
+     */
+    public void setEpsilonParameter(double v) {
+        m_epsilon = v;
+    }
+
+    /**
+     * Returns the tip text for this property
+     *
+     * @return tip text for this property suitable for displaying in the
+     *         explorer/experimenter gui
+     */
+    public String epsilonParameterTipText() {
+        return "The epsilon parameter of the epsilon insensitive loss function.";
+    }
+
+    /**
+     * Get the number of iterations to perform.
+     *
+     * @return maximum number of iterations to perform.
+     */
+    public int getMaximumNumberOfIterations() {
+        return m_MaxIts;
+    }
+
+    /**
+     * Set the number of iterations to perform.
+     *
+     * @param v the number of iterations to perform.
+     */
+    public void setMaximumNumberOfIterations(int v) {
+        m_MaxIts = v;
+    }
+
+    /**
+     * Returns the tip text for this property
+     *
+     * @return tip text for this property suitable for displaying in the
+     *         explorer/experimenter gui
+     */
+    public String maximumNumberOfIterationsTipText() {
+        return "The maximum number of iterations to perform.";
     }
 
     /**
@@ -635,7 +755,7 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      */
     protected Parameter getParameters() {
 
-        Parameter parameter = new Parameter(m_SolverType, m_Cost, m_eps);
+        Parameter parameter = new Parameter(m_SolverType, m_Cost, m_eps, m_MaxIts, m_epsilon);
 
         if (m_Weight.length > 0) {
             parameter.setWeights(m_Weight, m_WeightLabel);
@@ -719,13 +839,13 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
      */
     public double[] distributionForInstance(Instance instance) throws Exception {
 
-	m_ReplaceMissingValues.input(instance);
-	m_ReplaceMissingValues.batchFinished();
-	instance = m_ReplaceMissingValues.output();
+        m_ReplaceMissingValues.input(instance);
+        m_ReplaceMissingValues.batchFinished();
+        instance = m_ReplaceMissingValues.output();
 
-	m_NominalToBinary.input(instance);
-	m_NominalToBinary.batchFinished();
-	instance = m_NominalToBinary.output();
+        m_NominalToBinary.input(instance);
+        m_NominalToBinary.batchFinished();
+        instance = m_NominalToBinary.output();
 
         if (m_Filter != null) {
             m_Filter.input(instance);
@@ -751,11 +871,12 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
             }
         } else {
             double prediction = Linear.predict(m_Model, x);
-	    if (instance.classAttribute().isNominal()) {
-                result[(int)prediction] = 1;
-	    } else {
-                result[0] = prediction;
-	    }
+            if (instance.classAttribute().isNominal()) {
+                result[(int) prediction] = 1;
+            } else {
+                result[0] = prediction * m_x1 + m_x0;
+                ;
+            }
         }
 
         return result;
@@ -809,20 +930,43 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
         insts = new Instances(insts);
         insts.deleteWithMissingClass();
 
-	m_ReplaceMissingValues = new ReplaceMissingValues();
-	m_ReplaceMissingValues.setInputFormat(insts);
-	insts = Filter.useFilter(insts, m_ReplaceMissingValues);
+	      m_ReplaceMissingValues = new ReplaceMissingValues();
+	      m_ReplaceMissingValues.setInputFormat(insts);
+	      insts = Filter.useFilter(insts, m_ReplaceMissingValues);
 
-	m_NominalToBinary = new NominalToBinary();
-	m_NominalToBinary.setInputFormat(insts);
-	insts = Filter.useFilter(insts, m_NominalToBinary);
+        m_NominalToBinary = new NominalToBinary();
+	      m_NominalToBinary.setInputFormat(insts);
+	      insts = Filter.useFilter(insts, m_NominalToBinary);
+        // retrieve two different class values used to determine filter transformation
+
+        double y0 = insts.instance(0).classValue();
+        int index = 1;
+        while (index < insts.numInstances() && insts.instance(index).classValue() == y0) {
+            index++;
+        }
+        if (index == insts.numInstances()) {
+            // degenerate case, all class values are equal
+            // we don't want to deal with this, too much hassle
+            throw new Exception("All class values are the same. At least two class values should be different");
+        }
+        double y1 = insts.instance(index).classValue();
 
         if (getNormalize()) {
             m_Filter = new Normalize();
+            ((Normalize)m_Filter).setIgnoreClass(true); // Normalize class as well
             m_Filter.setInputFormat(insts);
             insts = Filter.useFilter(insts, m_Filter);
         }
 
+        if (m_Filter != null) {
+            double z0 = insts.instance(0).classValue();
+            double z1 = insts.instance(index).classValue();
+            m_x1 = (y0-y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+            m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
+        } else {
+            m_x1 = 1.0;
+            m_x0 = 0.0;
+        }
         // Find out which classes are empty (needed for output of model)
         if (insts.classAttribute().isNominal()) {
             m_Counts = new double[insts.numClasses()];
@@ -843,7 +987,7 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
             }
             vx[d] = x;
             double classValue = inst.classValue();
-	    // int classValueInt = (int)classValue;
+	          // int classValueInt = (int)classValue;
             // if (classValueInt != classValue) throw new RuntimeException("unsupported class value: " + classValue);
             vy[d] = classValue;
         }
@@ -896,38 +1040,49 @@ public class LibLINEAR extends AbstractClassifier implements TechnicalInformatio
                         if (j != m_Header.classIndex()) {
                             if (w[index] >= 0) {
                                 sb.append((j > 0) ? "+" : " ");
+                            } else {
+                                sb.append("-");
                             }
-                            sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " +
-                                    (getNormalize() ? "(normalized)" : "") + m_Header.attribute(j).name() + "\n");
+                            sb.append(Utils.doubleToString(Math.abs(w[index]), 12, getNumDecimalPlaces()) + " * " +
+                                    (getNormalize() ? "(normalized) " : "") + m_Header.attribute(j).name() + "\n");
                         }
                         index += ((m_Header.numClasses() == 2) ? 1 : numNonEmptyClasses);
                     }
                     if (m_Bias >= 0) {
                         if (w[index] >= 0) {
                             sb.append("+");
+                        }else {
+                            sb.append("-");
                         }
-                        sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " + getModel().getBias() +
+                        sb.append(Utils.doubleToString(Math.abs(w[index]), 12, getNumDecimalPlaces()) + " * " + getModel().getBias() +
                                 "\n\n");
                     }
                 }
             }
         } else { // Numeric class
+            if (getNormalize()) {
+                sb.append("NOTE: CLASS HAS ALSO BEEN NORMALIZED.\n\n");
+            }
             int index = 0;
             for (int j = 0; j < m_Header.numAttributes(); j++) {
                 if (j != m_Header.classIndex()) {
                     if (w[index] >= 0) {
                         sb.append((j > 0) ? "+" : " ");
+                    } else {
+                        sb.append("-");
                     }
-                    sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " +
-                            (getNormalize() ? "(normalized)" : "") + m_Header.attribute(j).name() + "\n");
+                    sb.append(Utils.doubleToString(Math.abs(w[index]), 12, getNumDecimalPlaces()) + " * " +
+                            (getNormalize() ? "(normalized) " : "") + m_Header.attribute(j).name() + "\n");
                 }
                 index++;
             }
             if (m_Bias >= 0) {
                 if (w[index] >= 0) {
                     sb.append("+");
+                } else {
+                    sb.append("-");
                 }
-                sb.append(Utils.doubleToString(w[index], getNumDecimalPlaces()) + " * " + getModel().getBias() +
+                sb.append(Utils.doubleToString(Math.abs(w[index]), 12, getNumDecimalPlaces()) + " * " + getModel().getBias() +
                         "\n\n");
             }
         }
