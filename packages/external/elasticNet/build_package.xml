@@ -165,6 +165,8 @@
     </delete>
     <copy file="Description.props"
           todir="${dist}/${package}"/>
+    <copy file="ML_Report.pdf"
+          todir="${dist}/${package}"/>
     <mkdir dir="${dist}/${package}/doc"/>
     <copy todir="${dist}/${package}/doc" >
        <fileset dir="${doc}">
