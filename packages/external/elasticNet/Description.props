@@ -1,0 +1,30 @@
+# Description file for elasticNet
+
+PackageName=elasticNet
+
+Version=1.0.0
+
+Date=2015-11-16
+
+Title=An implementation of the elastic net method for linear regression
+
+Category=Regression
+
+Author=Nikhil Murali Kishore
+
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+License=GPL
+
+Description=Implements the elastic method for linear regression
+
+#Changes=
+
+# Package URL for obtaining the package archive
+PackageURL=http://prdownloads.sourceforge.net/weka/elasticNet1.0.0.zip?download
+
+# URL for further information
+URL=file://ML_Report.pdf
+
+
+Depends=weka (>=3.7.1)
