@@ -24,7 +24,7 @@ Description=Implements the elastic method for linear regression
 PackageURL=http://prdownloads.sourceforge.net/weka/elasticNet1.0.0.zip?download
 
 # URL for further information
-URL=file://ML_Report.pdf
+URL=file:///${WEKA_HOME}/packages/elasticNet/ML_Report.pdf
 
 
 Depends=weka (>=3.7.1)
