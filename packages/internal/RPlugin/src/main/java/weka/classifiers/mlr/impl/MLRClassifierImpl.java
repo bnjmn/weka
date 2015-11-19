@@ -118,6 +118,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   /** Whether to output info/warning messages from R to the console */
   protected boolean m_logMessagesFromR = false;
 
+  /** The random number seed. */
+  protected int m_Seed = 1;
+
   /** Holds the textual representation of the R model */
   protected StringBuffer m_modelText;
 
@@ -429,7 +432,12 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     newVector.addElement(new Option("\tLog messages from R", "L", 0, "-L"));
     newVector.addElement(new Option(
       "\tIf set, classifier is run in debug mode and\n"
-        + "\tmay output additional info to the console", "D", 0, "-D"));
+        + "\tmay output additional info to the console",
+            "output-debug-info", 0, "-output-debug-info"));
+    newVector.addElement(new Option(
+            "\tRandom number seed.\n"
+                    + "\t(default 1)",
+            "S", 1, "-S <num>"));
 
     return newVector.elements();
   }
@@ -470,9 +478,16 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     setDontReplaceMissingValues(Utils.getFlag('M', options));
 
-    setDebug(Utils.getFlag('D', options));
+    setDebug(Utils.getFlag("output-debug-info", options));
 
     setLogMessagesFromR(Utils.getFlag('L', options));
+
+    String seed = Utils.getOption('S', options);
+    if (seed.length() != 0) {
+      setSeed(Integer.parseInt(seed));
+    } else {
+      setSeed(1);
+    }
 
     Utils.checkForRemainingOptions(options);
   }
@@ -505,8 +520,11 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     }
 
     if (getDebug()) {
-      options.add("-D");
+      options.add("-output-debug-info");
     }
+
+    options.add("-S");
+    options.add("" + getSeed());
 
     return options.toArray(new String[1]);
   }
@@ -711,6 +729,29 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   public boolean getLogMessagesFromR() {
     return m_logMessagesFromR;
   }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random number seed to be used.";
+  }
+
+  /**
+   * Set the seed for random number generation.
+   *
+   * @param seed the seed
+   */
+  public void setSeed(int seed) { m_Seed = seed; }
+
+  /**
+   * Gets the seed for the random number generations
+   *
+   * @return the seed for the random number generation
+   */
+  public int getSeed() { return m_Seed; }
 
   protected Instances handleZeroFrequencyNominalValues(Instances data) {
     // do we need to merge zero-frequency nominal values?
@@ -926,6 +967,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng = RSession.acquireSession(this);
     eng.setLog(this, m_logger);
     eng.clearConsoleBuffer(this);
+
+    // Set seed for random number generator in R in a data-dependent manner
+    eng.parseAndEval(this, "set.seed(" + data.getRandomNumberGenerator(getSeed()).nextInt() + ")");
 
     // clean up any previous model
     // suffix model identifier with hashcode of this object

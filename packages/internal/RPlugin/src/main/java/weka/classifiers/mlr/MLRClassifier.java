@@ -26,7 +26,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Enumeration;
 
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.Classifier;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
@@ -50,7 +50,7 @@ import weka.core.Tag;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class MLRClassifier extends AbstractClassifier implements OptionHandler,
+public class MLRClassifier extends RandomizableClassifier implements OptionHandler,
   CapabilitiesHandler, BatchPredictor, RevisionHandler, CommandlineRunnable,
   Serializable {
 
@@ -782,6 +782,70 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    if (m_delegate == null) {
+      init();
+    }
+    try {
+      Method m =
+              m_delegate.getClass().getDeclaredMethod("seedTipText",
+                      new Class[] {});
+
+      Object result = m.invoke(m_delegate, new Object[] {});
+      return result.toString();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return "";
+  }
+
+  /**
+   * Set the seed for random number generation.
+   *
+   * @param seed the seed
+   */
+  public void setSeed(int seed) {
+    if (m_delegate == null) {
+      init();
+    }
+    try {
+      Method m =
+              m_delegate.getClass().getDeclaredMethod("setSeed",
+                      new Class[] { Integer.TYPE });
+
+      m.invoke(m_delegate, new Object[] { new Integer(seed) });
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Gets the seed for the random number generations
+   *
+   * @return the seed for the random number generation
+   */
+  public int getSeed() {
+    if (m_delegate == null) {
+      init();
+    }
+    try {
+      Method m =
+              m_delegate.getClass().getDeclaredMethod("getSeed",
+                      new Class[]{});
+
+      Object result = m.invoke(m_delegate, new Object[]{});
+      return ((Integer) result).intValue();
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+    return -1;
+  }
+
+  /**
    * Build the specified R learner on the incoming training data.
    * 
    * @param data the training data to be used for generating the R model.
@@ -823,7 +887,7 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   /**
    * Calculates the class membership probabilities for the given test instance.
    * 
-   * @param instance the instance to be classified
+   * @param inst the instance to be classified
    * @return predicted class probability distribution
    * @throws Exception if distribution can't be computed successfully
    */
@@ -880,7 +944,7 @@ public class MLRClassifier extends AbstractClassifier implements OptionHandler,
   /**
    * Main method for testing this class.
    * 
-   * @param argv the options
+   * @param args the options
    */
   public static void main(String[] args) {
     MLRClassifier c = new MLRClassifier();
