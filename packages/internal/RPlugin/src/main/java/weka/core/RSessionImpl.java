@@ -15,7 +15,7 @@
 
 /*
  *    RSessionImpl.java
- *    Copyright (C) 2012-2014 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -25,6 +25,8 @@ import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.List;
+import java.awt.GraphicsEnvironment;
+import java.util.Locale;
 
 import org.rosuda.JRI.Mutex;
 import org.rosuda.REngine.REXP;
@@ -481,8 +483,33 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
 
     checkSessionHolder(requester);
 
+    String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
+    if (!GraphicsEnvironment.isHeadless()) {
+      if (!(OS.indexOf("mac") >= 0) && !(OS.indexOf("darwin") >= 0)) { // Can't pop up window on OS X wihout X11
+        if (OS.indexOf("win") >= 0) {
+          parseAndEval(requester, "windows(width = 5, height = 0.5, xpos = 100, ypos = 100)");
+        } else if (OS.indexOf("nux") >= 0) {
+          parseAndEval(requester, "X11(width = 5, height = 0.5, xpos = 100, ypos = 100)");
+        }
+        if ((OS.indexOf("win") >= 0) || (OS.indexOf("nux") >= 0)) {
+          parseAndEval(requester, "par(mar=c(0, 0, 2, 0))");
+          parseAndEval(requester, "plot.new()");
+          parseAndEval(requester, "title(\"Please wait while R packages are being installed.\")");
+        }
+      }
+    }
+
     REXP result = parseAndEval(requester, "install.packages(\"" + libraryName
       + "\")");
+
+    if (!GraphicsEnvironment.isHeadless()) {
+      if (!(OS.indexOf("mac") >= 0) && !(OS.indexOf("darwin") >= 0)) { // Can't pop up window on OS X
+        if ((OS.indexOf("win") >= 0) || (OS.indexOf("nux") >= 0)) {
+          parseAndEval(requester, "dev.off()");
+        }
+      }
+    }
+
     if (result.isNull()) {
       return false;
     }
