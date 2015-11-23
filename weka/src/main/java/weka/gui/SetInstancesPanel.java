@@ -495,7 +495,9 @@ public class SetInstancesPanel extends JPanel {
    */
   @Override
   public void addPropertyChangeListener(PropertyChangeListener l) {
-    m_Support.addPropertyChangeListener(l);
+    if (m_Support != null) {
+      m_Support.addPropertyChangeListener(l);
+    }
   }
 
   /**
