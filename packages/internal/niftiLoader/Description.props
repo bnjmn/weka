@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=niftyLoader
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2015-10-02
+
+# Title (required)
+Title=Package for loading a directory with MRI data in NIfTI format into WEKA
+
+Category=Converter
+
+# Author (required)
+Author=Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. There are some example Groovy scripts that apply this loader in the groovy-example-scripts folder in $WEKA_HOME/packages/niftiLoader. They can be executed in the GroovyConsole that comes with WEKA's kfGroovy package.
+
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+#PackageURL=http://prdownloads.sourceforge.net/weka/niftyLoader1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/niftyLoader
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.11)
