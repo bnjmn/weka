@@ -23,6 +23,8 @@ class PlotARFF extends JPanel {
       NIfTIDirectoryLoader loader = new NIfTIDirectoryLoader()
       loader.setDirectory(new File(WekaPackageManager.WEKA_HOME.toString() + File.separator + "packages" + File.separator + "niftiLoader" + File.separator + "example_data"))
       Instances data = loader.getDataSet()
+
+      // We know that XDIM = YDIM for this data and that it's a 2D image
       int numValues = (int)Math.sqrt(data.numAttributes() - 1)
       
       int w = getWidth() / numValues
@@ -30,8 +32,8 @@ class PlotARFF extends JPanel {
 
       // Go through instance in correct order and plot pixels
       int index = 0;
-      for (int x = 0; x < numValues; x++) {
-        for (int y = 0; y < numValues; y++) {
+      for (int y = 0; y < numValues; y++) {
+        for (int x = 0; x < numValues; x++) {
           int val = (int) (255.0 * data.instance(0).value(index++))
           Color color = new Color(val, val, val)
           g2.setColor(color)         
@@ -43,9 +45,7 @@ class PlotARFF extends JPanel {
     }
   }
  }
- 
-print WekaPackageManager.WEKA_HOME.toString()
- 
+
 f = new JFrame();
 f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 f.setSize(500,500);

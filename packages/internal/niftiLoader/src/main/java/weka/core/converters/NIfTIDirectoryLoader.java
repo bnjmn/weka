@@ -68,6 +68,12 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
   /** Holds the source of the data set. */
   protected File m_sourceFile = new File(System.getProperty("user.dir"));
 
+  /** Hold the source of the mask file (if there is one). */
+  protected File m_maskFile = new File(System.getProperty("user.dir"));
+
+  /** The mask data (if there is one). */
+  protected double[][][] m_mask = null;
+
   /** whether to print some debug information */
   protected boolean m_Debug = false;
 
@@ -89,9 +95,11 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     return "Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must" +
             " contain as many subdirectories as there are classes of MRI" +
             " data. Each subdirectory name will be used as the class label for the corresponding .nii files in that" +
-            " subdirectory. (This is the same strategy as the one used by WEKA's TextDirectoryLoader.)" +
+            " subdirectory. (This is the same strategy as the one used by WEKA's TextDirectoryLoader.)\n\n" +
             " Currently, the package only reads volume information for the first time slot from" +
-            " each .nii file. The readDoubleVol(short ttt) method from the Nifti1Dataset class" +
+            " each .nii file. A mask file can also be specified as a parameter. This mask is must be consistent +" +
+            " with the other data and is applied to every 2D/3D volume in this other data.\n\n"
+            + "The readDoubleVol(short ttt) method from the Nifti1Dataset class" +
             " (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the" +
             " data for each volume into a sparse WEKA instance (with ttt=0). For an LxMxN volume (the dimensions" +
             " must be the same for each .nii file in the directory!), the order of values in the generated instance" +
@@ -112,8 +120,8 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     result.add(new Option("\tEnables debug output.\n" + "\t(default: off)",
       "D", 0, "-D"));
 
-    result.add(new Option("\tThe directory to work on.\n"
-      + "\t(default: current directory)", "dir", 0, "-dir <directory>"));
+    result.add(new Option("\tThe mask data to apply to every volume.\n"
+            + "\t(default: current directory)", "mask", 0, "-mask <filename>"));
 
     return result.elements();
   }
@@ -143,6 +151,8 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     setDebug(Utils.getFlag("D", options));
 
     setDirectory(new File(Utils.getOption("dir", options)));
+
+    setMask(new File(Utils.getOption("mask", options)));
   }
 
   /**
@@ -160,6 +170,9 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
 
     options.add("-dir");
     options.add(getDirectory().getAbsolutePath());
+
+    options.add("-mask");
+    options.add(getMask().getAbsolutePath());
 
     return options.toArray(new String[options.size()]);
   }
@@ -191,7 +204,6 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     return "Whether to print additional debug information to the console.";
   }
 
-
   /**
    * Returns a description of the file type, actually it's directories.
    * 
@@ -212,7 +224,7 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
 
   /**
    * get the Dir specified as the source
-   * 
+   *
    * @return the source directory
    */
   public File getDirectory() {
@@ -221,12 +233,40 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
 
   /**
    * sets the source directory
-   * 
+   *
    * @param dir the source directory
    * @throws IOException if an error occurs
    */
   public void setDirectory(File dir) throws IOException {
     setSource(dir);
+  }
+
+  /**
+   * the tip text for this property
+   *
+   * @return the tip text
+   */
+  public String maskTipText() {
+    return "The NIfTI file to load the mask data from.";
+  }
+
+  /**
+   * get the mask file
+   *
+   * @return the mask file
+   */
+  public File getMask() {
+    return new File(m_maskFile.getAbsolutePath());
+  }
+
+  /**
+   * sets mask file
+   *
+   * @param file the mask file
+   * @throws IOException if an error occurs
+   */
+  public void setMask(File file) throws IOException {
+    m_maskFile = file;
   }
 
   /**
@@ -289,32 +329,61 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
         File subdir = new File(directoryPath + File.separator + subdir2);
         if (subdir.isDirectory()) {
           classes.add(subdir2);
-        }
-        String[] files = subdir.list();
-        for (String file : files) {
-          String filename = directoryPath + File.separator + subdir2 + File.separator + file;
-          Nifti1Dataset data = new Nifti1Dataset(filename);
-          data.readHeader();
-          if (!data.exists()) {
-            throw new IOException("The file " + filename + " is not a valid dataset in Nifti1 format.");
-          }
-          if (header == null) {
-            header = new Nifti1Dataset();
-            header.copyHeader(data);
-          } else {
-            if (header.XDIM != data.XDIM) {
-              throw new IOException("X dimension for " + filename + " inconsistent with previous X dimensions.");
-            }
-            if (header.YDIM != data.YDIM) {
-              throw new IOException("Y dimension for " + filename + " inconsistent with previous Y dimensions.");
-            }
-            if (header.ZDIM != data.ZDIM) {
-              throw new IOException("Z dimension for " + filename + " inconsistent with previous Z dimensions.");
+          String[] files = subdir.list();
+          for (String file : files) {
+            String filename = directoryPath + File.separator + subdir2 + File.separator + file;
+            Nifti1Dataset data = new Nifti1Dataset(filename);
+            data.readHeader();
+            if (!data.exists()) {
+              System.err.println("The file " + filename + " is not a valid dataset in Nifti1 format -- skipping.");
+            } else {
+              if (header == null) {
+                header = new Nifti1Dataset();
+                header.copyHeader(data);
+              } else {
+                if (header.XDIM != data.XDIM) {
+                  throw new IOException("X dimension for " + filename + " inconsistent with previous X dimensions.");
+                }
+                if (header.YDIM != data.YDIM) {
+                  throw new IOException("Y dimension for " + filename + " inconsistent with previous Y dimensions.");
+                }
+                if (header.ZDIM != data.ZDIM) {
+                  throw new IOException("Z dimension for " + filename + " inconsistent with previous Z dimensions.");
+                }
+              }
             }
           }
         }
       }
 
+      // Do we have a mask file?
+      m_mask = null;
+      if (m_maskFile.exists() && m_maskFile.isFile()) {
+        try {
+          String filename = m_maskFile.getAbsolutePath();
+          Nifti1Dataset data = new Nifti1Dataset(filename);
+          data.readHeader();
+          if (!data.exists()) {
+            System.err.println("The file " + filename + " is not a valid dataset in Nifti1 format -- skipping.");
+          } else {
+            if (header.XDIM != data.XDIM) {
+              throw new IOException("X dimension for mask in " + filename + " data X dimension.");
+            }
+            if (header.YDIM != data.YDIM) {
+              throw new IOException("Y dimension for mask in " + filename + " data Y dimensions.");
+            }
+            if (header.ZDIM != data.ZDIM) {
+              throw new IOException("Z dimension for mask in " + filename + " data Z dimensions.");
+            }
+          }
+          m_mask = data.readDoubleVol((short) 0);
+        } catch (Exception ex) {
+          System.err.println(ex.getMessage());
+          m_mask = null;
+        }
+      }
+
+      // Create header info for Instances object
       if (header.ZDIM == 0) {
         for (int y = 0; y < header.YDIM; y++) {
           for (int x = 0; x < header.XDIM; x++) {
@@ -340,6 +409,34 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     }
 
     return m_structure;
+  }
+
+  /**
+   * Method that Nifti dataset (time slot 0) into an instance, taking the mask (if any) into account.
+   */
+  protected double[] make1Darray(Nifti1Dataset dataSet, Instances structure, int classValue) throws IOException {
+
+    double[][][] doubles = dataSet.readDoubleVol((short) 0);
+    double[] newInst = new double[structure.numAttributes()];
+    int counter = 0;
+    if (dataSet.ZDIM == 0) {
+      for (int y = 0; y < dataSet.YDIM; y++) {
+        for (int x = 0; x < dataSet.XDIM; x++) {
+          newInst[counter++] = (m_mask == null || m_mask[0][y][x] > 0) ? doubles[0][y][x] : 0.0;
+        }
+      }
+    } else {
+      for (int z = 0; z < dataSet.ZDIM; z++) {
+        for (int y = 0; y < dataSet.YDIM; y++) {
+          for (int x = 0; x < dataSet.XDIM; x++) {
+            newInst[counter++] = (m_mask == null || m_mask[z][y][x] > 0) ? doubles[z][y][x] : 0.0;
+          }
+        }
+      }
+    }
+    newInst[structure.classIndex()] = classValue;
+
+    return newInst;
   }
 
   /**
@@ -378,33 +475,17 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
         try {
           fileCount++;
           if (getDebug()) {
-            System.err.println("processing " + fileCount + " : " + subdirPath
-                    + " : " + file);
+            System.err.println("processing " + fileCount + " : " + subdirPath + " : " + file);
           }
 
-          double[] newInst = new double[m_structure.numAttributes()];
           String filename = directoryPath + File.separator + subdirPath + File.separator + file;
           Nifti1Dataset dataSet = new Nifti1Dataset(filename);
           dataSet.readHeader();
-          double[][][] doubles = dataSet.readDoubleVol((short) 0);
-          int counter = 0;
-          if (dataSet.ZDIM == 0) {
-            for (int y = 0; y < dataSet.YDIM; y++) {
-              for (int x = 0; x < dataSet.XDIM; x++) {
-                newInst[counter++] = doubles[0][y][x];
-              }
-            }
+          if (!dataSet.exists()) {
+            System.err.println("The file " + filename + " is not a valid dataset in Nifti1 format -- skipping.");
           } else {
-            for (int z = 0; z < dataSet.ZDIM; z++) {
-              for (int y = 0; y < dataSet.YDIM; y++) {
-                for (int x = 0; x < dataSet.XDIM; x++) {
-                  newInst[counter++] = doubles[z][y][x];
-                }
-              }
-            }
+            data.add(new SparseInstance(1.0, make1Darray(dataSet, m_structure, k)));
           }
-          newInst[data.classIndex()] = k;
-          data.add(new SparseInstance(1.0, newInst));
         } catch (Exception e) {
           System.err.println("failed to convert file: " + directoryPath
             + File.separator + subdirPath + File.separator + file);
@@ -474,30 +555,11 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
     if (found) {
       String nextDoc = classContents.poll();
 
-      double[] newInst = new double[m_structure.numAttributes()];
       String filename = directoryPath + File.separator
               + classAtt.value(m_lastClassDir) + File.separator + nextDoc;
       Nifti1Dataset dataSet = new Nifti1Dataset(filename);
       dataSet.readHeader();
-      double[][][] doubles = dataSet.readDoubleVol((short)0);
-      int counter = 0;
-      if (dataSet.ZDIM == 0) {
-        for (int y = 0; y < dataSet.YDIM; y++) {
-          for (int x = 0; x < dataSet.XDIM; x++) {
-            newInst[counter++] = doubles[0][y][x];
-          }
-        }
-      } else {
-        for (int z = 0; z < dataSet.ZDIM; z++) {
-          for (int y = 0; y < dataSet.YDIM; y++) {
-            for (int x = 0; x < dataSet.XDIM; x++) {
-              newInst[counter++] = doubles[z][y][x];
-            }
-          }
-        }
-      }
-      newInst[structure.classIndex()] = m_lastClassDir;
-      Instance inst = new SparseInstance(1.0, newInst);
+      Instance inst = new SparseInstance(1.0, make1Darray(dataSet, structure, m_lastClassDir));
       inst.setDataset(structure);
 
       m_lastClassDir++;

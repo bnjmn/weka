@@ -117,5 +117,5 @@ testData = loader.getDataSet()
 println "Evaluating model on test data"
 evaluation = new Evaluation(trainingData)
 evaluation.evaluateModel(model, testData)
-print evaluation.toSummaryString()
-print evaluation.toMatrixString()
+println evaluation.toSummaryString()
+println evaluation.toMatrixString()
