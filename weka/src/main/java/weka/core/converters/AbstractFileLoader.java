@@ -306,6 +306,8 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
     }
 
     if (options.length > 0) {
+      String fileName = options[0];
+      options[0] = "";
       if (loader instanceof OptionHandler) {
         // set options
         try {
@@ -324,7 +326,7 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
       }
 
       try {
-        loader.setFile(new File(options[0]));
+        loader.setFile(new File(fileName));
         // incremental
         if (loader instanceof IncrementalConverter) {
           Instances structure = loader.getStructure();
