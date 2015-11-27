@@ -259,9 +259,6 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
 
     result = new StringBuffer("\nUsage:\n");
     result.append("\t" + loader.getClass().getName().replaceAll(".*\\.", ""));
-    if (loader instanceof OptionHandler) {
-      result.append(" [options]");
-    }
     result.append(" <");
     String[] ext = loader.getFileExtensions();
     for (int i = 0; i < ext.length; i++) {
@@ -270,7 +267,11 @@ public abstract class AbstractFileLoader extends AbstractLoader implements
       }
       result.append("file" + ext[i]);
     }
-    result.append(">\n");
+    result.append(">");
+    if (loader instanceof OptionHandler) {
+      result.append(" [options]");
+    }
+    result.append("\n");
 
     if (loader instanceof OptionHandler) {
       result.append("\nOptions:\n\n");
