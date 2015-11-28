@@ -23,11 +23,7 @@ package weka.core.converters;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.*;
 
@@ -35,7 +31,11 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
 /**
  <!-- globalinfo-start -->
- * Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. (This is the same strategy as the one used by WEKA's TextDirectoryLoader.) Currently, the package only reads volume information for the first time slot from each .nii file. The readDoubleVol(short ttt) method from the Nifti1Dataset class (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the data for each volume into a sparse WEKA instance (with ttt=0). For an LxMxN volume (the dimensions must be the same for each .nii file in the directory!), the order of values in the generated instance is [(z_1, y_1, x_1), ..., (z_1, y_1, x_L), (z_1, y_2, x_1), ..., (z_1, y_M, x_L), (z_2, y_1, x_1), ..., (z_N, y_M, x_L)]. If the volume is an image and not 3D, then only x and y coordinates are used.
+ * Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. (This is the same strategy as the one used by WEKA's TextDirectoryLoader.)<br>
+ * <br>
+ *  Currently, the package only reads volume information for the first time slot from each .nii file. A mask file can also be specified as a parameter. This mask is must be consistent + with the other data and is applied to every 2D/3D volume in this other data.<br>
+ * <br>
+ * The readDoubleVol(short ttt) method from the Nifti1Dataset class (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the data for each volume into a sparse WEKA instance (with ttt=0). For an LxMxN volume (the dimensions must be the same for each .nii file in the directory!), the order of values in the generated instance is [(z_1, y_1, x_1), ..., (z_1, y_1, x_L), (z_1, y_2, x_1), ..., (z_1, y_M, x_L), (z_2, y_1, x_1), ..., (z_N, y_M, x_L)]. If the volume is an image and not 3D, then only x and y coordinates are used.
  * <br><br>
  <!-- globalinfo-end -->
  * 
@@ -46,13 +46,12 @@ import weka.core.converters.nifti.Nifti1Dataset;
  *  Enables debug output.
  *  (default: off)</pre>
  * 
- * <pre> -dir &lt;directory&gt;
- *  The directory to work on.
+ * <pre> -mask &lt;filename&gt;
+ *  The mask data to apply to every volume.
  *  (default: current directory)</pre>
  * 
  <!-- options-end -->
  *
- * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @see Loader
  */
@@ -137,8 +136,8 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
    *  Enables debug output.
    *  (default: off)</pre>
    * 
-   * <pre> -dir &lt;directory&gt;
-   *  The directory to work on.
+   * <pre> -mask &lt;filename&gt;
+   *  The mask data to apply to every volume.
    *  (default: current directory)</pre>
    * 
    <!-- options-end -->
@@ -197,7 +196,7 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
 
   /**
    * the tip text for this property
-   * 
+   *
    * @return the tip text
    */
   public String debugTipText() {
@@ -355,6 +354,9 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
           }
         }
       }
+
+      // Sort class values so that order is clearly defined
+      Collections.sort(classes);
 
       // Do we have a mask file?
       m_mask = null;

@@ -14,8 +14,8 @@
  */
 
 /*
- * JSONLoader.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * NIfTIFileLoader.java
+ * Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -23,18 +23,32 @@ package weka.core.converters;
 
 import java.io.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
-import java.util.zip.GZIPInputStream;
 
 import weka.core.*;
 import weka.core.converters.nifti.Nifti1Dataset;
 
 /**
  <!-- globalinfo-start -->
+ * Reads a file in .nii format. It automatically decompresses the data if the extension is '.nii.gz'.<br>
+ * <br>
+ * A mask file can be specified as a parameter. The mask must be consistent with the main dataset and it is applied to every 2D/3D volume in the main dataset.<br>
+ * <br>
+ * A file with volume attributes (e.g., class labels) can also be specified as a parameter. The number of records with attributes must be the same as the number of volumes in the main dataset.<br>
+ * <br>
+ * The attributes are read using the loader that is specified as a third parameter. The loader must be configured appropriately to read the attribute information correctly.<br>
+ * <br>
+ * The readDoubleVol(short ttt) method from the Nifti1Dataset class (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the data for each volume into a sparse WEKA instance. For an LxMxN volume , the order of values in the generated instance is [(z_1, y_1, x_1), ..., (z_1, y_1, x_L), (z_1, y_2, x_1), ..., (z_1, y_M, x_L), (z_2, y_1, x_1), ..., (z_N, y_M, x_L)]. If the volume is an image and not 3D, then only x and y coordinates are used.
+ * <br><br>
  <!-- globalinfo-end -->
+ *
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @see Loader
  */
- public class NIfTIFileLoader extends AbstractFileLoader implements BatchConverter, OptionHandler {
+ public class NIfTIFileLoader extends AbstractFileLoader
+        implements BatchConverter, IncrementalConverter, OptionHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = 3764733651132196582L;
@@ -51,9 +65,9 @@ import weka.core.converters.nifti.Nifti1Dataset;
   /** The file with the volume attributes (if any). */
   protected File m_attributesFile = new File(System.getProperty("user.dir"));
 
-  /** The field separator for the file with the volume attributes. */
-  protected String m_FieldSeparator = " ";
-
+  /** The loader to use for loading the volume attributes. */
+  protected Loader m_attributeLoader = new CSVLoader();
+  
   /** The Instances object with the volume attributes (if any). */
   protected Instances m_attributeData = null;
 
@@ -63,6 +77,9 @@ import weka.core.converters.nifti.Nifti1Dataset;
   /** The mask data (if there is one). */
   protected double[][][] m_mask = null;
 
+  /** Current time slot in NIfTI file, if loading in incremental mode. */
+  protected int m_currentTimeSlot = 0;
+
   /**
    * Returns a string describing this Loader.
    *
@@ -70,10 +87,45 @@ import weka.core.converters.nifti.Nifti1Dataset;
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return
-            "Reads a source that is in the .nii format. It automatically decompresses the data if the extension is '" +
-                    FILE_EXTENSION_COMPRESSED + "'.";
+    return "Reads a file in .nii format. It automatically decompresses the data if the extension is '" +
+            FILE_EXTENSION_COMPRESSED + "'.\n\nA mask file can be specified as a parameter. The mask must be consistent" +
+            " with the main dataset and it is applied to every 2D/3D volume in the main dataset.\n\n" +
+            "A file with volume attributes (e.g., class labels) can also be specified as a parameter. " +
+            "The number of records with attributes must be the same as the number of volumes in the main dataset.\n\n" +
+            "The attributes are read using the loader that is specified as a third parameter. The loader must be " +
+            "configured appropriately to read the attribute information correctly.\n\n" +
+            "The readDoubleVol(short ttt) method from the Nifti1Dataset class" +
+            " (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the data for each" +
+            " volume into a sparse WEKA instance. For an LxMxN volume , the order of values in the generated instance" +
+            " is [(z_1, y_1, x_1), ..., (z_1, y_1, x_L), (z_1, y_2, x_1), ..., (z_1, y_M, x_L), (z_2, y_1, x_1), ...," +
+            " (z_N, y_M, x_L)]. If the volume is an image and not 3D, then only x and y coordinates are used." +
+            " The loader is currently very slow.";
   }
+
+  /**
+   * String describing default attribute loader.
+   */
+  protected String defaultLoaderString() {
+
+    return "weka.core.converters.CSVLoader -H -N first-last -F \" \"";
+  }
+
+  /**
+   * Constructor initializes the attribute loader with default settings.
+   */
+  public NIfTIFileLoader() {
+    try {
+      String[] loaderSpec = Utils.splitOptions(defaultLoaderString());
+      if (loaderSpec.length == 0) {
+        throw new IllegalArgumentException("Invalid loader specification string");
+      }
+      String loaderName = loaderSpec[0];
+      loaderSpec[0] = "";
+      setAttributeLoader((Loader) Utils.forName(Loader.class, loaderName, loaderSpec));
+    } catch (Exception ex) {
+      System.err.println("Could not parse default loader string in NIfTIFileLoader: " + ex.getMessage());
+    }
+   }
 
   /**
    * Lists the available options
@@ -90,11 +142,16 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
     result.add(new Option("\tThe attribute data for every volume.\n"
             + "\t(default: user home directory)", "attributes", 0, "-attributes <filename>"));
+    result.addElement(new Option(
+            "\tClass name of loader to use, followed by loader options.\n"
+                    + "\t(default: " + defaultLoaderString() + ")",
+            "attributeLoader", 1, "-attributeLoader <loader specification>"));
 
-    result.addElement(new Option("\tThe field separator to be used for the attributes file.\n"
-            + "\t'\\t' can be used as well.\n" + "\t(default: ' ')", "F", 1,
-            "-F <separator>"));
-
+    if (getAttributeLoader() instanceof OptionHandler) {
+      result.addElement(new Option("", "", 0,
+              "\nOptions specific to loader " + getAttributeLoader().getClass().getName() + ":"));
+      result.addAll(Collections.list(((OptionHandler) getAttributeLoader()).listOptions()));
+    }
     return result.elements();
   }
 
@@ -103,6 +160,85 @@ import weka.core.converters.nifti.Nifti1Dataset;
    * <p/>
    *
    <!-- options-start -->
+   * Valid options are: <p>
+   * 
+   * <pre> -mask &lt;filename&gt;
+   *  The mask data to apply to every volume.
+   *  (default: user home directory)</pre>
+   * 
+   * <pre> -attributes &lt;filename&gt;
+   *  The attribute data for every volume.
+   *  (default: user home directory)</pre>
+   * 
+   * <pre> -attributeLoader &lt;loader specification&gt;
+   *  Class name of loader to use, followed by loader options.
+   *  (default: weka.core.converters.CSVLoader -H -N first-last -F " ")</pre>
+   * 
+   * <pre> 
+   * Options specific to loader weka.core.converters.CSVLoader:
+   * </pre>
+   * 
+   * <pre> -H
+   *  No header row present in the data.</pre>
+   * 
+   * <pre> -N &lt;range&gt;
+   *  The range of attributes to force type to be NOMINAL.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -L &lt;nominal label spec&gt;
+   *  Optional specification of legal labels for nominal
+   *  attributes. May be specified multiple times.
+   *  Batch mode can determine this
+   *  automatically (and so can incremental mode if
+   *  the first in memory buffer load of instances
+   *  contains an example of each legal value). The
+   *  spec contains two parts separated by a ":". The
+   *  first part can be a range of attribute indexes or
+   *  a comma-separated list off attruibute names; the
+   *  second part is a comma-separated list of labels. E.g
+   *  "1,2,4-6:red,green,blue" or "att1,att2:red,green,blue"</pre>
+   * 
+   * <pre> -S &lt;range&gt;
+   *  The range of attribute to force type to be STRING.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -D &lt;range&gt;
+   *  The range of attribute to force type to be DATE.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -format &lt;date format&gt;
+   *  The date formatting string to use to parse date values.
+   *  (default: "yyyy-MM-dd'T'HH:mm:ss")</pre>
+   * 
+   * <pre> -R &lt;range&gt;
+   *  The range of attribute to force type to be NUMERIC.
+   *  'first' and 'last' are accepted as well.
+   *  Examples: "first-last", "1,4,5-27,50-last"
+   *  (default: -none-)</pre>
+   * 
+   * <pre> -M &lt;str&gt;
+   *  The string representing a missing value.
+   *  (default: ?)</pre>
+   * 
+   * <pre> -F &lt;separator&gt;
+   *  The field separator to be used.
+   *  '\t' can be used as well.
+   *  (default: ',')</pre>
+   * 
+   * <pre> -E &lt;enclosures&gt;
+   *  The enclosure character(s) to use for strings.
+   *  Specify as a comma separated list (e.g. ",' (default: ",')</pre>
+   * 
+   * <pre> -B &lt;num&gt;
+   *  The size of the in memory buffer (in rows).
+   *  (default: 100)</pre>
+   * 
    <!-- options-end -->
    *
    * @param options the options
@@ -125,12 +261,19 @@ import weka.core.converters.nifti.Nifti1Dataset;
       setAttributesFile(new File(System.getProperty("user.dir")));
     }
 
-    tmpStr = Utils.getOption('F', options);
-    if (tmpStr.length() != 0) {
-      setFieldSeparator(tmpStr);
-    } else {
-      setFieldSeparator(" ");
+    String loaderString = Utils.getOption("attributeLoader", options);
+    if (loaderString.length() <= 0) {
+      loaderString = defaultLoaderString();
     }
+    String[] loaderSpec = Utils.splitOptions(loaderString);
+    if (loaderSpec.length == 0) {
+      throw new IllegalArgumentException("Invalid loader specification string");
+    }
+    String loaderName = loaderSpec[0];
+    loaderSpec[0] = "";
+    setAttributeLoader((Loader) Utils.forName(Loader.class, loaderName, loaderSpec));
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**
@@ -148,8 +291,13 @@ import weka.core.converters.nifti.Nifti1Dataset;
     options.add("-attributes");
     options.add(getAttributesFile().getAbsolutePath());
 
-    options.add("-F");
-    options.add(getFieldSeparator());
+    options.add("-attributeLoader");
+    Loader c = getAttributeLoader();
+    if (c instanceof OptionHandler) {
+      options.add(c.getClass().getName() + " " + Utils.joinOptions(((OptionHandler) c).getOptions()));
+    } else {
+      options.add(c.getClass().getName());
+    }
 
     return options.toArray(new String[options.size()]);
   }
@@ -188,7 +336,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
-  public String fieldSeparatorTipText() {
+  public String attributeLoaderTipText() {
     return "The character to use as separator for the attributes file (use '\\t' for TAB).";
   }
 
@@ -197,8 +345,8 @@ import weka.core.converters.nifti.Nifti1Dataset;
    *
    * @return the character to use
    */
-  public String getFieldSeparator() {
-    return Utils.backQuoteChars(m_FieldSeparator);
+  public Loader getAttributeLoader() {
+    return m_attributeLoader;
   }
 
   /**
@@ -206,16 +354,9 @@ import weka.core.converters.nifti.Nifti1Dataset;
    *
    * @param value the character to use
    */
-  public void setFieldSeparator(String value) {
-    m_FieldSeparator = Utils.unbackQuoteChars(value);
-    if (m_FieldSeparator.length() != 1) {
-      m_FieldSeparator = " ";
-      System.err
-              .println("Field separator can only be a single character (exception being '\t'), "
-                      + "defaulting back to '" + m_FieldSeparator + "'!");
-    }
+  public void setAttributeLoader(Loader value) {
+    m_attributeLoader = value;
   }
-
   /**
    * the tip text for this property
    *
@@ -359,11 +500,8 @@ import weka.core.converters.nifti.Nifti1Dataset;
       m_attributeData = null;
       if (m_attributesFile.exists() && m_attributesFile.isFile()) {
         try {
-          CSVLoader attLoader = new CSVLoader();
-          attLoader.setNoHeaderRowPresent(true);
-          attLoader.setFieldSeparator(getFieldSeparator());
-          attLoader.setSource(m_attributesFile);
-          m_attributeData = attLoader.getDataSet();
+          m_attributeLoader.setSource(m_attributesFile);
+          m_attributeData = m_attributeLoader.getDataSet();
           if ((m_dataSet.TDIM == 0 && m_attributeData.numInstances() != 1) ||
                   (m_attributeData.numInstances() != m_dataSet.TDIM)) {
             System.err.println("WARNING: Attribute information inconsistent with number of time slots in " +
@@ -406,6 +544,9 @@ import weka.core.converters.nifti.Nifti1Dataset;
       m_structure.setClassIndex(m_structure.numAttributes() - 1);
     }
 
+    // Reset time slot in case we want to read incrementally.
+    m_currentTimeSlot = 0;
+
     return new Instances(m_structure, 0);
   }
 
@@ -440,7 +581,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
   }
 
   /**
-   * Method that turns an volume at the given time slot into an instance, incorporating
+   * Method that turns a volume at the given time slot into an instance, incorporating
    * the corresponding information from the attribute file (if any).
    */
   protected double[] make1Darray(int timeSlot) throws IOException {
@@ -471,16 +612,24 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
     return newInst;
   }
+
   /**
-   * JSONLoader is unable to process a data set incrementally.
-   *
-   * @param structure		ignored
-   * @return 			never returns without throwing an exception
-   * @throws IOException 	always. JSONLoader is unable to process a
-   * 				data set incrementally.
+   * Method used to read one instance at a time in incremental loading mode. Returns null
+   * if no further data remains to be read.
    */
   public Instance getNextInstance(Instances structure) throws IOException {
-    throw new IOException("NIfTIFileLoader can't read data sets incrementally.");
+    if (getRetrieval() == BATCH) {
+      throw new IOException("Cannot mix getting instances in both incremental and batch modes");
+    }
+    m_structure = structure;
+    setRetrieval(INCREMENTAL);
+
+    //Have we read all the data?
+    if ((m_currentTimeSlot == 0 && m_dataSet.TDIM == 0) || (m_currentTimeSlot < m_dataSet.TDIM)) {
+      return new SparseInstance(1.0, make1Darray(m_currentTimeSlot++));
+     } else {
+      return null;
+    }
   }
 
   /**
@@ -501,3 +650,4 @@ import weka.core.converters.nifti.Nifti1Dataset;
     runFileLoader(new NIfTIFileLoader(), args);
   }
 }
+
