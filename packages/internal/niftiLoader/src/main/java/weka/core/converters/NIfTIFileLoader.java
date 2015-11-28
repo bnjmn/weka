@@ -626,7 +626,9 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
     //Have we read all the data?
     if ((m_currentTimeSlot == 0 && m_dataSet.TDIM == 0) || (m_currentTimeSlot < m_dataSet.TDIM)) {
-      return new SparseInstance(1.0, make1Darray(m_currentTimeSlot++));
+      Instance inst = new SparseInstance(1.0, make1Darray(m_currentTimeSlot++));
+      inst.setDataset(m_structure);
+      return inst;
      } else {
       return null;
     }
