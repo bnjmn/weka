@@ -20,9 +20,6 @@
 
 package weka.core.json;
 
-import java.awt.BorderLayout;
-import java.io.Reader;
-
 import java_cup.runtime.DefaultSymbolFactory;
 import java_cup.runtime.SymbolFactory;
 
@@ -30,10 +27,12 @@ import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
+import java.awt.BorderLayout;
+import java.io.Reader;
 
 /**
- * Container class for storing a <a href="http://www.json.org/"
- * target="_blank">JSON</a> data structure.
+ * Container class for storing a
+ * <a href="http://www.json.org/" target="_blank">JSON</a> data structure.
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -51,10 +50,8 @@ public class JSONNode extends DefaultMutableTreeNode {
    */
   public static enum NodeType {
     /** a primitive. */
-    PRIMITIVE,
-    /** an object with nested key-value pairs. */
-    OBJECT,
-    /** an array. */
+    PRIMITIVE, /** an object with nested key-value pairs. */
+    OBJECT, /** an array. */
     ARRAY
   }
 
@@ -444,6 +441,14 @@ public class JSONNode extends DefaultMutableTreeNode {
     int i;
     char c;
 
+    // take care of already escaped characters first (like
+    // \n in string literals
+    // kind of ugly - probably a better way of handling this
+    // somehow.
+    s = s.replace("\\n", "@@-@@n").replace("\\r", "@@-@@r")
+      .replace("\\t", "@@-@@t").replace("\\b", "@@-@@b")
+      .replace("\\f", "@@-@@f");
+
     if ((s.indexOf('\"') > -1) || (s.indexOf('\\') > -1)
       || (s.indexOf('\b') > -1) || (s.indexOf('\f') > -1)
       || (s.indexOf('\n') > -1) || (s.indexOf('\r') > -1)
@@ -487,9 +492,8 @@ public class JSONNode extends DefaultMutableTreeNode {
     int index;
 
     // replace each of the following characters with the backquoted version
-    String charsFind[] =
-      { "\\\\", "\\'", "\\t", "\\n", "\\r", "\\b", "\\f", "\\\"", "\\%",
-        "\\u001E" };
+    String charsFind[] = { "\\\\", "\\'", "\\t", "\\n", "\\r", "\\b", "\\f",
+      "\\\"", "\\%", "\\u001E" };
     char charsReplace[] =
       { '\\', '\'', '\t', '\n', '\r', '\b', '\f', '"', '%', '\u001E' };
     int pos[] = new int[charsFind.length];
@@ -520,7 +524,7 @@ public class JSONNode extends DefaultMutableTreeNode {
       }
     }
 
-    return newStringBuffer.toString();
+    return newStringBuffer.toString().replace("@@-@@", "\\");
   }
 
   /**
