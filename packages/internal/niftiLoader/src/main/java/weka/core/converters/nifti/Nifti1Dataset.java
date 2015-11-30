@@ -2087,6 +2087,9 @@ public class Nifti1Dataset {
 	return;
 	}
 
+		// BufferedInputStream to use for gzipped data (made into member variable for speed by eibe)
+		private BufferedInputStream bis = null;
+		private long currentPosition = 0;
 
 	//////////////////////////////////////////////////////////////////
 	/*
@@ -2099,8 +2102,6 @@ public class Nifti1Dataset {
 
 	byte b[];
 	RandomAccessFile raf;
-	GZIPInputStream gis;
-	BufferedInputStream bis;
 	short ZZZ;
 	long skip_head, skip_data;
 	int blob_size;
@@ -2123,10 +2124,36 @@ public class Nifti1Dataset {
 	// read the volume from disk into a byte array
 	// read compressed data with BufferedInputStream
 	if (ds_datname.endsWith(".gz")) {
-	bis = new BufferedInputStream(new GZIPInputStream(new FileInputStream(ds_datname)));
-	bis.skip(skip_head+skip_data);
-	bis.read(b,0,blob_size);
-	bis.close();
+
+		// Check whether the stream has already been opened and we are at the correct position
+		if ((bis == null) || (currentPosition != skip_head + skip_data)) {
+			bis = new BufferedInputStream(new GZIPInputStream(new FileInputStream(ds_datname)));
+			currentPosition = 0;
+		}
+		if (currentPosition != skip_head + skip_data) { // Are we at the wrong position in the stream?
+			bis.skip(skip_head + skip_data);
+			currentPosition = skip_head + skip_data;
+		}
+
+		// Read the actual data
+		bis.read(b,0,blob_size);
+
+		// Skip to the start of the next blob (if there's another blob left)
+		bis.mark(blob_size);
+		long skipped = 0, toSkip = blob_size;
+		while ((toSkip > 0) && ((skipped = bis.skip(toSkip)) != 0)) {
+			toSkip -= skipped;
+		}
+
+		// Check whether we have reached the end of the dataset (i.e., there is no further blob available)
+		if (toSkip > 0) {
+			bis.close();
+			bis = null;
+			currentPosition = 0;
+		} else {
+			bis.reset();
+			currentPosition += blob_size;
+		}
 	}
 	// read uncompressed data with RandomAccessFile
 	else {
