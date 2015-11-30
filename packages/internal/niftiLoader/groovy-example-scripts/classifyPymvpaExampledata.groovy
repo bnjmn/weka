@@ -1,21 +1,19 @@
 // This Groovy script, which can be executed using the GroovyConsole that is available
 // from the tools menu of WEKA's GUIChooser once the kfGroovy package has been installed,
-// processes an .nii example file containing an entire dataset of volumes and a separate
-// text file with labels for these volumes, into two folders containing individual .nii
-// files for each volume. The labels are used to create subdirectories containing these
-// .nii files. The script creates two directories, one for training (WEKA_train) and one
-// for testing (WEKA_test). These can be opened in WEKA using the NiftiDirectoryLoader.
+// processes an .nii example file containing an entire dataset of volumes, a separate
+// text file with labels for these volumes, and a .nii file with a mask applied to each volume.
 //
-// The script then uses the NIfTIDirectoryLoader for WEKA to create training and test
-// files for WEKA. It builds a naive Bayes model from the training data and evaluates it
-// on the test data.
+// The script uses the NIfTIFileLoader for WEKA to create training and test
+// files for WEKA. It builds a logistic regression model using LibLINEAR from 
+// the training data and evaluates it on the test data.
 
 // Import the Java libraries for dealing with NIFTI data using WEKA
-import weka.core.converters.nifti.Nifti1Dataset
-import weka.core.converters.NIfTIDirectoryLoader
+import weka.core.converters.NIfTIFileLoader
+import weka.core.SelectedTag
+import weka.core.Instances
 
 // Import WEKA libraries for training and evaluation
-import weka.classifiers.bayes.NaiveBayes
+import weka.classifiers.functions.LibLINEAR
 import weka.classifiers.evaluation.Evaluation
 
 // We need some packages to download and extract example .nii data from the web
@@ -46,73 +44,22 @@ while ((nextEntry = tarArchiveInputStream.getNextTarEntry()) != null) {
 }
 tarArchiveInputStream.close()
 
-println "Reading attributes_literal.txt file with labels"
-reader = new BufferedReader(new FileReader(inputPrefix + "pymvpa-exampledata" + File.separator + "attributes_literal.txt"))
-labels = new ArrayList<String>()
-while ((label = reader.readLine()) != null) {
-  labels.add(label.split(" ")[0])
-}
-reader.close()
+println "Loading data as a WEKA Instances object using the NIfTIFileLoader"
+loader = new NIfTIFileLoader()
+loader.setSource(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "bold.nii.gz"))
+loader.setAttributesFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "attributes_literal.txt"))
+loader.setMaskFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "mask.nii.gz"))
+data = loader.getDataSet()
+data.setClassIndex(0) // The first attribute has the class
 
-println "Creating folder pymvpa-exampledata-processed-for-weka for output data in user's home"
-outputFolder = new File(System.getProperty("user.home") + File.separator + "pymvpa-exampledata-processed-for-weka")
-outputFolder.delete()
-outputFolder.mkdir()
-outputPrefix = outputFolder.getAbsolutePath() + File.separator
+println "Splitting data into training and test data, using the first 968 volumes for training"
+trainingData = new Instances(data, 0, 968);
+testData = new Instances(data, 968, data.numInstances() - 968)
 
-println "Creating folders for training and test data in output folder"
-for (label in labels) {
-  dir = new File(outputPrefix + "WEKA_train" + File.separator + label);
-  dir.mkdirs();
-  dir = new File(outputPrefix + "WEKA_test" + File.separator + label);
-  dir.mkdirs();
-}
-
-println "Loading header of bold.nii file" 
-data = new Nifti1Dataset(inputPrefix + "pymvpa-exampledata" + File.separator + "bold.nii")
-data.readHeader()
-
-println "Creating .nii files in folders, using first eight sessions for training (including the first 968 volumes)"
-splitPoint = 968
-for (int i = 0; i < splitPoint; i++) {
-  localName = outputPrefix + "WEKA_train" + File.separator + labels.get(i) + File.separator + i
-  volume = data.readDoubleVol((short)i)
-  outputFile = new Nifti1Dataset()
-  outputFile.copyHeader(data)
-  outputFile.setHeaderFilename(localName + ".nii")
-  outputFile.writeHeader()
-  outputFile.setDataFilename(localName)
-  outputFile.writeVol(volume, (short)0)
-}
-
-println "Creating .nii files in folders, using remaining four sessions for testing"
-for (int i = splitPoint; i < data.TDIM; i++) {
-  localName = outputPrefix + "WEKA_test" + File.separator + labels.get(i) + File.separator + i
-  volume = data.readDoubleVol((short)i)
-  outputFile = new Nifti1Dataset()
-  outputFile.copyHeader(data)
-  outputFile.setHeaderFilename(localName + ".nii")
-  outputFile.writeHeader()
-  outputFile.setDataFilename(localName)
-  outputFile.writeVol(volume, (short)0)
-}
-
-println "Deleting temporary folder with downloaded archive"
-inputFolder.delete()
-
-println "Loading training data as a WEKA Instances object using the NIfTIDirectoryLoader"
-loader = new NIfTIDirectoryLoader()
-loader.setDirectory(new File(outputPrefix + "WEKA_train"))
-trainingData = loader.getDataSet()
-
-println "Building naive Bayes model on training data"
-model = new NaiveBayes()
+println "Building model on training data"
+model = new LibLINEAR()
+model.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE))
 model.buildClassifier(trainingData)
-
-println "Loading test data as a WEKA Instances object using the NIfTIDirectoryLoader"
-loader = new NIfTIDirectoryLoader()
-loader.setDirectory(new File(outputPrefix + "WEKA_test"))
-testData = loader.getDataSet()
 
 println "Evaluating model on test data"
 evaluation = new Evaluation(trainingData)

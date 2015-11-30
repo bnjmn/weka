@@ -2,31 +2,30 @@
 // an .nii file and plot it.
 
 import java.awt.*
-import java.awt.geom.*
 import javax.swing.*
 
 import weka.core.Instances
-import weka.core.Instance
-import weka.core.converters.NIfTIDirectoryLoader
+import weka.core.converters.NIfTIFileLoader
 import weka.core.WekaPackageManager
 
 class PlotARFF extends JPanel {
- 
+
   protected void paintComponent(Graphics g) {
 
     try {
       super.paintComponent(g)
       Graphics2D g2 = (Graphics2D)g
-      
-      // Load all .nii files in the given directory into
-      // a WEKA Instances object     
-      NIfTIDirectoryLoader loader = new NIfTIDirectoryLoader()
-      loader.setDirectory(new File(WekaPackageManager.WEKA_HOME.toString() + File.separator + "packages" + File.separator + "niftiLoader" + File.separator + "example_data"))
+
+      // Load .nii file into a WEKA Instances object
+      NIfTIFileLoader loader = new NIfTIFileLoader()
+      loader.setSource(new File(WekaPackageManager.WEKA_HOME.toString() + File.separator + "packages" +
+              File.separator + "niftiLoader" + File.separator + "example_data" + File.separator + "Class_1" +
+              File.separator + "face.nii"));
       Instances data = loader.getDataSet()
 
       // We know that XDIM = YDIM for this data and that it's a 2D image
-      int numValues = (int)Math.sqrt(data.numAttributes() - 1)
-      
+      int numValues = (int)Math.sqrt(data.numAttributes())
+
       int w = getWidth() / numValues
       int h = getHeight() / numValues
 
@@ -36,7 +35,7 @@ class PlotARFF extends JPanel {
         for (int x = 0; x < numValues; x++) {
           int val = (int) (255.0 * data.instance(0).value(index++))
           Color color = new Color(val, val, val)
-          g2.setColor(color)         
+          g2.setColor(color)
           g2.fill(new Rectangle(x * w, y * h, w, h))
         }
       }
@@ -44,7 +43,7 @@ class PlotARFF extends JPanel {
       e.printStackTrace()
     }
   }
- }
+}
 
 f = new JFrame();
 f.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
