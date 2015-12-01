@@ -474,7 +474,7 @@ public class MultiInstanceWrapper extends Filter implements OptionHandler,
           DenseInstance insT = new DenseInstance(getInputFormat().instance(
             origInstanceIndex++).weight(), newVals);
           insT.setDataset(convertedInstances);
-          push(insT);
+          push(insT, false); // No need to copy instance
           tempInstances.delete();
           counter = 0;
         }
