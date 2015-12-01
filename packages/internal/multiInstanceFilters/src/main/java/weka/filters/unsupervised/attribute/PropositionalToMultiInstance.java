@@ -549,7 +549,7 @@ public class PropositionalToMultiInstance extends Filter implements
     }
 
     for (int i = 0; i < output.numInstances(); i++) {
-      push(output.instance(i), false); // No need to copy
+      push(output.instance(i));
     }
 
     // Free memory

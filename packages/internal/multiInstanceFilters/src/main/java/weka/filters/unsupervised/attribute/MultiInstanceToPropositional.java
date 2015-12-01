@@ -461,7 +461,7 @@ public class MultiInstanceToPropositional extends Filter implements
       RelationalLocator.copyRelationalValues(newInst, false, data,
         m_BagRelAtts, outputFormat, m_OutputRelAtts);
 
-      push(newInst, false); // No need to copy instance
+      push(newInst);
     }
   }
 
