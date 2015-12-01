@@ -3,16 +3,18 @@
 // processes an .nii example file containing an entire dataset of volumes, a separate
 // text file with labels for these volumes, and a .nii file with a mask applied to each volume.
 //
-// The script uses the NIfTIFileLoader for WEKA to create training and test
-// files for WEKA. It builds a logistic regression model using LibLINEAR from 
-// the training data and evaluates it on the test data.
+// The script uses the NIfTIFileLoader for WEKA to load the data. 
+// It performs a leave-one-out cross-validation with a logistic regression model using LibLINEAR.
 
 // Import the Java libraries for dealing with NIFTI data using WEKA
 import weka.core.converters.NIfTIFileLoader
 import weka.core.SelectedTag
 import weka.core.Instances
 
-// Import WEKA libraries for training and evaluation
+// Import WEKA libraries for preprocessing, training, and evaluation
+import weka.filters.Filter
+import weka.filters.unsupervised.attribute.PropositionalToMultiInstance
+import weka.filters.unsupervised.attribute.RELAGGS
 import weka.classifiers.functions.LibLINEAR
 import weka.classifiers.evaluation.Evaluation
 
@@ -21,7 +23,7 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 
 println "Creating temporary folder to store downloaded data and extract it"
-inputFolder = File.createTempFile("pymvpa-exampledata", "");
+inputFolder = File.createTempFile("pymvpa-exampledata", "")
 inputFolder.delete()
 inputFolder.mkdir()
 inputPrefix = inputFolder.getAbsolutePath() + File.separator
@@ -33,13 +35,12 @@ while ((nextEntry = tarArchiveInputStream.getNextTarEntry()) != null) {
   if (nextEntry.isDirectory()) {
     new File(inputPrefix + nextEntry.getName()).mkdirs()
   } else {
-    buffer = new byte[4096];
-    out = new BufferedOutputStream(new FileOutputStream(inputPrefix + nextEntry.getName()));
-    int len;
+    buffer = new byte[4096]
+    out = new BufferedOutputStream(new FileOutputStream(inputPrefix + nextEntry.getName()))
     while((len = tarArchiveInputStream.read(buffer)) != -1) {
-      out.write(buffer, 0, len);   
+      out.write(buffer, 0, len)
     }
-    out.close();
+    out.close()
   }
 }
 tarArchiveInputStream.close()
@@ -50,19 +51,28 @@ loader.setSource(new File(inputPrefix + "pymvpa-exampledata" + File.separator + 
 loader.setAttributesFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "attributes_literal.txt"))
 loader.setMaskFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "mask.nii.gz"))
 data = loader.getDataSet()
-data.setClassIndex(0) // The first attribute has the class
+data.setClassIndex(0) // The first attribute has the class (indexing is 0-based)
 
-println "Splitting data into training and test data, using the first 968 volumes for training"
-trainingData = new Instances(data, 0, 968);
-testData = new Instances(data, 968, data.numInstances() - 968)
+println "Turning data into relational format and propositionalising it again by computing summary statistics"
+toRelational = new PropositionalToMultiInstance()
+toRelational.setBagID(2) // The second attribute is the bag ID (indexing is 1-based)
+toRelational.setInputFormat(data)
+data = Filter.useFilter(data, toRelational)
+toSummaryStats = new RELAGGS()
+toSummaryStats.setInputFormat(data)
+data = Filter.useFilter(data, toSummaryStats)
 
-println "Building model on training data"
+println data.classAttribute().toString()
+for (int i = 0; i < data.numInstances(); i++) {
+  println data.instance(i).classValue()
+}
+
+println "Setting up model configuration"
 model = new LibLINEAR()
 model.setSVMType(new SelectedTag(0, LibLINEAR.TAGS_SVMTYPE))
-model.buildClassifier(trainingData)
 
-println "Evaluating model on test data"
-evaluation = new Evaluation(trainingData)
-evaluation.evaluateModel(model, testData)
+println "Performing leave-one-out cross-validation on the data"
+evaluation = new Evaluation(data)
+evaluation.crossValidateModel(model, data, data.numInstances(), new Random(1))
 println evaluation.toSummaryString()
 println evaluation.toMatrixString()
