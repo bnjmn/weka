@@ -34,20 +34,21 @@ import weka.filters.SimpleBatchFilter;
 
 /**
  * <!-- globalinfo-start --> A propositionalization filter inspired by the
- * RELAGGS algorithm.<br/>
+ * RELAGGS algorithm.<br>
  * It processes all relational attributes that fall into the user defined range. Currently, the
- * filter only processes one level of nesting.<br/>
- * The class attribute is not touched.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
+ * filter only processes one level of nesting.<br>
+ * The class attribute is not touched.<br>
+ * <br>
+ * For more information see:<br>
+ * <br>
  * M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to
  * Propositionalization. In: Work-in-Progress Track at the Thirteenth
  * International Conference on Inductive Logic Programming (ILP), 2003.
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
+ * </p>
  * 
  * <pre>
  * &#64;inproceedings{Krogel2003,
@@ -59,11 +60,11 @@ import weka.filters.SimpleBatchFilter;
  *    PDF = {http://kd.cs.uni-magdeburg.de/\~krogel/papers/aggs.pdf}
  * }
  * </pre>
- * <p/>
+ * <p>
  * <!-- technical-bibtex-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -D
@@ -184,11 +185,10 @@ public class RELAGGS extends SimpleBatchFilter implements
   }
 
   /**
-   * Parses the options for this object.
-   * <p/>
+   * <p>Parses the options for this object.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
    * 
    * <pre>
    * -D

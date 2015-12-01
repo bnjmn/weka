@@ -45,16 +45,16 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> Implements the MILES transformation that maps
- * multiple instance bags into a high-dimensional single-instance feature space.<br/>
- * For more information see:<br/>
- * <br/>
+ * multiple instance bags into a high-dimensional single-instance feature space.<br>
+ * For more information see:<br>
+ * <br>
  * Y. Chen, J. Bi, J.Z. Wang (2006). MILES: Multiple-instance learning via
- * embedded instance selection. IEEE PAMI. 28(12):1931-1947.<br/>
- * <br/>
- * James Foulds, Eibe Frank: Revisiting multiple-instance learning via embedded
+ * embedded instance selection. IEEE PAMI. 28(12):1931-1947.<br>
+ * <br>
+ * <p>James Foulds, Eibe Frank: Revisiting multiple-instance learning via embedded
  * instance selection. In: 21st Australasian Joint Conference on Artificial
  * Intelligence, 300-310, 2008.
- * <p/>
+ * </p>
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
@@ -79,11 +79,11 @@ import weka.filters.UnsupervisedFilter;
  *    year = {2008}
  * }
  * </pre>
- * <p/>
+ * <p>
  * <!-- technical-bibtex-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -S &lt;num&gt;
@@ -116,6 +116,8 @@ public class MILESFilter extends SimpleBatchFilter implements
 
   /**
    * Returns the tip text for this property
+   *
+   * @return the tip text for this property
    */
   public String sigmaTipText() {
 
@@ -124,6 +126,8 @@ public class MILESFilter extends SimpleBatchFilter implements
 
   /**
    * Sets the sigma parameter.
+   *
+   * @param sigma the sigma value
    */
   public void setSigma(double sigma) {
     m_sigma = sigma;
@@ -131,6 +135,8 @@ public class MILESFilter extends SimpleBatchFilter implements
 
   /**
    * Gets the sigma parameter.
+   *
+   * @return the tip-text for this property
    */
   public double getSigma() {
     return m_sigma;
@@ -319,11 +325,11 @@ public class MILESFilter extends SimpleBatchFilter implements
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.</p>
    * 
+   * <p>
    * <!-- options-start --> Valid options are:
-   * <p/>
+   * </p>
    * 
    * <pre>
    * -S &lt;num&gt;

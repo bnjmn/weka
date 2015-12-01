@@ -44,11 +44,11 @@ import weka.filters.supervised.attribute.PartitionMembership;
  * MultiInstanceToPropositional with default parameters, where each instance is
  * labeled with its bag's class label. Aggregates resulting data using sum/mode.
  * The resulting data can be processed by a single-instance classifier.
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -F &lt;filter name and options&gt;
@@ -125,11 +125,10 @@ public class MultiInstanceWrapper extends Filter implements OptionHandler,
   }
 
   /**
-   * Parses the options for this object.
-   * <p/>
+   * <p>Parses the options for this object.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
    * 
    * <pre>
    * -F &lt;filter name and options&gt;

@@ -48,14 +48,14 @@ import weka.filters.UnsupervisedFilter;
  * applied first to convert the multi-instance dataset into a propositional
  * instance dataset. After normalization or standardization, we may use this
  * PropositionalToMultiInstance filter to convert the data back to
- * multi-instance format.<br/>
- * <br/>
+ * multi-instance format.<br>
+ * <br>
  * Note: the bag ID attribute must be a nominal attribute
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -S &lt;num&gt;
@@ -151,11 +151,10 @@ public class PropositionalToMultiInstance extends Filter implements
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
    * 
    * <pre>
    * -S &lt;num&gt;

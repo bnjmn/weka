@@ -46,14 +46,14 @@ import weka.filters.UnsupervisedFilter;
  * <!-- globalinfo-start --> Converts the multi-instance dataset into single
  * instance dataset so that the Nominalize, Standardize and other type of
  * filters or transformation can be applied to these data for the further
- * preprocessing.<br/>
+ * preprocessing.<br>
  * Note: the first attribute of the converted dataset is a nominal attribute and
  * refers to the bagId.
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -A &lt;num&gt;
@@ -142,11 +142,10 @@ public class MultiInstanceToPropositional extends Filter implements
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
    * 
    * <pre>
    * -A &lt;num&gt;
