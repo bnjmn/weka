@@ -31,9 +31,25 @@ import weka.filters.SimpleBatchFilter;
 
 /**
  * <!-- globalinfo-start -->
+ * A filter for performing the Cartesian product of a set of nominal attributes.
+ * <br><br>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -R &lt;col1,col2-col4,...&gt;
+ *  Specifies list of nominal attributes to use to form the product.
+ *  (default none)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
+ * 
  * <!-- options-end -->
  *
  * @author Eibe Frank
@@ -45,7 +61,7 @@ public class CartesianProduct extends SimpleBatchFilter {
   private static final long serialVersionUID = -227979753639722020L;
 
   /** the attribute range to work on */
-  protected Range m_Attributes = new Range("first-last");
+  protected Range m_Attributes = new Range("");
 
   /**
    * Returns a string describing this filter
@@ -82,6 +98,20 @@ public class CartesianProduct extends SimpleBatchFilter {
    * <p/>
    * 
    * <!-- options-start -->
+   * Valid options are: <p>
+   * 
+   * <pre> -R &lt;col1,col2-col4,...&gt;
+   *  Specifies list of nominal attributes to use to form the product.
+   *  (default none)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, filter is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, filter capabilities are not checked before filter is built
+   *  (use with caution).</pre>
+   * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -94,7 +124,7 @@ public class CartesianProduct extends SimpleBatchFilter {
     if (tmpStr.length() != 0) {
       setAttributeIndices(tmpStr);
     } else {
-      setAttributeIndices("first-last");
+      setAttributeIndices("");
     }
 
     super.setOptions(options);
@@ -112,11 +142,9 @@ public class CartesianProduct extends SimpleBatchFilter {
 
     Vector<String> result = new Vector<String>();
 
-    result.add("-R");
     if (!getAttributeIndices().equals("")) {
+      result.add("-R");
       result.add(getAttributeIndices());
-    } else {
-      result.add("first-last");
     }
 
     Collections.addAll(result, super.getOptions());
@@ -218,16 +246,24 @@ public class CartesianProduct extends SimpleBatchFilter {
 
     String name = "";
     for (int i = 0; i < inputFormat.numAttributes(); i++) {
-      atts.add(inputFormat.attribute(i)); // Can just copy reference becase index remains unchanged.
-      if (inputFormat.attribute(i).isNominal() && m_Attributes.isInRange(i)) {
-        ArrayList<String> newValues = new ArrayList<String>(values.size() * inputFormat.attribute(i).numValues());
-        for (String value : values) {
+      atts.add(inputFormat.attribute(i)); // Can just copy reference because index remains unchanged.
+      if (inputFormat.attribute(i).isNominal() && m_Attributes.isInRange(i) && i != inputFormat.classIndex()) {
+        if (values.size() == 0) {
+          values = new ArrayList<String>(inputFormat.attribute(i).numValues());
           for (int j = 0; j < inputFormat.attribute(i).numValues(); j++) {
-            newValues.add(value + "_x_" + inputFormat.attribute(i).value(j));
+            values.add(inputFormat.attribute(i).value(j));
           }
+          name = inputFormat.attribute(i).name();
+        } else {
+          ArrayList<String> newValues = new ArrayList<String>(values.size() * inputFormat.attribute(i).numValues());
+          for (String value : values) {
+            for (int j = 0; j < inputFormat.attribute(i).numValues(); j++) {
+              newValues.add(value + "_x_" + inputFormat.attribute(i).value(j));
+            }
+          }
+          name += "_x_" + inputFormat.attribute(i).name();
+          values = newValues;
         }
-        name += "_x_" + inputFormat.attribute(i).name();
-        values = newValues;
       }
     }
     if (values.size() > 0) {
@@ -260,20 +296,31 @@ public class CartesianProduct extends SimpleBatchFilter {
     for (Instance inst : instances) {
       if (instances.numAttributes() < result.numAttributes()) { // Do we actually need to add an attribute?
         double[] newVals = new double[result.numAttributes()];
+        for (int i = 0; i < inst.numValues(); i++) {
+          newVals[inst.index(i)] = inst.valueSparse(i);
+        }
         String value = "";
         for (int i = 0; i < inst.numAttributes(); i++) {
-          newVals[i] = inst.value(i);
-          if (instances.attribute(i).isNominal() && m_Attributes.isInRange(i)) {
-            value += (value.length() > 0) ? "_x_" + inst.stringValue(i) : inst.stringValue(i);
+          if (instances.attribute(i).isNominal() && m_Attributes.isInRange(i) && i != instances.classIndex()) {
+            if (Utils.isMissingValue(newVals[i])) {
+              value = null;
+              break;
+            } else {
+              value += (value.length() > 0) ? "_x_" + instances.attribute(i).value((int) newVals[i]) :
+                      instances.attribute(i).value((int) newVals[i]);
+            }
           }
         }
-        double v = result.attribute(result.numAttributes() - 1).indexOfValue(value);;
-        if (v != -1) {
-          newVals[newVals.length - 1] = v;
-        } else {
+        if (value == null) {
           newVals[newVals.length - 1] = Double.NaN;
+        } else {
+          newVals[newVals.length - 1] = result.attribute(result.numAttributes() - 1).indexOfValue(value);;
         }
-        result.add(new DenseInstance(inst.weight(), newVals));
+        if (inst instanceof DenseInstance) {
+          result.add(new DenseInstance(inst.weight(), newVals));
+        } else {
+          result.add(new SparseInstance(inst.weight(), newVals));
+        }
       } else {
         result.add(inst);
       }
@@ -301,3 +348,4 @@ public class CartesianProduct extends SimpleBatchFilter {
     runFilter(new CartesianProduct(), args);
   }
 }
+
