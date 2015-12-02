@@ -14,6 +14,9 @@ An overview of the libraries used in Weka:
 - JFlex.jar
   Version:  1.6.0
   URL:      http://jflex.de/
-  
+
+- commons-compress-1.10.jar
+  Version: 1.10
+  URL: https://commons.apache.org/proper/commons-compress/
 
 Version: $Revision$
