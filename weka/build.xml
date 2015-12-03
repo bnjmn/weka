@@ -593,6 +593,7 @@
          <include name="weka/**/*.txt"/>
          <include name="weka/**/*.xml"/>
          <include name="weka/**/*.kfml"/>
+         <include name="weka/**/*.kf"/>
          <include name="weka/**/*.arff"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
@@ -611,6 +612,11 @@
       </patternset>
     </unzip>
     <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/commons-compress-1.10.jar" dest="${build}/classes">
       <patternset>
         <include name="org/**/*"/>
       </patternset>
