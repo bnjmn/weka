@@ -59,7 +59,7 @@ import weka.filters.UnsupervisedFilter;
  *
  * <pre>
  * -B &lt;num&gt;
- *  The index of the bag ID attribute. (default 0)
+ *  The index of the bag ID attribute. (default first)
  * </pre>
  *
  *
@@ -76,7 +76,9 @@ public class PropositionalToMultiInstance extends Filter implements
   private static final long serialVersionUID = 5825873573912102482L;
 
   /** The index of the bag indicator attribute */
-  protected int m_BagIndicator = 0;
+
+  /** the index of the attribute */
+  protected SingleIndex m_BagIndicator = new SingleIndex("first");
 
   /** do not weight bags by number of instances they contain */
   protected boolean m_DoNotWeightBags = false;
@@ -135,7 +137,7 @@ public class PropositionalToMultiInstance extends Filter implements
 
     result.addElement(new Option(
             "\tThe index of the bag ID attribute."
-                    + "\t(default: 0)", "B", 1, "-B"));
+                    + "\t(default: first)", "B", 1, "-B"));
 
     return result.elements();
   }
@@ -158,7 +160,7 @@ public class PropositionalToMultiInstance extends Filter implements
    *
    * <pre>
    * -B &lt;num&gt;
-   *  The index of the bag ID attribute. (default 0)
+   *  The index of the bag ID attribute. (default first)
    * </pre>
    *
    * <!-- options-end -->
@@ -183,9 +185,9 @@ public class PropositionalToMultiInstance extends Filter implements
 
     tmpStr = Utils.getOption('B', options);
     if (tmpStr.length() != 0) {
-      setBagID(Integer.parseInt(tmpStr));
+      setBagID(tmpStr);
     } else {
-      setBagID(1);
+      setBagID("first");
     }
 
     Utils.checkForRemainingOptions(options);
@@ -262,8 +264,8 @@ public class PropositionalToMultiInstance extends Filter implements
    *
    * @param value the index of the new bag indicator attribute
    */
-  public void setBagID(int value) {
-    m_BagIndicator = (value - 1);
+  public void setBagID(String value) {
+    m_BagIndicator.setSingleIndex(value);
   }
 
   /**
@@ -271,8 +273,8 @@ public class PropositionalToMultiInstance extends Filter implements
    *
    * @return the index of the bag ID attribute
    */
-  public int getBagID() {
-    return m_BagIndicator + 1;
+  public String getBagID() {
+    return m_BagIndicator.getSingleIndex();
   }
 
   /**
@@ -371,25 +373,32 @@ public class PropositionalToMultiInstance extends Filter implements
   @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
-    if (instanceInfo.attribute(m_BagIndicator).type() != Attribute.NOMINAL) {
+    m_BagIndicator.setUpper(instanceInfo.numAttributes() - 1);
+
+    if (instanceInfo.attribute(m_BagIndicator.getIndex()).type() != Attribute.NOMINAL) {
       throw new Exception(
         "The bag ID attribute type of the original propositional instance dataset must be nominal!");
     }
-    if (m_BagIndicator == instanceInfo.classIndex()) {
+    if (m_BagIndicator.getIndex() == instanceInfo.classIndex()) {
       throw new Exception(
               "The bag ID cannot be the same as the index of the class attribute!");
     }
+    if ((m_BagIndicator.getIndex() < 0)
+            || (m_BagIndicator.getIndex() > instanceInfo.numAttributes())) {
+      throw new IllegalArgumentException("Bag index out of range!");
+    }
+
     super.setInputFormat(instanceInfo);
 
     /* create a new output format (multi-instance format) */
     Instances newData = instanceInfo.stringFreeStructure();
-    Attribute attBagIndex = (Attribute) newData.attribute(m_BagIndicator).copy();
+    Attribute attBagIndex = (Attribute) newData.attribute(m_BagIndicator.getIndex()).copy();
     Attribute attClass = null;
     if (newData.classIndex() >= 0) {
       attClass = (Attribute) newData.classAttribute().copy();
     }
     // remove the bagIndex attribute
-    newData.deleteAttributeAt(m_BagIndicator);
+    newData.deleteAttributeAt(m_BagIndicator.getIndex());
     // remove the class attribute if necessary
     int classIndex = newData.classIndex();
     if (classIndex >= 0) {
@@ -482,11 +491,11 @@ public class PropositionalToMultiInstance extends Filter implements
     }
 
     Instances input = getInputFormat();
-    input.sort(m_BagIndicator); // make sure that bagID is sorted
+    input.sort(m_BagIndicator.getIndex()); // make sure that bagID is sorted
     Instances output = getOutputFormat();
     Instances bagInsts = output.attribute(1).relation().stringFreeStructure();
 
-    double bagIndex = input.instance(0).value(m_BagIndicator);
+    double bagIndex = input.instance(0).value(m_BagIndicator.getIndex());
     double classValue = -1;
     if (input.classIndex() >= 0) {
       classValue = input.instance(0).classValue();
@@ -495,14 +504,22 @@ public class PropositionalToMultiInstance extends Filter implements
 
     // Convert pending input instances
     for (int i = 0; i < input.numInstances(); i++) {
-      double currentBagIndex = input.instance(i).value(m_BagIndicator);
+      double currentBagIndex = input.instance(i).value(m_BagIndicator.getIndex());
 
       // Convert instance into an instance for the bag
       double[] bagInst = new double[bagInsts.numAttributes()];
       Instance inputInst = input.instance(i);
       for (int j = 0; j < inputInst.numValues(); j++) {
         int index = inputInst.index(j);
-        if (index != input.classIndex() && index != m_BagIndicator) {
+        if (index != input.classIndex() && index != m_BagIndicator.getIndex()) {
+
+          // Bag instance does not have bag indicator or class attribute!
+          if ((input.classIndex() >= 0) && (index > input.classIndex())) {
+            index--;
+          }
+          if (index > m_BagIndicator.getIndex()) {
+            index--;
+          }
           bagInst[index] = inputInst.valueSparse(j);
         }
       }
