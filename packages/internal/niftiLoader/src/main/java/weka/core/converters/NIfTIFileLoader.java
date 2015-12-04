@@ -32,7 +32,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
 /**
  <!-- globalinfo-start -->
- * Reads a file in .nii format. It automatically decompresses the data if the extension is '.nii.gz'.<br>
+ * Reads a file in NIfTI format. It automatically decompresses the data if the extension is '.nii.gz'.<br>
  * <br>
  * A mask file can be specified as a parameter. The mask must be consistent with the main dataset and it is applied to every 2D/3D volume in the main dataset.<br>
  * <br>
@@ -87,7 +87,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
    * 			displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Reads a file in .nii format. It automatically decompresses the data if the extension is '" +
+    return "Reads a file in NIfTI format. It automatically decompresses the data if the extension is '" +
             FILE_EXTENSION_COMPRESSED + "'.\n\nA mask file can be specified as a parameter. The mask must be consistent" +
             " with the main dataset and it is applied to every 2D/3D volume in the main dataset.\n\n" +
             "A file with volume attributes (e.g., class labels) can also be specified as a parameter. " +
