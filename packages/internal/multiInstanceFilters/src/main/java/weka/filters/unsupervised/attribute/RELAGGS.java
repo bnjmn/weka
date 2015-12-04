@@ -15,7 +15,7 @@
 
 /*
  * RELAGGS.java
- * Copyright (C) 2007 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2007-2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.filters.unsupervised.attribute;
@@ -33,23 +33,19 @@ import weka.core.TechnicalInformation.Type;
 import weka.filters.SimpleBatchFilter;
 
 /**
- * <!-- globalinfo-start --> A propositionalization filter inspired by the
- * RELAGGS algorithm.<br>
- * It processes all relational attributes that fall into the user defined range. Currently, the
- * filter only processes one level of nesting.<br>
+ * <!-- globalinfo-start -->
+ * A propositionalization filter inspired by the RELAGGS algorithm.<br>
+ * It processes all relational attributes that fall into the user defined range. Currently, the filter only processes one level of nesting.<br>
  * The class attribute is not touched.<br>
  * <br>
  * For more information see:<br>
  * <br>
- * M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to
- * Propositionalization. In: Work-in-Progress Track at the Thirteenth
- * International Conference on Inductive Logic Programming (ILP), 2003.
- * <p>
+ * M.-A. Krogel, S. Wrobel: Facets of Aggregation Approaches to Propositionalization. In: Work-in-Progress Track at the Thirteenth International Conference on Inductive Logic Programming (ILP), 2003.
+ * <br><br>
  * <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * </p>
- * 
+ * <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;inproceedings{Krogel2003,
  *    author = {M.-A. Krogel and S. Wrobel},
@@ -60,34 +56,49 @@ import weka.filters.SimpleBatchFilter;
  *    PDF = {http://kd.cs.uni-magdeburg.de/\~krogel/papers/aggs.pdf}
  * }
  * </pre>
- * <p>
+ * <br><br>
  * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * </p>
+ * <!-- options-start -->
+ * Valid options are: <p>
  * 
- * <pre>
- * -D
- *  Turns on output of debugging information.
- * </pre>
- * 
- * <pre>
- * -R &lt;index1,index2-index4,...&gt;
+ * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of string attributes to convert to words.
- *  (default: select all relational attributes)
- * </pre>
+ *  (default: select all relational attributes)</pre>
  * 
- * <pre>
- * -V
- *  Inverts the matching sense of the selection.
- * </pre>
+ * <pre> -V
+ *  Inverts the matching sense of the selection.</pre>
  * 
- * <pre>
- * -C &lt;num&gt;
+ * <pre> -C &lt;num&gt;
  *  Max. cardinality of nominal attributes. If a nominal attribute
  *  has more values than this upper limit, then it will be skipped.
- *  (default: 20)
- * </pre>
+ *  (default: 20)</pre>
+ * 
+ * <pre> -S
+ *  Generate sparse instances.</pre>
+ * 
+ * <pre> -disable-min
+ *  Disable out of MIN statistic.</pre>
+ * 
+ * <pre> -disable-max
+ *  Disable out of MAX statistic.</pre>
+ * 
+ * <pre> -disable-avg
+ *  Disable out of AVG statistic.</pre>
+ * 
+ * <pre> -disable-stdev
+ *  Disable out of STDEV statistic.</pre>
+ * 
+ * <pre> -disable-sum
+ *  Disable out of SUM statistic.</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
  * 
  * <!-- options-end -->
  * 
@@ -113,6 +124,16 @@ public class RELAGGS extends SimpleBatchFilter implements
    * <code>att_index-att_index_in_rel_att &lt;-&gt; AttributeStats</code>
    */
   protected Hashtable<String, AttributeStats> m_AttStats = null;
+
+  /** whether to generate sparse instances */
+  protected boolean m_GenerateSparseInstances = false;
+
+  /** Boolean flags used to disable output of particular summary statistics */
+  protected boolean m_DisableMIN = false;
+  protected boolean m_DisableMAX = false;
+  protected boolean m_DisableAVG = false;
+  protected boolean m_DisableSTDEV = false;
+  protected boolean m_DisableSUM = false;
 
   /**
    * Returns a string describing this filter
@@ -157,6 +178,87 @@ public class RELAGGS extends SimpleBatchFilter implements
   }
 
   /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableMIN() {
+    return m_DisableMIN;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableMIN true if output is disabled
+   */
+  public void setDisableMIN(boolean m_DisableMIN) {
+    this.m_DisableMIN = m_DisableMIN;
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableMAX() {
+    return m_DisableMAX;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableMAX true if output is disabled
+   */
+  public void setDisableMAX(boolean m_DisableMAX) {
+    this.m_DisableMAX = m_DisableMAX;
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableAVG() {
+    return m_DisableAVG;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableAVG true if output is disabled
+   */
+  public void setDisableAVG(boolean m_DisableAVG) {
+    this.m_DisableAVG = m_DisableAVG;
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableSTDEV() {
+    return m_DisableSTDEV;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableSTDEV true if output is disabled
+   */
+  public void setDisableSTDEV(boolean m_DisableSTDEV) {
+    this.m_DisableSTDEV = m_DisableSTDEV;
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableSUM() {
+    return m_DisableSUM;
+  }
+
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableSUM true if output is disabled
+   */
+  public void setDisableSUM(boolean m_DisableSUM) {
+    this.m_DisableSUM = m_DisableSUM;
+  }
+
+  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -179,6 +281,24 @@ public class RELAGGS extends SimpleBatchFilter implements
         + "\thas more values than this upper limit, then it will be skipped.\n"
         + "\t(default: 20)", "C", 1, "-C <num>"));
 
+    result.addElement(new Option(
+            "\tGenerate sparse instances.", "S", 0, "-S"));
+
+    result.addElement(new Option(
+            "\tDisable out of MIN statistic.", "disable-min", 0, "-disable-min"));
+
+    result.addElement(new Option(
+            "\tDisable out of MAX statistic.", "disable-max", 0, "-disable-max"));
+
+    result.addElement(new Option(
+            "\tDisable out of AVG statistic.", "disable-avg", 0, "-disable-avg"));
+
+    result.addElement(new Option(
+            "\tDisable out of STDEV statistic.", "disable-stdev", 0, "-disable-stdev"));
+
+    result.addElement(new Option(
+            "\tDisable out of SUM statistic.", "disable-sum", 0, "-disable-sum"));
+
     result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
@@ -188,30 +308,46 @@ public class RELAGGS extends SimpleBatchFilter implements
    * <p>Parses the options for this object.
    * </p>
    * 
-   * <!-- options-start --> Valid options are:
+   * <!-- options-start -->
+   * Valid options are: <p>
    * 
-   * <pre>
-   * -D
-   *  Turns on output of debugging information.
-   * </pre>
-   * 
-   * <pre>
-   * -R &lt;index1,index2-index4,...&gt;
+   * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of string attributes to convert to words.
-   *  (default: select all relational attributes)
-   * </pre>
+   *  (default: select all relational attributes)</pre>
    * 
-   * <pre>
-   * -V
-   *  Inverts the matching sense of the selection.
-   * </pre>
+   * <pre> -V
+   *  Inverts the matching sense of the selection.</pre>
    * 
-   * <pre>
-   * -C &lt;num&gt;
+   * <pre> -C &lt;num&gt;
    *  Max. cardinality of nominal attributes. If a nominal attribute
    *  has more values than this upper limit, then it will be skipped.
-   *  (default: 20)
-   * </pre>
+   *  (default: 20)</pre>
+   * 
+   * <pre> -S
+   *  Generate sparse instances.</pre>
+   * 
+   * <pre> -disable-min
+   *  Disable out of MIN statistic.</pre>
+   * 
+   * <pre> -disable-max
+   *  Disable out of MAX statistic.</pre>
+   * 
+   * <pre> -disable-avg
+   *  Disable out of AVG statistic.</pre>
+   * 
+   * <pre> -disable-stdev
+   *  Disable out of STDEV statistic.</pre>
+   * 
+   * <pre> -disable-sum
+   *  Disable out of SUM statistic.</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, filter is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, filter capabilities are not checked before filter is built
+   *  (use with caution).</pre>
    * 
    * <!-- options-end -->
    * 
@@ -238,6 +374,18 @@ public class RELAGGS extends SimpleBatchFilter implements
       setMaxCardinality(20);
     }
 
+    setGenerateSparseInstances(Utils.getFlag('S', options));
+
+    setDisableMIN(Utils.getFlag("disable-min", options));
+
+    setDisableMAX(Utils.getFlag("disable-max", options));
+
+    setDisableAVG(Utils.getFlag("disable-avg", options));
+
+    setDisableSTDEV(Utils.getFlag("disable-stdev", options));
+
+    setDisableSUM(Utils.getFlag("disable-sum", options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -262,6 +410,30 @@ public class RELAGGS extends SimpleBatchFilter implements
 
     result.add("-C");
     result.add("" + getMaxCardinality());
+
+    if (getGenerateSparseInstances()) {
+      result.add("-S");
+    }
+
+    if (getDisableMIN()) {
+      result.add("-disable-min");
+    }
+
+    if (getDisableMAX()) {
+      result.add("-disable-max");
+    }
+
+    if (getDisableAVG()) {
+      result.add("-disable-avg");
+    }
+
+    if (getDisableSTDEV()) {
+      result.add("-disable-stdev");
+    }
+
+    if (getDisableSUM()) {
+      result.add("-disable-sum");
+    }
 
     Collections.addAll(result, super.getOptions());
 
@@ -360,6 +532,34 @@ public class RELAGGS extends SimpleBatchFilter implements
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String generateSparseInstancesTipText() {
+    return "Generate sparse instances rather than dense ones.";
+  }
+
+  /**
+   * Sets whether to generate sparse instances.
+   *
+   * @param value the new setting
+   */
+  public void setGenerateSparseInstances(boolean value) {
+    m_GenerateSparseInstances = value;
+  }
+
+  /**
+   * Gets whether to generate sparse instances.
+   *
+   * @return true if sparse instances are to be generated
+   */
+  public boolean getGenerateSparseInstances() {
+    return m_GenerateSparseInstances;
+  }
+
+  /**
    * Returns the Capabilities of this filter.
    * 
    * @return the capabilities of this object
@@ -452,11 +652,21 @@ public class RELAGGS extends SimpleBatchFilter implements
         att = relFormat.attribute(n);
 
         if (att.isNumeric()) {
-          atts.add(new Attribute(prefix + att.name() + "_MIN"));
-          atts.add(new Attribute(prefix + att.name() + "_MAX"));
-          atts.add(new Attribute(prefix + att.name() + "_AVG"));
-          atts.add(new Attribute(prefix + att.name() + "_STDEV"));
-          atts.add(new Attribute(prefix + att.name() + "_SUM"));
+          if (!getDisableMIN()) {
+            atts.add(new Attribute(prefix + att.name() + "_MIN"));
+          }
+          if (!getDisableMAX()) {
+            atts.add(new Attribute(prefix + att.name() + "_MAX"));
+          }
+          if (!getDisableAVG()) {
+            atts.add(new Attribute(prefix + att.name() + "_AVG"));
+          }
+          if (!getDisableSTDEV()) {
+            atts.add(new Attribute(prefix + att.name() + "_STDEV"));
+          }
+          if (!getDisableSUM()) {
+            atts.add(new Attribute(prefix + att.name() + "_SUM"));
+          }
         } else if (att.isNominal()) {
           if (att.numValues() <= m_MaxCardinality) {
             for (m = 0; m < att.numValues(); m++) {
@@ -580,11 +790,21 @@ public class RELAGGS extends SimpleBatchFilter implements
             stats = m_AttStats.get(k + "-" + i + "-" + n);
 
             if (att.isNumeric()) {
-              values[l++] = stats.numericStats.min;
-              values[l++] = stats.numericStats.max;
-              values[l++] = stats.numericStats.mean;
-              values[l++] = stats.numericStats.stdDev;
-              values[l++] = stats.numericStats.sum;
+              if (!getDisableMIN()) {
+                values[l++] = stats.numericStats.min;
+              }
+              if (!getDisableMAX()) {
+                values[l++] = stats.numericStats.max;
+              }
+              if (!getDisableAVG()) {
+                values[l++] = stats.numericStats.mean;
+              }
+              if (!getDisableSTDEV()) {
+                values[l++] = stats.numericStats.stdDev;
+              }
+              if (!getDisableSUM()) {
+                values[l++] = stats.numericStats.sum;
+              }
           } else if (att.isNominal() && att.numValues() <= m_MaxCardinality) {
               for (m = 0; m < att.numValues(); m++) {
                 values[l++] =  stats.nominalCounts[m];
@@ -594,7 +814,11 @@ public class RELAGGS extends SimpleBatchFilter implements
         }
       }
 
-      result.add(new DenseInstance(inst.weight(), values));
+      if (m_GenerateSparseInstances) {
+        result.add(new SparseInstance(inst.weight(), values));
+      } else {
+        result.add(new DenseInstance(inst.weight(), values));
+      }
     }
 
     return result;
@@ -619,3 +843,4 @@ public class RELAGGS extends SimpleBatchFilter implements
     runFilter(new RELAGGS(), args);
   }
 }
+
