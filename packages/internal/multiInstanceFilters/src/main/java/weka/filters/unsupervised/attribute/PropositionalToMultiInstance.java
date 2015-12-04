@@ -26,18 +26,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RelationalLocator;
-import weka.core.RevisionUtils;
-import weka.core.StringLocator;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -413,7 +403,7 @@ public class PropositionalToMultiInstance extends Filter implements
     if (classIndex >= 0) {
       attInfo.add(attClass);
     }
-    Instances data = new Instances("Relation-Valued-Dataset", attInfo, 0);
+    Instances data = new Instances(instanceInfo.relationName(), attInfo, 0);
     if (classIndex >= 0) {
       data.setClassIndex(data.numAttributes() - 1);
     }
@@ -509,13 +499,19 @@ public class PropositionalToMultiInstance extends Filter implements
 
       // Convert instance into an instance for the bag
       double[] bagInst = new double[bagInsts.numAttributes()];
-      int index = 0;
-      for (int j = 0; j < input.instance(i).numAttributes(); j++) {
-        if (j != input.classIndex() && j != m_BagIndicator) {
-          bagInst[index++] = input.instance(i).value(j);
+      Instance inputInst = input.instance(i);
+      for (int j = 0; j < inputInst.numValues(); j++) {
+        int index = inputInst.index(j);
+        if (index != input.classIndex() && index != m_BagIndicator) {
+          bagInst[index] = inputInst.valueSparse(j);
         }
       }
-      Instance inst = new DenseInstance(input.instance(i).weight(), bagInst);
+      Instance inst = null;
+      if (inputInst instanceof DenseInstance) {
+        inst = new DenseInstance(inputInst.weight(), bagInst);
+      } else {
+        inst = new SparseInstance(inputInst.weight(), bagInst);
+      }
       inst.setDataset(bagInsts);
 
       // Starting a new bag?
