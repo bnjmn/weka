@@ -26,7 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. There are some example Groovy scripts that apply this loader in the groovy-example-scripts folder in $WEKA_HOME/packages/niftiLoader. They can be executed in the GroovyConsole that comes with WEKA's kfGroovy package.
+Description=Package for loading a file or a directory containing MRI data in NIfTI format. The file loader can load a single NIfTI file, apply a mask file to each volume, and also read an associated attributes file with attributes for each volume. The directory loader can load a directory of NIfTI files. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. There are some example Groovy scripts in the groovy-example-scripts folder in $WEKA_HOME/packages/niftiLoader. They can be executed in the GroovyConsole that comes with WEKA's kfGroovy package. There is also an example shell script in the shell-example-scripts folder in $WEKA_HOME/packages/niftiLoader.
 
 #Changes=
 

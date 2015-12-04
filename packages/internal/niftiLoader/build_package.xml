@@ -184,10 +184,16 @@
          <include name="**/*"/>
        </fileset>
     </copy>
-    <mkdir dir="${dist}/${package}/groovy-example-scripts"/>
-    <copy todir="${dist}/${package}/groovy-example-scripts" >
-      <fileset dir="groovy-example-scripts">
+    <mkdir dir="${dist}/${package}/example-groovy-scripts"/>
+    <copy todir="${dist}/${package}/example-groovy-scripts" >
+      <fileset dir="example-groovy-scripts">
         <include name="*.groovy"/>
+      </fileset>
+    </copy>
+    <mkdir dir="${dist}/${package}/example-shell-scripts"/>
+    <copy todir="${dist}/${package}/example-shell-scripts" >
+      <fileset dir="example-shell-scripts">
+        <include name="*.sh"/>
       </fileset>
     </copy>
     <mkdir dir="${dist}/${package}/example_data"/>
