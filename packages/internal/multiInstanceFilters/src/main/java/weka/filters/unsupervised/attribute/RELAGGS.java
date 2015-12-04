@@ -178,87 +178,6 @@ public class RELAGGS extends SimpleBatchFilter implements
   }
 
   /**
-   * Get whether output of statistic is disabled
-   * @return true if output is disabled
-   */
-  public boolean getDisableMIN() {
-    return m_DisableMIN;
-  }
-
-  /**
-   * Set whether output of statistic is disabled
-   * @param m_DisableMIN true if output is disabled
-   */
-  public void setDisableMIN(boolean m_DisableMIN) {
-    this.m_DisableMIN = m_DisableMIN;
-  }
-
-  /**
-   * Get whether output of statistic is disabled
-   * @return true if output is disabled
-   */
-  public boolean getDisableMAX() {
-    return m_DisableMAX;
-  }
-
-  /**
-   * Set whether output of statistic is disabled
-   * @param m_DisableMAX true if output is disabled
-   */
-  public void setDisableMAX(boolean m_DisableMAX) {
-    this.m_DisableMAX = m_DisableMAX;
-  }
-
-  /**
-   * Get whether output of statistic is disabled
-   * @return true if output is disabled
-   */
-  public boolean getDisableAVG() {
-    return m_DisableAVG;
-  }
-
-  /**
-   * Set whether output of statistic is disabled
-   * @param m_DisableAVG true if output is disabled
-   */
-  public void setDisableAVG(boolean m_DisableAVG) {
-    this.m_DisableAVG = m_DisableAVG;
-  }
-
-  /**
-   * Get whether output of statistic is disabled
-   * @return true if output is disabled
-   */
-  public boolean getDisableSTDEV() {
-    return m_DisableSTDEV;
-  }
-
-  /**
-   * Set whether output of statistic is disabled
-   * @param m_DisableSTDEV true if output is disabled
-   */
-  public void setDisableSTDEV(boolean m_DisableSTDEV) {
-    this.m_DisableSTDEV = m_DisableSTDEV;
-  }
-
-  /**
-   * Get whether output of statistic is disabled
-   * @return true if output is disabled
-   */
-  public boolean getDisableSUM() {
-    return m_DisableSUM;
-  }
-
-
-  /**
-   * Set whether output of statistic is disabled
-   * @param m_DisableSUM true if output is disabled
-   */
-  public void setDisableSUM(boolean m_DisableSUM) {
-    this.m_DisableSUM = m_DisableSUM;
-  }
-
-  /**
    * Returns an enumeration describing the available options.
    * 
    * @return an enumeration of all the available options.
@@ -438,6 +357,137 @@ public class RELAGGS extends SimpleBatchFilter implements
     Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String disableMINTipText() {
+    return "Do not include MAX attributes in output.";
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableMIN() {
+    return m_DisableMIN;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableMIN true if output is disabled
+   */
+  public void setDisableMIN(boolean m_DisableMIN) {
+    this.m_DisableMIN = m_DisableMIN;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String disableMAXTipText() {
+    return "Do not include MAX attributes in output.";
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableMAX() {
+    return m_DisableMAX;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableMAX true if output is disabled
+   */
+  public void setDisableMAX(boolean m_DisableMAX) {
+    this.m_DisableMAX = m_DisableMAX;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String disableAVGTipText() {
+    return "Do not include AVG attributes in output.";
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableAVG() {
+    return m_DisableAVG;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableAVG true if output is disabled
+   */
+  public void setDisableAVG(boolean m_DisableAVG) {
+    this.m_DisableAVG = m_DisableAVG;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String disableSTDEVTipText() {
+    return "Do not include STDEV attributes in output.";
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableSTDEV() {
+    return m_DisableSTDEV;
+  }
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableSTDEV true if output is disabled
+   */
+  public void setDisableSTDEV(boolean m_DisableSTDEV) {
+    this.m_DisableSTDEV = m_DisableSTDEV;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String disableSUMTipText() {
+    return "Do not include SUM attributes in output.";
+  }
+
+  /**
+   * Get whether output of statistic is disabled
+   * @return true if output is disabled
+   */
+  public boolean getDisableSUM() {
+    return m_DisableSUM;
+  }
+
+
+  /**
+   * Set whether output of statistic is disabled
+   * @param m_DisableSUM true if output is disabled
+   */
+  public void setDisableSUM(boolean m_DisableSUM) {
+    this.m_DisableSUM = m_DisableSUM;
   }
 
   /**
