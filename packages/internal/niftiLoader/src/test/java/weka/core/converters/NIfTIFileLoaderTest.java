@@ -1,0 +1,241 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ */
+
+package weka.core.converters;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import weka.core.CheckGOE;
+import weka.core.CheckOptionHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+
+import java.io.File;
+import java.net.URL;
+
+/**
+ * Tests NIfTIFileLoader. Run from the command line with:<p/>
+ * java weka.core.converters.NIfTIFileLoaderTest
+ *
+ * @author Eibe Frank
+ * @version $Revision: 8034 $
+ */
+public class NIfTIFileLoaderTest 
+  extends TestCase {
+
+  /** whether the option handling is fully enabled */
+  public final static boolean TEST_OPTION_HANDLING = false;
+
+  /** the OptionHandler tester for the loader */
+  protected CheckOptionHandler m_OptionTesterLoader;
+
+  /** for testing GOE stuff for the loader */
+  protected CheckGOE m_GOETesterLoader;
+
+  /**
+   * Configures the CheckOptionHandler used for testing the option handling
+   * of the loader.
+   * Sets the scheme to test.
+   *
+   * @return	the fully configured CheckOptionHandler
+   */
+  protected CheckOptionHandler getOptionTesterLoader() {
+    return getOptionTester(getLoader());
+  }
+
+  /**
+   * Configures the CheckGOE used for testing the option handling
+   * of the loader.
+   * Sets the scheme to test.
+   *
+   * @return	the fully configured CheckGOE
+   */
+  protected CheckGOE getGOETesterLoader() {
+    return getGOETester(getLoader());
+  }
+
+  /**
+   * returns the loader used in the tests.
+   *
+   * @return the configured loader
+   */
+  public AbstractLoader getLoader() {
+    return new NIfTIFileLoader();
+  }
+
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default loader/saver to test and generates a test set of Instances.
+   *
+   * @throws Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+
+    URL url = this.getClass().getResource("/example_data/Class_1/face.nii");
+    File data = new File(url.getFile());
+
+    NIfTIFileLoader nf = new NIfTIFileLoader();
+    nf.setSource(data);
+    Instances instances = nf.getDataSet();
+
+    m_OptionTesterLoader = getOptionTesterLoader();
+    m_GOETesterLoader    = getGOETesterLoader();
+  }
+
+  /**
+   * Configures the CheckOptionHandler uses for testing the optionhandling.
+   * Sets the scheme to test.
+   *
+   * @param o	the object to test
+   * @return	the fully configured CheckOptionHandler
+   */
+  protected CheckOptionHandler getOptionTester(Object o) {
+    CheckOptionHandler		result;
+
+    result = new CheckOptionHandler();
+    if (o instanceof OptionHandler)
+      result.setOptionHandler((OptionHandler) o);
+    else
+      result.setOptionHandler(null);
+    result.setUserOptions(new String[0]);
+    result.setSilent(true);
+
+    return result;
+  }
+
+  /**
+   * Configures the CheckGOE used for testing GOE stuff.
+   *
+   * @param o	the object to test
+   * @return	the fully configured CheckGOE
+   */
+  protected CheckGOE getGOETester(Object o) {
+    CheckGOE		result;
+
+    result = new CheckGOE();
+    result.setObject(o);
+    result.setIgnoredProperties(result.getIgnoredProperties() + ",instances");
+    result.setSilent(true);
+
+    return result;
+  }
+
+  /**
+   * tests the listing of the options
+   */
+  public void testListOptions() {
+    if (m_OptionTesterLoader.getOptionHandler() != null) {
+      if (!m_OptionTesterLoader.checkListOptions())
+        fail("Loader: Options cannot be listed via listOptions.");
+    }
+ }
+
+  /**
+   * tests the setting of the options
+   */
+  public void testSetOptions() {
+    // TODO: currently disabled
+    if (!TEST_OPTION_HANDLING)
+      return;
+
+    if (m_OptionTesterLoader.getOptionHandler() != null) {
+      if (!m_OptionTesterLoader.checkSetOptions())
+        fail("Loader: setOptions method failed.");
+    }
+ }
+
+  /**
+   * tests whether there are any remaining options
+   */
+  public void testRemainingOptions() {
+    // TODO: currently disabled
+    if (!TEST_OPTION_HANDLING)
+      return;
+
+    if (m_OptionTesterLoader.getOptionHandler() != null) {
+      if (!m_OptionTesterLoader.checkRemainingOptions())
+        fail("Loader: There were 'left-over' options.");
+    }
+  }
+
+  /**
+   * tests the whether the user-supplied options stay the same after setting.
+   * getting, and re-setting again.
+   */
+  public void testCanonicalUserOptions() {
+    // TODO: currently disabled
+    if (!TEST_OPTION_HANDLING)
+      return;
+
+    if (m_OptionTesterLoader.getOptionHandler() != null) {
+      if (!m_OptionTesterLoader.checkCanonicalUserOptions())
+        fail("Loader: setOptions method failed");
+    }
+  }
+
+  /**
+   * tests the resetting of the options to the default ones
+   */
+  public void testResettingOptions() {
+    // TODO: currently disabled
+    if (!TEST_OPTION_HANDLING)
+      return;
+
+    if (m_OptionTesterLoader.getOptionHandler() != null) {
+      if (!m_OptionTesterLoader.checkSetOptions())
+        fail("Loader: Resetting of options failed");
+    }
+  }
+
+  /**
+   * tests for a globalInfo method
+   */
+  public void testGlobalInfo() {
+    if (!m_GOETesterLoader.checkGlobalInfo())
+      fail("Loader: No globalInfo method");
+  }
+
+  /**
+   * tests the tool tips
+   */
+  public void testToolTips() {
+    if (!m_GOETesterLoader.checkToolTips())
+      fail("Loader: Tool tips inconsistent");
+  }
+
+  /**
+   * returns a test suite.
+   * 
+   * @return the test suite
+   */
+  public static Test suite() {
+    return new TestSuite(NIfTIFileLoaderTest.class);
+  }
+
+  /**
+   * for running the test from commandline.
+   * 
+   * @param args the commandline arguments - ignored
+   */
+  public static void main(String[] args){
+    junit.textui.TestRunner.run(suite());
+  }
+}
+

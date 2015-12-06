@@ -357,6 +357,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
   public void setAttributeLoader(Loader value) {
     m_attributeLoader = value;
   }
+
   /**
    * the tip text for this property
    *
