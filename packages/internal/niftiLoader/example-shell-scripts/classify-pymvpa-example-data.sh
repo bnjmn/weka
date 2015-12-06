@@ -2,6 +2,7 @@
 
 # Script has been tested on OS X El Capitan. Assumes that WEKA is in Java's CLASSPATH (e.g., weka.jar).
 # Also, the WEKA packages niftiLoader, multiInstanceFilters and LibLINEAR need to be installed.
+# Requires WEKA versions > 3.7.13.
 
 echo "Downloading example data"
 curl http://www.pymvpa.org/files/pymvpa_exampledata.tar.bz2 > pymvpa_exampledata.tar.bz2

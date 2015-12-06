@@ -6,7 +6,7 @@
 // The script uses the NIfTIFileLoader for WEKA to load the data. 
 // It builds a linear SVM using LibLINEAR on the first 10 sessions and evaluates it on the last 2.
 //
-// This script requires WEKA 3.7.14 or later to run. Also, the niftiLoader, multiInstanceFilters, and
+// This script requires WEKA versions > 3.7.13 to run. Also, the niftiLoader, multiInstanceFilters, and
 // LibLINEAR packages need to have been installed.
 
 // Import the Java libraries for dealing with NIFTI data using WEKA
