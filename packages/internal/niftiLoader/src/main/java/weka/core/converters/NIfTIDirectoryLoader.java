@@ -127,7 +127,7 @@ public class NIfTIDirectoryLoader extends AbstractLoader implements
 
   /**
    * Parses a given list of options.
-   * <p/>
+   * <p>
    * 
    <!-- options-start -->
    * Valid options are: <p>

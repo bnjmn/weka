@@ -31,7 +31,7 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * Tests NIfTIFileLoader. Run from the command line with:<p/>
+ * Tests NIfTIFileLoader. Run from the command line with:<p>
  * java weka.core.converters.NIfTIFileLoaderTest
  *
  * @author Eibe Frank

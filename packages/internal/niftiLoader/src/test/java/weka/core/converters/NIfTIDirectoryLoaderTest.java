@@ -31,7 +31,7 @@ import java.io.File;
 import java.net.URL;
 
 /**
- * Tests NIfTIDirectoryLoader. Run from the command line with:<p/>
+ * Tests NIfTIDirectoryLoader. Run from the command line with:<p>
  * java weka.core.converters.NIfTIDirectoryLoaderTest
  *
  * @author Eibe Frank

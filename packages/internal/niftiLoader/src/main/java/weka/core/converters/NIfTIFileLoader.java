@@ -157,7 +157,7 @@ import weka.core.converters.nifti.Nifti1Dataset;
 
   /**
    * Parses a given list of options.
-   * <p/>
+   * <p>
    *
    <!-- options-start -->
    * Valid options are: <p>

@@ -265,8 +265,8 @@ public class Nifti1Dataset {
 	*	the .hdr, .img, or .nii extension, optionally followed by a .gz
 	*	compression suffix.  Or, the name can be specified with no 
 	*	extensions or suffixes, in which case the program will look in
-	* 	this order for files with these extensions: .hdr<.gz> .img<.gz>
-	*	.nii<.gz>
+	* 	this order for files with these extensions: .hdr (.gz) .img (.gz)
+	*	.nii (.gz)
 	*/
 	public Nifti1Dataset(String name) {
 
@@ -2454,7 +2454,7 @@ public class Nifti1Dataset {
 	//////////////////////////////////////////////////////////////////
 	/**
 	* main routine is used only for testing
-	* @param args <input dataset>
+	* @param args the command-line arguments (file name)
 	*/
 	public static void main(String[] args) {
 		

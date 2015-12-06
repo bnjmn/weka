@@ -28,7 +28,6 @@ public class EndianCorrectInputStream extends DataInputStream {
      * Constructor for an InputStream.
      * @param is InputStream to read data from
      * @param be -- endian flag: if be (big endian) is false bytes will be flipped on read
-     * @exception FileNotFoundException
      */
     public EndianCorrectInputStream(InputStream is, boolean be)  {
 	super(is);
