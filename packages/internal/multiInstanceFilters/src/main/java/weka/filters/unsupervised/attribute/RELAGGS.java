@@ -60,7 +60,7 @@ import weka.filters.SimpleBatchFilter;
  * <!-- technical-bibtex-end -->
  * 
  * <!-- options-start -->
- * Valid options are: <p>
+ * Valid options are: <br><br>
  * 
  * <pre> -R &lt;index1,index2-index4,...&gt;
  *  Specify list of string attributes to convert to words.
@@ -228,7 +228,7 @@ public class RELAGGS extends SimpleBatchFilter implements
    * </p>
    * 
    * <!-- options-start -->
-   * Valid options are: <p>
+   * Valid options are: <br><br>
    * 
    * <pre> -R &lt;index1,index2-index4,...&gt;
    *  Specify list of string attributes to convert to words.
