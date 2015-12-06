@@ -12,7 +12,7 @@
   <description>
 Package for loading a directory containing MRI data in NIfTI format. The directory to be loaded must contain as many subdirectories as there are classes of MRI data. Each subdirectory name will be used as the class label for the corresponding .nii files in that subdirectory. (This is the same strategy as the one used by WEKA's TextDirectoryLoader.) Currently, the package only reads volume information for the first time slot from each .nii file. The readDoubleVol(short ttt) method from the Nifti1Dataset class (http://niftilib.sourceforge.net/java_api_html/Nifti1Dataset.html) is used to read the data for each volume into a sparse WEKA instance (with ttt=0). For an LxMxN volume (the dimensions must be the same for each .nii file in the directory!), the order of values in the generated instance is [(z_1, y_1, x_1), ..., (z_1, y_1, x_L), (z_1, y_2, x_1), ..., (z_1, y_M, x_L), (z_2, y_1, x_1), ..., (z_N, y_M, x_L)]. If the volume is an image, then only x and y coordinates are used.
   </description>
-  <url>http://weka.sourceforge.net/doc.packages/niftyLoader</url>
+  <url>http://weka.sourceforge.net/doc.packages/niftiLoader</url>
   <organization>
     <name>University of Waikato, Hamilton, NZ</name>
     <url>http://www.waikato.ac.nz/</url>
@@ -48,9 +48,9 @@ Package for loading a directory containing MRI data in NIfTI format. The directo
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftyLoader</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftyLoader</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftyLoader</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftiLoader</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftiLoader</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/niftiLoader</url>
   </scm>
 
   <profiles>
