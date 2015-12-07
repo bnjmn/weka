@@ -31,7 +31,7 @@ Description=A filter that applies the LOF (Local Outlier Factor) algorithm to co
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/localOutlierFactor1.0.6.zip?download
 
-Changes=Fixed a capabilities bug in the filter that prevented running on datasets with a unary class set
+Changes=Fixed a capabilities bug in the filter that prevented running on datasets with a unary class set. The LOF classifier no longer produces probabilities that are exactly zero, as the Evaluation class will interpret an all zero distribution as unclassified. Also reversed the order/meaning of the probabilities output - it now outputs 1 - normalized LOF score for the first probability (i.e. probability of 'normal') and the normalized LOF score for the second (outlier) class (in the binary class case). This makes more sense in the unary case where training data typically contains instances of the normal class.
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/localOutlierFactor
