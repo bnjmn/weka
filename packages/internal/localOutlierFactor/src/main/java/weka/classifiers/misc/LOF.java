@@ -21,11 +21,6 @@
 
 package weka.classifiers.misc;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.AbstractClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -45,17 +40,22 @@ import weka.core.neighboursearch.LinearNNSearch;
 import weka.core.neighboursearch.NearestNeighbourSearch;
 import weka.filters.Filter;
 
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * <!-- globalinfo-start --> A Classifier that applies the LOF (Local Outlier
  * Factor) algorithm to compute an "outlier" score for each instance in the
  * data. The data is expected to have a unary or binary class attribute, which
  * is ignored at training time. The distributionForInstance() method returns the
- * outlier score in the first element of the distribution. If the class
- * attribute is binary, then the second element holds one minus this score. To
- * evaluate performance of this method for a dataset where outliers/anomalies
- * are known, simply code the outliers using the class attribute: normal cases
- * should correspond to the second value of the class attribute; outliers to the
- * first one.<br>
+ * 1 - normalized outlier score in the first element of the distribution. If the
+ * class attribute is binary, then the second element holds the normalized
+ * outlier score. To evaluate performance of this method for a dataset where
+ * outliers/anomalies are known, simply code the outliers using the class
+ * attribute: normal cases should correspond to the first value of the class
+ * attribute; outliers to the second one.<br>
  * <br>
  * Can use multiple cores/cpus to speed up the LOF computation for large
  * datasets. Nearest neighbor search methods and distance functions are
@@ -119,9 +119,9 @@ import weka.filters.Filter;
  * @version $Revision: $
  * 
  */
-public class LOF extends AbstractClassifier implements Serializable,
-  CapabilitiesHandler, OptionHandler, TechnicalInformationHandler,
-  RevisionHandler {
+public class LOF extends AbstractClassifier
+  implements Serializable, CapabilitiesHandler, OptionHandler,
+  TechnicalInformationHandler, RevisionHandler {
 
   /**
    * For serialization
@@ -139,10 +139,17 @@ public class LOF extends AbstractClassifier implements Serializable,
   /** The nearest neighbor search to use */
   protected NearestNeighbourSearch m_nnTemplate = new LinearNNSearch();
 
+  /** The number of threads to use */
   protected String m_numSlots = "1";
 
+  /** Maximum LOF score seen in the training data */
   protected double m_minScore;
+
+  /** Minimum LOF score seen in the training data */
   protected double m_maxScore;
+
+  /** Minimum probability value */
+  protected static final double m_tol = 1e-6;
 
   /**
    * Returns a string describing this scheme
@@ -227,19 +234,21 @@ public class LOF extends AbstractClassifier implements Serializable,
   public Enumeration<Option> listOptions() {
 
     Vector<Option> newVector = new Vector<Option>();
-    newVector.add(new Option("\tLower bound on the k nearest neighbors "
-      + "for finding max LOF (minPtsLB)\n\t(default = 10)", "min", 1,
-      "-min <num>"));
-    newVector.add(new Option("\tUpper bound on the k nearest neighbors "
-      + "for finding max LOF (minPtsUB)\n\t(default = 40)", "max", 1,
-      "-max <num>"));
+    newVector.add(new Option(
+      "\tLower bound on the k nearest neighbors "
+        + "for finding max LOF (minPtsLB)\n\t(default = 10)",
+      "min", 1, "-min <num>"));
+    newVector.add(new Option(
+      "\tUpper bound on the k nearest neighbors "
+        + "for finding max LOF (minPtsUB)\n\t(default = 40)",
+      "max", 1, "-max <num>"));
     newVector.addElement(new Option(
       "\tThe nearest neighbour search algorithm to use "
-        + "(default: weka.core.neighboursearch.LinearNNSearch).\n", "A", 0,
-      "-A"));
-    newVector.addElement(new Option("\tNumber of execution slots.\n"
-      + "\t(default 1 - i.e. no parallelism)", "num-slots", 1,
-      "-num-slots <num>"));
+        + "(default: weka.core.neighboursearch.LinearNNSearch).\n",
+      "A", 0, "-A"));
+    newVector.addElement(new Option(
+      "\tNumber of execution slots.\n" + "\t(default 1 - i.e. no parallelism)",
+      "num-slots", 1, "-num-slots <num>"));
 
     newVector.addAll(Collections.list(super.listOptions()));
 
@@ -247,11 +256,11 @@ public class LOF extends AbstractClassifier implements Serializable,
   }
 
   /**
-   * <p>Parses a given list of options.
+   * <p>
+   * Parses a given list of options.
    * </p>
    * 
-   * <!-- options-start --> Valid options are:
-   * <br>
+   * <!-- options-start --> Valid options are: <br>
    * 
    * <pre>
    * -min &lt;num&gt;
@@ -303,8 +312,8 @@ public class LOF extends AbstractClassifier implements Serializable,
       String className = nnSearchClassSpec[0];
       nnSearchClassSpec[0] = "";
 
-      setNNSearch((NearestNeighbourSearch) Utils.forName(
-        NearestNeighbourSearch.class, className, nnSearchClassSpec));
+      setNNSearch((NearestNeighbourSearch) Utils
+        .forName(NearestNeighbourSearch.class, className, nnSearchClassSpec));
     } else {
       this.setNNSearch(new LinearNNSearch());
     }
@@ -484,7 +493,7 @@ public class LOF extends AbstractClassifier implements Serializable,
     m_lof.setNumExecutionSlots(m_numSlots);
 
     Instances temp = Filter.useFilter(data, m_lof);
-
+    
     for (int i = 0; i < temp.numInstances(); i++) {
       double current = temp.instance(i).value(temp.numAttributes() - 1);
       if (!Double.isNaN(current)) {
@@ -511,19 +520,19 @@ public class LOF extends AbstractClassifier implements Serializable,
       lofScore = scored.value(scored.numAttributes() - 1);
 
       lofScore -= m_minScore;
-      if (lofScore < 0) {
-        lofScore = 0;
+      if (lofScore <= 0) {
+        lofScore = m_tol;
       }
 
       lofScore = lofScore / (m_maxScore - m_minScore);
-      if (lofScore > 1) {
-        lofScore = 1;
+      if (lofScore >= 1) {
+        lofScore = 1 - m_tol;
       }
     }
 
-    scores[0] = lofScore;
+    scores[0] = 1 - lofScore;
     if (scores.length > 1) {
-      scores[1] = 1.0 - lofScore;
+      scores[1] = lofScore;
     }
 
     return scores;
