@@ -55,21 +55,22 @@ import weka.filters.Filter;
  * evaluate performance of this method for a dataset where outliers/anomalies
  * are known, simply code the outliers using the class attribute: normal cases
  * should correspond to the second value of the class attribute; outliers to the
- * first one.<br/>
- * <br/>
+ * first one.<br>
+ * <br>
  * Can use multiple cores/cpus to speed up the LOF computation for large
  * datasets. Nearest neighbor search methods and distance functions are
- * pluggable.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
+ * pluggable.<br>
+ * <br>
+ * For more information, see:<br>
+ * <br>
  * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000).
  * LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record.
  * 29(2):93-104.
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
+ * </p>
  * 
  * <pre>
  * &#64;article{Breunig2000,
@@ -83,11 +84,11 @@ import weka.filters.Filter;
  *    year = {2000}
  * }
  * </pre>
- * <p/>
+ * <p>
  * <!-- technical-bibtex-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -min &lt;num&gt;
@@ -246,11 +247,11 @@ public class LOF extends AbstractClassifier implements Serializable,
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
+   * <br>
    * 
    * <pre>
    * -min &lt;num&gt;
@@ -549,6 +550,8 @@ public class LOF extends AbstractClassifier implements Serializable,
 
   /**
    * Main method for this class.
+   *
+   * @param args arguments to use
    */
   public static void main(String[] args) {
 

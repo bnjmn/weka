@@ -61,17 +61,18 @@ import weka.filters.Filter;
  * Factor) algorithm to compute an "outlier" score for each instance in the
  * data. Can use multiple cores/cpus to speed up the LOF computation for large
  * datasets. Nearest neighbor search methods and distance functions are
- * pluggable.<br/>
- * <br/>
- * For more information, see:<br/>
- * <br/>
+ * pluggable.<br>
+ * <br>
+ * For more information, see:<br>
+ * <br>
  * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000).
  * LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record.
  * 29(2):93-104.
- * <p/>
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
+ * </p>
  * 
  * <pre>
  * &#64;article{Breunig2000,
@@ -85,11 +86,11 @@ import weka.filters.Filter;
  *    year = {2000}
  * }
  * </pre>
- * <p/>
+ * <p>
  * <!-- technical-bibtex-end -->
  * 
  * <!-- options-start --> Valid options are:
- * <p/>
+ * </p>
  * 
  * <pre>
  * -min &lt;num&gt;
@@ -162,6 +163,12 @@ public class LOF extends Filter implements OptionHandler,
   protected int m_completed;
   protected int m_failed;
 
+  /** 
+   * If true, then the LOF scores for the training data do not
+   * need to be computed.
+   */
+  protected boolean m_classifierMode = false;
+
   /**
    * Returns a string describing this filter
    * 
@@ -197,6 +204,7 @@ public class LOF extends Filter implements OptionHandler,
     // class
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
+    result.enable(Capability.UNARY_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
@@ -259,11 +267,11 @@ public class LOF extends Filter implements OptionHandler,
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.
+   * </p>
    * 
    * <!-- options-start --> Valid options are:
-   * <p/>
+   * <br>
    * 
    * <pre>
    * -min &lt;num&gt;
@@ -351,6 +359,17 @@ public class LOF extends Filter implements OptionHandler,
     options.add(getNumExecutionSlots());
 
     return options.toArray(new String[0]);
+  }
+
+  /**
+   * Set whether to work in classifier mode or not. In classifier
+   * mode the LOF scores for the training data do not need to
+   * be computed at training time
+   *
+   * @param cm true if working as a classifier
+   */
+  public void setClassifierMode(boolean cm) {
+    m_classifierMode = cm;
   }
 
   /**
@@ -943,14 +962,16 @@ public class LOF extends Filter implements OptionHandler,
     m_executorPool.shutdown();
 
     // make the output instances
-    for (int i = 0; i < training.numInstances(); i++) {
-      Instance current = training.instance(i);
-      Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
+    if (!m_classifierMode) {
+      for (int i = 0; i < training.numInstances(); i++) {
+        Instance current = training.instance(i);
+        Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
 
-      // use the maximum LOF found over the range of k's explored
-      double maxLOF = currentN.m_lof[Utils.maxIndex(currentN.m_lof)];
-      Instance inst = makeOutputInstance(current, maxLOF);
-      push(inst);
+        // use the maximum LOF found over the range of k's explored
+        double maxLOF = currentN.m_lof[Utils.maxIndex(currentN.m_lof)];
+        Instance inst = makeOutputInstance(current, maxLOF);
+        push(inst);
+      }
     }
   }
 
@@ -1112,14 +1133,16 @@ public class LOF extends Filter implements OptionHandler,
     }
 
     // make the output instances
-    for (int i = 0; i < training.numInstances(); i++) {
-      Instance current = training.instance(i);
-      Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
+    if (!m_classifierMode) {
+      for (int i = 0; i < training.numInstances(); i++) {
+        Instance current = training.instance(i);
+        Neighborhood currentN = m_kDistanceContainer.get(m_instKeys[i]);
 
-      // use the maximum LOF found over the range of k's explored
-      double maxLOF = currentN.m_lof[Utils.maxIndex(currentN.m_lof)];
-      Instance inst = makeOutputInstance(current, maxLOF);
-      push(inst);
+        // use the maximum LOF found over the range of k's explored
+        double maxLOF = currentN.m_lof[Utils.maxIndex(currentN.m_lof)];
+        Instance inst = makeOutputInstance(current, maxLOF);
+        push(inst);
+      }
     }
   }
 
