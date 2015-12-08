@@ -218,6 +218,7 @@ public class LOF extends AbstractClassifier
     // class
     result.enable(Capability.UNARY_CLASS);
     result.enable(Capability.BINARY_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
 
     // instances
     result.setMinimumNumberInstances(1);
@@ -493,7 +494,7 @@ public class LOF extends AbstractClassifier
     m_lof.setNumExecutionSlots(m_numSlots);
 
     Instances temp = Filter.useFilter(data, m_lof);
-    
+
     for (int i = 0; i < temp.numInstances(); i++) {
       double current = temp.instance(i).value(temp.numAttributes() - 1);
       if (!Double.isNaN(current)) {
