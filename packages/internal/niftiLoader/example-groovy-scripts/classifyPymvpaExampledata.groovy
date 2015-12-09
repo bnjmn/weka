@@ -1,10 +1,14 @@
 // This Groovy script, which can be executed using the GroovyConsole that is available
 // from the tools menu of WEKA's GUIChooser once the kfGroovy package has been installed,
-// processes an .nii example file containing an entire dataset of volumes, a separate
-// text file with labels for these volumes, and a .nii file with a mask applied to each volume.
+// processes an .nii.gz example file containing an entire dataset of volumes, a separate
+// text file with labels for these volumes, and a .nii.gz file with a mask.
 //
-// The script uses the NIfTIFileLoader for WEKA to load the data. 
-// It builds a linear SVM using LibLINEAR on the first 10 sessions and evaluates it on the last 2.
+// The script uses the NIfTIFileLoader for WEKA to load the data. It attempts to replicate the 12-fold
+// leave-one-run-out cross-validation experiment from http://www.pymvpa.org/tutorial_classifiers.html, but
+// without the domain-specific detrending and normalisation steps described at
+// http://www.pymvpa.org/tutorial_mappers.html#basic-preprocessing. Instead, standard WEKA normalization is applied
+// before the linear SVM is built (-Z flag for LibLINEAR). Average accuracy across the 12-folds obtained using this
+// script is 80.21%, slightly better than the 78.13% reported at the above URL.
 //
 // This script requires WEKA versions > 3.7.13 to run. Also, the niftiLoader, multiInstanceFilters, and
 // LibLINEAR packages need to have been installed.
@@ -19,6 +23,7 @@ import weka.filters.unsupervised.attribute.RELAGGS
 import weka.filters.unsupervised.attribute.CartesianProduct
 import weka.filters.unsupervised.attribute.Remove
 import weka.filters.unsupervised.instance.RemoveWithValues
+import weka.classifiers.AbstractClassifier
 import weka.classifiers.meta.FilteredClassifier
 import weka.classifiers.functions.LibLINEAR
 import weka.classifiers.evaluation.Evaluation
@@ -28,14 +33,14 @@ import org.apache.commons.compress.archivers.tar.TarArchiveInputStream
 import org.apache.commons.compress.compressors.CompressorStreamFactory
 
 println "Creating temporary folder to store downloaded data and extract it"
-inputFolder = File.createTempFile("pymvpa-exampledata", "")
+inputFolder = File.createTempFile("tutorial_data", "")
 inputFolder.delete()
 inputFolder.mkdir()
 inputPrefix = inputFolder.getAbsolutePath() + File.separator
 
-println "Downloading and extracting http://www.pymvpa.org/files/pymvpa_exampledata.tar.bz2"
+println "Downloading and extracting http://data.pymvpa.org/datasets/tutorial_data/tutorial_data-0.2.tar.gz"
 tarArchiveInputStream = new TarArchiveInputStream(new CompressorStreamFactory()
-    .createCompressorInputStream(new BufferedInputStream(new URL("http://www.pymvpa.org/files/pymvpa_exampledata.tar.bz2").openStream())))
+        .createCompressorInputStream(new BufferedInputStream(new URL("http://data.pymvpa.org/datasets/tutorial_data/tutorial_data-0.2.tar.gz").openStream())))
 while ((nextEntry = tarArchiveInputStream.getNextTarEntry()) != null) {
   if (nextEntry.isDirectory()) {
     new File(inputPrefix + nextEntry.getName()).mkdirs()
@@ -51,10 +56,11 @@ while ((nextEntry = tarArchiveInputStream.getNextTarEntry()) != null) {
 tarArchiveInputStream.close()
 
 println "Loading data as a WEKA Instances object using the NIfTIFileLoader"
+actualInputFolder = inputPrefix + "tutorial_data" + File.separator + "data" + File.separator
 loader = new NIfTIFileLoader()
-loader.setSource(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "bold.nii.gz"))
-loader.setAttributesFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "attributes_literal.txt"))
-loader.setMaskFile(new File(inputPrefix + "pymvpa-exampledata" + File.separator + "mask.nii.gz"))
+loader.setSource(new File(actualInputFolder + "bold.nii.gz"))
+loader.setAttributesFile(new File(actualInputFolder + "attributes.txt"))
+loader.setMaskFile(new File(actualInputFolder + "mask_vt.nii.gz"))
 data = loader.getDataSet()
 
 println "Removing all instances corresponding to rest condition"
@@ -65,19 +71,19 @@ rWV.setModifyHeader(true)
 rWV.setInputFormat(data)
 data = Filter.useFilter(data, rWV)
 
-println "Adding Cartesian product of class and session ID as last attribute"
+println "Adding Cartesian product of class and run ID as last attribute"
 addBagID = new CartesianProduct()
 addBagID.setAttributeIndices("1-2")
 addBagID.setInputFormat(data)
 data = Filter.useFilter(data, addBagID)
 
-println "Removing session ID attribute"
+println "Removing run ID attribute"
 remove = new Remove()
 remove.setAttributeIndices("2")
 remove.setInputFormat(data)
 data = Filter.useFilter(data, remove)
 
-println "Converting into relational format by collecting one bag for each combination of class value and session ID"
+println "Converting into relational format by collecting one bag for each combination of class value and run ID"
 toRelational = new PropositionalToMultiInstance()
 toRelational.setBagID("last")
 toRelational.setDoNotWeightBags(true) // We do not want to weight instances by the size of their bags
@@ -95,35 +101,48 @@ toSummaryStats.setDisableSUM(true)
 toSummaryStats.setInputFormat(data)
 data = Filter.useFilter(data, toSummaryStats)  // Compute summary statistics for each bag
 
-println "Creating training set using first 10 sessions"
-rWV = new RemoveWithValues();
-rWV.setAttributeIndex("1")
-rWV.setNominalIndices("11,12,23,24,35,36,47,48,59,60,71,72,83,84,95,96")
-rWV.setInputFormat(data)
-train = Filter.useFilter(data, rWV)
-
-println "Creating test set using last 2 sessions"
-rWV = new RemoveWithValues();
-rWV.setAttributeIndex("1")
-rWV.setNominalIndices("11,12,23,24,35,36,47,48,59,60,71,72,83,84,95,96")
-rWV.setInvertSelection(true)
-rWV.setInputFormat(data)
-test = Filter.useFilter(data, rWV)
+println "Creating Evaluation object to hold results of 12-fold leave-one-run-out cross-validation"
+evaluation = new Evaluation(data)
 
 println "Setting up model configuration with FilteredClassifier to remove bag identifier"
-model = new FilteredClassifier()
+template = new FilteredClassifier()
 svm = new LibLINEAR()
 svm.setNormalize(true)
-model.setClassifier(svm)
+template.setClassifier(svm)
 filter = new Remove();
 filter.setAttributeIndices("first")
-model.setFilter(filter)
+template.setFilter(filter)
 
-println "Building model on training set"
-model.buildClassifier(train)
+println "Running 12-fold leave-one-run-out cross-validation"
+for (int i = 1; i <= 12; i++) {
 
-println "Evaluating model on test set"
-evaluation = new Evaluation(train)
-evaluation.evaluateModel(model, test)
+  // Copy classifier so that we can be sure that no data is leaked this way
+  model = AbstractClassifier.makeCopy(template)
+
+  // order of values: scissors_x_0,...,scissors_x_11,face_x_0,...,face_x_11,cat_x_0,...,cat_x_11,shoe_x_0,...,shoe_x_11,
+  // house_x_0,...,house_x_11,scrambledpix_x_0,...,scrambledpix_x_11,bottle_x_0,...,bottle_x_11,chair_x_0,...,chair_x_11
+  indicesToRemove = i + "," + (i + 12) + "," + (i + 24) + "," + (i + 36) + "," + (i + 48) + "," + (i + 60) + "," + (i + 72) + "," + (i + 84)
+
+  println "Creating training set leaving out run " + i
+  rWV = new RemoveWithValues();
+  rWV.setAttributeIndex("1")
+  rWV.setNominalIndices(indicesToRemove)
+  rWV.setInputFormat(data)
+  train = Filter.useFilter(data, rWV)
+
+  println "Creating test set using run " + i
+  rWV = new RemoveWithValues();
+  rWV.setAttributeIndex("1")
+  rWV.setNominalIndices(indicesToRemove)
+  rWV.setInvertSelection(true)
+  rWV.setInputFormat(data)
+  test = Filter.useFilter(data, rWV)
+
+  println "Building model on training set"
+  model.buildClassifier(train)
+
+  println "Evaluating model on test set"
+  evaluation.evaluateModel(model, test)
+}
 println evaluation.toSummaryString()
 println evaluation.toMatrixString()
