@@ -20,14 +20,14 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.util.Vector;
+import weka.core.Capabilities;
+import weka.core.Instances;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.AbstractLoader;
+import weka.core.converters.AbstractSaver;
+import weka.core.converters.ConverterUtils;
+import weka.core.converters.FileSourcedConverter;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -37,15 +37,14 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
-
-import weka.core.Capabilities;
-import weka.core.Instances;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.AbstractLoader;
-import weka.core.converters.AbstractSaver;
-import weka.core.converters.ConverterUtils;
-import weka.core.converters.FileSourcedConverter;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.util.Vector;
 
 /**
  * A specialized JFileChooser that lists all available file Loaders and Savers.
@@ -658,7 +657,7 @@ public class ConverterFileChooser extends JFileChooser {
 
     if (result == APPROVE_OPTION) {
       m_LastFilter = getFileFilter();
-      configureCurrentConverter(SAVER_DIALOG);
+      // configureCurrentConverter(SAVER_DIALOG);
 
       // bring up options dialog?
       if (m_CheckBoxOptions.isSelected()) {
@@ -673,6 +672,7 @@ public class ConverterFileChooser extends JFileChooser {
         }
         pd.setVisible(true);
         result = m_EditorResult;
+        // configureCurrentConverter(SAVER_DIALOG);
       }
     }
 
