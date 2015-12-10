@@ -31,7 +31,7 @@ Description=Package for loading a file or a directory containing MRI data in NIf
 Changes=Example scripts now use a more appropriate version of the data and perform 12-fold leave-one-run-out cross-validation.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/niftyLoader1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/niftiLoader1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/niftyLoader
