@@ -21,31 +21,6 @@
 
 package weka.classifiers.evaluation;
 
-import java.beans.BeanInfo;
-import java.beans.Introspector;
-import java.beans.MethodDescriptor;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.Reader;
-import java.io.Serializable;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Random;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.ConditionalDensityEstimator;
@@ -77,6 +52,31 @@ import weka.core.xml.KOML;
 import weka.core.xml.XMLOptions;
 import weka.core.xml.XMLSerialization;
 import weka.estimators.UnivariateKernelEstimator;
+
+import java.beans.BeanInfo;
+import java.beans.Introspector;
+import java.beans.MethodDescriptor;
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Reader;
+import java.io.Serializable;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Random;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Class for evaluating machine learning models.
@@ -2816,7 +2816,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
                 boolean display = m_metricsToDisplay.contains(metricName);
                 // For the GUI and the command line StandardEvaluationMetrics
                 // are an "all or nothing" jobby (because we need the user to
-                // supply how they should be displayed and formated via the
+                // supply how they should be displayed and formatted via the
                 // toSummaryString() method
                 if (display) {
                   String formattedS =
@@ -2841,11 +2841,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
                 && !m.appliesToNominalClass() && m.appliesToNumericClass()) {
                 String metricName = m.getMetricName().toLowerCase();
                 boolean display = m_metricsToDisplay.contains(metricName);
-                List<String> statNames = m.getStatisticNames();
-                for (String s : statNames) {
-                  display =
-                    (display && m_metricsToDisplay.contains(s.toLowerCase()));
-                }
+
                 if (display) {
                   String formattedS =
                     ((StandardEvaluationMetric) m).toSummaryString();
