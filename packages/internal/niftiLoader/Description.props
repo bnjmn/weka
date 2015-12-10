@@ -34,7 +34,7 @@ Changes=Example scripts now use a more appropriate version of the data and perfo
 PackageURL=http://prdownloads.sourceforge.net/weka/niftiLoader1.0.1.zip?download
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.packages/niftyLoader
+URL=http://weka.sourceforge.net/doc.packages/niftiLoader
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
