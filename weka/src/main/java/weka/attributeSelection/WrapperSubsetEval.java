@@ -21,13 +21,6 @@
 
 package weka.attributeSelection;
 
-import java.util.BitSet;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
@@ -50,18 +43,26 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
+import java.util.BitSet;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
+
 /**
- * <!-- globalinfo-start --> WrapperSubsetEval:<br/>
- * <br/>
+ <!-- globalinfo-start -->
+ * WrapperSubsetEval:<br>
+ * <br>
  * Evaluates attribute sets by using a learning scheme. Cross validation is used
- * to estimate the accuracy of the learning scheme for a set of attributes.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
- * Ron Kohavi, George H. John (1997). Wrappers for feature subset selection.
+ * to estimate the accuracy of the learning scheme for a set of attributes.<br>
+ * <br>
+ * For more information see:<br>
+ * <br>
+ * <p>Ron Kohavi, George H. John (1997). Wrappers for feature subset selection.
  * Artificial Intelligence. 97(1-2):273-324.
- * <p/>
- * <!-- globalinfo-end -->
+ * </p>
+ <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
  * 
@@ -78,11 +79,12 @@ import weka.filters.unsupervised.attribute.Remove;
  *    ISSN = {0004-3702}
  * }
  * </pre>
- * <p/>
- * <!-- technical-bibtex-end -->
+ * <p>
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
+ <!-- options-start -->
+ * Valid options are:
+ * </p>
  * 
  * <pre>
  * -B &lt;base learner&gt;
@@ -135,13 +137,13 @@ import weka.filters.unsupervised.attribute.Remove;
  *  may output additional info to the console
  * </pre>
  * 
- * <!-- options-end -->
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
-  OptionHandler, TechnicalInformationHandler {
+public class WrapperSubsetEval extends ASEvaluation
+  implements SubsetEvaluator, OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -4573057658746728675L;
@@ -194,8 +196,9 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
      * @param metric the metric object
      * @param statisticName the particular statistic that this tag pertains to
      */
-    public PluginTag(AbstractEvaluationMetric metric, String statisticName) {
-      super(EVAL_PLUGIN, statisticName, statisticName);
+    public PluginTag(int ID, AbstractEvaluationMetric metric,
+      String statisticName) {
+      super(ID, statisticName, statisticName);
       m_metric = metric;
       m_statisticName = statisticName;
     }
@@ -242,43 +245,38 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
 
   protected static List<AbstractEvaluationMetric> PLUGIN_METRICS =
     AbstractEvaluationMetric.getPluginMetrics();
+
   static {
     int totalPluginCount = 0;
     if (PLUGIN_METRICS != null) {
-      for ( AbstractEvaluationMetric m : PLUGIN_METRICS ) {
+      for (AbstractEvaluationMetric m : PLUGIN_METRICS) {
         totalPluginCount += m.getStatisticNames().size();
       }
     }
 
     TAGS_EVALUATION = new Tag[8 + totalPluginCount];
-    TAGS_EVALUATION[0] =
-      new Tag(EVAL_DEFAULT, "default",
-        "Default: accuracy (discrete class); RMSE (numeric class)");
+    TAGS_EVALUATION[0] = new Tag(EVAL_DEFAULT, "default",
+      "Default: accuracy (discrete class); RMSE (numeric class)");
     TAGS_EVALUATION[1] =
       new Tag(EVAL_ACCURACY, "acc", "Accuracy (discrete class only)");
-    TAGS_EVALUATION[2] =
-      new Tag(EVAL_RMSE, "rmse",
-        "RMSE (of the class probabilities for discrete class)");
-    TAGS_EVALUATION[3] =
-      new Tag(EVAL_MAE, "mae",
-        "MAE (of the class probabilities for discrete class)");
+    TAGS_EVALUATION[2] = new Tag(EVAL_RMSE, "rmse",
+      "RMSE (of the class probabilities for discrete class)");
+    TAGS_EVALUATION[3] = new Tag(EVAL_MAE, "mae",
+      "MAE (of the class probabilities for discrete class)");
     TAGS_EVALUATION[4] =
       new Tag(EVAL_FMEASURE, "f-meas", "F-measure (discrete class only)");
-    TAGS_EVALUATION[5] =
-      new Tag(EVAL_AUC, "auc",
-        "AUC (area under the ROC curve - discrete class only)");
-    TAGS_EVALUATION[6] =
-      new Tag(EVAL_AUPRC, "auprc",
-        "AUPRC (area under the precision-recall curve - discrete class only)");
-    TAGS_EVALUATION[7] =
-      new Tag(EVAL_CORRELATION, "corr-coeff",
-        "Correlation coefficient - numeric class only");
+    TAGS_EVALUATION[5] = new Tag(EVAL_AUC, "auc",
+      "AUC (area under the ROC curve - discrete class only)");
+    TAGS_EVALUATION[6] = new Tag(EVAL_AUPRC, "auprc",
+      "AUPRC (area under the precision-recall curve - discrete class only)");
+    TAGS_EVALUATION[7] = new Tag(EVAL_CORRELATION, "corr-coeff",
+      "Correlation coefficient - numeric class only");
 
     if (PLUGIN_METRICS != null) {
       int index = 8;
-      for ( AbstractEvaluationMetric m : PLUGIN_METRICS ) {
-        for ( String stat : m.getStatisticNames() ) {
-          TAGS_EVALUATION[index++] = new PluginTag( m, stat );
+      for (AbstractEvaluationMetric m : PLUGIN_METRICS) {
+        for (String stat : m.getStatisticNames()) {
+          TAGS_EVALUATION[index++] = new PluginTag(index + 1, m, stat);
         }
       }
     }
@@ -346,53 +344,54 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
         + "\tPlace any classifier options LAST on the command line\n"
         + "\tfollowing a \"--\". eg.:\n"
         + "\t\t-B weka.classifiers.bayes.NaiveBayes ... -- -K\n"
-        + "\t(default: weka.classifiers.rules.ZeroR)", "B", 1,
-      "-B <base learner>"));
+        + "\t(default: weka.classifiers.rules.ZeroR)",
+      "B", 1, "-B <base learner>"));
 
     newVector.addElement(new Option(
       "\tnumber of cross validation folds to use for estimating accuracy.\n"
-        + "\t(default=5)", "F", 1, "-F <num>"));
-
-    newVector
-      .addElement(new Option(
-        "\tSeed for cross validation accuracy testimation.\n"
-          + "\t(default = 1)", "R", 1, "-R <seed>"));
+        + "\t(default=5)",
+      "F", 1, "-F <num>"));
 
     newVector.addElement(new Option(
-      "\tthreshold by which to execute another cross validation\n"
+      "\tSeed for cross validation accuracy testimation.\n" + "\t(default = 1)",
+      "R", 1, "-R <seed>"));
+
+    newVector.addElement(
+      new Option("\tthreshold by which to execute another cross validation\n"
         + "\t(standard deviation---expressed as a percentage of the mean).\n"
         + "\t(default: 0.01 (1%))", "T", 1, "-T <num>"));
 
-    newVector.addElement(new Option(
-      "\tPerformance evaluation measure to use for selecting attributes.\n"
-        + "\t(Default = default: accuracy for discrete class and rmse for "
-        + "numeric class)", "E", 1, "-E " + Tag.toOptionList(TAGS_EVALUATION)));
-
     newVector
       .addElement(new Option(
-        "\tOptional class value (label or 1-based index) to use in conjunction with\n"
-          + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n"
-          + "\tthe class-weighted average.", "IRclass", 1,
-        "-IRclass <label | index>"));
+        "\tPerformance evaluation measure to use for selecting attributes.\n"
+          + "\t(Default = default: accuracy for discrete class and rmse for "
+          + "numeric class)",
+        "E", 1, "-E " + Tag.toOptionList(TAGS_EVALUATION)));
+
+    newVector.addElement(new Option(
+      "\tOptional class value (label or 1-based index) to use in conjunction with\n"
+        + "\tIR statistics (f-meas, auc or auprc). Omitting this option will use\n"
+        + "\tthe class-weighted average.",
+      "IRclass", 1, "-IRclass <label | index>"));
 
     if ((m_BaseClassifier != null)
       && (m_BaseClassifier instanceof OptionHandler)) {
-      newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to scheme " + m_BaseClassifier.getClass().getName()
-          + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) m_BaseClassifier)
-        .listOptions()));
+      newVector.addElement(new Option("", "", 0, "\nOptions specific to scheme "
+        + m_BaseClassifier.getClass().getName() + ":"));
+      newVector.addAll(
+        Collections.list(((OptionHandler) m_BaseClassifier).listOptions()));
     }
 
     return newVector.elements();
   }
 
   /**
-   * Parses a given list of options.
-   * <p/>
+   * <p>Parses a given list of options.
+   * </p>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
+   <!-- options-start -->
+   *   Valid options are:
+   * <br>
    * 
    * <pre>
    * -B &lt;base learner&gt;
@@ -445,7 +444,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
    *  may output additional info to the console
    * </pre>
    * 
-   * <!-- options-end -->
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -488,7 +487,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     optionString = Utils.getOption('E', options);
     if (optionString.length() != 0) {
       for (Tag t : TAGS_EVALUATION) {
-        if (t.getIDStr().equalsIgnoreCase( optionString )) {
+        if (t.getIDStr().equalsIgnoreCase(optionString)) {
           setEvaluationMeasure(new SelectedTag(t.getIDStr(), TAGS_EVALUATION));
           break;
         }
@@ -766,7 +765,7 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     result.disable(Capability.NUMERIC_CLASS);
     result.disable(Capability.DATE_CLASS);
     boolean pluginMetricNominalClass = false;
-    if (m_evaluationMeasure.getID() == EVAL_PLUGIN) {
+    if (m_evaluationMeasure.getID() >= EVAL_PLUGIN) {
       String metricName = ((PluginTag) m_evaluationMeasure).getMetricName();
       for (AbstractEvaluationMetric m : PLUGIN_METRICS) {
         if (m.getMetricName().equals(metricName)) {
@@ -778,7 +777,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     if (m_evaluationMeasure.getID() != EVAL_ACCURACY
       && m_evaluationMeasure.getID() != EVAL_FMEASURE
       && m_evaluationMeasure.getID() != EVAL_AUC
-      && m_evaluationMeasure.getID() != EVAL_AUPRC && !pluginMetricNominalClass) {
+      && m_evaluationMeasure.getID() != EVAL_AUPRC
+      && !pluginMetricNominalClass) {
       result.enable(Capability.NUMERIC_CLASS);
       result.enable(Capability.DATE_CLASS);
     }
@@ -866,8 +866,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     // max of 5 repetitions of cross validation
     for (i = 0; i < 5; i++) {
       m_Evaluation = new Evaluation(trainCopy);
-      m_Evaluation
-        .crossValidateModel(m_BaseClassifier, trainCopy, m_folds, Rnd);
+      m_Evaluation.crossValidateModel(m_BaseClassifier, trainCopy, m_folds,
+        Rnd);
 
       switch (m_evaluationMeasure.getID()) {
       case EVAL_DEFAULT:
@@ -906,27 +906,25 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       case EVAL_CORRELATION:
         repError[i] = m_Evaluation.correlationCoefficient();
         break;
-      case EVAL_PLUGIN:
-        if (m_evaluationMeasure.getID() == EVAL_PLUGIN) {
+      default:
+        if (m_evaluationMeasure.getID() >= EVAL_PLUGIN) {
           metricName = ((PluginTag) m_evaluationMeasure).getMetricName();
           statName = ((PluginTag) m_evaluationMeasure).getStatisticName();
           statName = ((PluginTag) m_evaluationMeasure).getStatisticName();
           pluginMetric = m_Evaluation.getPluginMetric(metricName);
           if (pluginMetric == null) {
-            throw new Exception("Metric  " + metricName + " does not seem to be "
-              + "available");
+            throw new Exception(
+              "Metric  " + metricName + " does not seem to be " + "available");
           }
         }
 
         if (pluginMetric instanceof InformationRetrievalEvaluationMetric) {
           if (m_IRClassVal < 0) {
-            repError[i] =
-              ((InformationRetrievalEvaluationMetric) pluginMetric)
-                .getClassWeightedAverageStatistic(statName);
+            repError[i] = ((InformationRetrievalEvaluationMetric) pluginMetric)
+              .getClassWeightedAverageStatistic(statName);
           } else {
-            repError[i] =
-              ((InformationRetrievalEvaluationMetric) pluginMetric)
-                .getStatistic(statName, m_IRClassVal);
+            repError[i] = ((InformationRetrievalEvaluationMetric) pluginMetric)
+              .getStatistic(statName, m_IRClassVal);
           }
         } else {
           repError[i] = pluginMetric.getStatistic(statName);
@@ -954,15 +952,16 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
     case EVAL_RMSE:
     case EVAL_MAE:
       if (m_trainInstances.classAttribute().isNominal()
-        && (m_evaluationMeasure.getID() == EVAL_DEFAULT || m_evaluationMeasure
-          .getID() == EVAL_ACCURACY)) {
+        && (m_evaluationMeasure.getID() == EVAL_DEFAULT
+          || m_evaluationMeasure.getID() == EVAL_ACCURACY)) {
         evalMetric = 1 - evalMetric;
       } else {
         evalMetric = -evalMetric; // maximize
       }
       break;
-    case EVAL_PLUGIN:
-      if (!pluginMetric.statisticIsMaximisable(statName)) {
+    default:
+      if (pluginMetric != null
+        && !pluginMetric.statisticIsMaximisable(statName)) {
         evalMetric = -evalMetric; // maximize
       }
     }
@@ -983,8 +982,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       text.append("\tWrapper subset evaluator has not been built yet\n");
     } else {
       text.append("\tWrapper Subset Evaluator\n");
-      text.append("\tLearning scheme: " + getClassifier().getClass().getName()
-        + "\n");
+      text.append(
+        "\tLearning scheme: " + getClassifier().getClass().getName() + "\n");
       text.append("\tScheme options: ");
       String[] classifierOptions = new String[0];
 
@@ -999,9 +998,8 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       text.append("\n");
       String IRClassL = "";
       if (m_IRClassVal >= 0) {
-        IRClassL =
-          "(class value: "
-            + m_trainInstances.classAttribute().value(m_IRClassVal) + ")";
+        IRClassL = "(class value: "
+          + m_trainInstances.classAttribute().value(m_IRClassVal) + ")";
       }
       switch (m_evaluationMeasure.getID()) {
       case EVAL_DEFAULT:
@@ -1042,18 +1040,19 @@ public class WrapperSubsetEval extends ASEvaluation implements SubsetEvaluator,
       case EVAL_CORRELATION:
         text.append("\tSubset evaluation: correlation coefficient\n");
         break;
-      case EVAL_PLUGIN:
+      default:
         text
           .append("\tSubset evaluation: " + m_evaluationMeasure.getReadable());
-        if (((PluginTag) m_evaluationMeasure).getMetric() instanceof InformationRetrievalEvaluationMetric) {
+        if (((PluginTag) m_evaluationMeasure)
+          .getMetric() instanceof InformationRetrievalEvaluationMetric) {
           text.append(" " + (m_IRClassVal > 0 ? IRClassL : ""));
         }
         text.append("\n");
         break;
       }
 
-      text.append("\tNumber of folds for accuracy estimation: " + m_folds
-        + "\n");
+      text
+        .append("\tNumber of folds for accuracy estimation: " + m_folds + "\n");
     }
 
     return text.toString();
