@@ -499,8 +499,11 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       }
     }
 
-    REXP result = parseAndEval(requester, "install.packages(\"" + libraryName
-      + "\")");
+    // Need to prevent R from popping up dialogue in case there is a newer source version.
+    REXP result1 = parseAndEval(requester, "options(install.packages.check.source = \"no\")");
+
+    // Now try to install the package.
+    REXP result = parseAndEval(requester, "install.packages(\"" + libraryName + "\")");
 
     if (!GraphicsEnvironment.isHeadless()) {
       if (!(OS.indexOf("mac") >= 0) && !(OS.indexOf("darwin") >= 0)) { // Can't pop up window on OS X

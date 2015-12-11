@@ -280,6 +280,10 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     // instances
     result.setMinimumNumberInstances(0);
 
+    // set dependencies
+    for (Capability cap : Capability.values())
+      result.enableDependency(cap);
+
     return result;
   }
 
