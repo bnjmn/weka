@@ -21,6 +21,18 @@
 
 package distributed.core;
 
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.DistributedWekaException;
+import weka.gui.Logger;
+import weka.gui.ProgrammaticProperty;
+
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.Serializable;
@@ -29,12 +41,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-import weka.core.*;
-import weka.distributed.CSVToARFFHeaderMapTask;
-import weka.distributed.DistributedWekaException;
-import weka.gui.Logger;
-import weka.gui.ProgrammaticProperty;
-
 /**
  * Abstract base class for all distributed jobs.
  * 
@@ -42,7 +48,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  */
 public abstract class DistributedJob implements EnvironmentHandler,
-  Serializable {
+  Serializable, CommandlineRunnable {
 
   /** Property key for specifying weka packages to use in the job */
   public static final String WEKA_ADDITIONAL_PACKAGES_KEY =
@@ -354,5 +360,38 @@ public abstract class DistributedJob implements EnvironmentHandler,
   /** Enum of job status states */
   public static enum JobStatus {
     NOT_RUNNING, RUNNING, FINISHED, FAILED;
+  }
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
   }
 }
