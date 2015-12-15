@@ -34,18 +34,8 @@ import java.util.Vector;
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 
 /**
  <!-- globalinfo-start -->
@@ -103,7 +93,7 @@ import weka.core.WeightedInstancesHandler;
  */
 public class CostSensitiveClassifier 
   extends RandomizableSingleClassifierEnhancer
-  implements OptionHandler, Drawable {
+  implements OptionHandler, Drawable, BatchPredictor {
 
   /** for serialization */
   static final long serialVersionUID = -110658209263002404L;
@@ -556,30 +546,116 @@ public class CostSensitiveClassifier
 
     if (!m_MinimizeExpectedCost) {
       return m_Classifier.distributionForInstance(instance);
+    } else {
+      return convertDistribution(m_Classifier.distributionForInstance(instance), instance);
     }
-    double [] pred = m_Classifier.distributionForInstance(instance);
+  }
+
+  /**
+   * Convert distribution using minimum expected cost approach. The incoming
+   * array is modified and returned!
+   *
+   * @param pred the predicted distribution
+   * @param instance the instance
+   * @return the modified distribution
+   */
+  protected double[] convertDistribution(double[] pred, Instance instance) throws Exception {
+
     double [] costs = m_CostMatrix.expectedCosts(pred, instance);
-    /*
-    for (int i = 0; i < pred.length; i++) {
-      System.out.print(pred[i] + " ");
-    }
-    System.out.println();
-    for (int i = 0; i < costs.length; i++) {
-      System.out.print(costs[i] + " ");
-    }
-    System.out.println("\n");
-    */
 
     // This is probably not ideal
     int classIndex = Utils.minIndex(costs);
     for (int i = 0; i  < pred.length; i++) {
       if (i == classIndex) {
-	pred[i] = 1.0;
+        pred[i] = 1.0;
       } else {
-	pred[i] = 0.0;
+        pred[i] = 0.0;
       }
     }
-    return pred; 
+    return pred;
+  }
+
+  /**
+   * Batch scoring method. Calls the appropriate method for the base learner if
+   * it implements BatchPredictor. Otherwise it simply calls the
+   * distributionForInstance() method repeatedly.
+   *
+   * @param insts the instances to get predictions for
+   * @return an array of probability distributions, one for each instance
+   * @throws Exception if a problem occurs
+   */
+  public double[][] distributionsForInstances(Instances insts) throws Exception {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      double[][] dists = ((BatchPredictor) getClassifier()).distributionsForInstances(insts);
+      if (!m_MinimizeExpectedCost) {
+        return dists;
+      } else {
+        for (int i = 0; i < dists.length; i++) {
+          dists[i] = convertDistribution(dists[i], insts.instance(i));
+        }
+        return dists;
+      }
+    } else {
+      double[][] result = new double[insts.numInstances()][insts.numClasses()];
+      for (int i = 0; i < insts.numInstances(); i++) {
+        result[i] = distributionForInstance(insts.instance(i));
+      }
+      return result;
+    }
+  }
+
+  /**
+   * Tool tip text for this property
+   *
+   * @return the tool tip for this property
+   */
+  public String batchSizeTipText() {
+    return "Batch size to use if base learner is a BatchPredictor";
+  }
+
+  /**
+   * Set the batch size to use. Gets passed through to the base learner if it
+   * implements BatchPrecitor. Otherwise it is just ignored.
+   *
+   * @param size the batch size to use
+   */
+  public void setBatchSize(String size) {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      ((BatchPredictor) getClassifier()).setBatchSize(size);
+    }
+  }
+
+  /**
+   * Gets the preferred batch size from the base learner if it implements
+   * BatchPredictor. Returns 1 as the preferred batch size otherwise.
+   *
+   * @return the batch size to use
+   */
+  public String getBatchSize() {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      return ((BatchPredictor) getClassifier()).getBatchSize();
+    } else {
+      return "1";
+    }
+  }
+
+  /**
+   * Returns true if the base classifier implements BatchPredictor and is able
+   * to generate batch predictions efficiently
+   *
+   * @return true if the base classifier can generate batch predictions
+   *         efficiently
+   */
+  public boolean implementsMoreEfficientBatchPrediction() {
+    if (!(getClassifier() instanceof BatchPredictor)) {
+      return false;
+    }
+
+    return ((BatchPredictor) getClassifier())
+            .implementsMoreEfficientBatchPrediction();
   }
 
   /**
