@@ -25,6 +25,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import weka.core.CommandlineRunnable;
 import weka.core.Instance;
 import weka.core.Instances;
 
@@ -35,7 +36,7 @@ import weka.core.Instances;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class AbstractLoader implements Loader {
+public abstract class AbstractLoader implements Loader, CommandlineRunnable {
 
   /** ID to avoid warning */
   private static final long serialVersionUID = 2425432084900694551L;
@@ -115,4 +116,37 @@ public abstract class AbstractLoader implements Loader {
   @Override
   public abstract Instance getNextInstance(Instances structure)
     throws IOException;
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
+  }
 }

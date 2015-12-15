@@ -21,13 +21,10 @@
 
 package weka.clusterers;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.CapabilitiesIgnorer;
+import weka.core.CommandlineRunnable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -37,16 +34,19 @@ import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * Abstract clusterer.
  * 
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class AbstractClusterer implements Clusterer, Cloneable,
-                                                   Serializable, CapabilitiesHandler, 
-                                                   RevisionHandler, OptionHandler,
-                                                   CapabilitiesIgnorer {
+public abstract class AbstractClusterer
+  implements Clusterer, Cloneable, Serializable, CapabilitiesHandler,
+  RevisionHandler, OptionHandler, CapabilitiesIgnorer, CommandlineRunnable {
 
   /** for serialization */
   private static final long serialVersionUID = -6099962589663877632L;
@@ -131,17 +131,17 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector =
-      Option.listOptionsForClassHierarchy(this.getClass(), AbstractClusterer.class);
+    Vector<Option> newVector = Option
+      .listOptionsForClassHierarchy(this.getClass(), AbstractClusterer.class);
 
     newVector.addElement(new Option(
       "\tIf set, clusterer is run in debug mode and\n"
-        + "\tmay output additional info to the console", "output-debug-info",
-      0, "-output-debug-info"));
+        + "\tmay output additional info to the console",
+      "output-debug-info", 0, "-output-debug-info"));
     newVector.addElement(new Option(
       "\tIf set, clusterer capabilities are not checked before clusterer is built\n"
-        + "\t(use with caution).", "-do-not-check-capabilities", 0,
-      "-do-not-check-capabilities"));
+        + "\t(use with caution).",
+      "-do-not-check-capabilities", 0, "-do-not-check-capabilities"));
 
     return newVector.elements();
   }
@@ -168,8 +168,8 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
 
     Option.setOptionsForHierarchy(options, this, AbstractClusterer.class);
     setDebug(Utils.getFlag("output-debug-info", options));
-    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
-      options));
+    setDoNotCheckCapabilities(
+      Utils.getFlag("do-not-check-capabilities", options));
   }
 
   /**
@@ -243,7 +243,8 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
   public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
-    for (String s : Option.getOptionsForHierarchy(this, AbstractClusterer.class)) {
+    for (String s : Option.getOptionsForHierarchy(this,
+      AbstractClusterer.class)) {
       options.add(s);
     }
 
@@ -344,16 +345,48 @@ public abstract class AbstractClusterer implements Clusterer, Cloneable,
    */
   public static void runClusterer(Clusterer clusterer, String[] options) {
     try {
-      System.out.println(ClusterEvaluation
-        .evaluateClusterer(clusterer, options));
+      System.out
+        .println(ClusterEvaluation.evaluateClusterer(clusterer, options));
     } catch (Exception e) {
-      if ((e.getMessage() == null)
-        || ((e.getMessage() != null) && (e.getMessage().indexOf(
-          "General options") == -1))) {
+      if ((e.getMessage() == null) || ((e.getMessage() != null)
+        && (e.getMessage().indexOf("General options") == -1))) {
         e.printStackTrace();
       } else {
         System.err.println(e.getMessage());
       }
     }
+  }
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
   }
 }

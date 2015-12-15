@@ -21,23 +21,32 @@
 
 package weka.associations;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.CapabilitiesIgnorer;
+import weka.core.CommandlineRunnable;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.RevisionHandler;
+import weka.core.RevisionUtils;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+
 import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.*;
-
-/** 
+/**
  * Abstract scheme for learning associations. All schemes for learning
  * associations implemement this class
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
- * @version $Revision$ 
+ * @version $Revision$
  */
-public abstract class AbstractAssociator 
-  implements Cloneable, Associator, Serializable, CapabilitiesHandler, 
-             CapabilitiesIgnorer, RevisionHandler, OptionHandler {
- 
+public abstract class AbstractAssociator
+  implements Cloneable, Associator, Serializable, CapabilitiesHandler,
+  CapabilitiesIgnorer, RevisionHandler, OptionHandler, CommandlineRunnable {
+
   /** for serialization */
   private static final long serialVersionUID = -3017644543382432070L;
 
@@ -51,8 +60,8 @@ public abstract class AbstractAssociator
    */
   @Override
   public Enumeration<Option> listOptions() {
-    Vector<Option> newVector =
-      Option.listOptionsForClassHierarchy(this.getClass(), AbstractAssociator.class);
+    Vector<Option> newVector = Option
+      .listOptionsForClassHierarchy(this.getClass(), AbstractAssociator.class);
 
     return newVector.elements();
   }
@@ -75,7 +84,8 @@ public abstract class AbstractAssociator
    */
   public String[] getOptions() {
     Vector<String> options = new Vector<String>();
-    for (String s : Option.getOptionsForHierarchy(this, AbstractAssociator.class)) {
+    for (String s : Option.getOptionsForHierarchy(this,
+      AbstractAssociator.class)) {
       options.add(s);
     }
     return options.toArray(new String[0]);
@@ -111,26 +121,25 @@ public abstract class AbstractAssociator
 
     return m_DoNotCheckCapabilities;
   }
-  
+
   /**
-   * Creates a new instance of a associator given it's class name and
-   * (optional) arguments to pass to it's setOptions method. If the
-   * associator implements OptionHandler and the options parameter is
-   * non-null, the associator will have it's options set.
+   * Creates a new instance of a associator given it's class name and (optional)
+   * arguments to pass to it's setOptions method. If the associator implements
+   * OptionHandler and the options parameter is non-null, the associator will
+   * have it's options set.
    *
    * @param associatorName the fully qualified class name of the associator
    * @param options an array of options suitable for passing to setOptions. May
-   * be null.
+   *          be null.
    * @return the newly created associator, ready for use.
    * @exception Exception if the associator name is invalid, or the options
-   * supplied are not acceptable to the associator
+   *              supplied are not acceptable to the associator
    */
-  public static Associator forName(String associatorName,
-				   String [] options) throws Exception {
+  public static Associator forName(String associatorName, String[] options)
+    throws Exception {
 
-    return (Associator)Utils.forName(Associator.class,
-				     associatorName,
-				     options);
+    return (Associator) Utils.forName(Associator.class, associatorName,
+      options);
   }
 
   /**
@@ -145,72 +154,102 @@ public abstract class AbstractAssociator
   }
 
   /**
-   * Creates copies of the current associator. Note that this method
-   * now uses Serialization to perform a deep copy, so the Associator
-   * object must be fully Serializable. Any currently built model will
-   * now be copied as well.
+   * Creates copies of the current associator. Note that this method now uses
+   * Serialization to perform a deep copy, so the Associator object must be
+   * fully Serializable. Any currently built model will now be copied as well.
    *
    * @param model an example associator to copy
    * @param num the number of associators copies to create.
    * @return an array of associators.
-   * @exception Exception if an error occurs 
+   * @exception Exception if an error occurs
    */
-  public static Associator[] makeCopies(Associator model,
-					 int num) throws Exception {
+  public static Associator[] makeCopies(Associator model, int num)
+    throws Exception {
 
     if (model == null) {
       throw new Exception("No model associator set");
     }
-    Associator [] associators = new Associator [num];
+    Associator[] associators = new Associator[num];
     SerializedObject so = new SerializedObject(model);
-    for(int i = 0; i < associators.length; i++) {
+    for (int i = 0; i < associators.length; i++) {
       associators[i] = (Associator) so.getObject();
     }
     return associators;
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this associator. Maximally permissive
-   * capabilities are allowed by default. Derived associators should
-   * override this method and first disable all capabilities and then
-   * enable just those capabilities that make sense for the scheme.
+   * capabilities are allowed by default. Derived associators should override
+   * this method and first disable all capabilities and then enable just those
+   * capabilities that make sense for the scheme.
    *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * @return the capabilities of this object
+   * @see Capabilities
    */
   public Capabilities getCapabilities() {
     Capabilities defaultC = new Capabilities(this);
     defaultC.enableAll();
-    
+
     return defaultC;
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return            the revision
+   * @return the revision
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
   }
-  
+
   /**
    * runs the associator with the given commandline options
    * 
-   * @param associator	the associator to run
-   * @param options	the commandline options
+   * @param associator the associator to run
+   * @param options the commandline options
    */
   public static void runAssociator(Associator associator, String[] options) {
     try {
-      System.out.println(
-	  AssociatorEvaluation.evaluate(associator, options));
-    }
-    catch (Exception e) {
-      if (    (e.getMessage() != null)
-	   && (e.getMessage().indexOf("General options") == -1) )
-	e.printStackTrace();
+      System.out.println(AssociatorEvaluation.evaluate(associator, options));
+    } catch (Exception e) {
+      if ((e.getMessage() != null)
+        && (e.getMessage().indexOf("General options") == -1))
+        e.printStackTrace();
       else
-	System.err.println(e.getMessage());
+        System.err.println(e.getMessage());
     }
+  }
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
   }
 }

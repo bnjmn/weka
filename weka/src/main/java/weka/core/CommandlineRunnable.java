@@ -28,6 +28,13 @@ package weka.core;
  * @version $Revision$
  */
 public interface CommandlineRunnable {
+
+  /**
+   * Perform any setup stuff that might need to happen before execution.
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  void preExecution() throws Exception;
   
   /**
    * Execute the supplied object.
@@ -38,4 +45,11 @@ public interface CommandlineRunnable {
    * type.
    */
   void run(Object toRun, String[] options) throws IllegalArgumentException;
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  void postExecution() throws Exception;
 }

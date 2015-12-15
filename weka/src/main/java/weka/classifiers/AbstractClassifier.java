@@ -21,15 +21,12 @@
 
 package weka.classifiers;
 
-import java.io.Serializable;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.CapabilitiesIgnorer;
+import weka.core.CommandlineRunnable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -38,6 +35,10 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Abstract classifier. All schemes for numeric or nominal prediction in Weka
@@ -50,7 +51,7 @@ import weka.core.Utils;
  */
 public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   Cloneable, Serializable, OptionHandler, CapabilitiesHandler, RevisionHandler,
-  CapabilitiesIgnorer {
+  CapabilitiesIgnorer, CommandlineRunnable {
 
   /** for serialization */
   private static final long serialVersionUID = 6502780192411755341L;
@@ -86,8 +87,8 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   public static Classifier forName(String classifierName, String[] options)
     throws Exception {
 
-    return ((AbstractClassifier) Utils.forName(Classifier.class,
-      classifierName, options));
+    return ((AbstractClassifier) Utils.forName(Classifier.class, classifierName,
+      options));
   }
 
   /**
@@ -135,8 +136,8 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
     try {
       System.out.println(Evaluation.evaluateModel(classifier, options));
     } catch (Exception e) {
-      if (((e.getMessage() != null) && (e.getMessage().indexOf(
-        "General options") == -1))
+      if (((e.getMessage() != null)
+        && (e.getMessage().indexOf("General options") == -1))
         || (e.getMessage() == null)) {
         e.printStackTrace();
       } else {
@@ -228,24 +229,22 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector =
-      Option.listOptionsForClassHierarchy(this.getClass(),
-        AbstractClassifier.class);
+    Vector<Option> newVector = Option
+      .listOptionsForClassHierarchy(this.getClass(), AbstractClassifier.class);
 
     newVector.addElement(new Option(
       "\tIf set, classifier is run in debug mode and\n"
-        + "\tmay output additional info to the console", "output-debug-info",
-      0, "-output-debug-info"));
-    newVector
-      .addElement(new Option(
-        "\tIf set, classifier capabilities are not checked before classifier is built\n"
-          + "\t(use with caution).", "-do-not-check-capabilities", 0,
-        "-do-not-check-capabilities"));
+        + "\tmay output additional info to the console",
+      "output-debug-info", 0, "-output-debug-info"));
+    newVector.addElement(new Option(
+      "\tIf set, classifier capabilities are not checked before classifier is built\n"
+        + "\t(use with caution).",
+      "-do-not-check-capabilities", 0, "-do-not-check-capabilities"));
 
     newVector.addElement(new Option(
       "\tThe number of decimal places for the output of numbers in the model"
-        + " (default " + m_numDecimalPlaces + ").", "num-decimal-places", 1,
-      "-num-decimal-places"));
+        + " (default " + m_numDecimalPlaces + ").",
+      "num-decimal-places", 1, "-num-decimal-places"));
 
     return newVector.elements();
   }
@@ -300,8 +299,8 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
 
     Option.setOptionsForHierarchy(options, this, AbstractClassifier.class);
     setDebug(Utils.getFlag("output-debug-info", options));
-    setDoNotCheckCapabilities(Utils.getFlag("do-not-check-capabilities",
-      options));
+    setDoNotCheckCapabilities(
+      Utils.getFlag("do-not-check-capabilities", options));
 
     String optionString = Utils.getOption("num-decimal-places", options);
     if (optionString.length() != 0) {
@@ -345,6 +344,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * 
    * @return true if capabilities checking is turned off.
    */
+  @Override
   public boolean getDoNotCheckCapabilities() {
 
     return m_DoNotCheckCapabilities;
@@ -355,6 +355,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    *
    * @param doNotCheckCapabilities true if capabilities are not to be checked.
    */
+  @Override
   public void setDoNotCheckCapabilities(boolean doNotCheckCapabilities) {
 
     m_DoNotCheckCapabilities = doNotCheckCapabilities;
@@ -436,6 +437,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * @return true if this classifier can generate batch predictions in an
    *         efficient manner.
    */
+  @Override
   public boolean implementsMoreEfficientBatchPrediction() {
     return false;
   }
@@ -453,7 +455,8 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * @throws Exception if a problem occurs.
    */
   @Override
-  public double[][] distributionsForInstances(Instances batch) throws Exception {
+  public double[][] distributionsForInstances(Instances batch)
+    throws Exception {
     double[][] batchPreds = new double[batch.numInstances()][];
     for (int i = 0; i < batch.numInstances(); i++) {
       batchPreds[i] = distributionForInstance(batch.instance(i));
@@ -487,5 +490,38 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   @Override
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
   }
 }

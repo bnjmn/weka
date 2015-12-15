@@ -21,16 +21,17 @@
 
 package weka.attributeSelection;
 
-import java.io.Serializable;
-
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
 import weka.core.CapabilitiesIgnorer;
+import weka.core.CommandlineRunnable;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+
+import java.io.Serializable;
 
 /**
  * Abstract attribute selection evaluation class
@@ -38,9 +39,8 @@ import weka.core.Utils;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public abstract class ASEvaluation
-  implements Serializable, CapabilitiesHandler,
-  CapabilitiesIgnorer, RevisionHandler {
+public abstract class ASEvaluation implements Serializable, CapabilitiesHandler,
+  CapabilitiesIgnorer, RevisionHandler, CommandlineRunnable {
 
   /** for serialization */
   private static final long serialVersionUID = 2091705669885950849L;
@@ -103,8 +103,7 @@ public abstract class ASEvaluation
    * @return a possibly ranked list of postprocessed attributes
    * @exception Exception if postprocessing fails for some reason
    */
-  public int[] postProcess(int[] attributeSet)
-    throws Exception {
+  public int[] postProcess(int[] attributeSet) throws Exception {
     return attributeSet;
   }
 
@@ -121,10 +120,9 @@ public abstract class ASEvaluation
    * @exception Exception if the evaluator name is invalid, or the options
    *              supplied are not acceptable to the evaluator
    */
-  public static ASEvaluation forName(String evaluatorName,
-    String[] options) throws Exception {
-    return (ASEvaluation) Utils.forName(ASEvaluation.class,
-      evaluatorName,
+  public static ASEvaluation forName(String evaluatorName, String[] options)
+    throws Exception {
+    return (ASEvaluation) Utils.forName(ASEvaluation.class, evaluatorName,
       options);
   }
 
@@ -138,8 +136,8 @@ public abstract class ASEvaluation
    * @return an array of evaluators.
    * @exception Exception if an error occurs
    */
-  public static ASEvaluation[] makeCopies(ASEvaluation model,
-    int num) throws Exception {
+  public static ASEvaluation[] makeCopies(ASEvaluation model, int num)
+    throws Exception {
 
     if (model == null) {
       throw new Exception("No model evaluator set");
@@ -193,8 +191,8 @@ public abstract class ASEvaluation
    */
   public static void runEvaluator(ASEvaluation evaluator, String[] options) {
     try {
-      System.out.println(
-        AttributeSelection.SelectAttributes(evaluator, options));
+      System.out
+        .println(AttributeSelection.SelectAttributes(evaluator, options));
     } catch (Exception e) {
       String msg = e.toString().toLowerCase();
       if ((msg.indexOf("help requested") == -1)
@@ -203,5 +201,38 @@ public abstract class ASEvaluation
       }
       System.err.println(e.getMessage());
     }
+  }
+
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object. Subclasses need to override this method.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws IllegalArgumentException if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) {
+    throw new IllegalArgumentException(
+      "Subclass needs to override this method!");
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
   }
 }
