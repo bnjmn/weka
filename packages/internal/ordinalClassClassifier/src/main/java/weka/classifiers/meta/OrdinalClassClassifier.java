@@ -429,7 +429,11 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
     }
   }
 
-    public String batchSizeTipText() {
+  /**
+   * The tool tip for this property
+   * @return the tip
+   */
+  public String batchSizeTipText() {
 	return "Preferred batch size for prediction";
     }
 
@@ -444,6 +448,22 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
    */
   public String getBatchSize() {
     return "";
+  }
+
+  /**
+   * Returns true if the base classifier implements BatchPredictor and is able
+   * to generate batch predictions efficiently
+   *
+   * @return true if the base classifier can generate batch predictions
+   *         efficiently
+   */
+  public boolean implementsMoreEfficientBatchPrediction() {
+    if (!(getClassifier() instanceof BatchPredictor)) {
+      return false;
+    }
+
+    return ((BatchPredictor) getClassifier())
+            .implementsMoreEfficientBatchPrediction();
   }
 
   /**
