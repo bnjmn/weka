@@ -1,4 +1,4 @@
-@relation Multi-Instance-Dataset-weka.filters.unsupervised.attribute.PropositionalToMultiInstance-S1
+@relation Testdata-weka.filters.unsupervised.attribute.PropositionalToMultiInstance-S1-Bfirst
 
 @attribute Nominal1 {att1val1,att1val2}
 @attribute bag relational
