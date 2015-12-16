@@ -341,6 +341,15 @@
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="timeSeriesFilters"/>
     </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="wekaPython"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="percentageErrorMetrics"/>
+    </antcall>
+    <antcall target="${packageCommand}_internal">
+      <param name="packageName" value="niftiLoader "/>
+    </antcall>
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
