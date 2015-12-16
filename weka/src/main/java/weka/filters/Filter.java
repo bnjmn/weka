@@ -21,18 +21,11 @@
 
 package weka.filters;
 
-import java.io.FileOutputStream;
-import java.io.PrintWriter;
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.Vector;
-
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
 import weka.core.CapabilitiesIgnorer;
+import weka.core.CommandlineRunnable;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
@@ -47,6 +40,14 @@ import weka.core.UnsupportedAttributeTypeException;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.core.converters.ConverterUtils.DataSource;
+
+import java.io.FileOutputStream;
+import java.io.PrintWriter;
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Vector;
 
 /**
  * An abstract class for instance filters: objects that take instances as input,
@@ -80,8 +81,7 @@ import weka.core.converters.ConverterUtils.DataSource;
  * @version $Revision$
  */
 public abstract class Filter implements Serializable, CapabilitiesHandler,
-                                        RevisionHandler, OptionHandler,
-                                        CapabilitiesIgnorer {
+  RevisionHandler, OptionHandler, CapabilitiesIgnorer, CommandlineRunnable {
 
   /** for serialization */
   private static final long serialVersionUID = -8835063755891851218L;
@@ -238,8 +238,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       initOutputLocators(m_OutputFormat, null);
 
       // Rename the relation
-      String relationName = outputFormat.relationName() + "-"
-        + this.getClass().getName();
+      String relationName =
+        outputFormat.relationName() + "-" + this.getClass().getName();
       if (this instanceof OptionHandler) {
         String[] options = ((OptionHandler) this).getOptions();
         for (String option : options) {
@@ -286,8 +286,9 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Adds an output instance to the queue. The derived class should use this
-   * method for each output instance it makes available. Note that the instance is only
-   * copied before it is added to the output queue if it has a reference to a dataset.
+   * method for each output instance it makes available. Note that the instance
+   * is only copied before it is added to the output queue if it has a reference
+   * to a dataset.
    *
    * @param instance the instance to be added to the queue.
    */
@@ -298,9 +299,9 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
   /**
    * Adds an output instance to the queue. The derived class should use this
-   * method for each output instance it makes available. Note that the instance is only
-   * copied before it is added to the output queue if copyInstance has value true and
-   * if the instance has a reference to a dataset.
+   * method for each output instance it makes available. Note that the instance
+   * is only copied before it is added to the output queue if copyInstance has
+   * value true and if the instance has a reference to a dataset.
    *
    * @param instance the instance to be added to the queue.
    * @param copyInstance whether instance is to be copied
@@ -318,6 +319,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       m_OutputQueue.push(instance);
     }
   }
+
   /**
    * Clears the output queue.
    */
@@ -336,7 +338,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      // No need to copy instance here because copyValues() does not modify the instance and
+      // No need to copy instance here because copyValues() does not modify the
+      // instance and
       // the add() method makes a copy anyway.
       copyValues(instance, true);
       m_InputFormat.add(instance);
@@ -391,11 +394,13 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    */
   protected void copyValues(Instance instance, boolean isInput) {
 
-    RelationalLocator.copyRelationalValues(instance, (isInput) ? m_InputFormat
-      : m_OutputFormat, (isInput) ? m_InputRelAtts : m_OutputRelAtts);
+    RelationalLocator.copyRelationalValues(instance,
+      (isInput) ? m_InputFormat : m_OutputFormat,
+      (isInput) ? m_InputRelAtts : m_OutputRelAtts);
 
-    StringLocator.copyStringValues(instance, (isInput) ? m_InputFormat
-      : m_OutputFormat, (isInput) ? m_InputStringAtts : m_OutputStringAtts);
+    StringLocator.copyStringValues(instance,
+      (isInput) ? m_InputFormat : m_OutputFormat,
+      (isInput) ? m_InputStringAtts : m_OutputStringAtts);
   }
 
   /**
@@ -441,8 +446,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     if ((m_InputStringAtts.getAttributeIndices().length > 0)
       || (m_InputRelAtts.getAttributeIndices().length > 0)) {
       m_InputFormat = m_InputFormat.stringFreeStructure();
-      m_InputStringAtts = new StringLocator(m_InputFormat,
-        m_InputStringAtts.getAllowedIndices());
+      m_InputStringAtts =
+        new StringLocator(m_InputFormat, m_InputStringAtts.getAllowedIndices());
       m_InputRelAtts = new RelationalLocator(m_InputFormat,
         m_InputRelAtts.getAllowedIndices());
     } else {
@@ -788,8 +793,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("   * @param format	the data format to use\n");
     result.append("   * @return		the generated Instance object\n");
     result.append("   */\n");
-    result
-      .append("  protected Instance objectsToInstance(Object[] obj, Instances format) {\n");
+    result.append(
+      "  protected Instance objectsToInstance(Object[] obj, Instances format) {\n");
     result.append("    Instance		result;\n");
     result.append("    double[]		values;\n");
     result.append("    int		i;\n");
@@ -802,8 +807,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("      else if (format.attribute(i).isNumeric())\n");
     result.append("        values[i] = (Double) obj[i];\n");
     result.append("      else if (format.attribute(i).isNominal())\n");
-    result
-      .append("        values[i] = format.attribute(i).indexOfValue((String) obj[i]);\n");
+    result.append(
+      "        values[i] = format.attribute(i).indexOfValue((String) obj[i]);\n");
     result.append("    }\n");
     result.append("\n");
     result.append("    // create new instance\n");
@@ -819,7 +824,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("   * turns the Instance object into an array of Objects\n");
     result.append("   *\n");
     result.append("   * @param inst	the instance to turn into an array\n");
-    result.append("   * @return		the Object array representing the instance\n");
+    result.append(
+      "   * @return		the Object array representing the instance\n");
     result.append("   */\n");
     result.append("  protected Object[] instanceToObjects(Instance inst) {\n");
     result.append("    Object[]	result;\n");
@@ -845,8 +851,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("   * turns the Instances object into an array of Objects\n");
     result.append("   *\n");
     result.append("   * @param data	the instances to turn into an array\n");
-    result
-      .append("   * @return		the Object array representing the instances\n");
+    result.append(
+      "   * @return		the Object array representing the instances\n");
     result.append("   */\n");
     result
       .append("  protected Object[][] instancesToObjects(Instances data) {\n");
@@ -868,12 +874,12 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     result.append("   *\n");
     result
       .append("   * @param instanceInfo the format of the data to convert\n");
-    result
-      .append("   * @return always true, to indicate that the output format can \n");
+    result.append(
+      "   * @return always true, to indicate that the output format can \n");
     result.append("   *         be collected immediately.\n");
     result.append("   */\n");
-    result
-      .append("  public boolean setInputFormat(Instances instanceInfo) throws Exception {\n");
+    result.append(
+      "  public boolean setInputFormat(Instances instanceInfo) throws Exception {\n");
     result.append("    super.setInputFormat(instanceInfo);\n");
     result.append("    \n");
     result.append("    // generate output format\n");
@@ -888,15 +894,15 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       } else if (output.attribute(i).isNominal()) {
         result.append("    attValues = new ArrayList<String>();\n");
         for (n = 0; n < output.attribute(i).numValues(); n++) {
-          result.append("    attValues.add(\"" + output.attribute(i).value(n)
-            + "\");\n");
+          result.append(
+            "    attValues.add(\"" + output.attribute(i).value(n) + "\");\n");
         }
         result.append("    atts.add(new Attribute(\""
           + output.attribute(i).name() + "\", attValues));\n");
       } else {
-        throw new UnsupportedAttributeTypeException("Attribute type '"
-          + output.attribute(i).type() + "' (position " + (i + 1)
-          + ") is not supported!");
+        throw new UnsupportedAttributeTypeException(
+          "Attribute type '" + output.attribute(i).type() + "' (position "
+            + (i + 1) + ") is not supported!");
       }
     }
     result.append("    \n");
@@ -930,24 +936,24 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     // batchFinished
     result.append("\n");
     result.append("  /**\n");
-    result
-      .append("   * Performs a batch filtering of the buffered data, if any available.\n");
+    result.append(
+      "   * Performs a batch filtering of the buffered data, if any available.\n");
     result.append("   *\n");
     result
       .append("   * @return true if instances were filtered otherwise false\n");
     result.append("   */\n");
     result.append("  public boolean batchFinished() throws Exception {\n");
     result.append("    if (getInputFormat() == null)\n");
-    result
-      .append("      throw new NullPointerException(\"No input instance format defined\");;\n");
+    result.append(
+      "      throw new NullPointerException(\"No input instance format defined\");;\n");
     result.append("\n");
     result.append("    Instances inst = getInputFormat();\n");
     result.append("    if (inst.numInstances() > 0) {\n");
     result.append("      Object[][] filtered = " + className
       + ".filter(instancesToObjects(inst));\n");
     result.append("      for (int i = 0; i < filtered.length; i++) {\n");
-    result
-      .append("        push(objectsToInstance(filtered[i], getOutputFormat()));\n");
+    result.append(
+      "        push(objectsToInstance(filtered[i], getOutputFormat()));\n");
     result.append("      }\n");
     result.append("    }\n");
     result.append("\n");
@@ -961,16 +967,15 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     // toString
     result.append("\n");
     result.append("  /**\n");
-    result
-      .append("   * Returns only the classnames and what filter it is based on.\n");
+    result.append(
+      "   * Returns only the classnames and what filter it is based on.\n");
     result.append("   *\n");
     result.append("   * @return a short description\n");
     result.append("   */\n");
     result.append("  public String toString() {\n");
     result.append("    return \"Auto-generated filter wrapper, based on "
-      + filter.getClass().getName() + " (generated with Weka "
-      + Version.VERSION + ").\\n" + "\" + this.getClass().getName() + \"/"
-      + className + "\";\n");
+      + filter.getClass().getName() + " (generated with Weka " + Version.VERSION
+      + ").\\n" + "\" + this.getClass().getName() + \"/" + className + "\";\n");
     result.append("  }\n");
 
     // main
@@ -1000,8 +1005,10 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *          -i input_file <br/>
    *          -o output_file <br/>
    *          -c class_index <br/>
-   *          -z classname (for filters implementing weka.filters.Sourcable) <br/>
-   *          -decimal num (the number of decimal places to use in the output; default = 6) <br/>
+   *          -z classname (for filters implementing weka.filters.Sourcable)
+   *          <br/>
+   *          -decimal num (the number of decimal places to use in the output;
+   *          default = 6) <br/>
    *          or -h for help on options
    * @throws Exception if something goes wrong or the user requests help on
    *           command options
@@ -1072,34 +1079,34 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         Enumeration<Option> enu = ((OptionHandler) filter).listOptions();
         while (enu.hasMoreElements()) {
           Option option = enu.nextElement();
-          filterOptions += option.synopsis() + '\n' + option.description()
-            + "\n";
+          filterOptions +=
+            option.synopsis() + '\n' + option.description() + "\n";
         }
       }
 
-      String genericOptions = "\nGeneral options:\n\n" + "-h\n"
-        + "\tGet help on available options.\n"
-        + "\t(use -b -h for help on batch mode.)\n" + "-i <file>\n"
-        + "\tThe name of the file containing input instances.\n"
-        + "\tIf not supplied then instances will be read from stdin.\n"
-        + "-o <file>\n"
-        + "\tThe name of the file output instances will be written to.\n"
-        + "\tIf not supplied then instances will be written to stdout.\n"
-        + "-c <class index>\n"
-        + "\tThe number of the attribute to use as the class.\n"
-        + "\t\"first\" and \"last\" are also valid entries.\n"
-        + "\tIf not supplied then no class is assigned.\n"
-        + "-decimal <integer>\n"
-        + "\tThe maximum number of digits to print after the decimal\n"
-        + "\tplace for numeric values (default: 6)\n";
+      String genericOptions =
+        "\nGeneral options:\n\n" + "-h\n" + "\tGet help on available options.\n"
+          + "\t(use -b -h for help on batch mode.)\n" + "-i <file>\n"
+          + "\tThe name of the file containing input instances.\n"
+          + "\tIf not supplied then instances will be read from stdin.\n"
+          + "-o <file>\n"
+          + "\tThe name of the file output instances will be written to.\n"
+          + "\tIf not supplied then instances will be written to stdout.\n"
+          + "-c <class index>\n"
+          + "\tThe number of the attribute to use as the class.\n"
+          + "\t\"first\" and \"last\" are also valid entries.\n"
+          + "\tIf not supplied then no class is assigned.\n"
+          + "-decimal <integer>\n"
+          + "\tThe maximum number of digits to print after the decimal\n"
+          + "\tplace for numeric values (default: 6)\n";
 
       if (filter instanceof Sourcable) {
         genericOptions += "-z <class name>\n"
           + "\tOutputs the source code representing the trained filter.\n";
       }
 
-      throw new Exception('\n' + ex.getMessage() + filterOptions
-        + genericOptions);
+      throw new Exception(
+        '\n' + ex.getMessage() + filterOptions + genericOptions);
     }
 
     if (debug) {
@@ -1126,13 +1133,14 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
           System.err.println("Filter said collect immediately");
         }
         if (!printedHeader) {
-          throw new Error("Filter didn't return true from setInputFormat() "
-            + "earlier!");
+          throw new Error(
+            "Filter didn't return true from setInputFormat() " + "earlier!");
         }
         if (debug) {
           System.err.println("Getting output instance");
         }
-        output.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        output
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1154,7 +1162,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         System.err.println("Getting output instance");
       }
       while (filter.numPendingOutput() > 0) {
-        output.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        output
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
         if (debug) {
           System.err.println("Getting output instance");
         }
@@ -1169,8 +1178,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     }
 
     if (sourceCode.length() != 0) {
-      System.out.println(wekaStaticWrapper((Sourcable) filter, sourceCode,
-        data, filter.getOutputFormat()));
+      System.out.println(wekaStaticWrapper((Sourcable) filter, sourceCode, data,
+        filter.getOutputFormat()));
     }
   }
 
@@ -1184,8 +1193,10 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *          -r (second) input file <br/>
    *          -s (second) output file <br/>
    *          -c class_index <br/>
-   *          -z classname (for filters implementing weka.filters.Sourcable) <br/>
-   *          -decimal num (the number of decimal places to use in the output; default = 6) <br/>
+   *          -z classname (for filters implementing weka.filters.Sourcable)
+   *          <br/>
+   *          -decimal num (the number of decimal places to use in the output;
+   *          default = 6) <br/>
    *          or -h for help on options
    * @throws Exception if something goes wrong or the user requests help on
    *           command options
@@ -1277,8 +1288,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         Enumeration<Option> enu = ((OptionHandler) filter).listOptions();
         while (enu.hasMoreElements()) {
           Option option = enu.nextElement();
-          filterOptions += option.synopsis() + '\n' + option.description()
-            + "\n";
+          filterOptions +=
+            option.synopsis() + '\n' + option.description() + "\n";
         }
       }
 
@@ -1295,15 +1306,15 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         + "\tIf not supplied then no class is assigned.\n"
         + "-decimal <integer>\n"
         + "\tThe maximum number of digits to print after the decimal\n"
-          + "\tplace for numeric values (default: 6)\n";
+        + "\tplace for numeric values (default: 6)\n";
 
       if (filter instanceof Sourcable) {
         genericOptions += "-z <class name>\n"
           + "\tOutputs the source code representing the trained filter.\n";
       }
 
-      throw new Exception('\n' + ex.getMessage() + filterOptions
-        + genericOptions);
+      throw new Exception(
+        '\n' + ex.getMessage() + filterOptions + genericOptions);
     }
     boolean printedHeader = false;
     if (filter.setInputFormat(firstData)) {
@@ -1317,10 +1328,11 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       inst = firstInput.nextElement(firstData);
       if (filter.input(inst)) {
         if (!printedHeader) {
-          throw new Error("Filter didn't return true from setInputFormat() "
-            + "earlier!");
+          throw new Error(
+            "Filter didn't return true from setInputFormat() " + "earlier!");
         }
-        firstOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        firstOutput
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1330,7 +1342,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         firstOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
-        firstOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        firstOutput
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1350,7 +1363,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
           throw new Error("Filter didn't return true from"
             + " isOutputFormatDefined() earlier!");
         }
-        secondOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        secondOutput
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
 
@@ -1360,7 +1374,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
         secondOutput.println(filter.getOutputFormat().toString());
       }
       while (filter.numPendingOutput() > 0) {
-        secondOutput.println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
+        secondOutput
+          .println(filter.output().toStringMaxDecimalDigits(maxDecimalPlaces));
       }
     }
     if (secondOutput != null) {
@@ -1404,17 +1419,17 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = Option.listOptionsForClassHierarchy(this.getClass(), Filter.class);
+    Vector<Option> newVector =
+      Option.listOptionsForClassHierarchy(this.getClass(), Filter.class);
 
     newVector.addElement(new Option(
       "\tIf set, filter is run in debug mode and\n"
-        + "\tmay output additional info to the console", "output-debug-info",
-      0, "-output-debug-info"));
-    newVector
-      .addElement(new Option(
-        "\tIf set, filter capabilities are not checked before filter is built\n"
-          + "\t(use with caution).", "-do-not-check-capabilities", 0,
-        "-do-not-check-capabilities"));
+        + "\tmay output additional info to the console",
+      "output-debug-info", 0, "-output-debug-info"));
+    newVector.addElement(new Option(
+      "\tIf set, filter capabilities are not checked before filter is built\n"
+        + "\t(use with caution).",
+      "-do-not-check-capabilities", 0, "-do-not-check-capabilities"));
 
     return newVector.elements();
   }
@@ -1424,13 +1439,13 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    * <p>
    *
    * -D <br>
-   * If set, filter is run in debug mode and may output additional info to
-   * the console.
+   * If set, filter is run in debug mode and may output additional info to the
+   * console.
    * <p>
    *
    * -do-not-check-capabilities <br>
-   * If set, filter capabilities are not checked before filter is built
-   * (use with caution).
+   * If set, filter capabilities are not checked before filter is built (use
+   * with caution).
    * <p>
    *
    * @param options the list of options as an array of strings
@@ -1441,7 +1456,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
     Option.setOptionsForHierarchy(options, this, Filter.class);
     setDebug(Utils.getFlag("output-debug-info", options));
-    setDoNotCheckCapabilities( Utils.getFlag( "do-not-check-capabilities", options ) );
+    setDoNotCheckCapabilities(
+      Utils.getFlag("do-not-check-capabilities", options));
   }
 
   /**
@@ -1530,6 +1546,43 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   }
 
   /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  /**
+   * Execute the supplied object.
+   *
+   * @param toRun the object to execute
+   * @param options any options to pass to the object
+   * @throws Exception if the object is not of the expected type.
+   */
+  @Override
+  public void run(Object toRun, String[] options) throws Exception {
+    if (!(toRun instanceof Filter)) {
+      throw new IllegalArgumentException("Object to run is not a Filter!");
+    }
+    preExecution();
+    runFilter((Filter) toRun, options);
+    postExecution();
+  }
+
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
+  }
+
+  /**
    * Main method for testing this class.
    *
    * @param args should contain arguments to the filter: use -h for help
@@ -1538,7 +1591,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
 
     try {
       if (args.length == 0) {
-        throw new Exception("First argument must be the class name of a Filter");
+        throw new Exception(
+          "First argument must be the class name of a Filter");
       }
       String fname = args[0];
       Filter f = (Filter) Class.forName(fname).newInstance();
