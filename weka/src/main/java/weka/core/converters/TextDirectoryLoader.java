@@ -654,6 +654,26 @@ public class TextDirectoryLoader extends AbstractLoader implements
     loader.run(loader, args);
   }
 
+  /**
+   * Perform any setup stuff that might need to happen before commandline
+   * execution. Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during setup
+   */
+  @Override
+  public void preExecution() throws Exception {
+  }
+  
+  /**
+   * Perform any teardown stuff that might need to happen after execution.
+   * Subclasses should override if they need to do something here
+   *
+   * @throws Exception if a problem occurs during teardown
+   */
+  @Override
+  public void postExecution() throws Exception {
+  }
+
   @Override
   public void run(Object toRun, String[] args) throws IllegalArgumentException {
     if (!(toRun instanceof TextDirectoryLoader)) {

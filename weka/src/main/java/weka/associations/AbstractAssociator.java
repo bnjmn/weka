@@ -235,12 +235,18 @@ public abstract class AbstractAssociator
    *
    * @param toRun the object to execute
    * @param options any options to pass to the object
-   * @throws IllegalArgumentException if the object is not of the expected type.
+   * @throws Exception if a problem occurs
    */
   @Override
-  public void run(Object toRun, String[] options) {
-    throw new IllegalArgumentException(
-      "Subclass needs to override this method!");
+  public void run(Object toRun, String[] options) throws Exception {
+    if (!(toRun instanceof Associator)) {
+      throw new IllegalArgumentException(
+        "Object to run is not an instance of Associator!");
+    }
+
+    preExecution();
+    runAssociator((Associator) toRun, options);
+    postExecution();
   }
 
   /**

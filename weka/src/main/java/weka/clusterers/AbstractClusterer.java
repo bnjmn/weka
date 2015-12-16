@@ -372,12 +372,17 @@ public abstract class AbstractClusterer
    *
    * @param toRun the object to execute
    * @param options any options to pass to the object
-   * @throws IllegalArgumentException if the object is not of the expected type.
+   * @throws Exception if the object if a problem occurs
    */
   @Override
-  public void run(Object toRun, String[] options) {
-    throw new IllegalArgumentException(
-      "Subclass needs to override this method!");
+  public void run(Object toRun, String[] options) throws Exception {
+    if (!(toRun instanceof Clusterer)) {
+      throw new IllegalArgumentException("Object to execute is not a Clusterer!");
+    }
+
+    preExecution();
+    runClusterer((Clusterer)toRun, options);
+    postExecution();
   }
 
   /**

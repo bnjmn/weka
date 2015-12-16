@@ -41,10 +41,9 @@ public interface CommandlineRunnable {
    * 
    * @param toRun the object to execute
    * @param options any options to pass to the object
-   * @throws IllegalArgumentException if the object is not of the expected
-   * type.
+   * @throws Exception if a problem occurs.
    */
-  void run(Object toRun, String[] options) throws IllegalArgumentException;
+  void run(Object toRun, String[] options) throws Exception;
 
   /**
    * Perform any teardown stuff that might need to happen after execution.

@@ -503,16 +503,20 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   }
 
   /**
-   * Execute the supplied object. Subclasses need to override this method.
+   * Execute the supplied object.
    *
    * @param toRun the object to execute
    * @param options any options to pass to the object
-   * @throws IllegalArgumentException if the object is not of the expected type.
+   * @throws Exception if the object is not of the expected type.
    */
   @Override
-  public void run(Object toRun, String[] options) {
-    throw new IllegalArgumentException(
-      "Subclass needs to override this method!");
+  public void run(Object toRun, String[] options) throws Exception {
+    if (!(toRun instanceof Classifier)) {
+      throw new IllegalArgumentException("Object to run is not a Classifier!");
+    }
+    preExecution();
+    runClassifier((Classifier) toRun, options);
+    postExecution();
   }
 
   /**
