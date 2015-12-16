@@ -210,7 +210,13 @@ public abstract class AbstractAssociator
    */
   public static void runAssociator(Associator associator, String[] options) {
     try {
+      if (associator instanceof CommandlineRunnable) {
+        ((CommandlineRunnable)associator).preExecution();
+      }
       System.out.println(AssociatorEvaluation.evaluate(associator, options));
+      if (associator instanceof CommandlineRunnable) {
+        ((CommandlineRunnable)associator).postExecution();
+      }
     } catch (Exception e) {
       if ((e.getMessage() != null)
         && (e.getMessage().indexOf("General options") == -1))

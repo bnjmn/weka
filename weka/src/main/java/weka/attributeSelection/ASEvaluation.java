@@ -191,8 +191,11 @@ public abstract class ASEvaluation implements Serializable, CapabilitiesHandler,
    */
   public static void runEvaluator(ASEvaluation evaluator, String[] options) {
     try {
+      evaluator.preExecution();
       System.out
         .println(AttributeSelection.SelectAttributes(evaluator, options));
+      evaluator.postExecution();
+
     } catch (Exception e) {
       String msg = e.toString().toLowerCase();
       if ((msg.indexOf("help requested") == -1)

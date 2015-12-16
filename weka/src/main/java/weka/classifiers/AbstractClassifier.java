@@ -134,7 +134,13 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    */
   public static void runClassifier(Classifier classifier, String[] options) {
     try {
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable)classifier).preExecution();
+      }
       System.out.println(Evaluation.evaluateModel(classifier, options));
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) classifier).postExecution();
+      }
     } catch (Exception e) {
       if (((e.getMessage() != null)
         && (e.getMessage().indexOf("General options") == -1))
@@ -514,9 +520,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
     if (!(toRun instanceof Classifier)) {
       throw new IllegalArgumentException("Object to run is not a Classifier!");
     }
-    preExecution();
     runClassifier((Classifier) toRun, options);
-    postExecution();
   }
 
   /**

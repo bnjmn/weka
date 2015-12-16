@@ -21,15 +21,12 @@
 
 package weka.classifiers.meta;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.BatchPredictor;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
+import weka.core.CommandlineRunnable;
 import weka.core.Drawable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -40,6 +37,10 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.filters.Filter;
+
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> Class for running an arbitrary classifier on data
@@ -134,8 +135,8 @@ import weka.filters.Filter;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class FilteredClassifier extends SingleClassifierEnhancer implements
-  Drawable, PartitionGenerator, IterativeClassifier, BatchPredictor {
+public class FilteredClassifier extends SingleClassifierEnhancer
+  implements Drawable, PartitionGenerator, IterativeClassifier, BatchPredictor {
 
   /** for serialization */
   static final long serialVersionUID = -4523450618538717400L;
@@ -211,8 +212,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
     if (m_Classifier instanceof Drawable)
       return ((Drawable) m_Classifier).graph();
     else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " cannot be graphed");
+      throw new Exception(
+        "Classifier: " + getClassifierSpec() + " cannot be graphed");
   }
 
   /**
@@ -224,8 +225,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
     if (m_Classifier instanceof PartitionGenerator)
       buildClassifier(data);
     else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " cannot generate a partition");
+      throw new Exception(
+        "Classifier: " + getClassifierSpec() + " cannot generate a partition");
   }
 
   /**
@@ -247,8 +248,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
           .getMembershipValues(newInstance);
       }
     } else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " cannot generate a partition");
+      throw new Exception(
+        "Classifier: " + getClassifierSpec() + " cannot generate a partition");
   }
 
   /**
@@ -260,8 +261,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
     if (m_Classifier instanceof PartitionGenerator)
       return ((PartitionGenerator) m_Classifier).numElements();
     else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " cannot generate a partition");
+      throw new Exception(
+        "Classifier: " + getClassifierSpec() + " cannot generate a partition");
   }
 
   /**
@@ -327,11 +328,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
     newVector.addAll(Collections.list(super.listOptions()));
 
     if (getFilter() instanceof OptionHandler) {
-      newVector.addElement(new Option("", "", 0,
-        "\nOptions specific to filter " + getFilter().getClass().getName()
-          + ":"));
-      newVector.addAll(Collections.list(((OptionHandler) getFilter())
-        .listOptions()));
+      newVector.addElement(new Option("", "", 0, "\nOptions specific to filter "
+        + getFilter().getClass().getName() + ":"));
+      newVector
+        .addAll(Collections.list(((OptionHandler) getFilter()).listOptions()));
     }
 
     return newVector.elements();
@@ -443,6 +443,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).preExecution();
+    }
   }
 
   /**
@@ -593,8 +596,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
      */
     if (!m_Filter.input(instance)) {
       if (!m_Filter.mayRemoveInstanceAfterFirstBatchDone()) {
-        throw new Exception("Filter didn't make the test instance"
-          + " immediately available!");
+        throw new Exception(
+          "Filter didn't make the test instance" + " immediately available!");
       } else {
         m_Filter.batchFinished();
         return null;
@@ -684,7 +687,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
    * @return an array of probability distributions, one for each instance
    * @throws Exception if a problem occurs
    */
-  public double[][] distributionsForInstances(Instances insts) throws Exception {
+  public double[][] distributionsForInstances(Instances insts)
+    throws Exception {
 
     if (getClassifier() instanceof BatchPredictor) {
       Instances filteredInsts = Filter.useFilter(insts, m_Filter);
@@ -730,11 +734,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
       return "FilteredClassifier: No model built yet.";
     }
 
-    String result =
-      "FilteredClassifier using " + getClassifierSpec()
-        + " on data filtered through " + getFilterSpec()
-        + "\n\nFiltered Header\n" + m_FilteredInstances.toString()
-        + "\n\nClassifier Model\n" + m_Classifier.toString();
+    String result = "FilteredClassifier using " + getClassifierSpec()
+      + " on data filtered through " + getFilterSpec() + "\n\nFiltered Header\n"
+      + m_FilteredInstances.toString() + "\n\nClassifier Model\n"
+      + m_Classifier.toString();
     return result;
   }
 
@@ -745,6 +748,20 @@ public class FilteredClassifier extends SingleClassifierEnhancer implements
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).preExecution();
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).postExecution();
+    }
   }
 
   /**

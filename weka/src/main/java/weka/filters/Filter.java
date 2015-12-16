@@ -1396,11 +1396,13 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    */
   public static void runFilter(Filter filter, String[] options) {
     try {
+      filter.preExecution();
       if (Utils.getFlag('b', options)) {
         Filter.batchFilterFile(filter, options);
       } else {
         Filter.filterFile(filter, options);
       }
+      filter.postExecution();
     } catch (Exception e) {
       if ((e.toString().indexOf("Help requested") == -1)
         && (e.toString().indexOf("Filter options") == -1)) {
@@ -1567,9 +1569,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
     if (!(toRun instanceof Filter)) {
       throw new IllegalArgumentException("Object to run is not a Filter!");
     }
-    preExecution();
     runFilter((Filter) toRun, options);
-    postExecution();
   }
 
   /**
