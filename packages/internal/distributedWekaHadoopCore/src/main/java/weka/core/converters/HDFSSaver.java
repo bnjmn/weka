@@ -21,15 +21,12 @@
 
 package weka.core.converters;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Vector;
-
+import distributed.core.DistributedJobConfig;
+import distributed.hadoop.HDFSConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
@@ -40,8 +37,10 @@ import weka.core.Instance;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import distributed.core.DistributedJobConfig;
-import distributed.hadoop.HDFSConfig;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Saver for writing to HDFS. Delegates to a base saver for writing the actual
@@ -518,6 +517,14 @@ public class HDFSSaver extends AbstractSaver implements IncrementalConverter,
     HDFSSaver saver = new HDFSSaver();
 
     saver.run(saver, args);
+  }
+
+  @Override
+  public void preExecution() {
+  }
+
+  @Override
+  public void postExecution() {
   }
 
   @Override

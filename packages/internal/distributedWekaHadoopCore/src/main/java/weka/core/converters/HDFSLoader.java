@@ -21,15 +21,12 @@
 
 package weka.core.converters;
 
-import java.io.IOException;
-import java.util.Enumeration;
-import java.util.Vector;
-
+import distributed.core.DistributedJobConfig;
+import distributed.hadoop.HDFSConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
-
 import weka.core.CommandlineRunnable;
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -38,8 +35,10 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import distributed.core.DistributedJobConfig;
-import distributed.hadoop.HDFSConfig;
+
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * Loader for data stored in HDFS. Delegates to a base loader to do the actual
@@ -91,15 +90,14 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
   public Enumeration<Option> listOptions() {
     Vector<Option> result = new Vector<Option>();
 
-    result.addElement(new Option("\tThe path to source file in HDFS.",
-      "source", 1, "-source <path>"));
+    result.addElement(new Option("\tThe path to source file in HDFS.", "source",
+      1, "-source <path>"));
 
-    result
-      .addElement(new Option(
-        "\tThe fully qualified name of the underlying loader to use, followed by its options\n\t"
-          + ". E.g. \"weka.core.converters.CSVLoader -N first\".\n\t"
-          + "(default: weka.core.converters.CSVLoader", "loader", 1,
-        "-loader <loader>"));
+    result.addElement(new Option(
+      "\tThe fully qualified name of the underlying loader to use, followed by its options\n\t"
+        + ". E.g. \"weka.core.converters.CSVLoader -N first\".\n\t"
+        + "(default: weka.core.converters.CSVLoader",
+      "loader", 1, "-loader <loader>"));
 
     Enumeration<Option> hdfsOpts = new HDFSConfig().listOptions();
     while (hdfsOpts.hasMoreElements()) {
@@ -142,8 +140,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
     result.add("-loader");
     String loaderSpec = m_delegate.getClass().getName();
     if (m_delegate instanceof OptionHandler) {
-      loaderSpec += " "
-        + Utils.joinOptions(((OptionHandler) m_delegate).getOptions());
+      loaderSpec +=
+        " " + Utils.joinOptions(((OptionHandler) m_delegate).getOptions());
     }
     result.add(loaderSpec);
 
@@ -263,8 +261,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
       ClassLoader orig = Thread.currentThread().getContextClassLoader();
       try {
-        Thread.currentThread().setContextClassLoader(
-          this.getClass().getClassLoader());
+        Thread.currentThread()
+          .setContextClassLoader(this.getClass().getClassLoader());
         Path pt = new Path(url);
         Configuration conf = new Configuration();
         conf.set(HDFSConfig.HADOOP_FS_DEFAULT_NAME,
@@ -275,8 +273,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
         FileSystem fs = FileSystem.get(conf);
 
         if (!fs.exists(pt)) {
-          throw new IOException("The source file - \"" + url
-            + "\" does not seem to exist in HDFS");
+          throw new IOException(
+            "The source file - \"" + url + "\" does not seem to exist in HDFS");
         }
 
         m_delegate.reset();
@@ -307,8 +305,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
 
     ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
-      Thread.currentThread().setContextClassLoader(
-        this.getClass().getClassLoader());
+      Thread.currentThread()
+        .setContextClassLoader(this.getClass().getClassLoader());
       String url = constructURL();
       Path pt = new Path(url);
 
@@ -321,8 +319,8 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
       FileSystem fs = FileSystem.get(conf);
 
       if (!fs.exists(pt)) {
-        throw new Exception("The source file - \"" + url
-          + "\" does not seem to exist in HDFS");
+        throw new Exception(
+          "The source file - \"" + url + "\" does not seem to exist in HDFS");
       }
 
       m_delegate.reset();
@@ -379,6 +377,14 @@ public class HDFSLoader extends AbstractLoader implements BatchConverter,
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+  @Override
+  public void preExecution() {
+  }
+
+  @Override
+  public void postExecution() {
   }
 
   @Override
