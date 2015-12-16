@@ -20,36 +20,13 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import weka.core.Environment;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.WekaPackageManager;
+import weka.core.packageManagement.Dependency;
+import weka.core.packageManagement.Package;
+import weka.core.packageManagement.PackageConstraint;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -80,16 +57,36 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-
-import org.pentaho.packageManagement.Dependency;
-import org.pentaho.packageManagement.Package;
-import org.pentaho.packageManagement.PackageConstraint;
-
-import weka.core.Environment;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.WekaPackageManager;
-import weka.gui.FileEnvironmentField;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  * A GUI interface the the package management system.
@@ -1135,7 +1132,7 @@ public class PackageManager extends JPanel {
                 if (!toCheck.getTarget().checkConstraint(installedVersion)) {
                   needsUpgrade.add(toCheck.getTarget());
                   Package mostRecent = toCheck.getTarget().getPackage();
-                  if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+                  if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
                     mostRecent =
                       WekaPackageManager
                         .mostRecentVersionWithRespectToConstraint(toCheck
@@ -1155,7 +1152,7 @@ public class PackageManager extends JPanel {
             } else {
               try {
                 Package mostRecent = toCheck.getTarget().getPackage();
-                if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+                if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
                   mostRecent =
                     WekaPackageManager
                       .mostRecentVersionWithRespectToConstraint(toCheck
@@ -1480,7 +1477,7 @@ public class PackageManager extends JPanel {
         m_backB.setEnabled(false);
         URLConnection conn = null;
         URL homeURL = new URL(BROWSER_HOME);
-        org.pentaho.packageManagement.PackageManager pm =
+        weka.core.packageManagement.PackageManager pm =
           WekaPackageManager.getUnderlyingPackageManager();
         if (pm.setProxyAuthentication(homeURL)) {
           conn = homeURL.openConnection(pm.getProxy());

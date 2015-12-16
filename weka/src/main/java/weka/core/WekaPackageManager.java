@@ -20,6 +20,20 @@
 
 package weka.core;
 
+import weka.core.converters.ConverterUtils;
+import weka.core.packageManagement.DefaultPackageManager;
+import weka.core.packageManagement.Dependency;
+import weka.core.packageManagement.Package;
+import weka.core.packageManagement.PackageConstraint;
+import weka.core.packageManagement.PackageManager;
+import weka.core.packageManagement.VersionPackageConstraint;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
+import weka.gui.beans.BeansProperties;
+import weka.gui.beans.KnowledgeFlowApp;
+import weka.gui.beans.PluginManager;
+import weka.gui.explorer.ExplorerDefaults;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -53,21 +67,6 @@ import java.util.Set;
 import java.util.StringTokenizer;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-
-import org.pentaho.packageManagement.DefaultPackageManager;
-import org.pentaho.packageManagement.Dependency;
-import org.pentaho.packageManagement.Package;
-import org.pentaho.packageManagement.PackageConstraint;
-import org.pentaho.packageManagement.PackageManager;
-import org.pentaho.packageManagement.VersionPackageConstraint;
-
-import weka.core.converters.ConverterUtils;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
-import weka.gui.beans.BeansProperties;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.beans.PluginManager;
-import weka.gui.explorer.ExplorerDefaults;
 
 /**
  * Class providing package management and manipulation routines. Also provides a
@@ -2297,7 +2296,7 @@ public class WekaPackageManager {
           if (!toCheck.getTarget().checkConstraint(installedVersion)) {
             needsUpgrade.add(toCheck.getTarget());
             Package mostRecent = toCheck.getTarget().getPackage();
-            if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+            if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
               mostRecent =
                 WekaPackageManager
                   .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());
@@ -2306,7 +2305,7 @@ public class WekaPackageManager {
           }
         } else {
           Package mostRecent = toCheck.getTarget().getPackage();
-          if (toCheck.getTarget() instanceof org.pentaho.packageManagement.VersionPackageConstraint) {
+          if (toCheck.getTarget() instanceof weka.core.packageManagement.VersionPackageConstraint) {
             mostRecent =
               WekaPackageManager
                 .mostRecentVersionWithRespectToConstraint(toCheck.getTarget());

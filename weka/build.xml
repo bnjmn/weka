@@ -620,7 +620,7 @@
         <include name="java_cup/runtime/**/*"/>
       </patternset>
     </unzip>
-    <unzip src="${lib}/packageManager.jar" dest="${build}/classes">
+    <unzip src="${lib}/bounce.jar" dest="${build}/classes">
       <patternset>
         <include name="org/**/*"/>
       </patternset>
