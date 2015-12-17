@@ -747,20 +747,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     return RevisionUtils.extract("$Revision$");
   }
 
-  @Override
-  public void preExecution() throws Exception {
-    if (getClassifier() instanceof CommandlineRunnable) {
-      ((CommandlineRunnable) getClassifier()).preExecution();
-    }
-  }
-
-  @Override
-  public void postExecution() throws Exception {
-    if (getClassifier() instanceof CommandlineRunnable) {
-      ((CommandlineRunnable) getClassifier()).postExecution();
-    }
-  }
-
   /**
    * Main method for testing this class.
    *

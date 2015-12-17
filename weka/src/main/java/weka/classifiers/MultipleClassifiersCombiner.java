@@ -25,11 +25,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
  * Abstract utility class for handling settings common to
@@ -222,5 +219,23 @@ public abstract class MultipleClassifiersCombiner extends AbstractClassifier {
     result.setOwner(this);
 
     return result;
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+    for (Classifier classifier : getClassifiers()) {
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) classifier).preExecution();
+      }
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    for (Classifier classifier : getClassifiers()) {
+      if (classifier instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) classifier).postExecution();
+      }
+    }
   }
 }

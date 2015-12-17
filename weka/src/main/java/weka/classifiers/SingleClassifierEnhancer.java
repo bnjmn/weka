@@ -26,11 +26,8 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import weka.classifiers.rules.ZeroR;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
  * Abstract utility class for handling settings common to meta
@@ -211,5 +208,19 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
     Classifier c = getClassifier();
     return c.getClass().getName() + " "
       + Utils.joinOptions(((OptionHandler)c).getOptions());
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).preExecution();
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    if (getClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getClassifier()).postExecution();
+    }
   }
 }
