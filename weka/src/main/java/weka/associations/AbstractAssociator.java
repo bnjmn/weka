@@ -214,15 +214,19 @@ public abstract class AbstractAssociator
         ((CommandlineRunnable)associator).preExecution();
       }
       System.out.println(AssociatorEvaluation.evaluate(associator, options));
-      if (associator instanceof CommandlineRunnable) {
-        ((CommandlineRunnable)associator).postExecution();
-      }
     } catch (Exception e) {
       if ((e.getMessage() != null)
         && (e.getMessage().indexOf("General options") == -1))
         e.printStackTrace();
       else
         System.err.println(e.getMessage());
+    }
+    try {
+      if (associator instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) associator).postExecution();
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 

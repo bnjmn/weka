@@ -194,8 +194,6 @@ public abstract class ASEvaluation implements Serializable, CapabilitiesHandler,
       evaluator.preExecution();
       System.out
         .println(AttributeSelection.SelectAttributes(evaluator, options));
-      evaluator.postExecution();
-
     } catch (Exception e) {
       String msg = e.toString().toLowerCase();
       if ((msg.indexOf("help requested") == -1)
@@ -203,6 +201,12 @@ public abstract class ASEvaluation implements Serializable, CapabilitiesHandler,
         e.printStackTrace();
       }
       System.err.println(e.getMessage());
+    }
+
+    try {
+      evaluator.postExecution();
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 

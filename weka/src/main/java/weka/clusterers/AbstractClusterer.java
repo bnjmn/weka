@@ -346,14 +346,10 @@ public abstract class AbstractClusterer
   public static void runClusterer(Clusterer clusterer, String[] options) {
     try {
       if (clusterer instanceof CommandlineRunnable) {
-        ((CommandlineRunnable)clusterer).preExecution();
+        ((CommandlineRunnable) clusterer).preExecution();
       }
       System.out
         .println(ClusterEvaluation.evaluateClusterer(clusterer, options));
-
-      if (clusterer instanceof CommandlineRunnable) {
-        ((CommandlineRunnable)clusterer).postExecution();
-      }
     } catch (Exception e) {
       if ((e.getMessage() == null) || ((e.getMessage() != null)
         && (e.getMessage().indexOf("General options") == -1))) {
@@ -361,6 +357,13 @@ public abstract class AbstractClusterer
       } else {
         System.err.println(e.getMessage());
       }
+    }
+    try {
+      if (clusterer instanceof CommandlineRunnable) {
+        ((CommandlineRunnable) clusterer).postExecution();
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 
@@ -384,10 +387,11 @@ public abstract class AbstractClusterer
   @Override
   public void run(Object toRun, String[] options) throws Exception {
     if (!(toRun instanceof Clusterer)) {
-      throw new IllegalArgumentException("Object to execute is not a Clusterer!");
+      throw new IllegalArgumentException(
+        "Object to execute is not a Clusterer!");
     }
 
-    runClusterer((Clusterer)toRun, options);
+    runClusterer((Clusterer) toRun, options);
   }
 
   /**

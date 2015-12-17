@@ -1402,7 +1402,6 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       } else {
         Filter.filterFile(filter, options);
       }
-      filter.postExecution();
     } catch (Exception e) {
       if ((e.toString().indexOf("Help requested") == -1)
         && (e.toString().indexOf("Filter options") == -1)) {
@@ -1410,6 +1409,11 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
       } else {
         System.err.println(e.getMessage());
       }
+    }
+    try {
+      filter.postExecution();
+    } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 
