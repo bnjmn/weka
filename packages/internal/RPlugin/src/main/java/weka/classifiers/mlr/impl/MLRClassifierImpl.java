@@ -1520,8 +1520,6 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       throw new Exception(ex.getMessage());
     }
 
-    m_counter.set(5);
-
     checkForErrors();
     RSession.releaseSession(this);
 
