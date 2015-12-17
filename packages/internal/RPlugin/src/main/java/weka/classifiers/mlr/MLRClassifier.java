@@ -421,21 +421,6 @@ public class MLRClassifier extends RandomizableClassifier
     return ((OptionHandler) m_delegate).getOptions();
   }
 
-  public void setLaunchedFromCommandLine(boolean l) {
-    if (m_delegate == null) {
-      init();
-    }
-
-    try {
-      Method m = m_delegate.getClass().getDeclaredMethod(
-        "setLaunchedFromCommandLine", new Class[] { Boolean.class });
-
-      m.invoke(m_delegate, new Object[] { new Boolean(l) });
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
-  }
-
   @Override
   public String debugTipText() {
     if (m_delegate == null) {
@@ -994,11 +979,12 @@ public class MLRClassifier extends RandomizableClassifier
 
   @Override
   public void preExecution() {
-    setLaunchedFromCommandLine(true);
   }
 
   @Override
   public void postExecution() {
-    closeREngine();
+    if (System.getProperty("r.shutdown", "false").equalsIgnoreCase("true")) {
+      closeREngine();
+    }
   }
 }
