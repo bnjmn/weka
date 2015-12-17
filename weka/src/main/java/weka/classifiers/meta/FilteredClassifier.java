@@ -443,9 +443,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
-    if (getClassifier() instanceof CommandlineRunnable) {
-      ((CommandlineRunnable) getClassifier()).preExecution();
-    }
   }
 
   /**
