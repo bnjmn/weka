@@ -31,19 +31,9 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelMultipleClassifiersCombiner;
 import weka.classifiers.rules.ZeroR;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
+import weka.core.*;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 
 /**
  <!-- globalinfo-start -->
@@ -526,7 +516,23 @@ public class Stacking
     metaInstance.setDataset(m_MetaFormat);
     return metaInstance;
   }
-  
+
+  @Override
+  public void preExecution() throws Exception {
+    super.preExecution();
+    if (getMetaClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getMetaClassifier()).preExecution();
+    }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+    super.postExecution();
+    if (getMetaClassifier() instanceof CommandlineRunnable) {
+      ((CommandlineRunnable) getMetaClassifier()).postExecution();
+    }
+  }
+
   /**
    * Returns the revision string.
    * 
