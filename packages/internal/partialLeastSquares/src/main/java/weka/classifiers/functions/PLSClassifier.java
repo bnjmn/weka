@@ -15,7 +15,7 @@
 
 /*
  * PLSClassifier.java
- * Copyright (C) 2006 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.functions;
@@ -33,6 +33,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.PLSFilter;
 
@@ -101,7 +102,8 @@ import weka.filters.supervised.attribute.PLSFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class PLSClassifier extends AbstractClassifier {
+public class PLSClassifier extends AbstractClassifier
+  implements WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4819775160590973256L;
