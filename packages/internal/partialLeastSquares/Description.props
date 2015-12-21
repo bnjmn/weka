@@ -9,7 +9,7 @@ PackageName=partialLeastSquares
 Version=1.0.3
 
 #Date
-Date=2013-12-03
+Date=2015-12-21
 
 # Title (required)
 Title=Partial least squares filter and classifier for performing PLS regression.
