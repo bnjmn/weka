@@ -21,16 +21,17 @@
 
 package weka.gui;
 
+import weka.core.Utils;
+
+import javax.swing.JOptionPane;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
+import javax.swing.UIManager.LookAndFeelInfo;
+import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
 import java.util.Properties;
-
-import javax.swing.JOptionPane;
-import javax.swing.UIManager;
-import javax.swing.UIManager.LookAndFeelInfo;
-
-import weka.core.Utils;
 
 /**
  * A little helper class for setting the Look and Feel of the user interface.
@@ -96,6 +97,14 @@ public class LookAndFeel {
               return false;
             }
           });
+      }
+
+      // workaround for scrollbar handle disappearing bug in Nimbus LAF:
+      // https://bugs.openjdk.java.net/browse/JDK-8134828
+      if (classname.toLowerCase().contains("nimbus")) {
+        javax.swing.LookAndFeel lookAndFeel = UIManager.getLookAndFeel();
+        UIDefaults defaults = lookAndFeel.getDefaults();
+        defaults.put("ScrollBar.minimumThumbSize", new Dimension(30, 30));
       }
     } catch (Exception e) {
       e.printStackTrace();
