@@ -30,13 +30,16 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SerializedObject;
 import weka.core.Utils;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.CapabilitiesHandler;
 import weka.filters.AllFilter;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.AddID;
 
 /**
  * <!-- globalinfo-start -->
- * Applies the given filter before calling the given neighbour search method. The filter must not change the size of the dataset or the order of the instances! Also, the range  setting is specified for the distance function is ignored: all attributes are used  for the distance calculation.
+ * Applies the given filter before calling the given neighbour search method. The filter must not change the size of the dataset or the order of the instances! Also, the range setting that is specified for the distance function is ignored: all attributes are used for the distance calculation.
  * <p/>
  * <!-- globalinfo-end -->
  *
@@ -44,7 +47,7 @@ import weka.filters.unsupervised.attribute.AddID;
  * Valid options are: <p/>
  * 
  * <pre> -F
- *  The filter to use. (default: weka.unsupervised.attribute.RandomProjection</pre>
+ *  The filter to use. (default: weka.filters.AllFilter)</pre>
  * 
  * <pre> -S
  *  The search method to use. (default: weka.core.neighboursearch.LinearNNSearch)</pre>
@@ -81,7 +84,7 @@ import weka.filters.unsupervised.attribute.AddID;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 8034 $
  */
-public class FilteredNeighbourSearch extends NearestNeighbourSearch {
+public class FilteredNeighbourSearch extends NearestNeighbourSearch implements CapabilitiesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = 1369174644087067375L;
@@ -102,6 +105,22 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
   protected NearestNeighbourSearch m_ModifiedSearchMethod = null;
 
   /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+ 
+   Capabilities result = getFilter().getCapabilities();
+
+    // set dependencies
+    for (Capability cap : Capability.values())
+      result.enableDependency(cap);
+
+    return result;
+  }
+
+  /**
    * Sets the instances to build the filtering model from.
    * 
    * @param insts the Instances object
@@ -112,6 +131,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
       super.setInstances(data);
 
       // Apply user-specified filter
+      getCapabilities().testWithFail(data);
       Instances filteredData = new Instances(data);
       getFilter().setInputFormat(filteredData);
       filteredData = Filter.useFilter(data, getFilter());
@@ -152,8 +172,8 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
   public String globalInfo() {
     return "Applies the given filter before calling the given neighbour search method. The filter "
       + "must not change the size of the dataset or the order of the instances! Also, the range "
-      + " setting is specified for the distance function is ignored: all attributes are used "
-      + " for the distance calculation.";
+      + "setting that is specified for the distance function is ignored: all attributes are used "
+      + "for the distance calculation.";
   }
 
   /**
@@ -223,7 +243,7 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
 
     result
       .add(new Option(
-        "\tThe filter to use. (default: weka.unsupervised.attribute.RandomProjection",
+        "\tThe filter to use. (default: weka.filters.AllFilter",
         "F", 1, "-F"));
 
     result
@@ -425,7 +445,8 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
   }
 
   /**
-   * Just callsthe update method.
+   * Updates the instance info in the underlying search method, once the
+   * instance has been filtered.
    * 
    * @param ins The instance to add the information of.
    */
@@ -433,7 +454,9 @@ public class FilteredNeighbourSearch extends NearestNeighbourSearch {
   public void addInstanceInfo(Instance ins) {
     if (m_Instances != null)
       try {
-        update(ins);
+        getFilter().input(ins);
+        m_AddID.input(getFilter().output());
+        m_ModifiedSearchMethod.addInstanceInfo(m_AddID.output());
       } catch (Exception ex) {
         ex.printStackTrace();
       }
