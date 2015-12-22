@@ -15,18 +15,14 @@
 
 /*
  *    GaussianProcesses.java
- *    Copyright (C) 2005-2012 University of Waikato
+ *    Copyright (C) 2005-2012,2015 University of Waikato
  */
 
 package weka.classifiers.functions;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import weka.classifiers.AbstractClassifier;
 import weka.classifiers.ConditionalDensityEstimator;
 import weka.classifiers.IntervalEstimator;
+import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.functions.supportVector.CachedKernel;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
@@ -36,6 +32,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.ResampleUtils;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -52,91 +49,92 @@ import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
+
 /**
- * <!-- globalinfo-start --> Implements Gaussian processes for regression
- * without hyperparameter-tuning. To make choosing an appropriate noise level
- * easier, this implementation applies normalization/standardization to the
- * target attribute as well (if normalization/standardizaton is turned on).
- * Missing values are replaced by the global mean/mode. Nominal attributes are
- * converted to binary ones. <!-- globalinfo-end -->
+ * <!-- globalinfo-start -->
+ * * Implements Gaussian processes for regression without hyperparameter-tuning. To make choosing an appropriate noise level easier, this implementation applies normalization/standardization to the target attribute as well as the other attributes (if  normalization/standardizaton is turned on). Missing values are replaced by the global mean/mode. Nominal attributes are converted to binary ones. Note that kernel caching is turned off if the kernel used implements CachedKernel.
+ * * <br><br>
+ * <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * 
- * <pre>
- *        @misc{Mackay1998,
- *          address = {Dept. of Physics, Cambridge University, UK},
- *          author = {David J.C. Mackay},
- *          title = {Introduction to Gaussian Processes},
- *          year = {1998},
- *          PS = {http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz}
- *       }
- * </pre>
- * 
- * <p/>
+ * <!-- technical-bibtex-start -->
+ * * BibTeX:
+ * * <pre>
+ * * &#64;misc{Mackay1998,
+ * *    address = {Dept. of Physics, Cambridge University, UK},
+ * *    author = {David J.C. Mackay},
+ * *    title = {Introduction to Gaussian Processes},
+ * *    year = {1998},
+ * *    PS = {http://wol.ra.phy.cam.ac.uk/mackay/gpB.ps.gz}
+ * * }
+ * * </pre>
+ * * <br><br>
  * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * <p/>
- * 
- * <pre>
- *       -D
- *        If set, classifier is run in debug mode and
- *        may output additional info to the console
- * </pre>
- * 
- * <pre>
- *       -L &lt;double&gt;
- *        Level of Gaussian Noise. (default 0.1)
- * </pre>
- * 
- * <pre>
- *       -N
- *        Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)
- * </pre>
- * 
- * <pre>
- *       -K &lt;classname and parameters&gt;
- *        The Kernel to use.
- *        (default: weka.classifiers.functions.supportVector.PolyKernel)
- * </pre>
- * 
- * <pre>
- * 
- *       Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
- * </pre>
- * 
- * <pre>
- *       -D
- *        Enables debugging output (if available) to be printed.
- *        (default: off)
- * </pre>
- * 
- * <pre>
- *       -no-checks
- *        Turns off all checks - use with caution!
- *        (default: checks on)
- * </pre>
- * 
- * <pre>
- *       -C &lt;num&gt;
- *        The size of the cache (a prime number).
- *        (default: 250007)
- * </pre>
- * 
- * <pre>
- *       -G &lt;num&gt;
- *        The Gamma parameter.
- *        (default: 0.01)
- * </pre>
- * 
+ * <!-- options-start -->
+ * * Valid options are: <p>
+ * * 
+ * * <pre> -L &lt;double&gt;
+ * *  Level of Gaussian Noise wrt transformed target. (default 1)</pre>
+ * * 
+ * * <pre> -N
+ * *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ * * 
+ * * <pre> -K &lt;classname and parameters&gt;
+ * *  The Kernel to use.
+ * *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ * * 
+ * * <pre> -S &lt;num&gt;
+ * *  Random number seed.
+ * *  (default 1)</pre>
+ * * 
+ * * <pre> -output-debug-info
+ * *  If set, classifier is run in debug mode and
+ * *  may output additional info to the console</pre>
+ * * 
+ * * <pre> -do-not-check-capabilities
+ * *  If set, classifier capabilities are not checked before classifier is built
+ * *  (use with caution).</pre>
+ * * 
+ * * <pre> -num-decimal-places
+ * *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * * 
+ * * <pre> 
+ * * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+ * * </pre>
+ * * 
+ * * <pre> -E &lt;num&gt;
+ * *  The Exponent to use.
+ * *  (default: 1.0)</pre>
+ * * 
+ * * <pre> -L
+ * *  Use lower-order terms.
+ * *  (default: no)</pre>
+ * * 
+ * * <pre> -C &lt;num&gt;
+ * *  The size of the cache (a prime number), 0 for full cache and 
+ * *  -1 to turn it off.
+ * *  (default: 250007)</pre>
+ * * 
+ * * <pre> -output-debug-info
+ * *  Enables debugging output (if available) to be printed.
+ * *  (default: off)</pre>
+ * * 
+ * * <pre> -no-checks
+ * *  Turns off all checks - use with caution!
+ * *  (default: checks on)</pre>
+ * * 
  * <!-- options-end -->
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class GaussianProcesses extends AbstractClassifier implements
-  OptionHandler, IntervalEstimator, ConditionalDensityEstimator,
+public class GaussianProcesses extends RandomizableClassifier implements
+  IntervalEstimator, ConditionalDensityEstimator,
   TechnicalInformationHandler, WeightedInstancesHandler {
 
   /** for serialization */
@@ -283,7 +281,14 @@ public class GaussianProcesses extends AbstractClassifier implements
   @Override
   public void buildClassifier(Instances insts) throws Exception {
 
-    /* check the set of training instances */
+    // do we need to resample?
+    if (ResampleUtils.hasInstanceWeights(insts)) {
+      if (getDebug())
+	System.err.println(getClass().getName() + ": resampling training data");
+      insts = insts.resampleWithWeights(new Random(m_Seed));
+    }
+
+    // check the set of training instances
     if (!m_checksTurnedOff) {
       // can classifier handle the data?
       getCapabilities().testWithFail(insts);
@@ -603,7 +608,7 @@ public class GaussianProcesses extends AbstractClassifier implements
    * Returns natural logarithm of density estimate for given value based on
    * given instance.
    * 
-   * @param instance the instance to make the prediction for.
+   * @param inst the instance to make the prediction for.
    * @param value the value to make the prediction for.
    * @return the natural logarithm of the density estimate
    * @exception Exception if the density cannot be computed
@@ -670,65 +675,59 @@ public class GaussianProcesses extends AbstractClassifier implements
    * Parses a given list of options.
    * <p/>
    * 
-   * <!-- options-start --> Valid options are:
-   * <p/>
-   * 
-   * <pre>
-   *       -D
-   *        If set, classifier is run in debug mode and
-   *        may output additional info to the console
-   * </pre>
-   * 
-   * <pre>
-   *       -L &lt;double&gt;
-   *        Level of Gaussian Noise. (default 0.1)
-   * </pre>
-   * 
-   * <pre>
-   *       -M &lt;double&gt;
-   *        Level of Gaussian Noise for the class. (default 0.1)
-   * </pre>
-   * 
-   * <pre>
-   *       -N
-   *        Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)
-   * </pre>
-   * 
-   * <pre>
-   *       -K &lt;classname and parameters&gt;
-   *        The Kernel to use.
-   *        (default: weka.classifiers.functions.supportVector.PolyKernel)
-   * </pre>
-   * 
-   * <pre>
-   * 
-   *       Options specific to kernel weka.classifiers.functions.supportVector.RBFKernel:
-   * </pre>
-   * 
-   * <pre>
-   *       -D
-   *        Enables debugging output (if available) to be printed.
-   *        (default: off)
-   * </pre>
-   * 
-   * <pre>
-   *       -no-checks
-   *        Turns off all checks - use with caution!
-   *        (default: checks on)
-   * </pre>
-   * 
-   * <pre>
-   *       -C &lt;num&gt;
-   *        The size of the cache (a prime number).
-   *        (default: 250007)
-   * </pre>
-   * 
-   * <pre>
-   *       -G &lt;num&gt;
-   *        The Gamma parameter.
-   *        (default: 0.01)
-   * </pre>
-   * 
+   * <!-- options-start -->
+   * * Valid options are: <p>
+   * * 
+   * * <pre> -L &lt;double&gt;
+   * *  Level of Gaussian Noise wrt transformed target. (default 1)</pre>
+   * * 
+   * * <pre> -N
+   * *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   * * 
+   * * <pre> -K &lt;classname and parameters&gt;
+   * *  The Kernel to use.
+   * *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   * * 
+   * * <pre> -S &lt;num&gt;
+   * *  Random number seed.
+   * *  (default 1)</pre>
+   * * 
+   * * <pre> -output-debug-info
+   * *  If set, classifier is run in debug mode and
+   * *  may output additional info to the console</pre>
+   * * 
+   * * <pre> -do-not-check-capabilities
+   * *  If set, classifier capabilities are not checked before classifier is built
+   * *  (use with caution).</pre>
+   * * 
+   * * <pre> -num-decimal-places
+   * *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+   * * 
+   * * <pre> 
+   * * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+   * * </pre>
+   * * 
+   * * <pre> -E &lt;num&gt;
+   * *  The Exponent to use.
+   * *  (default: 1.0)</pre>
+   * * 
+   * * <pre> -L
+   * *  Use lower-order terms.
+   * *  (default: no)</pre>
+   * * 
+   * * <pre> -C &lt;num&gt;
+   * *  The size of the cache (a prime number), 0 for full cache and 
+   * *  -1 to turn it off.
+   * *  (default: 250007)</pre>
+   * * 
+   * * <pre> -output-debug-info
+   * *  Enables debugging output (if available) to be printed.
+   * *  (default: off)</pre>
+   * * 
+   * * <pre> -no-checks
+   * *  Turns off all checks - use with caution!
+   * *  (default: checks on)</pre>
+   * * 
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
