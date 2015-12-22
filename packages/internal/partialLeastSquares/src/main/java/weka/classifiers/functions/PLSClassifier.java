@@ -22,9 +22,10 @@ package weka.classifiers.functions;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Random;
 import java.util.Vector;
 
-import weka.classifiers.AbstractClassifier;
+import weka.classifiers.RandomizableClassifier;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -102,7 +103,7 @@ import weka.filters.supervised.attribute.PLSFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class PLSClassifier extends AbstractClassifier
+public class PLSClassifier extends RandomizableClassifier
   implements WeightedInstancesHandler {
 
   /** for serialization */
@@ -313,6 +314,20 @@ public class PLSClassifier extends AbstractClassifier
    */
   @Override
   public void buildClassifier(Instances data) throws Exception {
+    // do we need to resample?
+    boolean resample = false;
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (data.instance(i).weight() != 1.0) {
+        resample = true;
+        break;
+      }
+    }
+    if (resample) {
+      if (getDebug())
+	System.err.println(getClass().getName() + ": resampling training data");
+      data = data.resampleWithWeights(new Random(m_Seed));
+    }
+
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
