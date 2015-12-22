@@ -41,23 +41,6 @@ import org.rosuda.REngine.RList;
  */
 public class RUtils {
 
-  public static String cleanse(String q) {
-    // return "'" + q + "'";
-
-    q = q.replace('-', '.').replace(' ', '.').replace("\\", "\\\\");
-    q = q.replace("%", "\\%").replace("'", "\\'").replace("\n", "\\n");
-    q = q.replace("\r", "\\r").replace("\"", "\\\"");
-    q = q.replace("$", "_dollar_").replace("#", "_hash_").replace("(", "_op_");
-    q = q.replace(")", "_cp_").replace("[", "_ob_").replace("]", "_cb_");
-    q = q.replace("{", "_obr_").replace("}", "_cbr_");
-    q = q.replace("!", "_exl_").replace(";", "_semiC_");
-    q = q.replace("/", "_div_").replace("@", "_at_").replace("+", "_plus_");
-    q = q.replace("=", "_eq_").replace("?", "_qm_");
-    q = q.replace( ">", "_gr_" ).replace( "<", "_lt_" );
-
-    return q;
-  }
-
   /**
    * Transfer a set of instances into a R data frame in the workspace
    * 
@@ -76,6 +59,36 @@ public class RUtils {
 
     // checkSessionHolder(requester);
 
+    // First, clean up all attribute names using R's make.names() function
+    StringBuffer sb = new StringBuffer("make.names(c(");
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      Attribute att = insts.attribute(i);
+      if (i > 0) {
+        sb.append(",");
+      }
+      sb.append("\"" + att.name() + "\"");
+    }
+    sb.append("), unique = TRUE)");
+    String[] cleanedAttNames = session.parseAndEval(requester, sb.toString()).asStrings();
+
+    // Now, clean up all values
+    String[][] cleanedAttValues = new String[insts.numAttributes()][];
+    for (int i = 0; i < insts.numAttributes(); i++) {
+      if (insts.attribute(i).isNominal()) {
+        sb = new StringBuffer("make.names(c(");
+        Attribute att = insts.attribute(i);
+        for (int j = 0; j < att.numValues(); j++) {
+          if (j > 0) {
+            sb.append(",");
+          }
+          sb.append("\"" + att.value(j) + "\"");
+
+        }
+        sb.append("), unique = TRUE)");
+        cleanedAttValues[i] = session.parseAndEval(requester, sb.toString()).asStrings();
+      }
+    }
+
     // transfer data to R, one column at a time
     for (int i = 0; i < insts.numAttributes(); i++) {
       Attribute att = insts.attribute(i);
@@ -89,13 +102,13 @@ public class RUtils {
             d[j] = insts.instance(j).value(i);
           }
         }
-        session.assign(requester, cleanse("v_" + att.name()), d);
+        session.assign(requester, cleanedAttNames[i], d);
       } else if (att.isNominal()) {
         int[] d = new int[insts.numInstances()];
         String[] labels = new String[att.numValues()];
         int[] levels = new int[att.numValues()];
         for (int j = 0; j < att.numValues(); j++) {
-          labels[j] = cleanse(att.value(j));
+          labels[j] = cleanedAttValues[i][j];
           levels[j] = j;
         }
         for (int j = 0; j < insts.numInstances(); j++) {
@@ -105,9 +118,9 @@ public class RUtils {
             d[j] = (int) insts.instance(j).value(i);
           }
         }
-        session.assign(requester, cleanse("v_" + att.name()), d);
-        session.assign(requester, cleanse("v_" + att.name() + "_labels"), labels);
-        session.assign(requester, cleanse("v_" + att.name() + "_levels"), levels);
+        session.assign(requester, cleanedAttNames[i], d);
+        session.assign(requester, cleanedAttNames[i] + "_labels", labels);
+        session.assign(requester, cleanedAttNames[i] + "_levels", levels);
         /*
          * System.err.println("Evaluating : " + quote(att.name() + "_factor") +
          * "=factor(" + quote(att.name()) + ",labels=" + quote(att.name() +
@@ -115,8 +128,8 @@ public class RUtils {
          */
 
         session.parseAndEval( requester,
-          cleanse( "v_" + att.name() + "_factor" ) + "=factor(" + cleanse( "v_" + att.name() ) + ",levels=" + cleanse(
-            "v_" + att.name() + "_levels" ) + ",labels=" + cleanse( "v_" + att.name() + "_labels" ) + ")" );
+                cleanedAttNames[i] + "_factor"  + "=factor(" + cleanedAttNames[i] + ",levels=" +
+                        cleanedAttNames[i] + "_levels"  + ",labels=" + cleanedAttNames[i] + "_labels"  + ")" );
       } else if (att.isString()) {
         String[] d = new String[insts.numInstances()];
         for (int j = 0; j < insts.numInstances(); j++) {
@@ -127,7 +140,7 @@ public class RUtils {
             d[j] = insts.instance(j).stringValue(i);
           }
         }
-        session.assign(requester, cleanse("v_" + att.name()), d);
+        session.assign(requester, cleanedAttNames[i], d);
       }
     }
 
@@ -144,10 +157,10 @@ public class RUtils {
       Attribute att = insts.attribute(i);
 
       if (att.isNumeric() || att.isString()) {
-        temp.append("\"" + cleanse(att.name()) + "\"" +  "=" + cleanse("v_" + att.name()));
+        temp.append("\"" + cleanedAttNames[i] + "\"" +  "=" + cleanedAttNames[i]);
       } else if (att.isNominal()) {
         temp
-          .append("\"" + cleanse(att.name()) +"\"" + "=" + cleanse("v_" + att.name() + "_factor"));
+          .append("\"" + cleanedAttNames[i] +"\"" + "=" + cleanedAttNames[i] + "_factor");
       }
 
       if (i < insts.numAttributes() - 1) {
@@ -164,9 +177,9 @@ public class RUtils {
       Attribute att = insts.attribute(i);
 
       if (att.isNumeric() || att.isString()) {
-        temp.append(cleanse("v_" + att.name()));
+        temp.append(cleanedAttNames[i]);
       } else if (att.isNominal()) {
-        temp.append(cleanse("v_" + att.name() + "_factor"));
+        temp.append(cleanedAttNames[i] + "_factor");
       }
 
       if (i < insts.numAttributes() - 1) {

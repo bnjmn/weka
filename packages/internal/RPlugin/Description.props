@@ -5,10 +5,10 @@
 PackageName=RPlugin
 
 # Version (required)
-Version=1.1.13
+Version=1.1.14
 
 #Date (year-month-day)
-Date=2015-12-12
+Date=2015-12-23
 
 # Title (required)
 Title=Execute R Scripts
@@ -29,13 +29,13 @@ License=LGPL 3.0
 Description=Provides a Knowledge Flow component for executing an R script and a wrapper classifier for the MLR (machine learning in R) R package. Also provides a Knowledge Flow perspective and Explorer plugin that implements an interactive R console and allows visualization of graphics produced by R. IMPORTANT: This package requires the R system (>= 3.0.0) to be installed on your computer before it can be used. Before using this package you must manually install the R package "rJava" by typing install.packages("rJava") from the R console. Furthermore, the environment variable R_HOME must be set to point to the installation directory for R and the R executable must be in the PATH environment variable. This package will attempt to locate the JRI native library (which is installed  as part of rJava) automatically under Windows and Mac OS X. For this to succeed  under Windows it is necessary for the R_LIBS_USER environment variable to be set to point to the user's personal R packages directory. Alternatively, the jri.native.library  java property can be set to point directly to the jri native library file, or the  java.library.path can be set to point to the directory that contains the jri native library file. More information on configuring Java to access JRI under various OS can be found at http://www.rforge.net/JRI/ \n\nExample Knowledge Flow template files demonstrating the R components can be found in ${WEKA_HOME}/packages/RPlugin/templates.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.13.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/RPlugin1.1.14.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2012/07/r-integration-in-weka.html
 
 # Changes in this release
-Changes=Updated for changes to the CommandlineRunnable interface. MLRClassifier can now be used from the command line as a base classifier for meta schemes. Previously, it could be used in this way but control was not released after execution.
+Changes=Attribute names and values are now cleaned up using R's make.names function, so more datasets can now be successfully transferred into the R environment.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
