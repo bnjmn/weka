@@ -22,6 +22,7 @@
 package weka.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
@@ -69,16 +70,23 @@ import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeEvaluator;
 import weka.attributeSelection.AttributeSelection;
 import weka.attributeSelection.AttributeTransformer;
+import weka.attributeSelection.BestFirst;
+import weka.attributeSelection.CfsSubsetEval;
 import weka.attributeSelection.Ranker;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.Settings;
 import weka.core.Utils;
+import weka.gui.AbstractPerspective;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
+import weka.gui.PerspectiveInfo;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -102,7 +110,11 @@ import weka.gui.visualize.MatrixPanel;
  * @author Mark Hall (mhall@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class AttributeSelectionPanel extends JPanel implements
+@PerspectiveInfo(ID = "weka.gui.explorer.attributeselectionpanel",
+  title = "Select attributes",
+  toolTipText = "Determine relevance of attributes",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class AttributeSelectionPanel extends AbstractPerspective implements
   CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization */
@@ -112,10 +124,12 @@ public class AttributeSelectionPanel extends JPanel implements
   protected Explorer m_Explorer = null;
 
   /** Lets the user configure the attribute evaluator */
-  protected GenericObjectEditor m_AttributeEvaluatorEditor = new GenericObjectEditor();
+  protected GenericObjectEditor m_AttributeEvaluatorEditor =
+    new GenericObjectEditor();
 
   /** Lets the user configure the search method */
-  protected GenericObjectEditor m_AttributeSearchEditor = new GenericObjectEditor();
+  protected GenericObjectEditor m_AttributeSearchEditor =
+    new GenericObjectEditor();
 
   /** The panel showing the current attribute evaluation method */
   protected PropertyPanel m_AEEPanel = new PropertyPanel(
@@ -185,6 +199,9 @@ public class AttributeSelectionPanel extends JPanel implements
   /** A thread that attribute selection runs in */
   protected Thread m_RunThread;
 
+  /** True if startup settings have been applied */
+  protected boolean m_initialSettingsSet;
+
   /* Register the property editors we need */
   static {
     GenericObjectEditor.registerEditors();
@@ -207,8 +224,10 @@ public class AttributeSelectionPanel extends JPanel implements
         }
       }
     });
-    m_History.setBorder(BorderFactory
+    JPanel historyHolder = new JPanel(new BorderLayout());
+    historyHolder.setBorder(BorderFactory
       .createTitledBorder("Result list (right-click for options)"));
+    historyHolder.add(m_History, BorderLayout.CENTER);
     m_AttributeEvaluatorEditor.setClassType(ASEvaluation.class);
     m_AttributeEvaluatorEditor.setValue(ExplorerDefaults.getASEvaluator());
     m_AttributeEvaluatorEditor
@@ -218,12 +237,14 @@ public class AttributeSelectionPanel extends JPanel implements
           if (m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator) {
             if (!(m_AttributeSearchEditor.getValue() instanceof Ranker)) {
               Object backup = m_AttributeEvaluatorEditor.getBackup();
-              int result = JOptionPane.showConfirmDialog(null,
-                "You must use use the Ranker search method "
-                  + "in order to use\n"
-                  + m_AttributeEvaluatorEditor.getValue().getClass().getName()
-                  + ".\nShould I select the Ranker search method for you?",
-                "Alert!", JOptionPane.YES_NO_OPTION);
+              int result =
+                JOptionPane.showConfirmDialog(null,
+                  "You must use use the Ranker search method "
+                    + "in order to use\n"
+                    + m_AttributeEvaluatorEditor.getValue().getClass()
+                      .getName()
+                    + ".\nShould I select the Ranker search method for you?",
+                  "Alert!", JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeSearchEditor.setValue(new Ranker());
               } else {
@@ -236,17 +257,18 @@ public class AttributeSelectionPanel extends JPanel implements
           } else {
             if (m_AttributeSearchEditor.getValue() instanceof Ranker) {
               Object backup = m_AttributeEvaluatorEditor.getBackup();
-              int result = JOptionPane
-                .showConfirmDialog(
-                  null,
-                  "You must use use a search method that explores \n"
-                    + "the space of attribute subsets (such as GreedyStepwise) in "
-                    + "order to use\n"
-                    + m_AttributeEvaluatorEditor.getValue().getClass()
-                      .getName()
-                    + ".\nShould I select the GreedyStepwise search method for "
-                    + "you?\n(you can always switch to a different method afterwards)",
-                  "Alert!", JOptionPane.YES_NO_OPTION);
+              int result =
+                JOptionPane
+                  .showConfirmDialog(
+                    null,
+                    "You must use use a search method that explores \n"
+                      + "the space of attribute subsets (such as GreedyStepwise) in "
+                      + "order to use\n"
+                      + m_AttributeEvaluatorEditor.getValue().getClass()
+                        .getName()
+                      + ".\nShould I select the GreedyStepwise search method for "
+                      + "you?\n(you can always switch to a different method afterwards)",
+                    "Alert!", JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeSearchEditor
                   .setValue(new weka.attributeSelection.GreedyStepwise());
@@ -262,15 +284,15 @@ public class AttributeSelectionPanel extends JPanel implements
 
           m_StartBut.setEnabled(true);
           // check capabilities...
-          Capabilities currentFilter = m_AttributeEvaluatorEditor
-            .getCapabilitiesFilter();
-          ASEvaluation evaluator = (ASEvaluation) m_AttributeEvaluatorEditor
-            .getValue();
+          Capabilities currentFilter =
+            m_AttributeEvaluatorEditor.getCapabilitiesFilter();
+          ASEvaluation evaluator =
+            (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
           Capabilities currentSchemeCapabilities = null;
           if (evaluator != null && currentFilter != null
             && (evaluator instanceof CapabilitiesHandler)) {
-            currentSchemeCapabilities = ((CapabilitiesHandler) evaluator)
-              .getCapabilities();
+            currentSchemeCapabilities =
+              ((CapabilitiesHandler) evaluator).getCapabilities();
 
             if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
               && !currentSchemeCapabilities.supports(currentFilter)) {
@@ -290,13 +312,16 @@ public class AttributeSelectionPanel extends JPanel implements
           if (m_AttributeSearchEditor.getValue() instanceof Ranker) {
             if (!(m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator)) {
               Object backup = m_AttributeSearchEditor.getBackup();
-              int result = JOptionPane.showConfirmDialog(null,
-                "You must use use an evaluator that evaluates\n"
-                  + "single attributes (such as InfoGain) in order to use\n"
-                  + "the Ranker. Should I select the InfoGain evaluator "
-                  + "for you?\n"
-                  + "(You can always switch to a different method afterwards)",
-                "Alert!", JOptionPane.YES_NO_OPTION);
+              int result =
+                JOptionPane
+                  .showConfirmDialog(
+                    null,
+                    "You must use use an evaluator that evaluates\n"
+                      + "single attributes (such as InfoGain) in order to use\n"
+                      + "the Ranker. Should I select the InfoGain evaluator "
+                      + "for you?\n"
+                      + "(You can always switch to a different method afterwards)",
+                    "Alert!", JOptionPane.YES_NO_OPTION);
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeEvaluatorEditor
                   .setValue(new weka.attributeSelection.InfoGainAttributeEval());
@@ -310,16 +335,17 @@ public class AttributeSelectionPanel extends JPanel implements
           } else {
             if (m_AttributeEvaluatorEditor.getValue() instanceof AttributeEvaluator) {
               Object backup = m_AttributeSearchEditor.getBackup();
-              int result = JOptionPane
-                .showConfirmDialog(
-                  null,
-                  "You must use use an evaluator that evaluates\n"
-                    + "subsets of attributes (such as CFS) in order to use\n"
-                    + m_AttributeEvaluatorEditor.getValue().getClass()
-                      .getName()
-                    + ".\nShould I select the CFS subset evaluator for you?"
-                    + "\n(you can always switch to a different method afterwards)",
-                  "Alert!", JOptionPane.YES_NO_OPTION);
+              int result =
+                JOptionPane
+                  .showConfirmDialog(
+                    null,
+                    "You must use use an evaluator that evaluates\n"
+                      + "subsets of attributes (such as CFS) in order to use\n"
+                      + m_AttributeEvaluatorEditor.getValue().getClass()
+                        .getName()
+                      + ".\nShould I select the CFS subset evaluator for you?"
+                      + "\n(you can always switch to a different method afterwards)",
+                    "Alert!", JOptionPane.YES_NO_OPTION);
 
               if (result == JOptionPane.YES_OPTION) {
                 m_AttributeEvaluatorEditor
@@ -547,8 +573,8 @@ public class AttributeSelectionPanel extends JPanel implements
     gbC.gridx = 0;
     gbC.weightx = 0;
     gbC.weighty = 100;
-    gbL.setConstraints(m_History, gbC);
-    mondo.add(m_History);
+    gbL.setConstraints(historyHolder, gbC);
+    mondo.add(historyHolder);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;
@@ -608,8 +634,8 @@ public class AttributeSelectionPanel extends JPanel implements
     String[] attribNames = new String[m_Instances.numAttributes() + 1];
     attribNames[0] = "No class";
     for (int i = 0; i < inst.numAttributes(); i++) {
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
-        + ") ";
+      String type =
+        "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       String attnm = m_Instances.attribute(i).name();
       attribNames[i + 1] = type + attnm;
     }
@@ -649,14 +675,14 @@ public class AttributeSelectionPanel extends JPanel implements
           int numFolds = 10;
           int seed = 1;
           int classIndex = m_ClassCombo.getSelectedIndex() - 1;
-          ASEvaluation evaluator = (ASEvaluation) m_AttributeEvaluatorEditor
-            .getValue();
+          ASEvaluation evaluator =
+            (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
 
           ASSearch search = (ASSearch) m_AttributeSearchEditor.getValue();
 
           StringBuffer outBuff = new StringBuffer();
-          String name = (new SimpleDateFormat("HH:mm:ss - "))
-            .format(new Date());
+          String name =
+            (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
           String sname = search.getClass().getName();
           if (sname.startsWith("weka.attributeSelection.")) {
             name += sname.substring("weka.attributeSelection.".length());
@@ -665,8 +691,8 @@ public class AttributeSelectionPanel extends JPanel implements
           }
           String ename = evaluator.getClass().getName();
           if (ename.startsWith("weka.attributeSelection.")) {
-            name += (" + " + ename.substring("weka.attributeSelection."
-              .length()));
+            name +=
+              (" + " + ename.substring("weka.attributeSelection.".length()));
           } else {
             name += (" + " + ename);
           }
@@ -691,24 +717,29 @@ public class AttributeSelectionPanel extends JPanel implements
               list.add(element);
             }
           }
-          cmd = ename + " "
-            + Utils.joinOptions(list.toArray(new String[list.size()]));
+          cmd =
+            ename + " "
+              + Utils.joinOptions(list.toArray(new String[list.size()]));
 
           // 2. filter command
-          weka.filters.supervised.attribute.AttributeSelection filter = new weka.filters.supervised.attribute.AttributeSelection();
+          weka.filters.supervised.attribute.AttributeSelection filter =
+            new weka.filters.supervised.attribute.AttributeSelection();
           filter.setEvaluator((ASEvaluation) m_AttributeEvaluatorEditor
             .getValue());
           filter.setSearch((ASSearch) m_AttributeSearchEditor.getValue());
-          cmdFilter = filter.getClass().getName() + " "
-            + Utils.joinOptions(((OptionHandler) filter).getOptions());
+          cmdFilter =
+            filter.getClass().getName() + " "
+              + Utils.joinOptions(((OptionHandler) filter).getOptions());
 
           // 3. meta-classifier command
-          weka.classifiers.meta.AttributeSelectedClassifier cls = new weka.classifiers.meta.AttributeSelectedClassifier();
+          weka.classifiers.meta.AttributeSelectedClassifier cls =
+            new weka.classifiers.meta.AttributeSelectedClassifier();
           cls
             .setEvaluator((ASEvaluation) m_AttributeEvaluatorEditor.getValue());
           cls.setSearch((ASSearch) m_AttributeSearchEditor.getValue());
-          cmdClassifier = cls.getClass().getName() + " "
-            + Utils.joinOptions(cls.getOptions());
+          cmdClassifier =
+            cls.getClass().getName() + " "
+              + Utils.joinOptions(cls.getOptions());
 
           AttributeSelection eval = null;
 
@@ -849,8 +880,8 @@ public class AttributeSelectionPanel extends JPanel implements
 
             if (evaluator instanceof AttributeTransformer) {
               try {
-                Instances transformed = ((AttributeTransformer) evaluator)
-                  .transformedData(inst);
+                Instances transformed =
+                  ((AttributeTransformer) evaluator).transformedData(inst);
                 transformed
                   .setRelationName("AT: " + transformed.relationName());
 
@@ -926,8 +957,9 @@ public class AttributeSelectionPanel extends JPanel implements
       MatrixPanel mp = new MatrixPanel();
       mp.setInstances(ti);
       String plotName = ti.relationName();
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Attribute Selection Visualize: " + plotName);
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Attribute Selection Visualize: "
+          + plotName);
       jf.setSize(800, 600);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(mp, BorderLayout.CENTER);
@@ -1112,8 +1144,8 @@ public class AttributeSelectionPanel extends JPanel implements
       resultListMenu.add(saveTrans);
     }
 
-    JMenuItem reApplyConfig = new JMenuItem(
-      "Re-apply attribute selection configuration");
+    JMenuItem reApplyConfig =
+      new JMenuItem("Re-apply attribute selection configuration");
     if (eval != null && search != null) {
       reApplyConfig.addActionListener(new ActionListener() {
         @Override
@@ -1168,15 +1200,15 @@ public class AttributeSelectionPanel extends JPanel implements
 
     m_StartBut.setEnabled(true);
     // check capabilities...
-    Capabilities currentFilter = m_AttributeEvaluatorEditor
-      .getCapabilitiesFilter();
-    ASEvaluation evaluator = (ASEvaluation) m_AttributeEvaluatorEditor
-      .getValue();
+    Capabilities currentFilter =
+      m_AttributeEvaluatorEditor.getCapabilitiesFilter();
+    ASEvaluation evaluator =
+      (ASEvaluation) m_AttributeEvaluatorEditor.getValue();
     Capabilities currentSchemeCapabilities = null;
     if (evaluator != null && currentFilter != null
       && (evaluator instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler) evaluator)
-        .getCapabilities();
+      currentSchemeCapabilities =
+        ((CapabilitiesHandler) evaluator).getCapabilities();
 
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
         && !currentSchemeCapabilities.supports(currentFilter)) {
@@ -1240,6 +1272,167 @@ public class AttributeSelectionPanel extends JPanel implements
     return "Determine relevance of attributes";
   }
 
+  @Override
+  public boolean requiresLog() {
+    return true;
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new AttributeSelectionPanelDefaults();
+  }
+
+  @Override
+  public boolean okToBeActive() {
+    return m_Instances != null;
+  }
+
+  @Override
+  public void setActive(boolean active) {
+    super.setActive(active);
+
+    if (m_isActive) {
+      // make sure initial settings get applied
+      settingsChanged();
+    }
+  }
+
+  @Override
+  public void settingsChanged() {
+    if (getMainApplication() != null) {
+      if (!m_initialSettingsSet) {
+        Object initialEval =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), AttributeSelectionPanelDefaults.EVALUATOR_KEY,
+            AttributeSelectionPanelDefaults.EVALUATOR,
+            Environment.getSystemWide());
+        m_AttributeEvaluatorEditor.setValue(initialEval);
+
+        Object initialSearch =
+          getMainApplication().getApplicationSettings()
+            .getSetting(getPerspectiveID(),
+              AttributeSelectionPanelDefaults.SEARCH_KEY,
+              AttributeSelectionPanelDefaults.SEARCH,
+              Environment.getSystemWide());
+        m_AttributeSearchEditor.setValue(initialSearch);
+
+        TestMode initialEvalMode =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), AttributeSelectionPanelDefaults.EVAL_MODE_KEY,
+            AttributeSelectionPanelDefaults.EVAL_MODE,
+            Environment.getSystemWide());
+        m_TrainBut.setSelected(initialEvalMode == TestMode.TRAINING_SET);
+        m_CVBut.setSelected(initialEvalMode == TestMode.CROSS_VALIDATION);
+
+        int folds =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), AttributeSelectionPanelDefaults.FOLDS_KEY,
+            AttributeSelectionPanelDefaults.FOLDS, Environment.getSystemWide());
+        m_CVText.setText("" + folds);
+
+        int seed =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), AttributeSelectionPanelDefaults.SEED_KEY,
+            AttributeSelectionPanelDefaults.SEED, Environment.getSystemWide());
+        m_SeedText.setText("" + seed);
+
+        updateRadioLinks();
+        m_initialSettingsSet = true;
+      }
+
+      Font outputFont =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), AttributeSelectionPanelDefaults.OUTPUT_FONT_KEY,
+          AttributeSelectionPanelDefaults.OUTPUT_FONT,
+          Environment.getSystemWide());
+      m_OutText.setFont(outputFont);
+      m_History.setFont(outputFont);
+      Color textColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          AttributeSelectionPanelDefaults.OUTPUT_TEXT_COLOR_KEY,
+          AttributeSelectionPanelDefaults.OUTPUT_TEXT_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setForeground(textColor);
+      m_History.setForeground(textColor);
+      Color outputBackgroundColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          AttributeSelectionPanelDefaults.OUTPUT_BACKGROUND_COLOR_KEY,
+          AttributeSelectionPanelDefaults.OUTPUT_BACKGROUND_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setBackground(outputBackgroundColor);
+      m_History.setBackground(outputBackgroundColor);
+    }
+  }
+
+  public static enum TestMode {
+    TRAINING_SET, CROSS_VALIDATION;
+  }
+
+  protected static final class AttributeSelectionPanelDefaults extends Defaults {
+
+    public static final String ID = "weka.gui.explorer.attributeselectionpanel";
+
+    protected static final Settings.SettingKey EVALUATOR_KEY =
+      new Settings.SettingKey(ID + ".initialEvaluator", "Initial evaluator",
+        "On startup, set this evaluator as the default one");
+    protected static final ASEvaluation EVALUATOR = new CfsSubsetEval();
+
+    protected static final Settings.SettingKey SEARCH_KEY =
+      new Settings.SettingKey(ID + ".initialSearch", "Initial search method",
+        "On startup, set this search method as the default one");
+    protected static final ASSearch SEARCH = new BestFirst();
+
+    protected static final Settings.SettingKey EVAL_MODE_KEY =
+      new Settings.SettingKey(ID + ".initialEvalMode",
+        "Default evaluation mode", "");
+    protected static final TestMode EVAL_MODE = TestMode.TRAINING_SET;
+
+    protected static final Settings.SettingKey FOLDS_KEY =
+      new Settings.SettingKey(ID + ".xvalFolds",
+        "Default cross-validation folds", "");
+    protected static final Integer FOLDS = 10;
+
+    protected static final Settings.SettingKey SEED_KEY =
+      new Settings.SettingKey(ID + ".seed", "Random seed", "");
+    protected static final Integer SEED = 1;
+
+    protected static final Settings.SettingKey OUTPUT_FONT_KEY =
+      new Settings.SettingKey(ID + ".outputFont", "Font for text output",
+        "Font to " + "use in the output area");
+    protected static final Font OUTPUT_FONT = new Font("Monospaced",
+      Font.PLAIN, 12);
+
+    protected static final Settings.SettingKey OUTPUT_TEXT_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputFontColor", "Output text color",
+        "Color " + "of output text");
+    protected static final Color OUTPUT_TEXT_COLOR = Color.black;
+
+    protected static final Settings.SettingKey OUTPUT_BACKGROUND_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputBackgroundColor",
+        "Output background color", "Output background color");
+    protected static final Color OUTPUT_BACKGROUND_COLOR = Color.white;
+    private static final long serialVersionUID = -5413933415469545770L;
+
+    public AttributeSelectionPanelDefaults() {
+      super(ID);
+      m_defaults.put(EVALUATOR_KEY, EVALUATOR);
+      m_defaults.put(SEARCH_KEY, SEARCH);
+      m_defaults.put(EVAL_MODE_KEY, EVAL_MODE);
+      m_defaults.put(FOLDS_KEY, FOLDS);
+      m_defaults.put(SEED_KEY, SEED);
+      m_defaults.put(OUTPUT_FONT_KEY, OUTPUT_FONT);
+      m_defaults.put(OUTPUT_TEXT_COLOR_KEY, OUTPUT_TEXT_COLOR);
+      m_defaults.put(OUTPUT_BACKGROUND_COLOR_KEY, OUTPUT_BACKGROUND_COLOR);
+    }
+  }
+
   /**
    * Tests out the attribute selection panel from the command line.
    * 
@@ -1248,8 +1441,8 @@ public class AttributeSelectionPanel extends JPanel implements
   public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Select attributes");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Select attributes");
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributeSelectionPanel sp = new AttributeSelectionPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1267,8 +1460,8 @@ public class AttributeSelectionPanel extends JPanel implements
       jf.setVisible(true);
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
-        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-          args[0]));
+        java.io.Reader r =
+          new java.io.BufferedReader(new java.io.FileReader(args[0]));
         Instances i = new Instances(r);
         sp.setInstances(i);
       }

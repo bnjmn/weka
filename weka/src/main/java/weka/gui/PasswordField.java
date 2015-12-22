@@ -81,7 +81,7 @@ public class PasswordField extends JPanel implements PropertyEditor,
     });
 
     add(m_password, BorderLayout.CENTER);
-    setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    // setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
   }
 
   /**

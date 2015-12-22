@@ -1,0 +1,163 @@
+{
+	"flow_name" : "learnAndSaveModel",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/beans/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "79,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TrainingSetMaker"
+				]
+			},
+			"coordinates" : "239,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to configure me\nwith an ARFF file"
+			},
+			"connections" : {
+			},
+			"coordinates" : "26,178"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Double click to\nspecify the class\nattribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "232,178"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.trees.J48",
+					"options" : "-C 0.25 -M 2"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "J48",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"SerializedModelSaver"
+				],
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "281,295"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TrainingSetMaker",
+			"properties" : {
+				"name" : "TrainingSetMaker"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"J48"
+				]
+			},
+			"coordinates" : "439,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.SerializedModelSaver",
+			"properties" : {
+				"filenamePrefix" : "exampleModel",
+				"includeRelationNameInFilename" : false,
+				"incrementalSaveSchedule" : 0,
+				"name" : "SerializedModelSaver",
+				"outputDirectory" : "${user.home}"
+			},
+			"connections" : {
+			},
+			"coordinates" : "521,295"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "41,295"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Make the dataset into\na training set"
+			},
+			"connections" : {
+			},
+			"coordinates" : "513,98"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Learn a decision tree\n(double click to configure\noptions)"
+			},
+			"connections" : {
+			},
+			"coordinates" : "246,385"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Double click to configure\na filename prefix and\ndirectory to save the\nmodel to"
+			},
+			"connections" : {
+			},
+			"coordinates" : "597,302"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "Collects the textual\ndescription of the\nmodel."
+			},
+			"connections" : {
+			},
+			"coordinates" : "26,381"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader. The model is saved as \"exampleModelJ48_1_1.model\" to your home directory\n(Java property \"user.home\").</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "31,6"
+		}
+	]
+}

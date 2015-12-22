@@ -1,0 +1,11 @@
+weka.gui.Perspective=weka.gui.explorer.PreprocessPanel,\
+ weka.gui.explorer.ClassifierPanel,\
+ weka.gui.explorer.ClustererPanel,\
+ weka.gui.explorer.AssociationsPanel,\
+ weka.gui.explorer.AttributeSelectionPanel,\
+ weka.gui.explorer.VisualizePanel,\
+ weka.gui.experiment.Experimenter,\
+ weka.gui.knowledgeflow.MainKFPerspective,\
+ weka.gui.knowledgeflow.AttributeSummaryPerspective,\
+ weka.gui.knowledgeflow.ScatterPlotMatrixPerspective,\
+ weka.gui.knowledgeflow.SQLViewerPerspective

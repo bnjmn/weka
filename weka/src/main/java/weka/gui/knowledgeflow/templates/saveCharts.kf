@@ -1,0 +1,314 @@
+{
+	"flow_name" : "saveCharts",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/beans/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"DataVisualizer",
+					"AttributeSummarizer"
+				]
+			},
+			"coordinates" : "94,97"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.DataVisualizer",
+			"properties" : {
+				"name" : "DataVisualizer",
+				"offscreenAdditionalOpts" : "-color=/last",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "JFreeChart Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "age",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver2"
+				]
+			},
+			"coordinates" : "254,97"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.AttributeSummarizer",
+			"properties" : {
+				"name" : "AttributeSummarizer",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "JFreeChart Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : ""
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver"
+				]
+			},
+			"coordinates" : "254,221"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/chart2.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver"
+			},
+			"connections" : {
+			},
+			"coordinates" : "414,221"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/chart1.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver2"
+			},
+			"connections" : {
+			},
+			"coordinates" : "414,97"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassValuePicker"
+				]
+			},
+			"coordinates" : "14,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassValuePicker",
+			"properties" : {
+				"classValue" : "good",
+				"name" : "ClassValuePicker"
+			},
+			"connections" : {
+				"dataSet" : [
+					"CrossValidationFoldMaker"
+				]
+			},
+			"coordinates" : "174,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CrossValidationFoldMaker",
+			"properties" : {
+				"name" : "CrossValidationFoldMaker",
+				"numFolds" : "10",
+				"preserveOrder" : false,
+				"seed" : "1"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"NaiveBayes"
+				],
+				"testSet" : [
+					"NaiveBayes"
+				]
+			},
+			"coordinates" : "334,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.bayes.NaiveBayes",
+					"options" : ""
+				},
+				"loadClassifierFileName" : "",
+				"name" : "NaiveBayes",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator"
+				]
+			},
+			"coordinates" : "534,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator"
+			},
+			"connections" : {
+				"thresholdData" : [
+					"ModelPerformanceChart"
+				],
+				"visualizableError" : [
+					"ModelPerformanceChart2"
+				]
+			},
+			"coordinates" : "694,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "JFreeChart Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver3"
+				]
+			},
+			"coordinates" : "694,219"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart2",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "JFreeChart Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "age",
+				"offscreenYAxis" : "credit_amount"
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver4"
+				]
+			},
+			"coordinates" : "519,221"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/beans/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader2"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "14,207"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/chart3.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver3"
+			},
+			"connections" : {
+			},
+			"coordinates" : "694,95"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/chart4.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver4"
+			},
+			"connections" : {
+			},
+			"coordinates" : "519,97"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Errors scatter plot"
+			},
+			"connections" : {
+			},
+			"coordinates" : "487,312"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "ROC curve"
+			},
+			"connections" : {
+			},
+			"coordinates" : "624,226"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "German credit\ndata"
+			},
+			"connections" : {
+			},
+			"coordinates" : "84,194"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Bar chart for \"employment\""
+			},
+			"connections" : {
+			},
+			"coordinates" : "209,316"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Scatter plot of\n\"age\" vs \"credit_amount\""
+			},
+			"connections" : {
+			},
+			"coordinates" : "254,183"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader and configure the chart components and image savers.<p><p>Charts are saved to png files in your home directory using Weka's built-in chart rendering. For pretty charts install the\n<b>\"jfreechartOffscreenChartRenderer\"</b> package using the package manager.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "22,4"
+		}
+	]
+}

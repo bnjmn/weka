@@ -1,0 +1,217 @@
+{
+	"flow_name" : "twoAttSelectionSchemes",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ASEvaluator",
+			"properties" : {
+				"evaluator" : {
+					"type" : "optionHandler",
+					"class" : "weka.attributeSelection.CfsSubsetEval",
+					"options" : "-P 1 -E 1"
+				},
+				"name" : "CfsSubsetEval",
+				"treatXValFoldsSeparately" : false
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"testSet" : [
+					"TextViewer2"
+				]
+			},
+			"coordinates" : "507,85"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ASSearchStrategy",
+			"properties" : {
+				"name" : "GreedyStepwise",
+				"searchStrategy" : {
+					"type" : "optionHandler",
+					"class" : "weka.attributeSelection.GreedyStepwise",
+					"options" : "-T -1.7976931348623157E308 -N -1 -num-slots 1"
+				}
+			},
+			"connections" : {
+				"info" : [
+					"CfsSubsetEval"
+				]
+			},
+			"coordinates" : "659,86"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "32,193"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "650,186"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CrossValidationFoldMaker",
+			"properties" : {
+				"name" : "CrossValidationFoldMaker",
+				"numFolds" : "5",
+				"preserveOrder" : false,
+				"seed" : "1"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"CfsSubsetEval",
+					"InfoGainAttributeEval"
+				],
+				"testSet" : [
+					"CfsSubsetEval",
+					"InfoGainAttributeEval"
+				]
+			},
+			"coordinates" : "362,193"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer2"
+			},
+			"connections" : {
+			},
+			"coordinates" : "335,85"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "/last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"CrossValidationFoldMaker"
+				]
+			},
+			"coordinates" : "200,193"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ASEvaluator",
+			"properties" : {
+				"evaluator" : {
+					"type" : "optionHandler",
+					"class" : "weka.attributeSelection.InfoGainAttributeEval",
+					"options" : ""
+				},
+				"name" : "InfoGainAttributeEval",
+				"treatXValFoldsSeparately" : false
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "509,288"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ASSearchStrategy",
+			"properties" : {
+				"name" : "Ranker",
+				"searchStrategy" : {
+					"type" : "optionHandler",
+					"class" : "weka.attributeSelection.Ranker",
+					"options" : "-T -1.7976931348623157E308 -N -1"
+				}
+			},
+			"connections" : {
+				"info" : [
+					"InfoGainAttributeEval"
+				]
+			},
+			"coordinates" : "659,288"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "26,3"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to \nconfigure me with\nan ARFF file"
+			},
+			"connections" : {
+			},
+			"coordinates" : "12,282"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Double click to\nspecify the class\nattribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "184,283"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "5-fold CV. Double \nclick to alter the\nnumber of folds."
+			},
+			"connections" : {
+			},
+			"coordinates" : "323,285"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "View the reduced\ntest fold data."
+			},
+			"connections" : {
+			},
+			"coordinates" : "207,97"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note8",
+				"noteText" : "CFS evaluation with forward selection search"
+			},
+			"connections" : {
+			},
+			"coordinates" : "472,57"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note9",
+				"noteText" : "Information gain attribute ranking"
+			},
+			"connections" : {
+			},
+			"coordinates" : "517,386"
+		}
+	]
+}

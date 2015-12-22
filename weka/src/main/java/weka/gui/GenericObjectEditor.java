@@ -173,6 +173,14 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** for filtering the tree based on the Capabilities of the leaves. */
   protected Capabilities m_CapabilitiesFilter = null;
 
+  public static void setShowGlobalInfoToolTips(boolean show) {
+    m_ShowGlobalInfoToolTip = show;
+  }
+
+  public boolean getShowGlobalInfoToolTips() {
+    return m_ShowGlobalInfoToolTip;
+  }
+
   public static void determineClasses() {
     try {
       // make sure we load all packages first!!!

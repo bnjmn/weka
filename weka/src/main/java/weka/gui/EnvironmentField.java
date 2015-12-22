@@ -208,7 +208,7 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
     }
     add(m_combo, BorderLayout.CENTER);
 
-    setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
+    // setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 
     Dimension d = getPreferredSize();
     setPreferredSize(new Dimension(250, d.height));

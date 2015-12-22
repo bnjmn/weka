@@ -55,11 +55,14 @@ import weka.gui.CustomPanelSupplier;
  * Widget that displays a label and a combo box for selecting environment
  * variables. The enter arbitrary text, select an environment variable or a
  * combination of both. Any variables are resolved (if possible) and resolved
- * values are displayed in a tip-text.
+ * values are displayed in a tip-text.<p></p>
+ *
+ * This class is deprecated - use the version in weka.gui instead.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
+@Deprecated
 public class EnvironmentField extends JPanel implements EnvironmentHandler,
   PropertyEditor, CustomPanelSupplier {
 

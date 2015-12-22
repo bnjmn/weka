@@ -1,0 +1,175 @@
+{
+	"flow_name" : "cvTemplate",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "80,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"CrossValidationFoldMaker"
+				]
+			},
+			"coordinates" : "240,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CrossValidationFoldMaker",
+			"properties" : {
+				"name" : "CrossValidationFoldMaker",
+				"numFolds" : "10",
+				"preserveOrder" : false,
+				"seed" : "1"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"J48"
+				],
+				"testSet" : [
+					"J48"
+				]
+			},
+			"coordinates" : "440,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"visualizableError" : [
+					"ModelPerformanceChart"
+				]
+			},
+			"coordinates" : "360,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "640,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "120,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to configure me\nwith an ARFF file"
+			},
+			"connections" : {
+			},
+			"coordinates" : "34,168"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Double click to\nspecify the class\nattribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "236,171"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "10-fold CV by default.\nDouble click to alter\nthe number of folds."
+			},
+			"connections" : {
+			},
+			"coordinates" : "372,171"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Performance results\nreported here. Right-click\nand choose \"show results\""
+			},
+			"connections" : {
+			},
+			"coordinates" : "602,377"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Right-click and select \"show chart\"\nto see scatter plot and misclassified\npoints."
+			},
+			"connections" : {
+			},
+			"coordinates" : "50,380"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.trees.J48",
+					"options" : "-C 0.25 -M 2"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "J48",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator"
+				]
+			},
+			"coordinates" : "640,80"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "23,11"
+		}
+	]
+}

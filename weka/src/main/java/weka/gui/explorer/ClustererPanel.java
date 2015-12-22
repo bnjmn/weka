@@ -22,6 +22,7 @@
 package weka.gui.explorer;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
@@ -80,22 +81,28 @@ import javax.swing.filechooser.FileFilter;
 
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
+import weka.clusterers.SimpleKMeans;
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
+import weka.core.Defaults;
 import weka.core.Drawable;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.SerializedObject;
+import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.Version;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.AbstractPerspective;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.InstancesSummaryPanel;
 import weka.gui.ListSelectorDialog;
 import weka.gui.Logger;
+import weka.gui.PerspectiveInfo;
 import weka.gui.PropertyPanel;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -123,7 +130,10 @@ import weka.gui.visualize.plugins.TreeVisualizePlugin;
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ClustererPanel extends JPanel implements
+@PerspectiveInfo(ID = "weka.gui.explorer.clustererpanel", title = "Cluster",
+  toolTipText = "Cluster instances",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class ClustererPanel extends AbstractPerspective implements
   CapabilitiesFilterChangeListener, ExplorerPanel, LogHandler {
 
   /** for serialization */
@@ -245,6 +255,9 @@ public class ClustererPanel extends JPanel implements
   protected JFileChooser m_FileChooser = new JFileChooser(new File(
     System.getProperty("user.dir")));
 
+  /** Whether startup settings have been applied yet or not */
+  protected boolean m_initialSettingsSet;
+
   /* Register the property editors we need */
   static {
     GenericObjectEditor.registerEditors();
@@ -267,8 +280,10 @@ public class ClustererPanel extends JPanel implements
         }
       }
     });
-    m_History.setBorder(BorderFactory
+    JPanel historyHolder = new JPanel(new BorderLayout());
+    historyHolder.setBorder(BorderFactory
       .createTitledBorder("Result list (right-click for options)"));
+    historyHolder.add(m_History, BorderLayout.CENTER);
     m_ClustererEditor.setClassType(Clusterer.class);
     m_ClustererEditor.setValue(ExplorerDefaults.getClusterer());
     m_ClustererEditor.addPropertyChangeListener(new PropertyChangeListener() {
@@ -280,8 +295,8 @@ public class ClustererPanel extends JPanel implements
         Capabilities currentSchemeCapabilities = null;
         if (clusterer != null && currentFilter != null
           && (clusterer instanceof CapabilitiesHandler)) {
-          currentSchemeCapabilities = ((CapabilitiesHandler) clusterer)
-            .getCapabilities();
+          currentSchemeCapabilities =
+            ((CapabilitiesHandler) clusterer).getCapabilities();
 
           if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
             && !currentSchemeCapabilities.supports(currentFilter)) {
@@ -485,15 +500,17 @@ public class ClustererPanel extends JPanel implements
     p2.add(m_StorePredictionsBut);
 
     // Any launcher plugins
-    Vector<String> pluginsVector = GenericObjectEditor
-      .getClassnames(ClustererPanelLaunchHandlerPlugin.class.getName());
+    Vector<String> pluginsVector =
+      GenericObjectEditor.getClassnames(ClustererPanelLaunchHandlerPlugin.class
+        .getName());
     JButton pluginBut = null;
     if (pluginsVector.size() == 1) {
       try {
         // display a single button
         String className = pluginsVector.elementAt(0);
-        final ClustererPanelLaunchHandlerPlugin plugin = (ClustererPanelLaunchHandlerPlugin) Class
-          .forName(className).newInstance();
+        final ClustererPanelLaunchHandlerPlugin plugin =
+          (ClustererPanelLaunchHandlerPlugin) Class.forName(className)
+            .newInstance();
         if (plugin != null) {
           plugin.setClustererPanel(this);
           pluginBut = new JButton(plugin.getLaunchCommand());
@@ -515,16 +532,17 @@ public class ClustererPanel extends JPanel implements
       for (int i = 0; i < pluginsVector.size(); i++) {
         String className = (pluginsVector.elementAt(i));
         try {
-          final ClustererPanelLaunchHandlerPlugin plugin = (ClustererPanelLaunchHandlerPlugin) Class
-            .forName(className).newInstance();
+          final ClustererPanelLaunchHandlerPlugin plugin =
+            (ClustererPanelLaunchHandlerPlugin) Class.forName(className)
+              .newInstance();
 
           if (plugin == null) {
             continue;
           }
           okPluginCount++;
           plugin.setClustererPanel(this);
-          java.awt.MenuItem popI = new java.awt.MenuItem(
-            plugin.getLaunchCommand());
+          java.awt.MenuItem popI =
+            new java.awt.MenuItem(plugin.getLaunchCommand());
           popI.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -618,8 +636,8 @@ public class ClustererPanel extends JPanel implements
     gbC.gridy = 2;
     gbC.gridx = 0;
     gbC.weightx = 0;
-    gbL.setConstraints(m_History, gbC);
-    mondo.add(m_History);
+    gbL.setConstraints(historyHolder, gbC);
+    mondo.add(historyHolder);
     gbC = new GridBagConstraints();
     gbC.fill = GridBagConstraints.BOTH;
     gbC.gridy = 0;
@@ -678,8 +696,8 @@ public class ClustererPanel extends JPanel implements
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       String name = m_Instances.attribute(i).name();
       m_ignoreKeyModel.addElement(name);
-      String type = "(" + Attribute.typeToStringShort(m_Instances.attribute(i))
-        + ") ";
+      String type =
+        "(" + Attribute.typeToStringShort(m_Instances.attribute(i)) + ") ";
       String attnm = m_Instances.attribute(i).name();
       attribNames[i] = type + attnm;
     }
@@ -755,8 +773,8 @@ public class ClustererPanel extends JPanel implements
           Instances inst = new Instances(m_Instances);
           inst.setClassIndex(-1);
           Instances userTest = null;
-          ClustererAssignmentsPlotInstances plotInstances = ExplorerDefaults
-            .getClustererAssignmentsPlotInstances();
+          ClustererAssignmentsPlotInstances plotInstances =
+            ExplorerDefaults.getClustererAssignmentsPlotInstances();
           plotInstances.setClusterer((Clusterer) m_ClustererEditor.getValue());
           if (m_TestInstances != null) {
             userTest = new Instances(m_TestInstances);
@@ -771,8 +789,8 @@ public class ClustererPanel extends JPanel implements
           Clusterer clusterer = (Clusterer) m_ClustererEditor.getValue();
           Clusterer fullClusterer = null;
           StringBuffer outBuff = new StringBuffer();
-          String name = (new SimpleDateFormat("HH:mm:ss - "))
-            .format(new Date());
+          String name =
+            (new SimpleDateFormat("HH:mm:ss - ")).format(new Date());
           String cname = clusterer.getClass().getName();
           if (cname.startsWith("weka.clusterers.")) {
             name += cname.substring("weka.clusterers.".length());
@@ -781,10 +799,10 @@ public class ClustererPanel extends JPanel implements
           }
           String cmd = m_ClustererEditor.getValue().getClass().getName();
           if (m_ClustererEditor.getValue() instanceof OptionHandler) {
-            cmd += " "
-              + Utils
-                .joinOptions(((OptionHandler) m_ClustererEditor.getValue())
-                  .getOptions());
+            cmd +=
+              " "
+                + Utils.joinOptions(((OptionHandler) m_ClustererEditor
+                  .getValue()).getOptions());
           }
           try {
             m_Log.logMessage("Started " + cname);
@@ -887,8 +905,8 @@ public class ClustererPanel extends JPanel implements
                 int[] newIgnoredAtts = new int[ignoredAtts.length + 1];
                 System.arraycopy(ignoredAtts, 0, newIgnoredAtts, 0,
                   ignoredAtts.length);
-                newIgnoredAtts[ignoredAtts.length] = m_ClassCombo
-                  .getSelectedIndex();
+                newIgnoredAtts[ignoredAtts.length] =
+                  m_ClassCombo.getSelectedIndex();
                 ignoredAtts = newIgnoredAtts;
               }
             }
@@ -1141,13 +1159,13 @@ public class ClustererPanel extends JPanel implements
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String graphString, String treeName) {
-    final javax.swing.JFrame jf = new javax.swing.JFrame(
-      "Weka Classifier Tree Visualizer: " + treeName);
+    final javax.swing.JFrame jf =
+      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     if (graphString.contains("digraph")) {
-      TreeVisualizer tv = new TreeVisualizer(null, graphString,
-        new PlaceNode2());
+      TreeVisualizer tv =
+        new TreeVisualizer(null, graphString, new PlaceNode2());
       jf.getContentPane().add(tv, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
@@ -1158,7 +1176,8 @@ public class ClustererPanel extends JPanel implements
       jf.setVisible(true);
       tv.fitToScreen();
     } else if (graphString.startsWith("Newick:")) {
-      HierarchyVisualizer tv = new HierarchyVisualizer(graphString.substring(7));
+      HierarchyVisualizer tv =
+        new HierarchyVisualizer(graphString.substring(7));
       jf.getContentPane().add(tv, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
         @Override
@@ -1179,8 +1198,8 @@ public class ClustererPanel extends JPanel implements
   protected void visualizeClusterAssignments(VisualizePanel sp) {
     if (sp != null) {
       String plotName = sp.getName();
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Clusterer Visualize: " + plotName);
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Clusterer Visualize: " + plotName);
       jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1318,8 +1337,8 @@ public class ClustererPanel extends JPanel implements
     }
     resultListMenu.add(saveModel);
 
-    JMenuItem reEvaluate = new JMenuItem(
-      "Re-evaluate model on current test set");
+    JMenuItem reEvaluate =
+      new JMenuItem("Re-evaluate model on current test set");
     if (clusterer != null && m_TestInstances != null) {
       reEvaluate.addActionListener(new ActionListener() {
         @Override
@@ -1332,8 +1351,8 @@ public class ClustererPanel extends JPanel implements
     }
     resultListMenu.add(reEvaluate);
 
-    JMenuItem reApplyConfig = new JMenuItem(
-      "Re-apply this model's configuration");
+    JMenuItem reApplyConfig =
+      new JMenuItem("Re-apply this model's configuration");
     if (clusterer != null) {
       reApplyConfig.addActionListener(new ActionListener() {
         @Override
@@ -1388,19 +1407,19 @@ public class ClustererPanel extends JPanel implements
     // trees
     if (grph != null) {
       // trees
-      Vector<String> pluginsVector = GenericObjectEditor
-        .getClassnames(TreeVisualizePlugin.class.getName());
+      Vector<String> pluginsVector =
+        GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
       for (int i = 0; i < pluginsVector.size(); i++) {
         String className = (pluginsVector.elementAt(i));
         try {
-          TreeVisualizePlugin plugin = (TreeVisualizePlugin) Class.forName(
-            className).newInstance();
+          TreeVisualizePlugin plugin =
+            (TreeVisualizePlugin) Class.forName(className).newInstance();
           if (plugin == null) {
             continue;
           }
           availablePlugins = true;
-          JMenuItem pluginMenuItem = plugin.getVisualizeMenuItem(grph,
-            selectedName);
+          JMenuItem pluginMenuItem =
+            plugin.getVisualizeMenuItem(grph, selectedName);
           Version version = new Version();
           if (pluginMenuItem != null) {
             if (version.compareTo(plugin.getMinVersion()) < 0) {
@@ -1466,8 +1485,8 @@ public class ClustererPanel extends JPanel implements
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       sFile = m_FileChooser.getSelectedFile();
       if (!sFile.getName().toLowerCase().endsWith(MODEL_FILE_EXTENSION)) {
-        sFile = new File(sFile.getParent(), sFile.getName()
-          + MODEL_FILE_EXTENSION);
+        sFile =
+          new File(sFile.getParent(), sFile.getName() + MODEL_FILE_EXTENSION);
       }
       m_Log.statusMessage("Saving model to file...");
 
@@ -1646,8 +1665,8 @@ public class ClustererPanel extends JPanel implements
           StringBuffer outBuff = m_History.getNamedBuffer(name);
           Instances userTest = null;
 
-          ClustererAssignmentsPlotInstances plotInstances = ExplorerDefaults
-            .getClustererAssignmentsPlotInstances();
+          ClustererAssignmentsPlotInstances plotInstances =
+            ExplorerDefaults.getClustererAssignmentsPlotInstances();
           plotInstances.setClusterer(clusterer);
           if (m_TestInstances != null) {
             userTest = new Instances(m_TestInstances);
@@ -1789,8 +1808,8 @@ public class ClustererPanel extends JPanel implements
     if (m_ClassesToClustersBut.isSelected()) {
       // remove the class too
       String classSelection = m_ClassCombo.getSelectedItem().toString();
-      classSelection = classSelection
-        .substring(classSelection.indexOf(")") + 1).trim();
+      classSelection =
+        classSelection.substring(classSelection.indexOf(")") + 1).trim();
       int classIndex = tempInst.attribute(classSelection).index();
 
       Remove rm = new Remove();
@@ -1818,8 +1837,8 @@ public class ClustererPanel extends JPanel implements
     Capabilities currentSchemeCapabilities = null;
     if (clusterer != null && currentFilter != null
       && (clusterer instanceof CapabilitiesHandler)) {
-      currentSchemeCapabilities = ((CapabilitiesHandler) clusterer)
-        .getCapabilities();
+      currentSchemeCapabilities =
+        ((CapabilitiesHandler) clusterer).getCapabilities();
 
       if (!currentSchemeCapabilities.supportsMaybe(currentFilter)
         && !currentSchemeCapabilities.supports(currentFilter)) {
@@ -1883,6 +1902,139 @@ public class ClustererPanel extends JPanel implements
     return "Identify instance clusters";
   }
 
+  @Override
+  public boolean requiresLog() {
+    return true;
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new ClustererPanelDefaults();
+  }
+
+  @Override
+  public boolean okToBeActive() {
+    return m_Instances != null;
+  }
+
+  @Override
+  public void setActive(boolean active) {
+    super.setActive(active);
+    if (m_isActive) {
+      settingsChanged();
+    }
+  }
+
+  @Override
+  public void settingsChanged() {
+    if (getMainApplication() != null) {
+      if (!m_initialSettingsSet) {
+        m_initialSettingsSet = true;
+        Object initialC =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClustererPanelDefaults.CLUSTERER_KEY,
+            ClustererPanelDefaults.CLUSTERER, Environment.getSystemWide());
+        m_ClustererEditor.setValue(initialC);
+
+        TestMode iniitalTestMode =
+          getMainApplication().getApplicationSettings().getSetting(
+            getPerspectiveID(), ClustererPanelDefaults.TEST_MODE_KEY,
+            ClustererPanelDefaults.TEST_MODE, Environment.getSystemWide());
+        m_TrainBut.setSelected(iniitalTestMode == TestMode.USE_TRAINING_SET);
+        m_PercentBut.setSelected(iniitalTestMode == TestMode.PERCENTAGE_SPLIT);
+        m_TestSplitBut
+          .setSelected(iniitalTestMode == TestMode.SUPPLIED_TEST_SET);
+        m_ClassesToClustersBut
+          .setSelected(iniitalTestMode == TestMode.CLASSES_TO_CLUSTERS_EVAL);
+        m_StorePredictionsBut.setSelected(getMainApplication()
+          .getApplicationSettings().getSetting(getPerspectiveID(),
+            ClustererPanelDefaults.STORE_CLUSTERS_FOR_VIS_KEY,
+            ClustererPanelDefaults.STORE_CLUSTERS_VIS,
+            Environment.getSystemWide()));
+      }
+      Font outputFont =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(), ClustererPanelDefaults.OUTPUT_FONT_KEY,
+          ClustererPanelDefaults.OUTPUT_FONT, Environment.getSystemWide());
+      m_OutText.setFont(outputFont);
+      Color textColor =
+        getMainApplication().getApplicationSettings()
+          .getSetting(getPerspectiveID(),
+            ClustererPanelDefaults.OUTPUT_TEXT_COLOR_KEY,
+            ClustererPanelDefaults.OUTPUT_TEXT_COLOR,
+            Environment.getSystemWide());
+      m_OutText.setForeground(textColor);
+      Color outputBackgroundColor =
+        getMainApplication().getApplicationSettings().getSetting(
+          getPerspectiveID(),
+          ClustererPanelDefaults.OUTPUT_BACKGROUND_COLOR_KEY,
+          ClustererPanelDefaults.OUTPUT_BACKGROUND_COLOR,
+          Environment.getSystemWide());
+      m_OutText.setBackground(outputBackgroundColor);
+      m_History.setBackground(outputBackgroundColor);
+    }
+  }
+
+  public static enum TestMode {
+    PERCENTAGE_SPLIT, USE_TRAINING_SET, SUPPLIED_TEST_SET,
+    CLASSES_TO_CLUSTERS_EVAL;
+  }
+
+  /**
+   * Default settings for the clusterer panel
+   */
+  protected static final class ClustererPanelDefaults extends Defaults {
+    public static final String ID = "weka.gui.explorer.clustererpanel";
+
+    protected static final Settings.SettingKey CLUSTERER_KEY =
+      new Settings.SettingKey(ID + ".initialClusterer", "Initial clusterer",
+        "On startup, set this clusterer as the default one");
+    protected static final Clusterer CLUSTERER = new SimpleKMeans();
+
+    protected static final Settings.SettingKey TEST_MODE_KEY =
+      new Settings.SettingKey(ID + ".initialTestMode", "Default test mode", "");
+    protected static final TestMode TEST_MODE = TestMode.USE_TRAINING_SET;
+
+    protected static final Settings.SettingKey STORE_CLUSTERS_FOR_VIS_KEY =
+      new Settings.SettingKey(ID + ".storeClusterersForVis", "Store clusters "
+        + "for visualization", "");
+    protected static final boolean STORE_CLUSTERS_VIS = true;
+
+    protected static final Settings.SettingKey OUTPUT_FONT_KEY =
+      new Settings.SettingKey(ID + ".outputFont", "Font for text output",
+        "Font to " + "use in the output area");
+    protected static final Font OUTPUT_FONT = new Font("Monospaced",
+      Font.PLAIN, 12);
+
+    protected static final Settings.SettingKey OUTPUT_TEXT_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputFontColor", "Output text color",
+        "Color " + "of output text");
+    protected static final Color OUTPUT_TEXT_COLOR = Color.black;
+
+    protected static final Settings.SettingKey OUTPUT_BACKGROUND_COLOR_KEY =
+      new Settings.SettingKey(ID + ".outputBackgroundColor",
+        "Output background color", "Output background color");
+    protected static final Color OUTPUT_BACKGROUND_COLOR = Color.white;
+
+    private static final long serialVersionUID = 2708388782229179493L;
+
+    public ClustererPanelDefaults() {
+      super(ID);
+
+      m_defaults.put(CLUSTERER_KEY, CLUSTERER);
+      m_defaults.put(TEST_MODE_KEY, TEST_MODE);
+      m_defaults.put(STORE_CLUSTERS_FOR_VIS_KEY, STORE_CLUSTERS_VIS);
+      m_defaults.put(OUTPUT_FONT_KEY, OUTPUT_FONT);
+      m_defaults.put(OUTPUT_TEXT_COLOR_KEY, OUTPUT_TEXT_COLOR);
+      m_defaults.put(OUTPUT_BACKGROUND_COLOR_KEY, OUTPUT_BACKGROUND_COLOR);
+    }
+  }
+
   /**
    * Tests out the clusterer panel from the command line.
    * 
@@ -1891,8 +2043,8 @@ public class ClustererPanel extends JPanel implements
   public static void main(String[] args) {
 
     try {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Cluster");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Cluster");
       jf.getContentPane().setLayout(new BorderLayout());
       final ClustererPanel sp = new ClustererPanel();
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1911,8 +2063,8 @@ public class ClustererPanel extends JPanel implements
       jf.setVisible(true);
       if (args.length == 1) {
         System.err.println("Loading instances from " + args[0]);
-        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-          args[0]));
+        java.io.Reader r =
+          new java.io.BufferedReader(new java.io.FileReader(args[0]));
         Instances i = new Instances(r);
         sp.setInstances(i);
       }

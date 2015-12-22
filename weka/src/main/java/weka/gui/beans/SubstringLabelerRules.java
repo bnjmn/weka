@@ -85,6 +85,8 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
    */
   protected boolean m_nominalBinary;
 
+  protected boolean m_voteLabels = true;
+
   /** Environment variables */
   protected transient Environment m_env = Environment.getSystemWide();
 
@@ -346,12 +348,24 @@ public class SubstringLabelerRules implements EnvironmentHandler, Serializable {
     Instance result = inputI;
     if (m_matchRules.size() > 0) {
       String label = null;
+      int[] labelVotes = new int[m_matchRules.size()];
+      int index = 0;
       for (SubstringLabelerMatchRule m : m_matchRules) {
         label = m.apply(inputI);
 
         if (label != null) {
-          break;
+          if (m_voteLabels) {
+            labelVotes[index]++;
+          } else {
+            break;
+          }
         }
+        index++;
+      }
+
+      if (m_voteLabels && Utils.sum(labelVotes) > 0) {
+        int maxIndex = Utils.maxIndex(labelVotes);
+        label = m_matchRules.get(maxIndex).getLabel();
       }
 
       double[] vals = new double[m_outputStructure.numAttributes()];

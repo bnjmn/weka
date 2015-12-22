@@ -1,0 +1,208 @@
+{
+	"flow_name" : "twoClusterers",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/beans/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"Remove"
+				]
+			},
+			"coordinates" : "36,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Clusterer",
+			"properties" : {
+				"clusterer" : {
+					"type" : "optionHandler",
+					"class" : "weka.clusterers.EM",
+					"options" : "-I 100 -N -1 -X 10 -max -1 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -K 10 -num-slots 1 -S 100"
+				},
+				"loadClustererFileName" : "",
+				"name" : "EM"
+			},
+			"connections" : {
+				"batchClusterer" : [
+					"ClustererPerformanceEvaluator"
+				]
+			},
+			"coordinates" : "358,57"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClustererPerformanceEvaluator",
+			"properties" : {
+				"name" : "ClustererPerformanceEvaluator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "558,57"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "680,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TrainTestSplitMaker",
+			"properties" : {
+				"name" : "TrainTestSplitMaker",
+				"seed" : "1",
+				"trainPercent" : "66.0"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"EM",
+					"MakeDensityBasedClusterer"
+				],
+				"testSet" : [
+					"EM",
+					"MakeDensityBasedClusterer"
+				]
+			},
+			"coordinates" : "200,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Clusterer",
+			"properties" : {
+				"clusterer" : {
+					"type" : "optionHandler",
+					"class" : "weka.clusterers.MakeDensityBasedClusterer",
+					"options" : "-M 1.0E-6 -W weka.clusterers.SimpleKMeans -- -init 0 -max-candidates 100 -periodic-pruning 10000 -min-density 2.0 -t1 -1.25 -t2 -1.0 -N 3 -A \"weka.core.EuclideanDistance -R first-last\" -I 500 -num-slots 1 -S 10"
+				},
+				"loadClustererFileName" : "",
+				"name" : "MakeDensityBasedClusterer"
+			},
+			"connections" : {
+				"batchClusterer" : [
+					"ClustererPerformanceEvaluator2"
+				]
+			},
+			"coordinates" : "360,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClustererPerformanceEvaluator",
+			"properties" : {
+				"name" : "ClustererPerformanceEvaluator2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "560,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to \nconfigure with \nan ARFF dataset."
+			},
+			"connections" : {
+			},
+			"coordinates" : "12,374"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "2/3 - 1/3 train-test\nsplit. Double click\nto change split\npercentage."
+			},
+			"connections" : {
+			},
+			"coordinates" : "157,255"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "EM clustering with\ncross-validation to\nchoose the best\nnumber of clusters."
+			},
+			"connections" : {
+			},
+			"coordinates" : "358,147"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Fits Gaussian distributions\nto the clusters found by\nk-means. Double click to\nconfigure."
+			},
+			"connections" : {
+			},
+			"coordinates" : "306,373"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Computes evaluation\nresults."
+			},
+			"connections" : {
+			},
+			"coordinates" : "532,376"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "Right click and\nselect \"Show results\""
+			},
+			"connections" : {
+			},
+			"coordinates" : "652,263"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.Remove",
+					"options" : "-R last"
+				},
+				"name" : "Remove"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TrainTestSplitMaker"
+				]
+			},
+			"coordinates" : "36,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "Remove the class column"
+			},
+			"connections" : {
+			},
+			"coordinates" : "9,136"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note8",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "20,8"
+		}
+	]
+}

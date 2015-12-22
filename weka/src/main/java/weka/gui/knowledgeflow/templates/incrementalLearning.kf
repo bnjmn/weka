@@ -1,0 +1,135 @@
+{
+	"flow_name" : "incrementalLearning",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"instance" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "40,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"instance" : [
+					"NaiveBayesUpdateable"
+				]
+			},
+			"coordinates" : "240,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.bayes.NaiveBayesUpdateable",
+					"options" : ""
+				},
+				"loadClassifierFileName" : "",
+				"name" : "NaiveBayesUpdateable",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"incrementalClassifier" : [
+					"IncrementalClassifierEvaluator"
+				]
+			},
+			"coordinates" : "440,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.IncrementalClassifierEvaluator",
+			"properties" : {
+				"chartingEvalWindowSize" : 0,
+				"name" : "IncrementalClassifierEvaluator",
+				"outputPerClassInfoRetrievalStats" : false,
+				"statusFrequency" : 100
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"chart" : [
+					"StripChart"
+				]
+			},
+			"coordinates" : "680,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.StripChart",
+			"properties" : {
+				"XLabelFreq" : 500,
+				"name" : "StripChart",
+				"refreshFreq" : 5,
+				"refreshWidth" : 1
+			},
+			"connections" : {
+			},
+			"coordinates" : "680,240"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "400,240"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click and\nconfigure with an\nARFF file to process"
+			},
+			"connections" : {
+			},
+			"coordinates" : "23,129"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Set the class attribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "210,135"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Incremental naive\nBayes"
+			},
+			"connections" : {
+			},
+			"coordinates" : "420,137"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Right-click and choose\n\"Show chart\" before\nlaunching this flow."
+			},
+			"connections" : {
+			},
+			"coordinates" : "619,327"
+		}
+	]
+}

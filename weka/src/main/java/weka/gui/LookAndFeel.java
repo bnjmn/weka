@@ -21,6 +21,8 @@
 
 package weka.gui;
 
+import weka.core.Environment;
+import weka.core.Settings;
 import weka.core.Utils;
 
 import javax.swing.JOptionPane;
@@ -31,6 +33,9 @@ import java.awt.Dimension;
 import java.awt.KeyEventDispatcher;
 import java.awt.KeyboardFocusManager;
 import java.awt.event.KeyEvent;
+import java.io.IOException;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Properties;
 
 /**
@@ -63,6 +68,22 @@ public class LookAndFeel {
           + "or the directory that java was started from\n", "LookAndFeel",
         JOptionPane.ERROR_MESSAGE);
     }
+  }
+
+  /**
+   * Get a list of fully qualified class names of available look and feels
+   * 
+   * @return a list of look and feel class names that are available on this
+   *         platform
+   */
+  public static List<String> getAvailableLookAndFeelClasses() {
+    List<String> lafs = new LinkedList<String>();
+
+    for (UIManager.LookAndFeelInfo i : UIManager.getInstalledLookAndFeels()) {
+      lafs.add(i.getClassName());
+    }
+
+    return lafs;
   }
 
   /**
@@ -112,6 +133,28 @@ public class LookAndFeel {
     }
 
     return result;
+  }
+
+  /**
+   * Set the look and feel from loaded settings
+   *
+   * @param appID the ID of the application to load settings for
+   * @param lookAndFeelKey the key to look up the look and feel in the settings
+   * @throws IOException if a problem occurs when loading settings
+   */
+  public static void setLookAndFeel(String appID, String lookAndFeelKey)
+    throws IOException {
+    Settings forLookAndFeelOnly = new Settings("weka", appID);
+
+    String laf =
+      forLookAndFeelOnly.getSetting(appID, lookAndFeelKey, "",
+        Environment.getSystemWide());
+
+    if (laf.length() > 0 && laf.contains(".")
+      && LookAndFeel.setLookAndFeel(laf)) {
+    } else {
+      LookAndFeel.setLookAndFeel();
+    }
   }
 
   /**

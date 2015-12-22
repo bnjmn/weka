@@ -35,7 +35,9 @@ import javax.swing.JTabbedPane;
 
 import weka.core.Memory;
 import weka.experiment.Experiment;
+import weka.gui.AbstractPerspective;
 import weka.gui.LookAndFeel;
+import weka.gui.PerspectiveInfo;
 
 /**
  * The main class for the experiment environment. Lets the user create, open,
@@ -44,7 +46,10 @@ import weka.gui.LookAndFeel;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class Experimenter extends JPanel {
+@PerspectiveInfo(ID = "weka.gui.experimenter", title = "Experiment",
+  toolTipText = "Run large scale experiments",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class Experimenter extends AbstractPerspective {
 
   /** for serialization */
   private static final long serialVersionUID = -5751617505738193788L;
@@ -66,6 +71,13 @@ public class Experimenter extends JPanel {
    * involved in this experiment.
    */
   protected boolean m_ClassFirst = false;
+
+  /**
+   * Creates the experiment environment gui with no initial experiment
+   */
+  public Experimenter() {
+    this(false);
+  }
 
   /**
    * Creates the experiment environment gui with no initial experiment

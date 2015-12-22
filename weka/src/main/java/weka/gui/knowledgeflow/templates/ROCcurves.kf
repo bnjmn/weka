@@ -1,0 +1,227 @@
+{
+	"flow_name" : "ROC curves for two classifiers",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/beans/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "43,335"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassValuePicker"
+				]
+			},
+			"coordinates" : "43,206"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CrossValidationFoldMaker",
+			"properties" : {
+				"name" : "CrossValidationFoldMaker",
+				"numFolds" : "10",
+				"preserveOrder" : false,
+				"seed" : "1"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"Logistic",
+					"RandomForest"
+				],
+				"testSet" : [
+					"Logistic",
+					"RandomForest"
+				]
+			},
+			"coordinates" : "363,46"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"thresholdData" : [
+					"ModelPerformanceChart"
+				]
+			},
+			"coordinates" : "683,206"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "483,206"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "683,375"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to configure me\nwith your own ARFF file"
+			},
+			"connections" : {
+			},
+			"coordinates" : "22,419"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Double click to\nspecify the class\nattribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "123,219"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Performance results\nreported here. Right-click\nand choose \"show results\""
+			},
+			"connections" : {
+			},
+			"coordinates" : "461,149"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Right-click and select \n\"show chart\" to see\nROC curves for both\nclassifiers"
+			},
+			"connections" : {
+			},
+			"coordinates" : "564,304"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.functions.Logistic",
+					"options" : "-R 1.0E-8 -M -1"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "Logistic",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator2"
+				]
+			},
+			"coordinates" : "363,246"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"thresholdData" : [
+					"ModelPerformanceChart"
+				]
+			},
+			"coordinates" : "483,375"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassValuePicker",
+			"properties" : {
+				"classValue" : "good",
+				"name" : "ClassValuePicker"
+			},
+			"connections" : {
+				"dataSet" : [
+					"CrossValidationFoldMaker"
+				]
+			},
+			"coordinates" : "43,46"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Double click to\nchoose the class\nvalue to be considered\nas the \"positive\" class"
+			},
+			"connections" : {
+			},
+			"coordinates" : "115,98"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.trees.RandomForest",
+					"options" : "-I 100 -K 0 -S 1 -num-slots 1"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "RandomForest",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator"
+				]
+			},
+			"coordinates" : "683,46"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "10,5"
+		}
+	]
+}
