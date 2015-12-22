@@ -24,6 +24,7 @@ import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
+import weka.core.ResampleUtils;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
@@ -38,7 +39,7 @@ import java.util.Vector;
 /**
  <!-- globalinfo-start -->
  * Generic wrapper around any classifier to enable weighted instances support.<br>
- * Uses resampling with weights if the base classifier is not implementing the weka.core.WeightedInstancesHandler interface. By default, the training data is passed through to the base classifier if it can handle instance weights. However, it is possible to force the use of resampling with weights as well.
+ * Uses resampling with weights if the base classifier is not implementing the weka.core.WeightedInstancesHandler interface and there are instance weights other 1.0 present. By default, the training data is passed through to the base classifier if it can handle instance weights. However, it is possible to force the use of resampling with weights as well.
  * <br><br>
  <!-- globalinfo-end -->
  *
@@ -109,7 +110,8 @@ public class WeightedInstancesHandlerWrapper
     return
       "Generic wrapper around any classifier to enable weighted instances support.\n"
       + "Uses resampling with weights if the base classifier is not implementing "
-      + "the " + WeightedInstancesHandler.class.getName() + " interface. By default, "
+      + "the " + WeightedInstancesHandler.class.getName() + " interface and there "
+      + "are instance weights other than 1.0 present. By default, "
       + "the training data is passed through to the base classifier if it can handle "
       + "instance weights. However, it is possible to force the use of resampling "
       + "with weights as well.";
@@ -205,7 +207,10 @@ public class WeightedInstancesHandlerWrapper
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    if (getForceResampleWithWeights() || !(m_Classifier instanceof WeightedInstancesHandler)) {
+    boolean resample = getForceResampleWithWeights()
+      || (!(m_Classifier instanceof WeightedInstancesHandler) && ResampleUtils.hasInstanceWeights(data));
+
+    if (resample) {
       if (getDebug())
 	System.err.println(getClass().getName() + ": resampling training data");
       data = data.resampleWithWeights(new Random(m_Seed));
