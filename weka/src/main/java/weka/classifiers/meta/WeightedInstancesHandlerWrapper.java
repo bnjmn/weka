@@ -205,8 +205,11 @@ public class WeightedInstancesHandlerWrapper
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
-    if (getForceResampleWithWeights() || !(m_Classifier instanceof WeightedInstancesHandler))
+    if (getForceResampleWithWeights() || !(m_Classifier instanceof WeightedInstancesHandler)) {
+      if (getDebug())
+	System.err.println(getClass().getName() + ": resampling training data");
       data = data.resampleWithWeights(new Random(m_Seed));
+    }
 
     m_Classifier.buildClassifier(data);
   }
