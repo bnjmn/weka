@@ -170,6 +170,12 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   protected transient List<String> m_errorsFromR;
 
   /**
+   * The cleaned attribute names and values from R.
+   */
+  String[] m_cleanedAttNames = null;
+  String[][] m_cleanedAttValues = null;
+
+  /**
    * Global info for this wrapper classifier.
    * 
    * @return the global info suitable for displaying in the GUI.
@@ -777,6 +783,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       }
     }
 
+    m_originalTrainingHeader = null;
     if (modifiedIndices.size() > 0) {
       m_originalTrainingHeader = new Instances(data, 0);
 
@@ -965,7 +972,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
 
     // transfer training data into a data frame in R
-    RUtils.instancesToDataFrame(eng, this, data, "mlr_data");
+    Object[] result = RUtils.instancesToDataFrame(eng, this, data, "mlr_data");
+    m_cleanedAttNames = (String[])result[0];
+    m_cleanedAttValues = (String[][])result[1];
 
     try {
       String mlrIdentifier =
@@ -986,10 +995,10 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       String taskString = null;
       if (data.classAttribute().isNominal()) {
         taskString = "task <- makeClassifTask(data = mlr_data, target = \""
-          + RUtils.cleanse(data.classAttribute().name()) + "\")";
+          + m_cleanedAttNames[data.classIndex()] + "\")";
       } else {
         taskString = "task <- makeRegrTask(data = mlr_data, target = \""
-          + RUtils.cleanse(data.classAttribute().name()) + "\")";
+          + m_cleanedAttNames[data.classIndex()] + "\")";
       }
 
       if (m_Debug) {
@@ -1094,8 +1103,15 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     if (classAtt.isNominal()) {
       if (m_schemeProducesProbs) {
+        int indexInTestHeader = 0;
         for (int i = 0; i < classAtt.numValues(); i++) {
-          String classL = RUtils.cleanse(classAtt.value(i));
+          if ((indexInTestHeader + 1) > m_testHeader.classAttribute().numValues()) {
+            break; // Have run out of values;
+          }
+          if (!classAtt.value(i).equals(m_testHeader.classAttribute().value(indexInTestHeader))) {
+            continue; // Skip empty classes
+          }
+          String classL = m_cleanedAttValues[m_testHeader.classAttribute().index()][indexInTestHeader++];
 
           int index = -1;
           for (int j = 0; j < attributeNames.length; j++) {
@@ -1104,15 +1120,6 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
               break;
             }
           }
-
-          if (index == -1) {
-            // it appears that the prediction frame will not contain a column
-            // for
-            // empty classes
-
-            continue;
-          }
-
           Object columnObject = frame.get(index);
           REXPVector colVector = (REXPVector) columnObject;
           double[] colD = colVector.asDoubles();
@@ -1126,11 +1133,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
         }
       } else {
         // handle the "truth", "response" frame
-        List<String> cleansedClassVals = new ArrayList<String>();
-        for (int i = 0; i < classAtt.numValues(); i++) {
-          cleansedClassVals.add(RUtils.cleanse(classAtt.value(i)));
-        }
-        classAtt = new Attribute(classAtt.name(), cleansedClassVals);
+        Attribute tempClassAtt = new Attribute(classAtt.name(), new ArrayList(Arrays.asList(m_cleanedAttValues[m_testHeader.classAttribute().index()])));
         Object columnObject = frame.get(1);
         REXPVector colVector = (REXPVector) columnObject;
         String[] labels = colVector.asStrings();
@@ -1140,16 +1143,29 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
             + "but got " + labels.length + "!");
         }
 
+        // Take care of empty classes by computing index map
+        int[] indexMap = new int[m_testHeader.classAttribute().numValues()];
+        int indexInTestHeader = 0;
+        for (int i = 0; i < classAtt.numValues(); i++) {
+          if ((indexInTestHeader + 1) > m_testHeader.classAttribute().numValues()) {
+            break; // Have run out of values;
+          }
+          if (!classAtt.value(i).equals(m_testHeader.classAttribute().value(indexInTestHeader))) {
+            continue; // Skip empty classes
+          }
+          indexMap[indexInTestHeader++] = i;
+        }
+
         // convert labels to 1/0 probs
         for (int i = 0; i < numRows; i++) {
           String pred = labels[i];
 
-          int labelIndex = classAtt.indexOfValue(pred.trim());
+          int labelIndex = tempClassAtt.indexOfValue(pred.trim());
 
           if (labelIndex < 0) {
             System.err.println("Didn't find label: " + pred.trim());
           } else {
-            result[i][labelIndex] = 1.0;
+            result[i][indexMap[labelIndex]] = 1.0;
           }
         }
       }
