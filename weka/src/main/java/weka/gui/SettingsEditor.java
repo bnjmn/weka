@@ -32,6 +32,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -39,15 +40,20 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Dialog;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
+import java.awt.Window;
+import java.awt.event.HierarchyEvent;
+import java.awt.event.HierarchyListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
@@ -185,13 +191,12 @@ public class SettingsEditor extends JPanel {
    */
   public static int showSingleSettingsEditor(Settings settings,
     String settingsID, String settingsName, JComponent parent)
-    throws IOException {
+      throws IOException {
     final SingleSettingsEditor sse =
       createSingleSettingsEditor(settings.getSettings(settingsID));
     sse.setPreferredSize(new Dimension(600, 300));
-    java.net.URL url =
-      SettingsEditor.class.getClassLoader().getResource(
-        "weka/gui/weka_icon_new_48.png");
+    java.net.URL url = SettingsEditor.class.getClassLoader()
+      .getResource("weka/gui/weka_icon_new_48.png");
     final ImageIcon wekaIcon =
       new ImageIcon(Toolkit.getDefaultToolkit().getImage(url));
     int result =
@@ -221,15 +226,34 @@ public class SettingsEditor extends JPanel {
     final SettingsEditor settingsEditor =
       new SettingsEditor(settings, application);
     settingsEditor.setPreferredSize(new Dimension(800, 350));
-    java.net.URL url =
-      PerspectiveManager.class.getClassLoader().getResource(
-        "weka/gui/weka_icon_new_48.png");
+    java.net.URL url = PerspectiveManager.class.getClassLoader()
+      .getResource("weka/gui/weka_icon_new_48.png");
     final ImageIcon wekaIcon =
       new ImageIcon(Toolkit.getDefaultToolkit().getImage(url));
-    int result =
-      JOptionPane.showConfirmDialog((JComponent) application, settingsEditor,
-        application.getApplicationName() + " Settings",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, wekaIcon);
+    final JOptionPane pane = new JOptionPane(settingsEditor,
+      JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
+    pane.addHierarchyListener(new HierarchyListener() {
+      @Override
+      public void hierarchyChanged(HierarchyEvent e) {
+        Window window = SwingUtilities.getWindowAncestor(pane);
+        if (window instanceof Dialog) {
+          Dialog dialog = (Dialog) window;
+          if (!dialog.isResizable()) {
+            dialog.setResizable(true);
+          }
+        }
+      }
+    });
+    JDialog dialog = pane.createDialog((JComponent) application,
+      application.getApplicationName() + " Settings");
+    dialog.show();
+    Object resultO = pane.getValue();
+    int result = -1;
+    if (resultO == null) {
+      result = JOptionPane.CLOSED_OPTION;
+    } else if (resultO instanceof Integer) {
+      result = (Integer) resultO;
+    }
 
     if (result == JOptionPane.OK_OPTION) {
       settingsEditor.applyToSettings();
@@ -239,8 +263,8 @@ public class SettingsEditor extends JPanel {
     return result;
   }
 
-  public static class SingleSettingsEditor extends JPanel implements
-    PropertyChangeListener {
+  public static class SingleSettingsEditor extends JPanel
+    implements PropertyChangeListener {
 
     private static final long serialVersionUID = 8896265984902770239L;
     protected Map<Settings.SettingKey, Object> m_perspSettings;
@@ -264,8 +288,8 @@ public class SettingsEditor extends JPanel {
       int i = 0;
       for (Map.Entry<Settings.SettingKey, Object> prop : pSettings.entrySet()) {
         Settings.SettingKey settingName = prop.getKey();
-        if (settingName.getKey().equals(
-          PerspectiveManager.VISIBLE_PERSPECTIVES_KEY.getKey())) {
+        if (settingName.getKey()
+          .equals(PerspectiveManager.VISIBLE_PERSPECTIVES_KEY.getKey())) {
           // skip this as we've got a dedicated panel for this one
           continue;
         }
@@ -292,19 +316,17 @@ public class SettingsEditor extends JPanel {
         // of listening/updating for every key stroke on text fields
         if (settingValue instanceof java.io.File) {
 
-          String dialogType =
-            settingName.getMetadataElement("java.io.File.dialogType", ""
-              + JFileChooser.OPEN_DIALOG);
+          String dialogType = settingName.getMetadataElement(
+            "java.io.File.dialogType", "" + JFileChooser.OPEN_DIALOG);
           String fileType =
-            settingName.getMetadataElement("java.io.File.fileSelectionMode", ""
-              + JFileChooser.FILES_AND_DIRECTORIES);
+            settingName.getMetadataElement("java.io.File.fileSelectionMode",
+              "" + JFileChooser.FILES_AND_DIRECTORIES);
 
           int dType = Integer.parseInt(dialogType);
           int fType = Integer.parseInt(fileType);
 
-          editor =
-            new FileEnvironmentField("", Environment.getSystemWide(), dType,
-              fType == JFileChooser.DIRECTORIES_ONLY);
+          editor = new FileEnvironmentField("", Environment.getSystemWide(),
+            dType, fType == JFileChooser.DIRECTORIES_ONLY);
         }
 
         if (editor == null) {
@@ -444,8 +466,8 @@ public class SettingsEditor extends JPanel {
       for (Map.Entry<Settings.SettingKey, Object> e : m_perspSettings
         .entrySet()) {
         Settings.SettingKey settingKey = e.getKey();
-        if (settingKey.getKey().equals(
-          PerspectiveManager.VISIBLE_PERSPECTIVES_KEY.getKey())) {
+        if (settingKey.getKey()
+          .equals(PerspectiveManager.VISIBLE_PERSPECTIVES_KEY.getKey())) {
           continue;
         }
         PropertyEditor editor = m_editorMap.get(settingKey);
@@ -467,8 +489,8 @@ public class SettingsEditor extends JPanel {
 
     private static final long serialVersionUID = -4765015948030757897L;
     protected List<JCheckBox> m_perspectiveChecks = new ArrayList<JCheckBox>();
-    protected JCheckBox m_toolBarVisibleOnStartup = new JCheckBox(
-      "Perspective toolbar visible on start up");
+    protected JCheckBox m_toolBarVisibleOnStartup =
+      new JCheckBox("Perspective toolbar visible on start up");
 
     public PerspectiveSelector() {
       setLayout(new BorderLayout());
@@ -478,24 +500,23 @@ public class SettingsEditor extends JPanel {
       if (availablePerspectives.size() > 0) {
         PerspectiveManager.SelectedPerspectivePreferences userSelected =
           new PerspectiveManager.SelectedPerspectivePreferences();
-        userSelected =
-          m_settings.getSetting(m_ownerApp.getApplicationID(),
-            PerspectiveManager.VISIBLE_PERSPECTIVES_KEY, userSelected,
-            Environment.getSystemWide());
+        userSelected = m_settings.getSetting(m_ownerApp.getApplicationID(),
+          PerspectiveManager.VISIBLE_PERSPECTIVES_KEY, userSelected,
+          Environment.getSystemWide());
 
         JPanel p = new JPanel();
         p.setLayout(new BoxLayout(p, BoxLayout.Y_AXIS));
         if (!userSelected.getPerspectivesToolbarAlwaysHidden()) {
           p.add(m_toolBarVisibleOnStartup);
-          m_toolBarVisibleOnStartup.setSelected(userSelected
-            .getPerspectivesToolbarVisibleOnStartup());
+          m_toolBarVisibleOnStartup
+            .setSelected(userSelected.getPerspectivesToolbarVisibleOnStartup());
         }
 
         for (Perspective perspective : availablePerspectives) {
           String pName = perspective.getPerspectiveTitle();
           JCheckBox jb = new JCheckBox(pName);
-          jb.setSelected(userSelected.getUserVisiblePerspectives().contains(
-            pName));
+          jb.setSelected(
+            userSelected.getUserVisiblePerspectives().contains(pName));
           m_perspectiveChecks.add(jb);
           p.add(jb);
         }
@@ -514,8 +535,8 @@ public class SettingsEditor extends JPanel {
       PerspectiveManager.SelectedPerspectivePreferences newPrefs =
         new PerspectiveManager.SelectedPerspectivePreferences();
       newPrefs.setUserVisiblePerspectives(selectedPerspectives);
-      newPrefs.setPerspectivesToolbarVisibleOnStartup(m_toolBarVisibleOnStartup
-        .isSelected());
+      newPrefs.setPerspectivesToolbarVisibleOnStartup(
+        m_toolBarVisibleOnStartup.isSelected());
       m_settings.setSetting(m_ownerApp.getApplicationID(),
         PerspectiveManager.VISIBLE_PERSPECTIVES_KEY, newPrefs);
     }
