@@ -42,7 +42,14 @@ import org.rosuda.REngine.RList;
 public class RUtils {
 
   /**
-   * Transfer a set of instances into a R data frame in the workspace
+   * Transfer a set of instances into a R data frame in the workspace.
+   *
+   * This method returns an array with the attribute names
+   * and attribute values in R's cleaned-up form. The first object in
+   * the array that is returned is a 1D string array with the 
+   * cleaned-up attribute names. The second object in the array
+   * is a 2D string array with the cleaned-up attribute values.
+   * Rows for non-nominal attributes in this 2D array are null.
    * 
    * @param session the RSession to use
    * @param requester the requesting object
@@ -52,8 +59,9 @@ public class RUtils {
    *           session holder
    * @throws REngineException if a problem occurs on the R end
    * @throws REXPMismatchException if a problem occurs on the R end
+   * @return the attribute names and values in R
    */
-  public static void instancesToDataFrame(RSession session, Object requester,
+  public static Object[] instancesToDataFrame(RSession session, Object requester,
     Instances insts, String frameName) throws RSessionException,
     REngineException, REXPMismatchException {
 
@@ -190,6 +198,12 @@ public class RUtils {
 
     // System.err.println("Executing: " + temp.toString());
     session.parseAndEval(requester, temp.toString());
+
+    // Return cleaned-up names and values
+    Object[] result = new Object[2];
+    result[0] = cleanedAttNames;
+    result[1] = cleanedAttValues;
+    return result;
   }
 
   /**
