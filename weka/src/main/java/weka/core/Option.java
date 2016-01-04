@@ -22,6 +22,7 @@
 package weka.core;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.File;
@@ -29,7 +30,9 @@ import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Vector;
 
 /**
@@ -46,6 +49,10 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class Option implements RevisionHandler {
+
+  /** A cache of property descriptors */
+  private static final Map<Class<?>, PropertyDescriptor[]> s_descriptorCache =
+    new HashMap<Class<?>, PropertyDescriptor[]>();
 
   /** What does this option do? */
   private String m_Description;
@@ -65,6 +72,7 @@ public class Option implements RevisionHandler {
    * @param description the option's description
    * @param name the option's name
    * @param numArguments the number of arguments
+   * @param synopsis the option's synopsis¬
    */
   public Option(String description, String name, int numArguments,
     String synopsis) {
@@ -87,8 +95,8 @@ public class Option implements RevisionHandler {
    *          stop getting options from
    * @return a list of options
    */
-  public static Vector<Option> listOptionsForClassHierarchy(
-    Class<?> childClazz, Class<?> oldestAncestorClazz) {
+  public static Vector<Option> listOptionsForClassHierarchy(Class<?> childClazz,
+    Class<?> oldestAncestorClazz) {
     Vector<Option> results = listOptionsForClass(childClazz);
 
     Class<?> parent = childClazz;
@@ -109,7 +117,8 @@ public class Option implements RevisionHandler {
    * @param clazz the class to get methods from
    * @param methList the list to add them to
    */
-  protected static void addMethodsToList(Class<?> clazz, List<Method> methList) {
+  protected static void addMethodsToList(Class<?> clazz,
+    List<Method> methList) {
     Method[] methods = clazz.getDeclaredMethods();
     for (Method m : methods) {
       methList.add(m);
@@ -229,8 +238,10 @@ public class Option implements RevisionHandler {
     try {
       Object[] args = {};
       Class<?> parent = targetClazz.getSuperclass();
-      BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
-      PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+      // BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
+      // PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+      PropertyDescriptor[] properties =
+        getPropertyDescriptors(targetClazz, parent);
 
       for (PropertyDescriptor p : properties) {
         Method getter = p.getReadMethod();
@@ -265,8 +276,8 @@ public class Option implements RevisionHandler {
                     .add("-" + parameterDescription.commandLineParamName());
                 }
                 if (element instanceof OptionHandler) {
-                  options
-                    .add(getOptionStringForOptionHandler((OptionHandler) element));
+                  options.add(
+                    getOptionStringForOptionHandler((OptionHandler) element));
                 } else {
                   options.add(element.toString());
                 }
@@ -281,7 +292,8 @@ public class Option implements RevisionHandler {
               options
                 .add(getOptionStringForOptionHandler((OptionHandler) value));
             } else if (value instanceof SelectedTag) {
-              options.add("" + ((SelectedTag)value).getSelectedTag().getReadable());
+              options
+                .add("" + ((SelectedTag) value).getSelectedTag().getReadable());
             } else {
               // check for boolean/flag
               if (parameterDescription.commandLineParamIsFlag()) {
@@ -358,6 +370,28 @@ public class Option implements RevisionHandler {
   }
 
   /**
+   * Get property descriptors for a target class. Checks a cache first before
+   * using introspection.
+   *
+   * @param targetClazz the target to get the descriptors for
+   * @param parent the parent class at which to stop getting descriptors
+   * @return an array of property descriptors
+   * @throws IntrospectionException if a problem occurs
+   */
+  private static PropertyDescriptor[] getPropertyDescriptors(
+    Class<?> targetClazz, Class<?> parent) throws IntrospectionException {
+
+    PropertyDescriptor[] result = s_descriptorCache.get(targetClazz);
+    if (result == null) {
+      BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
+      result = bi.getPropertyDescriptors();
+      s_descriptorCache.put(targetClazz, result);
+    }
+
+    return result;
+  }
+
+  /**
    * Sets options on the target object. Settings identified by this method are
    * bean properties (with get/set methods) annotated using the OptionMetadata
    * annotation. Options from just the supplied targetClazz (which is expected
@@ -377,8 +411,10 @@ public class Option implements RevisionHandler {
       try {
         Object[] getterArgs = {};
         Class<?> parent = targetClazz.getSuperclass();
-        BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
-        PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+        // BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
+        // PropertyDescriptor[] properties = bi.getPropertyDescriptors();
+        PropertyDescriptor[] properties =
+          getPropertyDescriptors(targetClazz, parent);
 
         for (PropertyDescriptor p : properties) {
           Method getter = p.getReadMethod();
@@ -399,13 +435,11 @@ public class Option implements RevisionHandler {
             Object valueToSet = null;
             if (parameterDescription.commandLineParamIsFlag()) {
               processOpt = true;
-              valueToSet =
-                (Utils.getFlag(parameterDescription.commandLineParamName(),
-                  options));
+              valueToSet = (Utils
+                .getFlag(parameterDescription.commandLineParamName(), options));
             } else {
-              optionValue =
-                Utils.getOption(parameterDescription.commandLineParamName(),
-                  options);
+              optionValue = Utils.getOption(
+                parameterDescription.commandLineParamName(), options);
               processOpt = optionValue.length() > 0;
             }
 
@@ -413,7 +447,8 @@ public class Option implements RevisionHandler {
             // the type
             Object value = getter.invoke(target, getterArgs);
             if (value != null && processOpt) {
-              if (value.getClass().isArray() && ((Object[]) value).length >= 0) {
+              if (value.getClass().isArray()
+                && ((Object[]) value).length >= 0) {
                 // We're interested in the actual element type...
                 Class<?> elementType =
                   getter.getReturnType().getComponentType();
@@ -422,9 +457,8 @@ public class Option implements RevisionHandler {
                 List<String> optionValues = new ArrayList<String>();
                 optionValues.add(optionValue);
                 while (true) {
-                  optionValue =
-                    Utils.getOption(
-                      parameterDescription.commandLineParamName(), options);
+                  optionValue = Utils.getOption(
+                    parameterDescription.commandLineParamName(), options);
                   if (optionValue.length() == 0) {
                     break;
                   }
@@ -444,7 +478,7 @@ public class Option implements RevisionHandler {
                   Array.set(valueToSet, i, elementObject);
                 }
               } else if (value instanceof SelectedTag) {
-                Tag[] legalTags = ((SelectedTag)value).getTags();
+                Tag[] legalTags = ((SelectedTag) value).getTags();
                 int tagIndex = Integer.MAX_VALUE;
                 // first try and parse as an integer
                 try {
@@ -468,8 +502,8 @@ public class Option implements RevisionHandler {
                   valueToSet = new SelectedTag(tagIndex, legalTags);
                 } else {
                   throw new Exception("Unable to set option: '"
-                    + parameterDescription.commandLineParamName() +
-                    "'. This option takes a SelectedTag argument, and "
+                    + parameterDescription.commandLineParamName()
+                    + "'. This option takes a SelectedTag argument, and "
                     + "the supplied value of '" + optionValue + "' "
                     + "does not match any of the legal IDs or strings "
                     + "for it.");
@@ -488,10 +522,10 @@ public class Option implements RevisionHandler {
                     valueToSet = new Float(optionValue);
                   }
                 } catch (NumberFormatException e) {
-                  throw new Exception("Option: '"
-                    + parameterDescription.commandLineParamName()
-                    + "' requires a " + value.getClass().getCanonicalName()
-                    + " argument");
+                  throw new Exception(
+                    "Option: '" + parameterDescription.commandLineParamName()
+                      + "' requires a " + value.getClass().getCanonicalName()
+                      + " argument");
                 }
               } else if (value instanceof String) {
                 valueToSet = optionValue;
@@ -528,8 +562,8 @@ public class Option implements RevisionHandler {
     throws Exception {
     String[] optHandlerSpec = Utils.splitOptions(optionValue);
     if (optHandlerSpec.length == 0) {
-      throw new Exception("Invalid option handler specification " + "string '"
-        + optionValue);
+      throw new Exception(
+        "Invalid option handler specification " + "string '" + optionValue);
     }
     String optionHandler = optHandlerSpec[0];
     optHandlerSpec[0] = "";
@@ -548,7 +582,8 @@ public class Option implements RevisionHandler {
    * @throws IllegalAccessException if a problem occurs
    */
   protected static void setOption(Method setter, Object target,
-    Object valueToSet) throws InvocationTargetException, IllegalAccessException {
+    Object valueToSet)
+      throws InvocationTargetException, IllegalAccessException {
     Object[] setterArgs = { valueToSet };
     setter.invoke(target, setterArgs);
   }
