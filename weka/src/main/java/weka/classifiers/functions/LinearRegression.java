@@ -607,10 +607,6 @@ public class LinearRegression extends AbstractClassifier implements
 
     super.setOptions(options);
     Utils.checkForRemainingOptions(options);
-
-    super.setOptions(options);
-
-    Utils.checkForRemainingOptions(options);
   }
 
   /**
