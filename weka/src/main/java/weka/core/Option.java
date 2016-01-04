@@ -238,8 +238,6 @@ public class Option implements RevisionHandler {
     try {
       Object[] args = {};
       Class<?> parent = targetClazz.getSuperclass();
-      // BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
-      // PropertyDescriptor[] properties = bi.getPropertyDescriptors();
       PropertyDescriptor[] properties =
         getPropertyDescriptors(targetClazz, parent);
 
@@ -411,8 +409,6 @@ public class Option implements RevisionHandler {
       try {
         Object[] getterArgs = {};
         Class<?> parent = targetClazz.getSuperclass();
-        // BeanInfo bi = Introspector.getBeanInfo(targetClazz, parent);
-        // PropertyDescriptor[] properties = bi.getPropertyDescriptors();
         PropertyDescriptor[] properties =
           getPropertyDescriptors(targetClazz, parent);
 
