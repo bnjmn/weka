@@ -1,0 +1,119 @@
+{
+	"flow_name" : "trainTwoClassifiers",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-existing-header ${user.home}/sparkOutput/arff/hypo.arff -names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"WekaClassifierSparkJob"
+				]
+			},
+			"coordinates" : "40,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierSparkJob",
+			"properties" : {
+				"jobOptions" : "-model-file-name naiveBayes.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 1 -seed 1 --",
+				"name" : "WekaClassifierSparkJob"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"success" : [
+					"RandomlyShuffleDataSparkJob"
+				]
+			},
+			"coordinates" : "240,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "440,280"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RandomizedDataSparkJob",
+			"properties" : {
+				"jobOptions" : "-class last -seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "RandomlyShuffleDataSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"WekaClassifierSparkJob2"
+				]
+			},
+			"coordinates" : "440,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierSparkJob",
+			"properties" : {
+				"jobOptions" : "-model-file-name votedJRIP.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.rules.JRip -fold-number -1 -total-folds 1 -seed 1 -- -F 3 -N 2.0 -O 2 -S 1",
+				"name" : "WekaClassifierSparkJob2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "680,160"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html>Uses the hypothyroid csv file\nin the <b>sample_data</b> directory of\nthe distributedWekaSpark package\nas input. The dataset is split into\n4 partitions, and an ARFF header\nwith additional summary metadata\nattributes is computed using all the\nCPU cores on your computer.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "10,264"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "86,13"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Train naive Bayes in a \ndistributed fashion."
+			},
+			"connections" : {
+			},
+			"coordinates" : "200,109"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Randomly shuffle and\nstratify the data (RDD) \ninto 4 partitions."
+			},
+			"connections" : {
+			},
+			"coordinates" : "399,94"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Train JRip rules in a distributed \nfashion. Learns one set of rules\nper partion of the data. The final\nmodel is a Voted ensemble."
+			},
+			"connections" : {
+			},
+			"coordinates" : "560,80"
+		}
+	]
+}

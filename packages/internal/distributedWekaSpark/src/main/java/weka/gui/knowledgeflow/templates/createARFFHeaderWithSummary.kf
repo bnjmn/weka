@@ -1,0 +1,47 @@
+{
+	"flow_name" : "createARFFHeaderWithSummary",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "143,96"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "423,96"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html>Uses the hypothyroid csv file\nin the <b>sample_data</b> directory of\nthe distributedWekaSpark package\nas input. The dataset is split into\n4 partitions, and an ARFF header\nwith additional summary metadata\nattributes is computed using all the\nCPU cores on your computer.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "78,197"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "68,19"
+		}
+	]
+}

@@ -1,0 +1,93 @@
+{
+	"flow_name" : "kMeansClustering",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-existing-header ${user.home}/sparkOutput/arff/hypo.arff -names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"RandomlyShuffleDataSparkJob"
+				]
+			},
+			"coordinates" : "57,83"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "625,83"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.KMeansClustererSparkJob",
+			"properties" : {
+				"jobOptions" : "-model-file-name kMeans.model -num-clusters 4 -num-iterations 20 -num-runs 5 -init-kmeans-its 5 -seed 1 -tolerance 1.0E-4 -filter \"weka.filters.unsupervised.attribute.Remove -R last\" -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "KMeansClustererSparkJob"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "465,83"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RandomizedDataSparkJob",
+			"properties" : {
+				"jobOptions" : "-seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "RandomlyShuffleDataSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"KMeansClustererSparkJob"
+				]
+			},
+			"coordinates" : "305,83"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html>Uses the hypothyroid csv file\nin the <b>sample_data</b> directory of\nthe distributedWekaSpark package\nas input. The dataset is split into\n4 partitions, and an ARFF header\nwith additional summary metadata\nattributes is computed using all the\nCPU cores on your computer.\n</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "33,197"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Randomly shuffle and\nstratify the data (RDD) \ninto 4 partitions."
+			},
+			"connections" : {
+			},
+			"coordinates" : "271,197"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Executes 5 separate runs\nof k-means++ and selects\nthe best (lowest within\ncluster SSE). Uses a Remove\nfilter to remove the class\nattribute from the data\non the fly."
+			},
+			"connections" : {
+			},
+			"coordinates" : "436,198"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "56,15"
+		}
+	]
+}

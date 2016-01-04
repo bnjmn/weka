@@ -1,0 +1,92 @@
+{
+	"flow_name" : "computeCorrelationMatrixAndPCA",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-existing-header ${user.home}/sparkOutput/arff/hypo.arff -names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"CorrelationMatrixSparkJob"
+				]
+			},
+			"coordinates" : "80,67"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.CorrelationMatrixSparkJob",
+			"properties" : {
+				"jobOptions" : "-pca -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "CorrelationMatrixSparkJob"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"image" : [
+					"ImageViewer"
+				]
+			},
+			"coordinates" : "320,67"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "560,67"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageViewer",
+			"properties" : {
+				"name" : "ImageViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "560,187"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "47,13"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Distributed computation of a\ncorrelation matrix. Uses the\nmatrix as input to a Principal\nComponents Analysis."
+			},
+			"connections" : {
+			},
+			"coordinates" : "271,167"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Display a heat map of\nthe correlation matrix."
+			},
+			"connections" : {
+			},
+			"coordinates" : "518,282"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "<html>Uses the hypothyroid csv file\nin the <b>sample_data</b> directory of\nthe distributedWekaSpark package\nas input. The dataset is split into\n4 partitions, and an ARFF header\nwith additional summary metadata\nattributes is computed using all the\nCPU cores on your computer.\n\nThe spark dataset is passed\ndownstream via the \"success\"\nconnection.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "29,167"
+		}
+	]
+}

@@ -1,0 +1,119 @@
+{
+	"flow_name" : "evaluateTwoClassifiers",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-existing-header ${user.home}/sparkOutput/arff/hypo.arff -names-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.names -header-file-name hypo.arff -input-file ${WEKA_HOME}/packages/distributedWekaSpark/sample_data/hypothyroid.csv -min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"RandomlyShuffleDataSparkJob"
+				]
+			},
+			"coordinates" : "41,125"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html>Uses the hypothyroid csv file\nin the <b>sample_data</b> directory of\nthe distributedWekaSpark package\nas input. The dataset is split into\n4 partitions, and an ARFF header\nwith additional summary metadata\nattributes is computed using all the\nCPU cores on your computer.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "11,228"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierEvaluationSparkJob",
+			"properties" : {
+				"jobOptions" : "-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1 --",
+				"name" : "WekaClassifierEvaluationSparkJob"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"success" : [
+					"WekaClassifierEvaluationSparkJob2"
+				]
+			},
+			"coordinates" : "452,125"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "455,279"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RandomizedDataSparkJob",
+			"properties" : {
+				"jobOptions" : "-class last -seed 1 -num-splits 4 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0",
+				"name" : "RandomlyShuffleDataSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"WekaClassifierEvaluationSparkJob"
+				]
+			},
+			"coordinates" : "254,125"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierEvaluationSparkJob",
+			"properties" : {
+				"jobOptions" : "-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -K 0 -S 1 -num-slots 1",
+				"name" : "WekaClassifierEvaluationSparkJob2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "672,124"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Randomly shuffle and\nstratify the data (RDD) \ninto 4 partitions."
+			},
+			"connections" : {
+			},
+			"coordinates" : "243,229"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Perform 10-fold \ncross-validation\nusing naive Bayes."
+			},
+			"connections" : {
+			},
+			"coordinates" : "416,68"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Perform 10-fold\ncross-validation\nusing Random Forests\n(100 trees total - 25 per \npartition)."
+			},
+			"connections" : {
+			},
+			"coordinates" : "611,38"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "28,7"
+		}
+	]
+}
