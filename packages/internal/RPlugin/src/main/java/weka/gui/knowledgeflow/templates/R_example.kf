@@ -1,0 +1,191 @@
+{
+	"flow_name" : "R scripting",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"MergeManyValues"
+				]
+			},
+			"coordinates" : "16,103"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "694,138"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RScriptExecutor",
+			"properties" : {
+				"RScript" : "library(mlr)\ntask = makeClassifTask(data = rdata, target = \"class\")\nlearner = makeLearner(\"classif.rpart\", predict.type = \"prob\")\nmodel = train(learner, task)\nprint(getLearnerModel(model))",
+				"name" : "RScriptExecutor",
+				"scriptFile" : ""
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "494,138"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RScriptExecutor",
+			"properties" : {
+				"RScript" : "data(iris)\npairs(iris[1:4], main = \"Anderson's Iris Data -- 3 species\", pch = 21, bg = c(\"red\", \"green3\", \"blue\")[unclass(iris$Species)])\niris",
+				"name" : "RScriptExecutor2",
+				"scriptFile" : ""
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver"
+				],
+				"dataSet" : [
+					"TextViewer2"
+				]
+			},
+			"coordinates" : "111,255"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer2"
+			},
+			"connections" : {
+			},
+			"coordinates" : "388,254"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/scatter.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver"
+			},
+			"connections" : {
+			},
+			"coordinates" : "376,341"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Load iris data within R, create a \nscatter plot matrix image,\noutput the iris data as Weka \nInstances."
+			},
+			"connections" : {
+			},
+			"coordinates" : "38,350"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Save the iris scatter plot matrix\nas a png file to $user.home/scatter.png"
+			},
+			"connections" : {
+			},
+			"coordinates" : "461,366"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Print the iris Instances that\nhave come from the R\nenvironment."
+			},
+			"connections" : {
+			},
+			"coordinates" : "460,284"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Load the german credit risk\ndata from the classpath"
+			},
+			"connections" : {
+			},
+			"coordinates" : "12,57"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Learn a decision tree (rpart) in\nR and print the tree."
+			},
+			"connections" : {
+			},
+			"coordinates" : "512,231"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><font size=5><b><i>Using R from within a Weka \nKnowledge Flow </i></b></font><br><br>This flow is basically ready to run out of the box. The R package \nMLR is needed. If you haven't used the MLRClassifier yet, \nthen install MLR manually from the R console with \n\"install.packages('mlr')\"</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "395,6"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.MergeManyValues",
+					"options" : "-C 4 -L merged -R 1,8"
+				},
+				"name" : "MergeManyValues"
+			},
+			"connections" : {
+				"dataSet" : [
+					"MergeManyValues2"
+				]
+			},
+			"coordinates" : "157,139"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Filter",
+			"properties" : {
+				"filter" : {
+					"type" : "optionHandler",
+					"class" : "weka.filters.unsupervised.attribute.MergeManyValues",
+					"options" : "-C 9 -L merged -R 1,last"
+				},
+				"name" : "MergeManyValues2"
+			},
+			"connections" : {
+				"dataSet" : [
+					"RScriptExecutor"
+				]
+			},
+			"coordinates" : "316,139"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "Handle zero-frequency\nnominal values (empty factor\nlevels)"
+			},
+			"connections" : {
+			},
+			"coordinates" : "188,72"
+		}
+	]
+}

@@ -1,0 +1,214 @@
+{
+	"flow_name" : "MLR example",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/credit-g.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "24,166"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TrainTestSplitMaker"
+				]
+			},
+			"coordinates" : "184,166"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.mlr.MLRClassifier",
+					"options" : "-learner classif.rpart -batch 100"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "MLRClassifier",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"batchClassifier" : [
+					"ClassifierPerformanceEvaluator"
+				],
+				"text" : [
+					"TextViewer2"
+				]
+			},
+			"coordinates" : "344,6"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassifierPerformanceEvaluator",
+			"properties" : {
+				"errorPlotPointSizeProportionalToMargin" : false,
+				"evaluationMetricsToOutput" : "Correct,Incorrect,Kappa,Total cost,Average cost,KB relative,KB information,Correlation,Complexity 0,Complexity scheme,Complexity improvement,MAE,RMSE,RAE,RRSE,Coverage,Region size,TP rate,FP rate,Precision,Recall,F-measure,MCC,ROC area,PRC area",
+				"name" : "ClassifierPerformanceEvaluator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"visualizableError" : [
+					"ModelPerformanceChart"
+				],
+				"thresholdData" : [
+					"ModelPerformanceChart2"
+				]
+			},
+			"coordinates" : "504,166"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "664,166"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer2"
+			},
+			"connections" : {
+			},
+			"coordinates" : "624,6"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TrainTestSplitMaker",
+			"properties" : {
+				"name" : "TrainTestSplitMaker",
+				"seed" : "1",
+				"trainPercent" : "66.0"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"MLRClassifier"
+				],
+				"testSet" : [
+					"MLRClassifier"
+				]
+			},
+			"coordinates" : "344,166"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "504,326"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ModelPerformanceChart",
+			"properties" : {
+				"name" : "ModelPerformanceChart2",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "704,326"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Load credit risk data\nfrom the classpath"
+			},
+			"connections" : {
+			},
+			"coordinates" : "6,126"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Split the data into \n2/3rd train and 1/3rd\ntest"
+			},
+			"connections" : {
+			},
+			"coordinates" : "313,266"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Learn rpart decision tree"
+			},
+			"connections" : {
+			},
+			"coordinates" : "186,29"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Compute evaluation \nstatistics"
+			},
+			"connections" : {
+			},
+			"coordinates" : "544,126"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note5",
+				"noteText" : "Scatter plot of errors"
+			},
+			"connections" : {
+			},
+			"coordinates" : "489,426"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "ROC curve"
+			},
+			"connections" : {
+			},
+			"coordinates" : "702,427"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "<html><font size=5><b><i>Learning and evaluating an rpart decision<br> tree in the Weka framework </i></b></font><br><br>This flow is ready to run out of the box.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "11,348"
+		}
+	]
+}

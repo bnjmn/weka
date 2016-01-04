@@ -1,0 +1,3 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.RScriptExecutor
+weka.gui.Perspective=weka.gui.knowledgeflow.RConsolePerspective
+*resources*=[weka.knowledgeflow.plugin.templates|R scripting|weka/gui/knowledgeflow/templates/R_example.kf],[weka.knowledgeflow.plugin.templates|Running an MLR classifier|weka/gui/knowledgeflow/templates/R_example2.kf]

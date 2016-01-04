@@ -1,0 +1,176 @@
+# Defines the syntax highlighting for R
+#
+# Author:  Mark Hall (mhall{[at]}pentaho{[dot]}com)
+# Version: $Revision: 10426 $
+
+########
+# Font #
+########
+
+# the font name
+FontName=monospaced
+
+# the font size
+FontSize=12
+
+#############################################
+# Colors (R,G,B format can be used as well) #
+#############################################
+
+# the font color
+ForegroundColor=black
+
+# the background color
+BackgroundColor=white
+
+# the color for keywords
+KeywordColor=blue
+
+# the color for comments
+CommentColor=gray
+
+# the color for strings
+StringColor=red
+
+##########
+# Syntax #
+##########
+
+# whether the syntax highlighting etc is on or not (true|false)
+Syntax=true
+
+# the number of spaces to use for indentation
+Indentation=2
+
+# the number of characters that a single tab represents
+Tabs=2
+
+# whether to use blanks instead of tabs (true|false)
+UseBlanks=true
+
+# word delimiters
+Delimiters=;:{}()[]+-/%<=>!&|^~*
+
+# delimiter for quoted strings/characters
+QuoteDelimiters="'
+
+# the character to escape quotes
+QuoteEscape=\\
+
+# whether multi-line comments are enabled (true|false)
+MultiLineComment=false
+
+# the start delimiter of a multi-line comment
+MultiLineCommentStart=/*
+
+# the end delimiter of a multi-line comment
+MultiLineCommentEnd=*/
+
+# the start delimiter of a single-line comment
+SingleLineCommentStart=#
+
+# whether to add matching block ends (true|false)
+AddMatchingBlockEnd=false
+
+# the start of a block (e.g., "opening bracket")
+BlockStart=(
+
+# the end of a block (e.g., "closing bracket")
+BlockEnd=)
+
+# whether the keywords are case-sensitive (true|false)
+CaseSensitive=false
+
+# the keywords
+Keywords=\
+        if,\
+        else,\
+        repeat,\
+        while,\
+        function,\
+        for,\
+        next,\
+        break,\
+        TRUE,\
+        FALSE,\
+        NULL,\
+        Inf,\
+        NaN,\
+        NA,\
+        NA_integer,\
+        NA_real,\
+        NA_complex,\
+        NA_character,\
+        aplot,\
+        dplot,\
+        gplot,\
+        iplot,\
+        color,\
+        dynamic,\
+        device,\
+        sysdata,\
+        datasets,\
+        data,\
+        manip,\
+        attribute,\
+        classes,\
+        character,\
+        complex,\
+        category,\
+        list,\
+        chron,\
+        array,\
+        algebra,\
+        arith,\
+        math,\
+        logic,\
+        optimize,\
+        symbolmath,\
+        graphs,\
+        programming,\
+        interface,\
+        IO,\
+        file,\
+        connection,\
+        database,\
+        iteration,\
+        methods,\
+        print,\
+        error,\
+        environment,\
+        internal,\
+        utilities,\
+        misc,\
+        documentation,\
+        debugging,\
+        datagen,\
+        distribution,\
+        univar,\
+        htest,\
+        models,\
+        regression,\
+        nonlinear,\
+        robust,\
+        design,\
+        multivariate,\
+        ts,\
+        survival,\
+        nonparametric,\
+        smooth,\
+        loess,\
+        cluster,\
+        tree,\
+        survey,\
+        classif,\
+        spacial,\
+        neural,\
+        summary,\
+        bootstrap,\
+        power,\
+        dstudy,\
+        trellis,\
+        grouping,\
+        sampling,\
+        accuracy,\
+        overview,
+                

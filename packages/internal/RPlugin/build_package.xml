@@ -168,6 +168,7 @@
          <include name="**/*.properties"/>
          <include name="**/*.default"/>
          <include name="**/*.kfml"/>
+         <include name="**/*.kf"/>
        </fileset>
     </copy>
 
