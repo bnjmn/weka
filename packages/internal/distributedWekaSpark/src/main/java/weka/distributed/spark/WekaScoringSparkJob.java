@@ -21,9 +21,8 @@
 
 package weka.distributed.spark;
 
-import java.io.*;
-import java.util.*;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -31,15 +30,33 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.broadcast.Broadcast;
-import org.apache.spark.streaming.api.java.JavaDStream;
-import org.apache.spark.streaming.api.java.JavaStreamingContext;
-
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
+import weka.core.DenseInstance;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.distributed.WekaScoringMapTask;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
+
+//import org.apache.spark.streaming.api.java.JavaDStream;
+// import org.apache.spark.streaming.api.java.JavaStreamingContext;
 
 /**
  * Spark job for scoring new data using an existing Weka classifier or clusterer
@@ -90,7 +107,7 @@ public class WekaScoringSparkJob extends SparkJob implements
   /**
    * A threshold to apply to the value of a prediction - predicted instances
    * below the threshold do not make it into the output. Takes the format:
-   * [label|index]:<double>. The label or index is the name of a class label (or
+   * {@code [label|index]:<double>}. The label or index is the name of a class label (or
    * zero-based index of the label) respectively. The label or index can be
    * omitted entirely in the case of a numeric target; in the case of a nominal
    * target, the first label (index 0) is assumed.
@@ -99,6 +116,9 @@ public class WekaScoringSparkJob extends SparkJob implements
    */
   protected String m_classPredictionThreshold = "";
 
+  /**
+   * Constructor
+   */
   public WekaScoringSparkJob() {
     super("Scoring job", "Score data with a Weka model");
   }
@@ -228,7 +248,7 @@ public class WekaScoringSparkJob extends SparkJob implements
   /**
    * Get the prediction threshold to apply - predicted instances below the
    * threshold do not make it into the output. Takes the format:
-   * [label|index]:<double>. The label or index is the name of a class label (or
+   * {@code [label|index]:<double>}. The label or index is the name of a class label (or
    * zero-based index of the label) respectively. The label or index can be
    * omitted entirely in the case of a numeric target; in the case of a nominal
    * target, the first label (index 0) is assumed.
@@ -244,7 +264,7 @@ public class WekaScoringSparkJob extends SparkJob implements
   /**
    * Set the prediction threshold to apply - predicted instances below the
    * threshold do not make it into the output. Takes the format:
-   * [label|index]:<double>. The label or index is the name of a class label (or
+   * {@code [label|index]:<double>}. The label or index is the name of a class label (or
    * zero-based index of the label) respectively. The label or index can be
    * omitted entirely in the case of a numeric target; in the case of a nominal
    * target, the first label (index 0) is assumed.
@@ -519,14 +539,14 @@ public class WekaScoringSparkJob extends SparkJob implements
     return scoredDataset;
   }
 
-  /**
+  /*
    * Score the supplied streaming dataset using the model
    *
    * @param streamingContext the streaming context to use
    * @param streamingData the streaming RDD
    * @return the scored data as a new JavaDStream
    * @throws DistributedWekaException if a problem occurs
-   */
+   *
   public JavaDStream<Instance> scoreDataStreaming(
     JavaStreamingContext streamingContext, JavaDStream<Instance> streamingData)
     throws DistributedWekaException {
@@ -541,7 +561,7 @@ public class WekaScoringSparkJob extends SparkJob implements
     JavaDStream<Instance> scoredData = streamingData.mapPartitions(scoring);
 
     return scoredData;
-  }
+  } */
 
   @Override
   public boolean runJobWithContext(JavaSparkContext sparkContext)
@@ -558,7 +578,7 @@ public class WekaScoringSparkJob extends SparkJob implements
     JavaRDD<Instance> dataSet = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      dataSet = getDataset(TRAINING_DATA).getDataset();
+      dataSet = ((Dataset<Instance>) getDataset(TRAINING_DATA)).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
@@ -581,10 +601,12 @@ public class WekaScoringSparkJob extends SparkJob implements
         return false;
       }
 
-      Dataset d = m_arffHeaderJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d =
+        (Dataset<Instance>) m_arffHeaderJob.getDataset(TRAINING_DATA);
       headerWithSummary = d.getHeaderWithSummary();
       dataSet = d.getDataset();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet,
+        headerWithSummary));
       logMessage("Fetching RDD<Instance> dataset from ARFF job: "
         + dataSet.partitions().size() + " partitions.");
     }
@@ -722,16 +744,34 @@ public class WekaScoringSparkJob extends SparkJob implements
     /** For serialization */
     private static final long serialVersionUID = -8714068105548643581L;
 
+    /**
+     * Provide access to the model in the case that it has been broadcast to the
+     * nodes
+     */
     protected Broadcast<WekaScoringMapTask> m_broadcastModel;
 
+    /** Holds the model in the case that broadcasting is not being used */
+    protected WekaScoringMapTask m_task;
+
     protected Instances m_scoredOutputFormat;
-    protected int m_threshIndex;
+    protected int m_threshIndex = -1;
     protected double m_thresh;
     protected int[] m_selectedIndices;
 
     /** Holds input instances when the model is a BatchPredictor */
     protected List<Instance> m_scored = new ArrayList<Instance>();
 
+    /**
+     * Constructor to use when the model is being broadcast to the nodes
+     *
+     * @param broadcastModel for obtaining the model
+     * @param scoredOutputFormat the output format of the scored data
+     * @param threshIndex index of the class label to apply the probability
+     *          threshold to - -1 for no thresholding
+     * @param thresh the threshold to use (if threshIndex >= 0)
+     * @param selectedIndices indices of input attributes to include in the
+     *          scored output (null to include all)
+     */
     public ScoringFlatMapFunction(
       final Broadcast<WekaScoringMapTask> broadcastModel,
       final Instances scoredOutputFormat, final int threshIndex,
@@ -743,8 +783,31 @@ public class WekaScoringSparkJob extends SparkJob implements
       m_selectedIndices = selectedIndices;
     }
 
-    public void setBroadcastModel(Broadcast<WekaScoringMapTask> broadcastModel) {
-      m_broadcastModel = broadcastModel;
+    /**
+     * Constructor to use when the model is being broadcast to the nodes. Does not
+     * apply a threshold to the probability of a given class label; includes all
+     * input attributes in the output.
+     *
+     * @param scoredOutputFormat the output format of the scored data
+     * @param broadcastModel for obtaining the model
+     */
+    public ScoringFlatMapFunction(Instances scoredOutputFormat,
+      final Broadcast<WekaScoringMapTask> broadcastModel) {
+      this(broadcastModel, scoredOutputFormat, -1, -1, null);
+    }
+
+    /**
+     * Constructor to use when the model is not being broadcast. Does not apply
+     * a threshold to the probability of a given class label; includes all input
+     * attributes in the output
+     *
+     * @param scoredOutputFormat the output format of the scored data
+     * @param task the scoring task to use
+     */
+    public ScoringFlatMapFunction(Instances scoredOutputFormat,
+      WekaScoringMapTask task) {
+      m_scoredOutputFormat = scoredOutputFormat;
+      m_task = task;
     }
 
     /**
@@ -790,7 +853,8 @@ public class WekaScoringSparkJob extends SparkJob implements
     public Iterable<Instance> call(Iterator<Instance> partition)
       throws Exception {
 
-      WekaScoringMapTask task = m_broadcastModel.value();
+      WekaScoringMapTask task =
+        m_broadcastModel != null ? m_broadcastModel.value() : m_task;
       List<Instance> forBatchPredictors = new ArrayList<Instance>();
 
       while (partition.hasNext()) {

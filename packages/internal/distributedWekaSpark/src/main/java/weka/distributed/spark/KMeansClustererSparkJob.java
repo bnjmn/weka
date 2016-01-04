@@ -21,23 +21,13 @@
 
 package weka.distributed.spark;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
-
 import scala.Tuple2;
 import weka.clusterers.CentroidSketch;
 import weka.clusterers.Clusterer;
@@ -65,8 +55,17 @@ import weka.distributed.KMeansReduceTask;
 import weka.filters.Filter;
 import weka.gui.beans.ClustererProducer;
 import weka.gui.beans.TextProducer;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Spark job for training a k-means clusterer with or without the k-means++
@@ -77,6 +76,8 @@ import distributed.core.DistributedJobConfig;
  */
 public class KMeansClustererSparkJob extends SparkJob implements
   CommandlineRunnable, TextProducer, ClustererProducer, OptionHandler {
+
+  public static final String K_MEANS_MODEL = "k-means-model";
 
   /**
    * The subdirectory of the output directory that this job saves its results to
@@ -404,7 +405,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
    */
   public String kMeansParallelInitStepsTipText() {
     return "The number of iterations of the k-means|| initialization routine to perform. "
-      + "Only applies if initialize using random centroids has not been turned on.";
+      + "Only applies if initializeFlow using random centroids has not been turned on.";
   }
 
   /**
@@ -544,6 +545,8 @@ public class KMeansClustererSparkJob extends SparkJob implements
       result.add(mapOpts.nextElement());
     }
 
+    result.add(new Option("", "", 0,
+      "\nOptions specific to data randomization/stratification:"));
     RandomizedDataSparkJob tempRJob = new RandomizedDataSparkJob();
     Enumeration<Option> randOpts = tempRJob.listOptions();
     while (randOpts.hasMoreElements()) {
@@ -1558,7 +1561,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
     int oversampleFactor = numClusters > 1 ? 2 : 1;
     List<Instance> centerList =
       dataset.takeSample(true, oversampleFactor * numRuns * numClusters,
-                         seed);
+        seed);
 
     // make sure that start points and header have been through any filters
     KMeansMapTask forFilteringOnly = new KMeansMapTask();
@@ -1601,7 +1604,7 @@ public class KMeansClustererSparkJob extends SparkJob implements
     JavaRDD<Instance> dataSet = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      dataSet = getDataset(TRAINING_DATA).getDataset();
+      dataSet = ((Dataset<Instance>) getDataset(TRAINING_DATA)).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("[k-means] RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
@@ -1623,10 +1626,12 @@ public class KMeansClustererSparkJob extends SparkJob implements
         return false;
       }
 
-      Dataset d = m_arffHeaderJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d =
+        (Dataset<Instance>) m_arffHeaderJob.getDataset(TRAINING_DATA);
       headerWithSummary = d.getHeaderWithSummary();
       dataSet = d.getDataset();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet,
+        headerWithSummary));
     }
 
     int numClusters = 2;
@@ -1684,16 +1689,22 @@ public class KMeansClustererSparkJob extends SparkJob implements
         return false;
       }
 
-      Dataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d =
+        (Dataset<Instance>) m_randomizeSparkJob.getDataset(TRAINING_DATA);
       dataSet = d.getDataset();
       headerWithSummary = d.getHeaderWithSummary();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet,
+        headerWithSummary));
       // m_dataSet = randomized;
     }
 
     m_finalClusterer =
       buildClusterer(dataSet, headerWithSummary, numIterations, numRuns,
         numClusters);
+    // pass on the model (in case EM clustering is being executed downstream
+    // from us)
+    getDataset(TRAINING_DATA).setAdditionalDataElement(K_MEANS_MODEL,
+      m_finalClusterer);
 
     outputPath +=
       (outputPath.toLowerCase().contains("://") ? "/" : File.separator)
@@ -1740,6 +1751,6 @@ public class KMeansClustererSparkJob extends SparkJob implements
       kcsj.runJob();
     } catch (Exception ex) {
       ex.printStackTrace();
-   }
+    }
   }
 }

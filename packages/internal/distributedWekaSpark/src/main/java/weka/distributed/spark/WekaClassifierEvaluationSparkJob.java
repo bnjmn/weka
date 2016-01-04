@@ -21,23 +21,14 @@
 
 package weka.distributed.spark;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
 import org.apache.spark.storage.StorageLevel;
-
 import scala.Tuple2;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.AggregateableEvaluation;
@@ -62,8 +53,16 @@ import weka.distributed.WekaClassifierReduceTask;
 import weka.filters.PreconstructedFilter;
 import weka.gui.beans.InstancesProducer;
 import weka.gui.beans.TextProducer;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Spark job for running an evaluation of a classifier or a regressor. Invokes
@@ -107,7 +106,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
   /**
    * Fraction of predictions to retain in order to compute auc/auprc.
    * Predictions are not retained if this is unspecified or the fraction is set
-   * <= 0
+   * {@code <= 0}
    */
   protected String m_predFrac = "";
 
@@ -744,7 +743,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
       JavaRDD<Instance> dataSet = null;
       Instances headerWithSummary = null;
       if (getDataset(TRAINING_DATA) != null) {
-        dataSet = getDataset(TRAINING_DATA).getDataset();
+        dataSet = ((Dataset<Instance>)getDataset(TRAINING_DATA)).getDataset();
         headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
         logMessage("RDD<Instance> dataset provided: "
           + dataSet.partitions().size() + " partitions.");
@@ -769,7 +768,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
           return false;
         }
 
-        Dataset d = m_classifierJob.m_arffHeaderJob.getDataset(TRAINING_DATA);
+        Dataset<Instance> d = (Dataset<Instance>) m_classifierJob.m_arffHeaderJob.getDataset(TRAINING_DATA);
         headerWithSummary = d.getHeaderWithSummary();
         dataSet = d.getDataset();
         setDataset(TRAINING_DATA, d);
@@ -796,7 +795,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
         m_classifierJob.m_randomizeSparkJob
           .setCachingStrategy(getCachingStrategy());
         m_classifierJob.m_randomizeSparkJob.setDataset(TRAINING_DATA,
-          new Dataset(dataSet, headerWithSummary));
+          new Dataset<Instance>(dataSet, headerWithSummary));
 
         // make sure the random seed gets in there from the setting in the
         // underlying
@@ -821,8 +820,8 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
           return false;
         }
 
-        Dataset d =
-          m_classifierJob.m_randomizeSparkJob.getDataset(TRAINING_DATA);
+        Dataset<Instance> d =
+          (Dataset<Instance>) m_classifierJob.m_randomizeSparkJob.getDataset(TRAINING_DATA);
         dataSet = d.getDataset();
         headerWithSummary = d.getHeaderWithSummary();
         setDataset(TRAINING_DATA, d);
@@ -855,7 +854,7 @@ public class WekaClassifierEvaluationSparkJob extends SparkJob implements
             m_classifierJob.getCSVMapTaskOptions(), sparkContext,
             getCachingStrategy(), minSlices, true);
 
-        setDataset(TEST_DATA, new Dataset(dataset, headerWithSummary));
+        setDataset(TEST_DATA, new Dataset<Instance>(dataset, headerWithSummary));
       }
 
       Evaluation results =

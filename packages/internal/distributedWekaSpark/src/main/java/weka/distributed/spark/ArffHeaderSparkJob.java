@@ -21,29 +21,11 @@
 
 package weka.distributed.spark;
 
-import java.awt.image.BufferedImage;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.Vector;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-
 import weka.core.Attribute;
 import weka.core.ChartUtils;
 import weka.core.CommandlineRunnable;
@@ -58,8 +40,26 @@ import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.gui.beans.InstancesProducer;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * A Spark job for creating a unified ARFF header (including summary "meta"
@@ -118,18 +118,11 @@ public class ArffHeaderSparkJob extends SparkJob implements
   protected String m_pathToAggregatedHeader = "";
 
   /**
-   * If there are >= this number of partitions then we will run a parallel
+   * If there are {@code >=} this number of partitions then we will run a parallel
    * partial reduce (combine) before running the final local reduce to 1 ARFF
    * header
    */
   protected int m_parallelReduceThreshold = 400;
-
-  /**
-   * If doing a parallel partial reduce then this is the minimum number of ARFF
-   * headers to aggregate per task (i.e. minimum number of headers in a
-   * partition).
-   */
-  protected int m_parallelReduceMinPartitionSize = 4;
 
   /** Holds any images generated from the summary attributes */
   protected List<BufferedImage> m_summaryCharts =
@@ -159,9 +152,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
     try {
       header = new Instances(ir);
     } finally {
-      if (ir != null) {
-        ir.close();
-      }
+      ir.close();
     }
 
     return header;
@@ -186,7 +177,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
         "\tPath to header file to use. Set this if you have\n\t"
           + "run previous jobs that have generated a header already. Setting this\n\t"
           + "prevents this job from running.", "existing-header", 1,
-        "-existing-header"));
+        "-existing-header <path>"));
     result
       .add(new Option("\tComma separated list of attribute names to use.\n\t"
         + "Use either this option, -names-file or neither (in which case\n\t"
@@ -280,17 +271,12 @@ public class ArffHeaderSparkJob extends SparkJob implements
     }
 
     String[] superOpts = super.getOptions();
-    for (String o : superOpts) {
-      options.add(o);
-    }
+    options.addAll(Arrays.asList(superOpts));
 
     if (!DistributedJobConfig.isEmpty(getCsvToArffTaskOptions())) {
       try {
         String[] csvOpts = Utils.splitOptions(getCsvToArffTaskOptions());
-
-        for (String s : csvOpts) {
-          options.add(s);
-        }
+        options.addAll(Arrays.asList(csvOpts));
       } catch (Exception e) {
         e.printStackTrace();
       }
@@ -516,9 +502,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
           result.add(line.trim());
         }
       } finally {
-        if (br != null) {
-          br.close();
-        }
+        br.close();
       }
     }
 
@@ -560,9 +544,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
       pr.print("\n");
       pr.flush();
     } finally {
-      if (pr != null) {
-        pr.close();
-      }
+      pr.close();
     }
   }
 
@@ -710,7 +692,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
           getCsvToArffTaskOptions(), sparkContext, getCachingStrategy(),
           minSlices, true);
 
-      setDataset(TRAINING_DATA, new Dataset(dataSet, m_finalHeader));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet, m_finalHeader));
 
       // done!
       return true;
@@ -737,7 +719,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
 
     String absoluteInputFile = resolveLocalOrOtherFileSystemPath(inputFile);
 
-    boolean computeQuartiles = false;
+    boolean computeQuartiles;
     try {
       computeQuartiles =
         Utils.getFlag("compute-quartiles",
@@ -847,7 +829,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
         CSVToARFFHeaderReduceTask.stripSummaryAtts(m_finalHeader),
         getCsvToArffTaskOptions(), getCachingStrategy(), true);
 
-    setDataset(TRAINING_DATA, new Dataset(dataSet, m_finalHeader));
+    setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet, m_finalHeader));
 
     writeHeaderToOutput();
     if (computeQuartiles) {

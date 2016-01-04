@@ -21,19 +21,10 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-import javax.swing.JPanel;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.log4j.WriterAppender;
 import org.apache.spark.api.java.JavaSparkContext;
-
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Utils;
@@ -42,8 +33,15 @@ import weka.distributed.spark.CachingStrategy;
 import weka.distributed.spark.Dataset;
 import weka.distributed.spark.SparkJob;
 import weka.gui.Logger;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Abstract base class for Knowledge Flow steps for Spark
@@ -446,10 +444,10 @@ public class AbstractSparkJob extends JPanel implements Startable, BeanCommon,
    * job
    */
   protected void notifySuccessListeners(
-    Iterator<Map.Entry<String, Dataset>> datasetIterator) {
+    Iterator<Map.Entry<String, Dataset<?>>> datasetIterator) {
 
-    List<Map.Entry<String, Dataset>> datasets =
-      datasetIterator.hasNext() ? new ArrayList<Map.Entry<String, Dataset>>()
+    List<Map.Entry<String, Dataset<?>>> datasets =
+      datasetIterator.hasNext() ? new ArrayList<Map.Entry<String, Dataset<?>>>()
         : null;
     if (datasets != null) {
       while (datasetIterator.hasNext()) {
@@ -491,10 +489,10 @@ public class AbstractSparkJob extends JPanel implements Startable, BeanCommon,
    * @param reason the reason for the failure (exception message)
    */
   protected void notifyFailureListeners(String reason,
-    Iterator<Map.Entry<String, Dataset>> datasetIterator) {
+    Iterator<Map.Entry<String, Dataset<?>>> datasetIterator) {
 
-    List<Map.Entry<String, Dataset>> datasets =
-      datasetIterator.hasNext() ? new ArrayList<Map.Entry<String, Dataset>>()
+    List<Map.Entry<String, Dataset<?>>> datasets =
+      datasetIterator.hasNext() ? new ArrayList<Map.Entry<String, Dataset<?>>>()
         : null;
 
     if (datasets != null) {

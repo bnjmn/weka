@@ -22,48 +22,45 @@
 package weka.distributed.spark;
 
 import org.apache.spark.api.java.JavaRDD;
-
-import weka.core.Instance;
 import weka.core.Instances;
 
 /**
- * Class that encapsulates dataset information - i.e. an RDD[Instance] along
+ * Class that encapsulates dataset information - i.e. an {@code RDD<Instance>} along
  * with ARFF header + summary attribute information
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class Dataset {
+public class Dataset<T> extends AbstractDataset {
 
-  /** The RDD<Instance> dataset */
-  protected JavaRDD<Instance> m_dataset;
+  private static final long serialVersionUID = -5152522334987920816L;
 
-  /** The header plus summary metadata for the dataset */
-  protected Instances m_headerWithSummary;
+  /** The {@code RDD<T>} dataset */
+  protected JavaRDD<T> m_dataset;
 
   /**
    * Constructor
    * 
-   * @param dataset the RDD<Instance> dataset
+   * @param dataset the {@code RDD<T>} dataset
    * @param headerWithSummary the header for the data with summary attributes
    */
-  public Dataset(JavaRDD<Instance> dataset, Instances headerWithSummary) {
+  public Dataset(JavaRDD<T> dataset, Instances headerWithSummary) {
+    super(headerWithSummary);
     m_dataset = dataset;
-    m_headerWithSummary = headerWithSummary;
   }
 
   /**
-   * Get the RDD<Instance> dataset
+   * Get the {@code RDD<T>} dataset
    * 
    * @return the dataset
    */
-  public JavaRDD<Instance> getDataset() {
+  public JavaRDD<T> getDataset() {
     return m_dataset;
   }
 
   /**
    * Get the header (with summary attributes) for the dataset
-   * 
+   *
    * @return the header (with summary attributes)
    */
   public Instances getHeaderWithSummary() {

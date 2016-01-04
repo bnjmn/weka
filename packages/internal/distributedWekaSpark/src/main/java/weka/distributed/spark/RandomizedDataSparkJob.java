@@ -21,10 +21,8 @@
 
 package weka.distributed.spark;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
@@ -36,17 +34,29 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
 import org.apache.spark.api.java.function.PairFlatMapFunction;
-
 import scala.Tuple2;
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.Utils;
 import weka.core.stats.ArffSummaryNumericMetric;
 import weka.core.stats.NominalStats;
 import weka.core.stats.NumericStats;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * Job for creating randomly shuffled (and stratified if a nominal class is set)
@@ -753,7 +763,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
         + m_sortedByFold.partitions().size());
     }
 
-    setDataset(TRAINING_DATA, new Dataset(m_sortedByFold, headerWithSummary));
+    setDataset(TRAINING_DATA, new Dataset<Instance>(m_sortedByFold, headerWithSummary));
 
     if (m_writeRandomizedDataToOutput) {
       writeRandomizedSplits(outputPath, m_sortedByFold);
@@ -784,6 +794,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
     }
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean runJobWithContext(JavaSparkContext sparkContext)
     throws IOException, DistributedWekaException {
@@ -804,7 +815,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
     JavaRDD<Instance> inputData = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      inputData = getDataset(TRAINING_DATA).getDataset();
+      inputData = (JavaRDD<Instance>)getDataset(TRAINING_DATA).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("RDD<Instance> dataset provided: "
         + inputData.partitions().size() + " partitions.");
@@ -830,7 +841,7 @@ public class RandomizedDataSparkJob extends SparkJob implements
       Dataset d = m_arffHeaderJob.getDataset(TRAINING_DATA);
 
       headerWithSummary = d.getHeaderWithSummary();
-      inputData = d.getDataset();
+      inputData = (JavaRDD<Instance>)d.getDataset();
       logMessage("Fetching RDD<Instance> dataset from ARFF job: "
         + inputData.partitions().size() + " partitions.");
     }
@@ -846,8 +857,6 @@ public class RandomizedDataSparkJob extends SparkJob implements
 
     // clean the output directory
     SparkJob.deleteDirectory(outputPath);
-
-    String inputFile = environmentSubstitute(m_sjConfig.getInputFile());
 
     int seed = 1;
     if (!DistributedJobConfig.isEmpty(getRandomSeed())) {
@@ -902,6 +911,12 @@ public class RandomizedDataSparkJob extends SparkJob implements
         break;
       }
     }
+
+    if (summaryAttOrig == null) {
+      throw new DistributedWekaException("Was unable to find a summary attribute for "
+        + "deterimining the total number of instances in the dataset");
+    }
+
     String summaryName = summaryAttOrig.name();
     Attribute summaryAtt =
       headerWithSummary
@@ -1098,10 +1113,6 @@ public class RandomizedDataSparkJob extends SparkJob implements
 
     /** For serialization */
     private static final long serialVersionUID = 3355852963548447505L;
-
-    /** Holds the randomly shuffled rows for a partition */
-    protected List<Tuple2<Integer, Object>> m_randomizedRows =
-      new ArrayList<Tuple2<Integer, Object>>();
 
     /** The header of the data (sans summary attributes) */
     protected Instances m_headerNoSummary;

@@ -21,24 +21,11 @@
 
 package weka.distributed.spark;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Vector;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.api.java.function.FlatMapFunction;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Attribute;
@@ -57,8 +44,20 @@ import weka.distributed.WekaClassifierReduceTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
 import weka.gui.beans.ClassifierProducer;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Job for building a classifier in Spark.
@@ -85,7 +84,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
   protected String m_classIndex = "";
 
   /**
-   * Number of iterations over the data to perform - > 1 only makes sense for
+   * Number of iterations over the data to perform - {@code > 1} only makes sense for
    * iterative aggregateable classifiers such as SGD
    */
   protected int m_numIterations = 1;
@@ -623,7 +622,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
 
   /**
    * Get the number of iterations (passes over the data) to run in the model
-   * building phase. > 1 only makes sense for incremental classifiers such as
+   * building phase. {@code > 1} only makes sense for incremental classifiers such as
    * SGD that converge on a solution.
    *
    * @return the number of iterations to run
@@ -634,7 +633,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
 
   /**
    * Set the number of iterations (passes over the data) to run in the model
-   * building phase. > 1 only makes sense for incremental classifiers such as
+   * building phase. {@code > 1} only makes sense for incremental classifiers such as
    * SGD that converge on a solution.
    *
    * @param i the number of iterations to run
@@ -779,6 +778,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
     // System.err.println(m_finalClassifier);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean runJobWithContext(JavaSparkContext sparkContext)
     throws IOException, DistributedWekaException {
@@ -794,7 +794,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
     JavaRDD<Instance> dataSet = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      dataSet = getDataset(TRAINING_DATA).getDataset();
+      dataSet = (JavaRDD<Instance>) getDataset(TRAINING_DATA).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
@@ -866,7 +866,7 @@ public class WekaClassifierSparkJob extends SparkJob implements
       m_randomizeSparkJob.setStatusMessagePrefix(m_statusMessagePrefix);
       m_randomizeSparkJob.setLog(getLog());
       m_randomizeSparkJob.setCachingStrategy(getCachingStrategy());
-      m_randomizeSparkJob.setDataset(TRAINING_DATA, new Dataset(dataSet,
+      m_randomizeSparkJob.setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet,
         headerWithSummary));
 
       // make sure the random seed gets in there from the setting in the
@@ -895,9 +895,9 @@ public class WekaClassifierSparkJob extends SparkJob implements
       Dataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
       // dataSet =
       // m_randomizeSparkJob.getRandomizedStratifiedRDD();
-      dataSet = d.getDataset();
+      dataSet = (JavaRDD<weka.core.Instance>) d.getDataset();
       headerWithSummary = d.getHeaderWithSummary();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet, headerWithSummary));
     }
 
     try {

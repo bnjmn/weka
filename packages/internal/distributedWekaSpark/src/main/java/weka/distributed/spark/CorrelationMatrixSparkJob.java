@@ -421,8 +421,7 @@ public class CorrelationMatrixSparkJob extends SparkJob implements
                   int[] co = null;
                   if (coOcc != null) {
                     co = coOcc[i];
-                  }
-                  MatrixRowHolder rh = new MatrixRowHolder(i, row, co);
+                  }                  MatrixRowHolder rh = new MatrixRowHolder(i, row, co);
                   m_partialRows
                     .add(new Tuple2<Integer, MatrixRowHolder>(i, rh));
                 }
@@ -746,7 +745,7 @@ public class CorrelationMatrixSparkJob extends SparkJob implements
     JavaRDD<Instance> dataSet = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      dataSet = getDataset(TRAINING_DATA).getDataset();
+      dataSet = (JavaRDD<Instance>) getDataset(TRAINING_DATA).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
@@ -769,12 +768,12 @@ public class CorrelationMatrixSparkJob extends SparkJob implements
         return false;
       }
 
-      logMessage("Fetching RDD<Instance> dataset from ARFF job: "
-        + dataSet.partitions().size() + " partitions.");
-      Dataset d = m_arffHeaderJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d = (Dataset<Instance>) m_arffHeaderJob.getDataset(TRAINING_DATA);
       dataSet = d.getDataset();
       headerWithSummary = d.getHeaderWithSummary();
       setDataset(TRAINING_DATA, d);
+      logMessage("Fetching RDD<Instance> dataset from ARFF job: "
+        + dataSet.partitions().size() + " partitions.");
     }
 
     Instances headerNoSummary =

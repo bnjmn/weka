@@ -638,6 +638,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
     dataset.unpersist();
   }
 
+  @SuppressWarnings("unchecked")
   @Override
   public boolean runJobWithContext(JavaSparkContext sparkContext)
     throws IOException, DistributedWekaException {
@@ -653,7 +654,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
     JavaRDD<Instance> dataSet = null;
     Instances headerWithSummary = null;
     if (getDataset(TRAINING_DATA) != null) {
-      dataSet = getDataset(TRAINING_DATA).getDataset();
+      dataSet = ((Dataset<Instance>) getDataset(TRAINING_DATA)).getDataset();
       headerWithSummary = getDataset(TRAINING_DATA).getHeaderWithSummary();
       logMessage("RDD<Instance> dataset provided: "
         + dataSet.partitions().size() + " partitions.");
@@ -676,10 +677,10 @@ public class CanopyClustererSparkJob extends SparkJob implements
         return false;
       }
 
-      Dataset d = m_arffHeaderJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d = (Dataset<Instance>) m_arffHeaderJob.getDataset(TRAINING_DATA);
       headerWithSummary = d.getHeaderWithSummary();
       dataSet = d.getDataset();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet, headerWithSummary));
       logMessage("Fetching RDD<Instance> dataset from ARFF job: "
         + dataSet.partitions().size() + " partitions.");
     }
@@ -705,7 +706,7 @@ public class CanopyClustererSparkJob extends SparkJob implements
       m_randomizeSparkJob.setLog(getLog());
       m_randomizeSparkJob.setStatusMessagePrefix(m_statusMessagePrefix);
       m_randomizeSparkJob.setCachingStrategy(getCachingStrategy());
-      m_randomizeSparkJob.setDataset(TRAINING_DATA, new Dataset(dataSet,
+      m_randomizeSparkJob.setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet,
         headerWithSummary));
 
       if (!m_randomizeSparkJob.runJobWithContext(sparkContext)) {
@@ -716,10 +717,10 @@ public class CanopyClustererSparkJob extends SparkJob implements
 
       logMessage("Runing Canopy job...");
 
-      Dataset d = m_randomizeSparkJob.getDataset(TRAINING_DATA);
+      Dataset<Instance> d = (Dataset<Instance>) m_randomizeSparkJob.getDataset(TRAINING_DATA);
       dataSet = d.getDataset();
       headerWithSummary = d.getHeaderWithSummary();
-      setDataset(TRAINING_DATA, new Dataset(dataSet, headerWithSummary));
+      setDataset(TRAINING_DATA, new Dataset<Instance>(dataSet, headerWithSummary));
     }
 
     try {
