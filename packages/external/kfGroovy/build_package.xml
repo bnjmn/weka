@@ -70,6 +70,8 @@
          <include name="org/**/*.txt"/>
          <include name="org/**/*.xml"/>
          <include name="org/**/*.kfml"/>
+         <include name="weka/**/*.gif"/>
+         <include name="weka/**/*.kf"/>
          <include name="**/*.cup"/>
          <include name="**/*.flex"/>
          <include name="**/*.jflex"/>
@@ -172,6 +174,8 @@
     <copy file="Description.props"
           todir="${dist}/${package}"/>
     <copy file="Beans.props"
+          todir="${dist}/${package}"/>
+    <copy file="PluginManager.props"
           todir="${dist}/${package}"/>
     <copy file="MacOSXDefaults.groovy"
           todir="${dist}/${package}"/>

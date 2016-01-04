@@ -22,16 +22,6 @@
 package org.pentaho.dm.kf;
 
 import groovy.lang.GroovyClassLoader;
-
-import java.awt.BorderLayout;
-import java.beans.EventSetDescriptor;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Vector;
-
-import javax.swing.JPanel;
-
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.gui.Logger;
@@ -68,6 +58,14 @@ import weka.gui.beans.UserRequestAcceptor;
 import weka.gui.beans.Visible;
 import weka.gui.beans.VisualizableErrorEvent;
 import weka.gui.beans.VisualizableErrorListener;
+
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
+import java.beans.EventSetDescriptor;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Vector;
 
 /**
  * A KnowledgeFlow plugin that allows the user to write a Groovy script
@@ -291,7 +289,7 @@ public class GroovyComponent
    * Returns true if, at this time, 
    * the object will accept a connection with respect to the named event
    *
-   * @param eventName the event
+   * @param esd the event
    * @return true if the object will accept a connection
    */
   public boolean connectionAllowed(EventSetDescriptor esd) {

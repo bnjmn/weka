@@ -1,0 +1,2 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.GroovyStep
+*resources*=[weka.knowledgeflow.plugin.templates|Groovy scripting|weka/gui/knowledgeflow/templates/groovyLearningCurve.kf]
