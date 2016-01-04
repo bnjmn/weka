@@ -1,0 +1,3 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.PythonScriptExecutor
+weka.gui.Perspective=weka.gui.knowledgeflow.PythonPerspective
+*resources*=[weka.knowledgeflow.plugin.templates|Python scripting|weka/gui/knowledgeflow/templates/pythonScripting.kf],[weka.knowledgeflow.plugin.templates|Running two scikit-learn schemes|weka/gui/knowledgeflow/templates/scikitLearn.kf]

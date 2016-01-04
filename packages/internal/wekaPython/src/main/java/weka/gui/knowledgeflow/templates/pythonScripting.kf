@@ -1,0 +1,112 @@
+{
+	"flow_name" : "Python Scripting",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.PythonScriptExecutor",
+			"properties" : {
+				"debug" : false,
+				"name" : "PythonScriptExecutor",
+				"pythonScript" : "import matplotlib.pyplot as plt\nfrom pandas.tools.plotting import scatter_matrix\nfrom pandas.tools.plotting import andrews_curves\nfrom pandas.tools.plotting import parallel_coordinates\nfrom pandas.tools.plotting import radviz\nimport numpy as np\nfrom sklearn import *\niris=py_data\n# Summarize the input data\nsummary=str(iris.describe(include='all'))\n# Scatter plot\nscatter = scatter_matrix(iris,figsize=(6,6),diagonal='kde')\nfig=scatter[0][0].get_figure()\n# Andrew's curves\nfig2=plt.figure()\nandrews_curves(iris, 'class')\n# Parallel coordinates\nfig3=plt.figure()\nparallel_coordinates(iris, 'class')\n# RadViz\nfig4=plt.figure()\nradviz(iris, 'class')\n# learn a scikit-learn classifier and get predictions\nX=iris.iloc[:,[0,1,2,3]].values\nY=iris.iloc[:,[4]].values\ndt=tree.DecisionTreeClassifier()\ndt.fit(X,Y)\npreds=dt.predict_proba(X)",
+				"scriptFile" : "",
+				"variablesToGetFromPython" : "summary,iris,fig,fig2,fig3,fig4,preds"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"image" : [
+					"ImageViewer"
+				],
+				"dataSet" : [
+					"TextViewer2"
+				]
+			},
+			"coordinates" : "320,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"PythonScriptExecutor"
+				]
+			},
+			"coordinates" : "40,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "320,200"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageViewer",
+			"properties" : {
+				"name" : "ImageViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "560,200"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer2"
+			},
+			"connections" : {
+			},
+			"coordinates" : "560,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Load the iris data from\nthe classpath"
+			},
+			"connections" : {
+			},
+			"coordinates" : "28,137"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Collect textual\nvariables from\nPython"
+			},
+			"connections" : {
+			},
+			"coordinates" : "217,217"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Collect images\nfrom Python"
+			},
+			"connections" : {
+			},
+			"coordinates" : "450,221"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "The iris data\nback from Python"
+			},
+			"connections" : {
+			},
+			"coordinates" : "552,130"
+		}
+	]
+}
