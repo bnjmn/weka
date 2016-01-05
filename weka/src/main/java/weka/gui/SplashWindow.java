@@ -26,17 +26,24 @@
 
 package weka.gui;
 
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Frame;
 import java.awt.Graphics;
+import java.awt.GraphicsDevice;
+import java.awt.GraphicsEnvironment;
 import java.awt.Image;
 import java.awt.MediaTracker;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Ellipse2D;
 import java.net.URL;
+import java.util.List;
 
 /**
  * A Splash window.
@@ -77,6 +84,9 @@ public class SplashWindow extends Window {
    */
   private final Image image;
 
+  /** Any message to overlay on the image */
+  private final List<String> message;
+
   /**
    * This attribute indicates whether the method paint(Graphics) has been called
    * at least once since the construction of this window.<br>
@@ -96,9 +106,10 @@ public class SplashWindow extends Window {
    * @param parent the parent of the window.
    * @param image the splash image.
    */
-  private SplashWindow(Frame parent, Image image) {
+  private SplashWindow(Frame parent, Image image, List<String> message) {
     super(parent);
     this.image = image;
+    this.message = message;
 
     // Load the image
     MediaTracker mt = new MediaTracker(this);
@@ -112,6 +123,13 @@ public class SplashWindow extends Window {
     int imgWidth = image.getWidth(this);
     int imgHeight = image.getHeight(this);
     setSize(imgWidth, imgHeight);
+    GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+    if (ge.getDefaultScreenDevice().isWindowTranslucencySupported(
+      GraphicsDevice.WindowTranslucency.PERPIXEL_TRANSLUCENT)) {
+      // TODO this is if we are going to move to the big blue circular icon
+      // for the splash window
+      setShape(new Ellipse2D.Double(0, 0, getWidth(), getHeight()));
+    }
     Dimension screenDim = Toolkit.getDefaultToolkit().getScreenSize();
     setLocation((screenDim.width - imgWidth) / 2,
       (screenDim.height - imgHeight) / 2);
@@ -150,12 +168,33 @@ public class SplashWindow extends Window {
     paint(g);
   }
 
+  private void paintMessage(Graphics g) {
+    int imgWidth = image.getWidth(this);
+    int imgHeight = image.getHeight(this);
+    g.setFont(new Font(null, Font.BOLD, 10));
+    g.setColor(Color.WHITE);
+    FontMetrics fm = g.getFontMetrics();
+    int hf = fm.getAscent() + 1;
+
+    int heightStart = 4 * (imgHeight / 5) + 5;
+    int count = 0;
+    for (String s : message) {
+      int textWidth = fm.stringWidth(s);
+      g.drawString(s, (imgWidth - textWidth) / 2, heightStart + (count * hf));
+      count++;
+    }
+  }
+
   /**
    * Paints the image on the window.
    */
   @Override
   public void paint(Graphics g) {
     g.drawImage(image, 0, 0, this);
+    if (message != null) {
+      paintMessage(g);
+    }
+
     // Notify method splash that the window
     // has been painted.
     // Note: To improve performance we do not enter
@@ -174,12 +213,12 @@ public class SplashWindow extends Window {
    * @param image The splash image.
    */
   @SuppressWarnings("deprecation")
-  public static void splash(Image image) {
+  public static void splash(Image image, List<String> message) {
     if (m_instance == null && image != null) {
       Frame f = new Frame();
 
       // Create the splash image
-      m_instance = new SplashWindow(f, image);
+      m_instance = new SplashWindow(f, image, message);
 
       // Show the window.
       m_instance.show();
@@ -209,8 +248,18 @@ public class SplashWindow extends Window {
    * @param imageURL The url of the splash image.
    */
   public static void splash(URL imageURL) {
+    splash(imageURL, null);
+  }
+
+  /**
+   * Open's a splash window using the specified image and message
+   *
+   * @param imageURL The url of the splash image.
+   * @param message The message to overlay on the image
+   */
+  public static void splash(URL imageURL, List<String> message) {
     if (imageURL != null) {
-      splash(Toolkit.getDefaultToolkit().createImage(imageURL));
+      splash(Toolkit.getDefaultToolkit().createImage(imageURL), message);
     }
   }
 
@@ -238,8 +287,8 @@ public class SplashWindow extends Window {
         .getMethod(methodName, new Class[] { String[].class })
         .invoke(null, new Object[] { args });
     } catch (Exception e) {
-      InternalError error = new InternalError("Failed to invoke method: "
-        + methodName);
+      InternalError error =
+        new InternalError("Failed to invoke method: " + methodName);
       error.initCause(e);
       throw error;
     }
@@ -253,8 +302,7 @@ public class SplashWindow extends Window {
    */
   public static void invokeMain(String className, String[] args) {
     try {
-      Class.forName(className)
-        .getMethod("main", new Class[] { String[].class })
+      Class.forName(className).getMethod("main", new Class[] { String[].class })
         .invoke(null, new Object[] { args });
     } catch (Exception e) {
       InternalError error = new InternalError("Failed to invoke main method");
