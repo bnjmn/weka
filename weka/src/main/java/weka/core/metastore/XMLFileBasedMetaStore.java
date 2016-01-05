@@ -21,16 +21,15 @@
 
 package weka.core.metastore;
 
+import weka.core.WekaPackageManager;
+import weka.core.xml.XMLBasicSerialization;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-
-import weka.core.WekaPackageManager;
-import weka.core.metastore.MetaStore;
-import weka.core.xml.XMLBasicSerialization;
 
 /**
  * A simple default implementation of MetaStore that uses Weka's XML
@@ -52,7 +51,9 @@ public class XMLFileBasedMetaStore implements MetaStore {
   /** True if the store home has been successfully established */
   protected boolean m_storeDirOK;
 
-  /** Lookup for entries in the stores - just holds entry names and File paths */
+  /**
+   * Lookup for entries in the stores - just holds entry names and File paths
+   */
   protected Map<String, Map<String, File>> m_stores =
     new LinkedHashMap<String, Map<String, File>>();
 
@@ -146,13 +147,13 @@ public class XMLFileBasedMetaStore implements MetaStore {
 
         try {
           lockStore();
-          XMLBasicSerialization deserializer = new XMLBasicSerialization();
+          XMLBasicSerialization deserializer = getSerializer();
           Object loaded = deserializer.read(toLoad);
 
           if (loaded.getClass().equals(clazz)) {
-            throw new IOException("Deserialized entry ("
-              + loaded.getClass().getName() + ") was not "
-              + "the expected class: " + clazz.getName());
+            throw new IOException(
+              "Deserialized entry (" + loaded.getClass().getName()
+                + ") was not " + "the expected class: " + clazz.getName());
           }
 
           return loaded;
@@ -177,7 +178,8 @@ public class XMLFileBasedMetaStore implements MetaStore {
     lockStore();
     try {
       if (!store.mkdir()) {
-        throw new IOException("Unable to create meta store '" + storeName + "'");
+        throw new IOException(
+          "Unable to create meta store '" + storeName + "'");
       }
     } finally {
       unlockStore();
@@ -200,7 +202,7 @@ public class XMLFileBasedMetaStore implements MetaStore {
     store.put(name, loc);
     try {
       lockStore();
-      XMLBasicSerialization serializer = new XMLBasicSerialization();
+      XMLBasicSerialization serializer = getSerializer();
       serializer.write(loc, toStore);
     } catch (Exception ex) {
       throw new IOException(ex);
@@ -240,5 +242,57 @@ public class XMLFileBasedMetaStore implements MetaStore {
   protected void unlockStore() {
     File lock = new File(m_storeHome, ".lock");
     lock.delete();
+  }
+
+  /**
+   * Gets a serializer to use. Creates a subclass of
+   * {@code XMLBasicSerialization} that has allowed properties set for common
+   * option handlers.
+   * 
+   * @return a serializer instance
+   */
+  protected XMLBasicSerialization getSerializer() {
+    try {
+      XMLBasicSerialization ser = new XMLBasicSerialization() {
+        public void clear() throws Exception {
+          super.clear();
+
+          m_Properties.addAllowed(weka.classifiers.Classifier.class, "debug");
+          m_Properties.addAllowed(weka.classifiers.Classifier.class, "options");
+          m_Properties.addAllowed(weka.associations.Associator.class,
+            "options");
+          m_Properties.addAllowed(weka.clusterers.Clusterer.class, "options");
+          m_Properties.addAllowed(weka.filters.Filter.class, "options");
+          m_Properties.addAllowed(weka.core.converters.Saver.class, "options");
+          m_Properties.addAllowed(weka.core.converters.Loader.class, "options");
+          m_Properties.addAllowed(weka.attributeSelection.ASSearch.class,
+            "options");
+          m_Properties.addAllowed(weka.attributeSelection.ASEvaluation.class,
+            "options");
+
+          m_Properties.addAllowed(weka.core.converters.DatabaseSaver.class,
+            "options");
+          m_Properties.addAllowed(weka.core.converters.DatabaseLoader.class,
+            "options");
+          m_Properties.addAllowed(
+            weka.core.converters.TextDirectoryLoader.class, "options");
+
+          // we assume that classes implementing SplitEvaluator also implement
+          // OptionHandler
+          m_Properties.addAllowed(weka.experiment.SplitEvaluator.class,
+            "options");
+          // we assume that classes implementing ResultProducer also implement
+          // OptionHandler
+          m_Properties.addAllowed(weka.experiment.ResultProducer.class,
+            "options");
+
+        }
+      };
+      return ser;
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+
+    return null;
   }
 }
