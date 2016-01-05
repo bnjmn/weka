@@ -396,6 +396,15 @@ public class Flow {
   }
 
   /**
+   * Get the number of steps in this flow
+   *
+   * @return the number of steps in this flow
+   */
+  public int size() {
+    return m_flowSteps.size();
+  }
+
+  /**
    * Find a Step by name
    * 
    * @param stepName the name of the Step to find
