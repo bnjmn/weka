@@ -343,11 +343,21 @@ public class VisibleLayout extends JPanel {
     m_layout.initiateAddNote();
   }
 
-  protected Flow getFlow() {
+  /**
+   * Get the flow being edited by this layout
+   *
+   * @return the flow being edited by this layout
+   */
+  public Flow getFlow() {
     return m_flow;
   }
 
-  protected void setFlow(Flow flow) {
+  /**
+   * Set the flow to edit in this layout
+   *
+   * @param flow the flow to edit in this layout
+   */
+  public void setFlow(Flow flow) {
     m_flow = flow;
 
     m_renderGraph.clear();
