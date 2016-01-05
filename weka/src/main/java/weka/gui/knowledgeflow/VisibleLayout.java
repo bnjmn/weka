@@ -107,6 +107,11 @@ public class VisibleLayout extends JPanel {
    */
   protected String m_editConnection;
 
+  /**
+   * Constructor
+   *
+   * @param mainPerspective the main Knowledge Flow perspective
+   */
   public VisibleLayout(MainKFPerspective mainPerspective) {
     super();
     setLayout(new BorderLayout());
@@ -150,8 +155,8 @@ public class VisibleLayout extends JPanel {
   }
 
   /**
-   * Get a list of the steps (wrapped in StepVisual instances) that make up the
-   * flow rendered by this panel
+   * Get a list of the steps (wrapped in {@code StepVisual} instances) that make
+   * up the flow rendered/edited by this panel
    *
    * @return a list of steps
    */
@@ -249,6 +254,11 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Removes the currently selected list of steps from the layout
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void removeSelectedSteps() throws WekaException {
     addUndoPoint();
     for (StepVisual v : m_selectedSteps) {
@@ -267,15 +277,33 @@ public class VisibleLayout extends JPanel {
     m_layout.repaint();
   }
 
+  /**
+   * Copies the currently selected list of steps to the global clipboard
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void copySelectedStepsToClipboard() throws WekaException {
     copyStepsToClipboard(getSelectedSteps());
   }
 
+  /**
+   * Copies the supplied list of steps to the global clipboard
+   *
+   * @param steps the steps to copy to the clipboard
+   * @throws WekaException if a problem occurs
+   */
   protected void copyStepsToClipboard(List<StepVisual> steps)
     throws WekaException {
     m_mainPerspective.copyStepsToClipboard(steps);
   }
 
+  /**
+   * Pastes the contents (if any) of the global clipboard to this layout
+   *
+   * @param x the x coordinate to paste at
+   * @param y the y cooridinate to paste at
+   * @throws WekaException if a problem occurs
+   */
   protected void pasteFromClipboard(int x, int y) throws WekaException {
 
     addUndoPoint();
@@ -308,6 +336,9 @@ public class VisibleLayout extends JPanel {
     setSelectedSteps(added);
   }
 
+  /**
+   * Add an undo point
+   */
   protected void addUndoPoint() {
     try {
       File tempFile = File.createTempFile("knowledgeflow",
@@ -329,16 +360,27 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Get the number of entries in the undo stack
+   *
+   * @return the number of entries in the undo stack
+   */
   protected int getUndoBufferSize() {
     return m_undoBuffer.size();
   }
 
+  /**
+   * Snap the selected steps (if any) to the grid
+   */
   protected void snapSelectedToGrid() {
     if (m_selectedSteps.size() > 0) {
       m_layout.snapSelectedToGrid();
     }
   }
 
+  /**
+   * Initiate the process of adding a note to the layout
+   */
   protected void initiateAddNote() {
     m_layout.initiateAddNote();
   }
@@ -376,10 +418,25 @@ public class VisibleLayout extends JPanel {
     m_layout.repaint();
   }
 
+  /**
+   * Add all the supplied steps to the flow managed by this layout
+   *
+   * @param steps the steps to add
+   * @return a list of all the added steps, where each has been wrapped in an
+   *         appropriate {@code StepVisual} instance.
+   */
   protected List<StepVisual> addAll(List<StepManagerImpl> steps) {
     return addAll(steps, true);
   }
 
+  /**
+   * Add all the supplied steps to the flow managed by this layout
+   *
+   * @param steps the steps to add
+   * @param revalidate true if the GUI should be repainted
+   * @return a list of all the added steps, where each has been wrapped in an
+   *         appropriate {@code StepVisual} instance.
+   */
   protected List<StepVisual> addAll(List<StepManagerImpl> steps,
     boolean revalidate) {
     List<StepVisual> added = new ArrayList<StepVisual>();
@@ -398,6 +455,14 @@ public class VisibleLayout extends JPanel {
     return added;
   }
 
+  /**
+   * Add the supplied step to the flow managed by this layout
+   * 
+   * @param manager the {@code StepManager} instance managing the step to be
+   *          added
+   * @param x the x coordinate to add at
+   * @param y the y coordinate to add at
+   */
   protected void addStep(StepManagerImpl manager, int x, int y) {
     m_flow.addStep(manager);
     StepVisual visual = StepVisual.createVisual(manager);
@@ -424,6 +489,14 @@ public class VisibleLayout extends JPanel {
       .setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
   }
 
+  /**
+   * Connect the supplied source step to the supplied target step using the
+   * specified connection type
+   *
+   * @param source the {@code StepManager} instance managing the source step
+   * @param target the {@code StepManager} instance managing the target step
+   * @param connectionType the connection type to use
+   */
   public void connectSteps(StepManagerImpl source, StepManagerImpl target,
     String connectionType) {
     if (m_mainPerspective.getDebug()) {
@@ -441,6 +514,12 @@ public class VisibleLayout extends JPanel {
     m_layout.repaint();
   }
 
+  /**
+   * Rename a step
+   * 
+   * @param oldName the old name of the step to rename
+   * @param newName the new name to give the step
+   */
   protected void renameStep(String oldName, String newName) {
     try {
       m_flow.renameStep(oldName, newName);
@@ -449,6 +528,12 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Remove a step from the flow displayed/edited by this layout
+   * 
+   * @param step the {@code StepVisual} instance wrapping the step to be removed
+   * @throws WekaException if a problem occurs
+   */
   protected void removeStep(StepVisual step) throws WekaException {
     m_flow.removeStep(step.getStepManager());
     m_renderGraph.remove(step);
@@ -466,10 +551,20 @@ public class VisibleLayout extends JPanel {
     return m_renderGraph.size();
   }
 
+  /**
+   * Get the environment variables being used by this layout
+   * 
+   * @return the environment variables being used by this layout
+   */
   public Environment getEnvironment() {
     return m_env;
   }
 
+  /**
+   * Set the environment variables to use with this layout
+   * 
+   * @param env the environment variables to use
+   */
   public void setEnvironment(Environment env) {
     m_env = env;
   }
@@ -483,18 +578,39 @@ public class VisibleLayout extends JPanel {
     return source;
   }
 
+  /**
+   * Get the {@code FlowExecutor} being used for execution of this flow
+   * 
+   * @return the {@code FlowExecutor} in use by this layout
+   */
   public FlowExecutor getFlowExecutor() {
     return m_flowExecutor;
   }
 
+  /**
+   * Set the {@code FlowExcecutor} to use for executing the flow
+   * 
+   * @param executor the {@code FlowExecutor} to use for executing the flow in
+   *          this layout
+   */
   public void setFlowExecutor(FlowExecutor executor) {
     m_flowExecutor = executor;
   }
 
+  /**
+   * Get the current path (if any) of the flow being edited in this layout
+   * 
+   * @return the current path on disk of the flow
+   */
   public File getFilePath() {
     return m_filePath;
   }
 
+  /**
+   * Set the file path for the flow being edited by this layout
+   *
+   * @param path the path on disk for the flow being edited
+   */
   public void setFilePath(File path) {
     m_filePath = path != null ? path : new File("-NONE-");
 
@@ -505,22 +621,47 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Get the log panel in use by this layout
+   * 
+   * @return the log panel
+   */
   public KFLogPanel getLogPanel() {
     return m_logPanel;
   }
 
+  /**
+   * Get the current zoom setting for this layout
+   * 
+   * @return the current zoom setting
+   */
   public int getZoomSetting() {
     return m_zoomSetting;
   }
 
+  /**
+   * Set the current zoom setting for this layout
+   *
+   * @param zoom the current zoom setting
+   */
   public void setZoomSetting(int zoom) {
     m_zoomSetting = zoom;
   }
 
+  /**
+   * Get whether this flow has been altered since the last save operation
+   *
+   * @return true if the flow has been altered
+   */
   public boolean getEdited() {
     return m_hasBeenEdited;
   }
 
+  /**
+   * Set the edited status of this flow
+   *
+   * @param edited true if the flow has been altered
+   */
   public void setEdited(boolean edited) {
     m_hasBeenEdited = edited;
 
@@ -529,18 +670,40 @@ public class VisibleLayout extends JPanel {
     m_mainPerspective.setCurrentTabTitleEditedStatus(edited);
   }
 
+  /**
+   * Returns true if the flow managed by this layout is currently executing
+   *
+   * @return true if the flow is executing
+   */
   public boolean isExecuting() {
     return m_isExecuting;
   }
 
+  /**
+   * Get the current flow edit operation
+   * 
+   * @return the current flow edit operation
+   */
   protected LayoutOperation getFlowLayoutOperation() {
     return m_userOpp;
   }
 
+  /**
+   * Set the current flow edit operation
+   * 
+   * @param mode the current flow edit operation
+   */
   protected void setFlowLayoutOperation(LayoutOperation mode) {
     m_userOpp = mode;
   }
 
+  /**
+   * Execute the flow managed by this layout
+   * 
+   * @param sequential true if the flow's start points are to be launched
+   *          sequentially rather than in parallel
+   * @throws WekaException if a problem occurs
+   */
   public synchronized void executeFlow(boolean sequential)
     throws WekaException {
     if (isExecuting()) {
@@ -587,12 +750,22 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Stop the flow from executing
+   */
   public void stopFlow() {
     if (isExecuting()) {
       m_flowExecutor.stopProcessing();
     }
   }
 
+  /**
+   * Find the first step whose bounds enclose the supplied point
+   * 
+   * @param p the point
+   * @return the first step in the flow whose visible bounds enclose the
+   *         supplied point, or null if no such step exists
+   */
   protected StepVisual findStep(Point p) {
 
     Rectangle tempBounds = new Rectangle();
@@ -606,6 +779,12 @@ public class VisibleLayout extends JPanel {
     return null;
   }
 
+  /**
+   * Find a list of steps that exist within the supplied bounding box
+   * 
+   * @param boundingBox the bounding box to check
+   * @return a list of steps that fall within the bounding box
+   */
   protected List<StepVisual> findSteps(Rectangle boundingBox) {
     List<StepVisual> steps = new ArrayList<StepVisual>();
 
@@ -620,6 +799,13 @@ public class VisibleLayout extends JPanel {
     return steps;
   }
 
+  /**
+   * Find a list of steps in the flow that can accept the supplied connection
+   * type
+   * 
+   * @param connectionName the type of connection to check for
+   * @return a list of steps that can accept the supplied connection type
+   */
   protected List<StepManagerImpl>
     findStepsThatCanAcceptConnection(String connectionName) {
 
@@ -705,6 +891,16 @@ public class VisibleLayout extends JPanel {
     return closestConnections;
   }
 
+  /**
+   * Returns true if there is a previous (prior to index) connection to the
+   * supplied target step in the supplied map of connections.
+   *
+   * 
+   * @param outConns the map of connections to check
+   * @param target the target step to check for
+   * @param index connections to the target prior to this index in the map count
+   * @return true if a previous connection is found
+   */
   protected boolean previousConn(Map<String, List<StepManager>> outConns,
     StepManagerImpl target, int index) {
     boolean result = false;
@@ -768,6 +964,11 @@ public class VisibleLayout extends JPanel {
     });
   }
 
+  /**
+   * Save the flow managed by this layout
+   *
+   * @param showDialog true if a file dialog should be displayed
+   */
   protected void saveLayout(boolean showDialog) {
     boolean shownDialog = false;
     int returnVal = JFileChooser.APPROVE_OPTION;
@@ -803,6 +1004,9 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Pop an undo point and load the flow it encapsulates
+   */
   protected void popAndLoadUndo() {
     if (m_undoBuffer.size() > 0) {
       File undo = m_undoBuffer.pop();
@@ -814,6 +1018,12 @@ public class VisibleLayout extends JPanel {
     }
   }
 
+  /**
+   * Load a flow into this layout
+   *
+   * @param fFile the file containing the flow
+   * @param isUndo true if this is an "undo" layout
+   */
   protected void loadLayout(File fFile, boolean isUndo) {
     stopFlow();
 
@@ -855,10 +1065,16 @@ public class VisibleLayout extends JPanel {
       MainKFPerspectiveToolBar.Widgets.SAVE_FLOW_AS_BUTTON.toString());
   }
 
+  /**
+   * Editing operations on the layout
+   */
   protected static enum LayoutOperation {
     NONE, MOVING, CONNECTING, ADDING, SELECTING, PASTING;
   }
 
+  /**
+   * Small subclass of LogPanel for use by layouts
+   */
   protected class KFLogPanel extends LogPanel {
 
     /** For serialization */
