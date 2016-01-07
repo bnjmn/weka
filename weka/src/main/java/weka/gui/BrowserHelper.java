@@ -15,16 +15,19 @@
 
 /*
  * BrowserHelper.java
- * Copyright (C) 2006-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2012,2015 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
 
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Desktop;
+import java.awt.Desktop.Action;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.Method;
+import java.net.URI;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -76,33 +79,40 @@ public class BrowserHelper {
   public static void openURL(Component parent, String url, boolean showDialog) {
     String osName = System.getProperty("os.name");
     try {
-      // Mac OS
-      if (osName.startsWith("Mac OS")) {
-        Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
-        Method openURL = fileMgr.getDeclaredMethod("openURL",
-          new Class[] { String.class });
-        openURL.invoke(null, new Object[] { url });
+      if (Desktop.isDesktopSupported() && Desktop.getDesktop().isSupported(Action.BROWSE)) {
+        Desktop.getDesktop().browse(new URI(url));
       }
-      // Windows
-      else if (osName.startsWith("Windows")) {
-        Runtime.getRuntime()
-          .exec("rundll32 url.dll,FileProtocolHandler " + url);
-      }
-      // assume Unix or Linux
       else {
-        String browser = null;
-        for (int count = 0; count < LINUX_BROWSERS.length && browser == null; count++) {
-          // look for binaries and take first that's available
-          if (Runtime.getRuntime()
-            .exec(new String[] { "which", LINUX_BROWSERS[count] }).waitFor() == 0) {
-            browser = LINUX_BROWSERS[count];
-            break;
-          }
+        System.err.println("Desktop or browse action not supported, using fallback to determine browser.");
+
+        // Mac OS
+        if (osName.startsWith("Mac OS")) {
+          Class<?> fileMgr = Class.forName("com.apple.eio.FileManager");
+          Method openURL = fileMgr.getDeclaredMethod("openURL",
+              new Class[] { String.class });
+          openURL.invoke(null, new Object[] { url });
         }
-        if (browser == null) {
-          throw new Exception("Could not find web browser");
-        } else {
-          Runtime.getRuntime().exec(new String[] { browser, url });
+        // Windows
+        else if (osName.startsWith("Windows")) {
+          Runtime.getRuntime()
+            .exec("rundll32 url.dll,FileProtocolHandler " + url);
+        }
+        // assume Unix or Linux
+        else {
+          String browser = null;
+          for (int count = 0; count < LINUX_BROWSERS.length && browser == null; count++) {
+            // look for binaries and take first that's available
+            if (Runtime.getRuntime()
+                .exec(new String[] { "which", LINUX_BROWSERS[count] }).waitFor() == 0) {
+              browser = LINUX_BROWSERS[count];
+              break;
+            }
+          }
+          if (browser == null) {
+            throw new Exception("Could not find web browser");
+          } else {
+            Runtime.getRuntime().exec(new String[] { browser, url });
+          }
         }
       }
     } catch (Exception e) {
