@@ -457,7 +457,7 @@ public class GUIChooserApp extends JFrame {
           SettingsEditor.showSingleSettingsEditor(m_settings,
             GUIChooserDefaults.APP_ID, "GUIChooser",
             (JComponent) GUIChooserApp.this.getContentPane().getComponent(0),
-            500, 100);
+            550, 100);
         } catch (Exception ex) {
           ex.printStackTrace();
         }
