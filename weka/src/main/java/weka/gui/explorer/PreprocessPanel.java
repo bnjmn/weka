@@ -56,7 +56,7 @@ import weka.gui.PropertyPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.ViewerDialog;
-import weka.gui.Workbench;
+import weka.gui.WorkbenchApp;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
 import weka.gui.explorer.Explorer.ExplorerPanel;
@@ -713,7 +713,7 @@ public class PreprocessPanel extends AbstractPerspective implements
           // notify GOEs about change
           if (getExplorer() != null || getMainApplication() != null) {
             Explorer explorer = getExplorer();
-            Workbench app = (Workbench) getMainApplication();
+            WorkbenchApp app = (WorkbenchApp) getMainApplication();
             try {
               // get rid of old filter settings
               if (explorer != null) {

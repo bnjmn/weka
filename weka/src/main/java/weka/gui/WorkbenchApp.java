@@ -9,8 +9,10 @@ import weka.core.converters.ConverterUtils;
 import weka.gui.explorer.Explorer;
 import weka.gui.explorer.PreprocessPanel;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +21,7 @@ import java.util.List;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class Workbench extends AbstractGUIApplication {
+public class WorkbenchApp extends AbstractGUIApplication {
 
   private static final long serialVersionUID = -2357486011273897728L;
 
@@ -30,11 +32,11 @@ public class Workbench extends AbstractGUIApplication {
    * variable for the Workbench class which would be set to null by the memory
    * monitoring thread to free up some memory if we running out of memory
    */
-  protected static Workbench m_workbench;
+  protected static WorkbenchApp m_workbench;
 
   protected Settings m_workbenchSettings;
 
-  public Workbench() {
+  public WorkbenchApp() {
     super(true, new String[0],
       new String[] {
         weka.gui.knowledgeflow.AttributeSummaryPerspective.class
@@ -112,12 +114,12 @@ public class Workbench extends AbstractGUIApplication {
       if (System.getProperty("os.name").contains("Mac")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
-      m_workbench = new Workbench();
+      m_workbench = new WorkbenchApp();
       final javax.swing.JFrame jf =
         new javax.swing.JFrame("Weka " + m_workbench.getApplicationName());
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
-      Image icon = Toolkit.getDefaultToolkit().getImage(Workbench.class
+      Image icon = Toolkit.getDefaultToolkit().getImage(WorkbenchApp.class
         .getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 

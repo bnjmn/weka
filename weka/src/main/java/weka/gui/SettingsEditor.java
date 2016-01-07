@@ -179,7 +179,7 @@ public class SettingsEditor extends JPanel {
   /**
    * Popup a single panel settings editor dialog for one group of related
    * settings
-   * 
+   *
    * @param settings the settings object containing (potentially) many groups of
    *          settings
    * @param settingsID the ID of the particular set of settings to edit
@@ -192,16 +192,71 @@ public class SettingsEditor extends JPanel {
   public static int showSingleSettingsEditor(Settings settings,
     String settingsID, String settingsName, JComponent parent)
       throws IOException {
+    return showSingleSettingsEditor(settings, settingsID, settingsName, parent,
+      600, 300);
+  }
+
+  /**
+   * Popup a single panel settings editor dialog for one group of related
+   * settings
+   * 
+   * @param settings the settings object containing (potentially) many groups of
+   *          settings
+   * @param settingsID the ID of the particular set of settings to edit
+   * @param settingsName the name of this related set of settings
+   * @param parent the parent window
+   * @param width the width for the dialog
+   * @param height the height for the dialog
+   * @return the result chosen by the user (JOptionPane.OK_OPTION or
+   *         JOptionPanel.CANCEL_OPTION)
+   * @throws IOException if saving altered settings fails
+   */
+  public static int showSingleSettingsEditor(Settings settings,
+    String settingsID, String settingsName, JComponent parent, int width,
+    int height) throws IOException {
     final SingleSettingsEditor sse =
       createSingleSettingsEditor(settings.getSettings(settingsID));
-    sse.setPreferredSize(new Dimension(600, 300));
+    sse.setPreferredSize(new Dimension(width, height));
     java.net.URL url = SettingsEditor.class.getClassLoader()
       .getResource("weka/gui/weka_icon_new_48.png");
     final ImageIcon wekaIcon =
       new ImageIcon(Toolkit.getDefaultToolkit().getImage(url));
-    int result =
-      JOptionPane.showConfirmDialog(parent, sse, settingsName + " Settings",
-        JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE, wekaIcon);
+    final JOptionPane pane = new JOptionPane(sse, JOptionPane.PLAIN_MESSAGE,
+      JOptionPane.OK_CANCEL_OPTION);
+    pane.addHierarchyListener(new HierarchyListener() {
+      @Override
+      public void hierarchyChanged(HierarchyEvent e) {
+        Window window = SwingUtilities.getWindowAncestor(pane);
+        if (window instanceof Dialog) {
+          Dialog dialog = (Dialog) window;
+          if (!dialog.isResizable()) {
+            dialog.setResizable(true);
+          }
+        }
+      }
+    });
+    JDialog dialog =
+      pane.createDialog((JComponent) parent, settingsName + " Settings");
+    dialog.show();
+    Object resultO = pane.getValue();
+
+    /*
+     * int result = JOptionPane.showConfirmDialog(parent, sse, settingsName +
+     * " Settings", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE,
+     * wekaIcon);
+     */
+
+    int result = -1;
+    if (resultO == null) {
+      result = JOptionPane.CLOSED_OPTION;
+    } else if (resultO instanceof Integer) {
+      result = (Integer) resultO;
+    }
+
+    if (result == JOptionPane.OK_OPTION) {
+      sse.applyToSettings();
+      settings.saveSettings();
+    }
 
     if (result == JOptionPane.OK_OPTION) {
       sse.applyToSettings();

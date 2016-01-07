@@ -21,23 +21,36 @@
 
 package weka.gui;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.*;
-import java.lang.reflect.Method;
-import java.security.Permission;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import weka.classifiers.bayes.net.GUI;
+import weka.classifiers.evaluation.ThresholdCurve;
+import weka.core.Copyright;
+import weka.core.Defaults;
+import weka.core.Instances;
+import weka.core.Memory;
+import weka.core.Settings;
+import weka.core.SystemInfo;
+import weka.core.Utils;
+import weka.core.Version;
+import weka.core.WekaPackageManager;
+import weka.core.scripting.Groovy;
+import weka.core.scripting.Jython;
+import weka.gui.arffviewer.ArffViewer;
+import weka.gui.beans.PluginManager;
+import weka.gui.boundaryvisualizer.BoundaryVisualizer;
+import weka.gui.experiment.Experimenter;
+import weka.gui.explorer.Explorer;
+import weka.gui.graphvisualizer.GraphVisualizer;
+import weka.gui.knowledgeflow.MainKFPerspective;
+import weka.gui.scripting.JythonPanel;
+import weka.gui.sql.SqlViewer;
+import weka.gui.treevisualizer.Node;
+import weka.gui.treevisualizer.NodePlace;
+import weka.gui.treevisualizer.PlaceNode2;
+import weka.gui.treevisualizer.TreeBuild;
+import weka.gui.treevisualizer.TreeVisualizer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.ThresholdVisualizePanel;
+import weka.gui.visualize.VisualizePanel;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -56,36 +69,39 @@ import javax.swing.JScrollPane;
 import javax.swing.JSeparator;
 import javax.swing.JTable;
 import javax.swing.KeyStroke;
-
-import weka.classifiers.bayes.net.GUI;
-import weka.classifiers.evaluation.ThresholdCurve;
-import weka.core.Copyright;
-import weka.core.Instances;
-import weka.core.Memory;
-import weka.core.SystemInfo;
-import weka.core.Utils;
-import weka.core.Version;
-import weka.core.WekaPackageManager;
-import weka.core.scripting.Groovy;
-import weka.core.scripting.Jython;
-import weka.gui.arffviewer.ArffViewer;
-import weka.gui.beans.KnowledgeFlow;
-import weka.gui.beans.KnowledgeFlowApp;
-import weka.gui.beans.PluginManager;
-import weka.gui.boundaryvisualizer.BoundaryVisualizer;
-import weka.gui.experiment.Experimenter;
-import weka.gui.explorer.Explorer;
-import weka.gui.graphvisualizer.GraphVisualizer;
-import weka.gui.scripting.JythonPanel;
-import weka.gui.sql.SqlViewer;
-import weka.gui.treevisualizer.Node;
-import weka.gui.treevisualizer.NodePlace;
-import weka.gui.treevisualizer.PlaceNode2;
-import weka.gui.treevisualizer.TreeBuild;
-import weka.gui.treevisualizer.TreeVisualizer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.ThresholdVisualizePanel;
-import weka.gui.visualize.VisualizePanel;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.LayoutManager;
+import java.awt.Point;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintStream;
+import java.io.Reader;
+import java.lang.reflect.Method;
+import java.security.Permission;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * The main class for the Weka GUIChooser. Lets the user choose which GUI they
@@ -96,7 +112,7 @@ import weka.gui.visualize.VisualizePanel;
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class GUIChooser extends JFrame {
+public class GUIChooserApp extends JFrame {
 
   static {
     try {
@@ -124,8 +140,11 @@ public class GUIChooser extends JFrame {
   /** for serialization */
   private static final long serialVersionUID = 9001529425230247914L;
 
+  /** GUIChooser settings */
+  private Settings m_settings;
+
   /** the GUIChooser itself */
-  protected GUIChooser m_Self;
+  protected GUIChooserApp m_Self;
 
   // Menu stuff
   private JMenuBar m_jMenuBar;
@@ -138,6 +157,11 @@ public class GUIChooser extends JFrame {
 
   /** the panel for the application buttons */
   protected JPanel m_PanelApplications = new JPanel();
+
+  /** Click to open the Workbench */
+  protected JButton m_WorkbenchBut = new JButton("Workbench");
+
+  protected JFrame m_WorkbenchFrame;
 
   /** Click to open the Explorer */
   protected JButton m_ExplorerBut = new JButton("Explorer");
@@ -155,10 +179,13 @@ public class GUIChooser extends JFrame {
   protected JButton m_KnowledgeFlowBut = new JButton("KnowledgeFlow");
 
   /** Pending file to load on startup of the KnowledgeFlow */
-  protected String m_pendingKnowledgeFlowLoad = null;
+  protected String m_pendingKnowledgeFlowLoad;
 
   /** The frame containing the knowledge flow interface */
   protected JFrame m_KnowledgeFlowFrame;
+
+  /** The currently visible Knowledge Flow instance */
+  protected weka.gui.knowledgeflow.KnowledgeFlowApp m_knowledgeFlow;
 
   /** Click to open the simplecli */
   protected JButton m_SimpleBut = new JButton("Simple CLI");
@@ -223,7 +250,7 @@ public class GUIChooser extends JFrame {
 
   /** The weka image */
   Image m_weka = Toolkit.getDefaultToolkit().getImage(
-    GUIChooser.class.getClassLoader().getResource(
+    GUIChooserApp.class.getClassLoader().getResource(
       "weka/gui/images/weka_background.gif"));
 
   /** filechooser for the TreeVisualizer */
@@ -253,23 +280,23 @@ public class GUIChooser extends JFrame {
    */
   public static synchronized void createSingleton() {
     if (m_chooser == null) {
-      m_chooser = new GUIChooser();
+      m_chooser = new GUIChooserApp();
     }
   }
 
   /**
    * Get the singleton instance of the GUIChooser
-   * 
+   *
    * @return the singleton instance of the GUIChooser
    */
-  public static GUIChooser getSingleton() {
+  public static GUIChooserApp getSingleton() {
     return m_chooser;
   }
 
   /**
    * Interface for plugin components that can be accessed from either the
    * Visualization or Tools menu.
-   * 
+   *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
   public static interface GUIChooserMenuPlugin {
@@ -282,28 +309,28 @@ public class GUIChooser extends JFrame {
     /**
      * Get the name to display in title bar of the enclosing JFrame for the
      * plugin
-     * 
+     *
      * @return the name to display in the title bar
      */
     String getApplicationName();
 
     /**
      * Get the menu that the plugin is to be listed in
-     * 
+     *
      * @return the menu that the plugin is to be listed in
      */
     Menu getMenuToDisplayIn();
 
     /**
      * Get the text entry to appear in the menu
-     * 
+     *
      * @return the text entry to appear in the menu
      */
     String getMenuEntryText();
 
     /**
      * Return the menu bar for this plugin
-     * 
+     *
      * @return the menu bar for this plugin or null if it does not use a menu
      *         bar
      */
@@ -313,11 +340,14 @@ public class GUIChooser extends JFrame {
   /**
    * Creates the experiment environment gui with no initial experiment
    */
-  public GUIChooser() {
+  public GUIChooserApp() {
 
     super("Weka GUI Chooser");
 
     m_Self = this;
+
+    m_settings = new Settings("weka", GUIChooserDefaults.APP_ID);
+    m_settings.applyDefaults(new GUIChooserDefaults());
 
     // filechoosers
     m_FileChooserGraphVisualizer
@@ -339,7 +369,7 @@ public class GUIChooser extends JFrame {
     // general layout
     m_Icon =
       Toolkit.getDefaultToolkit().getImage(
-        GUIChooser.class.getClassLoader().getResource(
+        GUIChooserApp.class.getClassLoader().getResource(
           "weka/gui/weka_icon_new_48.png"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
@@ -349,10 +379,11 @@ public class GUIChooser extends JFrame {
     // applications
     m_PanelApplications.setBorder(BorderFactory
       .createTitledBorder("Applications"));
-    m_PanelApplications.setLayout(new GridLayout(4, 1));
+    m_PanelApplications.setLayout(new GridLayout(0, 1));
     m_PanelApplications.add(m_ExplorerBut);
     m_PanelApplications.add(m_ExperimenterBut);
     m_PanelApplications.add(m_KnowledgeFlowBut);
+    m_PanelApplications.add(m_WorkbenchBut);
     m_PanelApplications.add(m_SimpleBut);
 
     // Weka image plus copyright info
@@ -436,6 +467,22 @@ public class GUIChooser extends JFrame {
           Dimension size = m_MemoryUsageFrame.getPreferredSize();
           m_MemoryUsageFrame.setSize(new Dimension((int) size.getWidth(),
             (int) size.getHeight()));
+        }
+      }
+    });
+
+    final JMenuItem jMenuItemSettings = new JMenuItem();
+    m_jMenuProgram.add(jMenuItemSettings);
+    jMenuItemSettings.setText("Settings");
+    jMenuItemSettings.addActionListener(new ActionListener() {
+      @Override public void actionPerformed(ActionEvent e) {
+        try {
+          SettingsEditor.showSingleSettingsEditor(m_settings,
+            GUIChooserDefaults.APP_ID, "GUIChooser",
+            (JComponent) GUIChooserApp.this.getContentPane().getComponent(0),
+            500, 100);
+        } catch (Exception ex) {
+          ex.printStackTrace();
         }
       }
     });
@@ -1256,45 +1303,33 @@ public class GUIChooser extends JFrame {
       }
     });
 
-    KnowledgeFlowApp.addStartupListener(new weka.gui.beans.StartUpListener() {
-      @Override
-      public void startUpComplete() {
-        if (m_KnowledgeFlowFrame == null) {
-          final KnowledgeFlowApp kna = KnowledgeFlowApp.getSingleton();
-          m_KnowledgeFlowBut.setEnabled(false);
-          if (m_pendingKnowledgeFlowLoad != null
-            && m_pendingKnowledgeFlowLoad.length() > 0) {
-            KnowledgeFlowApp.getSingleton().loadLayout(
-              new File(m_pendingKnowledgeFlowLoad), true);
-            m_pendingKnowledgeFlowLoad = null;
-          }
-          m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
-          m_KnowledgeFlowFrame.setIconImage(m_Icon);
-          m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
-          m_KnowledgeFlowFrame.getContentPane().add(kna, BorderLayout.CENTER);
-          m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent w) {
-              kna.closeAllTabs();
-              kna.clearLayout(); // add a single "Untitled" tab ready for next
-                                 // time
-              m_KnowledgeFlowFrame.dispose();
-              m_KnowledgeFlowFrame = null;
-              m_KnowledgeFlowBut.setEnabled(true);
-              checkExit();
-            }
-          });
-          m_KnowledgeFlowFrame.pack();
-          m_KnowledgeFlowFrame.setSize(1000, 750);
-          m_KnowledgeFlowFrame.setVisible(true);
-        }
-      }
-    });
-
     m_KnowledgeFlowBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
         showKnowledgeFlow(null);
+      }
+    });
+
+    m_WorkbenchBut.addActionListener(new ActionListener() {
+
+      @Override public void actionPerformed(ActionEvent e) {
+        if (m_WorkbenchFrame == null) {
+          m_WorkbenchBut.setEnabled(false);
+          m_WorkbenchFrame = new JFrame("Weka Workbench");
+          m_WorkbenchFrame.setIconImage(m_Icon);
+          m_WorkbenchFrame.add(new WorkbenchApp(), BorderLayout.CENTER);
+          m_WorkbenchFrame.addWindowListener(new WindowAdapter() {
+            @Override public void windowClosing(WindowEvent e) {
+              m_WorkbenchFrame.dispose();
+              m_WorkbenchFrame = null;
+              m_WorkbenchBut.setEnabled(true);
+              checkExit();
+            }
+          });
+          m_WorkbenchFrame.pack();
+          m_WorkbenchFrame.setSize(1024, 768);
+          m_WorkbenchFrame.setVisible(true);
+        }
       }
     });
 
@@ -1365,7 +1400,7 @@ public class GUIChooser extends JFrame {
               + "found under the \"Tools\" menu.\n";
           stuff[1] = dontShow;
           // Display the tip on finding/using the package manager
-          JOptionPane.showMessageDialog(GUIChooser.this, stuff,
+          JOptionPane.showMessageDialog(GUIChooserApp.this, stuff,
             "Weka GUIChooser", JOptionPane.OK_OPTION);
 
           if (dontShow.isSelected()) {
@@ -1385,12 +1420,45 @@ public class GUIChooser extends JFrame {
 
   public void showKnowledgeFlow(String fileToLoad) {
     if (m_KnowledgeFlowFrame == null) {
-      KnowledgeFlow.startApp();
-      m_pendingKnowledgeFlowLoad = fileToLoad;
-    } else {
-      if (fileToLoad != null) {
-        KnowledgeFlowApp.getSingleton().loadLayout(new File(fileToLoad), true);
+      if (m_knowledgeFlow == null) {
+        m_knowledgeFlow = new weka.gui.knowledgeflow.KnowledgeFlowApp();
       }
+      m_KnowledgeFlowBut.setEnabled(false);
+      if (m_pendingKnowledgeFlowLoad != null
+        && m_pendingKnowledgeFlowLoad.length() > 0) {
+            /* KnowledgeFlowApp.getSingleton().loadLayout(
+              new File(m_pendingKnowledgeFlowLoad), true); */
+        ((MainKFPerspective) m_knowledgeFlow.getMainPerspective())
+          .loadLayout(new File(m_pendingKnowledgeFlowLoad), true);
+        m_pendingKnowledgeFlowLoad = null;
+      }
+      m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
+      m_KnowledgeFlowFrame.setIconImage(m_Icon);
+      m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
+      m_KnowledgeFlowFrame.getContentPane().
+        add(m_knowledgeFlow, BorderLayout.CENTER);
+      m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
+        @Override
+        public void windowClosing(WindowEvent w) {
+
+          ((MainKFPerspective) m_knowledgeFlow.getMainPerspective())
+            .closeAllTabs();
+          ((MainKFPerspective) m_knowledgeFlow.getMainPerspective()).
+            addUntitledTab();
+
+              /*kna.closeAllTabs();
+              kna.clearLayout(); // add a single "Untitled" tab ready for next
+                                 // time */
+          m_KnowledgeFlowFrame.dispose();
+          m_KnowledgeFlowFrame = null;
+          m_knowledgeFlow = null;
+          m_KnowledgeFlowBut.setEnabled(true);
+          checkExit();
+        }
+      });
+      m_KnowledgeFlowFrame.pack();
+      m_KnowledgeFlowFrame.setSize(1000, 750);
+      m_KnowledgeFlowFrame.setVisible(true);
     }
   }
 
@@ -1437,7 +1505,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * insert the menu item in a sorted fashion.
-   * 
+   *
    * @param menu the menu to add the item to
    * @param menuitem the menu item to add
    */
@@ -1447,7 +1515,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * insert the menu item in a sorted fashion.
-   * 
+   *
    * @param menu the menu to add the item to
    * @param menuitem the menu item to add
    * @param startIndex the index in the menu to start with (0-based)
@@ -1485,7 +1553,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * creates a frame and returns it.
-   * 
+   *
    * @param parent the parent of the generated frame
    * @param title the title of the frame
    * @param c the component to place, can be null
@@ -1498,7 +1566,7 @@ public class GUIChooser extends JFrame {
    * @param visible if true then the frame is made visible immediately
    * @return the generated frame
    */
-  protected Container createFrame(GUIChooser parent, String title, Component c,
+  protected Container createFrame(GUIChooserApp parent, String title, Component c,
     LayoutManager layout, Object layoutConstraints, int width, int height,
     JMenuBar menu, boolean listener, boolean visible) {
 
@@ -1550,7 +1618,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * Specialized JFrame class.
-   * 
+   *
    * @author fracpete (fracpete at waikato dot ac dot nz)
    * @version $Revision$
    */
@@ -1560,15 +1628,15 @@ public class GUIChooser extends JFrame {
     private static final long serialVersionUID = 8588293938686425618L;
 
     /** the parent frame. */
-    protected GUIChooser m_Parent;
+    protected GUIChooserApp m_Parent;
 
     /**
      * constructs a new internal frame that knows about its parent.
-     * 
+     *
      * @param parent the parent frame
      * @param title the title of the frame
      */
-    public ChildFrameSDI(GUIChooser parent, String title) {
+    public ChildFrameSDI(GUIChooserApp parent, String title) {
       super(title);
 
       m_Parent = parent;
@@ -1592,10 +1660,10 @@ public class GUIChooser extends JFrame {
 
     /**
      * returns the parent frame, can be null.
-     * 
+     *
      * @return the parent frame
      */
-    public GUIChooser getParentFrame() {
+    public GUIChooserApp getParentFrame() {
       return m_Parent;
     }
 
@@ -1615,7 +1683,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * creates and displays the title.
-   * 
+   *
    * @param title the additional part of the title
    */
   protected void createTitle(String title) {
@@ -1631,7 +1699,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * adds the given child frame to the list of frames.
-   * 
+   *
    * @param c the child frame to add
    */
   public void addChildFrame(Container c) {
@@ -1640,7 +1708,7 @@ public class GUIChooser extends JFrame {
 
   /**
    * tries to remove the child frame, it returns true if it could do such.
-   * 
+   *
    * @param c the child frame to remove
    * @return true if the child frame could be removed
    */
@@ -1676,24 +1744,62 @@ public class GUIChooser extends JFrame {
   }
 
   /**
+   * Inner class for defaults
+   */
+  public static final class GUIChooserDefaults extends Defaults {
+
+    /** APP name (GUIChooser isn't really an "app" as such */
+    public static final String APP_NAME = "GUIChooser";
+
+    /** ID */
+    public static final String APP_ID = "guichooser";
+
+    /** Settings key for LAF */
+    protected static final Settings.SettingKey LAF_KEY = new Settings.SettingKey(
+      APP_ID + ".lookAndFeel", "Look and feel for UI",
+      "Note: a restart is required for this setting to come into effect");
+
+    /** Default value for LAF */
+    protected static final String LAF = "";
+
+    private static final long serialVersionUID = -8524894440289936685L;
+
+    /**
+     * Constructor
+     */
+    public GUIChooserDefaults() {
+      super(APP_ID);
+      List<String> lafs = LookAndFeel.getAvailableLookAndFeelClasses();
+      lafs.add(0, "<use platform default>");
+      LAF_KEY.setPickList(lafs);
+      m_defaults.put(LAF_KEY, LAF);
+    }
+  }
+
+  /**
    * variable for the GUIChooser class which would be set to null by the memory
    * monitoring thread to free up some memory if we running out of memory
    */
-  private static GUIChooser m_chooser;
+  private static GUIChooserApp m_chooser;
 
   /** for monitoring the Memory consumption */
   private static Memory m_Memory = new Memory(true);
 
   /**
    * Tests out the GUIChooser environment.
-   * 
+   *
    * @param args ignored.
    */
   public static void main(String[] args) {
 
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
-    LookAndFeel.setLookAndFeel();
+    try {
+      LookAndFeel.setLookAndFeel(GUIChooserDefaults.APP_ID,
+        GUIChooserDefaults.APP_ID + ".lookAndFeel");
+    } catch (IOException ex) {
+      ex.printStackTrace();
+    }
 
     // Save std err and std out because they may be redirected by external code
     final PrintStream savedStdOut = System.out;
@@ -1746,7 +1852,7 @@ public class GUIChooser extends JFrame {
       // uncomment to disable the memory management:
       // m_Memory.setEnabled(false);
       // m_chooser = new GUIChooser();
-      GUIChooser.createSingleton();
+      GUIChooserApp.createSingleton();
       m_chooser.setVisible(true);
 
       if (args != null && args.length > 0) {

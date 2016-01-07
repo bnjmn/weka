@@ -427,6 +427,15 @@ public class MainKFPerspective extends AbstractPerspective {
   }
 
   /**
+   * Close all the open tabs
+   */
+  public void closeAllTabs() {
+    for (int i = 0; i < getNumTabs(); i++) {
+      removeTab(i);
+    }
+  }
+
+  /**
    * Remove/close a tab
    *
    * @param tabIndex the index of the tab to close
