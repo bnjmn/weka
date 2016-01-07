@@ -1291,10 +1291,11 @@ public class GUIChooserApp extends JFrame {
 
       @Override public void actionPerformed(ActionEvent e) {
         if (m_WorkbenchFrame == null) {
+          WorkbenchApp app = new WorkbenchApp();
           m_WorkbenchBut.setEnabled(false);
           m_WorkbenchFrame = new JFrame("Weka Workbench");
           m_WorkbenchFrame.setIconImage(m_Icon);
-          m_WorkbenchFrame.add(new WorkbenchApp(), BorderLayout.CENTER);
+          m_WorkbenchFrame.add(app, BorderLayout.CENTER);
           m_WorkbenchFrame.addWindowListener(new WindowAdapter() {
             @Override public void windowClosing(WindowEvent e) {
               m_WorkbenchFrame.dispose();
@@ -1303,6 +1304,7 @@ public class GUIChooserApp extends JFrame {
               checkExit();
             }
           });
+          app.showMenuBar(m_WorkbenchFrame);
           m_WorkbenchFrame.pack();
           m_WorkbenchFrame.setSize(1024, 768);
           m_WorkbenchFrame.setVisible(true);
@@ -1414,6 +1416,7 @@ public class GUIChooserApp extends JFrame {
       m_KnowledgeFlowFrame.getContentPane().setLayout(new BorderLayout());
       m_KnowledgeFlowFrame.getContentPane().
         add(m_knowledgeFlow, BorderLayout.CENTER);
+      m_knowledgeFlow.showMenuBar(m_KnowledgeFlowFrame);
       m_KnowledgeFlowFrame.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent w) {
