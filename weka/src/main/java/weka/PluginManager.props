@@ -5,8 +5,8 @@ weka.gui.Perspective=weka.gui.explorer.PreprocessPanel,\
  weka.gui.explorer.AttributeSelectionPanel,\
  weka.gui.explorer.VisualizePanel,\
  weka.gui.experiment.Experimenter,\
- weka.gui.SimpleCLIPanel,\
  weka.gui.knowledgeflow.MainKFPerspective,\
  weka.gui.knowledgeflow.AttributeSummaryPerspective,\
  weka.gui.knowledgeflow.ScatterPlotMatrixPerspective,\
- weka.gui.knowledgeflow.SQLViewerPerspective
+ weka.gui.knowledgeflow.SQLViewerPerspective,\
+ weka.gui.SimpleCLIPanel,\
