@@ -1434,7 +1434,7 @@ public class GUIChooserApp extends JFrame {
         }
       });
       m_KnowledgeFlowFrame.pack();
-      m_KnowledgeFlowFrame.setSize(1000, 750);
+      m_KnowledgeFlowFrame.setSize(1024, 768);
       m_KnowledgeFlowFrame.setVisible(true);
     }
   }
