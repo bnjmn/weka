@@ -543,8 +543,10 @@ public class PerspectiveManager extends JPanel {
     m_appMenuBar.removeAll();
     m_appMenuBar.add(programMenu);
     List<JMenu> mainMenus = m_perspectives.get(theIndex).getMenus();
-    for (JMenu m : mainMenus) {
-      m_appMenuBar.add(m);
+    if (mainMenus != null) {
+      for (JMenu m : mainMenus) {
+        m_appMenuBar.add(m);
+      }
     }
 
     m_mainApp.revalidate();

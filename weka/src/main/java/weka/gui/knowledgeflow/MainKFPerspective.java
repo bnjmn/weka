@@ -42,8 +42,6 @@ import weka.knowledgeflow.LoggingLevel;
 import weka.knowledgeflow.StepManagerImpl;
 import weka.knowledgeflow.steps.MemoryBasedDataSource;
 
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JMenu;
 import javax.swing.JOptionPane;
@@ -55,7 +53,6 @@ import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.Image;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -67,7 +64,7 @@ import java.util.List;
  */
 @PerspectiveInfo(ID = "knowledgeflow.main", title = "Data mining processes",
   toolTipText = "Data mining processes",
-  iconPath = "weka/gui/weka_icon_new.png")
+  iconPath = "weka/gui/weka_icon_new_small.png")
 public class MainKFPerspective extends AbstractPerspective {
 
   /**
@@ -604,25 +601,6 @@ public class MainKFPerspective extends AbstractPerspective {
 
   public MainKFPerspectiveToolBar getMainToolBar() {
     return m_mainToolBar;
-  }
-
-  @Override
-  public Icon getPerspectiveIcon() {
-    if (m_perspectiveIcon == null) {
-      super.getPerspectiveIcon();
-
-      double width = m_perspectiveIcon.getIconWidth();
-      double height = m_perspectiveIcon.getIconHeight();
-      width *= 0.035;
-      height *= 0.035;
-
-      Image wekaI = ((ImageIcon) m_perspectiveIcon).getImage();
-      wekaI =
-        wekaI.getScaledInstance((int) width, (int) height, Image.SCALE_SMOOTH);
-      m_perspectiveIcon = new ImageIcon(wekaI);
-    }
-
-    return m_perspectiveIcon;
   }
 
   @Override

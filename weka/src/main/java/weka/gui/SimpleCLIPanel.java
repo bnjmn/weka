@@ -20,6 +20,27 @@
 
 package weka.gui;
 
+import weka.core.Capabilities;
+import weka.core.CapabilitiesHandler;
+import weka.core.ClassDiscovery;
+import weka.core.Defaults;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Trie;
+import weka.core.Utils;
+import weka.gui.knowledgeflow.StepVisual;
+import weka.gui.scripting.ScriptingPanel;
+
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JInternalFrame;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JOptionPane;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import java.awt.BorderLayout;
 import java.awt.Container;
 import java.awt.Cursor;
@@ -39,25 +60,9 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
-
-import javax.swing.ImageIcon;
-import javax.swing.JFrame;
-import javax.swing.JInternalFrame;
-import javax.swing.JMenuBar;
-import javax.swing.JOptionPane;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTextPane;
-
-import weka.core.Capabilities;
-import weka.core.CapabilitiesHandler;
-import weka.core.ClassDiscovery;
-import weka.core.OptionHandler;
-import weka.core.Trie;
-import weka.core.Utils;
-import weka.gui.scripting.ScriptingPanel;
 
 /**
  * Creates a very simple command line for invoking the main method of classes.
@@ -68,7 +73,11 @@ import weka.gui.scripting.ScriptingPanel;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @author FracPete (fracpete at waikato dot ac dot nz)
  */
-public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
+@PerspectiveInfo(ID = "simplecli", title = "Simple CLI",
+  toolTipText = "Simple CLI for Weka",
+  iconPath = "weka/gui/weka_icon_new_small.png")
+public class SimpleCLIPanel extends ScriptingPanel
+  implements ActionListener, Perspective {
 
   /** for serialization. */
   private static final long serialVersionUID = 1089039734615114942L;
@@ -81,6 +90,12 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
 
   /** Contains the SimpleCLI properties. */
   protected static Properties PROPERTIES;
+
+  /** Main application (if any) owning this perspective */
+  protected GUIApplication m_mainApp;
+
+  /** The Icon for this perspective */
+  protected Icon m_perspectiveIcon;
 
   static {
     // Allow a properties file in the current directory to override
@@ -97,8 +112,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
           + "This file should be named \"" + PROPERTY_FILE + "\" and\n"
           + "should be placed either in your user home (which is set\n"
           + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-          + "or the directory that java was started from\n", "SimpleCLI",
-        JOptionPane.ERROR_MESSAGE);
+          + "or the directory that java was started from\n",
+        "SimpleCLI", JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -119,6 +134,102 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
 
   /** The commandline completion. */
   protected CommandlineCompletion m_Completion;
+
+  @Override
+  public void instantiationComplete() {
+
+  }
+
+  @Override
+  public boolean okToBeActive() {
+    return true;
+  }
+
+  @Override
+  public void setActive(boolean active) {
+
+  }
+
+  @Override
+  public void setLoaded(boolean loaded) {
+
+  }
+
+  @Override
+  public void setMainApplication(GUIApplication main) {
+    m_mainApp = main;
+  }
+
+  @Override
+  public GUIApplication getMainApplication() {
+    return m_mainApp;
+  }
+
+  @Override
+  public String getPerspectiveID() {
+    return "simplecli";
+  }
+
+  @Override
+  public String getPerspectiveTitle() {
+    return "Simple CLI";
+  }
+
+  @Override
+  public Icon getPerspectiveIcon() {
+    if (m_perspectiveIcon != null) {
+      return m_perspectiveIcon;
+    }
+
+    PerspectiveInfo perspectiveA =
+      this.getClass().getAnnotation(PerspectiveInfo.class);
+    if (perspectiveA != null && perspectiveA.iconPath() != null
+      && perspectiveA.iconPath().length() > 0) {
+      m_perspectiveIcon = StepVisual.loadIcon(perspectiveA.iconPath());
+    }
+
+    return m_perspectiveIcon;
+  }
+
+  @Override
+  public String getPerspectiveTipText() {
+    return "Simple CLI interface for Weka";
+  }
+
+  @Override
+  public List<JMenu> getMenus() {
+    return null;
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return null;
+  }
+
+  @Override
+  public void settingsChanged() {
+
+  }
+
+  @Override
+  public boolean acceptsInstances() {
+    return false;
+  }
+
+  @Override
+  public void setInstances(Instances instances) {
+
+  }
+
+  @Override
+  public boolean requiresLog() {
+    return false;
+  }
+
+  @Override
+  public void setLog(Logger log) {
+
+  }
 
   /**
    * A class that handles running the main method of the class in a separate
@@ -142,7 +253,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
      * @param commandArgs an array of Strings to use as command line args
      * @throws Exception if an error occurs
      */
-    public ClassRunner(Class<?> theClass, String[] commandArgs) throws Exception {
+    public ClassRunner(Class<?> theClass, String[] commandArgs)
+      throws Exception {
 
       setDaemon(true);
       Class<?>[] argTemplate = { String[].class };
@@ -174,8 +286,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
             // since file may not yet exist, command-line completion doesn't
             // work, hence replace "~" manually with home directory
             if (outFilename.startsWith("~")) {
-              outFilename = outFilename.replaceFirst("~",
-                System.getProperty("user.home"));
+              outFilename =
+                outFilename.replaceFirst("~", System.getProperty("user.home"));
             }
             outNew = new PrintStream(new File(outFilename));
             System.setOut(outNew);
@@ -215,8 +327,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
         outNew.flush();
         outNew.close();
         System.setOut(outOld);
-        System.out.println("Finished redirecting output to '" + outFilename
-          + "'.");
+        System.out
+          .println("Finished redirecting output to '" + outFilename + "'.");
       }
     }
   }
@@ -436,9 +548,9 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
 
             if (match) {
               if (prefix != null) {
-                result.add(partial.substring(0,
-                  partial.length() - prefix.length())
-                  + name);
+                result
+                  .add(partial.substring(0, partial.length() - prefix.length())
+                    + name);
               } else {
                 if (partial.endsWith("\\") || partial.endsWith("/")) {
                   result.add(partial + name);
@@ -728,8 +840,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
           argv.add(commandArgs[i]);
         }
 
-        m_RunThread = new ClassRunner(theClass, argv.toArray(new String[argv
-          .size()]));
+        m_RunThread =
+          new ClassRunner(theClass, argv.toArray(new String[argv.size()]));
         m_RunThread.setPriority(Thread.MIN_PRIORITY); // UI has most priority
         m_RunThread.start();
       } catch (Exception ex) {
@@ -745,12 +857,12 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
             for (int i = 2; i < commandArgs.length; i++) {
               args.add(commandArgs[i]);
             }
-            ((OptionHandler) obj).setOptions(args.toArray(new String[args
-              .size()]));
+            ((OptionHandler) obj)
+              .setOptions(args.toArray(new String[args.size()]));
           }
           Capabilities caps = ((CapabilitiesHandler) obj).getCapabilities();
-          System.out.println(caps.toString().replace("[", "\n")
-            .replace("]", "\n"));
+          System.out
+            .println(caps.toString().replace("[", "\n").replace("]", "\n"));
         } else {
           System.out.println("'" + commandArgs[1] + "' is not a "
             + CapabilitiesHandler.class.getName() + "!");
@@ -805,13 +917,14 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
         if (frame instanceof JInternalFrame) {
           ((JInternalFrame) frame).doDefaultCloseAction();
         } else {
-          ((Window) frame).dispatchEvent(new WindowEvent((Window) frame,
-            WindowEvent.WINDOW_CLOSING));
+          ((Window) frame).dispatchEvent(
+            new WindowEvent((Window) frame, WindowEvent.WINDOW_CLOSING));
         }
       }
 
     } else {
-      boolean help = ((commandArgs.length > 1) && commandArgs[0].equals("help"));
+      boolean help =
+        ((commandArgs.length > 1) && commandArgs[0].equals("help"));
       if (help && commandArgs[1].equals("java")) {
         System.out.println("java <classname> <args>\n\n"
           + "Starts the main method of <classname> with "
@@ -824,21 +937,20 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
           + "file to write to, e.g.:\n" + "  java some.Class > ."
           + File.separator + "some.txt");
       } else if (help && commandArgs[1].equals("break")) {
-        System.out.println("break\n\n"
-          + "Attempts to nicely interrupt the running job, "
-          + "if any. If this doesn't respond in an\n"
-          + "acceptable time, use \"kill\".\n");
+        System.out.println(
+          "break\n\n" + "Attempts to nicely interrupt the running job, "
+            + "if any. If this doesn't respond in an\n"
+            + "acceptable time, use \"kill\".\n");
       } else if (help && commandArgs[1].equals("kill")) {
-        System.out.println("kill\n\n"
-          + "Kills the running job, if any. You should only "
-          + "use this if the job doesn't respond to\n" + "\"break\".\n");
+        System.out.println(
+          "kill\n\n" + "Kills the running job, if any. You should only "
+            + "use this if the job doesn't respond to\n" + "\"break\".\n");
       } else if (help && commandArgs[1].equals("capabilities")) {
-        System.out
-          .println("capabilities <classname> <args>\n\n"
-            + "Lists the capabilities of the specified class.\n"
-            + "If the class is a " + OptionHandler.class.getName() + " then\n"
-            + "trailing options after the classname will be\n"
-            + "set as well.\n");
+        System.out.println("capabilities <classname> <args>\n\n"
+          + "Lists the capabilities of the specified class.\n"
+          + "If the class is a " + OptionHandler.class.getName() + " then\n"
+          + "trailing options after the classname will be\n"
+          + "set as well.\n");
       } else if (help && commandArgs[1].equals("cls")) {
         System.out.println("cls\n\n" + "Clears the output area.\n");
       } else if (help && commandArgs[1].equals("history")) {
@@ -847,10 +959,10 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
         System.out.println("exit\n\n" + "Exits the SimpleCLI program.\n");
       } else {
         // Print a help message
-        System.out.println("Command must be one of:\n"
-          + "\tjava <classname> <args> [ > file]\n" + "\tbreak\n" + "\tkill\n"
-          + "\tcapabilities <classname> <args>\n" + "\tcls\n" + "\thistory\n"
-          + "\texit\n" + "\thelp <command>\n");
+        System.out.println(
+          "Command must be one of:\n" + "\tjava <classname> <args> [ > file]\n"
+            + "\tbreak\n" + "\tkill\n" + "\tcapabilities <classname> <args>\n"
+            + "\tcls\n" + "\thistory\n" + "\texit\n" + "\thelp <command>\n");
       }
     }
   }
@@ -931,8 +1043,8 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener {
                 String common = m_Completion.getCommonPrefix(list);
 
                 // just extending by separator is not a real extension
-                if ((search.toLowerCase() + File.separator).equals(common
-                  .toLowerCase())) {
+                if ((search.toLowerCase() + File.separator)
+                  .equals(common.toLowerCase())) {
                   common = search;
                 }
 
