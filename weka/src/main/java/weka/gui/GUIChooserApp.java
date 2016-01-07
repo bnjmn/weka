@@ -161,6 +161,7 @@ public class GUIChooserApp extends JFrame {
   /** Click to open the Workbench */
   protected JButton m_WorkbenchBut = new JButton("Workbench");
 
+  /** Frame for the Workbench */
   protected JFrame m_WorkbenchFrame;
 
   /** Click to open the Explorer */
