@@ -92,7 +92,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
-import java.lang.reflect.Method;
 import java.security.Permission;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -113,30 +112,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class GUIChooserApp extends JFrame {
-
-  static {
-    try {
-      Object MacApp = Class.forName("com.apple.eawt.Application").newInstance();
-
-      Object macArffHandler =
-        Class.forName("weka.gui.MacArffOpenFilesHandler").newInstance();
-
-      Class<?> fileHandlerClass =
-        Class.forName("com.apple.eawt.OpenFilesHandler");
-      Class<?>[] paramClass = new Class[1];
-      paramClass[0] = fileHandlerClass;
-      Object[] args = new Object[1];
-      args[0] = macArffHandler;
-
-      Method m = MacApp.getClass().getMethod("setOpenFileHandler", paramClass);
-      System.out.println("Trying to install a file handler for Mac...");
-      m.invoke(MacApp, macArffHandler);
-
-    } catch (Exception ex) {
-      // quietly ignore...
-    }
-  }
-
+  
   /** for serialization */
   private static final long serialVersionUID = 9001529425230247914L;
 

@@ -774,7 +774,6 @@
   <!-- Put everything in ${build}/classes into the weka.jar file -->
   <target name="exejar" depends="compile, init_dist"
    description="Create an executable jar file in ./dist">
-    <copy todir="${build}/classes/weka/gui" file="resources/MacArffOpenFilesHandler.class"/>
     <jar jarfile="${dist}/weka.jar" 
       basedir="${build}/classes">
      <manifest>
