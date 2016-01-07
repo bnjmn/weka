@@ -40,7 +40,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
   }
 
   public KnowledgeFlowApp(boolean layoutComponent) {
-    super(layoutComponent, "weka.gui.knowledgeflow");
+    super(layoutComponent, "weka.gui.knowledgeflow", "weka.gui.SimpleCLIPanel");
 
     // add an initial "untitled" tab
     ((MainKFPerspective) m_perspectiveManager.getMainPerspective())
