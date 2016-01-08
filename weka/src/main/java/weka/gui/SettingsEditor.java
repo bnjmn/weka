@@ -28,7 +28,6 @@ import weka.core.Settings;
 
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
 import javax.swing.JComponent;
@@ -50,7 +49,6 @@ import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
-import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.HierarchyEvent;
 import java.awt.event.HierarchyListener;
@@ -217,24 +215,38 @@ public class SettingsEditor extends JPanel {
     final SingleSettingsEditor sse =
       createSingleSettingsEditor(settings.getSettings(settingsID));
     sse.setPreferredSize(new Dimension(width, height));
-    java.net.URL url = SettingsEditor.class.getClassLoader()
-      .getResource("weka/gui/weka_icon_new_48.png");
-    final ImageIcon wekaIcon =
-      new ImageIcon(Toolkit.getDefaultToolkit().getImage(url));
+
     final JOptionPane pane = new JOptionPane(sse, JOptionPane.PLAIN_MESSAGE,
       JOptionPane.OK_CANCEL_OPTION);
-    pane.addHierarchyListener(new HierarchyListener() {
-      @Override
-      public void hierarchyChanged(HierarchyEvent e) {
-        Window window = SwingUtilities.getWindowAncestor(pane);
-        if (window instanceof Dialog) {
-          Dialog dialog = (Dialog) window;
-          if (!dialog.isResizable()) {
-            dialog.setResizable(true);
+
+    // There appears to be a bug in Java > 1.6 under Linux that, more often than
+    // not, causes a sun.awt.X11.XException to occur when the following code
+    // to make the dialog resizable is used. A workaround is to set the
+    // suppressSwingDropSupport property to true (but this has to be done
+    // at JVM startup, and setting it programatically, no matter how early,
+    // does not seem to work). The hacky workaround here is to check for
+    // a nix OS and disable the resizing, unless the user has specifically
+    // used the -DsuppressSwingDropSupport=true JVM flag.
+    //
+    // See: http://bugs.java.com/view_bug.do?bug_id=7027598
+    // and: http://mipav.cit.nih.gov/pubwiki/index.php/FAQ:_Why_do_I_get_an_exception_when_running_MIPAV_via_X11_forwarding_on_Linux%3F
+    String os = System.getProperty("os.name").toLowerCase();
+    String suppressSwingDropSupport =
+      System.getProperty("suppressSwingDropSupport", "false");
+    boolean nix = os.contains("nix") || os.contains("nux") || os.contains("aix");
+    if (!nix || suppressSwingDropSupport.equalsIgnoreCase("true")) {
+      pane.addHierarchyListener(new HierarchyListener() {
+        @Override public void hierarchyChanged(HierarchyEvent e) {
+          Window window = SwingUtilities.getWindowAncestor(pane);
+          if (window instanceof Dialog) {
+            Dialog dialog = (Dialog) window;
+            if (!dialog.isResizable()) {
+              dialog.setResizable(true);
+            }
           }
         }
-      }
-    });
+      });
+    }
     JDialog dialog =
       pane.createDialog((JComponent) parent, settingsName + " Settings");
     dialog.show();
@@ -281,24 +293,38 @@ public class SettingsEditor extends JPanel {
     final SettingsEditor settingsEditor =
       new SettingsEditor(settings, application);
     settingsEditor.setPreferredSize(new Dimension(800, 350));
-    java.net.URL url = PerspectiveManager.class.getClassLoader()
-      .getResource("weka/gui/weka_icon_new_48.png");
-    final ImageIcon wekaIcon =
-      new ImageIcon(Toolkit.getDefaultToolkit().getImage(url));
+
     final JOptionPane pane = new JOptionPane(settingsEditor,
       JOptionPane.PLAIN_MESSAGE, JOptionPane.OK_CANCEL_OPTION);
-    pane.addHierarchyListener(new HierarchyListener() {
-      @Override
-      public void hierarchyChanged(HierarchyEvent e) {
-        Window window = SwingUtilities.getWindowAncestor(pane);
-        if (window instanceof Dialog) {
-          Dialog dialog = (Dialog) window;
-          if (!dialog.isResizable()) {
-            dialog.setResizable(true);
+
+    // There appears to be a bug in Java > 1.6 under Linux that, more often than
+    // not, causes a sun.awt.X11.XException to occur when the following code
+    // to make the dialog resizable is used. A workaround is to set the
+    // suppressSwingDropSupport property to true (but this has to be done
+    // at JVM startup, and setting it programatically, no matter how early,
+    // does not seem to work). The hacky workaround here is to check for
+    // a nix OS and disable the resizing, unless the user has specifically
+    // used the -DsuppressSwingDropSupport=true JVM flag.
+    //
+    // See: http://bugs.java.com/view_bug.do?bug_id=7027598
+    // and: http://mipav.cit.nih.gov/pubwiki/index.php/FAQ:_Why_do_I_get_an_exception_when_running_MIPAV_via_X11_forwarding_on_Linux%3F
+    String os = System.getProperty("os.name").toLowerCase();
+    String suppressSwingDropSupport =
+      System.getProperty("suppressSwingDropSupport", "false");
+    boolean nix = os.contains("nix") || os.contains("nux") || os.contains("aix");
+    if (!nix || suppressSwingDropSupport.equalsIgnoreCase("true")) {
+      pane.addHierarchyListener(new HierarchyListener() {
+        @Override public void hierarchyChanged(HierarchyEvent e) {
+          Window window = SwingUtilities.getWindowAncestor(pane);
+          if (window instanceof Dialog) {
+            Dialog dialog = (Dialog) window;
+            if (!dialog.isResizable()) {
+              dialog.setResizable(true);
+            }
           }
         }
-      }
-    });
+      });
+    }
     JDialog dialog = pane.createDialog((JComponent) application,
       application.getApplicationName() + " Settings");
     dialog.show();
