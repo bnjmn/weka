@@ -44,9 +44,9 @@
   <mailingLists>
     <mailingList>
       <name>wekalist</name>
-      <subscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
-      <unsubscribe>https://list.scms.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
-      <archive>https://list.scms.waikato.ac.nz/mailman/htdig/wekalist/</archive>
+      <subscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
+      <unsubscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
+      <archive>https://list.waikato.ac.nz/mailman/htdig/wekalist/</archive>
     </mailingList>
   </mailingLists>
 
@@ -57,9 +57,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</connection>
-    <developerConnection>scm:svn:https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</developerConnection>
-    <url>https://svn.scms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/associationRulesVisualizer</url>
   </scm>
 
   <profiles>
@@ -104,13 +104,13 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.2,)</version>
+      <version>[3.7.4,)</version>
     </dependency>
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.2,)</version>
+      <version>[3.7.4,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -235,7 +235,7 @@
           <artifactId>maven-release-plugin</artifactId>
           <version>2.1</version>
           <configuration>
-            <tagBase>https://svn.scms.waikato.ac.nz/svn/weka/tags</tagBase>
+            <tagBase>https://svn.cms.waikato.ac.nz/svn/weka/tags</tagBase>
             <useReleaseProfile>false</useReleaseProfile>
             <!-- tests are performed with the ant build file, hence skipped here. -->
             <preparationGoals>clean verify -P no-tests</preparationGoals>

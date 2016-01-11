@@ -216,7 +216,6 @@ public class Panel3D extends selection.DataPanel implements Printable {
 		// build the panel
 		try {
 		  remove(canvas3D);
-		  System.out.println("remove ok");	
 		
 		} catch (Exception e) {
 		}

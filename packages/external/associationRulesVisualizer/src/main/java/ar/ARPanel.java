@@ -21,26 +21,23 @@
 package ar;
 
 import help.HelpFrame;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.print.PageFormat;
-import java.awt.print.PrinterJob;
-import java.io.File;
-import java.io.IOException;
-
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JOptionPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import rules.Rule;
 import rulesParser.RulesParser;
 import selection.MultipleListSelectionEvent;
 import selection.MultipleListSelectionListener;
 import selection.RulesSelectionPanel;
 import visu1.Panel3D;
-import visu2.PanelLine;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -74,6 +71,7 @@ public class ARPanel
 		viewerTabbedPanel = new javax.swing.JTabbedPane();
 		selectionPanel = new selection.SelectionPanel();
 		visu1Panel3D = new Panel3D();
+		visu1PanelHolder.add(visu1Panel3D, BorderLayout.CENTER);
 		/*visu1Panel = new RulesSelectionPanel(visu1Panel3D);
 		visu1Panel.addActionListener(this); */
 /*		visu2PanelLine = new PanelLine();
@@ -109,7 +107,7 @@ public class ARPanel
 		});
 
 		viewerTabbedPanel.addTab("Selection", selectionPanel);
-		viewerTabbedPanel.addTab("3D Representation", visu1Panel3D);
+		viewerTabbedPanel.addTab("3D Representation", visu1PanelHolder);
 		/*viewerTabbedPanel.addTab("N Dimensional Line", visu2Panel);
 		viewerTabbedPanel.addTab("Double Decker Plot", visu3Panel); */
 
@@ -348,7 +346,15 @@ public class ARPanel
 		visu3Rules = selectionPanel.getSelectedRules(3); */
 
 		switch (numTab) {
+		case 0:
+			visu1PanelHolder.removeAll();
+			visu1PanelHolder.revalidate();
+			visu1PanelHolder.repaint();
+			break;
 			case 1 :
+				visu1PanelHolder.add(visu1Panel3D, BorderLayout.CENTER);
+				revalidate();
+				repaint();
 				String[] selectedCriteria =
 					selectionPanel.getSelectedCriteria();
 				visu1Panel3D.setData(visu1Rules, selectedCriteria);
@@ -357,9 +363,15 @@ public class ARPanel
 			case 2 :
 				visu2Panel.setData(visu2Rules, criteres);
 				visu2Panel.setSelectedRules(visu3Rules);
+				visu1PanelHolder.removeAll();
+				visu1PanelHolder.revalidate();
+				visu1PanelHolder.repaint();
 				break;
 			case 3 :
 				visu3Panel.setData(visu3Rules);
+				visu1PanelHolder.removeAll();
+				visu1PanelHolder.revalidate();
+				visu1PanelHolder.repaint();
 				break;
 		}
 
@@ -392,6 +404,7 @@ public class ARPanel
 	private selection.SelectionPanel selectionPanel;
 	private javax.swing.JTabbedPane viewerTabbedPanel;
 	private javax.swing.JMenu fileMenu;
+	private JPanel visu1PanelHolder = new JPanel(new BorderLayout());
 	private Panel3D visu1Panel3D;
 	private visu2.PanelLine visu2PanelLine;
 	private visu3.PanelDDecker visu3Panel;

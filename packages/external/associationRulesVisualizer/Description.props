@@ -1,4 +1,4 @@
-# Description file for prefuseTree
+# Description file for associationRulesVisualizer
 #
 # 
 
@@ -6,10 +6,10 @@
 PackageName=associationRulesVisualizer
 
 # Version (required)
-Version=1.0.2
+Version=1.0.3
 
 #Date
-Date=2012-03-20
+Date=2016-01-11
 
 # Title (required)
 Title=A visualization component for displaying association rules that uses a modified version of the Association Rules Viewer from DESS IAGL of Lille.
@@ -29,29 +29,19 @@ License=GPL 3.0
 Description=A visualization component for displaying association rules that uses a modified version of the Association Rules Viewer from DESS IAGL of Lille. Requires Java 3D to be installed.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/associationRulesVisualizer1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/associationRulesVisualizer1.0.3.zip?download
+
+# Changes in this release
+Changes=Fixed a refresh bug that prevented switching back to the rules selection tab from the 3D viewer. Now depends on scatterPlot3D (which includes all the necessary Java3D libs).
 
 # URL for further information
 URL=http://www2.lifl.fr/~jourdan/download/arv.html
 
 # Related to other packages?
-#Related=
+Related=scatterPlot3D
 
 # Dependencies
-Depends=weka (>=3.7.2)
+Depends=weka (>=3.7.4), scatterPlot3D (>= 1.0.6)
 
 # Special instructions to be displayed on installation of this package
-MessageToDisplayOnInstallation=This package requires Java 3D to be installed on your\n\
- system before it can be used. Mac users will already have Java 3D available to\n\
- them and will not require anything further. For other platforms, download and\n\
- install Java3D from https://java3d.dev.java.net/binary-builds.html before restarting\n\
- Weka.
- 
-# External class check. Skip loading this package if the following
-# class can't be instantiated.
-# DoNotLoadIfClassNotPresent=com.sun.j3d.utils.universe.SimpleUniverse
-
-# Log message to display if package can't be loaded because Java3D is not installed
-# DoNotLoadIfClassNotPresentMessage=associationRulesViewer can't be loaded because \
-# Java3D does not seem to be installed. Download and install Java3D from \
-#  https://java3d.dev.java.net/binary-builds.html before restarting Weka.
+MessageToDisplayOnInstallation=
