@@ -534,6 +534,7 @@
 
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="associationRulesVisualizer"/>
+      <param name="cp" value="../scatterPlot3D/lib/*"/>
     </antcall>
 
     <antcall target="${packageCommand}_external">
