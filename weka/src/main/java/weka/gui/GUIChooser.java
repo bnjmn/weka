@@ -24,6 +24,7 @@ package weka.gui;
 import weka.core.Copyright;
 import weka.core.Version;
 
+import javax.swing.JMenuBar;
 import java.util.Arrays;
 import java.util.List;
 
@@ -35,6 +36,50 @@ import java.util.List;
  * @version $Revision: $
  */
 public class GUIChooser {
+
+  /**
+   * Interface for plugin components that can be accessed from either the
+   * Visualization or Tools menu.
+   *
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
+  public static interface GUIChooserMenuPlugin {
+
+    /** Enum listing possible menus that plugins can appear in */
+    public static enum Menu {
+      TOOLS, VISUALIZATION
+    };
+
+    /**
+     * Get the name to display in title bar of the enclosing JFrame for the
+     * plugin
+     *
+     * @return the name to display in the title bar
+     */
+    String getApplicationName();
+
+    /**
+     * Get the menu that the plugin is to be listed in
+     *
+     * @return the menu that the plugin is to be listed in
+     */
+    Menu getMenuToDisplayIn();
+
+    /**
+     * Get the text entry to appear in the menu
+     *
+     * @return the text entry to appear in the menu
+     */
+    String getMenuEntryText();
+
+    /**
+     * Return the menu bar for this plugin
+     *
+     * @return the menu bar for this plugin or null if it does not use a menu
+     *         bar
+     */
+    JMenuBar getMenuBar();
+  }
 
   public static void main(String[] args) {
     List<String> message =

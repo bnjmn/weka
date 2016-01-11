@@ -180,8 +180,8 @@ public class GUIChooserApp extends JFrame {
   protected Vector<ArffViewer> m_ArffViewers = new Vector<ArffViewer>();
 
   /** keeps track of the opened GUIChooserMenuPlugins (if any) */
-  protected List<GUIChooserMenuPlugin> m_menuPlugins =
-    new ArrayList<GUIChooserMenuPlugin>();
+  protected List<GUIChooser.GUIChooserMenuPlugin> m_menuPlugins =
+    new ArrayList<GUIChooser.GUIChooserMenuPlugin>();
 
   /** The frame containing the SqlViewer */
   protected JFrame m_SqlViewerFrame;
@@ -268,50 +268,6 @@ public class GUIChooserApp extends JFrame {
    */
   public static GUIChooserApp getSingleton() {
     return m_chooser;
-  }
-
-  /**
-   * Interface for plugin components that can be accessed from either the
-   * Visualization or Tools menu.
-   *
-   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
-   */
-  public static interface GUIChooserMenuPlugin {
-
-    /** Enum listing possible menus that plugins can appear in */
-    public static enum Menu {
-      TOOLS, VISUALIZATION
-    };
-
-    /**
-     * Get the name to display in title bar of the enclosing JFrame for the
-     * plugin
-     *
-     * @return the name to display in the title bar
-     */
-    String getApplicationName();
-
-    /**
-     * Get the menu that the plugin is to be listed in
-     *
-     * @return the menu that the plugin is to be listed in
-     */
-    Menu getMenuToDisplayIn();
-
-    /**
-     * Get the text entry to appear in the menu
-     *
-     * @return the text entry to appear in the menu
-     */
-    String getMenuEntryText();
-
-    /**
-     * Return the menu bar for this plugin
-     *
-     * @return the menu bar for this plugin or null if it does not use a menu
-     *         bar
-     */
-    JMenuBar getMenuBar();
   }
 
   /**
@@ -1085,8 +1041,8 @@ public class GUIChooserApp extends JFrame {
       boolean firstTools = true;
       for (String name : pluginNames) {
         try {
-          final GUIChooserMenuPlugin p =
-            (GUIChooserMenuPlugin) PluginManager.getPluginInstance(
+          final GUIChooser.GUIChooserMenuPlugin p =
+            (GUIChooser.GUIChooserMenuPlugin) PluginManager.getPluginInstance(
               "weka.gui.GUIChooser.GUIChooserMenuPlugin", name);
 
           if (p instanceof JComponent) {
@@ -1116,7 +1072,7 @@ public class GUIChooserApp extends JFrame {
               }
             });
 
-            if (p.getMenuToDisplayIn() == GUIChooserMenuPlugin.Menu.VISUALIZATION) {
+            if (p.getMenuToDisplayIn() == GUIChooser.GUIChooserMenuPlugin.Menu.VISUALIZATION) {
               if (firstVis) {
                 m_jMenuVisualization.add(new JSeparator());
                 firstVis = false;
