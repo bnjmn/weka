@@ -334,6 +334,8 @@ public class StepManagerImpl implements StepManager {
       initializedOK = true;
     } catch (WekaException ex) {
       logError(ex.getMessage(), ex);
+    } catch (Throwable ex) {
+      logError(ex.getMessage(), ex);
     }
 
     m_throughput = null;
@@ -887,7 +889,7 @@ public class StepManagerImpl implements StepManager {
     } catch (WekaException ex) {
       interrupted();
       logError(ex.getMessage(), ex);
-    } catch (RuntimeException ex) {
+    } catch (Throwable ex) {
       interrupted();
       logError(ex.getMessage(), ex);
     }
@@ -899,7 +901,7 @@ public class StepManagerImpl implements StepManager {
     } catch (WekaException ex) {
       interrupted();
       logError(ex.getMessage(), ex);
-    } catch (RuntimeException e) {
+    } catch (Throwable e) {
       interrupted();
       logError(e.getMessage(), e);
     }
@@ -1092,7 +1094,7 @@ public class StepManagerImpl implements StepManager {
   }
 
   @Override
-  public void logError(String message, Exception cause) {
+  public void logError(String message, Throwable cause) {
     if (m_log != null) {
       m_log.log(message, LoggingLevel.ERROR, cause);
       m_log.statusMessage("ERROR: " + message);

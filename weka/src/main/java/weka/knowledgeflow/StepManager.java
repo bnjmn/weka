@@ -1,13 +1,13 @@
 package weka.knowledgeflow;
 
-import java.util.List;
-import java.util.Map;
-
 import weka.core.Instances;
 import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
 import weka.knowledgeflow.steps.Step;
+
+import java.util.List;
+import java.util.Map;
 
 /**
  * Client public interface for the StepManager. Step implementations should only
@@ -325,9 +325,9 @@ public interface StepManager {
    * Prints an exception to the log if supplied.
    * 
    * @param message the message to log
-   * @param cause the optional exception to log
+   * @param cause the optional Throwable to log
    */
-  void logError(String message, Exception cause);
+  void logError(String message, Throwable cause);
 
   /**
    * Write a message to the log at the given logging level

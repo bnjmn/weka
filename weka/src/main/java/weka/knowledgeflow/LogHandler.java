@@ -1,13 +1,13 @@
 package weka.knowledgeflow;
 
-import java.io.PrintWriter;
-import java.io.StringWriter;
-
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.gui.Logger;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
 
 public class LogHandler {
 
@@ -115,7 +115,7 @@ public class LogHandler {
   }
 
   protected void
-    log(String message, LoggingLevel messageLevel, Exception cause) {
+    log(String message, LoggingLevel messageLevel, Throwable cause) {
     if (messageLevel == LoggingLevel.WARNING
       || messageLevel == LoggingLevel.ERROR
       || messageLevel.ordinal() <= m_levelToLogAt.ordinal()) {
