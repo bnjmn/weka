@@ -13,10 +13,8 @@ import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionEnvironment;
 import weka.knowledgeflow.KFDefaults;
 
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -30,7 +28,7 @@ import java.util.Set;
 public class KnowledgeFlowApp extends AbstractGUIApplication {
 
   private static final long serialVersionUID = -1460599392623083983L;
-  
+
   protected Settings m_kfProperties;
 
   protected MainKFPerspective m_mainPerspective;
@@ -59,6 +57,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     return KFDefaults.APP_NAME;
   }
 
+  @Override
   public String getApplicationID() {
     return KFDefaults.APP_ID;
   }
@@ -71,6 +70,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     return m_mainPerspective;
   }
 
+  @Override
   public PerspectiveManager getPerspectiveManager() {
     return m_perspectiveManager;
   }
@@ -79,7 +79,28 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
   public Settings getApplicationSettings() {
     if (m_kfProperties == null) {
       m_kfProperties = new Settings("weka", KFDefaults.APP_ID);
-      m_kfProperties.applyDefaults(new KnowledgeFlowGeneralDefaults());
+      Defaults kfDefaults = new KnowledgeFlowGeneralDefaults();
+
+      String envName = m_kfProperties.getSetting(KFDefaults.APP_ID,
+        KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
+        KnowledgeFlowGeneralDefaults.EXECUTION_ENV,
+        Environment.getSystemWide());
+      try {
+        ExecutionEnvironment envForDefaults = (ExecutionEnvironment) (envName
+          .equals(BaseExecutionEnvironment.DESCRIPTION)
+            ? new BaseExecutionEnvironment()
+            : PluginManager.getPluginInstance(
+              ExecutionEnvironment.class.getCanonicalName(), envName));
+
+        Defaults envDefaults = envForDefaults.getDefaultSettings();
+        if (envDefaults != null) {
+          kfDefaults.add(envDefaults);
+        }
+      } catch (Exception ex) {
+        ex.printStackTrace();
+      }
+
+      m_kfProperties.applyDefaults(kfDefaults);
     }
     return m_kfProperties;
   }
@@ -98,10 +119,9 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
 
     private static final long serialVersionUID = 6957165806947500265L;
 
-    public static final Settings.SettingKey LAF_KEY =
-      new Settings.SettingKey(KFDefaults.APP_ID + ".lookAndFeel",
-        "Look and feel for UI", "Note: a restart "
-          + "is required for this setting ot come into effect");
+    public static final Settings.SettingKey LAF_KEY = new Settings.SettingKey(
+      KFDefaults.APP_ID + ".lookAndFeel", "Look and feel for UI",
+      "Note: a restart " + "is required for this setting ot come into effect");
     public static final String LAF = "";
 
     public static final Settings.SettingKey EXECUTION_ENV_KEY =

@@ -89,4 +89,13 @@ public class Defaults implements Serializable {
   public Map<Settings.SettingKey, Object> getDefaults() {
     return m_defaults;
   }
+
+  /**
+   * Add the supplied defaults to this one
+   *
+   * @param toAdd the defaults to add
+   */
+  public void add(Defaults toAdd) {
+    m_defaults.putAll(toAdd.getDefaults());
+  }
 }

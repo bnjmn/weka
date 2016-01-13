@@ -232,6 +232,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
             m_metricsList, getErrorPlotPointSizeProportionalToMargin(),
             evalLabel, new EvaluationCallback());
         getStepManager().getExecutionEnvironment().submitTask(evalTask);
+      } else {
+        getStepManager().interrupted();
       }
     } catch (Exception ex) {
       throw new WekaException(ex);
@@ -372,6 +374,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       }
       getStepManager().statusMessage("Finished");
       getStepManager().finished();
+    }
+    if (isStopRequested()) {
+      getStepManager().interrupted();
     }
   }
 
@@ -592,6 +597,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
 
         aggregateEvalTask(eval, classifier, testData, plotInstances, setNum,
           evalLabel);
+      } else {
+        getStepManager().interrupted();
       }
     }
 

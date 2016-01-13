@@ -51,7 +51,8 @@ import java.util.List;
  * @version $Revision: $
  */
 @KFStep(name = "Clusterer", category = "Clusterers",
-  toolTipText = "Weka clusterer wrapper", iconPath = "")
+  toolTipText = "Weka clusterer wrapper", iconPath = "",
+  resourceIntensive = true)
 public class Clusterer extends WekaAlgorithmWrapper
   implements PairedDataHelper.PairedProcessor<weka.clusterers.Clusterer> {
 
@@ -297,8 +298,7 @@ public class Clusterer extends WekaAlgorithmWrapper
    * Get a list of connection types that could be made to this Step at this
    * point in time
    *
-   * @return a list of incoming connection types that could be made at this
-   * time
+   * @return a list of incoming connection types that could be made at this time
    */
   @Override
   public List<String> getIncomingConnectionTypes() {
@@ -328,11 +328,11 @@ public class Clusterer extends WekaAlgorithmWrapper
   }
 
   /**
-   * Get a list of outgoing connections that could be made from this step
-   * at this point in time
+   * Get a list of outgoing connections that could be made from this step at
+   * this point in time
    *
    * @return a list of outgoing connections that could be made at this point in
-   * time
+   *         time
    */
   @Override
   public List<String> getOutgoingConnectionTypes() {

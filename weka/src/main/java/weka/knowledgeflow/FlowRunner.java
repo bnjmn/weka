@@ -12,7 +12,6 @@ import weka.knowledgeflow.steps.Note;
 import weka.knowledgeflow.steps.Step;
 
 import java.io.File;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -51,8 +50,15 @@ public class FlowRunner implements FlowExecutor {
   /** Executor service used for launching start points in parallel */
   // protected ExecutorService m_executorService;
 
-  /** Number of worker threads to use */
-  protected int m_numThreads = 50;
+  /** Number of worker threads to use in the step executor service */
+  protected int m_numThreads =
+    BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS;
+
+  /**
+   * Number of worker threads to use in the resource intensive executor service
+   */
+  protected int m_resourceIntensiveNumThreads =
+    BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS;
 
   /** Callback to notify when execution completes */
   protected ExecutionFinishedCallback m_callback;
@@ -65,11 +71,6 @@ public class FlowRunner implements FlowExecutor {
    */
   public FlowRunner() {
     Settings settings = new Settings("weka", KFDefaults.APP_ID);
-    try {
-      settings.loadSettings();
-    } catch (IOException ex) {
-      ex.printStackTrace();
-    }
     settings.applyDefaults(new KFDefaults());
     init(settings);
   }
@@ -105,11 +106,18 @@ public class FlowRunner implements FlowExecutor {
     m_execEnv.setFlowExecutor(this);
     m_execEnv.setLog(m_log);
     m_execEnv.setSettings(settings);
+
+    m_numThreads = settings.getSetting(KFDefaults.APP_ID,
+            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS);
+    m_resourceIntensiveNumThreads = settings.getSetting(KFDefaults.APP_ID,
+            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS);
   }
 
   @Override
   public void setSettings(Settings settings) {
-    m_execEnv.setSettings(settings);
+    init(settings);
   }
 
   @Override
@@ -285,10 +293,9 @@ public class FlowRunner implements FlowExecutor {
       return;
     }
 
-    m_execEnv.startClientExecutionService(m_numThreads);
-
     if (!m_flow.initFlow(this)) {
-      throw new WekaException("Flow did not initializeFlow properly - check log.");
+      throw new WekaException(
+        "Flow did not initializeFlow properly - check log.");
     }
 
     if (m_startSequentially) {
@@ -328,14 +335,16 @@ public class FlowRunner implements FlowExecutor {
     }
 
     m_wasStopped = false;
-    m_execEnv.startClientExecutionService(m_numThreads);
+    m_execEnv.startClientExecutionService(m_numThreads,
+      m_resourceIntensiveNumThreads);
 
     if (!m_flow.initFlow(this)) {
       m_wasStopped = true;
       if (m_callback != null) {
         m_callback.executionFinished();
       }
-      throw new WekaException("Flow did not initializeFlow properly - check log.");
+      throw new WekaException(
+        "Flow did not initializeFlow properly - check log.");
     }
 
     return startPoints;
@@ -408,16 +417,17 @@ public class FlowRunner implements FlowExecutor {
       m_logHandler.logLow("FlowRunner: Launching start point: "
         + stepToStart.getManagedStep().getName());
 
-      m_execEnv.submitTask(new StepTask<Void>(null) {
+      m_execEnv.launchStartPoint(stepToStart);
+      /* m_execEnv.submitTask(new StepTask<Void>(null) {
 
-        /** For serialization */
+        /** For serialization *
         private static final long serialVersionUID = -5466021103296024455L;
 
         @Override
         public void process() throws Exception {
           stepToStart.startStep();
         }
-      });
+      }); */
     }
 
     m_logHandler.logDebug("FlowRunner: Launching shutdown monitor");
@@ -445,15 +455,17 @@ public class FlowRunner implements FlowExecutor {
       m_logHandler.logLow("FlowRunner: Launching start point: "
         + startP.getManagedStep().getName());
 
-      m_execEnv.submitTask(new StepTask<Void>(null) {
-        /** For serialization */
+      m_execEnv.launchStartPoint(startP);
+
+      /* m_execEnv.submitTask(new StepTask<Void>(null) {
+        /** For serialization *
         private static final long serialVersionUID = 663985401825979869L;
 
         @Override
         public void process() throws Exception {
           startP.startStep();
         }
-      });
+      }); */
     }
     m_logHandler.logDebug("FlowRunner: Launching shutdown monitor");
     launchExecutorShutdownThread();

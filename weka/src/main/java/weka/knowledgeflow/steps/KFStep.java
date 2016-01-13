@@ -39,4 +39,13 @@ public @interface KFStep {
    * @return the path to the icon for this step
    */
   String iconPath();
+
+  /**
+   * True if this processing step is resource intensive (cpu or memory).
+   * BaseExecution environment will use the limited number of worker thread
+   * executor service to execute this step in this case.
+   *
+   * @return true if this step is CPU-intensive
+   */
+  boolean resourceIntensive() default false;
 }

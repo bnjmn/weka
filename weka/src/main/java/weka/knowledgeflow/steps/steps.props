@@ -17,7 +17,8 @@ weka.knowledgeflow.steps.ModelPerformanceChart,weka.knowledgeflow.steps.DataVisu
 weka.knowledgeflow.steps.BoundaryPlotter,\
 weka.knowledgeflow.steps.ScatterPlotMatrix,weka.knowledgeflow.steps.GraphViewer,\
 weka.knowledgeflow.steps.CostBenefitAnalysis,weka.knowledgeflow.steps.SerializedModelSaver,\
-weka.knowledgeflow.steps.SetVariables,weka.knowledgeflow.steps.ExampleClassifier,\
+weka.knowledgeflow.steps.SetVariables,weka.knowledgeflow.steps.MakeResourceIntensive,\
+weka.knowledgeflow.steps.ExampleClassifier,\
 weka.knowledgeflow.steps.Sorter,weka.knowledgeflow.steps.SubstringReplacer,\
 weka.knowledgeflow.steps.SubstringLabeler,weka.knowledgeflow.steps.Appender,\
 weka.knowledgeflow.steps.FlowByExpression,weka.knowledgeflow.steps.InstanceStreamToBatchMaker,\

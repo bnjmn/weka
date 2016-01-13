@@ -14,15 +14,8 @@ import weka.knowledgeflow.LogHandler;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.StepManagerImpl;
 
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.Point;
-import java.awt.Rectangle;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -714,6 +707,8 @@ public class VisibleLayout extends JPanel {
         m_mainPerspective.getMainApplication().getApplicationSettings());
       m_flowExecutor.setLogger(m_logPanel);
     }
+    m_flowExecutor.setSettings(
+      m_mainPerspective.getMainApplication().getApplicationSettings());
     m_mainPerspective.getMainToolBar().disableWidgets(
       MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
       MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());

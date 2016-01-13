@@ -1,9 +1,9 @@
 package weka.knowledgeflow;
 
+import weka.knowledgeflow.steps.Step;
+
 import java.io.Serializable;
 import java.util.concurrent.Callable;
-
-import weka.knowledgeflow.steps.Step;
 
 /**
  * A task that can be executed by the ExecutionEnvironment's submitTask()
@@ -42,6 +42,9 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
   /** The log to use */
   protected LogHandler m_log;
 
+  /** True if this is a high resource (cpu/memory) task */
+  protected boolean m_resourceIntensive = true;
+
   /**
    * The callback notifier delegate. Performs the actual notification back to
    * the step
@@ -51,12 +54,23 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
 
   /**
    * Constructor. Use this constructor if you are going to access the Future
-   * returned by ExecutionEnvironment.submitTask()
+   * returned by ExecutionEnvironment.submitTask().
    * 
    * @param source the source step producing this task
    */
   public StepTask(Step source) {
-    m_log = new LogHandler(source);
+    this(source, null, false);
+  }
+
+  /**
+   * Constructor. Use this constructor if you are going to access the Future
+   * returned by ExecutionEnvironment.submitTask()
+   *
+   * @param source the source step producing this task
+   * @param resourceIntensive true if this task is cpu/memory intensive
+   */
+  public StepTask(Step source, boolean resourceIntensive) {
+    this(source, null, resourceIntensive);
   }
 
   /**
@@ -67,8 +81,29 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    * @param callback the callback to use
    */
   public StepTask(Step source, StepTaskCallback<T> callback) {
-    this(source);
+    this(source, callback, false);
+  }
+
+  /**
+   * Constructor with supplied callback. Use this constructor to be notified via
+   * the supplied callback when a task has completed processing
+   *
+   * @param source the source step producing this task
+   * @param callback the callback to use
+   * @param resourceIntensive true if this task is cpu/memory intensive
+   */
+  public StepTask(Step source, StepTaskCallback<T> callback, boolean resourceIntensive) {
+    m_log = new LogHandler(source);
     m_callback = callback;
+    m_resourceIntensive = resourceIntensive;
+  }
+
+  public void setResourceIntensive(boolean resourceIntensive) {
+    m_resourceIntensive = resourceIntensive;
+  }
+
+  public boolean isResourceIntensive() {
+    return m_resourceIntensive;
   }
 
   /**

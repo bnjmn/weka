@@ -30,9 +30,11 @@ import weka.core.WekaException;
 import weka.gui.Logger;
 import weka.gui.beans.StreamThroughput;
 import weka.gui.knowledgeflow.StepVisual;
+import weka.knowledgeflow.steps.KFStep;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -129,6 +131,9 @@ public class StepManagerImpl implements StepManager {
    */
   protected boolean m_adjustForGraphicalRendering;
 
+  /** True if the managed step is a resource (cpu/memory) intensive step */
+  protected boolean m_stepIsResourceIntensive;
+
   /**
    * Constructor
    *
@@ -166,6 +171,29 @@ public class StepManagerImpl implements StepManager {
     m_managedStep = step;
     step.setStepManager(this);
     setManagedStepEditorClass(step.getCustomEditorForStep());
+
+    Annotation a = step.getClass().getAnnotation(KFStep.class);
+    m_stepIsResourceIntensive = a != null && ((KFStep) a).resourceIntensive();
+  }
+
+  /**
+   * Set whether the managed step is resource (cpu/memory) intensive or not
+   *
+   * @param resourceIntensive true if the managed step is resource intensive
+   */
+  @Override
+  public void setStepIsResourceIntensive(boolean resourceIntensive) {
+    m_stepIsResourceIntensive = resourceIntensive;
+  }
+
+  /**
+   * Get whether the managed step is resource (cpu/memory) intensive or not
+   *
+   * @return true if the step is resource intensive
+   */
+  @Override
+  public boolean stepIsResourceIntensive() {
+    return m_stepIsResourceIntensive;
   }
 
   /**
@@ -283,6 +311,7 @@ public class StepManagerImpl implements StepManager {
    *
    * @return the logging level in use
    */
+  @Override
   public LoggingLevel getLoggingLevel() {
     return m_log != null ? m_log.getLoggingLevel() : LoggingLevel.BASIC;
   }
@@ -624,6 +653,14 @@ public class StepManagerImpl implements StepManager {
     getIncomingConnectedStepsOfConnectionType(String connectionName) {
     return m_connectedByTypeIncoming.get(connectionName) != null
       ? m_connectedByTypeIncoming.get(connectionName)
+      : new ArrayList<StepManager>();
+  }
+
+  @Override
+  public List<StepManager>
+    getOutgoingConnectedStepsOfConnectionType(String connectionName) {
+    return m_connectedByTypeOutgoing.get(connectionName) != null
+      ? m_connectedByTypeOutgoing.get(connectionName)
       : new ArrayList<StepManager>();
   }
 

@@ -30,7 +30,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
- * <p>A helper class that Step implementations can use when processing paired data
+ * <p>
+ * A helper class that Step implementations can use when processing paired data
  * (e.g. train and test sets). Has the concept of a primary and secondary
  * connection/data type, where the secondary connection/data for a given set
  * number typically needs to be processed using a result generated from the
@@ -42,7 +43,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * processSecondary() called to deal with the secondary connection/data. The
  * result of execution on a particular primary data set number can be retrieved
  * by calling the getIndexedPrimaryResult() method, passing in the set number of
- * the primary result to retrieve.</p>
+ * the primary result to retrieve.
+ * </p>
  *
  * This class also provides an arbitrary storage mechanism for additional
  * results beyond the primary type of result. It also takes care of invoking
@@ -166,8 +168,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
     String connType = data.getConnectionName();
     if (connType.equals(m_primaryConType)) {
       processPrimary(data);
-    } else if (m_secondaryConType != null
-      && connType.equals(m_secondaryConType)) {
+    } else
+      if (m_secondaryConType != null && connType.equals(m_secondaryConType)) {
       processSecondary(data);
     } else {
       throw new WekaException("Illegal connection/data type: " + connType);
@@ -204,7 +206,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
 
     if (setNum == 1) {
       m_ownerStep.getStepManager().processing();
-      m_ownerStep.getStepManager().statusMessage("Processing...");
+      m_ownerStep.getStepManager()
+        .statusMessage("Processing set/fold " + setNum + " out of " + maxSetNum);
     }
 
     if (!m_ownerStep.isStopRequested()) {
@@ -331,16 +334,18 @@ public class PairedDataHelper<P> implements java.io.Serializable {
   }
 
   /**
-   * Interface for processors of paired data to implement. See the description in
-   * the class documentation of PairedDataHelper.
+   * Interface for processors of paired data to implement. See the description
+   * in the class documentation of PairedDataHelper.
    *
-   * @param <P> the type of the result produced by the processPrimary() method.
+   * @param
+   *          <P>
+   *          the type of the result produced by the processPrimary() method.
    */
-  public static interface PairedProcessor<P> {
-    public P processPrimary(Integer setNum, Integer maxSetNum, Data data,
+  public interface PairedProcessor<P> {
+    P processPrimary(Integer setNum, Integer maxSetNum, Data data,
       PairedDataHelper<P> helper) throws WekaException;
 
-    public void processSecondary(Integer setNum, Integer maxSetNum, Data data,
+    void processSecondary(Integer setNum, Integer maxSetNum, Data data,
       PairedDataHelper<P> helper) throws WekaException;
   }
 }

@@ -21,13 +21,13 @@
 
 package weka.knowledgeflow;
 
+import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
 import weka.gui.beans.PluginManager;
 
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -64,18 +64,29 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   protected transient Settings m_settings;
 
   /**
-   * An executor service that steps can use to do work in parallel (if desired).
-   * This is also used by the execution environment to invoke processIncoming()
-   * on a step when batch data is passed to it - i.e. a step receiving data will
-   * execute in its own thread. This is not used, however, when streaming data
-   * is processed, as it usually the case that processing is lightweight in this
-   * case and the gains of running a separate thread for each piece of data
-   * probably do not outweigh the overheads involved.
+   * This is the main executor service, used by the execution environment to
+   * invoke processIncoming() on a step when batch data is passed to it - i.e. a
+   * step receiving data will execute in its own thread. This is not used,
+   * however, when streaming data is processed, as it usually the case that
+   * processing is lightweight in this case and the gains of running a separate
+   * thread for each piece of data probably do not outweigh the overheads
+   * involved.
    */
   protected transient ExecutorService m_executorService;
 
+  /**
+   * An executor service that steps can use to do work in parallel (if desired)
+   * by using {@code StepTask instances}. This executor service is intended for
+   * high cpu load tasks, and the number of threads used by it should be kept <=
+   * number of physical CPU cores
+   */
+  protected transient ExecutorService m_clientExecutorService;
+
   /** The log */
   protected transient Logger m_log;
+
+  /** Log handler to wrap log in */
+  protected transient LogHandler m_logHandler;
 
   /** The level to log at */
   protected LoggingLevel m_loggingLevel = LoggingLevel.BASIC;
@@ -133,17 +144,15 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   @Override
   public void setSettings(Settings settings) {
     m_settings = settings;
+
+    m_logHandler.setLoggingLevel(m_settings.getSetting(KFDefaults.APP_ID,
+      KFDefaults.LOGGING_LEVEL_KEY, KFDefaults.LOGGING_LEVEL));
   }
 
   @Override
   public Settings getSettings() {
     if (m_settings == null) {
       m_settings = new Settings("weka", KFDefaults.APP_ID);
-      try {
-        m_settings.loadSettings();
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
     }
 
     return m_settings;
@@ -167,6 +176,12 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   @Override
   public void setLog(Logger log) {
     m_log = log;
+    if (m_logHandler == null) {
+      m_logHandler = new LogHandler(m_log);
+      m_logHandler.m_statusMessagePrefix =
+        "BaseExecutionEnvironment$" + hashCode() + "|";
+    }
+    m_logHandler.setLogger(m_log);
   }
 
   /**
@@ -202,7 +217,10 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   public <T> Future<ExecutionResult<T>> submitTask(StepTask<T> stepTask)
     throws WekaException {
 
-    return m_executorService.submit(stepTask);
+    m_logHandler.logDebug("Submitting " + stepTask.toString()
+      + (stepTask.isResourceIntensive() ?  " (resource intensive)" : ""));
+    return stepTask.isResourceIntensive() ? m_clientExecutorService.submit(stepTask)
+      : m_executorService.submit(stepTask);
   }
 
   /**
@@ -243,20 +261,36 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   }
 
   /**
-   * Start the executor service for clients to use to execute tasks in this
-   * execution environment. Client steps are free to use this service or to just
-   * do their processing locally within their own code.
+   * Start the main step executor service and the high cpu load executor service
+   * for clients to use to execute {@code StepTask} instances in this execution
+   * environment. Client steps are free to use this service or to just do their
+   * processing locally within their own code (in which case the main step
+   * executor service is used).
    * 
-   * @param numThreads the number of threads to use (level of parallelism). <= 0
-   *          indicates no limit on parallelism
+   * @param numThreadsMain the number of threads to use (level of parallelism).
+   *          <= 0 indicates no limit on parallelism
+   * @param numThreadsHighLoad the number of threads to use for the high cpu
+   *          load executor service (executes {@code StepTask} instances)
    */
-  protected void startClientExecutionService(int numThreads) {
+  protected void startClientExecutionService(int numThreadsMain,
+    int numThreadsHighLoad) {
     if (m_executorService != null) {
       m_executorService.shutdownNow();
     }
+
+    m_logHandler.logDebug(
+      "Requested number of threads for main step executor: " + numThreadsMain);
+    m_logHandler.logDebug("Requested number of threads for high load executor: "
+      + (numThreadsHighLoad > 0 ? numThreadsHighLoad
+        : Runtime.getRuntime().availableProcessors()));
     m_executorService =
-      numThreads > 0 ? Executors.newFixedThreadPool(numThreads)
+      numThreadsMain > 0 ? Executors.newFixedThreadPool(numThreadsMain)
         : Executors.newCachedThreadPool();
+
+    m_clientExecutorService =
+      numThreadsHighLoad > 0 ? Executors.newFixedThreadPool(numThreadsHighLoad)
+        : Executors
+          .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
   }
 
   /**
@@ -265,6 +299,45 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   protected void stopClientExecutionService() {
     if (m_executorService != null) {
       m_executorService.shutdown();
+    }
+
+    if (m_clientExecutorService != null) {
+      m_clientExecutorService.shutdown();
+    }
+  }
+
+  /**
+   * Launches a Step (via the startStep() method) in either than standard step
+   * executor service or the resource intensive executor service. Does not check
+   * that the step is actually a start point.
+   *
+   * @param startPoint the step to launch as a start point
+   * @throws WekaException if a problem occurs
+   */
+  protected void launchStartPoint(final StepManagerImpl startPoint)
+    throws WekaException {
+
+    m_logHandler.logDebug("Submitting " + startPoint.getName()
+      + (startPoint.stepIsResourceIntensive() ? " (resource intensive)"
+        : ""));
+    if (startPoint.stepIsResourceIntensive()) {
+      submitTask(new StepTask<Void>(null) {
+
+        /** For serialization */
+        private static final long serialVersionUID = -5466021103296024455L;
+
+        @Override
+        public void process() throws Exception {
+          startPoint.startStep();
+        }
+      });
+    } else {
+      m_executorService.submit(new Runnable() {
+        @Override
+        public void run() {
+          startPoint.startStep();
+        }
+      });
     }
   }
 
@@ -288,16 +361,62 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
         // instance (streaming) connections.
         step.processIncoming(data[0]);
       } else {
-        m_executorService.submit(new Runnable() {
-
-          @Override
-          public void run() {
-            for (Data d : data) {
-              step.processIncoming(d);
+        m_logHandler.logDebug("Submitting " + step.getName()
+          + (step.stepIsResourceIntensive() ? " (resource intensive)" : ""));
+        if (step.stepIsResourceIntensive()) {
+          m_clientExecutorService.submit(new Runnable() {
+            @Override
+            public void run() {
+              for (Data d : data) {
+                step.processIncoming(d);
+              }
             }
-          }
-        });
+          });
+        } else {
+          m_executorService.submit(new Runnable() {
+            @Override
+            public void run() {
+              for (Data d : data) {
+                step.processIncoming(d);
+              }
+            }
+          });
+        }
       }
+    }
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    return new BaseExecutionEnvironmentDefaults();
+  }
+
+  public static class BaseExecutionEnvironmentDefaults extends Defaults {
+
+    public static final Settings.SettingKey STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY =
+      new Settings.SettingKey(KFDefaults.APP_ID + ".stepExecutorNumThreads",
+        "Number of threads to use in the main step executor service", "");
+    public static final int STEP_EXECUTOR_SERVICE_NUM_THREADS = 50;
+
+    public static final Settings.SettingKey RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY =
+      new Settings.SettingKey(
+        KFDefaults.APP_ID + ".highResourceExecutorNumThreads",
+        "Number of threads to use in the resource intensive executor service",
+        "<html>This executor service is used for executing StepTasks and<br>"
+          + "Steps that are marked as resource intensive. 0 = use as many<br>"
+          + "threads as there are cpu processors.</html>");
+
+    /** Default (0) means use as many threads as there are cpu processors */
+    public static final int RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS = 0;
+    private static final long serialVersionUID = -3386792058002464330L;
+
+    public BaseExecutionEnvironmentDefaults() {
+      super(KFDefaults.APP_ID);
+
+      m_defaults.put(STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+        STEP_EXECUTOR_SERVICE_NUM_THREADS);
+      m_defaults.put(RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+        RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS);
     }
   }
 }

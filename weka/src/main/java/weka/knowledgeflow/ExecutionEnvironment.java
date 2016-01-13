@@ -21,6 +21,7 @@
 
 package weka.knowledgeflow;
 
+import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.WekaException;
@@ -42,6 +43,14 @@ public interface ExecutionEnvironment {
    * @return a description of this execution environment
    */
     String getDescription();
+
+  /**
+   * Get default settings for this ExecutionEnvironment.
+   *
+   * @return the default settings for this execution environment, or null if
+   *         there are no default settings.
+   */
+    Defaults getDefaultSettings();
 
   /**
    * Set whether this execution environment is headless

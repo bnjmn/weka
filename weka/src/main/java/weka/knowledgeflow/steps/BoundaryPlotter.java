@@ -21,20 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
-import java.awt.image.BufferedImage;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Random;
-import java.util.concurrent.Future;
-
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.clusterers.AbstractClusterer;
@@ -52,11 +38,24 @@ import weka.gui.ProgrammaticProperty;
 import weka.gui.boundaryvisualizer.DataGenerator;
 import weka.gui.boundaryvisualizer.KDDataGenerator;
 import weka.gui.knowledgeflow.KFGUIConsts;
-import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.ExecutionResult;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.StepTask;
+
+import java.awt.Color;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
+import java.awt.image.BufferedImage;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.Future;
 
 /**
  * A step that computes visualization data for class/cluster decision
@@ -208,7 +207,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
   /**
    * Set the name/index of the Y axis attribute
    *
-   * @param yAttName name/index of the Y axis attribute
+   * @param attName name/index of the Y axis attribute
    */
   // make programmatic as our dialog will handle these directly, rather than
   // deferring to the GOE
@@ -604,27 +603,6 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
     }
   }
 
-  protected void doClusterer(DensityBasedClusterer c, Instances trainingData,
-    int setNum, int maxSetNum) throws WekaException {
-    try {
-      m_osi =
-        new BufferedImage(m_imageWidth, m_imageHeight,
-          BufferedImage.TYPE_INT_RGB);
-      m_currentDescription = makeSchemeSpec(c, setNum, maxSetNum);
-      // notify listeners
-      getStepManager()
-        .logBasic("Starting new plot for " + m_currentDescription);
-      if (m_plotListener != null) {
-        m_plotListener.newPlotStarted(m_currentDescription);
-      }
-
-      Graphics m = m_osi.getGraphics();
-      m.fillRect(0, 0, m_imageWidth, m_imageHeight);
-    } catch (Exception ex) {
-      throw new WekaException(ex);
-    }
-  }
-
   protected void doScheme(Classifier classifier, DensityBasedClusterer clust,
     Instances trainingData, int setNum, int maxSetNum) throws WekaException {
     try {
@@ -682,6 +660,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
           getStepManager().logDetailed(
             "Launching task to compute image row " + i);
           SchemeRowTask t = new SchemeRowTask(this);
+          t.setResourceIntensive(isResourceIntensive());
           t.m_classifier = null;
           t.m_clusterer = null;
           if (toTrainClassifier != null) {

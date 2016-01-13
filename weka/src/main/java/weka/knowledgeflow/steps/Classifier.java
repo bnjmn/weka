@@ -37,6 +37,7 @@ import weka.gui.FilePropertyMetadata;
 import weka.gui.ProgrammaticProperty;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
+import weka.knowledgeflow.LoggingLevel;
 import weka.knowledgeflow.StepManager;
 
 import javax.swing.JFileChooser;
@@ -59,7 +60,8 @@ import java.util.List;
  * @version $Revision: $
  */
 @KFStep(name = "Classifier", category = "Classifiers",
-  toolTipText = "Weka classifier wrapper", iconPath = "")
+  toolTipText = "Weka classifier wrapper", iconPath = "",
+  resourceIntensive = true)
 public class Classifier extends WekaAlgorithmWrapper
   implements PairedDataHelper.PairedProcessor<weka.classifiers.Classifier> {
 
@@ -353,7 +355,8 @@ public class Classifier extends WekaAlgorithmWrapper
    * @throws WekaException if a problem occurs
    */
   @Override
-  public weka.classifiers.Classifier processPrimary(Integer setNum, Integer maxSetNum, Data data,
+  public weka.classifiers.Classifier processPrimary(Integer setNum,
+    Integer maxSetNum, Data data,
     PairedDataHelper<weka.classifiers.Classifier> helper) throws WekaException {
 
     Instances trainingData = data.getPrimaryPayload();
@@ -381,6 +384,11 @@ public class Classifier extends WekaAlgorithmWrapper
         getStepManager().logBasic(
           "Building " + classifierDesc + " on " + trainingData.relationName()
             + " for fold/set " + setNum + " out of " + maxSetNum);
+        if (getStepManager().getLoggingLevel().ordinal() > LoggingLevel.LOW
+          .ordinal()) {
+          getStepManager().statusMessage(
+            "Building " + classifierDesc + " on fold/set " + setNum);
+        }
 
         if (maxSetNum == 1) {
           // single train/test split - makes sense to retain this trained

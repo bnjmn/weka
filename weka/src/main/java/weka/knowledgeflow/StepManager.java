@@ -122,8 +122,8 @@ public interface StepManager {
    *          steps for
    * @return
    */
-  List<StepManager> getIncomingConnectedStepsOfConnectionType(
-    String connectionName);
+  List<StepManager>
+    getIncomingConnectedStepsOfConnectionType(String connectionName);
 
   /**
    * Get the named step that is connected with an incoming connection.
@@ -141,6 +141,17 @@ public interface StepManager {
    * @return the connected step
    */
   StepManager getOutgoingConnectedStepWithName(String stepName);
+
+  /**
+   * Get a list of downstream steps connected to this step with the given
+   * connection type.
+   * 
+   * @param connectionName the name of the outgoing connection
+   * @return a list of downstream steps connected to this one with the named
+   *         connection type
+   */
+  List<StepManager>
+    getOutgoingConnectedStepsOfConnectionType(String connectionName);
 
   /**
    * Get a Map of all incoming connections. Map is keyed by connection type;
@@ -229,7 +240,7 @@ public interface StepManager {
    * that they have started some processing. Calling this should set the busy
    * flag to true.
    */
-  void processing();
+    void processing();
 
   /**
    * Step implementations processing batch data should call this to indicate
@@ -352,6 +363,13 @@ public interface StepManager {
   Logger getLog();
 
   /**
+   * Get the currently set logging level
+   *
+   * @return the currently set logging level
+   */
+  LoggingLevel getLoggingLevel();
+
+  /**
    * Substitute all known environment variables in the given string
    * 
    * @param source the source string
@@ -372,11 +390,27 @@ public interface StepManager {
   Step getInfoStep(Class stepClass) throws WekaException;
 
   /**
-   * Returns a reference to the step being managed if it has one or more outgoing
-   * CON_INFO connections.
+   * Returns a reference to the step being managed if it has one or more
+   * outgoing CON_INFO connections.
    *
    * @return the step being managed if outgoing CON_INFO connections are present
    * @throws WekaException if there are no outgoing CON_INFO connections
    */
   Step getInfoStep() throws WekaException;
+
+  /**
+   * Returns true if the step managed by this step manager has been marked as
+   * being resource (cpu/memory) intensive.
+   * 
+   * @return true if the managed step is resource intensive
+   */
+  boolean stepIsResourceIntensive();
+
+  /**
+   * Mark the step managed by this step manager as resource intensive
+   * 
+   * @param isResourceIntensive true if the step managed by this step manager is
+   *          resource intensive
+   */
+  void setStepIsResourceIntensive(boolean isResourceIntensive);
 }

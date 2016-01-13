@@ -58,6 +58,9 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
   /** The step manager to use */
   protected transient StepManager m_stepManager;
 
+  /** True if the step is resource (cpu/memory) intensive */
+  protected boolean m_stepIsResourceIntensive;
+
   public BaseStep() {
     String clazzName = this.getClass().getCanonicalName();
     clazzName = clazzName.substring(clazzName.lastIndexOf(".") + 1);
@@ -109,6 +112,15 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     m_stopRequested = false;
     m_busy = false;
     stepInit();
+  }
+
+  @ProgrammaticProperty
+  public void setStepIsResourceIntensive(boolean isResourceIntensive) {
+    getStepManager().setStepIsResourceIntensive(isResourceIntensive);
+  }
+
+  public boolean isResourceIntensive() {
+    return getStepManager().stepIsResourceIntensive();
   }
 
   @Override

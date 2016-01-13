@@ -62,7 +62,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @see ASSearchStrategy
  */
 @KFStep(name = "ASEvaluator", category = "AttSelection",
-  toolTipText = "Weka attribute selection evaluator wrapper", iconPath = "")
+  toolTipText = "Weka attribute selection evaluator wrapper", iconPath = "",
+  resourceIntensive = true)
 public class ASEvaluator extends WekaAlgorithmWrapper {
 
   private static final long serialVersionUID = -1280208826860871742L;
