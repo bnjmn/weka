@@ -21,16 +21,15 @@
 
 package weka.knowledgeflow.steps;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import weka.core.Environment;
 import weka.core.WekaException;
 import weka.gui.ProgrammaticProperty;
 import weka.gui.knowledgeflow.KFGUIConsts;
-import weka.gui.knowledgeflow.StepVisual;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Step that can be used to set the values of environment variables for the flow
@@ -50,8 +49,8 @@ import weka.gui.knowledgeflow.StepVisual;
   iconPath = KFGUIConsts.BASE_ICON_PATH + "DiamondPlain.gif")
 public class SetVariables extends BaseStep {
 
-  protected static final String SEP1 = "@@**@@";
-  protected static final String SEP2 = "@*@*";
+  public static final String SEP1 = "@@vv@@";
+  public static final String SEP2 = "@v@v";
 
   private static final long serialVersionUID = 8042350408846800738L;
 
@@ -61,7 +60,6 @@ public class SetVariables extends BaseStep {
 
   @ProgrammaticProperty
   public void setVarsInternalRep(String rep) {
-    m_varsToSet.clear();
     m_internalRep = rep;
   }
 
@@ -71,16 +69,8 @@ public class SetVariables extends BaseStep {
 
   @Override
   public void stepInit() throws WekaException {
-    if (m_internalRep == null || m_internalRep.length() == 0) {
-      return;
-    }
-    String[] parts = m_internalRep.split(SEP1);
-    for (String p : parts) {
-      String[] keyVal = p.trim().split(SEP2);
-      if (keyVal.length == 2) {
-        m_varsToSet.put(keyVal[0].trim(), keyVal[1]);
-      }
-    }
+
+    m_varsToSet = internalToMap(m_internalRep);
 
     Environment currentEnv =
       getStepManager().getExecutionEnvironment().getEnvironmentVariables();
@@ -93,7 +83,10 @@ public class SetVariables extends BaseStep {
       String key = e.getKey();
       String value = e.getValue();
 
-      if (currentEnv.getVariableValue(key) == null) {
+      if (key != null && key.length() > 0 && value != null
+        && currentEnv.getVariableValue(key) == null) {
+        getStepManager()
+          .logDetailed("Setting variable: " + key + " = " + value);
         currentEnv.addVariable(key, value);
       }
     }
@@ -107,5 +100,25 @@ public class SetVariables extends BaseStep {
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return new ArrayList<String>();
+  }
+
+  @Override
+  public String getCustomEditorForStep() {
+    return "weka.gui.knowledgeflow.steps.SetVariablesStepEditorDialog";
+  }
+
+  public static Map<String, String> internalToMap(String internalRep) {
+    Map<String, String> varsToSet = new LinkedHashMap<String, String>();
+    if (internalRep != null || internalRep.length() > 0) {
+      String[] parts = internalRep.split(SEP1);
+      for (String p : parts) {
+        String[] keyVal = p.trim().split(SEP2);
+        if (keyVal.length == 2) {
+          varsToSet.put(keyVal[0].trim(), keyVal[1]);
+        }
+      }
+    }
+
+    return varsToSet;
   }
 }
