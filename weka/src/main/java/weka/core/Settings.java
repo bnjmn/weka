@@ -1,5 +1,9 @@
 package weka.core;
 
+import weka.core.metastore.MetaStore;
+import weka.core.metastore.XMLFileBasedMetaStore;
+import weka.knowledgeflow.LoggingLevel;
+
 import java.awt.Font;
 import java.io.File;
 import java.io.IOException;
@@ -9,10 +13,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import weka.core.metastore.MetaStore;
-import weka.core.metastore.XMLFileBasedMetaStore;
-import weka.knowledgeflow.LoggingLevel;
 
 /**
  * Maintains a collection of settings. Settings are key value pairs which can be
@@ -117,6 +117,24 @@ public class Settings implements Serializable {
     } catch (IOException ex) {
       throw new IllegalStateException(ex);
     }
+  }
+
+  /**
+   * Get the ID used for these settings
+   *
+   * @return the ID used
+   */
+  public String getID() {
+    return m_ID;
+  }
+
+  /**
+   * Get the store name for these settings
+   *
+   * @return the store name
+   */
+  public String getStoreName() {
+    return m_storeName;
   }
 
   /**

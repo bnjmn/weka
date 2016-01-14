@@ -20,6 +20,10 @@
  */
 package weka.core.packageManagement;
 
+import weka.core.Defaults;
+import weka.core.Environment;
+import weka.core.Settings;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -73,6 +77,57 @@ public class DefaultPackageManager extends PackageManager {
 
   static List<Package> s_installedPackageList;
 
+  /** Timeout to use for comms */
+  int m_timeout = DefaultPMDefaults.SOCKET_TIMEOUT;
+
+  /**
+   * Constructor
+   */
+  public DefaultPackageManager() {
+  }
+
+  /**
+   * Get the default settings for the default package manager
+   *
+   * @return the default settings
+   */
+  @Override
+  public Defaults getDefaultSettings() {
+
+    return new DefaultPMDefaults();
+  }
+
+  /**
+   * Apply settings.
+   *
+   * @param settings the settings to apply
+   */
+  @Override
+  public void applySettings(Settings settings) {
+    m_timeout = settings.getSetting(settings.getID(),
+      DefaultPMDefaults.SOCKET_TIMEOUT_KEY, DefaultPMDefaults.SOCKET_TIMEOUT,
+      Environment.getSystemWide());
+  }
+
+  /**
+   * Default settings for the default package manager implementation
+   */
+  protected static final class DefaultPMDefaults extends Defaults {
+    protected static final String APP_ID = "defaultpackagemanager";
+
+    protected static final Settings.SettingKey SOCKET_TIMEOUT_KEY =
+      new Settings.SettingKey(APP_ID + ".timeout",
+        "Timeout (in ms) for socket " + "comms", "");
+    /** Default timeout for socket connections (5 seconds) */
+    protected static final int SOCKET_TIMEOUT = 5000;
+    private static final long serialVersionUID = -1428588514991146709L;
+
+    public DefaultPMDefaults() {
+      super("defaultpackagemanager");
+      m_defaults.put(SOCKET_TIMEOUT_KEY, SOCKET_TIMEOUT);
+    }
+  }
+
   /*
    * protected File downloadPackage2(URL packageURL, PrintStream... progress)
    * throws Exception { String packageArchiveName = packageURL.toString();
@@ -84,9 +139,8 @@ public class DefaultPackageManager extends PackageManager {
    * // make a temp file to hold the downloaded archive File tmpDownload =
    * File.createTempFile(packageArchiveName, ".zip");
    * 
-   * for (int i = 0; i < progress.length; i++) {
-   * progress[i].println("[Package Manager] Tmp file: " +
-   * tmpDownload.toString()); }
+   * for (int i = 0; i < progress.length; i++) { progress[i].println(
+   * "[Package Manager] Tmp file: " + tmpDownload.toString()); }
    * 
    * System.err.println("Here in downloadPackage..."); URLConnection conn =
    * null;
@@ -95,8 +149,8 @@ public class DefaultPackageManager extends PackageManager {
    * (setProxyAuthentication()) { conn = packageURL.openConnection(m_httpProxy);
    * } else { conn = packageURL.openConnection(); }
    * 
-   * if (conn instanceof HttpURLConnection) {
-   * System.err.println("We have a http url conn."); }
+   * if (conn instanceof HttpURLConnection) { System.err.println(
+   * "We have a http url conn."); }
    * 
    * BufferedReader br = new BufferedReader(new
    * InputStreamReader(conn.getInputStream()));
@@ -117,28 +171,28 @@ public class DefaultPackageManager extends PackageManager {
     packageArchiveName = packageArchiveName.substring(0,
       packageArchiveName.lastIndexOf("." + fileExtension) + 3);
 
-    packageArchiveName = packageArchiveName.substring(0,
-      packageArchiveName.lastIndexOf('.'));
+    packageArchiveName =
+      packageArchiveName.substring(0, packageArchiveName.lastIndexOf('.'));
 
     packageArchiveName = packageArchiveName.substring(
       packageArchiveName.lastIndexOf('/'), packageArchiveName.length());
 
     // make a temp file to hold the downloaded archive
-    File tmpDownload = File.createTempFile(packageArchiveName, "."
-      + fileExtension);
+    File tmpDownload =
+      File.createTempFile(packageArchiveName, "." + fileExtension);
 
     for (PrintStream progres : progress) {
       progres.println(packageURL.toString());
-      progres.println("[DefaultPackageManager] Tmp file: "
-        + tmpDownload.toString());
+      progres
+        .println("[DefaultPackageManager] Tmp file: " + tmpDownload.toString());
     }
 
     URLConnection conn = getConnection(packageURL);
 
     BufferedInputStream bi = new BufferedInputStream(conn.getInputStream());
 
-    BufferedOutputStream bo = new BufferedOutputStream(new FileOutputStream(
-      tmpDownload));
+    BufferedOutputStream bo =
+      new BufferedOutputStream(new FileOutputStream(tmpDownload));
 
     // download the archive
     int totalBytesRead = 0;
@@ -210,17 +264,18 @@ public class DefaultPackageManager extends PackageManager {
     throws Exception {
 
     if (getPackageRepositoryURL() == null) {
-      throw new Exception("[DefaultPackageManager] No package repository set!!");
+      throw new Exception(
+        "[DefaultPackageManager] No package repository set!!");
     }
 
-    String versionsS = m_packageRepository.toString() + "/" + packageName + "/"
-      + "versions.txt";
+    String versionsS =
+      m_packageRepository.toString() + "/" + packageName + "/" + "versions.txt";
 
     URL packageURL = new URL(versionsS);
     URLConnection conn = getConnection(packageURL);
 
-    BufferedReader bi = new BufferedReader(new InputStreamReader(
-      conn.getInputStream()));
+    BufferedReader bi =
+      new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
     ArrayList<Object> versions = new ArrayList<Object>();
     String versionNumber;
@@ -245,7 +300,8 @@ public class DefaultPackageManager extends PackageManager {
   public Package getRepositoryPackageInfo(String packageName, Object version)
     throws Exception {
     if (getPackageRepositoryURL() == null) {
-      throw new Exception("[DefaultPackageManager] No package repository set!!");
+      throw new Exception(
+        "[DefaultPackageManager] No package repository set!!");
     }
 
     if (version == null) {
@@ -289,8 +345,8 @@ public class DefaultPackageManager extends PackageManager {
         packageProperties.load(new BufferedInputStream(is));
         is.close();
 
-        DefaultPackage pkg = new DefaultPackage(m_packageHome, this,
-          packageProperties);
+        DefaultPackage pkg =
+          new DefaultPackage(m_packageHome, this, packageProperties);
 
         return pkg;
       }
@@ -323,8 +379,8 @@ public class DefaultPackageManager extends PackageManager {
     packageProperties.load(fis);
     fis.close();
 
-    DefaultPackage pkg = new DefaultPackage(m_packageHome, this,
-      packageProperties);
+    DefaultPackage pkg =
+      new DefaultPackage(m_packageHome, this, packageProperties);
     return pkg;
   }
 
@@ -366,8 +422,8 @@ public class DefaultPackageManager extends PackageManager {
               .println("[DefaultPackageManager] removing: " + f.toString());
           }
           if (!f.delete()) {
-            System.err.println("[DefaultPackageManager] can't delete file "
-              + f.toString());
+            System.err.println(
+              "[DefaultPackageManager] can't delete file " + f.toString());
             f.deleteOnExit();
           }
         }
@@ -376,8 +432,8 @@ public class DefaultPackageManager extends PackageManager {
 
     // delete this directory
     if (!dir.delete()) {
-      System.err.println("[DefaultPackageManager] can't delete directory "
-        + dir.toString());
+      System.err.println(
+        "[DefaultPackageManager] can't delete directory " + dir.toString());
       dir.deleteOnExit();
     }
     for (PrintStream progres : progress) {
@@ -397,8 +453,8 @@ public class DefaultPackageManager extends PackageManager {
   @Override
   public void uninstallPackage(String packageName, PrintStream... progress)
     throws Exception {
-    File packageToDel = new File(m_packageHome.toString() + File.separator
-      + packageName);
+    File packageToDel =
+      new File(m_packageHome.toString() + File.separator + packageName);
 
     if (!packageToDel.exists()) {
       throw new Exception("[DefaultPackageManager] Can't remove " + packageName
@@ -424,8 +480,9 @@ public class DefaultPackageManager extends PackageManager {
   @Override
   public String installPackageFromArchive(String packageArchivePath,
     PrintStream... progress) throws Exception {
-    Properties packageProps = (Properties) getPackageArchiveInfo(
-      packageArchivePath).getPackageMetaData();
+    Properties packageProps =
+      (Properties) getPackageArchiveInfo(packageArchivePath)
+        .getPackageMetaData();
     String packageName = packageProps.getProperty("PackageName");
     String additionalLibs = packageProps.getProperty("AdditionalLibs");
     String[] additionalLibURLs = null;
@@ -461,9 +518,9 @@ public class DefaultPackageManager extends PackageManager {
     String[] additionalLibURLs, PrintStream... progress) throws Exception {
 
     if (!establishPackageHome()) {
-      throw new Exception("Unable to install additional libraries"
-        + " because package home (" + m_packageHome.getAbsolutePath()
-        + ") can't be established.");
+      throw new Exception(
+        "Unable to install additional libraries" + " because package home ("
+          + m_packageHome.getAbsolutePath() + ") can't be established.");
     }
 
     for (String libU : additionalLibURLs) {
@@ -476,21 +533,21 @@ public class DefaultPackageManager extends PackageManager {
 
         String destName = libU.substring(0, libU.lastIndexOf("." + "jar") + 3);
         destName = destName.substring(0, destName.lastIndexOf('.'));
-        destName = destName.substring(destName.lastIndexOf('/'),
-          destName.length());
+        destName =
+          destName.substring(destName.lastIndexOf('/'), destName.length());
         destName += ".jar";
 
-        File destDir = new File(m_packageHome, packageName + File.separator
-          + "lib");
+        File destDir =
+          new File(m_packageHome, packageName + File.separator + "lib");
         if (!destDir.mkdir()) {
           // hopefully failure is because the directory already exists
         }
         File destPath = new File(destDir, destName);
 
-        InputStream input = new BufferedInputStream(
-          new FileInputStream(libPath));
-        OutputStream output = new BufferedOutputStream(new FileOutputStream(
-          destPath));
+        InputStream input =
+          new BufferedInputStream(new FileInputStream(libPath));
+        OutputStream output =
+          new BufferedOutputStream(new FileOutputStream(destPath));
         copyStreams(input, output);
 
         input.close();
@@ -522,8 +579,8 @@ public class DefaultPackageManager extends PackageManager {
           uninstallPackage(toDownload.getName(), progress);
         }
       }
-      archivePaths[i] = downloadArchive(toDownload.getPackageURL(), "zip",
-        progress);
+      archivePaths[i] =
+        downloadArchive(toDownload.getPackageURL(), "zip", progress);
     }
 
     // OK, all downloaded successfully, now install them
@@ -547,7 +604,7 @@ public class DefaultPackageManager extends PackageManager {
    */
   protected static boolean checkDependencies(PackageConstraint toCheck,
     Map<String, Dependency> lookup, Map<String, List<Dependency>> conflicts)
-    throws Exception {
+      throws Exception {
     boolean ok = true;
 
     // get the dependencies for the package to check
@@ -566,8 +623,8 @@ public class DefaultPackageManager extends PackageManager {
         // we have to see if the version number for this package is compatible
         // with the one already in the lookup
         Dependency checkAgainst = lookup.get(depName);
-        PackageConstraint result = checkAgainst.getTarget().checkConstraint(
-          p.getTarget());
+        PackageConstraint result =
+          checkAgainst.getTarget().checkConstraint(p.getTarget());
         if (result != null) {
           checkAgainst.setTarget(result);
           lookup.put(depName, checkAgainst);
@@ -609,16 +666,14 @@ public class DefaultPackageManager extends PackageManager {
     Map<String, Dependency> lookup = new HashMap<String, Dependency>();
 
     for (Dependency d : initialList) {
-      lookup.put(
-        d.getTarget().getPackage().getPackageMetaDataElement("PackageName")
-          .toString(), d);
+      lookup.put(d.getTarget().getPackage()
+        .getPackageMetaDataElement("PackageName").toString(), d);
       ArrayList<Dependency> deps = new ArrayList<Dependency>();
       deps.add(d);
 
       // Pre-load a conficts Map
-      conflicts.put(
-        d.getTarget().getPackage().getPackageMetaDataElement("PackageName")
-          .toString(), deps);
+      conflicts.put(d.getTarget().getPackage()
+        .getPackageMetaDataElement("PackageName").toString(), deps);
     }
 
     // now process each of these to build the full list
@@ -671,8 +726,8 @@ public class DefaultPackageManager extends PackageManager {
       }
     }
 
-    String urlString = toInstall.getPackageMetaDataElement("PackageURL")
-      .toString();
+    String urlString =
+      toInstall.getPackageMetaDataElement("PackageURL").toString();
     URL packageURL = new URL(urlString);
 
     installPackageFromURL(packageURL, progress);
@@ -716,9 +771,9 @@ public class DefaultPackageManager extends PackageManager {
     PrintStream... progress) throws Exception {
 
     if (!establishPackageHome()) {
-      throw new Exception("Unable to install " + packageArchivePath
-        + " because package home (" + m_packageHome.getAbsolutePath()
-        + ") can't be established.");
+      throw new Exception(
+        "Unable to install " + packageArchivePath + " because package home ("
+          + m_packageHome.getAbsolutePath() + ") can't be established.");
     }
 
     File destDir = new File(m_packageHome, packageName);
@@ -749,8 +804,8 @@ public class DefaultPackageManager extends PackageManager {
       }
 
       for (PrintStream progres : progress) {
-        progres.println("[DefaultPackageManager] Installing: "
-          + zipEntry.getName());
+        progres
+          .println("[DefaultPackageManager] Installing: " + zipEntry.getName());
       }
 
       input = new BufferedInputStream(zipFile.getInputStream(zipEntry));
@@ -813,8 +868,8 @@ public class DefaultPackageManager extends PackageManager {
 
     ZipEntry z = new ZipEntry(packageName + "/Latest.props");
     ZipEntry z2 = new ZipEntry(packageName + "/Latest.html");
-    URLConnection conn = getConnection(m_packageRepository.toString() + "/"
-      + packageName + "/Latest.props");
+    URLConnection conn = getConnection(
+      m_packageRepository.toString() + "/" + packageName + "/Latest.props");
 
     BufferedInputStream bi = new BufferedInputStream(conn.getInputStream());
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -823,8 +878,8 @@ public class DefaultPackageManager extends PackageManager {
     zos.putNextEntry(z);
     zos.write(bos.toByteArray());
 
-    conn = getConnection(m_packageRepository.toString() + "/" + packageName
-      + "/Latest.html");
+    conn = getConnection(
+      m_packageRepository.toString() + "/" + packageName + "/Latest.html");
     bi = new BufferedInputStream(conn.getInputStream());
     bos = new ByteArrayOutputStream();
     transToBAOS(bi, bos);
@@ -833,8 +888,8 @@ public class DefaultPackageManager extends PackageManager {
 
     // write the versions.txt file to the zip
     z = new ZipEntry(packageName + "/versions.txt");
-    conn = getConnection(m_packageRepository.toString() + "/" + packageName
-      + "/versions.txt");
+    conn = getConnection(
+      m_packageRepository.toString() + "/" + packageName + "/versions.txt");
     bi = new BufferedInputStream(conn.getInputStream());
     bos = new ByteArrayOutputStream();
     transToBAOS(bi, bos);
@@ -843,8 +898,8 @@ public class DefaultPackageManager extends PackageManager {
 
     // write the index.html to the zip
     z = new ZipEntry(packageName + "/index.html");
-    conn = getConnection(m_packageRepository.toString() + "/" + packageName
-      + "/index.html");
+    conn = getConnection(
+      m_packageRepository.toString() + "/" + packageName + "/index.html");
     bi = new BufferedInputStream(conn.getInputStream());
     bos = new ByteArrayOutputStream();
     transToBAOS(bi, bos);
@@ -887,7 +942,8 @@ public class DefaultPackageManager extends PackageManager {
     throws Exception {
 
     if (getPackageRepositoryURL() == null) {
-      throw new Exception("[DefaultPackageManager] No package repository set!!");
+      throw new Exception(
+        "[DefaultPackageManager] No package repository set!!");
     }
 
     try {
@@ -942,18 +998,19 @@ public class DefaultPackageManager extends PackageManager {
     PrintStream... progress) throws Exception {
 
     if (getPackageRepositoryURL() == null) {
-      throw new Exception("[DefaultPackageManager] No package repository set!!");
+      throw new Exception(
+        "[DefaultPackageManager] No package repository set!!");
     }
 
     String packageList = m_packageRepository.toString() + "/packageList.txt";
-    String packageListWithVersion = m_packageRepository.toString()
-      + "/packageListWithVersion.txt";
+    String packageListWithVersion =
+      m_packageRepository.toString() + "/packageListWithVersion.txt";
 
     URLConnection conn = null;
     conn = getConnection(packageList);
 
-    BufferedReader bi = new BufferedReader(new InputStreamReader(
-      conn.getInputStream()));
+    BufferedReader bi =
+      new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
     ByteArrayOutputStream bos = new ByteArrayOutputStream();
     ZipOutputStream zos = new ZipOutputStream(bos);
@@ -997,8 +1054,8 @@ public class DefaultPackageManager extends PackageManager {
     while ((imageName = bi.readLine()) != null) {
       // System.err.println("Processing " + imageName);
       z = new ZipEntry(imageName);
-      URLConnection conn2 = getConnection(m_packageRepository.toString() + "/"
-        + imageName);
+      URLConnection conn2 =
+        getConnection(m_packageRepository.toString() + "/" + imageName);
       bi2 = new BufferedInputStream(conn2.getInputStream());
       bos2 = new ByteArrayOutputStream();
       transToBAOS(bi2, bos2);
@@ -1032,11 +1089,13 @@ public class DefaultPackageManager extends PackageManager {
    * @throws Exception if a list of packages can't be determined.
    */
   @Override
-  public List<Package> getAllPackages(PrintStream... progress) throws Exception {
+  public List<Package> getAllPackages(PrintStream... progress)
+    throws Exception {
     ArrayList<Package> allPackages = new ArrayList<Package>();
 
     if (getPackageRepositoryURL() == null) {
-      throw new Exception("[DefaultPackageManager] No package repository set!!");
+      throw new Exception(
+        "[DefaultPackageManager] No package repository set!!");
     }
 
     String packageList = m_packageRepository.toString() + "/packageList.txt";
@@ -1044,8 +1103,8 @@ public class DefaultPackageManager extends PackageManager {
     URL packageListURL = new URL(packageList);
     URLConnection conn = getConnection(packageListURL);
 
-    BufferedReader bi = new BufferedReader(new InputStreamReader(
-      conn.getInputStream()));
+    BufferedReader bi =
+      new BufferedReader(new InputStreamReader(conn.getInputStream()));
 
     String packageName;
     while ((packageName = bi.readLine()) != null) {
@@ -1085,9 +1144,9 @@ public class DefaultPackageManager extends PackageManager {
   @Override
   public List<Package> getInstalledPackages() throws Exception {
     if (!establishPackageHome()) {
-      throw new Exception("Unable to get list of installed packages "
-        + "because package home (" + m_packageHome.getAbsolutePath()
-        + ") can't be established.");
+      throw new Exception(
+        "Unable to get list of installed packages " + "because package home ("
+          + m_packageHome.getAbsolutePath() + ") can't be established.");
     }
 
     if (s_installedPackageList != null) {
@@ -1105,19 +1164,19 @@ public class DefaultPackageManager extends PackageManager {
 
     for (File content : contents) {
       if (content.isDirectory()) {
-        File description = new File(content.getAbsolutePath() + File.separator
-          + "Description.props");
+        File description = new File(
+          content.getAbsolutePath() + File.separator + "Description.props");
 
         if (description.exists()) {
           try {
             Properties packageProperties = new Properties();
-            BufferedInputStream bi = new BufferedInputStream(
-              new FileInputStream(description));
+            BufferedInputStream bi =
+              new BufferedInputStream(new FileInputStream(description));
             packageProperties.load(bi);
             bi.close();
             bi = null;
-            DefaultPackage pkg = new DefaultPackage(m_packageHome, this,
-              packageProperties);
+            DefaultPackage pkg =
+              new DefaultPackage(m_packageHome, this, packageProperties);
             installedP.add(pkg);
           } catch (Exception ex) {
             // ignore if we can't load the description file for some reason
@@ -1166,9 +1225,9 @@ public class DefaultPackageManager extends PackageManager {
 
     ObjectOutputStream oos = null;
     try {
-      oos = new ObjectOutputStream(new BufferedOutputStream(
-        new FileOutputStream(new File(m_packageHome,
-          INSTALLED_PACKAGE_CACHE_FILE))));
+      oos =
+        new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+          new File(m_packageHome, INSTALLED_PACKAGE_CACHE_FILE))));
       oos.writeObject(cacheToSave);
       oos.flush();
     } finally {
@@ -1195,9 +1254,8 @@ public class DefaultPackageManager extends PackageManager {
     if (new File(m_packageHome, INSTALLED_PACKAGE_CACHE_FILE).exists()) {
       ObjectInputStream ois = null;
       try {
-        ois = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(new File(m_packageHome.toString(),
-            INSTALLED_PACKAGE_CACHE_FILE))));
+        ois = new ObjectInputStream(new BufferedInputStream(new FileInputStream(
+          new File(m_packageHome.toString(), INSTALLED_PACKAGE_CACHE_FILE))));
 
         installedP = (List) ois.readObject();
       } finally {

@@ -20,6 +20,9 @@
  */
 package weka.core.packageManagement;
 
+import weka.core.Defaults;
+import weka.core.Settings;
+
 import java.awt.GraphicsEnvironment;
 import java.beans.Beans;
 import java.io.File;
@@ -52,11 +55,11 @@ public abstract class PackageManager {
 
     try {
       // See if org.pentaho.packageManagement.manager has been set
-      String managerName = System
-        .getProperty("org.pentaho.packageManagement.manager");
+      String managerName =
+        System.getProperty("org.pentaho.packageManagement.manager");
       if (managerName != null && managerName.length() > 0) {
-        Object manager = Beans.instantiate(pm.getClass().getClassLoader(),
-          managerName);
+        Object manager =
+          Beans.instantiate(pm.getClass().getClassLoader(), managerName);
         if (manager instanceof PackageManager) {
           pm = (PackageManager) manager;
         }
@@ -70,11 +73,11 @@ public abstract class PackageManager {
         if (packageManagerPropsFile.exists()) {
           Properties pmProps = new Properties();
           pmProps.load(new FileInputStream(packageManagerPropsFile));
-          managerName = pmProps
-            .getProperty("org.pentaho.packageManager.manager");
+          managerName =
+            pmProps.getProperty("org.pentaho.packageManager.manager");
           if (managerName != null && managerName.length() > 0) {
-            Object manager = Beans.instantiate(pm.getClass().getClassLoader(),
-              managerName);
+            Object manager =
+              Beans.instantiate(pm.getClass().getClassLoader(), managerName);
             if (manager instanceof PackageManager) {
               pm = (PackageManager) manager;
             }
@@ -83,8 +86,8 @@ public abstract class PackageManager {
       }
     } catch (Exception ex) {
       // ignore any problems and just return the default package manager
-      System.err
-        .println("Problem instantiating package manager. Using DefaultPackageManager.");
+      System.err.println(
+        "Problem instantiating package manager. Using DefaultPackageManager.");
     }
     return pm;
   }
@@ -110,7 +113,8 @@ public abstract class PackageManager {
   /** The password for the proxy */
   protected transient String m_proxyPassword;
 
-  protected transient boolean m_authenticatorSet = false;
+  /** True if an authenticator has been set */
+  protected transient boolean m_authenticatorSet;
 
   /**
    * Tries to configure a Proxy object for use in an Authenticator if there is a
@@ -122,12 +126,12 @@ public abstract class PackageManager {
   public void establishProxy() {
 
     // pick up system-wide proxy if possible
-//    String useSystemProxies = System.getProperty(
-//      "weka.packageManager.useSystemProxies", "true");
-//
-//    if (useSystemProxies.toLowerCase().equals("true")) {
-//      System.setProperty("java.net.useSystemProxies", "true");
-//    }
+    // String useSystemProxies = System.getProperty(
+    // "weka.packageManager.useSystemProxies", "true");
+    //
+    // if (useSystemProxies.toLowerCase().equals("true")) {
+    // System.setProperty("java.net.useSystemProxies", "true");
+    // }
 
     // check for user-supplied proxy properties
     String proxyHost = System.getProperty("http.proxyHost");
@@ -179,8 +183,8 @@ public abstract class PackageManager {
         Authenticator.setDefault(new Authenticator() {
           @Override
           protected PasswordAuthentication getPasswordAuthentication() {
-            return new PasswordAuthentication(m_proxyUsername, m_proxyPassword
-              .toCharArray());
+            return new PasswordAuthentication(m_proxyUsername,
+              m_proxyPassword.toCharArray());
           }
         });
       } else {
@@ -308,6 +312,26 @@ public abstract class PackageManager {
    */
   public void setProxyPassword(String proxyPassword) {
     m_proxyPassword = proxyPassword;
+  }
+
+  /**
+   * Get the default settings of this package manager. Default implementation
+   * returns null. Subclasses to override if they have default settings
+   *
+   * @return the default settings of this package manager
+   */
+  public Defaults getDefaultSettings() {
+    return null;
+  }
+
+  /**
+   * Apply the supplied settings. Default implementation does nothing.
+   * Subclasses should override to take note of settings changes.
+   * 
+   * @param settings the settings to apply
+   */
+  public void applySettings(Settings settings) {
+
   }
 
   /**
