@@ -33,9 +33,11 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Frame;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -235,25 +237,16 @@ public abstract class StepEditorDialog extends JPanel
   }
 
   private void createAboutPanel(String about, String firstSentence) {
-    JTextPane jt = new JTextPane();
-    /*
-     * m_helpText.append("NAME\n").append(m_stepToEdit.getClass().getName())
-     * .append("\n\n");
-     * m_helpText.append("SYNOPSIS\n").append(about).append("\n");
-     */
-    m_helpText.append(about);
-    // jt.setColumns(80);
-    jt.setContentType("text/html");
-    // jt.setFont(new Font("SansSerif", Font.PLAIN, 12));
-    jt.setEditable(false);
-    // jt.setLineWrap(true);
-    // jt.setWrapStyleWord(true);
+    JTextArea jt = new JTextArea();
 
-    /*
-     * if (!firstSentence.toLowerCase().startsWith("<html>")) { firstSentence =
-     * firstSentence.replace("\n", "<br>"); firstSentence = "<html><body>" +
-     * firstSentence + "</body></html>"; }
-     */
+    m_helpText.append(about);
+    jt.setColumns(30);
+    // jt.setContentType("text/html");
+    jt.setFont(new Font("SansSerif", Font.PLAIN, 12));
+    jt.setEditable(false);
+    jt.setLineWrap(true);
+    jt.setWrapStyleWord(true);
+
     jt.setText(firstSentence);
     jt.setBackground(getBackground());
 
