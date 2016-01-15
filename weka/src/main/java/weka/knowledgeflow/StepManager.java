@@ -62,7 +62,14 @@ public interface StepManager {
    * 
    * @return the name of the managed step
    */
-  String getName();
+    String getName();
+
+  /**
+   * Get the actual step managed by this step manager
+   *
+   * @return the Step managed by this step manager
+   */
+  Step getManagedStep();
 
   /**
    * Get the executing environment. This contains information such as whether
@@ -71,28 +78,28 @@ public interface StepManager {
    * 
    * @return the execution environment
    */
-  ExecutionEnvironment getExecutionEnvironment();
+    ExecutionEnvironment getExecutionEnvironment();
 
   /**
    * Get the knowledge flow settings
    *
    * @return the knowledge flow settings
    */
-  Settings getSettings();
+    Settings getSettings();
 
   /**
    * Get the number of steps that are connected with incoming connections
    * 
    * @return the number of incoming connections
    */
-  int numIncomingConnections();
+    int numIncomingConnections();
 
   /**
    * Get the number of steps that are connected with outgoing connections
    *
    * @return the number of outgoing connections
    */
-  int numOutgoingConnections();
+    int numOutgoingConnections();
 
   /**
    * Get the number of steps that are connected with the given incoming
@@ -102,7 +109,7 @@ public interface StepManager {
    * @return the number of steps connected with the specified incoming
    *         connection type
    */
-  int numIncomingConnectionsOfType(String connectionName);
+    int numIncomingConnectionsOfType(String connectionName);
 
   /**
    * Get the number of steps that are connected with the given outgoing
@@ -112,7 +119,7 @@ public interface StepManager {
    * @return the number of steps connected with the specified outgoing
    *         connection type
    */
-  int numOutgoingConnectionsOfType(String connectionName);
+    int numOutgoingConnectionsOfType(String connectionName);
 
   /**
    * Get a list of steps that are the source of incoming connections of the
@@ -122,8 +129,8 @@ public interface StepManager {
    *          steps for
    * @return
    */
-  List<StepManager>
-    getIncomingConnectedStepsOfConnectionType(String connectionName);
+    List<StepManager>
+      getIncomingConnectedStepsOfConnectionType(String connectionName);
 
   /**
    * Get the named step that is connected with an incoming connection.
@@ -132,7 +139,7 @@ public interface StepManager {
    * @return the step connected with an incoming connection or null if the named
    *         step is not connected
    */
-  StepManager getIncomingConnectedStepWithName(String stepName);
+    StepManager getIncomingConnectedStepWithName(String stepName);
 
   /**
    * Get a named step connected to this step with an outgoing connection
@@ -140,7 +147,7 @@ public interface StepManager {
    * @param stepName the name of the step to look for
    * @return the connected step
    */
-  StepManager getOutgoingConnectedStepWithName(String stepName);
+    StepManager getOutgoingConnectedStepWithName(String stepName);
 
   /**
    * Get a list of downstream steps connected to this step with the given
@@ -150,8 +157,8 @@ public interface StepManager {
    * @return a list of downstream steps connected to this one with the named
    *         connection type
    */
-  List<StepManager>
-    getOutgoingConnectedStepsOfConnectionType(String connectionName);
+    List<StepManager>
+      getOutgoingConnectedStepsOfConnectionType(String connectionName);
 
   /**
    * Get a Map of all incoming connections. Map is keyed by connection type;
@@ -159,7 +166,7 @@ public interface StepManager {
    * 
    * @return a Map of incoming connections
    */
-  Map<String, List<StepManager>> getIncomingConnections();
+    Map<String, List<StepManager>> getIncomingConnections();
 
   /**
    * Get a Map of all outgoing connections. Map is keyed by connection type;
@@ -167,7 +174,7 @@ public interface StepManager {
    * 
    * @return a Map of outgoing connections
    */
-  Map<String, List<StepManager>> getOutgoingConnections();
+    Map<String, List<StepManager>> getOutgoingConnections();
 
   /**
    * Output data to all steps connected with the supplied outgoing connection
@@ -179,8 +186,8 @@ public interface StepManager {
    * @param data a single Data object to send
    * @throws WekaException if a problem occurs
    */
-  void outputData(String outgoingConnectionName, Data data)
-    throws WekaException;
+    void outputData(String outgoingConnectionName, Data data)
+      throws WekaException;
 
   /**
    * Output one or more Data objects to all relevant steps. Populates the source
@@ -191,7 +198,7 @@ public interface StepManager {
    * 
    * @param data one or more Data objects to be sent
    */
-  void outputData(Data... data) throws WekaException;
+    void outputData(Data... data) throws WekaException;
 
   /**
    * Output a single Data object to the named step with the supplied outgoing
@@ -202,8 +209,8 @@ public interface StepManager {
    * @param data the data to send
    * @throws WekaException if a problem occurs
    */
-  void outputData(String outgoingConnectionName, String stepName, Data data)
-    throws WekaException;
+    void outputData(String outgoingConnectionName, String stepName, Data data)
+      throws WekaException;
 
   /**
    * Attempt to retrieve the structure (as a header-only set of instances) for
@@ -217,8 +224,8 @@ public interface StepManager {
    *         Instances object)
    * @throws WekaException if a problem occurs
    */
-  Instances getIncomingStructureForConnectionType(String connectionName)
-    throws WekaException;
+    Instances getIncomingStructureForConnectionType(String connectionName)
+      throws WekaException;
 
   /**
    * Attempt to get the incoming structure (as a header-only set of instances)
@@ -232,8 +239,8 @@ public interface StepManager {
    *         represented as a set of instances.
    * @throws WekaException if a problem occurs
    */
-  Instances getIncomingStructureFromStep(StepManager sourceStep,
-    String connectionName) throws WekaException;
+    Instances getIncomingStructureFromStep(StepManager sourceStep,
+      String connectionName) throws WekaException;
 
   /**
    * Step implementations processing batch data should call this to indicate
@@ -247,14 +254,14 @@ public interface StepManager {
    * that they have finished all processing. Calling this should set the busy
    * flag to false.
    */
-  void finished();
+    void finished();
 
   /**
    * Step implementations processing batch data should call this as soon as they
    * have finished processing after a stop has been requested. Calling this
    * should set the busy flag to false.
    */
-  void interrupted();
+    void interrupted();
 
   /**
    * Returns true if this data object marks the end of an incremental stream.
@@ -265,21 +272,21 @@ public interface StepManager {
    * @param data the data element to check
    * @return true if the data element is flagged as end of stream
    */
-  boolean isStreamFinished(Data data);
+    boolean isStreamFinished(Data data);
 
   /**
    * Start a throughput measurement. Should only be used by steps that are
    * processing instance streams. Call just before performing a unit of work for
    * an incoming instance.
    */
-  void throughputUpdateStart();
+    void throughputUpdateStart();
 
   /**
    * End a throughput measurement. Should only be used by steps that are
    * processing instance streams. Call just after finishing a unit of work for
    * an incoming instance
    */
-  void throughputUpdateEnd();
+    void throughputUpdateEnd();
 
   /**
    * Signal that throughput measurement has finished. Should only be used by
@@ -292,35 +299,35 @@ public interface StepManager {
    *          stream has ended
    * @throws WekaException if a problem occurs
    */
-  void throughputFinished(Data... data) throws WekaException;
+    void throughputFinished(Data... data) throws WekaException;
 
   /**
    * Log a message at the "low" level
    * 
    * @param message the message to log
    */
-  void logLow(String message);
+    void logLow(String message);
 
   /**
    * Log a message at the "basic" level
    * 
    * @param message the message to log
    */
-  void logBasic(String message);
+    void logBasic(String message);
 
   /**
    * Log a message at the "detailed" level
    * 
    * @param message the message to log
    */
-  void logDetailed(String message);
+    void logDetailed(String message);
 
   /**
    * Log a message at the "debug" level
    * 
    * @param message the message to log
    */
-  void logDebug(String message);
+    void logDebug(String message);
 
   /**
    * Log a warning message. Always makes it into the log regardless of what
@@ -328,7 +335,7 @@ public interface StepManager {
    * 
    * @param message the message to log
    */
-  void logWarning(String message);
+    void logWarning(String message);
 
   /**
    * Log an error message. Always makes it into the log regardless of what
@@ -338,7 +345,7 @@ public interface StepManager {
    * @param message the message to log
    * @param cause the optional Throwable to log
    */
-  void logError(String message, Throwable cause);
+    void logError(String message, Throwable cause);
 
   /**
    * Write a message to the log at the given logging level
@@ -346,28 +353,28 @@ public interface StepManager {
    * @param message the message to write
    * @param level the level for the message
    */
-  void log(String message, LoggingLevel level);
+    void log(String message, LoggingLevel level);
 
   /**
    * Write a status message
    * 
    * @param message the message
    */
-  void statusMessage(String message);
+    void statusMessage(String message);
 
   /**
    * Get the log
    *
    * @return the log object
    */
-  Logger getLog();
+    Logger getLog();
 
   /**
    * Get the currently set logging level
    *
    * @return the currently set logging level
    */
-  LoggingLevel getLoggingLevel();
+    LoggingLevel getLoggingLevel();
 
   /**
    * Substitute all known environment variables in the given string
@@ -375,7 +382,7 @@ public interface StepManager {
    * @param source the source string
    * @return the source string with all known variables resolved
    */
-  String environmentSubstitute(String source);
+    String environmentSubstitute(String source);
 
   /**
    * Returns a reference to the step being managed if it has one or more
@@ -387,7 +394,7 @@ public interface StepManager {
    * @throws WekaException if there are no outgoing CON_INFO connections or the
    *           managed step is the wrong type
    */
-  Step getInfoStep(Class stepClass) throws WekaException;
+    Step getInfoStep(Class stepClass) throws WekaException;
 
   /**
    * Returns a reference to the step being managed if it has one or more
@@ -396,7 +403,17 @@ public interface StepManager {
    * @return the step being managed if outgoing CON_INFO connections are present
    * @throws WekaException if there are no outgoing CON_INFO connections
    */
-  Step getInfoStep() throws WekaException;
+    Step getInfoStep() throws WekaException;
+
+  /**
+   * Finds a named step in the current flow. Returns null if the named step is
+   * not present in the flow
+   *
+   * @param stepNameToFind the name of the step to find
+   * @return the StepManager of the named step, or null if the step does not
+   *         exist in the current flow.
+   */
+    StepManager findStepInFlow(String stepNameToFind);
 
   /**
    * Returns true if the step managed by this step manager has been marked as
@@ -404,7 +421,7 @@ public interface StepManager {
    * 
    * @return true if the managed step is resource intensive
    */
-  boolean stepIsResourceIntensive();
+    boolean stepIsResourceIntensive();
 
   /**
    * Mark the step managed by this step manager as resource intensive
@@ -412,5 +429,5 @@ public interface StepManager {
    * @param isResourceIntensive true if the step managed by this step manager is
    *          resource intensive
    */
-  void setStepIsResourceIntensive(boolean isResourceIntensive);
+    void setStepIsResourceIntensive(boolean isResourceIntensive);
 }

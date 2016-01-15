@@ -158,6 +158,7 @@ public class StepManagerImpl implements StepManager {
    *
    * @return the step managed by this manager
    */
+  @Override
   public Step getManagedStep() {
     return m_managedStep;
   }
@@ -1220,6 +1221,20 @@ public class StepManagerImpl implements StepManager {
 
     throw new WekaException(
       "There are no outgoing info connections from " + "this step!");
+  }
+
+  /**
+   * Finds a named step in the current flow. Returns null if the named step is
+   * not present in the flow
+   *
+   * @param stepNameToFind the name of the step to find
+   * @return the StepManager of the named step, or null if the step does not
+   *         exist in the current flow.
+   */
+  public StepManager findStepInFlow(String stepName) {
+    Flow flow = m_executionEnvironment.getFlowExecutor().getFlow();
+
+    return flow.findStep(stepName);
   }
 
   public String stepStatusMessagePrefix() {
