@@ -83,6 +83,11 @@ public class Block extends BaseStep {
     m_smForStep =
       getStepManager().findStepInFlow(environmentSubstitute(m_stepToWaitFor));
 
+    if (m_smForStep == getStepManager()) {
+      // don't block on our self!!
+      throw new WekaException("Blocking on oneself will cause deadlock!");
+    }
+
     if (m_smForStep == null) {
       throw new WekaException("Step '" + environmentSubstitute(m_stepToWaitFor)
         + "' does not seem " + "to exist in the flow!");
@@ -138,5 +143,10 @@ public class Block extends BaseStep {
     Set<String> inConnTypes =
       getStepManager().getIncomingConnections().keySet();
     return new ArrayList<String>(inConnTypes);
+  }
+
+  @Override
+  public String getCustomEditorForStep() {
+    return "weka.gui.knowledgeflow.steps.BlockStepEditorDialog";
   }
 }

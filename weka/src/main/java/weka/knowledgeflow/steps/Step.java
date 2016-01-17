@@ -205,7 +205,7 @@ public interface Step {
    * Get default settings for the step (if any). Returning null indicates that
    * the step has no user-editable defaults.
    *
-   * @return
+   * @return the default settings
    */
     Defaults getDefaultSettings();
 }
