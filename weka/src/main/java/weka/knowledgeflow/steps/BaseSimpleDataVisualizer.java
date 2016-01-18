@@ -89,17 +89,35 @@ public abstract class BaseSimpleDataVisualizer extends BaseStep
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept at this
+   * time
+   * 
+   * @return a list of incoming connection types
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return Arrays.asList(StepManager.CON_DATASET, StepManager.CON_TRAININGSET,
       StepManager.CON_TESTSET);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce at this
+   * time. Subclasses to override (if necessary). This default implementation
+   * returns null (i.e. does not produce any outgoing data).
+   * 
+   * @return a list of outgoing connection types that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return null;
   }
 
+  /**
+   * Get the datasets seen so far
+   *
+   * @return a list of datasets
+   */
   public List<Data> getDatasets() {
     return m_data;
   }

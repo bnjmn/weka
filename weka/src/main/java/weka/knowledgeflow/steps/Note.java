@@ -24,16 +24,6 @@ public class Note extends BaseStep {
     return m_noteText;
   }
 
-  /**
-   * We override this so that we don't get messages printed to the log and
-   * status area for notes :-)
-   */
-  @Override
-  public void stop() {
-    m_stopRequested = true;
-    getStepManager().throughputUpdateEnd();
-  }
-
   @Override
   public List<String> getIncomingConnectionTypes() {
     return new ArrayList<String>();

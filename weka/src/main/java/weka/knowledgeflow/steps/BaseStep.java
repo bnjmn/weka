@@ -61,6 +61,9 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
   /** True if the step is resource (cpu/memory) intensive */
   protected boolean m_stepIsResourceIntensive;
 
+  /**
+   * Constructor
+   */
   public BaseStep() {
     String clazzName = this.getClass().getCanonicalName();
     clazzName = clazzName.substring(clazzName.lastIndexOf(".") + 1);
@@ -96,17 +99,33 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     return null;
   }
 
+  /**
+   * Get the step manager for this step
+   *
+   * @return the step manager for this step
+   */
   @NotPersistable
   @Override
   public StepManager getStepManager() {
     return m_stepManager;
   }
 
+  /**
+   * Set the step manager for this step
+   *
+   * @param manager the step manager to use
+   */
   @Override
   public void setStepManager(StepManager manager) {
     m_stepManager = manager;
   }
 
+  /**
+   * Initialize the step. Subclasses should not override - instead they should
+   * implement {@code stepInit()}.
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     m_stopRequested = false;
@@ -114,35 +133,71 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     stepInit();
   }
 
+  /**
+   * Set whether this step is resource intensive (cpu/memory) or not. This
+   * affects which executor service is used to execute the step's processing.
+   *
+   * @param isResourceIntensive true if this step is resource intensive.
+   */
   @ProgrammaticProperty
   public void setStepIsResourceIntensive(boolean isResourceIntensive) {
     getStepManager().setStepIsResourceIntensive(isResourceIntensive);
   }
 
+  /**
+   * Get whether this step is resource intensive (cpu/memory) or not.
+   *
+   * @return true if this step is resource intensive
+   */
   public boolean isResourceIntensive() {
     return getStepManager().stepIsResourceIntensive();
   }
 
+  /**
+   * Get the name of this step
+   *
+   * @return the name of this step
+   */
   @Override
   public String getName() {
     return m_stepName;
   }
 
+  /**
+   * Set the name of this step
+   *
+   * @param name the name for this step
+   */
   @ProgrammaticProperty
   @Override
   public void setName(String name) {
     m_stepName = name;
   }
 
+  /**
+   * Start processing. Subclasses should override this method if they can act as
+   * a start point in a flow.
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void start() throws WekaException {
     // no-op. Subclass should override if it acts as a start point
   }
 
+  /**
+   * Request that processing be stopped. Subclasses should call
+   * {@code isStopRequested()} periodically to see if they should stop
+   * processing.
+   */
   @Override
   public void stop() {
-    getStepManager().statusMessage("INTERRUPTED");
-    getStepManager().log("Interrupted", LoggingLevel.LOW);
+
+    if (!(this instanceof Note)) {
+      // don't want any logging or status updates for Notes :-)
+      getStepManager().statusMessage("INTERRUPTED");
+      getStepManager().log("Interrupted", LoggingLevel.LOW);
+    }
     m_stopRequested = true;
 
     // if this step is processing incrementally then this will ensure
@@ -152,15 +207,20 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     getStepManager().throughputUpdateEnd();
   }
 
+  /**
+   * Returns true if this step is busy.
+   *
+   * @return
+   */
   @NotPersistable
   @Override
-  public boolean isBusy() {
+  public final boolean isBusy() {
     return m_busy;
   }
 
   @ProgrammaticProperty
   @Override
-  public void setBusy(boolean busy) {
+  public final void setBusy(boolean busy) {
     m_busy = busy;
   }
 

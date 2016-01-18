@@ -73,6 +73,11 @@ public class Block extends BaseStep {
     return m_stepToWaitFor;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     if (m_stepToWaitFor == null || m_stepToWaitFor.length() == 0) {
@@ -94,6 +99,12 @@ public class Block extends BaseStep {
     }
   }
 
+  /**
+   * Process incoming data
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     if (m_smForStep == null) {
@@ -130,6 +141,12 @@ public class Block extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept at this
+   * time
+   *
+   * @return a list of incoming connection types
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return Arrays.asList(StepManager.CON_DATASET, StepManager.CON_TRAININGSET,
@@ -138,6 +155,12 @@ public class Block extends BaseStep {
       StepManager.CON_BATCH_ASSOCIATOR, StepManager.CON_TEXT);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce at this
+   * time
+   *
+   * @return a list of outgoing connection types
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     Set<String> inConnTypes =
@@ -145,6 +168,11 @@ public class Block extends BaseStep {
     return new ArrayList<String>(inConnTypes);
   }
 
+  /**
+   * Get the fully qualified class name of the custom editor for this step
+   *
+   * @return the class name of the custom editor
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.BlockStepEditorDialog";

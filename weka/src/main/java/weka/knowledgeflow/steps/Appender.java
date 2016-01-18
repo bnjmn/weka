@@ -301,7 +301,6 @@ public class Appender extends BaseStep {
     if (m_completed.size() == getStepManager().numIncomingConnections()
       && m_completeHeader == null) {
       // create mondo header...
-      // TODO
       getStepManager().logDetailed("Creating output header structure");
       m_completeHeader = makeOutputHeader();
 
