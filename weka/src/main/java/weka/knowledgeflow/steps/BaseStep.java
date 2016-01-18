@@ -29,6 +29,7 @@ import weka.gui.knowledgeflow.StepInteractiveViewer;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.LoggingLevel;
 import weka.knowledgeflow.StepManager;
+import weka.knowledgeflow.StepManagerImpl;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
@@ -45,12 +46,6 @@ import java.util.Map;
 public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
 
   private static final long serialVersionUID = -1595753549991953141L;
-
-  /** True if execution is to be stopped as soon as possible */
-  protected boolean m_stopRequested;
-
-  /** True if the step is busy processing */
-  protected boolean m_busy;
 
   /** The name of this step component */
   protected String m_stepName = "";
@@ -121,19 +116,6 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
   }
 
   /**
-   * Initialize the step. Subclasses should not override - instead they should
-   * implement {@code stepInit()}.
-   *
-   * @throws WekaException if a problem occurs
-   */
-  @Override
-  public void init() throws WekaException {
-    m_stopRequested = false;
-    m_busy = false;
-    stepInit();
-  }
-
-  /**
    * Set whether this step is resource intensive (cpu/memory) or not. This
    * affects which executor service is used to execute the step's processing.
    *
@@ -198,30 +180,14 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
       getStepManager().statusMessage("INTERRUPTED");
       getStepManager().log("Interrupted", LoggingLevel.LOW);
     }
-    m_stopRequested = true;
+    // m_stopRequested = true;
+    ((StepManagerImpl) getStepManager()).setStopRequested(true);
 
     // if this step is processing incrementally then this will ensure
     // that the busy flag gets set to false. This means that clients
     // processing incremental stuff *must* use the throughput update
     // mechanism
     getStepManager().throughputUpdateEnd();
-  }
-
-  /**
-   * Returns true if this step is busy.
-   *
-   * @return
-   */
-  @NotPersistable
-  @Override
-  public final boolean isBusy() {
-    return m_busy;
-  }
-
-  @ProgrammaticProperty
-  @Override
-  public final void setBusy(boolean busy) {
-    m_busy = busy;
   }
 
   @Override
@@ -256,9 +222,13 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     return null;
   }
 
-  @Override
+  /**
+   * Convenience method that calls {@code StepManager.isStopRequested()}
+   *
+   * @return true if the execution environment has requested processing to stop
+   */
   public boolean isStopRequested() {
-    return m_stopRequested;
+    return getStepManager().isStopRequested();
   }
 
   /**

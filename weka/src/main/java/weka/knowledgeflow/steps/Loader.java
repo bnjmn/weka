@@ -1,9 +1,5 @@
 package weka.knowledgeflow.steps;
 
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -17,6 +13,10 @@ import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.StepManagerImpl;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
 
 @KFStep(name = "Loader", category = "DataSources",
   toolTipText = "Weka loader wrapper", iconPath = "")
@@ -210,7 +210,7 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
 
     // can't reset the laoder to get the structure if we're actively
     // processing...
-    if (isBusy()) {
+    if (getStepManager().isStepBusy()) {
       return null;
     }
 

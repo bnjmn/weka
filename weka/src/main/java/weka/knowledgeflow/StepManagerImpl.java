@@ -56,6 +56,15 @@ public class StepManagerImpl implements StepManager {
   protected Step m_managedStep;
 
   /**
+   * True if the runtime environment has requested that the managed step stop
+   * processing
+   */
+  protected boolean m_stopRequested;
+
+  /** True if, at the current time, the managed step is busy with processing */
+  protected boolean m_stepIsBusy;
+
+  /**
    * Set and get arbitrary properties relating to this step/step manager. E.g. a
    * plugin execution environment might allow a step to be marked as execute
    * remotely or locally
@@ -359,8 +368,11 @@ public class StepManagerImpl implements StepManager {
    */
   protected boolean initStep() {
     boolean initializedOK = false;
+    m_stepIsBusy = false;
+    m_stopRequested = false;
     try {
-      getManagedStep().init();
+      getManagedStep().stepInit();
+      // getManagedStep().init();
       initializedOK = true;
     } catch (WekaException ex) {
       logError(ex.getMessage(), ex);
@@ -374,11 +386,41 @@ public class StepManagerImpl implements StepManager {
   }
 
   /**
+   * Returns true if, at the current time, the managed step is busy with
+   * processing
+   *
+   * @return true if the managed step is busy with processing
+   */
+  @Override
+  public boolean isStepBusy() {
+    return m_stepIsBusy;
+  }
+
+  /**
+   * Return true if a stop has been requested by the runtime environment
+   *
+   * @return true if a stop has been requested
+   */
+  @Override
+  public boolean isStopRequested() {
+    return m_stopRequested;
+  }
+
+  /**
+   * Set the status of the stop requested flag
+   *
+   * @param stopRequested true if a stop has been requested
+   */
+  public void setStopRequested(boolean stopRequested) {
+    m_stopRequested = stopRequested;
+  }
+
+  /**
    * Started processing. Sets the busy flag to true.
    */
   @Override
   public void processing() {
-    getManagedStep().setBusy(true);
+    m_stepIsBusy = true;
   }
 
   /**
@@ -387,8 +429,8 @@ public class StepManagerImpl implements StepManager {
    */
   @Override
   public void finished() {
-    getManagedStep().setBusy(false);
-    if (!getManagedStep().isStopRequested()) {
+    m_stepIsBusy = false;
+    if (!isStopRequested()) {
       statusMessage("Finished.");
     }
   }
@@ -399,7 +441,7 @@ public class StepManagerImpl implements StepManager {
    */
   @Override
   public void interrupted() {
-    getManagedStep().setBusy(false);
+    m_stepIsBusy = false;
   }
 
   /**
@@ -438,7 +480,7 @@ public class StepManagerImpl implements StepManager {
     if (m_throughput != null) {
       m_throughput.updateEnd(m_log.getLog());
 
-      if (getManagedStep().isStopRequested()) {
+      if (isStopRequested()) {
         finished();
       }
     }
@@ -818,7 +860,7 @@ public class StepManagerImpl implements StepManager {
   @Override
   public void outputData(String outgoingConnectionName, Data data)
     throws WekaException {
-    if (!getManagedStep().isStopRequested()) {
+    if (!isStopRequested()) {
       data.setConnectionName(outgoingConnectionName);
       data.setSourceStep(m_managedStep);
 
@@ -826,7 +868,7 @@ public class StepManagerImpl implements StepManager {
         m_connectedByTypeOutgoing.get(outgoingConnectionName);
       if (toNotify != null) {
         for (StepManager s : toNotify) {
-          if (!((StepManagerImpl) s).getManagedStep().isStopRequested()) {
+          if (!isStopRequested()) {
             m_executionEnvironment.sendDataToStep((StepManagerImpl) s, data);
           }
         }
@@ -847,7 +889,7 @@ public class StepManagerImpl implements StepManager {
    */
   @Override
   public void outputData(Data... data) throws WekaException {
-    if (!getManagedStep().isStopRequested()) {
+    if (!isStopRequested()) {
       Map<StepManagerImpl, List<Data>> stepsToSendTo =
         new LinkedHashMap<StepManagerImpl, List<Data>>();
 
@@ -875,7 +917,7 @@ public class StepManagerImpl implements StepManager {
 
       for (Map.Entry<StepManagerImpl, List<Data>> e : stepsToSendTo
         .entrySet()) {
-        if (!e.getKey().getManagedStep().isStopRequested()) {
+        if (!e.getKey().isStopRequested()) {
           m_executionEnvironment.sendDataToStep(e.getKey(),
             e.getValue().toArray(new Data[e.getValue().size()]));
         }
@@ -897,7 +939,7 @@ public class StepManagerImpl implements StepManager {
   @Override
   public void outputData(String outgoingConnectionName, String stepName,
     Data data) throws WekaException {
-    if (!getManagedStep().isStopRequested()) {
+    if (!isStopRequested()) {
       data.setConnectionName(outgoingConnectionName);
       data.setSourceStep(m_managedStep);
 
@@ -911,7 +953,7 @@ public class StepManagerImpl implements StepManager {
       }
 
       if (namedTarget != null
-        && !namedTarget.getManagedStep().isStopRequested()) {
+        && !namedTarget.isStopRequested()) {
         m_executionEnvironment.sendDataToStep(namedTarget, data);
       } else {
         // TODO log an error here and stop?
@@ -921,6 +963,9 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Start the managed step processing
+   */
   protected void startStep() {
     try {
       getManagedStep().start();
@@ -933,6 +978,19 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Stop the managed step's processing
+   */
+  protected void stopStep() {
+    m_stopRequested = true;
+    getManagedStep().stop();
+  }
+
+  /**
+   * Have the managed step process the supplied data object
+   *
+   * @param data the data for the managed step to process
+   */
   protected void processIncoming(Data data) {
     try {
       getManagedStep().processIncoming(data);
@@ -1138,6 +1196,7 @@ public class StepManagerImpl implements StepManager {
       m_log.statusMessage("ERROR: " + message);
     }
     if (m_executionEnvironment != null) {
+      // fatal error - make sure that everything stops.
       m_executionEnvironment.stopProcessing();
     }
   }
@@ -1231,10 +1290,10 @@ public class StepManagerImpl implements StepManager {
    * @return the StepManager of the named step, or null if the step does not
    *         exist in the current flow.
    */
-  public StepManager findStepInFlow(String stepName) {
+  public StepManager findStepInFlow(String stepNameToFind) {
     Flow flow = m_executionEnvironment.getFlowExecutor().getFlow();
 
-    return flow.findStep(stepName);
+    return flow.findStep(stepNameToFind);
   }
 
   public String stepStatusMessagePrefix() {

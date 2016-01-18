@@ -178,7 +178,7 @@ public class LayoutPanel extends PrintablePanel {
           // clicked over a step
           if (step != null) {
             if (me.getClickCount() == 2) {
-              if (!step.getStepManager().getManagedStep().isBusy()
+              if (!step.getStepManager().isStepBusy()
                 && !m_visLayout.isExecuting()) {
                 popupStepEditorDialog(step);
               }

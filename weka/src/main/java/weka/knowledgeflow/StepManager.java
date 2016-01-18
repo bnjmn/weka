@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    StepManager.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow;
 
 import weka.core.Instances;
@@ -69,7 +90,7 @@ public interface StepManager {
    *
    * @return the Step managed by this step manager
    */
-  Step getManagedStep();
+    Step getManagedStep();
 
   /**
    * Get the executing environment. This contains information such as whether
@@ -127,7 +148,8 @@ public interface StepManager {
    * 
    * @param connectionName the name of the incoming connection to get a list of
    *          steps for
-   * @return
+   * @return a list of steps that are the source of incoming connections of the
+   *         given type
    */
     List<StepManager>
       getIncomingConnectedStepsOfConnectionType(String connectionName);
@@ -241,6 +263,21 @@ public interface StepManager {
    */
     Instances getIncomingStructureFromStep(StepManager sourceStep,
       String connectionName) throws WekaException;
+
+  /**
+   * Returns true if, at this time, the step managed by this step manager is
+   * currently busy with processing
+   *
+   * @return true if the step managed by this step manager is busy
+   */
+    boolean isStepBusy();
+
+  /**
+   * Return true if a stop has been requested by the runtime environment
+   *
+   * @return true if a stop has been requested
+   */
+    boolean isStopRequested();
 
   /**
    * Step implementations processing batch data should call this to indicate

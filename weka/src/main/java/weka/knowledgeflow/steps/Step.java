@@ -60,13 +60,6 @@ public interface Step {
     void setStepManager(StepManager manager);
 
   /**
-   * Called before any processing commences
-   * 
-   * @throws WekaException if initialization cant be completed for some reason
-   */
-    void init() throws WekaException;
-
-  /**
    * Get the name of this step
    *
    * @return the name of this step
@@ -79,6 +72,13 @@ public interface Step {
    * @param name the name for this step
    */
     void setName(String name);
+
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
+    void stepInit() throws WekaException;
 
   /**
    * Get a list of incoming connection types that this step can accept. Ideally
@@ -113,27 +113,6 @@ public interface Step {
    * Request a stop to all processing by this step (as soon as possible)
    */
     void stop();
-
-  /**
-   * Return true if a stop has been requested by the runtime environment
-   * 
-   * @return true if a stop has been requested
-   */
-    boolean isStopRequested();
-
-  /**
-   * Return true if this step is actively processing something
-   * 
-   * @return true if component is busy
-   */
-    boolean isBusy();
-
-  /**
-   * Set the busy flag to indicate that the step is currently processing or not.
-   *
-   * @param busy the busy flag
-   */
-    void setBusy(boolean busy);
 
   /**
    * Process an incoming data payload (if the step accepts incoming connections)

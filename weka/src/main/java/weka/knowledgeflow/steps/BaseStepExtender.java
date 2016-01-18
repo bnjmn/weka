@@ -21,10 +21,10 @@
 
 package weka.knowledgeflow.steps;
 
-import java.util.List;
-
 import weka.core.WekaException;
 import weka.knowledgeflow.Data;
+
+import java.util.List;
 
 /**
  * A minimal set of methods, duplicated from the Step interface, that a simple
@@ -39,9 +39,7 @@ import weka.knowledgeflow.Data;
 public interface BaseStepExtender {
 
   /**
-   * Subclasses of BaseStep should implement this method for initialization, as
-   * BaseStep calls it and ensures that several initialization flags are reset
-   * correctly.
+   * Initialize the step.
    *
    * @throws WekaException if a problem occurs during initialization
    */

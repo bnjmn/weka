@@ -9,7 +9,6 @@ import weka.gui.Logger;
 import weka.gui.beans.PluginManager;
 import weka.gui.knowledgeflow.KnowledgeFlowApp;
 import weka.knowledgeflow.steps.Note;
-import weka.knowledgeflow.steps.Step;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -516,11 +515,10 @@ public class FlowRunner implements FlowExecutor {
     boolean busy = false;
     Iterator<StepManagerImpl> iter = m_flow.iterator();
     while (iter.hasNext()) {
-      Step s = iter.next().getManagedStep();
-      if (s.isBusy()) {
+      StepManagerImpl s = iter.next();
+      if (s.isStepBusy()) {
         m_logHandler.logDebug(s.getName() + " is still busy.");
         busy = true;
-        break;
       }
     }
 
@@ -534,7 +532,7 @@ public class FlowRunner implements FlowExecutor {
   public synchronized void stopProcessing() {
     Iterator<StepManagerImpl> iter = m_flow.iterator();
     while (iter.hasNext()) {
-      iter.next().getManagedStep().stop();
+      iter.next().stopStep();
     }
     System.err.println("Stopped all steps...");
     m_wasStopped = true;

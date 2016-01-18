@@ -111,13 +111,13 @@ public class Block extends BaseStep {
       // just pass data through
       getStepManager().outputData(data);
     } else {
-      if (m_smForStep.getManagedStep().isBusy()) {
+      if (m_smForStep.isStepBusy()) {
         getStepManager().processing();
         getStepManager().logBasic(
           "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
         getStepManager().statusMessage(
           "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
-        while (m_smForStep.getManagedStep().isBusy()) {
+        while (m_smForStep.isStepBusy()) {
           if (isStopRequested()) {
             break;
           }

@@ -161,7 +161,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    * @throws WekaException if a problem occurs
    */
   public void process(Data data) throws WekaException {
-    if (m_ownerStep.isStopRequested()) {
+    if (m_ownerStep.getStepManager().isStopRequested()) {
       m_ownerStep.getStepManager().interrupted();
       return;
     }
@@ -175,7 +175,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
       throw new WekaException("Illegal connection/data type: " + connType);
     }
 
-    if (!m_ownerStep.isStopRequested()) {
+    if (!m_ownerStep.getStepManager().isStopRequested()) {
       if (m_setCount != null && m_setCount.get() == 0) {
         m_ownerStep.getStepManager().finished();
         // save memory
@@ -210,7 +210,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
         .statusMessage("Processing set/fold " + setNum + " out of " + maxSetNum);
     }
 
-    if (!m_ownerStep.isStopRequested()) {
+    if (!m_ownerStep.getStepManager().isStopRequested()) {
       P result = (P) m_processor.processPrimary(setNum, maxSetNum, data, this);
       if (result != null) {
         m_primaryResultMap.put(setNum, result);
@@ -248,7 +248,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
       return;
     }
 
-    if (!m_ownerStep.isStopRequested()) {
+    if (!m_ownerStep.getStepManager().isStopRequested()) {
       m_processor.processSecondary(setNum, maxSetNum, data, this);
     }
 
@@ -272,7 +272,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
   public void reset() {
     // dont' reset if we're still processing!
     if (m_setCount != null && m_setCount.get() > 0
-      && !m_ownerStep.isStopRequested()) {
+      && !m_ownerStep.getStepManager().isStopRequested()) {
       return;
     }
     m_setCount = null;
@@ -281,7 +281,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
   /**
    * Return true if there is no further processing to be done
    *
-   * @return
+   * @return true if processing is done
    */
   public boolean isFinished() {
     return m_setCount.get() == 0;
