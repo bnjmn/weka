@@ -27,7 +27,6 @@ import weka.core.Instances;
 import weka.gui.AbstractPerspective;
 import weka.gui.PerspectiveInfo;
 import weka.gui.PythonPanel;
-import weka.gui.Workbench;
 import weka.gui.WorkbenchDefaults;
 
 /**
