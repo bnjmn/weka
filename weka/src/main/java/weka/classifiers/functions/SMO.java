@@ -58,133 +58,168 @@ import weka.filters.unsupervised.attribute.Standardize;
 
 /**
  <!-- globalinfo-start -->
- * Implements John Platt's sequential minimal optimization algorithm for training a support vector classifier.<br/>
- * <br/>
- * This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (In that case the coefficients in the output are based on the normalized data, not the original data --- this is important for interpreting the classifier.)<br/>
- * <br/>
- * Multi-class problems are solved using pairwise classification (1-vs-1 and if logistic models are built pairwise coupling according to Hastie and Tibshirani, 1998).<br/>
- * <br/>
- * To obtain proper probability estimates, use the option that fits logistic regression models to the outputs of the support vector machine. In the multi-class case the predicted probabilities are coupled using Hastie and Tibshirani's pairwise coupling method.<br/>
- * <br/>
- * Note: for improved speed normalization should be turned off when operating on SparseInstances.<br/>
- * <br/>
- * For more information on the SMO algorithm, see<br/>
- * <br/>
- * J. Platt: Fast Training of Support Vector Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br/>
- * <br/>
- * S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.<br/>
- * <br/>
- * Trevor Hastie, Robert Tibshirani: Classification by Pairwise Coupling. In: Advances in Neural Information Processing Systems, 1998.
- * <p/>
+ Implements John Platt's sequential minimal optimization algorithm for training a support vector classifier.<br>
+ <br>
+ This implementation globally replaces all missing values and transforms nominal attributes into binary ones. It also normalizes all attributes by default. (In that case the coefficients in the output are based on the normalized data, not the original data --- this is important for interpreting the classifier.)<br>
+ <br>
+ Multi-class problems are solved using pairwise classification (aka 1-vs-1).<br>
+ <br>
+ To obtain proper probability estimates, use the option that fits calibration models to the outputs of the support vector machine. In the multi-class case, the predicted probabilities are coupled using Hastie and Tibshirani's pairwise coupling method.<br>
+ <br>
+ Note: for improved speed normalization should be turned off when operating on SparseInstances.<br>
+ <br>
+ For more information on the SMO algorithm, see<br>
+ <br>
+ J. Platt: Fast Training of Support Vector Machines using Sequential Minimal Optimization. In B. Schoelkopf and C. Burges and A. Smola, editors, Advances in Kernel Methods - Support Vector Learning, 1998.<br>
+ <br>
+ S.S. Keerthi, S.K. Shevade, C. Bhattacharyya, K.R.K. Murthy (2001). Improvements to Platt's SMO Algorithm for SVM Classifier Design. Neural Computation. 13(3):637-649.<br>
+ <br>
+ Trevor Hastie, Robert Tibshirani: Classification by Pairwise Coupling. In: Advances in Neural Information Processing Systems, 1998.
+ <br><br>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
- * BibTeX:
- * <pre>
- * &#64;incollection{Platt1998,
- *    author = {J. Platt},
- *    booktitle = {Advances in Kernel Methods - Support Vector Learning},
- *    editor = {B. Schoelkopf and C. Burges and A. Smola},
- *    publisher = {MIT Press},
- *    title = {Fast Training of Support Vector Machines using Sequential Minimal Optimization},
- *    year = {1998},
- *    URL = {http://research.microsoft.com/\~jplatt/smo.html},
- *    PS = {http://research.microsoft.com/\~jplatt/smo-book.ps.gz},
- *    PDF = {http://research.microsoft.com/\~jplatt/smo-book.pdf}
- * }
- * 
- * &#64;article{Keerthi2001,
- *    author = {S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy},
- *    journal = {Neural Computation},
- *    number = {3},
- *    pages = {637-649},
- *    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
- *    volume = {13},
- *    year = {2001},
- *    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/smo_mod_nc.ps.gz}
- * }
- * 
- * &#64;inproceedings{Hastie1998,
- *    author = {Trevor Hastie and Robert Tibshirani},
- *    booktitle = {Advances in Neural Information Processing Systems},
- *    editor = {Michael I. Jordan and Michael J. Kearns and Sara A. Solla},
- *    publisher = {MIT Press},
- *    title = {Classification by Pairwise Coupling},
- *    volume = {10},
- *    year = {1998},
- *    PS = {http://www-stat.stanford.edu/\~hastie/Papers/2class.ps}
- * }
- * </pre>
- * <p/>
+ BibTeX:
+ <pre>
+ &#64;incollection{Platt1998,
+    author = {J. Platt},
+    booktitle = {Advances in Kernel Methods - Support Vector Learning},
+    editor = {B. Schoelkopf and C. Burges and A. Smola},
+    publisher = {MIT Press},
+    title = {Fast Training of Support Vector Machines using Sequential Minimal Optimization},
+    year = {1998},
+    URL = {http://research.microsoft.com/\~jplatt/smo.html},
+    PS = {http://research.microsoft.com/\~jplatt/smo-book.ps.gz},
+    PDF = {http://research.microsoft.com/\~jplatt/smo-book.pdf}
+ }
+ 
+ &#64;article{Keerthi2001,
+    author = {S.S. Keerthi and S.K. Shevade and C. Bhattacharyya and K.R.K. Murthy},
+    journal = {Neural Computation},
+    number = {3},
+    pages = {637-649},
+    title = {Improvements to Platt's SMO Algorithm for SVM Classifier Design},
+    volume = {13},
+    year = {2001},
+    PS = {http://guppy.mpe.nus.edu.sg/\~mpessk/svm/smo_mod_nc.ps.gz}
+ }
+ 
+ &#64;inproceedings{Hastie1998,
+    author = {Trevor Hastie and Robert Tibshirani},
+    booktitle = {Advances in Neural Information Processing Systems},
+    editor = {Michael I. Jordan and Michael J. Kearns and Sara A. Solla},
+    publisher = {MIT Press},
+    title = {Classification by Pairwise Coupling},
+    volume = {10},
+    year = {1998},
+    PS = {http://www-stat.stanford.edu/\~hastie/Papers/2class.ps}
+ }
+ </pre>
+ <br><br>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
- * Valid options are: <p/>
- * 
- * <pre> -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  Turning them off assumes that data is purely numeric, doesn't
- *  contain any missing values, and has a nominal class. Turning them
- *  off also means that no header information will be stored if the
- *  machine is linear. Finally, it also assumes that no instance has
- *  a weight equal to 0.
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;double&gt;
- *  The complexity constant C. (default 1)</pre>
- * 
- * <pre> -N
- *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
- * 
- * <pre> -L &lt;double&gt;
- *  The tolerance parameter. (default 1.0e-3)</pre>
- * 
- * <pre> -P &lt;double&gt;
- *  The epsilon for round-off error. (default 1.0e-12)</pre>
- * 
- * <pre> -M
- *  Fit logistic models to SVM outputs. </pre>
- * 
- * <pre> -V &lt;double&gt;
- *  The number of folds for the internal
- *  cross-validation. (default -1, use training data)</pre>
- * 
- * <pre> -W &lt;double&gt;
- *  The random number seed. (default 1)</pre>
- * 
- * <pre> -K &lt;classname and parameters&gt;
- *  The Kernel to use.
- *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
- * 
- * <pre> 
- * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
- * </pre>
- * 
- * <pre> -D
- *  Enables debugging output (if available) to be printed.
- *  (default: off)</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
- * 
- * <pre> -C &lt;num&gt;
- *  The size of the cache (a prime number), 0 for full cache and 
- *  -1 to turn it off.
- *  (default: 250007)</pre>
- * 
- * <pre> -E &lt;num&gt;
- *  The Exponent to use.
- *  (default: 1.0)</pre>
- * 
- * <pre> -L
- *  Use lower-order terms.
- *  (default: no)</pre>
- * 
+ Valid options are: <p>
+ 
+ <pre> -no-checks
+  Turns off all checks - use with caution!
+  Turning them off assumes that data is purely numeric, doesn't
+  contain any missing values, and has a nominal class. Turning them
+  off also means that no header information will be stored if the
+  machine is linear. Finally, it also assumes that no instance has
+  a weight equal to 0.
+  (default: checks on)</pre>
+ 
+ <pre> -C &lt;double&gt;
+  The complexity constant C. (default 1)</pre>
+ 
+ <pre> -N
+  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+ 
+ <pre> -L &lt;double&gt;
+  The tolerance parameter. (default 1.0e-3)</pre>
+ 
+ <pre> -P &lt;double&gt;
+  The epsilon for round-off error. (default 1.0e-12)</pre>
+ 
+ <pre> -M
+  Fit calibration models to SVM outputs. </pre>
+ 
+ <pre> -V &lt;double&gt;
+  The number of folds for the internal
+  cross-validation. (default -1, use training data)</pre>
+ 
+ <pre> -W &lt;double&gt;
+  The random number seed. (default 1)</pre>
+ 
+ <pre> -K &lt;classname and parameters&gt;
+  The Kernel to use.
+  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+ 
+ <pre> -calibrator &lt;scheme specification&gt;
+  Full name of calibration model, followed by options.
+  (default: "weka.classifiers.functions.Logistic")</pre>
+ 
+ <pre> -output-debug-info
+  If set, classifier is run in debug mode and
+  may output additional info to the console</pre>
+ 
+ <pre> -do-not-check-capabilities
+  If set, classifier capabilities are not checked before classifier is built
+  (use with caution).</pre>
+ 
+ <pre> -num-decimal-places
+  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ 
+ <pre> 
+ Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+ </pre>
+ 
+ <pre> -E &lt;num&gt;
+  The Exponent to use.
+  (default: 1.0)</pre>
+ 
+ <pre> -L
+  Use lower-order terms.
+  (default: no)</pre>
+ 
+ <pre> -C &lt;num&gt;
+  The size of the cache (a prime number), 0 for full cache and 
+  -1 to turn it off.
+  (default: 250007)</pre>
+ 
+ <pre> -output-debug-info
+  Enables debugging output (if available) to be printed.
+  (default: off)</pre>
+ 
+ <pre> -no-checks
+  Turns off all checks - use with caution!
+  (default: checks on)</pre>
+ 
+ <pre> 
+ Options specific to calibrator weka.classifiers.functions.Logistic:
+ </pre>
+ 
+ <pre> -C
+  Use conjugate gradient descent rather than BFGS updates.</pre>
+ 
+ <pre> -R &lt;ridge&gt;
+  Set the ridge in the log-likelihood.</pre>
+ 
+ <pre> -M &lt;number&gt;
+  Set the maximum number of iterations (default -1, until convergence).</pre>
+ 
+ <pre> -output-debug-info
+  If set, classifier is run in debug mode and
+  may output additional info to the console</pre>
+ 
+ <pre> -do-not-check-capabilities
+  If set, classifier capabilities are not checked before classifier is built
+  (use with caution).</pre>
+ 
+ <pre> -num-decimal-places
+  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -1686,72 +1721,107 @@ public class SMO
    * Parses a given list of options. <p/>
    *
    <!-- options-start -->
-   * Valid options are: <p/>
-   * 
-   * <pre> -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  Turning them off assumes that data is purely numeric, doesn't
-   *  contain any missing values, and has a nominal class. Turning them
-   *  off also means that no header information will be stored if the
-   *  machine is linear. Finally, it also assumes that no instance has
-   *  a weight equal to 0.
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;double&gt;
-   *  The complexity constant C. (default 1)</pre>
-   * 
-   * <pre> -N
-   *  Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
-   * 
-   * <pre> -L &lt;double&gt;
-   *  The tolerance parameter. (default 1.0e-3)</pre>
-   * 
-   * <pre> -P &lt;double&gt;
-   *  The epsilon for round-off error. (default 1.0e-12)</pre>
-   * 
-   * <pre> -M
-   *  Fit logistic models to SVM outputs. </pre>
-   * 
-   * <pre> -V &lt;double&gt;
-   *  The number of folds for the internal
-   *  cross-validation. (default -1, use training data)</pre>
-   * 
-   * <pre> -W &lt;double&gt;
-   *  The random number seed. (default 1)</pre>
-   * 
-   * <pre> -K &lt;classname and parameters&gt;
-   *  The Kernel to use.
-   *  (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
-   * 
-   * <pre> 
-   * Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
-   * </pre>
-   * 
-   * <pre> -D
-   *  Enables debugging output (if available) to be printed.
-   *  (default: off)</pre>
-   * 
-   * <pre> -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)</pre>
-   * 
-   * <pre> -C &lt;num&gt;
-   *  The size of the cache (a prime number), 0 for full cache and 
-   *  -1 to turn it off.
-   *  (default: 250007)</pre>
-   * 
-   * <pre> -E &lt;num&gt;
-   *  The Exponent to use.
-   *  (default: 1.0)</pre>
-   * 
-   * <pre> -L
-   *  Use lower-order terms.
-   *  (default: no)</pre>
-   * 
+   Valid options are: <p>
+   
+   <pre> -no-checks
+    Turns off all checks - use with caution!
+    Turning them off assumes that data is purely numeric, doesn't
+    contain any missing values, and has a nominal class. Turning them
+    off also means that no header information will be stored if the
+    machine is linear. Finally, it also assumes that no instance has
+    a weight equal to 0.
+    (default: checks on)</pre>
+   
+   <pre> -C &lt;double&gt;
+    The complexity constant C. (default 1)</pre>
+   
+   <pre> -N
+    Whether to 0=normalize/1=standardize/2=neither. (default 0=normalize)</pre>
+   
+   <pre> -L &lt;double&gt;
+    The tolerance parameter. (default 1.0e-3)</pre>
+   
+   <pre> -P &lt;double&gt;
+    The epsilon for round-off error. (default 1.0e-12)</pre>
+   
+   <pre> -M
+    Fit calibration models to SVM outputs. </pre>
+   
+   <pre> -V &lt;double&gt;
+    The number of folds for the internal
+    cross-validation. (default -1, use training data)</pre>
+   
+   <pre> -W &lt;double&gt;
+    The random number seed. (default 1)</pre>
+   
+   <pre> -K &lt;classname and parameters&gt;
+    The Kernel to use.
+    (default: weka.classifiers.functions.supportVector.PolyKernel)</pre>
+   
+   <pre> -calibrator &lt;scheme specification&gt;
+    Full name of calibration model, followed by options.
+    (default: "weka.classifiers.functions.Logistic")</pre>
+   
+   <pre> -output-debug-info
+    If set, classifier is run in debug mode and
+    may output additional info to the console</pre>
+   
+   <pre> -do-not-check-capabilities
+    If set, classifier capabilities are not checked before classifier is built
+    (use with caution).</pre>
+   
+   <pre> -num-decimal-places
+    The number of decimal places for the output of numbers in the model (default 2).</pre>
+   
+   <pre> 
+   Options specific to kernel weka.classifiers.functions.supportVector.PolyKernel:
+   </pre>
+   
+   <pre> -E &lt;num&gt;
+    The Exponent to use.
+    (default: 1.0)</pre>
+   
+   <pre> -L
+    Use lower-order terms.
+    (default: no)</pre>
+   
+   <pre> -C &lt;num&gt;
+    The size of the cache (a prime number), 0 for full cache and 
+    -1 to turn it off.
+    (default: 250007)</pre>
+   
+   <pre> -output-debug-info
+    Enables debugging output (if available) to be printed.
+    (default: off)</pre>
+   
+   <pre> -no-checks
+    Turns off all checks - use with caution!
+    (default: checks on)</pre>
+   
+   <pre> 
+   Options specific to calibrator weka.classifiers.functions.Logistic:
+   </pre>
+   
+   <pre> -C
+    Use conjugate gradient descent rather than BFGS updates.</pre>
+   
+   <pre> -R &lt;ridge&gt;
+    Set the ridge in the log-likelihood.</pre>
+   
+   <pre> -M &lt;number&gt;
+    Set the maximum number of iterations (default -1, until convergence).</pre>
+   
+   <pre> -output-debug-info
+    If set, classifier is run in debug mode and
+    may output additional info to the console</pre>
+   
+   <pre> -do-not-check-capabilities
+    If set, classifier capabilities are not checked before classifier is built
+    (use with caution).</pre>
+   
+   <pre> -num-decimal-places
+    The number of decimal places for the output of numbers in the model (default 2).</pre>
+   
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
