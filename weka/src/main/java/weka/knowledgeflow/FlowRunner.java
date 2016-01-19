@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    FlowRunner.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow;
 
 import weka.core.Environment;
@@ -85,13 +106,15 @@ public class FlowRunner implements FlowExecutor {
     // TODO probably need some command line options to override settings for
     // logging, execution environment etc.
 
-    String execName = settings.getSetting(KFDefaults.APP_ID,
-      KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
-      KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV);
+    String execName =
+      settings.getSetting(KFDefaults.APP_ID,
+        KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
+        KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV);
     BaseExecutionEnvironment execE = null;
     try {
-      execE = (BaseExecutionEnvironment) PluginManager.getPluginInstance(
-        BaseExecutionEnvironment.class.getCanonicalName(), execName);
+      execE =
+        (BaseExecutionEnvironment) PluginManager.getPluginInstance(
+          BaseExecutionEnvironment.class.getCanonicalName(), execName);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
@@ -106,12 +129,18 @@ public class FlowRunner implements FlowExecutor {
     m_execEnv.setLog(m_log);
     m_execEnv.setSettings(settings);
 
-    m_numThreads = settings.getSetting(KFDefaults.APP_ID,
-            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY,
-            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS);
-    m_resourceIntensiveNumThreads = settings.getSetting(KFDefaults.APP_ID,
-            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY,
-            BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS);
+    m_numThreads =
+      settings
+        .getSetting(
+          KFDefaults.APP_ID,
+          BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+          BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS);
+    m_resourceIntensiveNumThreads =
+      settings
+        .getSetting(
+          KFDefaults.APP_ID,
+          BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY,
+          BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS);
   }
 
   @Override
@@ -144,13 +173,7 @@ public class FlowRunner implements FlowExecutor {
         fr.setLaunchStartPointsSequentially(Utils.getFlag("s", args));
 
         Flow toRun = Flow.loadFlow(new File(fileName), new SimpleLogger());
-        // Flow.loadFlow(new BufferedReader(new FileReader(fileName)));
-        /*
-         * String loggingLevel = Environment.getSystemWide().getVariableValue(
-         * "weka.knowledgeflow.loggingLevel"); if (loggingLevel != null &&
-         * loggingLevel.length() > 0) { LoggingLevel lev =
-         * LoggingLevel.stringToLevel(loggingLevel); fr.setLoggingLevel(lev); }
-         */
+
         fr.setFlow(toRun);
         fr.run();
         fr.waitUntilFinished();
@@ -286,9 +309,8 @@ public class FlowRunner implements FlowExecutor {
     m_logHandler.m_statusMessagePrefix = "FlowRunner$" + hashCode() + "|";
     List<StepManagerImpl> startPoints = m_flow.findPotentialStartPoints();
     if (startPoints.size() == 0) {
-      m_logHandler.logError(
-        "FlowRunner: there don't appear to be any " + "start points to launch!",
-        null);
+      m_logHandler.logError("FlowRunner: there don't appear to be any "
+        + "start points to launch!", null);
       return;
     }
 
@@ -324,9 +346,8 @@ public class FlowRunner implements FlowExecutor {
     List<StepManagerImpl> startPoints = m_flow.findPotentialStartPoints();
     if (startPoints.size() == 0) {
       m_wasStopped = true;
-      m_logHandler.logError(
-        "FlowRunner: there don't appear to be any " + "start points to launch!",
-        null);
+      m_logHandler.logError("FlowRunner: there don't appear to be any "
+        + "start points to launch!", null);
       if (m_callback != null) {
         m_callback.executionFinished();
       }
@@ -417,16 +438,15 @@ public class FlowRunner implements FlowExecutor {
         + stepToStart.getManagedStep().getName());
 
       m_execEnv.launchStartPoint(stepToStart);
-      /* m_execEnv.submitTask(new StepTask<Void>(null) {
-
-        /** For serialization *
-        private static final long serialVersionUID = -5466021103296024455L;
-
-        @Override
-        public void process() throws Exception {
-          stepToStart.startStep();
-        }
-      }); */
+      /*
+       * m_execEnv.submitTask(new StepTask<Void>(null) {
+       * 
+       * /** For serialization * private static final long serialVersionUID =
+       * -5466021103296024455L;
+       * 
+       * @Override public void process() throws Exception {
+       * stepToStart.startStep(); } });
+       */
     }
 
     m_logHandler.logDebug("FlowRunner: Launching shutdown monitor");
@@ -456,15 +476,13 @@ public class FlowRunner implements FlowExecutor {
 
       m_execEnv.launchStartPoint(startP);
 
-      /* m_execEnv.submitTask(new StepTask<Void>(null) {
-        /** For serialization *
-        private static final long serialVersionUID = 663985401825979869L;
-
-        @Override
-        public void process() throws Exception {
-          startP.startStep();
-        }
-      }); */
+      /*
+       * m_execEnv.submitTask(new StepTask<Void>(null) { /** For serialization *
+       * private static final long serialVersionUID = 663985401825979869L;
+       * 
+       * @Override public void process() throws Exception { startP.startStep();
+       * } });
+       */
     }
     m_logHandler.logDebug("FlowRunner: Launching shutdown monitor");
     launchExecutorShutdownThread();

@@ -49,7 +49,7 @@ public interface Step {
    *
    * @return the step manager
    */
-    StepManager getStepManager();
+  StepManager getStepManager();
 
   /**
    * Set the step manager to use with this step. The execution environment will
@@ -57,28 +57,28 @@ public interface Step {
    *
    * @param manager the step manager to use
    */
-    void setStepManager(StepManager manager);
+  void setStepManager(StepManager manager);
 
   /**
    * Get the name of this step
    *
    * @return the name of this step
    */
-    String getName();
+  String getName();
 
   /**
    * Set the name for this step
    *
    * @param name the name for this step
    */
-    void setName(String name);
+  void setName(String name);
 
   /**
    * Initialize the step.
    *
    * @throws WekaException if a problem occurs during initialization
    */
-    void stepInit() throws WekaException;
+  void stepInit() throws WekaException;
 
   /**
    * Get a list of incoming connection types that this step can accept. Ideally
@@ -89,7 +89,7 @@ public interface Step {
    * @return a list of incoming connections that this step can accept given its
    *         current state
    */
-    List<String> getIncomingConnectionTypes();
+  List<String> getIncomingConnectionTypes();
 
   /**
    * Get a list of outgoing connection types that this step can produce. Ideally
@@ -100,19 +100,19 @@ public interface Step {
    * 
    * @return a list of outgoing connections that this step can produce
    */
-    List<String> getOutgoingConnectionTypes();
+  List<String> getOutgoingConnectionTypes();
 
   /**
    * Start executing (if this component is a start point)
    * 
    * @throws WekaException if a problem occurs
    */
-    void start() throws WekaException;
+  void start() throws WekaException;
 
   /**
    * Request a stop to all processing by this step (as soon as possible)
    */
-    void stop();
+  void stop();
 
   /**
    * Process an incoming data payload (if the step accepts incoming connections)
@@ -120,7 +120,7 @@ public interface Step {
    * @param data the payload to process
    * @throws WekaException if a problem occurs
    */
-    void processIncoming(Data data) throws WekaException;
+  void processIncoming(Data data) throws WekaException;
 
   /**
    * If possible, get the output structure for the named connection type as a
@@ -132,8 +132,8 @@ public interface Step {
    * @return the output structure as a header-only Instances object
    * @throws WekaException if a problem occurs
    */
-    Instances outputStructureForConnectionType(String connectionName)
-      throws WekaException;
+  Instances outputStructureForConnectionType(String connectionName)
+    throws WekaException;
 
   /**
    * Return the fully qualified name of a custom editor component (JComponent)
@@ -143,7 +143,7 @@ public interface Step {
    * 
    * @return the fully qualified name of a step editor component
    */
-    String getCustomEditorForStep();
+  String getCustomEditorForStep();
 
   /**
    * When running in a graphical execution environment a step can make one or
@@ -165,7 +165,7 @@ public interface Step {
    * @return a map of viewer component names, or null if this step has no
    *         graphical views
    */
-    Map<String, String> getInteractiveViewers();
+  Map<String, String> getInteractiveViewers();
 
   /**
    * An alternative to getStepInteractiveViewers that returns a Map of
@@ -178,7 +178,7 @@ public interface Step {
    *
    * @return a map of instantiated instances of StepInteractiveViewers
    */
-    Map<String, StepInteractiveViewer> getInteractiveViewersImpls();
+  Map<String, StepInteractiveViewer> getInteractiveViewersImpls();
 
   /**
    * Get default settings for the step (if any). Returning null indicates that
@@ -186,5 +186,5 @@ public interface Step {
    *
    * @return the default settings
    */
-    Defaults getDefaultSettings();
+  Defaults getDefaultSettings();
 }
