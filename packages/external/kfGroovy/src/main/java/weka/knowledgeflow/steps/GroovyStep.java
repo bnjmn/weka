@@ -106,7 +106,7 @@ public class GroovyStep extends BaseStep {
     m_groovyObject.setStepManager(getStepManager());
 
     // Init the script
-    m_groovyObject.init();
+    m_groovyObject.stepInit();
   }
 
   /**
