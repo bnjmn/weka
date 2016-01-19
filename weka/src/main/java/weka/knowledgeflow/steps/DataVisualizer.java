@@ -358,8 +358,11 @@ public class DataVisualizer extends BaseStep implements DataCollector {
 
     try {
       getStepManager().logDetailed("Creating image");
-      BufferedImage osi = m_offscreenRenderer.renderXYScatterPlot(defWidth,
-        defHeight, offscreenPlotInstances, xAxis, yAxis, options);
+      BufferedImage osi = predictedI.relationName().startsWith("__")
+        ? m_offscreenRenderer.renderXYLineChart(defWidth, defHeight,
+          offscreenPlotInstances, xAxis, yAxis, options)
+        : m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight,
+          offscreenPlotInstances, xAxis, yAxis, options);
 
       Data imageData = new Data(StepManager.CON_IMAGE, osi);
       String relationName = predictedI.relationName();
