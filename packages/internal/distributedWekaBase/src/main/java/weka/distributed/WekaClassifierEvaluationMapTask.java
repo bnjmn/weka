@@ -21,9 +21,6 @@
 
 package weka.distributed;
 
-import java.io.Serializable;
-import java.util.Random;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.evaluation.AggregateableEvaluationWithPriors;
@@ -31,6 +28,9 @@ import weka.classifiers.evaluation.Evaluation;
 import weka.core.BatchPredictor;
 import weka.core.Instance;
 import weka.core.Instances;
+
+import java.io.Serializable;
+import java.util.Random;
 
 /**
  * Map task for evaluating a trained classifier. Uses Instances.train/testCV()
@@ -271,12 +271,14 @@ public class WekaClassifierEvaluationMapTask implements Serializable {
 
     m_numTestInstances = test.numInstances();
 
-    if (m_classifier instanceof BatchPredictor) {
+    if (m_classifier instanceof BatchPredictor
+      && ((BatchPredictor) m_classifier)
+        .implementsMoreEfficientBatchPrediction()) {
 
       // this method always stores the predictions for AUC, so we need to get
-      // rid of them if we're note doing any AUC computation
+      // rid of them if we're not doing any AUC computation
       m_eval.evaluateModel(m_classifier, test);
-      if (m_predFrac < 0) {
+      if (m_predFrac <= 0) {
         ((AggregateableEvaluationWithPriors) m_eval).deleteStoredPredictions();
       }
     } else {
