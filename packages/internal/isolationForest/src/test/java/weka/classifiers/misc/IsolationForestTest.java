@@ -17,7 +17,7 @@
  * Copyright 2012 University of Waikato
  */
 
-package weka.classifiers.trees;
+package weka.classifiers.misc;
 
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.Classifier;
@@ -30,7 +30,7 @@ import junit.framework.TestSuite;
  * java weka.classifiers.trees.IsolationForestTest
  *
  * @author <a href="mailto:eibe@cs.waikato.ac.nz">Eibe Frank</a>
- * @version $Revision$
+ * @version $Revision: 9149 $
  */
 public class IsolationForestTest extends AbstractClassifierTest {
 
