@@ -1004,6 +1004,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
           .numValues() : ((weka.clusterers.Clusterer) m_clusterer)
           .numberOfClusters()];
 
+      double sumOfSums = 0;
       for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
 
         double[] sumOfProbsForLocation =
@@ -1018,6 +1019,7 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
 
         double[] weights = m_dataGenerator.getWeights();
         double sumOfWeights = Utils.sum(weights);
+        sumOfSums += sumOfWeights;
         int[] indices = Utils.sort(weights);
 
         // Prune 1% of weight mass
@@ -1062,12 +1064,12 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
         }
 
         for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights);
+          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] / m_numOfSamplesPerGenerator);
         }
       }
 
       // average
-      Utils.normalize(sumOfProbsForRegion);
+      Utils.normalize(sumOfProbsForRegion, sumOfSums);
 
       // cache
       double[] tempDist = new double[sumOfProbsForRegion.length];
