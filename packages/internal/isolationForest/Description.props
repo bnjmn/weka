@@ -6,7 +6,7 @@
 PackageName=isolationForest
 
 # Version (required)
-Version=1.0.3
+Version=1.0.2
 
 #Date
 Date=2016-01-21
@@ -31,7 +31,7 @@ Description=Class for building and using a classifier built on the Isolation For
 Changes=The meaning of the values of the class attribute has changed! Anomalies should now correspond to the second class value, no longer the first one. Can now also deal with unary classes. Has moved from classifiers.trees to classifiers.misc.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/isolationForest1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/isolationForest1.0.2.zip?download
 
 # URL for further information
 URL=http://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
