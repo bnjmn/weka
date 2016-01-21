@@ -54,6 +54,7 @@ import java.util.Set;
  */
 public class StepVisual extends JPanel {
 
+  /** Standard base path for Step icons */
   public static final String BASE_ICON_PATH = KFGUIConsts.BASE_ICON_PATH;
 
   /**
@@ -73,6 +74,7 @@ public class StepVisual extends JPanel {
   /** Whether to display connector dots */
   protected boolean m_displayConnectors;
 
+  /** Current connector dot colour */
   protected Color m_connectorColor = Color.blue;
 
   /**
@@ -104,6 +106,14 @@ public class StepVisual extends JPanel {
     this(null);
   }
 
+  /**
+   * Create a visual for the step managed by the supplied step manager. Uses the
+   * icon specified by the step itself (via the {@code KFStep} annotation)
+   *
+   * @param stepManager the step manager for the step to create a visual wrapper
+   *          for
+   * @return the {@code StepVisual} that wraps the step
+   */
   public static StepVisual createVisual(StepManagerImpl stepManager) {
 
     if (stepManager.getManagedStep() instanceof Note) {
@@ -116,6 +126,15 @@ public class StepVisual extends JPanel {
     }
   }
 
+  /**
+   * Create a visual for the step managed by the supplied step manager using the
+   * supplied icon.
+   *
+   * @param stepManager the step manager for the step to create a visual wrapper
+   *          for
+   * @param icon the icon to use in the visual
+   * @return the {@code StepVisual} that wraps the step
+   */
   public static StepVisual createVisual(StepManagerImpl stepManager,
     ImageIcon icon) {
 
@@ -125,6 +144,12 @@ public class StepVisual extends JPanel {
     return wrapper;
   }
 
+  /**
+   * Gets the icon for the supplied {@code Step}.
+   *
+   * @param step the step to get the icon for
+   * @return the icon for the step
+   */
   public static ImageIcon iconForStep(Step step) {
     KFStep stepAnnotation = step.getClass().getAnnotation(KFStep.class);
     if (stepAnnotation != null && stepAnnotation.iconPath() != null
@@ -153,6 +178,12 @@ public class StepVisual extends JPanel {
     return null;
   }
 
+  /**
+   * Load an icon from the supplied path
+   *
+   * @param iconPath the path to load from
+   * @return an icon
+   */
   public static ImageIcon loadIcon(String iconPath) {
     java.net.URL imageURL =
       StepVisual.class.getClassLoader().getResource(iconPath);
@@ -165,6 +196,13 @@ public class StepVisual extends JPanel {
     return null;
   }
 
+  /**
+   * Scale the supplied icon by the given factor
+   *
+   * @param icon the icon to scale
+   * @param factor the factor to scale by
+   * @return the scaled icon
+   */
   public static ImageIcon scaleIcon(ImageIcon icon, double factor) {
     Image pic = icon.getImage();
     double width = icon.getIconWidth();
@@ -178,6 +216,12 @@ public class StepVisual extends JPanel {
     return new ImageIcon(pic);
   }
 
+  /**
+   * Get the icon for this visual at the given scale factor
+   *
+   * @param scale the factor to scale the icon by
+   * @return the scaled icon
+   */
   public Image getIcon(double scale) {
     if (scale == 1) {
       return m_icon.getImage();
@@ -195,44 +239,97 @@ public class StepVisual extends JPanel {
     return pic;
   }
 
+  /**
+   * Convenience method for getting the name of the step that this visual wraps
+   *
+   * @return the name of the step
+   */
   public String getStepName() {
     return m_stepManager.getManagedStep().getName();
   }
 
+  /**
+   * Convenience method for setting the name of the step that this visual wraps
+   *
+   * @param name the name to set on the step
+   */
   public void setStepName(String name) {
     m_stepManager.getManagedStep().setName(name);
   }
 
+  /**
+   * Get the x coordinate of this step on the graphical layout
+   *
+   * @return the x coordinate of this step
+   */
   @Override
   public int getX() {
     return m_x;
   }
 
+  /**
+   * Set the x coordinate of this step on the graphical layout
+   *
+   * @param x the x coordinate of this step
+   */
   public void setX(int x) {
     m_x = x;
   }
 
+  /**
+   * Get the y coordinate of this step on the graphical layout
+   *
+   * @return the y coordinate of this step
+   */
   @Override
   public int getY() {
     return m_y;
   }
 
+  /**
+   * Set the y coordinate of this step on the graphical layout
+   *
+   * @param y the y coordinate of this step
+   */
   public void setY(int y) {
     m_y = y;
   }
 
+  /**
+   * Get the step manager for this visual
+   * 
+   * @return the step manager
+   */
   public StepManagerImpl getStepManager() {
     return m_stepManager;
   }
 
+  /**
+   * Set the step manager for this visual
+   * 
+   * @param manager the step manager to wrap
+   */
   public void setStepManager(StepManagerImpl manager) {
     m_stepManager = manager;
   }
 
+  /**
+   * Get the fully qualified name of the custom editor (if any) for the step
+   * wrapped in this visual
+   * 
+   * @return the custom editor, or null if the step does not specify one
+   */
   public String getCustomEditorForStep() {
     return m_stepManager.getManagedStep().getCustomEditorForStep();
   }
 
+  /**
+   * Get a set of fully qualified names of interactive viewers that the wrapped
+   * step provides.
+   * 
+   * @return a set of fully qualified interactive viewer names, or null if the
+   *         step does not have any interactive viewers.
+   */
   public Set<String> getStepInteractiveViewActionNames() {
     Map<String, String> viewComps =
       m_stepManager.getManagedStep().getInteractiveViewers();
@@ -243,22 +340,31 @@ public class StepVisual extends JPanel {
     return viewComps.keySet();
   }
 
-  public JComponent getStepInteractiveViewComponent(String viewActioName)
+  /**
+   * Gets an instance of the named step interactive viewer component
+   *
+   * @param viewActionName the action/name for the viewer to get
+   * @return the instantiated viewer component
+   * @throws WekaException if the step does not have any interactive viewers, or
+   *           does not provide a viewer with the given action/name
+   */
+  public JComponent getStepInteractiveViewComponent(String viewActionName)
     throws WekaException {
 
     if (m_stepManager.getManagedStep().getInteractiveViewers() == null) {
-      throw new WekaException("Steo '"
+      throw new WekaException("Step '"
         + m_stepManager.getManagedStep().getName() + "' "
         + "does not have any interactive view components");
     }
 
     String clazz =
-      m_stepManager.getManagedStep().getInteractiveViewers().get(viewActioName);
+      m_stepManager.getManagedStep().getInteractiveViewers()
+        .get(viewActionName);
     if (clazz == null) {
       throw new WekaException("Step '"
         + m_stepManager.getManagedStep().getName() + "' "
         + "does not have an interactive view component called '"
-        + viewActioName + "'");
+        + viewActionName + "'");
     }
 
     Object comp = null;

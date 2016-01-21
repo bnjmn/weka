@@ -81,8 +81,9 @@ public class LayoutPanel extends PrintablePanel {
     setupMouseListener();
     setupMouseMotionListener();
 
-    m_gridSpacing = m_visLayout.getMainPerspective()
-      .getSetting(KFDefaults.GRID_SPACING_KEY, KFDefaults.GRID_SPACING);
+    m_gridSpacing =
+      m_visLayout.getMainPerspective().getSetting(KFDefaults.GRID_SPACING_KEY,
+        KFDefaults.GRID_SPACING);
   }
 
   protected void setupMouseListener() {
@@ -97,10 +98,8 @@ public class LayoutPanel extends PrintablePanel {
         px /= z;
 
         if (m_visLayout.getMainPerspective().getPalleteSelectedStep() == null) {
-          if (((me.getModifiers()
-            & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
-            && m_visLayout
-              .getFlowLayoutOperation() == VisibleLayout.LayoutOperation.NONE) {
+          if (((me.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK)
+            && m_visLayout.getFlowLayoutOperation() == VisibleLayout.LayoutOperation.NONE) {
             StepVisual step =
               m_visLayout.findStep(new Point((int) px, (int) py));
             if (step != null) {
@@ -109,8 +108,7 @@ public class LayoutPanel extends PrintablePanel {
               m_oldY = (int) py;
               m_visLayout.setFlowLayoutOperation(LayoutOperation.MOVING);
             }
-            if (m_visLayout
-              .getFlowLayoutOperation() != LayoutOperation.MOVING) {
+            if (m_visLayout.getFlowLayoutOperation() != LayoutOperation.MOVING) {
               m_visLayout.setFlowLayoutOperation(LayoutOperation.SELECTING);
               m_oldX = (int) px;
               m_oldY = (int) py;
@@ -182,8 +180,7 @@ public class LayoutPanel extends PrintablePanel {
                 && !m_visLayout.isExecuting()) {
                 popupStepEditorDialog(step);
               }
-            } else if ((me.getModifiers()
-              & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK
+            } else if ((me.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK
               || me.isAltDown()) {
               stepContextualMenu(me.getPoint(), step, (int) (p.getX() / z),
                 (int) (p.getY() / z));
@@ -199,8 +196,7 @@ public class LayoutPanel extends PrintablePanel {
               return;
             }
           } else {
-            if ((me.getModifiers()
-              & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK
+            if ((me.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK
               || me.isAltDown()) {
 
               if (!m_visLayout.isExecuting()) {
@@ -226,9 +222,8 @@ public class LayoutPanel extends PrintablePanel {
               }
 
               m_visLayout.addUndoPoint();
-              m_visLayout.addStep(
-                m_visLayout.getMainPerspective().getPalleteSelectedStep(),
-                (int) x, (int) y);
+              m_visLayout.addStep(m_visLayout.getMainPerspective()
+                .getPalleteSelectedStep(), (int) x, (int) y);
 
               m_visLayout.getMainPerspective().clearDesignPaletteSelection();
               m_visLayout.getMainPerspective().setPalleteSelectedStep(null);
@@ -251,13 +246,12 @@ public class LayoutPanel extends PrintablePanel {
           }
 
           m_visLayout.setFlowLayoutOperation(LayoutOperation.NONE);
-          m_visLayout.getMainPerspective()
-            .setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          m_visLayout.getMainPerspective().setCursor(
+            Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           return;
         }
 
-        if (m_visLayout
-          .getFlowLayoutOperation() == LayoutOperation.CONNECTING) {
+        if (m_visLayout.getFlowLayoutOperation() == LayoutOperation.CONNECTING) {
           // turn off connector points and remove connecting line
           repaint();
           for (StepVisual v : m_visLayout.getRenderGraph()) {
@@ -270,7 +264,8 @@ public class LayoutPanel extends PrintablePanel {
 
             m_visLayout.addUndoPoint();
 
-            m_visLayout.connectSteps(m_visLayout.getEditStep().getStepManager(),
+            m_visLayout.connectSteps(
+              m_visLayout.getEditStep().getStepManager(),
               step.getStepManager(), m_visLayout.getEditConnection());
 
             m_visLayout.setEdited(true);
@@ -304,10 +299,10 @@ public class LayoutPanel extends PrintablePanel {
           int deltaX = (int) px - m_oldX;
           int deltaY = (int) py - m_oldY;
 
-          m_visLayout.getEditStep()
-            .setX(m_visLayout.getEditStep().getX() + deltaX);
-          m_visLayout.getEditStep()
-            .setY(m_visLayout.getEditStep().getY() + deltaY);
+          m_visLayout.getEditStep().setX(
+            m_visLayout.getEditStep().getX() + deltaX);
+          m_visLayout.getEditStep().setY(
+            m_visLayout.getEditStep().getY() + deltaY);
           for (StepVisual v : m_visLayout.getSelectedSteps()) {
             if (v != m_visLayout.getEditStep()) {
               v.setX(v.getX() + deltaX);
@@ -335,8 +330,7 @@ public class LayoutPanel extends PrintablePanel {
         px /= z;
         py /= z;
 
-        if (m_visLayout
-          .getFlowLayoutOperation() == LayoutOperation.CONNECTING) {
+        if (m_visLayout.getFlowLayoutOperation() == LayoutOperation.CONNECTING) {
           repaint();
           m_oldX = (int) px;
           m_oldY = (int) py;
@@ -347,8 +341,9 @@ public class LayoutPanel extends PrintablePanel {
 
   @Override
   public void paintComponent(Graphics gx) {
-    Color backG = m_visLayout.getMainPerspective()
-      .getSetting(KFDefaults.LAYOUT_COLOR_KEY, KFDefaults.LAYOUT_COLOR);
+    Color backG =
+      m_visLayout.getMainPerspective().getSetting(KFDefaults.LAYOUT_COLOR_KEY,
+        KFDefaults.LAYOUT_COLOR);
     if (!backG.equals(getBackground())) {
       setBackground(backG);
     }
@@ -371,8 +366,7 @@ public class LayoutPanel extends PrintablePanel {
 
     if (m_visLayout.getFlowLayoutOperation() == LayoutOperation.CONNECTING) {
       gx.drawLine(m_currentX, m_currentY, m_oldX, m_oldY);
-    } else
-      if (m_visLayout.getFlowLayoutOperation() == LayoutOperation.SELECTING) {
+    } else if (m_visLayout.getFlowLayoutOperation() == LayoutOperation.SELECTING) {
       gx.drawRect(m_currentX < m_oldX ? m_currentX : m_oldX,
         m_currentY < m_oldY ? m_currentY : m_oldY,
         Math.abs(m_oldX - m_currentX), Math.abs(m_oldY - m_currentY));
@@ -380,18 +374,23 @@ public class LayoutPanel extends PrintablePanel {
 
     if (m_visLayout.getMainPerspective().getSetting(KFDefaults.SHOW_GRID_KEY,
       KFDefaults.SHOW_GRID)) {
-      Color gridColor = m_visLayout.getMainPerspective()
-        .getSetting(KFDefaults.GRID_COLOR_KEY, KFDefaults.GRID_COLOR);
+      Color gridColor =
+        m_visLayout.getMainPerspective().getSetting(KFDefaults.GRID_COLOR_KEY,
+          KFDefaults.GRID_COLOR);
       gx.setColor(gridColor);
-      int gridSpacing = m_visLayout.getMainPerspective()
-        .getSetting(KFDefaults.GRID_SPACING_KEY, KFDefaults.GRID_SPACING);
-      int layoutWidth = m_visLayout.getMainPerspective()
-        .getSetting(KFDefaults.LAYOUT_WIDTH_KEY, KFDefaults.LAYOUT_WIDTH);
-      int layoutHeight = m_visLayout.getMainPerspective()
-        .getSetting(KFDefaults.LAYOUT_HEIGHT_KEY, KFDefaults.LAYOUT_HEIGHT);
+      int gridSpacing =
+        m_visLayout.getMainPerspective().getSetting(
+          KFDefaults.GRID_SPACING_KEY, KFDefaults.GRID_SPACING);
+      int layoutWidth =
+        m_visLayout.getMainPerspective().getSetting(
+          KFDefaults.LAYOUT_WIDTH_KEY, KFDefaults.LAYOUT_WIDTH);
+      int layoutHeight =
+        m_visLayout.getMainPerspective().getSetting(
+          KFDefaults.LAYOUT_HEIGHT_KEY, KFDefaults.LAYOUT_HEIGHT);
       Stroke original = ((Graphics2D) gx).getStroke();
-      Stroke dashed = new BasicStroke(1, BasicStroke.CAP_BUTT,
-        BasicStroke.JOIN_BEVEL, 0, new float[] { 3 }, 0);
+      Stroke dashed =
+        new BasicStroke(1, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL, 0,
+          new float[] { 3 }, 0);
       ((Graphics2D) gx).setStroke(dashed);
 
       for (int i = gridSpacing; i < layoutWidth / lz; i += gridSpacing) {
@@ -417,7 +416,9 @@ public class LayoutPanel extends PrintablePanel {
   }
 
   protected void paintStepLabels(Graphics gx) {
-    gx.setFont(new Font(null, Font.PLAIN, 9));
+    gx.setFont(new Font(null, Font.PLAIN, m_visLayout.getMainPerspective()
+      .getSetting(KFDefaults.STEP_LABEL_FONT_SIZE_KEY,
+        KFDefaults.STEP_LABEL_FONT_SIZE)));
     FontMetrics fm = gx.getFontMetrics();
     int hf = fm.getAscent();
 
@@ -433,8 +434,8 @@ public class LayoutPanel extends PrintablePanel {
       String label = v.getStepName();
       int labelwidth = fm.stringWidth(label);
       if (labelwidth < width) {
-        gx.drawString(label, (cx + (width / 2)) - (labelwidth / 2),
-          cy + height + hf + 2);
+        gx.drawString(label, (cx + (width / 2)) - (labelwidth / 2), cy + height
+          + hf + 2);
       } else {
         // split label
 
@@ -455,19 +456,19 @@ public class LayoutPanel extends PrintablePanel {
           String left = label.substring(0, closestI);
           String right = label.substring(closestI, label.length());
           if (left.length() > 1 && right.length() > 1) {
-            gx.drawString(left, (cx + (width / 2)) - (fm.stringWidth(left) / 2),
-              cy + height + (hf * 1) + 2);
-            gx.drawString(right,
-              (cx + (width / 2)) - (fm.stringWidth(right) / 2),
-              cy + height + (hf * 2) + 2);
+            gx.drawString(left,
+              (cx + (width / 2)) - (fm.stringWidth(left) / 2), cy + height
+                + (hf * 1) + 2);
+            gx.drawString(right, (cx + (width / 2))
+              - (fm.stringWidth(right) / 2), cy + height + (hf * 2) + 2);
           } else {
-            gx.drawString(label,
-              (cx + (width / 2)) - (fm.stringWidth(label) / 2),
-              cy + height + (hf * 1) + 2);
+            gx.drawString(label, (cx + (width / 2))
+              - (fm.stringWidth(label) / 2), cy + height + (hf * 1) + 2);
           }
         } else {
-          gx.drawString(label, (cx + (width / 2)) - (fm.stringWidth(label) / 2),
-            cy + height + (hf * 1) + 2);
+          gx.drawString(label,
+            (cx + (width / 2)) - (fm.stringWidth(label) / 2), cy + height
+              + (hf * 1) + 2);
         }
       }
     }
@@ -507,15 +508,17 @@ public class LayoutPanel extends PrintablePanel {
               int tWidth = targetI.getStepVisual().getWidth();
               int tHeight = targetI.getStepVisual().getHeight();
 
-              Point bestSourcePoint = stepVis.getClosestConnectorPoint(
-                new Point(tX + (tWidth / 2), tY + (tHeight / 2)));
+              Point bestSourcePoint =
+                stepVis.getClosestConnectorPoint(new Point(tX + (tWidth / 2),
+                  tY + (tHeight / 2)));
               Point bestTargetPoint =
                 targetI.getStepVisual().getClosestConnectorPoint(
                   new Point(sX + (sWidth / 2), sY + (sHeight / 2)));
 
               gx.setColor(Color.red);
-              boolean active = generatableOutputConnections == null
-                || !generatableOutputConnections.contains(connName) ? false
+              boolean active =
+                generatableOutputConnections == null
+                  || !generatableOutputConnections.contains(connName) ? false
                   : true;
               if (!active) {
                 gx.setColor(Color.gray);
@@ -528,31 +531,37 @@ public class LayoutPanel extends PrintablePanel {
               // paint an arrow head
               double angle;
               try {
-                double a = (bestSourcePoint.getY() - bestTargetPoint.getY())
-                  / (bestSourcePoint.getX() - bestTargetPoint.getX());
+                double a =
+                  (bestSourcePoint.getY() - bestTargetPoint.getY())
+                    / (bestSourcePoint.getX() - bestTargetPoint.getX());
                 angle = Math.atan(a);
               } catch (Exception ex) {
                 angle = Math.PI / 2;
               }
               Point arrowstart =
                 new Point(bestTargetPoint.x, bestTargetPoint.y);
-              Point arrowoffset = new Point((int) (7 * Math.cos(angle)),
-                (int) (7 * Math.sin(angle)));
+              Point arrowoffset =
+                new Point((int) (7 * Math.cos(angle)),
+                  (int) (7 * Math.sin(angle)));
               Point arrowend;
               if (bestSourcePoint.getX() >= bestTargetPoint.getX()) {
 
-                arrowend = new Point(arrowstart.x + arrowoffset.x,
-                  arrowstart.y + arrowoffset.y);
+                arrowend =
+                  new Point(arrowstart.x + arrowoffset.x, arrowstart.y
+                    + arrowoffset.y);
               } else {
-                arrowend = new Point(arrowstart.x - arrowoffset.x,
-                  arrowstart.y - arrowoffset.y);
+                arrowend =
+                  new Point(arrowstart.x - arrowoffset.x, arrowstart.y
+                    - arrowoffset.y);
               }
-              int xs[] = { arrowstart.x,
-                arrowend.x + (int) (7 * Math.cos(angle + (Math.PI / 2))),
-                arrowend.x + (int) (7 * Math.cos(angle - (Math.PI / 2))) };
-              int ys[] = { arrowstart.y,
-                arrowend.y + (int) (7 * Math.sin(angle + (Math.PI / 2))),
-                arrowend.y + (int) (7 * Math.sin(angle - (Math.PI / 2))) };
+              int xs[] =
+                { arrowstart.x,
+                  arrowend.x + (int) (7 * Math.cos(angle + (Math.PI / 2))),
+                  arrowend.x + (int) (7 * Math.cos(angle - (Math.PI / 2))) };
+              int ys[] =
+                { arrowstart.y,
+                  arrowend.y + (int) (7 * Math.sin(angle + (Math.PI / 2))),
+                  arrowend.y + (int) (7 * Math.sin(angle - (Math.PI / 2))) };
               gx.fillPolygon(xs, ys, 3);
 
               // paint the connection name
@@ -561,8 +570,7 @@ public class LayoutPanel extends PrintablePanel {
                 (int) ((bestTargetPoint.getX() - bestSourcePoint.getX()) / 2);
               int midy = (int) bestSourcePoint.getY();
               midy +=
-                (int) ((bestTargetPoint.getY() - bestSourcePoint.getY()) / 2)
-                  - 2;
+                (int) ((bestTargetPoint.getY() - bestSourcePoint.getY()) / 2) - 2;
               gx.setColor((active) ? Color.blue : Color.gray);
               // check to see if there is more than one connection
               // between the source and target
@@ -730,11 +738,11 @@ public class LayoutPanel extends PrintablePanel {
     Note n = new Note();
     StepManagerImpl noteManager = new StepManagerImpl(n);
     StepVisual noteVisual = StepVisual.createVisual(noteManager);
-    m_visLayout.getMainPerspective()
-      .setPalleteSelectedStep(noteVisual.getStepManager());
+    m_visLayout.getMainPerspective().setPalleteSelectedStep(
+      noteVisual.getStepManager());
     m_visLayout.setFlowLayoutOperation(LayoutOperation.ADDING);
-    m_visLayout.getMainPerspective()
-      .setCursor(Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+    m_visLayout.getMainPerspective().setCursor(
+      Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
   }
 
   protected void stepContextualMenu(Point pt, final StepVisual step,
@@ -780,8 +788,9 @@ public class LayoutPanel extends PrintablePanel {
         }
         // step.getStepManager().clearAllConnections();
         // LayoutPanel.this.remove(step);
-        String key = step.getStepName() + "$"
-          + step.getStepManager().getManagedStep().hashCode();
+        String key =
+          step.getStepName() + "$"
+            + step.getStepManager().getManagedStep().hashCode();
         m_visLayout.getLogPanel().statusMessage(key + "|remove");
 
         LayoutPanel.this.revalidate();
@@ -789,9 +798,12 @@ public class LayoutPanel extends PrintablePanel {
 
         m_visLayout.setEdited(true);
         m_visLayout.getMainPerspective().notifyIsDirty();
-        m_visLayout.getMainPerspective().getMainToolBar().enableWidget(
-          MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
-          m_visLayout.getSelectedSteps().size() > 0);
+        m_visLayout
+          .getMainPerspective()
+          .getMainToolBar()
+          .enableWidget(
+            MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
+            m_visLayout.getSelectedSteps().size() > 0);
       }
     });
     deleteItem.setEnabled(!executing);
@@ -871,8 +883,8 @@ public class LayoutPanel extends PrintablePanel {
           null, stepContextMenu);
         menuItemCount++;
       }
-    } else
-      if (interactiveViewsImpls != null && interactiveViewsImpls.size() > 0) {
+    } else if (interactiveViewsImpls != null
+      && interactiveViewsImpls.size() > 0) {
       MenuItem actions = new MenuItem("Actions:");
       actions.setEnabled(false);
       stepContextMenu.insert(actions, menuItemCount++);
@@ -888,8 +900,9 @@ public class LayoutPanel extends PrintablePanel {
     }
 
     // perspective stuff...
-    final List<Perspective> perspectives = m_visLayout.getMainPerspective()
-      .getMainApplication().getPerspectiveManager().getVisiblePerspectives();
+    final List<Perspective> perspectives =
+      m_visLayout.getMainPerspective().getMainApplication()
+        .getPerspectiveManager().getVisiblePerspectives();
     if (perspectives.size() > 0
       && step.getStepManager().getManagedStep() instanceof Loader) {
       final weka.core.converters.Loader theLoader =
@@ -902,8 +915,8 @@ public class LayoutPanel extends PrintablePanel {
         fileName = m_visLayout.environmentSubstitute(fileName);
         File tempF = new File(fileName);
         String fileNameFixedPathSep = fileName.replace(File.separatorChar, '/');
-        if (!tempF.isFile() && this.getClass().getClassLoader()
-          .getResource(fileNameFixedPathSep) == null) {
+        if (!tempF.isFile()
+          && this.getClass().getClassLoader().getResource(fileNameFixedPathSep) == null) {
           ok = false;
         }
       }
@@ -966,8 +979,8 @@ public class LayoutPanel extends PrintablePanel {
         public void run() {
           try {
             if (loader instanceof EnvironmentHandler) {
-              ((EnvironmentHandler) loader)
-                .setEnvironment(m_visLayout.getEnvironment());
+              ((EnvironmentHandler) loader).setEnvironment(m_visLayout
+                .getEnvironment());
               loader.reset();
             }
             m_visLayout.getLogPanel().statusMessage(
@@ -993,13 +1006,18 @@ public class LayoutPanel extends PrintablePanel {
                 }
               } else {
                 perspectives.get(perspectiveIndex).setInstances(data);
-                m_visLayout.getMainPerspective().getMainApplication()
-                  .getPerspectiveManager().setActivePerspective(
+                m_visLayout
+                  .getMainPerspective()
+                  .getMainApplication()
+                  .getPerspectiveManager()
+                  .setActivePerspective(
                     perspectives.get(perspectiveIndex).getPerspectiveID());
-                m_visLayout.getMainPerspective().getMainApplication()
-                  .getPerspectiveManager().setEnablePerspectiveTab(
-                    perspectives.get(perspectiveIndex).getPerspectiveID(),
-                    true);
+                m_visLayout
+                  .getMainPerspective()
+                  .getMainApplication()
+                  .getPerspectiveManager()
+                  .setEnablePerspectiveTab(
+                    perspectives.get(perspectiveIndex).getPerspectiveID(), true);
               }
             }
           } catch (Exception ex) {
@@ -1073,9 +1091,9 @@ public class LayoutPanel extends PrintablePanel {
   protected void popupStepInteractiveViewer(StepVisual step,
     String viewerClassName, StepInteractiveViewer viewerImpl) {
     try {
-      Object viewer = viewerClassName != null
-        ? Beans.instantiate(this.getClass().getClassLoader(), viewerClassName)
-        : viewerImpl;
+      Object viewer =
+        viewerClassName != null ? Beans.instantiate(this.getClass()
+          .getClassLoader(), viewerClassName) : viewerImpl;
       if (!(viewer instanceof StepInteractiveViewer)) {
         throw new WekaException("Interactive step viewer component "
           + viewerClassName + " must implement StepInteractiveViewer");
@@ -1087,10 +1105,10 @@ public class LayoutPanel extends PrintablePanel {
       }
 
       String viewerName = ((StepInteractiveViewer) viewer).getViewerName();
-      ((StepInteractiveViewer) viewer)
-        .setStep(step.getStepManager().getManagedStep());
-      ((StepInteractiveViewer) viewer)
-        .setMainKFPerspective(m_visLayout.getMainPerspective());
+      ((StepInteractiveViewer) viewer).setStep(step.getStepManager()
+        .getManagedStep());
+      ((StepInteractiveViewer) viewer).setMainKFPerspective(m_visLayout
+        .getMainPerspective());
       JFrame jf = new JFrame(viewerName);
       ((StepInteractiveViewer) viewer).setParentWindow(jf);
       ((StepInteractiveViewer) viewer).init();
@@ -1132,8 +1150,9 @@ public class LayoutPanel extends PrintablePanel {
       toPopup.setMainPerspective(m_visLayout.getMainPerspective());
     }
 
-    final JDialog d = new JDialog((java.awt.Frame) getTopLevelAncestor(),
-      ModalityType.DOCUMENT_MODAL);
+    final JDialog d =
+      new JDialog((java.awt.Frame) getTopLevelAncestor(),
+        ModalityType.DOCUMENT_MODAL);
     d.setLayout(new BorderLayout());
     d.getContentPane().add(toPopup, BorderLayout.CENTER);
     final StepEditorDialog toPopupC = toPopup;
@@ -1187,9 +1206,10 @@ public class LayoutPanel extends PrintablePanel {
   }
 
   private void highlightSubFlow(int startX, int startY, int endX, int endY) {
-    java.awt.Rectangle r = new java.awt.Rectangle(
-      (startX < endX) ? startX : endX, (startY < endY) ? startY : endY,
-      Math.abs(startX - endX), Math.abs(startY - endY));
+    java.awt.Rectangle r =
+      new java.awt.Rectangle((startX < endX) ? startX : endX,
+        (startY < endY) ? startY : endY, Math.abs(startX - endX),
+        Math.abs(startY - endY));
 
     List<StepVisual> selected = m_visLayout.findSteps(r);
     m_visLayout.setSelectedSteps(selected);
