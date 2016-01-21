@@ -43,6 +43,11 @@ public class WorkbenchDefaults extends Defaults {
     new Settings.SettingKey(APP_ID + ".showGlobalInfoTipText",
       "Show scheme tool tips in tree view", "");
   protected static final boolean SHOW_JTREE_GLOBAL_INFO_TIPS = true;
+  protected static final Settings.SettingKey LOG_MESSAGE_FONT_SIZE_KEY =
+    new Settings.SettingKey(APP_ID + ".logMessageFontSize",
+      "Size of font for log " + "messages",
+      "Size of font for log messages (-1 = system default)");
+  protected static final int LOG_MESSAGE_FONT_SIZE = -1;
   private static final long serialVersionUID = 7881327795923189743L;
 
   public WorkbenchDefaults() {
@@ -53,5 +58,6 @@ public class WorkbenchDefaults extends Defaults {
     LAF_KEY.setPickList(lafs);
     m_defaults.put(LAF_KEY, LAF);
     m_defaults.put(SHOW_JTREE_TIP_TEXT_KEY, SHOW_JTREE_GLOBAL_INFO_TIPS);
+    m_defaults.put(LOG_MESSAGE_FONT_SIZE_KEY, LOG_MESSAGE_FONT_SIZE);
   }
 }

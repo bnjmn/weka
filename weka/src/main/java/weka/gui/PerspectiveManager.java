@@ -76,8 +76,8 @@ import static weka.gui.knowledgeflow.StepVisual.loadIcon;
 public class PerspectiveManager extends JPanel {
 
   /** Interface name of perspectives */
-  public static final String PERSPECTIVE_INTERFACE =
-    Perspective.class.getCanonicalName();
+  public static final String PERSPECTIVE_INTERFACE = Perspective.class
+    .getCanonicalName();
 
   /** Settings key for visible perspectives in an application */
   public static final Settings.SettingKey VISIBLE_PERSPECTIVES_KEY =
@@ -181,8 +181,7 @@ public class PerspectiveManager extends JPanel {
    *          disallowed vetoes just weka.gui.funky.NonFunkyPerspective.)
    */
   public PerspectiveManager(GUIApplication mainApp,
-    String[] perspectivePrefixesToAllow,
-    String[] perspectivePrefixesToDisallow) {
+    String[] perspectivePrefixesToAllow, String[] perspectivePrefixesToDisallow) {
 
     if (perspectivePrefixesToAllow != null) {
       for (String prefix : perspectivePrefixesToAllow) {
@@ -262,7 +261,7 @@ public class PerspectiveManager extends JPanel {
 
     setupUserPerspectives();
 
-    initLogPanel();
+    initLogPanel(settings);
     if (m_mainPerspective.requiresLog()) {
       m_mainPerspective.setLog(m_LogPanel);
       add(m_LogPanel, BorderLayout.SOUTH);
@@ -277,19 +276,33 @@ public class PerspectiveManager extends JPanel {
   }
 
   /**
+   * Apply settings to the log panel
+   *
+   * @param settings settings to apply
+   */
+  protected void setLogSettings(Settings settings) {
+    int fontSize =
+      settings.getSetting(m_mainApp.getApplicationID(),
+        new Settings.SettingKey(m_mainApp.getApplicationID()
+          + ".logMessageFontSize", "", ""), -1);
+    m_LogPanel.setLoggingFontSize(fontSize);
+  }
+
+  /**
    * Initialize the log panel
    */
-  protected void initLogPanel() {
+  protected void initLogPanel(Settings settings) {
+    setLogSettings(settings);
     String date =
       (new SimpleDateFormat("EEEE, d MMMM yyyy")).format(new Date());
     m_LogPanel.logMessage("Weka " + m_mainApp.getApplicationName());
-    m_LogPanel
-      .logMessage("(c) " + Copyright.getFromYear() + "-" + Copyright.getToYear()
-        + " " + Copyright.getOwner() + ", " + Copyright.getAddress());
+    m_LogPanel.logMessage("(c) " + Copyright.getFromYear() + "-"
+      + Copyright.getToYear() + " " + Copyright.getOwner() + ", "
+      + Copyright.getAddress());
     m_LogPanel.logMessage("web: " + Copyright.getURL());
     m_LogPanel.logMessage("Started on " + date);
-    m_LogPanel
-      .statusMessage("Welcome to the Weka " + m_mainApp.getApplicationName());
+    m_LogPanel.statusMessage("Welcome to the Weka "
+      + m_mainApp.getApplicationName());
   }
 
   /**
@@ -324,6 +337,7 @@ public class PerspectiveManager extends JPanel {
     for (Map.Entry<String, Perspective> e : m_perspectiveCache.entrySet()) {
       e.getValue().settingsChanged();
     }
+    setLogSettings(m_mainApp.getApplicationSettings());
   }
 
   /**
@@ -380,9 +394,10 @@ public class PerspectiveManager extends JPanel {
    * @param settings the settings object to set this property on
    */
   public void setPerspectiveToolbarAlwaysHidden(Settings settings) {
-    SelectedPerspectivePreferences userVisiblePerspectives = settings
-      .getSetting(m_mainApp.getApplicationID(), VISIBLE_PERSPECTIVES_KEY,
-        new SelectedPerspectivePreferences(), Environment.getSystemWide());
+    SelectedPerspectivePreferences userVisiblePerspectives =
+      settings.getSetting(m_mainApp.getApplicationID(),
+        VISIBLE_PERSPECTIVES_KEY, new SelectedPerspectivePreferences(),
+        Environment.getSystemWide());
     userVisiblePerspectives.setPerspectivesToolbarAlwaysHidden(true);
     setPerspectiveToolBarIsVisible(false);
 
@@ -409,8 +424,9 @@ public class PerspectiveManager extends JPanel {
       m_programMenu.insert(settingsM, 0);
     }
 
-    JButton configB = new JButton(new ImageIcon(
-      loadIcon(MainKFPerspectiveToolBar.ICON_PATH + "cog.png").getImage()));
+    JButton configB =
+      new JButton(new ImageIcon(loadIcon(
+        MainKFPerspectiveToolBar.ICON_PATH + "cog.png").getImage()));
     configB.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 1));
     configB.setToolTipText("Settings");
     m_configAndPerspectivesToolBar.add(configB, BorderLayout.WEST);
@@ -661,8 +677,8 @@ public class PerspectiveManager extends JPanel {
             String perspectiveTitle =
               ((Perspective) perspective).getPerspectiveTitle();
             m_perspectiveNameLookup.put(perspectiveTitle, impl);
-            settings
-              .applyDefaults(((Perspective) perspective).getDefaultSettings());
+            settings.applyDefaults(((Perspective) perspective)
+              .getDefaultSettings());
           }
         } catch (Exception e) {
           e.printStackTrace();
@@ -693,16 +709,17 @@ public class PerspectiveManager extends JPanel {
 
       settings.applyDefaults(mainAppPerspectiveDefaults);
 
-      SelectedPerspectivePreferences userVisiblePerspectives = settings
-        .getSetting(m_mainApp.getApplicationID(), VISIBLE_PERSPECTIVES_KEY,
-          new SelectedPerspectivePreferences(), Environment.getSystemWide());
+      SelectedPerspectivePreferences userVisiblePerspectives =
+        settings.getSetting(m_mainApp.getApplicationID(),
+          VISIBLE_PERSPECTIVES_KEY, new SelectedPerspectivePreferences(),
+          Environment.getSystemWide());
 
       if (userVisiblePerspectives == defaultEmpty) {
         // no stored settings for this yet. We should start with
         // all perspectives visible
         for (Map.Entry<String, Perspective> e : m_perspectiveCache.entrySet()) {
-          userVisiblePerspectives.getUserVisiblePerspectives()
-            .add(e.getValue().getPerspectiveTitle());
+          userVisiblePerspectives.getUserVisiblePerspectives().add(
+            e.getValue().getPerspectiveTitle());
         }
         userVisiblePerspectives.setPerspectivesToolbarVisibleOnStartup(true);
       }
@@ -833,11 +850,12 @@ public class PerspectiveManager extends JPanel {
    * @return true if the user has specified that the perspective toolbar should
    *         be visible when the application first starts up
    */
-  public boolean
-    userRequestedPerspectiveToolbarVisibleOnStartup(Settings settings) {
-    SelectedPerspectivePreferences perspectivePreferences = settings.getSetting(
-      m_mainApp.getApplicationID(), VISIBLE_PERSPECTIVES_KEY,
-      new SelectedPerspectivePreferences(), Environment.getSystemWide());
+  public boolean userRequestedPerspectiveToolbarVisibleOnStartup(
+    Settings settings) {
+    SelectedPerspectivePreferences perspectivePreferences =
+      settings.getSetting(m_mainApp.getApplicationID(),
+        VISIBLE_PERSPECTIVES_KEY, new SelectedPerspectivePreferences(),
+        Environment.getSystemWide());
     return perspectivePreferences.getPerspectivesToolbarVisibleOnStartup();
   }
 
@@ -846,8 +864,8 @@ public class PerspectiveManager extends JPanel {
    * whether the perspectives toolbar is always hidden or is visible on
    * application startup
    */
-  public static class SelectedPerspectivePreferences
-    implements java.io.Serializable {
+  public static class SelectedPerspectivePreferences implements
+    java.io.Serializable {
     private static final long serialVersionUID = -2665480123235382483L;
 
     protected LinkedList<String> m_userVisiblePerspectives =
@@ -862,8 +880,8 @@ public class PerspectiveManager extends JPanel {
      */
     protected boolean m_perspectivesToolbarAlwaysHidden;
 
-    public void
-      setUserVisiblePerspectives(LinkedList<String> userVisiblePerspectives) {
+    public void setUserVisiblePerspectives(
+      LinkedList<String> userVisiblePerspectives) {
       m_userVisiblePerspectives = userVisiblePerspectives;
     }
 
