@@ -46,32 +46,19 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 /**
- * <!-- globalinfo-start --> A Classifier that applies the LOF (Local Outlier
- * Factor) algorithm to compute an "outlier" score for each instance in the
- * data. The data is expected to have a unary or binary class attribute, which
- * is ignored at training time. The distributionForInstance() method returns the
- * 1 - normalized outlier score in the first element of the distribution. If the
- * class attribute is binary, then the second element holds the normalized
- * outlier score. To evaluate performance of this method for a dataset where
- * outliers/anomalies are known, simply code the outliers using the class
- * attribute: normal cases should correspond to the first value of the class
- * attribute; outliers to the second one.<br>
+ <!-- globalinfo-start -->
+ * A Classifier that applies the LOF (Local Outlier Factor) algorithm to compute an "outlier" score for each instance in the data. The data is expected to have a unary or binary class attribute, which is ignored at training time. The distributionForInstance() method returns 1 - normalized outlier score in the first element of the distribution. If the class attribute is binary, then the second element holds the normalized outlier score. To evaluate performance of this method for a dataset where outliers/anomalies are known, simply code the outliers using the class attribute: normal cases should correspond to the first value of the class attribute; outliers to the second one.<br>
  * <br>
- * Can use multiple cores/cpus to speed up the LOF computation for large
- * datasets. Nearest neighbor search methods and distance functions are
- * pluggable.<br>
+ * Can use multiple cores/cpus to speed up the LOF computation for large datasets. Nearest neighbor search methods and distance functions are pluggable.<br>
  * <br>
  * For more information, see:<br>
  * <br>
- * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000).
- * LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record.
- * 29(2):93-104.
- * <p>
- * <!-- globalinfo-end -->
+ * Markus M. Breunig, Hans-Peter Kriegel, Raymond T. Ng, Jorg Sander (2000). LOF: Identifying Density-Based Local Outliers. ACM SIGMOD Record. 29(2):93-104.
+ * <br><br>
+ <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> BibTeX:
- * </p>
- * 
+ <!-- technical-bibtex-start -->
+ * BibTeX:
  * <pre>
  * &#64;article{Breunig2000,
  *    author = {Markus M. Breunig and Hans-Peter Kriegel and Raymond T. Ng and Jorg Sander},
@@ -84,36 +71,40 @@ import java.util.Vector;
  *    year = {2000}
  * }
  * </pre>
- * <p>
- * <!-- technical-bibtex-end -->
+ * <br><br>
+ <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> Valid options are:
- * </p>
+ <!-- options-start -->
+ * Valid options are: <p>
  * 
- * <pre>
- * -min &lt;num&gt;
+ * <pre> -min &lt;num&gt;
  *  Lower bound on the k nearest neighbors for finding max LOF (minPtsLB)
- *  (default = 10)
- * </pre>
+ *  (default = 10)</pre>
  * 
- * <pre>
- * -max &lt;num&gt;
+ * <pre> -max &lt;num&gt;
  *  Upper bound on the k nearest neighbors for finding max LOF (minPtsUB)
- *  (default = 40)
- * </pre>
+ *  (default = 40)</pre>
  * 
- * <pre>
- * -A
+ * <pre> -A
  *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
  * </pre>
  * 
- * <pre>
- * -num-slots &lt;num&gt;
+ * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
- *  (default 1 - i.e. no parallelism)
- * </pre>
+ *  (default 1 - i.e. no parallelism)</pre>
  * 
- * <!-- options-end -->
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * 
+ <!-- options-end -->
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
@@ -162,12 +153,12 @@ public class LOF extends AbstractClassifier
       + "to compute an \"outlier\" score for each instance in the data. "
       + "The data is expected to have a unary or binary class attribute, which "
       + "is ignored at training time. The distributionForInstance() method returns "
-      + "the outlier score in the first element of the distribution. If the class "
-      + "attribute is binary, then the second element holds one minus this score. "
+      + "1 - normalized outlier score in the first element of the distribution. If the class "
+      + "attribute is binary, then the second element holds the normalized outlier score. "
       + "To evaluate performance of this method for a dataset where outliers/anomalies "
       + "are known, simply code the outliers using the class attribute: normal cases "
-      + "should correspond to the second value of the class attribute; outliers to the "
-      + "first one.\n\nCan use "
+      + "should correspond to the first value of the class attribute; outliers to the "
+      + "second one.\n\nCan use "
       + "multiple cores/cpus to speed up the LOF computation for large datasets. "
       + "Nearest neighbor search methods and distance functions are pluggable."
       + "\n\nFor more information, see:\n\n"
@@ -261,32 +252,37 @@ public class LOF extends AbstractClassifier
    * Parses a given list of options.
    * </p>
    * 
-   * <!-- options-start --> Valid options are: <br>
+   <!-- options-start -->
+   * Valid options are: <p>
    * 
-   * <pre>
-   * -min &lt;num&gt;
+   * <pre> -min &lt;num&gt;
    *  Lower bound on the k nearest neighbors for finding max LOF (minPtsLB)
-   *  (default = 10)
-   * </pre>
+   *  (default = 10)</pre>
    * 
-   * <pre>
-   * -max &lt;num&gt;
+   * <pre> -max &lt;num&gt;
    *  Upper bound on the k nearest neighbors for finding max LOF (minPtsUB)
-   *  (default = 40)
-   * </pre>
+   *  (default = 40)</pre>
    * 
-   * <pre>
-   * -A
+   * <pre> -A
    *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
    * </pre>
    * 
-   * <pre>
-   * -num-slots &lt;num&gt;
+   * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
-   *  (default 1 - i.e. no parallelism)
-   * </pre>
+   *  (default 1 - i.e. no parallelism)</pre>
    * 
-   * <!-- options-end -->
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <pre> -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+   * 
+   <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -568,3 +564,4 @@ public class LOF extends AbstractClassifier
     runClassifier(new LOF(), args);
   }
 }
+
