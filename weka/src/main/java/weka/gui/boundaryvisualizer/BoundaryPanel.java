@@ -558,6 +558,8 @@ public class BoundaryPanel extends JPanel {
       double[] sumOfProbsForRegion = new double[m_trainingData.classAttribute()
         .numValues()];
 
+      double sumOfSums = 0;
+
       for (int u = 0; u < m_numOfSamplesPerRegion; u++) {
 
         double[] sumOfProbsForLocation = new double[m_trainingData
@@ -570,6 +572,7 @@ public class BoundaryPanel extends JPanel {
 
         double[] weights = m_dataGenerator.getWeights();
         double sumOfWeights = Utils.sum(weights);
+        sumOfSums += sumOfWeights;
         int[] indices = Utils.sort(weights);
 
         // Prune 1% of weight mass
@@ -610,12 +613,12 @@ public class BoundaryPanel extends JPanel {
         }
 
         for (int k = 0; k < sumOfProbsForRegion.length; k++) {
-          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] * sumOfWeights);
+          sumOfProbsForRegion[k] += (sumOfProbsForLocation[k] / m_numOfSamplesPerGenerator);
         }
       }
 
       // average
-      Utils.normalize(sumOfProbsForRegion);
+      Utils.normalize(sumOfProbsForRegion, sumOfSums);
 
       // cache
       if ((i < m_panelHeight) && (j < m_panelWidth)) {
