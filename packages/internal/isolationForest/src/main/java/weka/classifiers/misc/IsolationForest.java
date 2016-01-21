@@ -15,10 +15,10 @@
 
 /*
  *    IsolationForest.java
- *    Copyright (C) 2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-16 University of Waikato, Hamilton, New Zealand
  *
  */
-package weka.classifiers.trees;
+package weka.classifiers.misc;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -40,11 +40,61 @@ import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> <!-- globalinfo-end -->
+ * <!-- globalinfo-start -->
+ * Implements the isolation forest method for anomaly detection.<br>
+ * <br>
+ * Note that this classifier is designed for anomaly detection, it is not designed for solving two-class or multi-class classification problems!<br>
+ * <br>
+ * The data is expected to have have a class attribute with one or two values, which is ignored at training time. The distributionForInstance() method returns (1 - anomaly score) as the first element in the distribution, the second element (in the case of two classes) is the anomaly score.<br>
+ * <br>
+ * To evaluate performance of this method for a dataset where anomalies are known, simply code the anomalies using the class attribute: normal cases should correspond to the first value of the class attribute, anomalies to the second one.<br>
+ * <br>
+ * For more information, see:<br>
+ * <br>
+ * Fei Tony Liu, Kai Ming Ting, Zhi-Hua Zhou: Isolation Forest. In: ICDM, 413-422, 2008.
+ * <br><br>
+ * <!-- globalinfo-end -->
  * 
- * <!-- technical-bibtex-start --> <!-- technical-bibtex-end -->
+ * <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Liu2008,
+ *    author = {Fei Tony Liu and Kai Ming Ting and Zhi-Hua Zhou},
+ *    booktitle = {ICDM},
+ *    pages = {413-422},
+ *    publisher = {IEEE Computer Society},
+ *    title = {Isolation Forest},
+ *    year = {2008}
+ * }
+ * </pre>
+ * <br><br>
+ * <!-- technical-bibtex-end -->
  * 
- * <!-- options-start --> <!-- options-end -->
+ * <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -I &lt;number of trees&gt;
+ *  The number of trees in the forest (default 100).</pre>
+ * 
+ * <pre> -N &lt;the size of the subsample for each tree&gt;
+ *  The subsample size for each tree (default 256).</pre>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * 
+ * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
@@ -69,15 +119,17 @@ public class IsolationForest extends RandomizableClassifier implements
    */
   public String globalInfo() {
 
-    return "Implements the isolation forest method for anomaly detection. "
-      + "The data is expected to have two class values for the class attribute, "
+    return "Implements the isolation forest method for anomaly detection.\n\n"
+      + "Note that this classifier is designed for anomaly detection, it is not designed for solving " 
+      + "two-class or multi-class classification problems!\n\n"
+      + "The data is expected to have have a class attribute with one or two values, "
       + "which is ignored at training time. The distributionForInstance() "
-      + "method returns the anomaly score as the first element in the distribution, "
-      + "the second element is one minus this score.\n\nTo evaluate performance "
+      + "method returns (1 - anomaly score) as the first element in the distribution, "
+      + "the second element (in the case of two classes) is the anomaly score.\n\nTo evaluate performance "
       + "of this method for a dataset where anomalies are known, simply "
       + "code the anomalies using the class attribute: normal cases should "
-      + "correspond to the second value of the class attribute, anomalies to "
-      + "the first one." + "\n\nFor more information, see:\n\n"
+      + "correspond to the first value of the class attribute, anomalies to "
+      + "the second one." + "\n\nFor more information, see:\n\n"
       + getTechnicalInformation().toString();
   }
 
@@ -117,6 +169,7 @@ public class IsolationForest extends RandomizableClassifier implements
     result.enable(Capability.DATE_ATTRIBUTES);
 
     // class
+    result.enable(Capability.UNARY_CLASS);
     result.enable(Capability.BINARY_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
 
@@ -248,9 +301,33 @@ public class IsolationForest extends RandomizableClassifier implements
 
   /**
    * Parses a given list of options.
-   * <p/>
+   * <p>
    * 
-   * <!-- options-start --> <!-- options-end -->
+   * <!-- options-start -->
+   * Valid options are: <p>
+   * 
+   * <pre> -I &lt;number of trees&gt;
+   *  The number of trees in the forest (default 100).</pre>
+   * 
+   * <pre> -N &lt;the size of the subsample for each tree&gt;
+   *  The subsample size for each tree (default 256).</pre>
+   * 
+   * <pre> -S &lt;num&gt;
+   *  Random number seed.
+   *  (default 1)</pre>
+   * 
+   * <pre> -output-debug-info
+   *  If set, classifier is run in debug mode and
+   *  may output additional info to the console</pre>
+   * 
+   * <pre> -do-not-check-capabilities
+   *  If set, classifier capabilities are not checked before classifier is built
+   *  (use with caution).</pre>
+   * 
+   * <pre> -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+   * 
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -306,7 +383,7 @@ public class IsolationForest extends RandomizableClassifier implements
 
   /**
    * Returns the average path length of an unsuccessful search. Returns 0 if
-   * argument <= 1
+   * argument is less than or equal to 1
    */
   public static double c(double n) {
 
@@ -328,9 +405,11 @@ public class IsolationForest extends RandomizableClassifier implements
     }
     avgPathLength /= m_trees.length;
 
-    double[] scores = new double[2];
-    scores[0] = Math.pow(2, -avgPathLength / c(m_subsampleSize));
-    scores[1] = 1.0 - scores[0];
+    double[] scores = new double[inst.numClasses()];
+    scores[0] = 1.0 - Math.pow(2, -avgPathLength / c(m_subsampleSize));
+    if (scores.length > 1) {
+      scores[1] = 1.0 - scores[0];
+    }
 
     return scores;
   }
@@ -446,3 +525,4 @@ public class IsolationForest extends RandomizableClassifier implements
     }
   }
 }
+
