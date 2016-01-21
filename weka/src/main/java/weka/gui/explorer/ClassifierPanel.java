@@ -21,64 +21,6 @@
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
-
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.CostMatrix;
@@ -144,6 +86,63 @@ import weka.gui.visualize.plugins.ErrorVisualizePlugin;
 import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 import weka.gui.visualize.plugins.VisualizePlugin;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This panel allows the user to select and configure a classifier, set the
@@ -2820,20 +2819,8 @@ public class ClassifierPanel extends AbstractPerspective implements
               throw new Exception("No user test set has been specified");
             }
             if (trainHeader != null) {
-              boolean compatibilityProblem = false;
-              if (trainHeader.classIndex() > userTestStructure.numAttributes() - 1) {
-                compatibilityProblem = true;
-                // throw new Exception("Train and test set are not compatible");
-              }
-              userTestStructure.setClassIndex(trainHeader.classIndex());
               if (!trainHeader.equalHeaders(userTestStructure)) {
-                compatibilityProblem = true;
-                // throw new
-                // Exception("Train and test set are not compatible:\n" +
-                // trainHeader.equalHeadersMsg(userTestStructure));
-
-                if (compatibilityProblem
-                  && !(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
+                if (!(classifierToUse instanceof weka.classifiers.misc.InputMappedClassifier)) {
 
                   boolean wrapClassifier = false;
                   if (!Utils
@@ -2879,6 +2866,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
                     temp.setClassifier(classifierToUse);
                     temp.setModelHeader(trainHeader);
+                    temp.setTestStructure(userTestStructure);
                     classifierToUse = temp;
                   } else {
                     throw new Exception(
@@ -2920,13 +2908,11 @@ public class ClassifierPanel extends AbstractPerspective implements
             // visualization if selected
             // if (saveVis) {
             plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-            plotInstances.setInstances(userTestStructure);
+            plotInstances.setInstances(trainHeader != null ? trainHeader : userTestStructure);
             plotInstances.setClassifier(classifierToUse);
-            plotInstances.setClassIndex(userTestStructure.classIndex());
+            plotInstances.setClassIndex(trainHeader != null ? trainHeader.classIndex() : userTestStructure.classIndex());
             plotInstances.setSaveForVisualization(saveVis);
             plotInstances.setEvaluation(eval);
-            plotInstances.setUp();
-            // }
 
             outBuff.append("\n=== Re-evaluation on test set ===\n\n");
             outBuff.append("User supplied test set\n");
@@ -2954,18 +2940,14 @@ public class ClassifierPanel extends AbstractPerspective implements
                 (AbstractOutput) m_ClassificationOutputEditor.getValue();
               classificationOutput.setHeader(userTestStructure);
               classificationOutput.setBuffer(outBuff);
-              /*
-               * classificationOutput.setAttributes("");
-               * classificationOutput.setOutputDistribution(false);
-               */
-              // classificationOutput.printHeader();
             }
 
             // make adjustments if the classifier is an InputMappedClassifier
             eval =
-              setupEval(eval, classifierToUse, userTestStructure, costMatrix,
+              setupEval(eval, classifierToUse, trainHeader != null ? trainHeader : userTestStructure, costMatrix,
                 plotInstances, classificationOutput, false);
             eval.useNoPriors();
+            plotInstances.setUp();
 
             if (outputPredictionsText) {
               printPredictionsHeader(outBuff, classificationOutput,
