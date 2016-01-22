@@ -1,0 +1,44 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=iterativeAbsoluteErrorRegression
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2016-01-22
+
+# Title (required)
+Title=A meta learner that fits a regression model to minimize absolute error.
+
+Category=Regression
+
+# Author (required)
+Author=Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides a regression scheme that uses Schlossmacher's iteratively reweighted least squares method to fit a model that minimizes absolute error. The scheme can be used with any base learner in WEKA that performs least-squares regression.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/iterativeAbsoluteErrorRegression1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/iterativeAbsoluteErrorRegression
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=WrapperSubsetEval
+
+# Dependencies
+Depends=weka (>=3.7.1)
