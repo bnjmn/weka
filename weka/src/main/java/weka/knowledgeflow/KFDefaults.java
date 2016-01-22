@@ -63,24 +63,30 @@ public class KFDefaults extends Defaults {
         + "the names of steps and connections on the layout");
   public static final int STEP_LABEL_FONT_SIZE = 9;
 
+  public static final Settings.SettingKey LOGGING_LEVEL_KEY =
+    new Settings.SettingKey(MAIN_PERSPECTIVE_ID + ".loggingLevel", "Logging level",
+      "The logging level to use");
+  public static final LoggingLevel LOGGING_LEVEL = LoggingLevel.BASIC;
+
+  protected static final Settings.SettingKey LOG_MESSAGE_FONT_SIZE_KEY =
+    new Settings.SettingKey(MAIN_PERSPECTIVE_ID + ".logMessageFontSize",
+      "Size of font for log " + "messages",
+      "Size of font for log messages (-1 = system default)");
+  protected static final int LOG_MESSAGE_FONT_SIZE = -1;
+
   // Global app settings
   public static final Settings.SettingKey SHOW_JTREE_TIP_TEXT_KEY =
     new Settings.SettingKey(APP_ID + ".showGlobalInfoTipText",
       "Show scheme tool tips in tree view", "");
   public static final boolean SHOW_JTREE_GLOBAL_INFO_TIPS = true;
 
-  public static final Settings.SettingKey LOGGING_LEVEL_KEY =
-    new Settings.SettingKey(APP_ID + ".loggingLevel", "Logging level",
-      "The logging level to use");
-  public static final LoggingLevel LOGGING_LEVEL = LoggingLevel.BASIC;
-
   protected static final Settings.SettingKey[] DEFAULT_KEYS = {
     MAX_UNDO_POINTS_KEY, LAYOUT_COLOR_KEY, SHOW_GRID_KEY, GRID_COLOR_KEY,
     GRID_SPACING_KEY, LAYOUT_WIDTH_KEY, LAYOUT_HEIGHT_KEY,
-    STEP_LABEL_FONT_SIZE_KEY };
+    STEP_LABEL_FONT_SIZE_KEY, LOGGING_LEVEL_KEY, LOG_MESSAGE_FONT_SIZE_KEY };
   protected static final Object[] DEFAULT_VALUES = { MAX_UNDO_POINTS,
     LAYOUT_COLOR, SHOW_GRID, GRID_COLOR, GRID_SPACING, LAYOUT_WIDTH,
-    LAYOUT_HEIGHT, STEP_LABEL_FONT_SIZE };
+    LAYOUT_HEIGHT, STEP_LABEL_FONT_SIZE, LOGGING_LEVEL, LOG_MESSAGE_FONT_SIZE };
 
   /*
    * protected static void setDefaults(KFSettings props) { for (int i = 0; i <

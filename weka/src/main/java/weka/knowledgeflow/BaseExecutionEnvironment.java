@@ -145,8 +145,9 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   public void setSettings(Settings settings) {
     m_settings = settings;
 
-    m_logHandler.setLoggingLevel(m_settings.getSetting(KFDefaults.APP_ID,
-      KFDefaults.LOGGING_LEVEL_KEY, KFDefaults.LOGGING_LEVEL));
+    m_logHandler.setLoggingLevel(m_settings.getSetting(
+      KFDefaults.MAIN_PERSPECTIVE_ID, KFDefaults.LOGGING_LEVEL_KEY,
+      KFDefaults.LOGGING_LEVEL));
   }
 
   @Override
@@ -218,9 +219,9 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
     throws WekaException {
 
     m_logHandler.logDebug("Submitting " + stepTask.toString()
-      + (stepTask.isResourceIntensive() ?  " (resource intensive)" : ""));
-    return stepTask.isResourceIntensive() ? m_clientExecutorService.submit(stepTask)
-      : m_executorService.submit(stepTask);
+      + (stepTask.isResourceIntensive() ? " (resource intensive)" : ""));
+    return stepTask.isResourceIntensive() ? m_clientExecutorService
+      .submit(stepTask) : m_executorService.submit(stepTask);
   }
 
   /**
@@ -278,19 +279,21 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
       m_executorService.shutdownNow();
     }
 
-    m_logHandler.logDebug(
-      "Requested number of threads for main step executor: " + numThreadsMain);
-    m_logHandler.logDebug("Requested number of threads for high load executor: "
-      + (numThreadsHighLoad > 0 ? numThreadsHighLoad
-        : Runtime.getRuntime().availableProcessors()));
+    m_logHandler
+      .logDebug("Requested number of threads for main step executor: "
+        + numThreadsMain);
+    m_logHandler
+      .logDebug("Requested number of threads for high load executor: "
+        + (numThreadsHighLoad > 0 ? numThreadsHighLoad : Runtime.getRuntime()
+          .availableProcessors()));
     m_executorService =
       numThreadsMain > 0 ? Executors.newFixedThreadPool(numThreadsMain)
         : Executors.newCachedThreadPool();
 
     m_clientExecutorService =
       numThreadsHighLoad > 0 ? Executors.newFixedThreadPool(numThreadsHighLoad)
-        : Executors
-          .newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+        : Executors.newFixedThreadPool(Runtime.getRuntime()
+          .availableProcessors());
   }
 
   /**
@@ -318,8 +321,7 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
     throws WekaException {
 
     m_logHandler.logDebug("Submitting " + startPoint.getName()
-      + (startPoint.stepIsResourceIntensive() ? " (resource intensive)"
-        : ""));
+      + (startPoint.stepIsResourceIntensive() ? " (resource intensive)" : ""));
     if (startPoint.stepIsResourceIntensive()) {
       submitTask(new StepTask<Void>(null) {
 
@@ -399,8 +401,8 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
     public static final int STEP_EXECUTOR_SERVICE_NUM_THREADS = 50;
 
     public static final Settings.SettingKey RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS_KEY =
-      new Settings.SettingKey(
-        KFDefaults.APP_ID + ".highResourceExecutorNumThreads",
+      new Settings.SettingKey(KFDefaults.APP_ID
+        + ".highResourceExecutorNumThreads",
         "Number of threads to use in the resource intensive executor service",
         "<html>This executor service is used for executing StepTasks and<br>"
           + "Steps that are marked as resource intensive. 0 = use as many<br>"

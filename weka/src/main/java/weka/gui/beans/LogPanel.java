@@ -21,14 +21,7 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Iterator;
+import weka.gui.Logger;
 
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -38,8 +31,14 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
-
-import weka.gui.Logger;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.HashMap;
+import java.util.Iterator;
 
 /**
  * Class for displaying a status area (made up of a variable number of lines)
@@ -438,6 +437,16 @@ public class LogPanel extends JPanel implements Logger {
     });
     m_timers.put(stepHash, newTimer);
     newTimer.start();
+  }
+
+  /**
+   * Set the size of the font used in the log message area. <= 0 will use the
+   * default for JTextArea.
+   *
+   * @param size the size of the font to use in the log message area
+   */
+  public void setLoggingFontSize(int size) {
+    m_logPanel.setLoggingFontSize(size);
   }
 
   /**

@@ -1,7 +1,29 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    KnowledgeFlowApp.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow;
 
 import weka.core.Defaults;
 import weka.core.Environment;
+import weka.core.Memory;
 import weka.core.Settings;
 import weka.gui.AbstractGUIApplication;
 import weka.gui.GenericObjectEditor;
@@ -13,8 +35,10 @@ import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionEnvironment;
 import weka.knowledgeflow.KFDefaults;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import java.awt.BorderLayout;
+import java.awt.Image;
+import java.awt.Toolkit;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,12 +46,23 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Main Knowledge Flow application class
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class KnowledgeFlowApp extends AbstractGUIApplication {
 
   private static final long serialVersionUID = -1460599392623083983L;
+
+  /** for monitoring the Memory consumption */
+  protected static Memory m_Memory = new Memory(true);
+
+  /**
+   * variable for the KnowledgeFlowApp class which would be set to null by the
+   * memory monitoring thread to free up some memory if we running out of memory
+   */
+  protected static KnowledgeFlowApp m_kfApp;
 
   protected Settings m_kfProperties;
 
@@ -47,12 +82,13 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     m_perspectiveManager
       .addSettingsMenuItemToProgramMenu(getApplicationSettings());
 
-    if (m_perspectiveManager.userRequestedPerspectiveToolbarVisibleOnStartup(
-      getApplicationSettings())) {
+    if (m_perspectiveManager
+      .userRequestedPerspectiveToolbarVisibleOnStartup(getApplicationSettings())) {
       showPerspectivesToolBar();
     }
   }
 
+  @Override
   public String getApplicationName() {
     return KFDefaults.APP_NAME;
   }
@@ -81,14 +117,15 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
       m_kfProperties = new Settings("weka", KFDefaults.APP_ID);
       Defaults kfDefaults = new KnowledgeFlowGeneralDefaults();
 
-      String envName = m_kfProperties.getSetting(KFDefaults.APP_ID,
-        KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
-        KnowledgeFlowGeneralDefaults.EXECUTION_ENV,
-        Environment.getSystemWide());
+      String envName =
+        m_kfProperties.getSetting(KFDefaults.APP_ID,
+          KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
+          KnowledgeFlowGeneralDefaults.EXECUTION_ENV,
+          Environment.getSystemWide());
       try {
-        ExecutionEnvironment envForDefaults = (ExecutionEnvironment) (envName
-          .equals(BaseExecutionEnvironment.DESCRIPTION)
-            ? new BaseExecutionEnvironment()
+        ExecutionEnvironment envForDefaults =
+          (ExecutionEnvironment) (envName
+            .equals(BaseExecutionEnvironment.DESCRIPTION) ? new BaseExecutionEnvironment()
             : PluginManager.getPluginInstance(
               ExecutionEnvironment.class.getCanonicalName(), envName));
 
@@ -107,9 +144,10 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
 
   @Override
   public void settingsChanged() {
-    boolean showTipText = getApplicationSettings().getSetting(KFDefaults.APP_ID,
-      KFDefaults.SHOW_JTREE_TIP_TEXT_KEY,
-      KFDefaults.SHOW_JTREE_GLOBAL_INFO_TIPS, Environment.getSystemWide());
+    boolean showTipText =
+      getApplicationSettings().getSetting(KFDefaults.APP_ID,
+        KFDefaults.SHOW_JTREE_TIP_TEXT_KEY,
+        KFDefaults.SHOW_JTREE_GLOBAL_INFO_TIPS, Environment.getSystemWide());
     GenericObjectEditor.setShowGlobalInfoToolTips(showTipText);
 
     m_mainPerspective.m_stepTree.setShowLeafTipText(showTipText);
@@ -140,10 +178,10 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
       m_defaults.put(LAF_KEY, LAF);
       m_defaults.put(KFDefaults.SHOW_JTREE_TIP_TEXT_KEY,
         KFDefaults.SHOW_JTREE_GLOBAL_INFO_TIPS);
-      m_defaults.put(KFDefaults.LOGGING_LEVEL_KEY, KFDefaults.LOGGING_LEVEL);
 
-      Set<String> execs = PluginManager
-        .getPluginNamesOfType(ExecutionEnvironment.class.getCanonicalName());
+      Set<String> execs =
+        PluginManager.getPluginNamesOfType(ExecutionEnvironment.class
+          .getCanonicalName());
       List<String> execList = new ArrayList<String>();
       // make sure the default is listed first
       execList.add(BaseExecutionEnvironment.DESCRIPTION);
@@ -161,8 +199,8 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
 
   public static void main(String[] args) {
     try {
-      LookAndFeel.setLookAndFeel(KFDefaults.APP_ID,
-        KFDefaults.APP_ID + ".lookAndFeel");
+      LookAndFeel.setLookAndFeel(KFDefaults.APP_ID, KFDefaults.APP_ID
+        + ".lookAndFeel");
     } catch (IOException ex) {
       ex.printStackTrace();
     }
@@ -172,32 +210,67 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
       if (System.getProperty("os.name").contains("Mac")) {
         System.setProperty("apple.laf.useScreenMenuBar", "true");
       }
-      KnowledgeFlowApp app = new KnowledgeFlowApp();
+      m_kfApp = new KnowledgeFlowApp();
 
       if (args.length == 1) {
         File toLoad = new File(args[0]);
         if (toLoad.exists() && toLoad.isFile()) {
-          ((MainKFPerspective) app.getMainPerspective()).loadLayout(toLoad,
+          ((MainKFPerspective) m_kfApp.getMainPerspective()).loadLayout(toLoad,
             false);
         }
       }
       final javax.swing.JFrame jf =
-        new javax.swing.JFrame("Weka " + app.getApplicationName());
+        new javax.swing.JFrame("Weka " + m_kfApp.getApplicationName());
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
-      Image icon = Toolkit.getDefaultToolkit().getImage(KnowledgeFlowApp.class
-        .getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+      Image icon =
+        Toolkit.getDefaultToolkit().getImage(
+          KnowledgeFlowApp.class.getClassLoader().getResource(
+            "weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 
-      jf.getContentPane().add(app, BorderLayout.CENTER);
+      jf.getContentPane().add(m_kfApp, BorderLayout.CENTER);
 
       jf.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
       jf.pack();
-      app.showMenuBar(jf);
-      jf.setSize(1024, 768);
+      m_kfApp.showMenuBar(jf);
+      jf.setSize(1023, 768);
       jf.setVisible(true);
+      // weird effect where, if there are more perspectives than would fit
+      // in one row horizontally in the perspective manager, then the WrapLayout
+      // does not wrap when the Frame is first pack()ed. No amount of
+      // invalidating/revalidating/repainting components
+      // and ancestors seems to make a difference. Resizing - even by one pixel -
+      // however, does force it to re-layout and wrap. Perhaps this is an OSX bug...
+      jf.setSize(1024, 768);
 
+      Thread memMonitor = new Thread() {
+        @Override
+        public void run() {
+          while (true) {
+            // try {
+            // System.out.println("Before sleeping.");
+            // Thread.sleep(10);
+
+            if (m_Memory.isOutOfMemory()) {
+              // clean up
+              jf.dispose();
+              m_kfApp = null;
+              System.gc();
+
+              // display error
+              System.err.println("\ndisplayed message:");
+              m_Memory.showOutOfMemory();
+              System.err.println("\nexiting");
+              System.exit(-1);
+            }
+          }
+        }
+      };
+
+      memMonitor.setPriority(Thread.MAX_PRIORITY);
+      memMonitor.start();
     } catch (Exception ex) {
       ex.printStackTrace();
     }

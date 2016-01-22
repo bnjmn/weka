@@ -109,8 +109,8 @@ public class MainKFPerspective extends AbstractPerspective {
   protected String m_pasteBuffer = null;
 
   /** The file chooser for loading/saving layout files */
-  protected JFileChooser m_FileChooser =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+    System.getProperty("user.dir")));
 
   /** Manages template flows */
   protected TemplateManager m_templateManager = new TemplateManager();
@@ -160,8 +160,8 @@ public class MainKFPerspective extends AbstractPerspective {
     FileFilter nativeF = null;
     for (FileFilter f : Flow.FLOW_FILE_EXTENSIONS) {
       m_FileChooser.addChoosableFileFilter(f);
-      if (((ExtensionFileFilter) f).getExtensions()[0]
-        .equals("." + JSONFlowLoader.EXTENSION)) {
+      if (((ExtensionFileFilter) f).getExtensions()[0].equals("."
+        + JSONFlowLoader.EXTENSION)) {
         nativeF = f;
       }
     }
@@ -206,8 +206,8 @@ public class MainKFPerspective extends AbstractPerspective {
    * @param title the title for the dialog
    * @param isWarning true if the dialog should be a warning dialog
    */
-  public void showInfoDialog(Object information, String title,
-    boolean isWarning) {
+  public void
+    showInfoDialog(Object information, String title, boolean isWarning) {
     m_mainApplication.showInfoDialog(information, title, isWarning);
   }
 
@@ -231,9 +231,9 @@ public class MainKFPerspective extends AbstractPerspective {
    * @return true if snap-to-grid is turned on
    */
   public boolean getSnapToGrid() {
-    return ((JToggleButton) m_mainToolBar.getWidget(
-      MainKFPerspectiveToolBar.Widgets.SNAP_TO_GRID_BUTTON.toString()))
-        .isSelected();
+    return ((JToggleButton) m_mainToolBar
+      .getWidget(MainKFPerspectiveToolBar.Widgets.SNAP_TO_GRID_BUTTON
+        .toString())).isSelected();
   }
 
   /**
@@ -267,8 +267,7 @@ public class MainKFPerspective extends AbstractPerspective {
    * @param steps a list of steps to copy
    * @throws WekaException if a problem occurs
    */
-  public void copyStepsToClipboard(List<StepVisual> steps)
-    throws WekaException {
+  public void copyStepsToClipboard(List<StepVisual> steps) throws WekaException {
     if (steps.size() > 0) {
       m_pasteBuffer =
         VisibleLayout.serializeStepsToJSON(steps, "Clipboard copy");
@@ -395,14 +394,14 @@ public class MainKFPerspective extends AbstractPerspective {
       }
 
       m_mainToolBar.enableWidget(
-        MainKFPerspectiveToolBar.Widgets.CUT_BUTTON.toString(),
-        current.getSelectedSteps().size() > 0 && !current.isExecuting());
+        MainKFPerspectiveToolBar.Widgets.CUT_BUTTON.toString(), current
+          .getSelectedSteps().size() > 0 && !current.isExecuting());
       m_mainToolBar.enableWidget(
-        MainKFPerspectiveToolBar.Widgets.COPY_BUTTON.toString(),
-        current.getSelectedSteps().size() > 0 && !current.isExecuting());
+        MainKFPerspectiveToolBar.Widgets.COPY_BUTTON.toString(), current
+          .getSelectedSteps().size() > 0 && !current.isExecuting());
       m_mainToolBar.enableWidget(
-        MainKFPerspectiveToolBar.Widgets.DELETE_BUTTON.toString(),
-        current.getSelectedSteps().size() > 0 && !current.isExecuting());
+        MainKFPerspectiveToolBar.Widgets.DELETE_BUTTON.toString(), current
+          .getSelectedSteps().size() > 0 && !current.isExecuting());
       m_mainToolBar.enableWidget(
         MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
         current.numSteps() > 0 && !current.isExecuting());
@@ -444,10 +443,12 @@ public class MainKFPerspective extends AbstractPerspective {
 
     if (m_flowGraphs.get(tabIndex).getEdited()) {
       String tabTitle = m_flowTabs.getTitleAt(tabIndex);
-      String message = "\"" + tabTitle + "\" has been modified. Save changes "
-        + "before closing?";
-      int result = JOptionPane.showConfirmDialog(this, message, "Save changes",
-        JOptionPane.YES_NO_CANCEL_OPTION);
+      String message =
+        "\"" + tabTitle + "\" has been modified. Save changes "
+          + "before closing?";
+      int result =
+        JOptionPane.showConfirmDialog(this, message, "Save changes",
+          JOptionPane.YES_NO_CANCEL_OPTION);
 
       if (result == JOptionPane.YES_OPTION) {
         saveLayout(tabIndex, false);
@@ -504,8 +505,8 @@ public class MainKFPerspective extends AbstractPerspective {
    * @return the value (or default value) for the setting
    */
   public <T> T getSetting(Settings.SettingKey propKey, T defaultVal) {
-    return m_mainApplication.getApplicationSettings()
-      .getSetting(getPerspectiveID(), propKey, defaultVal, null);
+    return m_mainApplication.getApplicationSettings().getSetting(
+      getPerspectiveID(), propKey, defaultVal, null);
   }
 
   public void notifyIsDirty() {
@@ -548,8 +549,9 @@ public class MainKFPerspective extends AbstractPerspective {
         .addVariable(FLOW_PARENT_DIRECTORY_VARIABLE_KEY, absoluteF.getParent());
     } else {
       String tabTitle = fFile.toString();
-      tabTitle = tabTitle.substring(tabTitle.lastIndexOf(File.separator) + 1,
-        tabTitle.length());
+      tabTitle =
+        tabTitle.substring(tabTitle.lastIndexOf(File.separator) + 1,
+          tabTitle.length());
       if (tabTitle.lastIndexOf('.') > 0) {
         tabTitle = tabTitle.substring(0, tabTitle.lastIndexOf('.'));
       }
@@ -593,10 +595,11 @@ public class MainKFPerspective extends AbstractPerspective {
   }
 
   public boolean getDebug() {
-    return getMainApplication().getApplicationSettings()
+    return getMainApplication()
+      .getApplicationSettings()
       .getSetting(getPerspectiveID(), KFDefaults.LOGGING_LEVEL_KEY,
-        LoggingLevel.BASIC, Environment.getSystemWide())
-      .ordinal() == LoggingLevel.DEBUGGING.ordinal();
+        LoggingLevel.BASIC, Environment.getSystemWide()).ordinal() == LoggingLevel.DEBUGGING
+      .ordinal();
   }
 
   public MainKFPerspectiveToolBar getMainToolBar() {
@@ -608,8 +611,8 @@ public class MainKFPerspective extends AbstractPerspective {
     if (active) {
       // are we operating as a non-primary perspective somewhere other
       // than in the Knowledge Flow?
-      if (!getMainApplication().getApplicationID()
-        .equalsIgnoreCase(KFDefaults.APP_ID)) {
+      if (!getMainApplication().getApplicationID().equalsIgnoreCase(
+        KFDefaults.APP_ID)) {
         // check number of tabs and create a new one if none are open
         if (getNumTabs() == 0) {
           addUntitledTab();
@@ -634,6 +637,18 @@ public class MainKFPerspective extends AbstractPerspective {
   }
 
   @Override
+  public void settingsChanged() {
+    Settings settings = getMainApplication().getApplicationSettings();
+    int fontSize =
+      settings.getSetting(KFDefaults.MAIN_PERSPECTIVE_ID,
+        new Settings.SettingKey(KFDefaults.MAIN_PERSPECTIVE_ID
+          + ".logMessageFontSize", "", ""), -1);
+    for (VisibleLayout v : m_flowGraphs) {
+      v.getLogPanel().setLoggingFontSize(fontSize);
+    }
+  }
+
+  @Override
   public boolean acceptsInstances() {
     // allow instances only if running in the Workbench and the user has
     // opted to manually send loaded instances to perspectives. This is because
@@ -641,11 +656,12 @@ public class MainKFPerspective extends AbstractPerspective {
     // a set of instances. The MemoryDataSource keeps a reference to the data.
     GUIApplication mainApp = getMainApplication();
     if (mainApp.getApplicationID().equals(WorkbenchDefaults.APP_ID)) {
-      boolean sendToAll = mainApp.getApplicationSettings().getSetting(
-        PreprocessPanel.PreprocessDefaults.ID,
-        PreprocessPanel.PreprocessDefaults.ALWAYS_SEND_INSTANCES_TO_ALL_KEY,
-        PreprocessPanel.PreprocessDefaults.ALWAYS_SEND_INSTANCES_TO_ALL,
-        Environment.getSystemWide());
+      boolean sendToAll =
+        mainApp.getApplicationSettings().getSetting(
+          PreprocessPanel.PreprocessDefaults.ID,
+          PreprocessPanel.PreprocessDefaults.ALWAYS_SEND_INSTANCES_TO_ALL_KEY,
+          PreprocessPanel.PreprocessDefaults.ALWAYS_SEND_INSTANCES_TO_ALL,
+          Environment.getSystemWide());
 
       return !sendToAll;
     }
