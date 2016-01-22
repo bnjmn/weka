@@ -14,8 +14,8 @@
  */
 
 /*
- *    AdditiveRegression.java
- *    Copyright (C) 2000-2012 University of Waikato, Hamilton, New Zealand
+ *    IterativeAbsoluteErrorRegression.java
+ *    Copyright (C) 2015-16 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -34,12 +34,70 @@ import java.util.Random;
 
 /**
  * <!-- globalinfo-start -->
+ * Iteratively fits a regression model by attempting to minimize absolute error, using a base learner that minimizes weighted squared error.<br>
+ * <br>
+ * Weights are bounded from below by 1.0 / Utils.SMALL.<br>
+ * <br>
+ * Resamples data based on weights if base learner is not a WeightedInstancesHandler.<br>
+ * <br>
+ * For more information see:<br>
+ * <br>
+ * E. J. Schlossmacher (1973). An Iterative Technique for Absolute Deviations Curve Fitting. Journal of the American Statistical Association. 68(344).
+ * <br><br>
  * <!-- globalinfo-end -->
  *
  * <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;article{Schlossmacher1973,
+ *    author = {E. J. Schlossmacher},
+ *    journal = {Journal of the American Statistical Association},
+ *    number = {344},
+ *    title = {An Iterative Technique for Absolute Deviations Curve Fitting},
+ *    volume = {68},
+ *    year = {1973}
+ * }
+ * </pre>
+ * <br><br>
  * <!-- technical-bibtex-end -->
  *
  * <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -W
+ *  Full name of base classifier.
+ *  (default: weka.classifiers.trees.DecisionStump)</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * 
+ * <pre> 
+ * Options specific to classifier weka.classifiers.trees.DecisionStump:
+ * </pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * 
  * <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -49,7 +107,7 @@ public class IterativeAbsoluteErrorRegression extends RandomizableSingleClassifi
         implements TechnicalInformationHandler {
 
   /** for serialization */
-  static final long serialVersionUID = -2368937577670527151L;
+  static final long serialVersionUID = -2368837579670527151L;
 
   /** The number of iterations that have been performed **/
   protected int m_NumIterations = -1;
@@ -60,7 +118,7 @@ public class IterativeAbsoluteErrorRegression extends RandomizableSingleClassifi
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Iteratively fits a regression model by attempting to minimize absolute error, based on"
+    return "Iteratively fits a regression model by attempting to minimize absolute error, using"
             + "a base learner that minimizes weighted squared error.\n\n"
             + "Weights are bounded from below by 1.0 / Utils.SMALL.\n\n"
             + "Resamples data based on weights if base learner is not a WeightedInstancesHandler.\n\n"
@@ -332,3 +390,4 @@ public class IterativeAbsoluteErrorRegression extends RandomizableSingleClassifi
     runClassifier(new IterativeAbsoluteErrorRegression(), argv);
   }
 }
+
