@@ -62,7 +62,7 @@ import java.util.Random;
  * <!-- technical-bibtex-end -->
  *
  * <!-- options-start -->
- * Valid options are: <p>
+ * Valid options are: <br><br>
  * 
  * <pre> -S &lt;num&gt;
  *  Random number seed.
