@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>iterativeAbsoluteErrorRegression</artifactId>
-  <version>1.0.0</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>iterativeAbsoluteErrorRegression</name>
@@ -47,9 +47,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/iterativeAbsoluteErrorRegression-1.0.0</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/iterativeAbsoluteErrorRegression-1.0.0</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/iterativeAbsoluteErrorRegression-1.0.0</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/iterativeAbsoluteErrorRegression</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/iterativeAbsoluteErrorRegression</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/iterativeAbsoluteErrorRegression</url>
   </scm>
 
   <profiles>
