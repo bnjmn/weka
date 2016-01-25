@@ -79,7 +79,7 @@ public class AddValuesTest
    * @param data2 the other set of instances
    * @throws Exception if the datasets differ
    */
-  protected void compareDatasets(Instances data1, Instances data2)
+  protected void compDatasets(Instances data1, Instances data2)
     throws Exception {
     
     if (data1.numAttributes() != data2.numAttributes())
@@ -133,7 +133,7 @@ public class AddValuesTest
     }
 
     try {
-      compareDatasets(icopy, result);
+      compDatasets(icopy, result);
     } 
     catch (Exception ex) {
       ex.printStackTrace();
