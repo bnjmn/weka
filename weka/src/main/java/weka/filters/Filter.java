@@ -338,9 +338,7 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   protected void bufferInput(Instance instance) {
 
     if (instance != null) {
-      // No need to copy instance here because copyValues() does not modify the
-      // instance and
-      // the add() method makes a copy anyway.
+      instance = (Instance)instance.copy(); // The copyValues() method *does* modify the instance!
       copyValues(instance, true);
       m_InputFormat.add(instance);
     }
