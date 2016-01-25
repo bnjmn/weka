@@ -116,9 +116,16 @@
     </dependency>    
 
     <dependency>
-      <groupId>org.pentaho.pentaho-commons</groupId>
-      <artifactId>pentaho-package-manager</artifactId>
-      <version>1.0.11</version>
+      <groupId>nz.ac.waikato.cms.weka.thirdparty</groupId>
+      <artifactId>bounce</artifactId>
+      <version>0.18</version>
+    </dependency>    
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.10</version>
+      <optional>true</optional>
     </dependency>
   </dependencies>
 
