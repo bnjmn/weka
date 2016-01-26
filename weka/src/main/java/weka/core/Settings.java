@@ -1,10 +1,31 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    Settings
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.core;
 
 import weka.core.metastore.MetaStore;
 import weka.core.metastore.XMLFileBasedMetaStore;
 import weka.knowledgeflow.LoggingLevel;
 
-import java.awt.Font;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -16,13 +37,13 @@ import java.util.Set;
 
 /**
  * Maintains a collection of settings. Settings are key value pairs which can be
- * grouped together under a given name/ID. All settings managed by an instance
+ * grouped together under a given name. All settings managed by an instance
  * of this class are persisted in the central metastore under a given store
- * name. For example, the store name could be the name/ID of an application and
- * settings could be grouped according to components, panels etc. of the
- * application. Default settings (managed by Defaults objects) can be applied to
- * provide initial defaults (or to allow new settings that have yet to be
- * persisted to be added in the future).
+ * name. For example, the store name could be the name/ID of an application/
+ * system, and settings could be grouped according to applications, components,
+ * panels etc. Default settings (managed by {@code Defaults}
+ * objects) can be applied to provide initial defaults (or to allow new settings
+ * that have yet to be persisted to be added in the future).
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
@@ -39,11 +60,6 @@ public class Settings implements Serializable {
    */
   protected Map<String, Map<SettingKey, Object>> m_settings =
     new LinkedHashMap<String, Map<SettingKey, Object>>();
-
-  /**
-   * Defaults for this settings object
-   */
-  protected Defaults m_defaults;
 
   /**
    * The name of the store that these settings should be saved/loaded to/from
@@ -104,10 +120,10 @@ public class Settings implements Serializable {
 
   /**
    * Construct a new Settings object to be stored in the supplied store under
-   * the given ID
+   * the given ID/name
    *
    * @param storeName the name of the store to load/save to in the metastore
-   * @param ID the ID to use
+   * @param ID the ID/name to use
    */
   public Settings(String storeName, String ID) {
     m_storeName = storeName;
