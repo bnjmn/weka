@@ -510,7 +510,7 @@ public class MainKFPerspective extends AbstractPerspective {
   }
 
   public void notifyIsDirty() {
-    m_mainApplication.notifyIsDirty();
+    firePropertyChange("PROP_DIRTY", null, null);
   }
 
   /**

@@ -35,10 +35,8 @@ import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionEnvironment;
 import weka.knowledgeflow.KFDefaults;
 
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -143,6 +141,11 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
   }
 
   @Override
+  public Defaults getApplicationDefaults() {
+    return new KFDefaults();
+  }
+
+  @Override
   public void settingsChanged() {
     boolean showTipText =
       getApplicationSettings().getSetting(KFDefaults.APP_ID,
@@ -241,8 +244,10 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
       // in one row horizontally in the perspective manager, then the WrapLayout
       // does not wrap when the Frame is first pack()ed. No amount of
       // invalidating/revalidating/repainting components
-      // and ancestors seems to make a difference. Resizing - even by one pixel -
-      // however, does force it to re-layout and wrap. Perhaps this is an OSX bug...
+      // and ancestors seems to make a difference. Resizing - even by one pixel
+      // -
+      // however, does force it to re-layout and wrap. Perhaps this is an OSX
+      // bug...
       jf.setSize(1024, 768);
 
       Thread memMonitor = new Thread() {

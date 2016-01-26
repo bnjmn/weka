@@ -1,6 +1,7 @@
 package weka.gui;
 
 import weka.core.Capabilities;
+import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Memory;
 import weka.core.Settings;
@@ -9,10 +10,8 @@ import weka.core.converters.ConverterUtils;
 import weka.gui.explorer.Explorer;
 import weka.gui.explorer.PreprocessPanel;
 
-import javax.swing.JFrame;
-import java.awt.BorderLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
+import javax.swing.*;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
@@ -37,13 +36,12 @@ public class WorkbenchApp extends AbstractGUIApplication {
   protected Settings m_workbenchSettings;
 
   public WorkbenchApp() {
-    super(true, new String[0],
-      new String[] {
-        weka.gui.knowledgeflow.AttributeSummaryPerspective.class
-          .getCanonicalName(),
-        weka.gui.knowledgeflow.ScatterPlotMatrixPerspective.class
-          .getCanonicalName(),
-        weka.gui.knowledgeflow.SQLViewerPerspective.class.getCanonicalName() });
+    super(true, new String[0], new String[] {
+      weka.gui.knowledgeflow.AttributeSummaryPerspective.class
+        .getCanonicalName(),
+      weka.gui.knowledgeflow.ScatterPlotMatrixPerspective.class
+        .getCanonicalName(),
+      weka.gui.knowledgeflow.SQLViewerPerspective.class.getCanonicalName() });
     m_perspectiveManager
       .addSettingsMenuItemToProgramMenu(getApplicationSettings());
     showPerspectivesToolBar();
@@ -71,7 +69,7 @@ public class WorkbenchApp extends AbstractGUIApplication {
     return new PreprocessPanel();
   }
 
-  @Override
+  /* @Override
   public Settings getApplicationSettings() {
 
     if (m_workbenchSettings == null) {
@@ -80,12 +78,12 @@ public class WorkbenchApp extends AbstractGUIApplication {
     }
 
     return m_workbenchSettings;
-  }
+  } */
 
   @Override
   public void settingsChanged() {
-    GenericObjectEditor.setShowGlobalInfoToolTips(
-      getApplicationSettings().getSetting(WorkbenchDefaults.APP_ID,
+    GenericObjectEditor.setShowGlobalInfoToolTips(getApplicationSettings()
+      .getSetting(WorkbenchDefaults.APP_ID,
         WorkbenchDefaults.SHOW_JTREE_TIP_TEXT_KEY,
         WorkbenchDefaults.SHOW_JTREE_GLOBAL_INFO_TIPS,
         Environment.getSystemWide()));
@@ -95,10 +93,15 @@ public class WorkbenchApp extends AbstractGUIApplication {
     for (Perspective p : getPerspectiveManager().getVisiblePerspectives()) {
       if (p instanceof Explorer.CapabilitiesFilterChangeListener) {
         ((Explorer.CapabilitiesFilterChangeListener) p)
-          .capabilitiesFilterChanged(
-            new Explorer.CapabilitiesFilterChangeEvent(this, filter));
+          .capabilitiesFilterChanged(new Explorer.CapabilitiesFilterChangeEvent(
+            this, filter));
       }
     }
+  }
+
+  @Override
+  public Defaults getApplicationDefaults() {
+    return new WorkbenchDefaults();
   }
 
   public static void main(String[] args) {
@@ -119,8 +122,10 @@ public class WorkbenchApp extends AbstractGUIApplication {
         new javax.swing.JFrame("Weka " + m_workbench.getApplicationName());
       jf.getContentPane().setLayout(new java.awt.BorderLayout());
 
-      Image icon = Toolkit.getDefaultToolkit().getImage(WorkbenchApp.class
-        .getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+      Image icon =
+        Toolkit.getDefaultToolkit().getImage(
+          WorkbenchApp.class.getClassLoader().getResource(
+            "weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 
       jf.getContentPane().add(m_workbench, BorderLayout.CENTER);
