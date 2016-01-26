@@ -29,25 +29,8 @@ import weka.core.logging.Logger;
 import weka.gui.beans.PluginManager;
 import weka.gui.knowledgeflow.MainKFPerspectiveToolBar;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JComponent;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.FlowLayout;
-import java.awt.Frame;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -868,6 +851,7 @@ public class PerspectiveManager extends JPanel {
     java.io.Serializable {
     private static final long serialVersionUID = -2665480123235382483L;
 
+    /** List of user selected perspectives to show */
     protected LinkedList<String> m_userVisiblePerspectives =
       new LinkedList<String>();
 
@@ -880,27 +864,62 @@ public class PerspectiveManager extends JPanel {
      */
     protected boolean m_perspectivesToolbarAlwaysHidden;
 
+    /**
+     * Set a list of perspectives that should be visible
+     *
+     * @param userVisiblePerspectives
+     */
     public void setUserVisiblePerspectives(
       LinkedList<String> userVisiblePerspectives) {
       m_userVisiblePerspectives = userVisiblePerspectives;
     }
 
+    /**
+     * Get the list of perspectives that the user has specified should be
+     * visible in the application
+     * 
+     * @return the list of visible perspectives
+     */
     public LinkedList<String> getUserVisiblePerspectives() {
       return m_userVisiblePerspectives;
     }
 
+    /**
+     * Set whether the perspectives toolbar should be visible in the GUI at
+     * application startup
+     *
+     * @param v true if the perspectives toolbar should be visible at
+     *          application startup
+     */
     public void setPerspectivesToolbarVisibleOnStartup(boolean v) {
       m_perspectivesToolbarVisibleOnStartup = v;
     }
 
+    /**
+     * Get whether the perspectives toolbar should be visible in the GUI at
+     * application startup
+     *
+     * @return true if the perspectives toolbar should be visible at
+     *          application startup
+     */
     public boolean getPerspectivesToolbarVisibleOnStartup() {
       return m_perspectivesToolbarVisibleOnStartup;
     }
 
+    /**
+     * Set whether the perspectives toolbar should always be hidden
+     *
+     * @param h true if the perspectives toolbar should always be hidden
+     */
     public void setPerspectivesToolbarAlwaysHidden(boolean h) {
       m_perspectivesToolbarAlwaysHidden = h;
     }
 
+    /**
+     * Get whether the perspectives toolbar should always be hidden
+     *
+     * @return true if the perspectives toolbar should always be hidden
+     */
     public boolean getPerspectivesToolbarAlwaysHidden() {
       return m_perspectivesToolbarAlwaysHidden;
     }
