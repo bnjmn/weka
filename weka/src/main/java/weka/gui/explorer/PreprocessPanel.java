@@ -552,6 +552,16 @@ public class PreprocessPanel extends AbstractPerspective implements
   }
 
   /**
+   * We can accept instances
+   *
+   * @return true
+   */
+  @Override
+  public boolean acceptsInstances() {
+    return true;
+  }
+
+  /**
    * We've been instantiated and now have access to the main application and
    * PerspectiveManager
    */
@@ -574,7 +584,8 @@ public class PreprocessPanel extends AbstractPerspective implements
     List<Perspective> visiblePerspectives =
       getMainApplication().getPerspectiveManager().getVisiblePerspectives();
     for (Perspective p : visiblePerspectives) {
-      if (p.acceptsInstances()) {
+      if (p.acceptsInstances()
+        && !p.getPerspectiveID().equals(getPerspectiveID())) {
         perspectivesThatAcceptInstances.add(p);
       }
     }
@@ -703,7 +714,8 @@ public class PreprocessPanel extends AbstractPerspective implements
                 getMainApplication().getPerspectiveManager()
                   .getVisiblePerspectives();
               for (Perspective p : perspectiveList) {
-                if (p.acceptsInstances()) {
+                if (p.acceptsInstances()
+                  && !p.getPerspectiveID().equals(getPerspectiveID())) {
                   p.setInstances(m_Instances);
                 }
               }

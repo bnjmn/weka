@@ -21,19 +21,28 @@
 
 package weka.gui.experiment;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.Reader;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Range;
+import weka.core.converters.CSVLoader;
+import weka.experiment.CSVResultListener;
+import weka.experiment.DatabaseResultListener;
+import weka.experiment.Experiment;
+import weka.experiment.InstanceQuery;
+import weka.experiment.PairedCorrectedTTester;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.experiment.Tester;
+import weka.gui.DatabaseConnectionDialog;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.ListSelectorDialog;
+import weka.gui.Perspective;
+import weka.gui.PropertyDialog;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.SaveBuffer;
+import weka.gui.explorer.Explorer;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -54,28 +63,27 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Range;
-import weka.core.converters.CSVLoader;
-import weka.experiment.CSVResultListener;
-import weka.experiment.DatabaseResultListener;
-import weka.experiment.Experiment;
-import weka.experiment.InstanceQuery;
-import weka.experiment.PairedCorrectedTTester;
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.experiment.Tester;
-import weka.gui.DatabaseConnectionDialog;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.ListSelectorDialog;
-import weka.gui.PropertyDialog;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.SaveBuffer;
-import weka.gui.explorer.Explorer;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Image;
+import java.awt.Insets;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.Reader;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * This panel controls simple analysis of experimental results.
@@ -133,13 +141,19 @@ public class ResultsPanel extends JPanel {
     SwingConstants.RIGHT);
 
   /**
+   * If running in the Workbench (or other {@code GUIApplication}) this will
+   * hold a reference to the main perspective. Otherwise it will be null
+   */
+  protected Perspective m_mainPerspective;
+
+  /**
    * Contains all the available classes implementing the Tester-Interface (the
    * display names).
    * 
    * @see Tester
    */
-  protected DefaultComboBoxModel m_TesterClassesModel = new DefaultComboBoxModel(
-    FOR_JFC_1_1_DCBM_BUG);
+  protected DefaultComboBoxModel m_TesterClassesModel =
+    new DefaultComboBoxModel(FOR_JFC_1_1_DCBM_BUG);
 
   /**
    * Contains all the available classes implementing the Tester-Interface (the
@@ -148,7 +162,7 @@ public class ResultsPanel extends JPanel {
    * @see Tester
    */
   protected static Vector<Class<?>> m_Testers = null;
-  
+
   /**
    * Lists all the available classes implementing the Tester-Interface.
    * 
@@ -272,8 +286,8 @@ public class ResultsPanel extends JPanel {
    */
   public ResultsPanel() {
 
-    Vector<String> classes = GenericObjectEditor.getClassnames(Tester.class
-      .getName());
+    Vector<String> classes =
+      GenericObjectEditor.getClassnames(Tester.class.getName());
 
     // set names and classes
     m_Testers = new Vector<Class<?>>();
@@ -426,7 +440,8 @@ public class ResultsPanel extends JPanel {
 
     m_Explorer.setEnabled(false);
     m_Explorer.addActionListener(new ActionListener() {
-      @Override public void actionPerformed(ActionEvent e) {
+      @Override
+      public void actionPerformed(ActionEvent e) {
         openExplorer();
       }
     });
@@ -494,7 +509,6 @@ public class ResultsPanel extends JPanel {
     newButHolder.setLayout(new BorderLayout());
     newButHolder.setBorder(BorderFactory.createTitledBorder("Actions"));
     sourceAndButsHolder.add(newButHolder, BorderLayout.SOUTH);
-
 
     JPanel p3 = new JPanel();
     p3.setBorder(BorderFactory.createTitledBorder("Configure test"));
@@ -716,14 +730,12 @@ public class ResultsPanel extends JPanel {
     bts.add(m_Explorer);
     newButHolder.add(bts, BorderLayout.WEST);
 
-    /* gbC = new GridBagConstraints();
-    gbC.anchor = GridBagConstraints.NORTH;
-    gbC.fill = GridBagConstraints.HORIZONTAL;
-    gbC.gridy = 1;
-    gbC.gridx = 0;
-    gbC.insets = new Insets(5, 5, 5, 5);
-    gbL.setConstraints(bts, gbC);
-    mondo.add(bts); */
+    /*
+     * gbC = new GridBagConstraints(); gbC.anchor = GridBagConstraints.NORTH;
+     * gbC.fill = GridBagConstraints.HORIZONTAL; gbC.gridy = 1; gbC.gridx = 0;
+     * gbC.insets = new Insets(5, 5, 5, 5); gbL.setConstraints(bts, gbC);
+     * mondo.add(bts);
+     */
     gbC = new GridBagConstraints();
     // gbC.anchor = GridBagConstraints.NORTH;
     gbC.fill = GridBagConstraints.BOTH;
@@ -739,8 +751,8 @@ public class ResultsPanel extends JPanel {
      * gbC.weighty = 100; gbL.setConstraints(output, gbC);
      */
     // mondo.add(output);
-    JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mondo,
-      output);
+    JSplitPane splitPane =
+      new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, mondo, output);
     splitPane.setOneTouchExpandable(true);
     // splitPane.setDividerLocation(100);
 
@@ -748,6 +760,18 @@ public class ResultsPanel extends JPanel {
     add(sourceAndButsHolder, BorderLayout.NORTH);
     // add(mondo , BorderLayout.CENTER);
     add(splitPane, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set the main perspective (if running in a {@code GUIApplication}).
+   *
+   * @param mainPerspective the main perspective of the application
+   */
+  protected void setMainPerspective(Perspective mainPerspective) {
+    m_mainPerspective = mainPerspective;
+    if (m_mainPerspective.acceptsInstances()) {
+      m_Explorer.setText("Send to " + mainPerspective.getPerspectiveTitle());
+    }
   }
 
   /**
@@ -805,8 +829,8 @@ public class ResultsPanel extends JPanel {
        * null, null, dbaseURL);
        */
 
-      DatabaseConnectionDialog dbd = new DatabaseConnectionDialog(null,
-        dbaseURL, username);
+      DatabaseConnectionDialog dbd =
+        new DatabaseConnectionDialog(null, dbaseURL, username);
       dbd.setVisible(true);
 
       // if (dbaseURL == null) {
@@ -831,8 +855,9 @@ public class ResultsPanel extends JPanel {
       }
       System.err.println("found");
       m_FromLab.setText("Getting experiment index");
-      Instances index = m_InstanceQuery.retrieveInstances("SELECT * FROM "
-        + InstanceQuery.EXP_INDEX_TABLE);
+      Instances index =
+        m_InstanceQuery.retrieveInstances("SELECT * FROM "
+          + InstanceQuery.EXP_INDEX_TABLE);
       if (index.numInstances() == 0) {
         m_FromLab.setText("No experiments available");
         m_InstanceQuery.disconnectFromDatabase();
@@ -861,8 +886,8 @@ public class ResultsPanel extends JPanel {
       }
       Instance selInst = index.instance(jl.getSelectedIndex());
       Attribute tableAttr = index.attribute(InstanceQuery.EXP_RESULT_COL);
-      String table = InstanceQuery.EXP_RESULT_PREFIX
-        + selInst.toString(tableAttr);
+      String table =
+        InstanceQuery.EXP_RESULT_PREFIX + selInst.toString(tableAttr);
       setInstancesFromDatabaseTable(table);
 
     } catch (Exception ex) {
@@ -882,24 +907,24 @@ public class ResultsPanel extends JPanel {
   protected void setInstancesFromExp(Experiment exp) {
 
     if ((exp.getResultListener() instanceof CSVResultListener)) {
-      File resultFile = ((CSVResultListener) exp.getResultListener())
-        .getOutputFile();
+      File resultFile =
+        ((CSVResultListener) exp.getResultListener()).getOutputFile();
       if ((resultFile == null)) {
         m_FromLab.setText("No result file");
       } else {
         setInstancesFromFile(resultFile);
       }
     } else if (exp.getResultListener() instanceof DatabaseResultListener) {
-      String dbaseURL = ((DatabaseResultListener) exp.getResultListener())
-        .getDatabaseURL();
+      String dbaseURL =
+        ((DatabaseResultListener) exp.getResultListener()).getDatabaseURL();
       try {
         if (m_InstanceQuery == null) {
           m_InstanceQuery = new InstanceQuery();
         }
         m_InstanceQuery.setDatabaseURL(dbaseURL);
         m_InstanceQuery.connectToDatabase();
-        String tableName = m_InstanceQuery.getResultsTableName(exp
-          .getResultProducer());
+        String tableName =
+          m_InstanceQuery.getResultsTableName(exp.getResultProducer());
         setInstancesFromDatabaseTable(tableName);
       } catch (Exception ex) {
         m_FromLab.setText("Problem reading database");
@@ -919,8 +944,8 @@ public class ResultsPanel extends JPanel {
 
     try {
       m_FromLab.setText("Reading from database, please wait...");
-      final Instances i = m_InstanceQuery.retrieveInstances("SELECT * FROM "
-        + tableName);
+      final Instances i =
+        m_InstanceQuery.retrieveInstances("SELECT * FROM " + tableName);
       SwingUtilities.invokeAndWait(new Runnable() {
         @Override
         public void run() {
@@ -1030,11 +1055,12 @@ public class ResultsPanel extends JPanel {
     m_FromLab.setText("Got " + m_Instances.numInstances() + " results");
 
     // setup row and column names
-    Vector<String> rows = determineColumnNames(ExperimenterDefaults.getRow(),
-      "Key_Dataset", m_Instances);
-    Vector<String> cols = determineColumnNames(
-      ExperimenterDefaults.getColumn(),
-      "Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID", m_Instances);
+    Vector<String> rows =
+      determineColumnNames(ExperimenterDefaults.getRow(), "Key_Dataset",
+        m_Instances);
+    Vector<String> cols =
+      determineColumnNames(ExperimenterDefaults.getColumn(),
+        "Key_Scheme,Key_Scheme_options,Key_Scheme_version_ID", m_Instances);
 
     // Do other stuff
     m_DatasetKeyModel.removeAllElements();
@@ -1145,8 +1171,9 @@ public class ResultsPanel extends JPanel {
     // default is to display all columns
     m_TTester.setDisplayedResultsets(null);
 
-    String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date())
-      + "Available resultsets";
+    String name =
+      (new SimpleDateFormat("HH:mm:ss - ")).format(new Date())
+        + "Available resultsets";
     StringBuffer outBuff = new StringBuffer();
     outBuff
       .append("Available resultsets\n" + m_TTester.resultsetKey() + "\n\n");
@@ -1205,9 +1232,10 @@ public class ResultsPanel extends JPanel {
     int tType = m_TestsList.getSelectedIndex();
 
     m_TTester.setResultMatrix(m_ResultMatrix);
-    String name = (new SimpleDateFormat("HH:mm:ss - ")).format(new Date())
-      + (String) m_CompareCombo.getSelectedItem() + " - "
-      + (String) m_TestsList.getSelectedValue();
+    String name =
+      (new SimpleDateFormat("HH:mm:ss - ")).format(new Date())
+        + (String) m_CompareCombo.getSelectedItem() + " - "
+        + (String) m_TestsList.getSelectedValue();
     StringBuffer outBuff = new StringBuffer();
     outBuff.append(m_TTester.header(compareCol));
     outBuff.append("\n");
@@ -1323,8 +1351,8 @@ public class ResultsPanel extends JPanel {
    * the user approves.
    */
   public void setOutputFormatFromDialog() {
-    OutputFormatDialog dialog = new OutputFormatDialog(
-      PropertyDialog.getParentFrame(this));
+    OutputFormatDialog dialog =
+      new OutputFormatDialog(PropertyDialog.getParentFrame(this));
 
     m_ResultMatrix.setShowStdDev(m_ShowStdDevs.isSelected());
     dialog.setResultMatrix(m_ResultMatrix);
@@ -1391,25 +1419,32 @@ public class ResultsPanel extends JPanel {
 
   protected synchronized void openExplorer() {
     if (m_Instances != null) {
-      Explorer exp = new Explorer();
-      exp.getPreprocessPanel().setInstances(m_Instances);
+      if (m_mainPerspective == null || !m_mainPerspective.acceptsInstances()) {
+        Explorer exp = new Explorer();
+        exp.getPreprocessPanel().setInstances(m_Instances);
 
-      final JFrame jf = new JFrame("Weka Explorer");
-      jf.getContentPane().setLayout(new BorderLayout());
-      jf.getContentPane().add(exp, BorderLayout.CENTER);
-      jf.addWindowListener(new WindowAdapter() {
-        @Override
-        public void windowClosing(WindowEvent e) {
-          jf.dispose();
-        }
-      });
-      jf.pack();
-      jf.setSize(800, 600);
-      jf.setVisible(true);
-      Image icon = Toolkit.getDefaultToolkit().getImage(
-        exp.getClass().getClassLoader()
-          .getResource("weka/gui/weka_icon_new_48.png"));
-      jf.setIconImage(icon);
+        final JFrame jf = new JFrame("Weka Explorer");
+        jf.getContentPane().setLayout(new BorderLayout());
+        jf.getContentPane().add(exp, BorderLayout.CENTER);
+        jf.addWindowListener(new WindowAdapter() {
+          @Override
+          public void windowClosing(WindowEvent e) {
+            jf.dispose();
+          }
+        });
+        jf.pack();
+        jf.setSize(800, 600);
+        jf.setVisible(true);
+        Image icon =
+          Toolkit.getDefaultToolkit().getImage(
+            exp.getClass().getClassLoader()
+              .getResource("weka/gui/weka_icon_new_48.png"));
+        jf.setIconImage(icon);
+      } else {
+        m_mainPerspective.setInstances(m_Instances);
+        m_mainPerspective.getMainApplication().getPerspectiveManager()
+          .setActivePerspective(m_mainPerspective.getPerspectiveID());
+      }
     }
   }
 

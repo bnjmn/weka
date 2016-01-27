@@ -33,6 +33,9 @@ public class WorkbenchApp extends AbstractGUIApplication {
    */
   protected static WorkbenchApp m_workbench;
 
+  /** The main perspective for this application */
+  protected PreprocessPanel m_mainPerspective;
+
   protected Settings m_workbenchSettings;
 
   public WorkbenchApp() {
@@ -66,7 +69,10 @@ public class WorkbenchApp extends AbstractGUIApplication {
 
   @Override
   public Perspective getMainPerspective() {
-    return new PreprocessPanel();
+    if (m_mainPerspective == null) {
+      m_mainPerspective = new PreprocessPanel();
+    }
+    return m_mainPerspective;
   }
 
   /* @Override

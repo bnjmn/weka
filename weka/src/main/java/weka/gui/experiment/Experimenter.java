@@ -21,6 +21,14 @@
 
 package weka.gui.experiment;
 
+import weka.core.Memory;
+import weka.experiment.Experiment;
+import weka.gui.AbstractPerspective;
+import weka.gui.LookAndFeel;
+import weka.gui.PerspectiveInfo;
+
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 import java.awt.BorderLayout;
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -28,16 +36,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JTabbedPane;
-
-import weka.core.Memory;
-import weka.experiment.Experiment;
-import weka.gui.AbstractPerspective;
-import weka.gui.LookAndFeel;
-import weka.gui.PerspectiveInfo;
 
 /**
  * The main class for the experiment environment. Lets the user create, open,
@@ -113,6 +111,16 @@ public class Experimenter extends AbstractPerspective {
   }
 
   /**
+   * Gets called if we are running in a {@code GUIApplication}. We pass
+   * on a reference to the main perspective to the ResultsPanel here.
+   */
+  @Override
+  public void instantiationComplete() {
+    m_ResultsPanel
+      .setMainPerspective(getMainApplication().getMainPerspective());
+  }
+
+  /**
    * variable for the Experimenter class which would be set to null by the
    * memory monitoring thread to free up some memory if we running out of memory
    */
@@ -159,9 +167,10 @@ public class Experimenter extends AbstractPerspective {
       jf.setSize(800, 600);
       jf.setVisible(true);
 
-      Image icon = Toolkit.getDefaultToolkit().getImage(
-        m_experimenter.getClass().getClassLoader()
-          .getResource("weka/gui/weka_icon_new_48.png"));
+      Image icon =
+        Toolkit.getDefaultToolkit().getImage(
+          m_experimenter.getClass().getClassLoader()
+            .getResource("weka/gui/weka_icon_new_48.png"));
       jf.setIconImage(icon);
 
       Thread memMonitor = new Thread() {
