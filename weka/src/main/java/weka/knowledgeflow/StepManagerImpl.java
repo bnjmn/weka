@@ -1153,6 +1153,11 @@ public class StepManagerImpl implements StepManager {
       .outputStructureForConnectionType(connectionName);
   }
 
+  /**
+   * Log a message at the low logging level
+   *
+   * @param message the message to log
+   */
   @Override
   public void logLow(String message) {
     if (m_log != null) {
@@ -1160,6 +1165,11 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log a message at the basic logging level
+   *
+   * @param message the message to log
+   */
   @Override
   public void logBasic(String message) {
     if (m_log != null) {
@@ -1167,6 +1177,11 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log a message at the detailed logging level
+   *
+   * @param message the message to log
+   */
   @Override
   public void logDetailed(String message) {
     if (m_log != null) {
@@ -1174,6 +1189,11 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log a message at the debugging logging level
+   *
+   * @param message the message to log
+   */
   @Override
   public void logDebug(String message) {
     if (m_log != null) {
@@ -1181,6 +1201,11 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log a warning message
+   *
+   * @param message the message to log
+   */
   @Override
   public void logWarning(String message) {
     if (m_log != null) {
@@ -1189,6 +1214,12 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log an error
+   *
+   * @param message the message to log
+   * @param cause   the optional Throwable to log
+   */
   @Override
   public void logError(String message, Throwable cause) {
     if (m_log != null) {
@@ -1201,6 +1232,11 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Output a status message to the status area of the log
+   *
+   * @param message the message to output
+   */
   @Override
   public void statusMessage(String message) {
     if (m_log != null) {
@@ -1208,6 +1244,12 @@ public class StepManagerImpl implements StepManager {
     }
   }
 
+  /**
+   * Log a message at the supplied logging level
+   *
+   * @param message the message to write
+   * @param level   the level for the message
+   */
   @Override
   public void log(String message, LoggingLevel level) {
     if (m_log != null) {
@@ -1296,6 +1338,12 @@ public class StepManagerImpl implements StepManager {
     return flow.findStep(stepNameToFind);
   }
 
+  /**
+   * Gets a prefix for the step managed by this manager. Used to uniquely
+   * identify steps in the status area of the log
+   *
+   * @return a unique prefix for the step managed by this manager
+   */
   public String stepStatusMessagePrefix() {
     String prefix =
       (getManagedStep() != null ? getManagedStep().getName() : "Unknown") + "$";

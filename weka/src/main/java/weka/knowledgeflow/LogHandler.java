@@ -31,22 +31,38 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 
 /**
- * Class that wraps a {@code weka.gui.Logger} and filters log messages
- * according to the set logging level.
+ * Class that wraps a {@code weka.gui.Logger} and filters log messages according
+ * to the set logging level. Note that warnings and errors reported via the
+ * logWarning() and logError() methods will always be output regardless of the
+ * logging level set.
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class LogHandler {
 
+  /** Prefix to use for status messages */
   protected String m_statusMessagePrefix = "";
 
+  /** The log to use */
   protected Logger m_log;
 
+  /** True if status messages should be output as well as log messages */
   protected boolean m_status;
 
+  /**
+   * The level at which to report messages to the log. Messages at this level or
+   * higher will be reported to the log/status. Note that warnings and errors
+   * and errors reported via the logWarning() and logError() methods will always
+   * be output, regardless of the logging level set
+   */
   protected LoggingLevel m_levelToLogAt = LoggingLevel.BASIC;
 
+  /**
+   * Constructor that takes a {@code Step}. Uses the log from the step
+   * 
+   * @param source the source {@code Step}
+   */
   public LogHandler(Step source) {
     m_status = true;
     String prefix = (source != null ? source.getName() : "Unknown") + "$";
@@ -69,15 +85,33 @@ public class LogHandler {
     }
   }
 
+  /**
+   * Constructor that takes a log
+   * 
+   * @param log the log to wrap
+   */
   public LogHandler(Logger log) {
     this(log, true);
   }
 
+  /**
+   * Constructor that takes a log
+   * 
+   * @param log the log to wrap
+   * @param status true if warning and error messages should be output to the
+   *          status area as well as to the log
+   */
   public LogHandler(Logger log, boolean status) {
     m_log = log;
     m_status = status;
   }
 
+  /**
+   * Utility method to convert a stack trace to a String
+   *
+   * @param throwable the {@code Throwable} to convert to a stack trace string
+   * @return the string containing the stack trace
+   */
   public static String stackTraceToString(Throwable throwable) {
     StringWriter sw = new StringWriter();
     PrintWriter pw = new PrintWriter(sw);
@@ -86,62 +120,131 @@ public class LogHandler {
     return sw.toString();
   }
 
+  /**
+   * Set the log wrap
+   *
+   * @param log the log to wrap
+   */
   public void setLogger(Logger log) {
     m_log = log;
   }
 
+  /**
+   * Get the wrapped log
+   *
+   * @return the wrapped log
+   */
   public Logger getLog() {
     return m_log;
   }
 
+  /**
+   * Get the logging level in use
+   *
+   * @return
+   */
   public LoggingLevel getLoggingLevel() {
     return m_levelToLogAt;
   }
 
+  /**
+   * Set the logging level to use
+   *
+   * @param level the level to use
+   */
   public void setLoggingLevel(LoggingLevel level) {
     m_levelToLogAt = level;
   }
 
+  /**
+   * Log at the low level
+   *
+   * @param message the message to log
+   */
   public void logLow(String message) {
     log(message, LoggingLevel.LOW);
   }
 
+  /**
+   * Log at the basic level
+   *
+   * @param message the message to log
+   */
   public void logBasic(String message) {
     log(message, LoggingLevel.BASIC);
   }
 
+  /**
+   * Log at the detailed level
+   *
+   * @param message the message to log
+   */
   public void logDetailed(String message) {
     log(message, LoggingLevel.DETAILED);
   }
 
+  /**
+   * Log at the debugging level
+   *
+   * @param message the message to log
+   */
   public void logDebug(String message) {
     log(message, LoggingLevel.DEBUGGING);
   }
 
+  /**
+   * Log a warning
+   *
+   * @param message the message to log
+   */
   public void logWarning(String message) {
     log(message, LoggingLevel.WARNING);
     if (m_status) {
-      statusMessage( "WARNING: " + message );
+      statusMessage("WARNING: " + message);
     }
   }
 
+  /**
+   * Log an error
+   *
+   * @param message the message to log
+   * @param cause the cause of the error
+   */
   public void logError(String message, Exception cause) {
     log(message, LoggingLevel.ERROR, cause);
     if (m_status) {
-      statusMessage( "ERROR: " + message );
+      statusMessage("ERROR: " + message);
     }
   }
 
+  /**
+   * Output a status message
+   *
+   * @param message the status message
+   */
   public void statusMessage(String message) {
     if (m_log != null) {
       m_log.statusMessage(statusMessagePrefix() + message);
     }
   }
 
+  /**
+   * Log a message at the supplied level
+   *
+   * @param message the message to log
+   * @param messageLevel the level to log at
+   */
   public void log(String message, LoggingLevel messageLevel) {
     log(message, messageLevel, null);
   }
 
+  /**
+   * Log a message at the supplied level
+   *
+   * @param message the message to log
+   * @param messageLevel the level to log at
+   * @param cause an optional exception for error level messages
+   */
   protected void
     log(String message, LoggingLevel messageLevel, Throwable cause) {
     if (messageLevel == LoggingLevel.WARNING

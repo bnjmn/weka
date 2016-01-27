@@ -388,11 +388,19 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
     }
   }
 
+  /**
+   * Get default settings for the base execution environment
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new BaseExecutionEnvironmentDefaults();
   }
 
+  /**
+   * Defaults for the base execution environment
+   */
   public static class BaseExecutionEnvironmentDefaults extends Defaults {
 
     public static final Settings.SettingKey STEP_EXECUTOR_SERVICE_NUM_THREADS_KEY =

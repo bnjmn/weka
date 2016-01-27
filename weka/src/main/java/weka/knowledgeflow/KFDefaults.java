@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    KFDefaults
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow;
 
 import weka.core.Defaults;
@@ -7,7 +28,9 @@ import javax.swing.JPanel;
 import java.awt.Color;
 
 /**
- * Created by mhall on 22/01/15.
+ * Default settings for the Knowledge Flow
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  */
 public class KFDefaults extends Defaults {
 
@@ -87,12 +110,6 @@ public class KFDefaults extends Defaults {
   protected static final Object[] DEFAULT_VALUES = { MAX_UNDO_POINTS,
     LAYOUT_COLOR, SHOW_GRID, GRID_COLOR, GRID_SPACING, LAYOUT_WIDTH,
     LAYOUT_HEIGHT, STEP_LABEL_FONT_SIZE, LOGGING_LEVEL, LOG_MESSAGE_FONT_SIZE };
-
-  /*
-   * protected static void setDefaults(KFSettings props) { for (int i = 0; i <
-   * DEFAULT_KEYS.length; i++) { props.setKFSetting(DEFAULT_KEYS[i],
-   * DEFAULT_VALUES[i]); } }
-   */
 
   public KFDefaults() {
     super(MAIN_PERSPECTIVE_ID);

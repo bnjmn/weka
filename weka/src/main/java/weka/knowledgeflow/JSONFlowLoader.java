@@ -21,12 +21,12 @@
 
 package weka.knowledgeflow;
 
+import weka.core.WekaException;
+import weka.gui.Logger;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.Reader;
-
-import weka.core.WekaException;
-import weka.gui.Logger;
 
 /**
  * Flow loader that wraps the routines in JSONFlowUtils
@@ -36,35 +36,73 @@ import weka.gui.Logger;
  */
 public class JSONFlowLoader implements FlowLoader {
 
+  /** The log to use */
   protected Logger m_log;
 
+  /** The file exetension for JSON-based flows */
   public static final String EXTENSION = "kf";
 
+  /**
+   * Set a log to use
+   *
+   * @param log log to use
+   */
   @Override
   public void setLog(Logger log) {
     m_log = log;
   }
 
+  /**
+   * Get the file extension handled by this loader
+   *
+   * @return the file extension
+   */
   @Override
   public String getFlowFileExtension() {
     return EXTENSION;
   }
 
+  /**
+   * Get the description of the file format handled by this loader
+   *
+   * @return the description of the file format handled
+   */
   @Override
   public String getFlowFileExtensionDescription() {
     return "JSON Knowledge Flow configuration files";
   }
 
+  /**
+   * Read the flow from the supplied file
+   *
+   * @param flowFile the file to load from
+   * @return the Flow read
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Flow readFlow(File flowFile) throws WekaException {
     return JSONFlowUtils.readFlow(flowFile);
   }
 
+  /**
+   * Read the flow from the supplied input stream
+   *
+   * @param is the input stream to load from
+   * @return the Flow read
+   * @throws WekaException
+   */
   @Override
   public Flow readFlow(InputStream is) throws WekaException {
     return JSONFlowUtils.readFlow(is);
   }
 
+  /**
+   * Read the flow from the supplied reader
+   *
+   * @param r the reader to load from
+   * @return the Flow read
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Flow readFlow(Reader r) throws WekaException {
     return JSONFlowUtils.readFlow(r);

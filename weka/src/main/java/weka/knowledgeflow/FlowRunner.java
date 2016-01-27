@@ -67,9 +67,6 @@ public class FlowRunner implements FlowExecutor {
   /** Invoke start points sequentially? */
   protected boolean m_startSequentially;
 
-  /** Executor service used for launching start points in parallel */
-  // protected ExecutorService m_executorService;
-
   /** Number of worker threads to use in the step executor service */
   protected int m_numThreads =
     BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.STEP_EXECUTOR_SERVICE_NUM_THREADS;
@@ -143,16 +140,31 @@ public class FlowRunner implements FlowExecutor {
           BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS);
   }
 
+  /**
+   * Set the settings to use when executing the Flow
+   *
+   * @param settings the settings to use
+   */
   @Override
   public void setSettings(Settings settings) {
     init(settings);
   }
 
+  /**
+   * Get the settings in use when executing the Flow
+   *
+   * @return the settings
+   */
   @Override
   public Settings getSettings() {
     return m_execEnv.getSettings();
   }
 
+  /**
+   * Main method for executing the FlowRunner
+   *
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
@@ -326,6 +338,12 @@ public class FlowRunner implements FlowExecutor {
     }
   }
 
+  /**
+   * Initialize the flow ready for execution
+   *
+   * @return a list of start points in the Flow
+   * @throws WekaException if a problem occurs during initialization
+   */
   protected List<StepManagerImpl> initializeFlow() throws WekaException {
     m_wasStopped = false;
     if (m_flow == null) {
@@ -370,6 +388,11 @@ public class FlowRunner implements FlowExecutor {
     return startPoints;
   }
 
+  /**
+   * Run the flow by launching start points sequentially.
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void runSequentially() throws WekaException {
     List<StepManagerImpl> startPoints = initializeFlow();
@@ -379,6 +402,11 @@ public class FlowRunner implements FlowExecutor {
     runSequentially(startPoints);
   }
 
+  /**
+   * Run the flow by launching start points in parallel
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void runParallel() throws WekaException {
     List<StepManagerImpl> startPoints = initializeFlow();
@@ -488,6 +516,10 @@ public class FlowRunner implements FlowExecutor {
     launchExecutorShutdownThread();
   }
 
+  /**
+   * Launch a thread to monitor the progress of the flow, and then
+   * shutdown the executor service once all steps have completed.
+   */
   protected void launchExecutorShutdownThread() {
     if (m_execEnv != null) {
       Thread shutdownThread = new Thread() {

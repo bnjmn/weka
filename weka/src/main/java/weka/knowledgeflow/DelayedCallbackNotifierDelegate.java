@@ -30,10 +30,13 @@ package weka.knowledgeflow;
 public class DelayedCallbackNotifierDelegate
   implements CallbackNotifierDelegate {
 
+  /** The callback to notify */
   protected StepTaskCallback m_callback;
 
+  /** The task executed */
   protected StepTask m_taskExecuted;
 
+  /** The result produced */
   protected ExecutionResult m_result;
 
   /**

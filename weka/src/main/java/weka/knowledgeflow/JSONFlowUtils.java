@@ -21,6 +21,21 @@
 
 package weka.knowledgeflow;
 
+import weka.core.EnumHelper;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.OptionHandler;
+import weka.core.Settings;
+import weka.core.Utils;
+import weka.core.WekaException;
+import weka.core.json.JSONNode;
+import weka.gui.FilePropertyMetadata;
+import weka.knowledgeflow.steps.ClassAssigner;
+import weka.knowledgeflow.steps.NotPersistable;
+import weka.knowledgeflow.steps.Saver;
+import weka.knowledgeflow.steps.Step;
+import weka.knowledgeflow.steps.TrainingSetMaker;
+
 import java.beans.BeanInfo;
 import java.beans.Beans;
 import java.beans.Introspector;
@@ -45,21 +60,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import weka.core.EnumHelper;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.OptionHandler;
-import weka.core.Settings;
-import weka.core.Utils;
-import weka.core.WekaException;
-import weka.core.json.JSONNode;
-import weka.gui.FilePropertyMetadata;
-import weka.knowledgeflow.steps.ClassAssigner;
-import weka.knowledgeflow.steps.NotPersistable;
-import weka.knowledgeflow.steps.Saver;
-import weka.knowledgeflow.steps.Step;
-import weka.knowledgeflow.steps.TrainingSetMaker;
-
 /**
  * Utilities for building and saving flows from JSON data
  *
@@ -79,6 +79,14 @@ public class JSONFlowUtils {
   public static final String CONNECTIONS = "connections";
   public static final String COORDINATES = "coordinates";
 
+  /**
+   * Add a name,value pair to the JSON
+   *
+   * @param b the StringBuilder to add the pair to
+   * @param name the name
+   * @param value the associated value
+   * @param comma if true postfix a comma
+   */
   protected static void addNameValue(StringBuilder b, String name,
     String value, boolean comma) {
     b.append(name).append(" : ").append(value);
@@ -87,6 +95,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Add an {@code OptionHandler} spec to the JSON
+   *
+   * @param propName the name to associate with the option handler
+   * @param handler the option handler
+   * @param json the current {@JSONNode} to add to
+   */
   protected static void addOptionHandler(String propName,
     OptionHandler handler, JSONNode json) {
     JSONNode optionNode = json.addObject(propName);
@@ -95,6 +110,13 @@ public class JSONFlowUtils {
     optionNode.addPrimitive(OPTIONS, Utils.joinOptions(handler.getOptions()));
   }
 
+  /**
+   * Add an enum to the JSON
+   *
+   * @param propName the name to associate the enum with
+   * @param ee the enum to add
+   * @param json the current {@code JSONNode} to add to
+   */
   protected static void addEnum(String propName, Enum ee, JSONNode json) {
     JSONNode enumNode = json.addObject(propName);
     enumNode.addPrimitive("type", ENUM_HELPER);
@@ -103,6 +125,13 @@ public class JSONFlowUtils {
     enumNode.addPrimitive("value", helper.getSelectedEnumValue());
   }
 
+  /**
+   * Add a {@code weka.core.converters.Saver} to the JSON
+   * 
+   * @param propName the name to associate the saver with
+   * @param saver the saver to add
+   * @param json the current {@code JSONNode} to add to
+   */
   protected static void addSaver(String propName,
     weka.core.converters.Saver saver, JSONNode json) {
     JSONNode saverNode = json.addObject(propName);
@@ -144,6 +173,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Add a {@code weka.core.converters.Loader} to the JSON
+   *
+   * @param propName the name to associate the loader with
+   * @param loader the loader to add
+   * @param json the curren {@code JSONNode} to add to
+   */
   protected static void addLoader(String propName,
     weka.core.converters.Loader loader, JSONNode json) {
     JSONNode loaderNode = json.addObject(propName);
@@ -196,6 +232,13 @@ public class JSONFlowUtils {
 
   }
 
+  /**
+   * Add a step to the JSON
+   *
+   * @param stepArray the {@code JSONNode} to add the step to
+   * @param stepManager the {@code StepManager} of the step to add
+   * @throws WekaException if a problem occurs
+   */
   protected static void addStepJSONtoFlowArray(JSONNode stepArray,
     StepManagerImpl stepManager) throws WekaException {
 
@@ -279,6 +322,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read a {@code weka.core.converters.Loader} from the current JSON node
+   *
+   * @param loaderNode the {@code JSONNode} to read the loader from
+   * @return the instantiated loader
+   * @throws WekaException if a problem occurs
+   */
   protected static weka.core.converters.Loader readStepPropertyLoader(
     JSONNode loaderNode) throws WekaException {
 
@@ -319,6 +369,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read a {@code weka.core.converters.Saver} from the current JSON node
+   *
+   * @param saverNode the {@code JSONNode} to read from
+   * @return an instantiated saver
+   * @throws WekaException if a problem occurs
+   */
   protected static weka.core.converters.Saver readStepPropertySaver(
     JSONNode saverNode) throws WekaException {
     String clazz = saverNode.getChild(CLASS).getValue().toString();
@@ -356,6 +413,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read an {@code OptionHandler} from the current JSON node
+   *
+   * @param optionHNode the {@code JSONNode} to read from
+   * @return an instantiated and configured option handler
+   * @throws WekaException if a problem occurs
+   */
   protected static OptionHandler readStepPropertyOptionHandler(
     JSONNode optionHNode) throws WekaException {
 
@@ -377,6 +441,13 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read an enum from the current JSON node
+   *
+   * @param enumNode the {@code JSONNode} to read from
+   * @return the enum object
+   * @throws WekaException if a problem occurs
+   */
   protected static Object readStepPropertyEnum(JSONNode enumNode)
     throws WekaException {
     EnumHelper helper = new EnumHelper();
@@ -390,6 +461,14 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read a step property object from the current JSON node. Handles option
+   * handlers, loaders, savers and enums.
+   * 
+   * @param propNode the {@code JSONNode} to read from
+   * @return a step property object
+   * @throws Exception if a problem occurs
+   */
   protected static Object readStepObjectProperty(JSONNode propNode)
     throws Exception {
 
@@ -435,6 +514,13 @@ public class JSONFlowUtils {
     return null;
   }
 
+  /**
+   * Read a {@code Step} from the supplied JSON node
+   *
+   * @param stepNode the {@code JSONNode} to read from
+   * @param flow the {@code Flow} to add the read step to
+   * @throws WekaException if a problem occurs
+   */
   protected static void readStep(JSONNode stepNode, Flow flow)
     throws WekaException {
     String clazz = stepNode.getChild(CLASS).getValue().toString();
@@ -501,11 +587,28 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read step connections from the supplied JSON node
+   *
+   * @param step the {@code JSONNode} to read from
+   * @param flow the flow being constructed
+   * @throws WekaException if a problem occurs
+   */
   protected static void readConnectionsForStep(JSONNode step, Flow flow)
     throws WekaException {
     readConnectionsForStep(step, flow, false);
   }
 
+  /**
+   * Read step connections from the supplied JSON node
+   *
+   * @param step the {@code JSONNode} to read from
+   * @param flow the flow being constructed
+   * @param dontComplainAboutMissingConnections true if no exception should be
+   *          raised if the step named in a connection is not present in the
+   *          flow
+   * @throws WekaException if a problem occurs
+   */
   protected static void readConnectionsForStep(JSONNode step, Flow flow,
     boolean dontComplainAboutMissingConnections) throws WekaException {
     JSONNode properties = step.getChild(PROPERTIES);
@@ -540,6 +643,14 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Serializes the supplied flow to JSON and writes out using the supplied
+   * writer
+   *
+   * @param flow the {@code Flow} to serialize
+   * @param writer the {@code Writer} to write to
+   * @throws WekaException if a problem occurs
+   */
   public static void writeFlow(Flow flow, Writer writer) throws WekaException {
     try {
       String flowJSON = flowToJSON(flow);
@@ -556,11 +667,26 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Serializes the supplied flow to JSON and writes out using the supplied
+   * output stream
+   *
+   * @param flow the {@code Flow} to serialize
+   * @param os the {@code OutputStream} to write to
+   * @throws WekaException if a problem occurs
+   */
   public static void writeFlow(Flow flow, OutputStream os) throws WekaException {
     OutputStreamWriter osw = new OutputStreamWriter(os);
     writeFlow(flow, osw);
   }
 
+  /**
+   * Serializes the supplied flow to JSON and writes it out to the supplied file
+   *
+   * @param flow the {@code Flow} to serialize
+   * @param file the {@code File} to write to
+   * @throws WekaException if a problem occurs
+   */
   public static void writeFlow(Flow flow, File file) throws WekaException {
     try {
       Writer w = new BufferedWriter(new FileWriter(file));
@@ -570,10 +696,26 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read a flow from the supplied file
+   *
+   * @param file the file to read from
+   * @return the deserialized {@code Flow}
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(File file) throws WekaException {
     return readFlow(file, false);
   }
 
+  /**
+   * Read a flow from the supplied file
+   * 
+   * @param file the file to read from
+   * @param dontComplainAboutMissingConnections true if no exceptions should be
+   *          raised if connections are missing in the flow
+   * @return the deserialized Flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(File file,
     boolean dontComplainAboutMissingConnections) throws WekaException {
     try {
@@ -584,22 +726,53 @@ public class JSONFlowUtils {
     }
   }
 
+  /**
+   * Read a Flow from the supplied input stream
+   *
+   * @param is the {@code InputStream} to read from
+   * @return the deserialized flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(InputStream is) throws WekaException {
     return readFlow(is, false);
   }
 
+  /**
+   * Read a Flow from the supplied input stream
+   *
+   * @param is the {@code InputStream} to read from
+   * @param dontComplainAboutMissingConnections true if no exception should be
+   *          raised if there are missing connections
+   * @return the deserialized flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(InputStream is,
     boolean dontComplainAboutMissingConnections) throws WekaException {
     InputStreamReader isr = new InputStreamReader(is);
 
-    return readFlow(isr,
-      dontComplainAboutMissingConnections);
+    return readFlow(isr, dontComplainAboutMissingConnections);
   }
 
+  /**
+   * Read a flow from the supplied reader
+   * 
+   * @param sr the reader to read from
+   * @return the deserialized flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(Reader sr) throws WekaException {
     return readFlow(sr, false);
   }
 
+  /**
+   * Read a flow from the supplied reader
+   * 
+   * @param sr the reader to read from
+   * @param dontComplainAboutMissingConnections true if no exception should be
+   *          raised if there are missing connections
+   * @return the deserialized flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow readFlow(Reader sr,
     boolean dontComplainAboutMissingConnections) throws WekaException {
     Flow flow = new Flow();
@@ -635,6 +808,15 @@ public class JSONFlowUtils {
     return flow;
   }
 
+  /**
+   * Utility routine to deserialize a flow from the supplied JSON string
+   * 
+   * @param flowJSON the string containing a flow in JSON form
+   * @param dontComplainAboutMissingConnections to not raise any exceptions if
+   *          there are missing connections in the flow
+   * @return the deserialized flow
+   * @throws WekaException if a problem occurs
+   */
   public static Flow JSONToFlow(String flowJSON,
     boolean dontComplainAboutMissingConnections) throws WekaException {
 
@@ -642,6 +824,13 @@ public class JSONFlowUtils {
     return readFlow(sr, dontComplainAboutMissingConnections);
   }
 
+  /**
+   * Utility routine to serialize a supplied flow to a JSON string
+   *
+   * @param flow the flow to serialize
+   * @return a string containing the flow in JSON form
+   * @throws WekaException if a problem occurs
+   */
   public static String flowToJSON(Flow flow) throws WekaException {
 
     JSONNode flowRoot = new JSONNode();
@@ -660,6 +849,11 @@ public class JSONFlowUtils {
     return b.toString();
   }
 
+  /**
+   * Main method for testing this class
+   *
+   * @param args command line arguments
+   */
   public static void main(String[] args) {
     try {
       weka.knowledgeflow.steps.Loader step =
