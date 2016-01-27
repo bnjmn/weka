@@ -21,13 +21,13 @@
 package weka.gui.explorer;
 
 import weka.core.Defaults;
-import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Settings;
 import weka.gui.AbstractPerspective;
 import weka.gui.PerspectiveInfo;
 import weka.gui.explorer.Explorer.ExplorerPanel;
 import weka.gui.visualize.MatrixPanel;
+import weka.gui.visualize.VisualizeUtils;
 
 import java.awt.BorderLayout;
 
@@ -124,7 +124,9 @@ public class VisualizePanel extends AbstractPerspective implements
    */
   @Override
   public Defaults getDefaultSettings() {
-    return new ScatterDefaults();
+    Defaults d = new ScatterDefaults();
+    d.add(new VisualizeUtils.VisualizeDefaults());
+    return d;
   }
 
   @Override
@@ -148,23 +150,18 @@ public class VisualizePanel extends AbstractPerspective implements
   @Override
   public void settingsChanged() {
     if (getMainApplication() != null) {
-      int pointSize =
-        m_mainApplication.getApplicationSettings().getSetting(
-          ScatterDefaults.ID, ScatterDefaults.POINT_SIZE_KEY,
-          ScatterDefaults.POINT_SIZE, Environment.getSystemWide());
-      int plotSize =
-        m_mainApplication.getApplicationSettings().getSetting(
-          ScatterDefaults.ID, ScatterDefaults.PLOT_SIZE_KEY,
-          ScatterDefaults.PLOT_SIZE, Environment.getSystemWide());
-
-      m_matrixPanel.setPointSize(pointSize);
-      m_matrixPanel.setPlotSize(plotSize);
+      m_matrixPanel.applySettings(m_mainApplication.getApplicationSettings(),
+        ScatterDefaults.ID);
       if (m_isActive) {
         m_matrixPanel.updatePanel();
       }
     }
   }
 
+  /**
+   * Default settings specific to the {@code MatrixPanel} that provides the
+   * scatter plot matrix
+   */
   public static class ScatterDefaults extends Defaults {
     public static final String ID = "weka.gui.workbench.visualizepanel";
 

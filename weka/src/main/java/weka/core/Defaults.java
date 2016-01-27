@@ -91,7 +91,8 @@ public class Defaults implements Serializable {
   }
 
   /**
-   * Add the supplied defaults to this one
+   * Add the supplied defaults to this one. Note that the added defaults now
+   * come under the ID of this set of defaults.
    *
    * @param toAdd the defaults to add
    */

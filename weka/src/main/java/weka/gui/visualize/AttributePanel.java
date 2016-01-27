@@ -21,6 +21,13 @@
 
 package weka.gui.visualize;
 
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.Settings;
+
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -32,12 +39,6 @@ import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
-
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-
-import weka.core.Attribute;
-import weka.core.Instances;
 
 /**
  * This panel displays one dimensional views of the attributes in a dataset.
@@ -78,7 +79,8 @@ public class AttributePanel extends JScrollPane {
   protected Color m_backgroundColor = null;
 
   /** The list of things listening to this panel */
-  protected ArrayList<AttributePanelListener> m_Listeners = new ArrayList<AttributePanelListener>();
+  protected ArrayList<AttributePanelListener> m_Listeners =
+    new ArrayList<AttributePanelListener>();
 
   /** Holds the random height for each instance. */
   protected int[] m_heights;
@@ -227,6 +229,7 @@ public class AttributePanel extends JScrollPane {
      */
     @Override
     public void paintComponent(Graphics gx) {
+      setBackground(m_barColour);
       super.paintComponent(gx);
       int xp, yp, h;
       h = this.getWidth();
@@ -238,8 +241,9 @@ public class AttributePanel extends JScrollPane {
           for (int noa = 0; noa < m_plotInstances.numInstances(); noa++) {
             if (!m_plotInstances.instance(noa).isMissing(m_attribIndex)
               && !m_plotInstances.instance(noa).isMissing(m_cIndex)) {
-              m_cached[noa] = (int) convertToPanel(m_plotInstances
-                .instance(noa).value(m_attribIndex));
+              m_cached[noa] =
+                (int) convertToPanel(m_plotInstances.instance(noa).value(
+                  m_attribIndex));
 
               if (m_pointDrawn[m_cached[noa] % h][m_heights[noa]]) {
                 m_cached[noa] = -9000;
@@ -275,8 +279,9 @@ public class AttributePanel extends JScrollPane {
           for (int noa = 0; noa < m_plotInstances.numInstances(); noa++) {
             if (m_cached[noa] != -9000) {
 
-              r = (m_plotInstances.instance(noa).value(m_cIndex) - m_minC)
-                / (m_maxC - m_minC);
+              r =
+                (m_plotInstances.instance(noa).value(m_cIndex) - m_minC)
+                  / (m_maxC - m_minC);
 
               r = (r * 240) + 15;
 
@@ -314,6 +319,22 @@ public class AttributePanel extends JScrollPane {
         m_barColour = VisualizeUtils.processColour(barC, m_barColour);
       }
     }
+  }
+
+  /**
+   * Apply settings
+   * 
+   * @param settings the settings to apply
+   * @param ownerID the ID of owner perspective, panel. Used when looking up our
+   *          settings
+   */
+  public void applySettings(Settings settings, String ownerID) {
+    m_barColour =
+      settings.getSetting(ownerID,
+        VisualizeUtils.VisualizeDefaults.BAR_BACKGROUND_COLOUR_KEY,
+        VisualizeUtils.VisualizeDefaults.BAR_BACKGROUND_COLOUR,
+        Environment.getSystemWide());
+    repaint();
   }
 
   public AttributePanel() {
@@ -597,8 +618,8 @@ public class AttributePanel extends JScrollPane {
           + "<dataset> [class col]");
         System.exit(1);
       }
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Attribute");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Attribute");
       jf.setSize(100, 100);
       jf.getContentPane().setLayout(new BorderLayout());
       final AttributePanel p2 = new AttributePanel();
@@ -622,8 +643,8 @@ public class AttributePanel extends JScrollPane {
       });
       if (args.length >= 1) {
         System.err.println("Loading instances from " + args[0]);
-        java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-          args[0]));
+        java.io.Reader r =
+          new java.io.BufferedReader(new java.io.FileReader(args[0]));
         Instances i = new Instances(r);
         i.setClassIndex(i.numAttributes() - 1);
         p2.setInstances(i);

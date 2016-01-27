@@ -21,6 +21,28 @@
 
 package weka.gui.visualize;
 
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.Settings;
+import weka.gui.ExtensionFileFilter;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dialog.ModalityType;
@@ -44,27 +66,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
-import weka.core.Attribute;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
 
 /**
  * This panel displays a plot matrix of the user selected attributes of a given
@@ -212,6 +213,18 @@ public class MatrixPanel extends JPanel {
   private final java.awt.Font f = new java.awt.Font("Dialog",
     java.awt.Font.BOLD, 11);
 
+  /** Settings (if available) to pass through to the VisualizePanels */
+  protected Settings m_settings;
+
+  /** For the background of the little plots */
+  protected Color m_backgroundColor = Color.white;
+
+  /**
+   * ID of the owner (perspective, panel etc.) under which to lookup our
+   * settings
+   */
+  protected String m_settingsOwnerID;
+
   protected transient Image m_osi = null;
   protected boolean[][] m_plottedCells;
   protected boolean m_regenerateOSI = true;
@@ -231,9 +244,9 @@ public class MatrixPanel extends JPanel {
     m_selAttrib.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent ae) {
-        final JDialog jd = new JDialog((JFrame) MatrixPanel.this
-          .getTopLevelAncestor(), "Attribute Selection Panel",
-          ModalityType.DOCUMENT_MODAL);
+        final JDialog jd =
+          new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(),
+            "Attribute Selection Panel", ModalityType.DOCUMENT_MODAL);
 
         JPanel jp = new JPanel();
         JScrollPane js = new JScrollPane(m_attribList);
@@ -330,17 +343,17 @@ public class MatrixPanel extends JPanel {
         percentTxt.setText(m_resamplePercent.getText());
         JButton doneBt = new JButton("Done");
 
-        final JDialog jd = new JDialog((JFrame) MatrixPanel.this
-          .getTopLevelAncestor(), "Subsample % Panel",
-          ModalityType.DOCUMENT_MODAL) {
-          private static final long serialVersionUID = -269823533147146296L;
+        final JDialog jd =
+          new JDialog((JFrame) MatrixPanel.this.getTopLevelAncestor(),
+            "Subsample % Panel", ModalityType.DOCUMENT_MODAL) {
+            private static final long serialVersionUID = -269823533147146296L;
 
-          @Override
-          public void dispose() {
-            m_resamplePercent.setText(percentTxt.getText());
-            super.dispose();
-          }
-        };
+            @Override
+            public void dispose() {
+              m_resamplePercent.setText(percentTxt.getText());
+              super.dispose();
+            }
+          };
         jd.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
         doneBt.addActionListener(new ActionListener() {
@@ -461,7 +474,8 @@ public class MatrixPanel extends JPanel {
         if (!m_fastScroll.isSelected()) {
           m_osi = null;
         } else {
-          m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
+          m_plottedCells =
+            new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
         }
         MatrixPanel.this.invalidate();
         MatrixPanel.this.repaint();
@@ -537,8 +551,9 @@ public class MatrixPanel extends JPanel {
       // )
       // );
 
-      inst = new Instances(inst, 0, (int) Math.round(currentPercent / 100D
-        * inst.numInstances()));
+      inst =
+        new Instances(inst, 0, (int) Math.round(currentPercent / 100D
+          * inst.numInstances()));
       m_previousPercent = currentPercent;
     }
     m_points = new int[inst.numInstances()][m_selectedAttribs.length]; // changed
@@ -572,10 +587,10 @@ public class MatrixPanel extends JPanel {
           m_pointColors[i] = (int) inst.instance(i).value(m_classIndex);
         }
 
-        jitterVals[i][0] = rnd.nextInt(m_jitter.getValue() + 1)
-          - m_jitter.getValue() / 2;
-        jitterVals[i][1] = rnd.nextInt(m_jitter.getValue() + 1)
-          - m_jitter.getValue() / 2;
+        jitterVals[i][0] =
+          rnd.nextInt(m_jitter.getValue() + 1) - m_jitter.getValue() / 2;
+        jitterVals[i][1] =
+          rnd.nextInt(m_jitter.getValue() + 1) - m_jitter.getValue() / 2;
 
       }
     }
@@ -600,15 +615,15 @@ public class MatrixPanel extends JPanel {
       }
 
       for (int i = 0; i < inst.numInstances(); i++) {
-        double r = (inst.instance(i).value(m_classIndex) - minC)
-          / (maxC - minC);
+        double r =
+          (inst.instance(i).value(m_classIndex) - minC) / (maxC - minC);
         r = (r * 240) + 15;
         m_pointColors[i] = (int) r;
 
-        jitterVals[i][0] = rnd.nextInt(m_jitter.getValue() + 1)
-          - m_jitter.getValue() / 2;
-        jitterVals[i][1] = rnd.nextInt(m_jitter.getValue() + 1)
-          - m_jitter.getValue() / 2;
+        jitterVals[i][0] =
+          rnd.nextInt(m_jitter.getValue() + 1) - m_jitter.getValue() / 2;
+        jitterVals[i][1] =
+          rnd.nextInt(m_jitter.getValue() + 1) - m_jitter.getValue() / 2;
       }
     }
 
@@ -649,8 +664,9 @@ public class MatrixPanel extends JPanel {
         temp1 = cellSize / inst.attribute(m_selectedAttribs[j]).numValues(); // m_type[1][j];
         temp2 = temp1 / 2;
         for (int i = 0; i < inst.numInstances(); i++) {
-          m_points[i][j] = (int) Math.round(temp2 + temp1
-            * inst.instance(i).value(m_selectedAttribs[j]));
+          m_points[i][j] =
+            (int) Math.round(temp2 + temp1
+              * inst.instance(i).value(m_selectedAttribs[j]));
           if (inst.instance(i).isMissing(m_selectedAttribs[j])) {
             m_missing[i][j] = true; // represents missing value
             if (m_selectedAttribs[j] == m_classIndex) {
@@ -662,9 +678,10 @@ public class MatrixPanel extends JPanel {
       } else {
         // m_type[0][j] = m_type[1][j] = 0;
         for (int i = 0; i < inst.numInstances(); i++) {
-          m_points[i][j] = (int) Math.round((inst.instance(i).value(
-            m_selectedAttribs[j]) - min[j])
-            * ratio[j]);
+          m_points[i][j] =
+            (int) Math
+              .round((inst.instance(i).value(m_selectedAttribs[j]) - min[j])
+                * ratio[j]);
           if (inst.instance(i).isMissing(m_selectedAttribs[j])) {
             m_missing[i][j] = true; // represents missing value
             if (m_selectedAttribs[j] == m_classIndex) {
@@ -707,8 +724,8 @@ public class MatrixPanel extends JPanel {
     m_classAttrib.removeAllItems();
     for (int i = 0; i < tempAttribNames.length; i++) {
       type = " (" + Attribute.typeToStringShort(m_data.attribute(i)) + ")";
-      tempAttribNames[i] = new String("Colour: " + m_data.attribute(i).name()
-        + " " + type);
+      tempAttribNames[i] =
+        new String("Colour: " + m_data.attribute(i).name() + " " + type);
       m_classAttrib.addItem(tempAttribNames[i]);
     }
     if (m_data.classIndex() == -1) {
@@ -781,10 +798,10 @@ public class MatrixPanel extends JPanel {
     setBt.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        JFileChooser chooser = new JFileChooser(new java.io.File(System
-          .getProperty("user.dir")));
-        ExtensionFileFilter myfilter = new ExtensionFileFilter("arff",
-          "Arff data files");
+        JFileChooser chooser =
+          new JFileChooser(new java.io.File(System.getProperty("user.dir")));
+        ExtensionFileFilter myfilter =
+          new ExtensionFileFilter("arff", "Arff data files");
         chooser.setFileFilter(myfilter);
         int returnVal = chooser.showOpenDialog(jf);
 
@@ -792,8 +809,9 @@ public class MatrixPanel extends JPanel {
           try {
             System.out.println("You chose to open this file: "
               + chooser.getSelectedFile().getName());
-            Instances in = new Instances(new FileReader(chooser
-              .getSelectedFile().getAbsolutePath()));
+            Instances in =
+              new Instances(new FileReader(chooser.getSelectedFile()
+                .getAbsolutePath()));
             mp.setInstances(in);
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -876,8 +894,8 @@ public class MatrixPanel extends JPanel {
             } else if (xpos > r.x + r.width) {
               break;
             } else {
-              attribWidth = fm.stringWidth(m_data.attribute(m_selectedAttrib)
-                .name());
+              attribWidth =
+                fm.stringWidth(m_data.attribute(m_selectedAttrib).name());
               g.drawString(
                 m_data.attribute(m_selectedAttrib).name(),
                 (attribWidth < cellSize) ? (xpos + (cellSize / 2 - attribWidth / 2))
@@ -1015,8 +1033,8 @@ public class MatrixPanel extends JPanel {
         return;
       }
 
-      JFrame jf = new JFrame("Weka Explorer: Visualizing "
-        + m_data.relationName());
+      JFrame jf =
+        new JFrame("Weka Explorer: Visualizing " + m_data.relationName());
       VisualizePanel vp = new VisualizePanel();
       try {
         PlotData2D pd = new PlotData2D(m_data);
@@ -1026,6 +1044,9 @@ public class MatrixPanel extends JPanel {
         vp.setXIndex(m_selectedAttribs[i]);
         vp.setYIndex(m_selectedAttribs[j]);
         vp.m_ColourCombo.setSelectedIndex(m_classIndex);
+        if (m_settings != null) {
+          vp.applySettings(m_settings, m_settingsOwnerID);
+        }
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -1095,9 +1116,10 @@ public class MatrixPanel extends JPanel {
     public void paintGraph(Graphics g, int xattrib, int yattrib, int xpos,
       int ypos) {
       int x, y;
-      g.setColor(this.getBackground().darker().darker());
+      g.setColor(m_backgroundColor.equals(Color.BLACK) ? m_backgroundColor
+        .brighter().brighter() : m_backgroundColor.darker().darker());
       g.drawRect(xpos - 1, ypos - 1, cellSize + 1, cellSize + 1);
-      g.setColor(Color.white);
+      g.setColor(m_backgroundColor);
       g.fillRect(xpos, ypos, cellSize, cellSize);
       for (int i = 0; i < m_points.length; i++) {
 
@@ -1124,8 +1146,8 @@ public class MatrixPanel extends JPanel {
             } else {
               // only x out of range
               x = intpad + m_points[i][xattrib];
-              y = intpad + (cellRange - m_points[i][yattrib])
-                + jitterVals[i][1];
+              y =
+                intpad + (cellRange - m_points[i][yattrib]) + jitterVals[i][1];
             }
           } else if (cellRange - m_points[i][yattrib] + jitterVals[i][1] < 0
             || cellRange - m_points[i][yattrib] + jitterVals[i][1] > cellRange) {
@@ -1238,8 +1260,8 @@ public class MatrixPanel extends JPanel {
    * @param pointSize the point size to use
    */
   public void setPointSize(int pointSize) {
-    if (pointSize <= m_pointSize.getMaximum() &&
-      pointSize > m_pointSize.getMinimum()) {
+    if (pointSize <= m_pointSize.getMaximum()
+      && pointSize > m_pointSize.getMinimum()) {
       m_pointSize.setValue(pointSize);
     }
   }
@@ -1250,10 +1272,43 @@ public class MatrixPanel extends JPanel {
    * @param plotSize the plot size to use
    */
   public void setPlotSize(int plotSize) {
-    if (plotSize >= m_plotSize.getMinimum() &&
-      plotSize <= m_plotSize.getMaximum()) {
+    if (plotSize >= m_plotSize.getMinimum()
+      && plotSize <= m_plotSize.getMaximum()) {
       m_plotSize.setValue(plotSize);
     }
+  }
+
+  /**
+   * Set the background colour for the cells in the matrix
+   * 
+   * @param c the background colour
+   */
+  public void setPlotBackgroundColour(Color c) {
+    m_backgroundColor = c;
+  }
+
+  /**
+   * @param settings
+   * @param ownerID
+   */
+  public void applySettings(Settings settings, String ownerID) {
+    m_settings = settings;
+    m_settingsOwnerID = ownerID;
+
+    setPointSize(settings.getSetting(ownerID,
+      weka.gui.explorer.VisualizePanel.ScatterDefaults.POINT_SIZE_KEY,
+      weka.gui.explorer.VisualizePanel.ScatterDefaults.POINT_SIZE,
+      Environment.getSystemWide()));
+
+    setPlotSize(settings.getSetting(ownerID,
+      weka.gui.explorer.VisualizePanel.ScatterDefaults.PLOT_SIZE_KEY,
+      weka.gui.explorer.VisualizePanel.ScatterDefaults.PLOT_SIZE,
+      Environment.getSystemWide()));
+
+    setPlotBackgroundColour(settings.getSetting(ownerID,
+      VisualizeUtils.VisualizeDefaults.BACKGROUND_COLOUR_KEY,
+      VisualizeUtils.VisualizeDefaults.BACKGROUND_COLOR,
+      Environment.getSystemWide()));
   }
 
   /**
@@ -1266,9 +1321,9 @@ public class MatrixPanel extends JPanel {
 
     Plot a = m_plotsPanel;
     a.setCellSize(m_plotSize.getValue());
-    Dimension d = new Dimension((m_selectedAttribs.length)
-      * (a.cellSize + a.extpad) + 2, (m_selectedAttribs.length)
-      * (a.cellSize + a.extpad) + 2);
+    Dimension d =
+      new Dimension((m_selectedAttribs.length) * (a.cellSize + a.extpad) + 2,
+        (m_selectedAttribs.length) * (a.cellSize + a.extpad) + 2);
     // System.out.println("Size: "+a.cellSize+" Extpad: "+
     // a.extpad+" selected: "+
     // m_selectedAttribs.length+' '+d);
@@ -1277,7 +1332,8 @@ public class MatrixPanel extends JPanel {
     a.setJitter(m_jitter.getValue());
 
     if (m_fastScroll.isSelected() && m_clearOSIPlottedCells) {
-      m_plottedCells = new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
+      m_plottedCells =
+        new boolean[m_selectedAttribs.length][m_selectedAttribs.length];
       m_clearOSIPlottedCells = false;
     }
 

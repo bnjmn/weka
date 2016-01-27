@@ -21,11 +21,19 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
+import weka.core.Defaults;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.Settings;
+import weka.core.WekaException;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.explorer.VisualizePanel;
+import weka.gui.knowledgeflow.BaseInteractiveViewer;
+import weka.gui.knowledgeflow.ScatterPlotMatrixPerspective;
+import weka.gui.visualize.MatrixPanel;
+import weka.knowledgeflow.Data;
+import weka.knowledgeflow.StepManager;
+import weka.knowledgeflow.steps.ScatterPlotMatrix;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -33,19 +41,11 @@ import javax.swing.JSplitPane;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.core.Defaults;
-import weka.core.Environment;
-import weka.core.Instances;
-import weka.core.Settings;
-import weka.core.WekaException;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.knowledgeflow.BaseInteractiveViewer;
-import weka.gui.knowledgeflow.ScatterPlotMatrixPerspective;
-import weka.gui.visualize.MatrixPanel;
-import weka.knowledgeflow.Data;
-import weka.knowledgeflow.StepManager;
-import weka.knowledgeflow.steps.ScatterPlotMatrix;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 /**
  * Interactive viewer for the ScatterPlotMatrix step
@@ -164,14 +164,14 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
   @Override
   public void applySettings(Settings settings) {
     int pointSize =
-      settings.getSetting(ScatterPlotMatrixPerspective.ScatterDefaults.ID,
-        ScatterPlotMatrixPerspective.ScatterDefaults.POINT_SIZE_KEY,
-        ScatterPlotMatrixPerspective.ScatterDefaults.POINT_SIZE,
+      settings.getSetting(VisualizePanel.ScatterDefaults.ID,
+        VisualizePanel.ScatterDefaults.POINT_SIZE_KEY,
+        VisualizePanel.ScatterDefaults.POINT_SIZE,
         Environment.getSystemWide());
     int plotSize =
-      settings.getSetting(ScatterPlotMatrixPerspective.ScatterDefaults.ID,
-        ScatterPlotMatrixPerspective.ScatterDefaults.PLOT_SIZE_KEY,
-        ScatterPlotMatrixPerspective.ScatterDefaults.PLOT_SIZE,
+      settings.getSetting(VisualizePanel.ScatterDefaults.ID,
+        VisualizePanel.ScatterDefaults.PLOT_SIZE_KEY,
+        VisualizePanel.ScatterDefaults.PLOT_SIZE,
         Environment.getSystemWide());
     m_matrixPanel.setPointSize(pointSize);
     m_matrixPanel.setPlotSize(plotSize);

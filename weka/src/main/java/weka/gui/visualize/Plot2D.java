@@ -21,6 +21,14 @@
 
 package weka.gui.visualize;
 
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Settings;
+import weka.core.Utils;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Font;
@@ -34,13 +42,6 @@ import java.awt.event.WindowEvent;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Vector;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
 
 /**
  * This class plots datasets in two dimensions. It can also plot classifier
@@ -196,8 +197,8 @@ public class Plot2D extends JPanel {
       String axisKey = thisClass + ".axisColour";
       String backgroundKey = thisClass + ".backgroundColour";
 
-      String axisColour = VisualizeUtils.VISUALIZE_PROPERTIES
-        .getProperty(axisKey);
+      String axisColour =
+        VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(axisKey);
       if (axisColour == null) {
         /*
          * System.err.println("Warning: no configuration property found in "
@@ -208,8 +209,8 @@ public class Plot2D extends JPanel {
         m_axisColour = VisualizeUtils.processColour(axisColour, m_axisColour);
       }
 
-      String backgroundColour = VisualizeUtils.VISUALIZE_PROPERTIES
-        .getProperty(backgroundKey);
+      String backgroundColour =
+        VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(backgroundKey);
       if (backgroundColour == null) {
         /*
          * System.err.println("Warning: no configuration property found in "
@@ -217,19 +218,43 @@ public class Plot2D extends JPanel {
          */
       } else {
         // System.err.println("Setting background colour to: "+backgroundColour);
-        m_backgroundColour = VisualizeUtils.processColour(backgroundColour,
-          m_backgroundColour);
+        m_backgroundColour =
+          VisualizeUtils.processColour(backgroundColour, m_backgroundColour);
       }
 
       try {
-        m_InstanceInfoFrameClass = Class
-          .forName(VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(thisClass
-            + ".instanceInfoFrame", "weka.gui.visualize.InstanceInfoFrame"));
+        m_InstanceInfoFrameClass =
+          Class.forName(VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(
+            thisClass + ".instanceInfoFrame",
+            "weka.gui.visualize.InstanceInfoFrame"));
       } catch (Exception e) {
         e.printStackTrace();
         m_InstanceInfoFrameClass = InstanceInfoFrame.class;
       }
     }
+  }
+
+  /**
+   * Apply settings
+   *
+   * @param settings the settings to apply
+   * @param ownerID the ID of the owner perspective, panel etc. to use when
+   *          looking up our settings
+   */
+  public void applySettings(Settings settings, String ownerID) {
+    m_axisColour =
+      settings.getSetting(ownerID,
+        VisualizeUtils.VisualizeDefaults.AXIS_COLOUR_KEY,
+        VisualizeUtils.VisualizeDefaults.AXIS_COLOR,
+        Environment.getSystemWide());
+    m_backgroundColour =
+      settings.getSetting(ownerID,
+        VisualizeUtils.VisualizeDefaults.BACKGROUND_COLOUR_KEY,
+        VisualizeUtils.VisualizeDefaults.BACKGROUND_COLOR,
+        Environment.getSystemWide());
+    this.setBackground(m_backgroundColour);
+
+    repaint();
   }
 
   /**
@@ -255,8 +280,8 @@ public class Plot2D extends JPanel {
         m_JitterVal = j;
         m_JRand = new Random(m_JitterVal);
         // if (m_pointLookup != null) {
-        m_drawnPoints = new int[m_XaxisEnd - m_XaxisStart + 1][m_YaxisEnd
-          - m_YaxisStart + 1];
+        m_drawnPoints =
+          new int[m_XaxisEnd - m_XaxisStart + 1][m_YaxisEnd - m_YaxisStart + 1];
         updatePturb();
         // }
         this.repaint();
@@ -508,10 +533,10 @@ public class Plot2D extends JPanel {
 
         for (int i = 0; i < temp_plot.m_plotInstances.numInstances(); i++) {
           if (temp_plot.m_pointLookup[i][0] != Double.NEGATIVE_INFINITY) {
-            double px = temp_plot.m_pointLookup[i][0]
-              + temp_plot.m_pointLookup[i][2];
-            double py = temp_plot.m_pointLookup[i][1]
-              + temp_plot.m_pointLookup[i][3];
+            double px =
+              temp_plot.m_pointLookup[i][0] + temp_plot.m_pointLookup[i][2];
+            double py =
+              temp_plot.m_pointLookup[i][1] + temp_plot.m_pointLookup[i][3];
             // double size = temp_plot.m_pointLookup[i][2];
             double size = temp_plot.m_shapeSize[i];
             if ((x >= px - size) && (x <= px + size) && (y >= py - size)
@@ -531,8 +556,8 @@ public class Plot2D extends JPanel {
 
                   if (temp_plot.m_plotInstances.instance(i).isMissing(j)) {
                     insts.append("Missing");
-                  } else if (temp_plot.m_plotInstances.attribute(j).isNominal() ||
-                    temp_plot.m_plotInstances.attribute(j).isString()) {
+                  } else if (temp_plot.m_plotInstances.attribute(j).isNominal()
+                    || temp_plot.m_plotInstances.attribute(j).isString()) {
                     insts.append(temp_plot.m_plotInstances.attribute(j).value(
                       (int) temp_plot.m_plotInstances.instance(i).value(j)));
                   } else {
@@ -810,7 +835,8 @@ public class Plot2D extends JPanel {
    * @param y the y coord
    * @param size the size of the shape
    */
-  private static void drawTriangleDown(Graphics gx, double x, double y, int size) {
+  private static void
+    drawTriangleDown(Graphics gx, double x, double y, int size) {
     gx.drawLine((int) (x), (int) (y + size), (int) (x - size), (int) (y - size));
 
     gx.drawLine((int) (x - size), (int) (y - size), (int) (x + size),
@@ -911,10 +937,10 @@ public class Plot2D extends JPanel {
             xj = m_JRand.nextGaussian();
             yj = m_JRand.nextGaussian();
           }
-          temp_plot.m_pointLookup[i][2] = pturbX(temp_plot.m_pointLookup[i][0],
-            xj);
-          temp_plot.m_pointLookup[i][3] = pturbY(temp_plot.m_pointLookup[i][1],
-            yj);
+          temp_plot.m_pointLookup[i][2] =
+            pturbX(temp_plot.m_pointLookup[i][0], xj);
+          temp_plot.m_pointLookup[i][3] =
+            pturbY(temp_plot.m_pointLookup[i][1], yj);
         }
       }
     }
@@ -937,10 +963,12 @@ public class Plot2D extends JPanel {
             temp_plot.m_pointLookup[i][0] = Double.NEGATIVE_INFINITY;
             temp_plot.m_pointLookup[i][1] = Double.NEGATIVE_INFINITY;
           } else {
-            double x = convertToPanelX(temp_plot.m_plotInstances.instance(i)
-              .value(m_xIndex));
-            double y = convertToPanelY(temp_plot.m_plotInstances.instance(i)
-              .value(m_yIndex));
+            double x =
+              convertToPanelX(temp_plot.m_plotInstances.instance(i).value(
+                m_xIndex));
+            double y =
+              convertToPanelY(temp_plot.m_plotInstances.instance(i).value(
+                m_yIndex));
             temp_plot.m_pointLookup[i][0] = x;
             temp_plot.m_pointLookup[i][1] = y;
           }
@@ -963,14 +991,18 @@ public class Plot2D extends JPanel {
         if (temp_plot.m_plotInstances.instance(i).isMissing(m_xIndex)
           || temp_plot.m_plotInstances.instance(i).isMissing(m_yIndex)) {
         } else {
-          double x = (temp_plot.m_pointLookup[i][0] + temp_plot.m_pointLookup[i][2]);
-          double y = (temp_plot.m_pointLookup[i][1] + temp_plot.m_pointLookup[i][3]);
+          double x =
+            (temp_plot.m_pointLookup[i][0] + temp_plot.m_pointLookup[i][2]);
+          double y =
+            (temp_plot.m_pointLookup[i][1] + temp_plot.m_pointLookup[i][3]);
 
           double prevx = 0;
           double prevy = 0;
           if (i > 0) {
-            prevx = (temp_plot.m_pointLookup[i - 1][0] + temp_plot.m_pointLookup[i - 1][2]);
-            prevy = (temp_plot.m_pointLookup[i - 1][1] + temp_plot.m_pointLookup[i - 1][3]);
+            prevx =
+              (temp_plot.m_pointLookup[i - 1][0] + temp_plot.m_pointLookup[i - 1][2]);
+            prevy =
+              (temp_plot.m_pointLookup[i - 1][1] + temp_plot.m_pointLookup[i - 1][3]);
           }
 
           int x_range = (int) x - m_XaxisStart;
@@ -993,8 +1025,8 @@ public class Plot2D extends JPanel {
                 if (temp_plot.m_plotInstances.instance(i).isMissing(m_cIndex)) {
                   ci = Color.gray;
                 } else {
-                  int ind = (int) temp_plot.m_plotInstances.instance(i).value(
-                    m_cIndex);
+                  int ind =
+                    (int) temp_plot.m_plotInstances.instance(i).value(m_cIndex);
                   ci = m_colorList.get(ind);
                 }
 
@@ -1034,8 +1066,9 @@ public class Plot2D extends JPanel {
                 double r;
                 Color ci = null;
                 if (!temp_plot.m_plotInstances.instance(i).isMissing(m_cIndex)) {
-                  r = (temp_plot.m_plotInstances.instance(i).value(m_cIndex) - m_minC)
-                    / (m_maxC - m_minC);
+                  r =
+                    (temp_plot.m_plotInstances.instance(i).value(m_cIndex) - m_minC)
+                      / (m_maxC - m_minC);
                   r = (r * 240) + 15;
                   ci = new Color((int) r, 150, (int) (255 - r));
                 } else {
@@ -1148,26 +1181,30 @@ public class Plot2D extends JPanel {
     int nondecimal;
     nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
 
-    precisionXmax = (decimal > 0) ? (int) Math
-      .abs(((Math.log(Math.abs(m_maxX)) / Math.log(10)))) + 2 : 1;
+    precisionXmax =
+      (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(m_maxX)) / Math
+        .log(10)))) + 2 : 1;
     if (precisionXmax > VisualizeUtils.MAX_PRECISION) {
       precisionXmax = 1;
     }
 
-    String maxStringX = Utils.doubleToString(m_maxX, nondecimal + 1
-      + precisionXmax, precisionXmax);
+    String maxStringX =
+      Utils.doubleToString(m_maxX, nondecimal + 1 + precisionXmax,
+        precisionXmax);
 
     whole = (int) Math.abs(m_minX);
     decimal = Math.abs(m_minX) - whole;
     nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
-    precisionXmin = (decimal > 0) ? (int) Math
-      .abs(((Math.log(Math.abs(m_minX)) / Math.log(10)))) + 2 : 1;
+    precisionXmin =
+      (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(m_minX)) / Math
+        .log(10)))) + 2 : 1;
     if (precisionXmin > VisualizeUtils.MAX_PRECISION) {
       precisionXmin = 1;
     }
 
-    String minStringX = Utils.doubleToString(m_minX, nondecimal + 1
-      + precisionXmin, precisionXmin);
+    String minStringX =
+      Utils.doubleToString(m_minX, nondecimal + 1 + precisionXmin,
+        precisionXmin);
 
     mswx = m_labelMetrics.stringWidth(maxStringX);
 
@@ -1177,31 +1214,36 @@ public class Plot2D extends JPanel {
     whole = (int) Math.abs(m_maxY);
     decimal = Math.abs(m_maxY) - whole;
     nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
-    precisionYmax = (decimal > 0) ? (int) Math
-      .abs(((Math.log(Math.abs(m_maxY)) / Math.log(10)))) + 2 : 1;
+    precisionYmax =
+      (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(m_maxY)) / Math
+        .log(10)))) + 2 : 1;
     if (precisionYmax > VisualizeUtils.MAX_PRECISION) {
       precisionYmax = 1;
     }
 
-    String maxStringY = Utils.doubleToString(m_maxY, nondecimal + 1
-      + precisionYmax, precisionYmax);
+    String maxStringY =
+      Utils.doubleToString(m_maxY, nondecimal + 1 + precisionYmax,
+        precisionYmax);
 
     whole = (int) Math.abs(m_minY);
     decimal = Math.abs(m_minY) - whole;
     nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
-    precisionYmin = (decimal > 0) ? (int) Math
-      .abs(((Math.log(Math.abs(m_minY)) / Math.log(10)))) + 2 : 1;
+    precisionYmin =
+      (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(m_minY)) / Math
+        .log(10)))) + 2 : 1;
     if (precisionYmin > VisualizeUtils.MAX_PRECISION) {
       precisionYmin = 1;
     }
 
-    String minStringY = Utils.doubleToString(m_minY, nondecimal + 1
-      + precisionYmin, precisionYmin);
+    String minStringY =
+      Utils.doubleToString(m_minY, nondecimal + 1 + precisionYmin,
+        precisionYmin);
 
     if (m_plotInstances.attribute(m_yIndex).isNumeric()) {
-      mswy = (m_labelMetrics.stringWidth(maxStringY) > m_labelMetrics
-        .stringWidth(minStringY)) ? m_labelMetrics.stringWidth(maxStringY)
-        : m_labelMetrics.stringWidth(minStringY);
+      mswy =
+        (m_labelMetrics.stringWidth(maxStringY) > m_labelMetrics
+          .stringWidth(minStringY)) ? m_labelMetrics.stringWidth(maxStringY)
+          : m_labelMetrics.stringWidth(minStringY);
       mswy += m_labelMetrics.stringWidth("M");
     } else {
       mswy = m_labelMetrics.stringWidth("MM");
@@ -1232,14 +1274,16 @@ public class Plot2D extends JPanel {
           whole = (int) Math.abs(mid);
           decimal = Math.abs(mid) - whole;
           nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
-          precisionXmid = (decimal > 0) ? (int) Math.abs(((Math.log(Math
-            .abs(mid)) / Math.log(10)))) + 2 : 1;
+          precisionXmid =
+            (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(mid)) / Math
+              .log(10)))) + 2 : 1;
           if (precisionXmid > VisualizeUtils.MAX_PRECISION) {
             precisionXmid = 1;
           }
 
-          String maxString = Utils.doubleToString(mid, nondecimal + 1
-            + precisionXmid, precisionXmid);
+          String maxString =
+            Utils.doubleToString(mid, nondecimal + 1 + precisionXmid,
+              precisionXmid);
           int sw = m_labelMetrics.stringWidth(maxString);
           double mx = m_XaxisStart + ((m_XaxisEnd - m_XaxisStart) / 2.0);
           gx.drawString(maxString, (int) (mx - ((sw) / 2.0)), m_YaxisEnd + hf
@@ -1305,14 +1349,16 @@ public class Plot2D extends JPanel {
           whole = (int) Math.abs(mid);
           decimal = Math.abs(mid) - whole;
           nondecimal = (whole > 0) ? (int) (Math.log(whole) / Math.log(10)) : 1;
-          precisionYmid = (decimal > 0) ? (int) Math.abs(((Math.log(Math
-            .abs(mid)) / Math.log(10)))) + 2 : 1;
+          precisionYmid =
+            (decimal > 0) ? (int) Math.abs(((Math.log(Math.abs(mid)) / Math
+              .log(10)))) + 2 : 1;
           if (precisionYmid > VisualizeUtils.MAX_PRECISION) {
             precisionYmid = 1;
           }
 
-          String maxString = Utils.doubleToString(mid, nondecimal + 1
-            + precisionYmid, precisionYmid);
+          String maxString =
+            Utils.doubleToString(mid, nondecimal + 1 + precisionYmid,
+              precisionYmid);
           int sw = m_labelMetrics.stringWidth(maxString);
           double mx = m_YaxisStart + ((m_YaxisEnd - m_YaxisStart) / 2.0);
           gx.drawString(maxString, m_XaxisStart - sw - m_tickSize - 1,
@@ -1330,8 +1376,9 @@ public class Plot2D extends JPanel {
         // can we at least print 2 characters
         if (maxYStringHeight >= (2 * hf)) {
           String val = m_plotInstances.attribute(m_yIndex).value(i);
-          int numPrint = ((maxYStringHeight / hf) > val.length()) ? val
-            .length() : (maxYStringHeight / hf);
+          int numPrint =
+            ((maxYStringHeight / hf) > val.length()) ? val.length()
+              : (maxYStringHeight / hf);
 
           for (int j = 0; j < numPrint; j++) {
             String ll = val.substring(j, j + 1);
@@ -1459,8 +1506,8 @@ public class Plot2D extends JPanel {
         System.exit(1);
       }
 
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Visualize");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       final Plot2D p2 = new Plot2D();
@@ -1488,8 +1535,8 @@ public class Plot2D extends JPanel {
       if (args.length >= 1) {
         for (int j = 0; j < args.length; j++) {
           System.err.println("Loading instances from " + args[j]);
-          java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-            args[j]));
+          java.io.Reader r =
+            new java.io.BufferedReader(new java.io.FileReader(args[j]));
           Instances i = new Instances(r);
           i.setClassIndex(i.numAttributes() - 1);
           PlotData2D pd1 = new PlotData2D(i);

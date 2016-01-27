@@ -21,6 +21,27 @@
 
 package weka.gui.visualize;
 
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Settings;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JSlider;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -44,27 +65,6 @@ import java.io.FileWriter;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JSlider;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 /**
  * This panel allows the user to visualize a dataset (and if provided) a
@@ -215,30 +215,40 @@ public class VisualizePanel extends PrintablePanel {
 
                 m_createShape = false;
                 if (m_shapePoints.size() >= 5) {
-                  double cx = Math.ceil(m_plot2D.convertToPanelX(m_shapePoints
-                    .get(m_shapePoints.size() - 4).doubleValue()));
+                  double cx =
+                    Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(
+                      m_shapePoints.size() - 4).doubleValue()));
 
-                  double cx2 = Math.ceil(m_plot2D.convertToPanelX(m_shapePoints
-                    .get(m_shapePoints.size() - 2).doubleValue())) - cx;
+                  double cx2 =
+                    Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(
+                      m_shapePoints.size() - 2).doubleValue()))
+                      - cx;
 
                   cx2 *= 50000;
 
-                  double cy = Math.ceil(m_plot2D.convertToPanelY(m_shapePoints
-                    .get(m_shapePoints.size() - 3).doubleValue()));
-                  double cy2 = Math.ceil(m_plot2D.convertToPanelY(m_shapePoints
-                    .get(m_shapePoints.size() - 1).doubleValue())) - cy;
+                  double cy =
+                    Math.ceil(m_plot2D.convertToPanelY(m_shapePoints.get(
+                      m_shapePoints.size() - 3).doubleValue()));
+                  double cy2 =
+                    Math.ceil(m_plot2D.convertToPanelY(m_shapePoints.get(
+                      m_shapePoints.size() - 1).doubleValue()))
+                      - cy;
                   cy2 *= 50000;
 
-                  double cxa = Math.ceil(m_plot2D.convertToPanelX(m_shapePoints
-                    .get(3).doubleValue()));
-                  double cxa2 = Math.ceil(m_plot2D
-                    .convertToPanelX(m_shapePoints.get(1).doubleValue())) - cxa;
+                  double cxa =
+                    Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(3)
+                      .doubleValue()));
+                  double cxa2 =
+                    Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(1)
+                      .doubleValue())) - cxa;
                   cxa2 *= 50000;
 
-                  double cya = Math.ceil(m_plot2D.convertToPanelY(m_shapePoints
-                    .get(4).doubleValue()));
-                  double cya2 = Math.ceil(m_plot2D
-                    .convertToPanelY(m_shapePoints.get(2).doubleValue())) - cya;
+                  double cya =
+                    Math.ceil(m_plot2D.convertToPanelY(m_shapePoints.get(4)
+                      .doubleValue()));
+                  double cya2 =
+                    Math.ceil(m_plot2D.convertToPanelY(m_shapePoints.get(2)
+                      .doubleValue())) - cya;
 
                   cya2 *= 50000;
 
@@ -270,8 +280,9 @@ public class VisualizePanel extends PrintablePanel {
                     if (m_shapePoints.get(m_shapePoints.size() - 3)
                       .doubleValue() == m_shapePoints.get(
                       m_shapePoints.size() - 1).doubleValue()) {
-                      cy2 = m_shapePoints.get(m_shapePoints.size() - 1)
-                        .doubleValue();
+                      cy2 =
+                        m_shapePoints.get(m_shapePoints.size() - 1)
+                          .doubleValue();
                     }
                   }
                   m_shapePoints.add(new Double(cy));
@@ -478,10 +489,10 @@ public class VisualizePanel extends PrintablePanel {
           if (e.getActionCommand().equals("Submit")) {
             if (m_splitListener != null && m_shapes != null) {
               // then send the split to the listener
-              Instances sub_set1 = new Instances(
-                m_plot2D.getMasterPlot().m_plotInstances, 500);
-              Instances sub_set2 = new Instances(
-                m_plot2D.getMasterPlot().m_plotInstances, 500);
+              Instances sub_set1 =
+                new Instances(m_plot2D.getMasterPlot().m_plotInstances, 500);
+              Instances sub_set2 =
+                new Instances(m_plot2D.getMasterPlot().m_plotInstances, 500);
 
               if (m_plot2D.getMasterPlot().m_plotInstances != null) {
 
@@ -509,8 +520,8 @@ public class VisualizePanel extends PrintablePanel {
               }
             } else if (m_shapes != null
               && m_plot2D.getMasterPlot().m_plotInstances != null) {
-              Instances sub_set1 = new Instances(
-                m_plot2D.getMasterPlot().m_plotInstances, 500);
+              Instances sub_set1 =
+                new Instances(m_plot2D.getMasterPlot().m_plotInstances, 500);
               int count = 0;
               for (int noa = 0; noa < m_plot2D.getMasterPlot().m_plotInstances
                 .numInstances(); noa++) {
@@ -604,6 +615,19 @@ public class VisualizePanel extends PrintablePanel {
         }
       });
       // //////////
+    }
+
+    /**
+     * Apply settings
+     * 
+     * @param settings the settings to apply
+     * @param ownerID the ID of the owner perspective, panel etc. This key is
+     *          used when looking up our settings
+     */
+    protected void applySettings(Settings settings, String ownerID) {
+      m_plot2D.applySettings(settings, ownerID);
+      setBackground(m_plot2D.getBackground());
+      repaint();
     }
 
     /**
@@ -1212,13 +1236,13 @@ public class VisualizePanel extends PrintablePanel {
           ar1 = getXCoords(m_shapePoints);
           ar2 = getYCoords(m_shapePoints);
           gx.drawPolyline(ar1, ar2, (m_shapePoints.size() - 1) / 2);
-          m_newMousePos.width = (int) Math.ceil(m_plot2D
-            .convertToPanelX(m_shapePoints.get(m_shapePoints.size() - 2)
-              .doubleValue()));
+          m_newMousePos.width =
+            (int) Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(
+              m_shapePoints.size() - 2).doubleValue()));
 
-          m_newMousePos.height = (int) Math.ceil(m_plot2D
-            .convertToPanelY(m_shapePoints.get(m_shapePoints.size() - 1)
-              .doubleValue()));
+          m_newMousePos.height =
+            (int) Math.ceil(m_plot2D.convertToPanelY(m_shapePoints.get(
+              m_shapePoints.size() - 1).doubleValue()));
 
           gx.drawLine(
             (int) Math.ceil(m_plot2D.convertToPanelX(m_shapePoints.get(
@@ -1327,15 +1351,16 @@ public class VisualizePanel extends PrintablePanel {
             edge1 = 1;
           } else {
             // test bottom
-            new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-              this.getHeight());
+            new_coords =
+              lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
+                this.getHeight());
             edge1 = 3;
           }
         }
       } else if (x1 > this.getWidth()) {
         // test right
-        new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(),
-          this.getWidth());
+        new_coords =
+          lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), this.getWidth());
         edge1 = 2;
         if (new_coords[0] < 0) {
           // then not right
@@ -1345,8 +1370,9 @@ public class VisualizePanel extends PrintablePanel {
             edge1 = 1;
           } else {
             // test bottom
-            new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-              this.getHeight());
+            new_coords =
+              lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
+                this.getHeight());
             edge1 = 3;
           }
         }
@@ -1356,8 +1382,8 @@ public class VisualizePanel extends PrintablePanel {
         edge1 = 1;
       } else {
         // test bottom
-        new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-          this.getHeight());
+        new_coords =
+          lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, this.getHeight());
         edge1 = 3;
       }
 
@@ -1381,15 +1407,16 @@ public class VisualizePanel extends PrintablePanel {
             edge2 = 1;
           } else {
             // test bottom
-            new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-              this.getHeight());
+            new_coords =
+              lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
+                this.getHeight());
             edge2 = 3;
           }
         }
       } else if (x1 > this.getWidth()) {
         // test right
-        new_coords = lineIntersect(x1, y1, x2, y2, 0, this.getHeight(),
-          this.getWidth());
+        new_coords =
+          lineIntersect(x1, y1, x2, y2, 0, this.getHeight(), this.getWidth());
         edge2 = 2;
         if (new_coords[0] < 0) {
           // then not right
@@ -1399,8 +1426,9 @@ public class VisualizePanel extends PrintablePanel {
             edge2 = 1;
           } else {
             // test bottom
-            new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-              this.getHeight());
+            new_coords =
+              lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
+                this.getHeight());
             edge2 = 3;
           }
         }
@@ -1410,8 +1438,8 @@ public class VisualizePanel extends PrintablePanel {
         edge2 = 1;
       } else {
         // test bottom
-        new_coords = lineIntersect(x1, y1, x2, y2, this.getWidth(), 0,
-          this.getHeight());
+        new_coords =
+          lineIntersect(x1, y1, x2, y2, this.getWidth(), 0, this.getHeight());
         edge2 = 3;
       }
 
@@ -1469,8 +1497,8 @@ public class VisualizePanel extends PrintablePanel {
       int cach = (v.size() - 1) / 2;
       int[] ar = new int[cach];
       for (int noa = 0; noa < cach; noa++) {
-        ar[noa] = (int) m_plot2D.convertToPanelX(v.get(noa * 2 + 1)
-          .doubleValue());
+        ar[noa] =
+          (int) m_plot2D.convertToPanelX(v.get(noa * 2 + 1).doubleValue());
       }
       return ar;
     }
@@ -1486,8 +1514,8 @@ public class VisualizePanel extends PrintablePanel {
       int cach = (v.size() - 1) / 2;
       int[] ar = new int[cach];
       for (int noa = 0; noa < cach; noa++) {
-        ar[noa] = (int) m_plot2D.convertToPanelY(v.get(noa * 2 + 2)
-          .doubleValue());
+        ar[noa] =
+          (int) m_plot2D.convertToPanelY(v.get(noa * 2 + 2).doubleValue());
       }
       return ar;
     }
@@ -1703,8 +1731,8 @@ public class VisualizePanel extends PrintablePanel {
 
         String showAttBars = thisClass + ".displayAttributeBars";
 
-        String val = VisualizeUtils.VISUALIZE_PROPERTIES
-          .getProperty(showAttBars);
+        String val =
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(showAttBars);
         if (val == null) {
           // System.err.println("Displaying attribute bars ");
           // m_showAttBars = true;
@@ -1728,8 +1756,8 @@ public class VisualizePanel extends PrintablePanel {
         String ycolKey = thisClass + "." + relationName + ".YDimension";
         String ccolKey = thisClass + "." + relationName + ".ColourDimension";
 
-        m_preferredXDimension = VisualizeUtils.VISUALIZE_PROPERTIES
-          .getProperty(xcolKey);
+        m_preferredXDimension =
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(xcolKey);
         /*
          * if (m_preferredXDimension == null) {
          * System.err.println("No preferred X dimension found in "
@@ -1737,8 +1765,8 @@ public class VisualizePanel extends PrintablePanel {
          * System.err.println("Setting preferred X dimension to "
          * +m_preferredXDimension); }
          */
-        m_preferredYDimension = VisualizeUtils.VISUALIZE_PROPERTIES
-          .getProperty(ycolKey);
+        m_preferredYDimension =
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(ycolKey);
         /*
          * if (m_preferredYDimension == null) {
          * System.err.println("No preferred Y dimension found in "
@@ -1746,8 +1774,8 @@ public class VisualizePanel extends PrintablePanel {
          * System.err.println("Setting preferred dimension Y to "
          * +m_preferredYDimension); }
          */
-        m_preferredColourDimension = VisualizeUtils.VISUALIZE_PROPERTIES
-          .getProperty(ccolKey);
+        m_preferredColourDimension =
+          VisualizeUtils.VISUALIZE_PROPERTIES.getProperty(ccolKey);
         /*
          * if (m_preferredColourDimension == null) {
          * System.err.println("No preferred Colour dimension found in "
@@ -1757,6 +1785,19 @@ public class VisualizePanel extends PrintablePanel {
          */
       }
     }
+  }
+
+  /**
+   * Apply settings
+   *
+   * @param settings the settings to apply
+   * @param ownerID the ID of the owner perspective, panel etc. to use when
+   *          looking up settings
+   */
+  public void applySettings(Settings settings, String ownerID) {
+    m_plot.applySettings(settings, ownerID);
+    m_attrib.applySettings(settings, ownerID);
+    repaint();
   }
 
   /**
@@ -2079,12 +2120,13 @@ public class VisualizePanel extends PrintablePanel {
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         File sFile = m_FileChooser.getSelectedFile();
         if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
-          sFile = new File(sFile.getParent(), sFile.getName()
-            + Instances.FILE_EXTENSION);
+          sFile =
+            new File(sFile.getParent(), sFile.getName()
+              + Instances.FILE_EXTENSION);
         }
         File selected = sFile;
-        Instances insts = new Instances(new BufferedReader(new FileReader(
-          selected)));
+        Instances insts =
+          new Instances(new BufferedReader(new FileReader(selected)));
         openVisibleInstances(insts);
       }
     } catch (Exception ex) {
@@ -2115,8 +2157,9 @@ public class VisualizePanel extends PrintablePanel {
         if (returnVal == JFileChooser.APPROVE_OPTION) {
           File sFile = m_FileChooser.getSelectedFile();
           if (!sFile.getName().toLowerCase().endsWith(Instances.FILE_EXTENSION)) {
-            sFile = new File(sFile.getParent(), sFile.getName()
-              + Instances.FILE_EXTENSION);
+            sFile =
+              new File(sFile.getParent(), sFile.getName()
+                + Instances.FILE_EXTENSION);
           }
           File selected = sFile;
           Writer w = new BufferedWriter(new FileWriter(selected));
@@ -2459,8 +2502,8 @@ public class VisualizePanel extends PrintablePanel {
 
       weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
         "Logging started");
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Explorer: Visualize");
+      final javax.swing.JFrame jf =
+        new javax.swing.JFrame("Weka Explorer: Visualize");
       jf.setSize(500, 400);
       jf.getContentPane().setLayout(new BorderLayout());
       final VisualizePanel sp = new VisualizePanel();
@@ -2478,8 +2521,8 @@ public class VisualizePanel extends PrintablePanel {
       if (args.length >= 1) {
         for (int j = 0; j < args.length; j++) {
           System.err.println("Loading instances from " + args[j]);
-          java.io.Reader r = new java.io.BufferedReader(new java.io.FileReader(
-            args[j]));
+          java.io.Reader r =
+            new java.io.BufferedReader(new java.io.FileReader(args[j]));
           Instances i = new Instances(r);
           i.setClassIndex(i.numAttributes() - 1);
           PlotData2D pd1 = new PlotData2D(i);
