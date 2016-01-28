@@ -60,14 +60,15 @@ import java.util.Vector;
 
 /** 
  <!-- globalinfo-start -->
- * A wrapper class for the libsvm tools (the libsvm classes, typically the jar file, need to be in the classpath to use this classifier).<br/>
- * LibSVM runs faster than SMO since it uses LibSVM to build the SVM classifier.<br/>
- * LibSVM allows users to experiment with One-class SVM, Regressing SVM, and nu-SVM supported by LibSVM tool. LibSVM reports many useful statistics about LibSVM classifier (e.g., confusion matrix,precision, recall, ROC score, etc.).<br/>
- * <br/>
+ * A wrapper class for the libsvm library. This wrapper supports the classifiers implemented in the libsvm
+ * library, including one-class SVMs.<br>
+ * Note: To be consistent with other SVMs in WEKA, the target attribute is now normalized before "
+ * SVM regression is performed.<br>
+ * <br>
  * Yasser EL-Manzalawy (2005). WLSVM. URL http://www.cs.iastate.edu/~yasser/wlsvm/.<br/>
- * <br/>
+ * <br>
  * Chih-Chung Chang, Chih-Jen Lin (2001). LIBSVM - A Library for Support Vector Machines. URL http://www.csie.ntu.edu.tw/~cjlin/libsvm/.
- * <p/>
+ * <p>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
@@ -215,7 +216,11 @@ public class LibSVM
   
   /** normalize input data. */
   protected boolean m_Normalize = false;
-  
+
+  /** coefficients used by normalization filter for doing its linear transformation **/
+  protected double m_x1 = 1.0;
+  protected double m_x0 = 0.0;
+
   /** If true, the replace missing values filter is not applied. */
   private boolean m_noReplaceMissingValues;
   
@@ -323,15 +328,10 @@ public class LibSVM
    *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return 
-      "A wrapper class for the libsvm tools (the libsvm classes, typically "
-    + "the jar file, need to be in the classpath to use this classifier).\n"
-    + "LibSVM runs faster than SMO since it uses LibSVM to build the SVM "
-    + "classifier.\n"
-    + "LibSVM allows users to experiment with One-class SVM, Regressing SVM, "
-    + "and nu-SVM supported by LibSVM tool. LibSVM reports many useful "
-    + "statistics about LibSVM classifier (e.g., confusion matrix,"
-    + "precision, recall, ROC score, etc.).\n"
+    return "A wrapper class for the libsvm library. This wrapper supports the classifiers implemented in the libsvm "
+            + "library, including one-class SVMs.\n"
+            + "Note: To be consistent with other SVMs in WEKA, the target attribute is now normalized before "
+            + "SVM regression is performed.\n"
     + "\n"
     + getTechnicalInformation().toString();
   }
@@ -1489,36 +1489,36 @@ public class LibSVM
    * @return 			the distribution
    * @throws Exception 		if the distribution can't be computed successfully
    */
-  public double[] distributionForInstance (Instance instance) throws Exception {	
+  public double[] distributionForInstance (Instance instance) throws Exception {
     int[] labels = new int[instance.numClasses()];
     double[] prob_estimates = null;
 
     if (m_ProbabilityEstimates) {
       invokeMethod(
-	  Class.forName(CLASS_SVM).newInstance(),
-	  "svm_get_labels",
-	  new Class[]{
-	    Class.forName(CLASS_SVMMODEL), 
-	    Array.newInstance(Integer.TYPE, instance.numClasses()).getClass()},
-	    new Object[]{
-	    m_Model, 
-	    labels});
+              Class.forName(CLASS_SVM).newInstance(),
+              "svm_get_labels",
+              new Class[]{
+                      Class.forName(CLASS_SVMMODEL),
+                      Array.newInstance(Integer.TYPE, instance.numClasses()).getClass()},
+              new Object[]{
+                      m_Model,
+                      labels});
 
       prob_estimates = new double[instance.numClasses()];
     }
-    
+
     if (!getDoNotReplaceMissingValues()) {
       m_ReplaceMissingValues.input(instance);
       m_ReplaceMissingValues.batchFinished();
       instance = m_ReplaceMissingValues.output();
     }
-    
+
     if (m_Filter != null) {
       m_Filter.input(instance);
       m_Filter.batchFinished();
       instance = m_Filter.output();
     }
-    
+
     m_NominalToBinary.input(instance);
     m_NominalToBinary.batchFinished();
     instance = m_NominalToBinary.output();
@@ -1526,55 +1526,52 @@ public class LibSVM
     Object x = instanceToArray(instance);
     double v;
     double[] result = new double[instance.numClasses()];
-    if (    m_ProbabilityEstimates 
-	 && ((m_SVMType == SVMTYPE_C_SVC) || (m_SVMType == SVMTYPE_NU_SVC)) ) {
+    if (m_ProbabilityEstimates
+            && ((m_SVMType == SVMTYPE_C_SVC) || (m_SVMType == SVMTYPE_NU_SVC))) {
       v = ((Double) invokeMethod(
-          Class.forName(CLASS_SVM).newInstance(),
-          "svm_predict_probability",
-          new Class[]{
-            Class.forName(CLASS_SVMMODEL), 
-            Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass(),
-            Array.newInstance(Double.TYPE, prob_estimates.length).getClass()},
-          new Object[]{
-            m_Model, 
-            x,
-            prob_estimates})).doubleValue();
+              Class.forName(CLASS_SVM).newInstance(),
+              "svm_predict_probability",
+              new Class[]{
+                      Class.forName(CLASS_SVMMODEL),
+                      Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass(),
+                      Array.newInstance(Double.TYPE, prob_estimates.length).getClass()},
+              new Object[]{
+                      m_Model,
+                      x,
+                      prob_estimates})).doubleValue();
 
       // Return order of probabilities to canonical weka attribute order
       for (int k = 0; k < prob_estimates.length; k++) {
         result[labels[k]] = prob_estimates[k];
       }
-    }
-    else {
+    } else {
       v = ((Double) invokeMethod(
-          Class.forName(CLASS_SVM).newInstance(),
-          "svm_predict",
-          new Class[]{
-            Class.forName(CLASS_SVMMODEL), 
-            Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass()},
-          new Object[]{
-            m_Model, 
-            x})).doubleValue();
-      
+              Class.forName(CLASS_SVM).newInstance(),
+              "svm_predict",
+              new Class[]{
+                      Class.forName(CLASS_SVMMODEL),
+                      Array.newInstance(Class.forName(CLASS_SVMNODE), Array.getLength(x)).getClass()},
+              new Object[]{
+                      m_Model,
+                      x})).doubleValue();
+
       if (instance.classAttribute().isNominal()) {
-	if (m_SVMType == SVMTYPE_ONE_CLASS_SVM) {
-	  if (v > 0)
-	    result[0] = 1;
-	  else
+        if (m_SVMType == SVMTYPE_ONE_CLASS_SVM) {
+          if (v > 0)
+            result[0] = 1;
+          else
             // outlier (interface for Classifier specifies that unclassified instances
             // should return a distribution of all zeros)
-	    result[0] = 0;  
-	}
-	else {
-	  result[(int) v] = 1;
-	}
-      }
-      else {
-	result[0] = v;
+            result[0] = 0;
+        } else {
+          result[(int) v] = 1;
+        }
+      } else {
+        result[0] = v * m_x1 + m_x0;
       }
     }
 
-    return result;                
+    return result;
   }
 
   /**
@@ -1650,13 +1647,36 @@ public class LibSVM
     // replace missing values filtering, it will fail
     // if the data actually does have missing values
     getCapabilities().testWithFail(insts);
-        
+
+    double y0 = insts.instance(0).classValue();
+    int index = 1;
+    while (index < insts.numInstances() && insts.instance(index).classValue() == y0) {
+      index++;
+    }
+    if (index == insts.numInstances()) {
+      // degenerate case, all class values are equal
+      // we don't want to deal with this, too much hassle
+      throw new Exception("All class values are the same. At least two class values should be different");
+    }
+    double y1 = insts.instance(index).classValue();
+
     if (getNormalize()) {
       m_Filter = new Normalize();
+      ((Normalize)m_Filter).setIgnoreClass(true); // Normalize class as well
       m_Filter.setInputFormat(insts);
       insts = Filter.useFilter(insts, m_Filter);
     }
-    
+
+    if (m_Filter != null) {
+      double z0 = insts.instance(0).classValue();
+      double z1 = insts.instance(index).classValue();
+      m_x1 = (y0-y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+      m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
+    } else {
+      m_x1 = 1.0;
+      m_x0 = 0.0;
+    }
+
     // nominal to binary
     m_NominalToBinary = new NominalToBinary();
     m_NominalToBinary.setInputFormat(insts);
