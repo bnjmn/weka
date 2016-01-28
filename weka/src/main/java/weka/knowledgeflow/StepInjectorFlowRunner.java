@@ -65,7 +65,7 @@ public class StepInjectorFlowRunner extends FlowRunner {
         "Only batch data can be injected via this method.");
     }
 
-    setExecutionFinishedCallback(callback);
+    addExecutionFinishedCallback(callback);
 
     String connName = toInject.getConnectionName();
     List<String> accceptableInputs = target.getIncomingConnectionTypes();

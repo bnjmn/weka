@@ -38,28 +38,28 @@ public interface FlowExecutor {
    * 
    * @param flow the flow to execute
    */
-    void setFlow(Flow flow);
+  void setFlow(Flow flow);
 
   /**
    * Get the flow to be executed
    * 
    * @return the flow to be executed
    */
-    Flow getFlow();
+  Flow getFlow();
 
   /**
    * Set a log to use
    * 
    * @param logger the log tos use
    */
-    void setLogger(Logger logger);
+  void setLogger(Logger logger);
 
   /**
    * Get the log in use
    * 
    * @return the log in use
    */
-    Logger getLogger();
+  Logger getLogger();
 
   /**
    * Set the level to log at
@@ -67,7 +67,7 @@ public interface FlowExecutor {
    * @param level the level to log at (logging messages at this level or below
    *          will be displayed in the log)
    */
-    void setLoggingLevel(LoggingLevel level);
+  void setLoggingLevel(LoggingLevel level);
 
   /**
    * Get the logging level to log at
@@ -81,7 +81,7 @@ public interface FlowExecutor {
    * 
    * @param env the execution environment to use
    */
-    void setExecutionEnvironment(BaseExecutionEnvironment env);
+  void setExecutionEnvironment(BaseExecutionEnvironment env);
 
   /**
    * Convenience method for applying settings - implementers should delegate the
@@ -89,7 +89,7 @@ public interface FlowExecutor {
    * 
    * @param settings the settings to use
    */
-    void setSettings(Settings settings);
+  void setSettings(Settings settings);
 
   /**
    * Convenience method for getting current settings - implementers should
@@ -97,14 +97,14 @@ public interface FlowExecutor {
    *
    * @return the settings in use
    */
-    Settings getSettings();
+  Settings getSettings();
 
   /**
    * Return the execution environment object for this flow executor
    * 
    * @return the execution environment
    */
-    BaseExecutionEnvironment getExecutionEnvironment();
+  BaseExecutionEnvironment getExecutionEnvironment();
 
   /**
    * Run the flow sequentially (i.e. launch start points sequentially rather
@@ -112,31 +112,38 @@ public interface FlowExecutor {
    * 
    * @throws WekaException if a problem occurs during execution
    */
-    void runSequentially() throws WekaException;
+  void runSequentially() throws WekaException;
 
   /**
    * Run the flow by launching all start points in parallel
    * 
    * @throws WekaException if a problem occurs during execution
    */
-    void runParallel() throws WekaException;
+  void runParallel() throws WekaException;
 
   /**
    * Stop all processing
    */
-    void stopProcessing();
+  void stopProcessing();
 
   /**
    * Returns true if execution was stopped via the stopProcessing() method
    *
    * @return true if execution was stopped
    */
-    boolean wasStopped();
+  boolean wasStopped();
 
   /**
-   * Set a callback to notify when execution finishes
+   * Add a callback to notify when execution finishes
    *
    * @param callback the callback to notify
    */
-    void setExecutionFinishedCallback(ExecutionFinishedCallback callback);
+  void addExecutionFinishedCallback(ExecutionFinishedCallback callback);
+
+  /**
+   * Remove a callback
+   *
+   * @param callback the callback to remove
+   */
+  void removeExecutionFinishedCallback(ExecutionFinishedCallback callback);
 }

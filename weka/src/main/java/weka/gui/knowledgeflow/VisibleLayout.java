@@ -718,7 +718,7 @@ public class VisibleLayout extends JPanel {
     m_flowExecutor.getExecutionEnvironment().setEnvironmentVariables(m_env);
     m_isExecuting = true;
     m_flowExecutor
-      .setExecutionFinishedCallback(new ExecutionFinishedCallback() {
+      .addExecutionFinishedCallback(new ExecutionFinishedCallback() {
         @Override
         public void executionFinished() {
           m_isExecuting = false;

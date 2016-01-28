@@ -78,7 +78,8 @@ public class FlowRunner implements FlowExecutor {
     BaseExecutionEnvironment.BaseExecutionEnvironmentDefaults.RESOURCE_INTENSIVE_EXECUTOR_SERVICE_NUM_THREADS;
 
   /** Callback to notify when execution completes */
-  protected ExecutionFinishedCallback m_callback;
+  protected List<ExecutionFinishedCallback> m_callbacks =
+    new ArrayList<ExecutionFinishedCallback>();
 
   /** Gets set to true if the stopProcessing() method is called */
   protected boolean m_wasStopped;
@@ -203,8 +204,21 @@ public class FlowRunner implements FlowExecutor {
    * @param callback the callback to notify
    */
   @Override
-  public void setExecutionFinishedCallback(ExecutionFinishedCallback callback) {
-    m_callback = callback;
+  public void addExecutionFinishedCallback(ExecutionFinishedCallback callback) {
+    if (!m_callbacks.contains(callback)) {
+      m_callbacks.add(callback);
+    }
+  }
+
+  /**
+   * Remove a callback
+   *
+   * @param callback the callback to remove
+   */
+  @Override
+  public void
+    removeExecutionFinishedCallback(ExecutionFinishedCallback callback) {
+    m_callbacks.remove(callback);
   }
 
   /**
@@ -348,9 +362,10 @@ public class FlowRunner implements FlowExecutor {
     m_wasStopped = false;
     if (m_flow == null) {
       m_wasStopped = true;
-      if (m_callback != null) {
-        m_callback.executionFinished();
+      for (ExecutionFinishedCallback c : m_callbacks) {
+        c.executionFinished();
       }
+
       throw new WekaException("No flow to execute!");
     }
 
@@ -366,9 +381,10 @@ public class FlowRunner implements FlowExecutor {
       m_wasStopped = true;
       m_logHandler.logError("FlowRunner: there don't appear to be any "
         + "start points to launch!", null);
-      if (m_callback != null) {
-        m_callback.executionFinished();
+      for (ExecutionFinishedCallback c : m_callbacks) {
+        c.executionFinished();;
       }
+
       return null;
     }
 
@@ -378,8 +394,8 @@ public class FlowRunner implements FlowExecutor {
 
     if (!m_flow.initFlow(this)) {
       m_wasStopped = true;
-      if (m_callback != null) {
-        m_callback.executionFinished();
+      for (ExecutionFinishedCallback c : m_callbacks) {
+        c.executionFinished();
       }
       throw new WekaException(
         "Flow did not initializeFlow properly - check log.");
@@ -517,8 +533,8 @@ public class FlowRunner implements FlowExecutor {
   }
 
   /**
-   * Launch a thread to monitor the progress of the flow, and then
-   * shutdown the executor service once all steps have completed.
+   * Launch a thread to monitor the progress of the flow, and then shutdown the
+   * executor service once all steps have completed.
    */
   protected void launchExecutorShutdownThread() {
     if (m_execEnv != null) {
@@ -528,8 +544,8 @@ public class FlowRunner implements FlowExecutor {
           waitUntilFinished();
           m_logHandler.logDebug("FlowRunner: Shutting down executor service");
           m_execEnv.stopClientExecutionService();
-          if (m_callback != null) {
-            m_callback.executionFinished();
+          for (ExecutionFinishedCallback c : m_callbacks) {
+            c.executionFinished();
           }
         }
       };
