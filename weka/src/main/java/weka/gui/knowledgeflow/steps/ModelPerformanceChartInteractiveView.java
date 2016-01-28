@@ -21,30 +21,34 @@
 
 package weka.gui.knowledgeflow.steps;
 
+import weka.core.Defaults;
+import weka.core.Settings;
+import weka.core.WekaException;
+import weka.gui.knowledgeflow.BaseInteractiveViewer;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizeUtils;
+import weka.knowledgeflow.steps.ModelPerformanceChart;
+
+import javax.swing.JButton;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
-import javax.swing.JButton;
-
-import weka.core.WekaException;
-import weka.gui.knowledgeflow.BaseInteractiveViewer;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.VisualizePanel;
-import weka.knowledgeflow.steps.ModelPerformanceChart;
-
 /**
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class ModelPerformanceChartInteractiveView extends
-  BaseInteractiveViewer {
+public class ModelPerformanceChartInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = 8818417648798221980L;
   protected JButton m_clearButton = new JButton("Clear results");
   protected VisualizePanel m_visPanel = new VisualizePanel();
+
+  protected static final String ID =
+    "weka.gui.knowledgeflow.steps.ModelPerformanceChartInteractiveView";
 
   @Override
   public String getViewerName() {
@@ -84,5 +88,19 @@ public class ModelPerformanceChartInteractiveView extends
       throw new WekaException(ex);
     }
     m_visPanel.setPreferredSize(new Dimension(800, 600));
+    applySettings(getSettings());
+  }
+
+  @Override
+  public Defaults getDefaultSettings() {
+    Defaults d = new VisualizeUtils.VisualizeDefaults();
+    d.setID(ID);
+
+    return d;
+  }
+
+  @Override
+  public void applySettings(Settings settings) {
+    m_visPanel.applySettings(settings, ID);
   }
 }

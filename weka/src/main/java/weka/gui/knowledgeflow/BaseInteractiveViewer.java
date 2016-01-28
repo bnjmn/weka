@@ -1,5 +1,13 @@
 package weka.gui.knowledgeflow;
 
+import weka.core.Defaults;
+import weka.core.Settings;
+import weka.gui.SettingsEditor;
+import weka.knowledgeflow.steps.Step;
+
+import javax.swing.JButton;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
@@ -8,15 +16,6 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.IOException;
-
-import javax.swing.JButton;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import weka.core.Defaults;
-import weka.core.Settings;
-import weka.gui.SettingsEditor;
-import weka.knowledgeflow.steps.Step;
 
 /**
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
