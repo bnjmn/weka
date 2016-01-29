@@ -4328,7 +4328,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           m_TotalCoverage += instance.weight();
         }
       }
-      m_TotalSizeOfRegions += sizeOfRegions / (m_MaxTarget - m_MinTarget);
+      m_TotalSizeOfRegions += instance.weight() * sizeOfRegions / (m_MaxTarget - m_MinTarget);
 
       // Update other stats
       m_ConfusionMatrix[actualClass][predictedClass] += instance.weight();
@@ -4375,7 +4375,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         .setPredictionIntervals(preds);
     }
     for (double[] pred : preds) {
-      m_TotalSizeOfRegions += (pred[1] - pred[0]) / (m_MaxTarget - m_MinTarget);
+      m_TotalSizeOfRegions += classMissing.weight() * (pred[1] - pred[0]) / (m_MaxTarget - m_MinTarget);
     }
     for (double[] pred : preds) {
       if ((pred[1] >= classValue) && (pred[0] <= classValue)) {
