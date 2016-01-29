@@ -128,4 +128,15 @@ public class BatchPredictorVote extends Vote implements BatchPredictor {
 
     return preds;
   }
+
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    for (int i = 0; i < m_Classifiers.length; i++) {
+      if (!((BatchPredictor) m_Classifiers[i])
+        .implementsMoreEfficientBatchPrediction()) {
+        return false;
+      }
+    }
+    return true;
+  }
 }
