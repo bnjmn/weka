@@ -35,7 +35,7 @@ import weka.core.WekaPackageManager;
 import weka.core.scripting.Groovy;
 import weka.core.scripting.Jython;
 import weka.gui.arffviewer.ArffViewer;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;

@@ -53,7 +53,7 @@ import weka.gui.LogPanel;
 import weka.gui.Logger;
 import weka.gui.LookAndFeel;
 import weka.gui.WekaTaskMonitor;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.Perspective;
 
 /**

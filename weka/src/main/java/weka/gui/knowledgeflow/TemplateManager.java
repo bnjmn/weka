@@ -23,7 +23,7 @@ package weka.gui.knowledgeflow;
 
 import weka.core.Utils;
 import weka.core.WekaException;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.knowledgeflow.Flow;
 import weka.knowledgeflow.JSONFlowLoader;
 

@@ -27,7 +27,7 @@ import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.WekaPackageManager;
 import weka.gui.Logger;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.knowledgeflow.KnowledgeFlowApp;
 import weka.knowledgeflow.steps.Note;
 

@@ -38,7 +38,7 @@ import javax.swing.SwingConstants;
 import weka.gui.EnvironmentField;
 import weka.gui.PropertySheetPanel;
 import weka.gui.beans.OffscreenChartRenderer;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.beans.WekaOffscreenChartRenderer;
 import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.ModelPerformanceChart;

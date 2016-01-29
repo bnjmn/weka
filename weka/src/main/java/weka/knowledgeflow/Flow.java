@@ -24,7 +24,7 @@ package weka.knowledgeflow;
 import weka.core.WekaException;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.Logger;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.knowledgeflow.steps.SetVariables;
 
 import javax.swing.filechooser.FileFilter;

@@ -8,7 +8,7 @@ import weka.core.OptionMetadata;
 import weka.core.WekaException;
 import weka.gui.ProgrammaticProperty;
 import weka.gui.beans.OffscreenChartRenderer;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.beans.WekaOffscreenChartRenderer;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.gui.visualize.PlotData2D;

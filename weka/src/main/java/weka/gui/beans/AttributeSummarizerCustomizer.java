@@ -21,14 +21,9 @@
 
 package weka.gui.beans;
 
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.GridLayout;
-import java.awt.Window;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Set;
-import java.util.Vector;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.PluginManager;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -37,9 +32,14 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
+import java.awt.BorderLayout;
+import java.awt.Font;
+import java.awt.GridLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * GUI customizer for attribute summarizer. Allows the customization of

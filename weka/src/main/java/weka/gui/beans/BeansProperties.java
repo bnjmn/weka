@@ -20,6 +20,12 @@
 
 package weka.gui.beans;
 
+import weka.core.PluginManager;
+import weka.core.Utils;
+import weka.core.metastore.MetaStore;
+import weka.core.metastore.XMLFileBasedMetaStore;
+
+import javax.swing.JOptionPane;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.Serializable;
@@ -30,12 +36,6 @@ import java.util.Properties;
 import java.util.SortedSet;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
-
-import javax.swing.JOptionPane;
-
-import weka.core.Utils;
-import weka.core.metastore.MetaStore;
-import weka.core.metastore.XMLFileBasedMetaStore;
 
 /**
  * Utility class encapsulating various properties for the KnowledgeFlow and

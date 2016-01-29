@@ -26,7 +26,7 @@ import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;

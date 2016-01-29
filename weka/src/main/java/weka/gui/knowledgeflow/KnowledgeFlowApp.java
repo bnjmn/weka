@@ -30,7 +30,7 @@ import weka.gui.GenericObjectEditor;
 import weka.gui.LookAndFeel;
 import weka.gui.Perspective;
 import weka.gui.PerspectiveManager;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionEnvironment;
 import weka.knowledgeflow.KFDefaults;

@@ -26,7 +26,7 @@ import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.logging.Logger;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.knowledgeflow.MainKFPerspectiveToolBar;
 
 import javax.swing.*;

@@ -26,7 +26,7 @@ import weka.gui.Logger;
 import weka.gui.beans.BeanCommon;
 import weka.gui.beans.BeanConnection;
 import weka.gui.beans.BeanInstance;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.beans.WekaWrapper;
 import weka.gui.beans.xml.XMLBeans;
 import weka.knowledgeflow.steps.ClassAssigner;

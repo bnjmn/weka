@@ -32,7 +32,7 @@ import weka.core.Utils;
 import weka.core.WekaPackageManager;
 import weka.core.logging.Logger;
 import weka.gui.CheckBoxList.CheckBoxListModel;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;

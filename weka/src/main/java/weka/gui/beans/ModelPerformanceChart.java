@@ -21,6 +21,19 @@
 
 package weka.gui.beans;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.PluginManager;
+import weka.gui.Logger;
+import weka.gui.visualize.PlotData2D;
+import weka.gui.visualize.VisualizePanel;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
@@ -36,19 +49,6 @@ import java.util.Enumeration;
 import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
-
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.gui.Logger;
-import weka.gui.visualize.PlotData2D;
-import weka.gui.visualize.VisualizePanel;
 
 /**
  * Bean that can be used for displaying threshold curves (e.g. ROC curves) and

@@ -21,12 +21,12 @@
 
 package weka.classifiers.evaluation;
 
+import weka.core.PluginManager;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-
-import weka.gui.beans.PluginManager;
 
 /**
  * Abstract base class for pluggable classification/regression evaluation

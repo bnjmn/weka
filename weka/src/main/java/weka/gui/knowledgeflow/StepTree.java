@@ -30,7 +30,7 @@ import weka.core.WekaException;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
-import weka.gui.beans.PluginManager;
+import weka.core.PluginManager;
 import weka.gui.knowledgeflow.VisibleLayout.LayoutOperation;
 import weka.knowledgeflow.steps.KFStep;
 import weka.knowledgeflow.steps.Step;
