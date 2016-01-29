@@ -201,6 +201,9 @@ public class GaussianProcesses extends RandomizableClassifier implements
 
   /** The vector of target values. */
   protected Matrix m_t;
+  
+  /** The weight of the training instances. */
+  protected double[] m_weights;
 
   /**
    * Returns a string describing classifier
@@ -280,13 +283,6 @@ public class GaussianProcesses extends RandomizableClassifier implements
    */
   @Override
   public void buildClassifier(Instances insts) throws Exception {
-
-    // do we need to resample?
-    if (ResampleUtils.hasInstanceWeights(insts)) {
-      if (getDebug())
-	System.err.println(getClass().getName() + ": resampling training data");
-      insts = insts.resampleWithWeights(new Random(m_Seed));
-    }
 
     // check the set of training instances
     if (!m_checksTurnedOff) {
@@ -374,12 +370,18 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // Compute average target value
     double sum = 0.0;
     for (int i = 0; i < insts.numInstances(); i++) {
-      sum += insts.instance(i).classValue();
+      sum += insts.instance(i).weight() * insts.instance(i).classValue();
     }
-    m_avg_target = sum / insts.numInstances();
+    m_avg_target = sum / insts.sumOfWeights();
 
     // Store squared noise level
     m_deltaSquared = m_delta * m_delta;
+
+    // Store square roots of instance m_weights
+    m_weights = new double[insts.numInstances()];
+    for (int i  = 0; i < insts.numInstances(); i++) {
+      m_weights[i] = Math.sqrt(insts.instance(i).weight());
+    }
 
     // initialize kernel matrix/covariance matrix
     int n = insts.numInstances();
@@ -388,10 +390,11 @@ public class GaussianProcesses extends RandomizableClassifier implements
     for (int i = 0; i < n; i++) {
       m_L[i] = new double[i + 1];
       for (int j = 0; j < i; j++) {
-        kv = m_kernel.eval(i, j, insts.instance(i));
+        double wj = Math.sqrt(insts.instance(j).weight());
+        kv = m_weights[i] * m_weights[j] * m_kernel.eval(i, j, insts.instance(i));
         m_L[i][j] = kv;
       }
-      kv = m_kernel.eval(i, i, insts.instance(i));
+      kv = m_weights[i] * m_weights[i] * m_kernel.eval(i, i, insts.instance(i));
       m_L[i][i] = kv + m_deltaSquared;
     }
 
@@ -450,7 +453,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     m_t = new Matrix(insts.numInstances(), 1);
     double[] tt = new double[n];
     for (int i = 0; i < n; i++) {
-      tt[i] = insts.instance(i).classValue() - m_avg_target;
+      tt[i] = m_weights[i] * (insts.instance(i).classValue() - m_avg_target);
     }
 
     // calculate m_t = tt . m_L
@@ -483,7 +486,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // Build K vector
     Matrix k = new Matrix(m_NumTrain, 1);
     for (int i = 0; i < m_NumTrain; i++) {
-      k.set(i, 0, m_kernel.eval(-1, i, inst));
+      k.set(i, 0, m_weights[i] * m_kernel.eval(-1, i, inst));
     }
 
     double result = k.transpose().times(m_t).get(0, 0) + m_avg_target;
@@ -561,7 +564,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // Build K vector (and Kappa)
     Matrix k = new Matrix(m_NumTrain, 1);
     for (int i = 0; i < m_NumTrain; i++) {
-      k.set(i, 0, m_kernel.eval(-1, i, inst));
+      k.set(i, 0, m_weights[i] * m_kernel.eval(-1, i, inst));
     }
 
     double estimate = k.transpose().times(m_t).get(0, 0) + m_avg_target;
@@ -598,7 +601,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // Build K vector (and Kappa)
     Matrix k = new Matrix(m_NumTrain, 1);
     for (int i = 0; i < m_NumTrain; i++) {
-      k.set(i, 0, m_kernel.eval(-1, i, inst));
+      k.set(i, 0, m_weights[i] * m_kernel.eval(-1, i, inst));
     }
 
     return computeStdDev(inst, k) / m_Alin;
@@ -621,7 +624,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // Build K vector (and Kappa)
     Matrix k = new Matrix(m_NumTrain, 1);
     for (int i = 0; i < m_NumTrain; i++) {
-      k.set(i, 0, m_kernel.eval(-1, i, inst));
+      k.set(i, 0, m_weights[i] * m_kernel.eval(-1, i, inst));
     }
 
     double estimate = k.transpose().times(m_t).get(0, 0) + m_avg_target;
