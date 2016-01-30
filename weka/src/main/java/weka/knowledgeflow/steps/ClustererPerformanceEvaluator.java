@@ -46,6 +46,15 @@ public class ClustererPerformanceEvaluator extends BaseStep {
 
   private static final long serialVersionUID = -6337375482954345717L;
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -57,6 +66,15 @@ public class ClustererPerformanceEvaluator extends BaseStep {
     return result;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -68,11 +86,22 @@ public class ClustererPerformanceEvaluator extends BaseStep {
     return result;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() {
     // nothing to do
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     weka.clusterers.Clusterer clusterer = (weka.clusterers.Clusterer) data

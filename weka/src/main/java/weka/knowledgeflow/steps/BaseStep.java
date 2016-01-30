@@ -190,6 +190,16 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     getStepManager().throughputUpdateEnd();
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -197,26 +207,77 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
     return null;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     // no-op. Subclass should override if it accepts incoming data
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return null;
   }
 
+  /**
+   * When running in a graphical execution environment a step can make one or
+   * more popup Viewer components available. These might be used to display
+   * results, graphics etc. Returning null indicates that the step has no such
+   * additional graphical views. The map returned by this method should be keyed
+   * by action name (e.g. "View results"), and values should be fully qualified
+   * names of the corresponding StepInteractiveView implementation. Furthermore,
+   * the contents of this map can (and should) be dependent on whether a
+   * particular viewer should be made available - i.e. if execution hasn't
+   * occurred yet, or if a particular incoming connection type is not present,
+   * then it might not be possible to view certain results.
+   *
+   * Viewers can implement StepInteractiveView directly (in which case they need
+   * to extends JPanel), or extends the AbstractInteractiveViewer class. The
+   * later extends JPanel, uses a BorderLayout, provides a "Close" button and a
+   * method to add additional buttons.
+   *
+   * @return a map of viewer component names, or null if this step has no
+   *         graphical views
+   */
   @Override
   public Map<String, String> getInteractiveViewers() {
     return null;
   }
 
+  /**
+   * An alternative to getStepInteractiveViewers that returns a Map of
+   * instantiated StepInteractiveViewer objects. Generally,
+   * getInteractiveViewers() is the preferred mechanism to specify any
+   * interactive viewers, as it does not require Steps to import and instantiate
+   * GUI classes. However, in some cases it might be unavoidable (e.g. Groovy
+   * script compilation involves custom classloaders), in these cases this
+   * method can be used instead.
+   *
+   * @return a map of instantiated instances of StepInteractiveViewers
+   */
   @Override
   public Map<String, StepInteractiveViewer> getInteractiveViewersImpls() {
     return null;
   }
 
+  /**
+   * Get default settings for the step (if any). Returning null indicates that
+   * the step has no user-editable defaults.
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return null;

@@ -63,18 +63,35 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
    * Evaluation object used for evaluating a classifier
    */
   private transient AggregateableEvaluation m_eval;
+
+  /** Plotting instances */
   private transient Instances m_aggregatedPlotInstances = null;
+
+  /** Sizes of points in plotting data */
   private transient ArrayList<Object> m_aggregatedPlotSizes = null;
+
+  /** Plotting shapes */
   private transient ArrayList<Integer> m_aggregatedPlotShapes = null;
 
+  /**
+   * True if plot point sizes are to be rendered proportional to the size of the
+   * prediction margin
+   */
   protected boolean m_errorPlotPointSizeProportionalToMargin;
 
   /** Evaluation metrics to output */
   protected String m_selectedEvalMetrics = "";
+
+  /** Holds a list of metric names */
   protected List<String> m_metricsList = new ArrayList<String>();
 
+  /** True if the step has been reset */
   protected boolean m_isReset;
+
+  /** For counting down the sets left to process */
   protected AtomicInteger m_setsToGo;
+
+  /** The maximum set number in the batch of sets being processed */
   protected int m_maxSetNum;
 
   protected void stringToList(String l) {
@@ -87,6 +104,13 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     }
   }
 
+  /**
+   * Get whether the size of plot data points will be proportional to the
+   * prediction margin
+   *
+   * @return true if plot data points will be rendered proportional to the size
+   *         of the prediction margin
+   */
   @OptionMetadata(displayName = "Error plot point size proportional to margin",
     description = "Set the point size proportional to the prediction "
       + "margin for classification error plots")
@@ -94,6 +118,13 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     return m_errorPlotPointSizeProportionalToMargin;
   }
 
+  /**
+   * Set whether the size of plot data points will be proportional to the
+   * prediction margin
+   *
+   * @param e true if plot data points will be rendered proportional to the size
+   *          of the prediction margin
+   */
   public void setErrorPlotPointSizeProportionalToMargin(boolean e) {
     m_errorPlotPointSizeProportionalToMargin = e;
   }
@@ -118,17 +149,35 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     stringToList(m);
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
 
-    if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_BATCH_CLASSIFIER) == 0) {
+    if (getStepManager().numIncomingConnectionsOfType(
+      StepManager.CON_BATCH_CLASSIFIER) == 0) {
       result.add(StepManager.CON_BATCH_CLASSIFIER);
     }
     return result;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -141,6 +190,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     return result;
   }
 
+  /**
+   * Constructor
+   */
   public ClassifierPerformanceEvaluator() {
     super();
     m_metricsList = Evaluation.getAllEvaluationMetricNames();
@@ -161,20 +213,27 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   /** for generating plottable instance with predictions appended. */
   private transient ClassifierErrorsPlotInstances m_PlotInstances = null;
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public synchronized void processIncoming(Data data) throws WekaException {
     try {
       int setNum =
         (Integer) data.getPayloadElement(StepManager.CON_AUX_DATA_SET_NUM);
-      Instances trainingData = (Instances) data
-        .getPayloadElement(StepManager.CON_AUX_DATA_TRAININGSET);
+      Instances trainingData =
+        (Instances) data
+          .getPayloadElement(StepManager.CON_AUX_DATA_TRAININGSET);
       Instances testData =
         (Instances) data.getPayloadElement(StepManager.CON_AUX_DATA_TESTSET);
 
       if (testData == null || testData.numInstances() == 0) {
         // can't evaluate empty/non-existent test instances
-        getStepManager()
-          .logDetailed("No test set available - unable to evaluate");
+        getStepManager().logDetailed(
+          "No test set available - unable to evaluate");
         return;
       }
 
@@ -188,8 +247,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         m_isReset = false;
         getStepManager().processing();
 
-        m_maxSetNum = (Integer) data
-          .getPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM);
+        m_maxSetNum =
+          (Integer) data
+            .getPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM);
         m_setsToGo = new AtomicInteger(0);
         if (trainingData == null) {
           // no training data to estimate majority class/mean target from
@@ -200,8 +260,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           m_PlotInstances.setClassIndex(testData.classIndex());
           m_PlotInstances.setEvaluation(eval);
 
-          eval = adjustForInputMappedClassifier(eval, classifier, testData,
-            m_PlotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, classifier, testData,
+              m_PlotInstances);
           eval.useNoPriors();
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
@@ -213,8 +274,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           m_PlotInstances.setClassIndex(trainingData.classIndex());
           m_PlotInstances.setEvaluation(eval);
 
-          eval = adjustForInputMappedClassifier(eval, classifier, trainingData,
-            m_PlotInstances);
+          eval =
+            adjustForInputMappedClassifier(eval, classifier, trainingData,
+              m_PlotInstances);
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
         }
@@ -240,10 +302,21 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     }
   }
 
+  /**
+   * Aggregates a single evaluation task into the overall evaluation
+   *
+   * @param eval the partial evaluation to aggregate
+   * @param classifier the classifier used for evaluation
+   * @param testData the test data evaluated on
+   * @param plotInstances plotting instances
+   * @param setNum the set number processed
+   * @param evalLabel evaluation type
+   * @throws Exception if a problem occurs
+   */
   protected synchronized void aggregateEvalTask(Evaluation eval,
     weka.classifiers.Classifier classifier, Instances testData,
     ClassifierErrorsPlotInstances plotInstances, int setNum, String evalLabel)
-      throws Exception {
+    throws Exception {
 
     m_eval.aggregate(eval);
 
@@ -272,8 +345,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       }
     }
 
-    getStepManager()
-      .statusMessage("Completed folds/sets " + m_setsToGo.incrementAndGet());
+    getStepManager().statusMessage(
+      "Completed folds/sets " + m_setsToGo.incrementAndGet());
 
     if (m_setsToGo.get() == m_maxSetNum) {
       AggregateableClassifierErrorsPlotInstances aggPlot =
@@ -282,8 +355,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       aggPlot.setPlotInstances(m_aggregatedPlotInstances);
       aggPlot.setPlotShapes(m_aggregatedPlotShapes);
       aggPlot.setPlotSizes(m_aggregatedPlotSizes);
-      aggPlot.setPointSizeProportionalToMargin(
-        m_errorPlotPointSizeProportionalToMargin);
+      aggPlot
+        .setPointSizeProportionalToMargin(m_errorPlotPointSizeProportionalToMargin);
 
       // triggers scaling of shape sizes
       aggPlot.getPlotInstances();
@@ -303,7 +376,10 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         }
       }
       String resultT =
-        "=== Evaluation result ===\n\n" + "Scheme: " + textTitle + "\n"
+        "=== Evaluation result ===\n\n"
+          + "Scheme: "
+          + textTitle
+          + "\n"
           + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n" : "")
           + "Relation: " + testData.relationName() + "\n\n"
           + m_eval.toSummaryString();
@@ -319,8 +395,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       getStepManager().outputData(text);
 
       // set up visualizable errors
-      if (getStepManager()
-        .numOutgoingConnectionsOfType(StepManager.CON_VISUALIZABLE_ERROR) > 0) {
+      if (getStepManager().numOutgoingConnectionsOfType(
+        StepManager.CON_VISUALIZABLE_ERROR) > 0) {
         PlotData2D errorD = new PlotData2D(m_aggregatedPlotInstances);
         errorD.setShapeSize(m_aggregatedPlotSizes);
         errorD.setShapeType(m_aggregatedPlotShapes);
@@ -332,8 +408,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       }
 
       // threshold data
-      if (testData.classAttribute().isNominal() && getStepManager()
-        .numOutgoingConnectionsOfType(StepManager.CON_THRESHOLD_DATA) > 0) {
+      if (testData.classAttribute().isNominal()
+        && getStepManager().numOutgoingConnectionsOfType(
+          StepManager.CON_THRESHOLD_DATA) > 0) {
         ThresholdCurve tc = new ThresholdCurve();
         Instances result = tc.getCurve(m_eval.predictions(), 0);
         result.setRelationName(testData.relationName());
@@ -347,18 +424,19 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
               if (options[ii].length() == 0) {
                 continue;
               }
-              if (options[ii].charAt(0) == '-' && !(options[ii].charAt(1) >= '0'
-                && options[ii].charAt(1) <= '9')) {
+              if (options[ii].charAt(0) == '-'
+                && !(options[ii].charAt(1) >= '0' && options[ii].charAt(1) <= '9')) {
                 newOptions += "<br>";
               }
               newOptions += options[ii];
             }
           }
         }
-        htmlTitle += " " + newOptions + "<br>" + " (class: "
-          + testData.classAttribute().value(0) + ")" + "</font></html>";
-        pd.setPlotName(
-          textTitle + " (class: " + testData.classAttribute().value(0) + ")");
+        htmlTitle +=
+          " " + newOptions + "<br>" + " (class: "
+            + testData.classAttribute().value(0) + ")" + "</font></html>";
+        pd.setPlotName(textTitle + " (class: "
+          + testData.classAttribute().value(0) + ")");
         pd.setPlotNameHTML(htmlTitle);
         boolean[] connectPoints = new boolean[result.numInstances()];
         for (int jj = 1; jj < connectPoints.length; jj++) {
@@ -380,11 +458,30 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     }
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.ClassifierPerformanceEvaluatorStepEditorDialog";
   }
 
+  /**
+   * Adjust evaluation configuration if an {@code InputMappedClassifier}
+   * is being used
+   *
+   * @param eval the evaluation object ot adjust
+   * @param classifier the classifier being used
+   * @param inst the instances being evaluated on
+   * @param plotInstances plotting instances
+   * @return the adjusted {@code Evaluation} object
+   * @throws Exception if a problem occurs
+   */
   protected static Evaluation adjustForInputMappedClassifier(Evaluation eval,
     weka.classifiers.Classifier classifier, Instances inst,
     ClassifierErrorsPlotInstances plotInstances) throws Exception {
@@ -429,8 +526,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
    *
    * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
    */
-  protected static class AggregateableClassifierErrorsPlotInstances
-    extends ClassifierErrorsPlotInstances {
+  protected static class AggregateableClassifierErrorsPlotInstances extends
+    ClassifierErrorsPlotInstances {
 
     /**
      * For serialization
@@ -522,8 +619,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
 
       getLogHandler().statusMessage(
         "Evaluating " + m_classifierDesc + " on fold/set " + m_setNum);
-      getLogHandler().logDetailed("Evaluating " + m_classifierDesc + " on "
-        + m_testData.relationName() + " fold/set " + m_setNum);
+      getLogHandler().logDetailed(
+        "Evaluating " + m_classifierDesc + " on " + m_testData.relationName()
+          + " fold/set " + m_setNum);
       ClassifierErrorsPlotInstances plotInstances =
         ExplorerDefaults.getClassifierErrorsPlotInstances();
       Evaluation eval = null;
@@ -536,8 +634,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         plotInstances.setEvaluation(eval);
         plotInstances
           .setPointSizeProportionalToMargin(m_errPlotPtSizePropToMarg);
-        eval = adjustForInputMappedClassifier(eval, m_classifier, m_testData,
-          plotInstances);
+        eval =
+          adjustForInputMappedClassifier(eval, m_classifier, m_testData,
+            plotInstances);
 
         eval.useNoPriors();
         eval.setMetricsToDisplay(m_metricsList);
@@ -549,8 +648,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         plotInstances.setEvaluation(eval);
         plotInstances
           .setPointSizeProportionalToMargin(m_errPlotPtSizePropToMarg);
-        eval = adjustForInputMappedClassifier(eval, m_classifier, m_trainData,
-          plotInstances);
+        eval =
+          adjustForInputMappedClassifier(eval, m_classifier, m_trainData,
+            plotInstances);
         eval.setMetricsToDisplay(m_metricsList);
       }
 
@@ -582,8 +682,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   protected class EvaluationCallback implements StepTaskCallback<Object[]> {
 
     @Override
-    public void taskFinished(ExecutionResult<Object[]> result)
-      throws Exception {
+    public void taskFinished(ExecutionResult<Object[]> result) throws Exception {
 
       if (!isStopRequested()) {
         Evaluation eval = (Evaluation) result.getResult()[0];

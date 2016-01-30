@@ -23,6 +23,7 @@ package weka.knowledgeflow.steps;
 
 import weka.core.Attribute;
 import weka.core.Instances;
+import weka.core.OptionMetadata;
 import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.SwapValues;
@@ -64,15 +65,14 @@ public class ClassValuePicker extends BaseStep {
   /** True if the class is set and is nominal */
   protected boolean m_classIsNominal;
 
-  public String classValueTipText() {
-    return "The class value to consider as the 'positive' class";
-  }
-
   /**
    * Set the class value considered to be the "positive" class value.
    * 
    * @param value the class value index to use
    */
+  @OptionMetadata(displayName = "Class value",
+    description = "The class value to consider as the 'positive' class",
+    displayOrder = 1)
   public void setClassValue(String value) {
     m_classValueS = value;
   }
@@ -86,6 +86,11 @@ public class ClassValuePicker extends BaseStep {
     return m_classValueS;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     m_classIsSet = true;
@@ -93,11 +98,16 @@ public class ClassValuePicker extends BaseStep {
 
     m_classValue = getStepManager().environmentSubstitute(m_classValueS).trim();
     if (m_classValue.length() == 0) {
-      throw new WekaException(
-        "No class label specified as the positive class!");
+      throw new WekaException("No class label specified as the positive class!");
     }
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
@@ -129,6 +139,13 @@ public class ClassValuePicker extends BaseStep {
     getStepManager().finished();
   }
 
+  /**
+   * Set the class value to be considered the 'positive' class
+   *
+   * @param dataSet the dataset to assign the class value for
+   * @return the altered dataset
+   * @throws WekaException if a problem occurs
+   */
   protected Instances assignClassValue(Instances dataSet) throws WekaException {
 
     Attribute classAtt = dataSet.classAttribute();
@@ -155,8 +172,8 @@ public class ClassValuePicker extends BaseStep {
       }
     }
     if (classValueIndex < 0 || classValueIndex > classAtt.numValues() - 1) {
-      throw new WekaException(
-        "Class label/index '" + m_classValue + "' is unknown or out of range!");
+      throw new WekaException("Class label/index '" + m_classValue
+        + "' is unknown or out of range!");
     }
 
     if (classValueIndex != 0) {
@@ -169,8 +186,8 @@ public class ClassValuePicker extends BaseStep {
         Instances newDataSet = Filter.useFilter(dataSet, sv);
         newDataSet.setRelationName(dataSet.relationName());
 
-        getStepManager()
-          .logBasic("New class value: " + newDataSet.classAttribute().value(0));
+        getStepManager().logBasic(
+          "New class value: " + newDataSet.classAttribute().value(0));
         return newDataSet;
       } catch (Exception ex) {
         throw new WekaException(ex);
@@ -180,6 +197,15 @@ public class ClassValuePicker extends BaseStep {
     return dataSet;
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() > 0) {
@@ -189,24 +215,42 @@ public class ClassValuePicker extends BaseStep {
       StepManager.CON_TESTSET);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
 
-    if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_DATASET) > 0) {
+    if (getStepManager().numIncomingConnectionsOfType(StepManager.CON_DATASET) > 0) {
       result.add(StepManager.CON_DATASET);
-    } else if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET) > 0) {
+    } else if (getStepManager().numIncomingConnectionsOfType(
+      StepManager.CON_TRAININGSET) > 0) {
       result.add(StepManager.CON_TRAININGSET);
-    } else if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TESTSET) > 0) {
+    } else if (getStepManager().numIncomingConnectionsOfType(
+      StepManager.CON_TESTSET) > 0) {
       result.add(StepManager.CON_TESTSET);
     }
 
     return result;
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -214,36 +258,40 @@ public class ClassValuePicker extends BaseStep {
     m_classValue = getStepManager().environmentSubstitute(m_classValueS).trim();
     if (!(connectionName.equals(StepManager.CON_DATASET)
       || connectionName.equals(StepManager.CON_TRAININGSET)
-      || connectionName.equals(StepManager.CON_TESTSET)
-      || connectionName.equals(StepManager.CON_INSTANCE))
+      || connectionName.equals(StepManager.CON_TESTSET) || connectionName
+        .equals(StepManager.CON_INSTANCE))
       || getStepManager().numIncomingConnections() == 0) {
       return null;
     }
 
     // our output structure is the same as whatever kind of input we are getting
-    Instances strucForDatasetCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_DATASET);
+    Instances strucForDatasetCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_DATASET);
     if (strucForDatasetCon != null) {
       // assignClass(strucForDatasetCon);
       return strucForDatasetCon;
     }
 
-    Instances strucForTestsetCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_TESTSET);
+    Instances strucForTestsetCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_TESTSET);
     if (strucForTestsetCon != null) {
       // assignClass(strucForTestsetCon);
       return strucForTestsetCon;
     }
 
-    Instances strucForTrainingCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_TRAININGSET);
+    Instances strucForTrainingCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_TRAININGSET);
     if (strucForTrainingCon != null) {
       // assignClass(strucForTrainingCon);
       return strucForTrainingCon;
     }
 
-    Instances strucForInstanceCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_INSTANCE);
+    Instances strucForInstanceCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_INSTANCE);
     if (strucForInstanceCon != null) {
       // assignClass(strucForInstanceCon);
       return strucForInstanceCon;
@@ -252,6 +300,14 @@ public class ClassValuePicker extends BaseStep {
     return null;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.ClassValuePickerStepEditorDialog";
