@@ -21,12 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -36,6 +30,12 @@ import weka.gui.ProgrammaticProperty;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Step that wraps a Weka filter. Handles dataSet, trainingSet, testSet and
@@ -78,26 +78,55 @@ public class Filter extends WekaAlgorithmWrapper {
   /** Keeps track of the number of train/test batches processed */
   protected AtomicInteger m_setCount;
 
+  /**
+   * Get the class of the wrapped algorithm
+   *
+   * @return the class of the wrapped algorithm
+   */
   @Override
   public Class getWrappedAlgorithmClass() {
     return weka.filters.Filter.class;
   }
 
+  /**
+   * Set the wrapped algorithm (filter)
+   *
+   * @param algo the algorithm to wrap
+   */
   @Override
   public void setWrappedAlgorithm(Object algo) {
     super.setWrappedAlgorithm(algo);
     m_defaultIconPath = StepVisual.BASE_ICON_PATH + "DefaultFilter.gif";
   }
 
+  /**
+   * Set the filter. Calls {@code setWrappedAlgorithm()}
+   *
+   * @param filter the filter to use
+   */
   @ProgrammaticProperty
   public void setFilter(weka.filters.Filter filter) {
     setWrappedAlgorithm(filter);
   }
 
+  /**
+   * Get the filter. Convenience method that calls {@code getWrappedAlgorithm()}
+   *
+   * @return the filter
+   */
   public weka.filters.Filter getFilter() {
     return (weka.filters.Filter) getWrappedAlgorithm();
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -128,6 +157,15 @@ public class Filter extends WekaAlgorithmWrapper {
     return result;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -165,6 +203,11 @@ public class Filter extends WekaAlgorithmWrapper {
     return result;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     if (!(getWrappedAlgorithm() instanceof weka.filters.Filter)) {
@@ -190,6 +233,12 @@ public class Filter extends WekaAlgorithmWrapper {
     m_isReset = true;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     Integer setNum = data.getPayloadElement(StepManager.CON_AUX_DATA_SET_NUM);
@@ -261,6 +310,15 @@ public class Filter extends WekaAlgorithmWrapper {
     }
   }
 
+  /**
+   * Processes the first batch of instances via the filter
+   *
+   * @param batch the batch of instances process
+   * @param conType the connection type
+   * @param setNum the set number of this batch
+   * @param maxSetNum the maximum set number
+   * @throws WekaException if a problem occurs
+   */
   protected void processFirstBatch(Instances batch, String conType,
     Integer setNum, Integer maxSetNum) throws WekaException {
 
@@ -297,6 +355,15 @@ public class Filter extends WekaAlgorithmWrapper {
     }
   }
 
+  /**
+   * Processes batches of instances that occur after the first batch
+   *
+   * @param batch the batch of instances to process
+   * @param conType the connection type
+   * @param setNum the set number of this batch
+   * @param maxSetNum the maximum set number
+   * @throws WekaException if a problem occurs
+   */
   protected synchronized void processSubsequentBatch(Instances batch,
     String conType, Integer setNum, Integer maxSetNum) throws WekaException {
 
@@ -322,6 +389,16 @@ public class Filter extends WekaAlgorithmWrapper {
     m_setCount.decrementAndGet();
   }
 
+  /**
+   * Process a batch of instances with a supplied filter
+   *
+   * @param batch the batch to process
+   * @param conType the connection type
+   * @param filterToUse the filter to apply
+   * @param setNum the set number
+   * @param maxSetNum the maximum set number
+   * @throws WekaException if a problem occurs
+   */
   protected void processBatch(Instances batch, String conType,
     weka.filters.Filter filterToUse, Integer setNum, Integer maxSetNum)
     throws WekaException {
@@ -341,6 +418,12 @@ public class Filter extends WekaAlgorithmWrapper {
     }
   }
 
+  /**
+   * Process an instance
+   *
+   * @param data the {@code Data} object containing the instance
+   * @throws WekaException if a problem occurs
+   */
   protected void processStreaming(Data data) throws WekaException {
     Instance toFilter = data.getPrimaryPayload();
     getStepManager().throughputUpdateStart();
@@ -369,6 +452,11 @@ public class Filter extends WekaAlgorithmWrapper {
     getStepManager().throughputUpdateEnd();
   }
 
+  /**
+   * Check to see if there are any pending instances to output from the filter
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void checkPendingStreaming() throws WekaException {
     try {
       m_streamingFilter.batchFinished();
@@ -397,6 +485,16 @@ public class Filter extends WekaAlgorithmWrapper {
     }
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
