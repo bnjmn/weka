@@ -21,6 +21,22 @@
 
 package weka.core.converters;
 
+import weka.core.Attribute;
+import weka.core.Capabilities;
+import weka.core.Capabilities.Capability;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.OptionMetadata;
+import weka.core.RevisionUtils;
+import weka.core.Utils;
+import weka.gui.FilePropertyMetadata;
+import weka.gui.PasswordProperty;
+
+import javax.swing.*;
 import java.io.File;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -28,14 +44,6 @@ import java.sql.SQLException;
 import java.text.SimpleDateFormat;
 import java.util.Enumeration;
 import java.util.Vector;
-
-import javax.swing.*;
-
-import weka.core.*;
-import weka.core.Capabilities.Capability;
-import weka.gui.FilePropertyMetadata;
-import weka.gui.PasswordProperty;
-import weka.core.OptionMetadata;
 
 /**
  * <!-- globalinfo-start --> Writes to a database (tested with MySQL, InstantDB,
@@ -161,7 +169,7 @@ public class DatabaseSaver extends AbstractSaver implements BatchConverter,
   protected String m_Username;
 
   /** the password for the database. */
-  protected String m_Password;
+  protected String m_Password = "";
 
   /** the custom props file to use instead of default one. */
   protected File m_CustomPropsFile = new File("${user.home}");

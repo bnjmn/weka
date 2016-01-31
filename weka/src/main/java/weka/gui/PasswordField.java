@@ -21,6 +21,7 @@
 
 package weka.gui;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -29,8 +30,6 @@ import java.awt.event.KeyEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
-
-import javax.swing.*;
 
 /**
  * Property editor widget that wraps and displays a JPasswordField.
@@ -159,12 +158,16 @@ public class PasswordField extends JPanel implements PropertyEditor,
 
   @Override
   public void addPropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.addPropertyChangeListener(pcl);
+    if (pcl != null && m_support != null) {
+      m_support.addPropertyChangeListener(pcl);
+    }
   }
 
   @Override
   public void removePropertyChangeListener(PropertyChangeListener pcl) {
-    m_support.removePropertyChangeListener(pcl);
+    if (pcl != null && m_support != null) {
+      m_support.removePropertyChangeListener(pcl);
+    }
   }
 
   /**

@@ -21,20 +21,6 @@
 
 package weka.core.converters;
 
-import java.io.File;
-import java.io.IOException;
-import java.sql.DatabaseMetaData;
-import java.sql.Date;
-import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
-import java.sql.SQLException;
-import java.sql.Time;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.StringTokenizer;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Environment;
@@ -49,8 +35,22 @@ import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.experiment.InstanceQuery;
 import weka.gui.FilePropertyMetadata;
+import weka.gui.PasswordProperty;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
+import java.io.File;
+import java.io.IOException;
+import java.sql.DatabaseMetaData;
+import java.sql.Date;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.SQLException;
+import java.sql.Time;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Hashtable;
+import java.util.StringTokenizer;
+import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> Reads Instances from a Database. Can read a
@@ -663,6 +663,7 @@ public class DatabaseLoader extends AbstractLoader implements BatchConverter,
    */
   @OptionMetadata(displayName = "Password",
     description = "The database password", displayOrder = 3)
+  @PasswordProperty
   public String getPassword() {
     // return m_DataBaseConnection.getPassword();
     return m_Password;
