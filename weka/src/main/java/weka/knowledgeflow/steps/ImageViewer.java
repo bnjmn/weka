@@ -118,6 +118,11 @@ public class ImageViewer extends BaseStep {
     getStepManager().finished();
   }
 
+  /**
+   * Get a map of named images that this step has collected
+   *
+   * @return a map of named images
+   */
   public Map<String, BufferedImage> getImages() {
     return m_images;
   }

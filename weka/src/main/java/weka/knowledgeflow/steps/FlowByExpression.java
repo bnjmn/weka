@@ -92,7 +92,10 @@ public class FlowByExpression extends BaseStep {
   /** Keep track of how many incoming batches we've seen */
   protected AtomicInteger m_batchCount;
 
+  /** True if the "true" step is valid (i.e. exists in the flow) */
   protected boolean m_validTrueStep;
+
+  /** True if the "false" step is valid (i.e. exists in the flow) */
   protected boolean m_validFalseStep;
 
   /** Re-usable data object for streaming */
@@ -170,6 +173,11 @@ public class FlowByExpression extends BaseStep {
     return result;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
@@ -189,6 +197,15 @@ public class FlowByExpression extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
 
@@ -205,6 +222,15 @@ public class FlowByExpression extends BaseStep {
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -230,6 +256,16 @@ public class FlowByExpression extends BaseStep {
     return result;
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -400,6 +436,14 @@ public class FlowByExpression extends BaseStep {
     }
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.FlowByExpressionStepEditorDialog";
@@ -710,6 +754,11 @@ public class FlowByExpression extends BaseStep {
     }
   }
 
+  /**
+   * An expression node that represents a clause of an expression
+   *
+   * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+   */
   public static class ExpressionClause extends ExpressionNode implements
     Serializable {
 

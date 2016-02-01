@@ -74,6 +74,11 @@ public class ImageSaver extends BaseStep {
    */
   protected ImageFormat m_defaultFormat;
 
+  /**
+   * Set the file to save to
+   *
+   * @param f the file to save to
+   */
   @OptionMetadata(displayName = "File to save to",
     description = "The file to save textual results to", displayOrder = 1)
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
@@ -82,20 +87,40 @@ public class ImageSaver extends BaseStep {
     m_file = f;
   }
 
+  /**
+   * Get the file to save to
+   *
+   * @return the file to save to
+   */
   public File getFile() {
     return m_file;
   }
 
+  /**
+   * Set the format of the image to save
+   *
+   * @param format
+   */
   @OptionMetadata(displayName = "Format to save image as",
     description = "Format to save to", displayOrder = 2)
   public void setFormat(ImageFormat format) {
     m_format = format;
   }
 
+  /**
+   * Get the format of the image to save
+   *
+   * @return the format of the image to save
+   */
   public ImageFormat getFormat() {
     return m_format;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     m_defaultFile = getFile().toString();
@@ -121,16 +146,40 @@ public class ImageSaver extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return Arrays.asList(StepManager.CON_IMAGE);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return null;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the payload to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public synchronized void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
@@ -164,6 +213,11 @@ public class ImageSaver extends BaseStep {
     }
   }
 
+  /**
+   * Get default settings for the step.
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new ImageSaverDefaults();

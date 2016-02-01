@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    InstanceStreamToBatchMaker.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Instance;
@@ -22,19 +43,38 @@ import java.util.List;
   iconPath = KFGUIConsts.BASE_ICON_PATH + "InstanceStreamToBatchMaker.gif")
 public class InstanceStreamToBatchMaker extends BaseStep {
 
+  /** For serialization */
   private static final long serialVersionUID = 5461324282251111320L;
+
   /** True if we've been reset */
   protected boolean m_isReset;
 
+  /** The structure of the incoming instances */
   protected Instances m_structure;
+
+  /** Holds incoming instances */
   protected List<Instance> m_batch;
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     m_batch = new ArrayList<Instance>();
     m_isReset = true;
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() == 0) {
@@ -43,6 +83,15 @@ public class InstanceStreamToBatchMaker extends BaseStep {
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     if (getStepManager().numIncomingConnections() > 0) {
@@ -53,6 +102,12 @@ public class InstanceStreamToBatchMaker extends BaseStep {
     return null;
   }
 
+  /**
+   * Process incoming data
+   *
+   * @param data the payload to process
+   * @throws WekaException
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     if (m_isReset) {
@@ -102,6 +157,16 @@ public class InstanceStreamToBatchMaker extends BaseStep {
     }
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {

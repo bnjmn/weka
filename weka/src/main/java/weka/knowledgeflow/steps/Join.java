@@ -164,6 +164,11 @@ public class Join extends BaseStep {
     return m_keySpec;
   }
 
+  /**
+   * Get the names of the connected steps as a list
+   *
+   * @return the names of the connected steps as a list
+   */
   public List<String> getConnectedInputNames() {
     // see what's connected (if anything)
     establishFirstAndSecondConnectedInputs();
@@ -175,6 +180,12 @@ public class Join extends BaseStep {
     return connected;
   }
 
+  /**
+   * Get the Instances structure being produced by the first input
+   *
+   * @return the Instances structure from the first input
+   * @throws WekaException if a problem occurs
+   */
   public Instances getFirstInputStructure() throws WekaException {
     if (m_firstInput == null) {
       establishFirstAndSecondConnectedInputs();
@@ -188,6 +199,12 @@ public class Join extends BaseStep {
     return null;
   }
 
+  /**
+   * Get the Instances structure being produced by the second input
+   *
+   * @return the Instances structure from the second input
+   * @throws WekaException if a problem occurs
+   */
   public Instances getSecondInputStructure() throws WekaException {
     if (m_secondInput == null) {
       establishFirstAndSecondConnectedInputs();
@@ -201,6 +218,9 @@ public class Join extends BaseStep {
     return null;
   }
 
+  /**
+   * Look for, and configure with respect to, first and second inputs
+   */
   protected void establishFirstAndSecondConnectedInputs() {
     m_firstInput = null;
     m_secondInput = null;
@@ -227,6 +247,11 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     m_firstBuffer = new LinkedList<Sorter.InstanceHolder>();
@@ -247,6 +272,12 @@ public class Join extends BaseStep {
     establishFirstAndSecondConnectedInputs();
   }
 
+  /**
+   * Process some incoming data
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
 
@@ -264,6 +295,12 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Handle streaming data
+   *
+   * @param data an instance of streaming data
+   * @throws WekaException if a problem occurs
+   */
   protected synchronized void processStreaming(Data data) throws WekaException {
     if (isStopRequested()) {
       return;
@@ -379,6 +416,11 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Add an instance to the first buffer
+   *
+   * @param inst the instance to add
+   */
   protected synchronized void addToFirstBuffer(Instance inst) {
     if (isStopRequested()) {
       return;
@@ -399,6 +441,11 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Add an instance to the second buffer
+   *
+   * @param inst the instance to add
+   */
   protected synchronized void addToSecondBuffer(Instance inst) {
     if (isStopRequested()) {
       return;
@@ -419,6 +466,11 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Clear the buffers
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected synchronized void clearBuffers() throws WekaException {
     while (m_firstBuffer.size() > 0 && m_secondBuffer.size() > 0) {
       if (isStopRequested()) {
@@ -432,6 +484,12 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Process batch data.
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   protected synchronized void processBatch(Data data) throws WekaException {
     Instances insts = data.getPrimaryPayload();
 
@@ -486,6 +544,12 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Check both buffers and return a joined instance (if possible at this time)
+   * or null
+   *
+   * @return a joined instance or null
+   */
   protected synchronized Instance processBuffers() {
     if (m_firstBuffer.size() > 0 && m_secondBuffer.size() > 0) {
       Sorter.InstanceHolder firstH = m_firstBuffer.peek();
@@ -768,6 +832,15 @@ public class Join extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -785,6 +858,15 @@ public class Join extends BaseStep {
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     if (getStepManager().numIncomingConnections() > 0) {
@@ -797,6 +879,14 @@ public class Join extends BaseStep {
     return null;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.JoinStepEditorDialog";
