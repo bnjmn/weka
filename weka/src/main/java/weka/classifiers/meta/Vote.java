@@ -21,17 +21,6 @@
 
 package weka.classifiers.meta;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
 import weka.core.Aggregateable;
@@ -51,6 +40,16 @@ import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.core.TechnicalInformationHandler;
 import weka.core.Utils;
+
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> Class for combining classifiers. Different
@@ -190,13 +189,6 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
 
   /** Combination Rule variable */
   protected int m_CombinationRule = AVERAGE_RULE;
-
-  /**
-   * the random number generator used for breaking ties in majority voting
-   * 
-   * @see #distributionForInstanceMajorityVoting(Instance)
-   */
-  protected Random m_Random;
 
   /** List of file paths to serialized models to load */
   protected List<String> m_classifiersToLoad = new ArrayList<String>();
@@ -482,8 +474,6 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
     Instances newData = new Instances(data);
     newData.deleteWithMissingClass();
     m_structure = new Instances(newData, 0);
-
-    m_Random = new Random(getSeed());
 
     if (m_classifiersToLoad.size() > 0) {
       m_preBuiltClassifiers.clear();
@@ -877,9 +867,14 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
         majorityIndexes.add(k);
       }
     }
-    // Resolve the ties according to a uniform random distribution
-    int majorityIndex =
-      majorityIndexes.get(m_Random.nextInt(majorityIndexes.size()));
+    int majorityIndex = tmpMajorityIndex;
+    if (majorityIndexes.size() > 1) {
+      // resolve ties by looking at the predicted distribution
+      double[] distPreds = distributionForInstanceAverage(instance);
+      majorityIndex = Utils.maxIndex(distPreds);
+      // Resolve the ties according to a uniform random distribution
+      // majorityIndex = majorityIndexes.get(m_Random.nextInt(majorityIndexes.size()));
+    }
 
     // set probs to 0
     probs = new double[probs.length];
