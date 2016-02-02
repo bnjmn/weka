@@ -291,8 +291,8 @@ public class LegacyFlowLoader implements FlowLoader {
   }
 
   /**
-   * Copy settings from a legacy {@code WekaWrapper} bean to the
-   * new {@code WekaAlgorithmWrapper} equivalent
+   * Copy settings from a legacy {@code WekaWrapper} bean to the new
+   * {@code WekaAlgorithmWrapper} equivalent
    *
    * @param legacy the legacy wrapper
    * @param current the new step equivalent
@@ -323,8 +323,8 @@ public class LegacyFlowLoader implements FlowLoader {
   }
 
   /**
-   * Copy the settings from a legacy non-algorithm wrapper bean to the
-   * new step equivalent
+   * Copy the settings from a legacy non-algorithm wrapper bean to the new step
+   * equivalent
    *
    * @param legacy the legacy bean to copy settings from
    * @param current the new {@code Step} to copy to
@@ -612,6 +612,9 @@ public class LegacyFlowLoader implements FlowLoader {
       && current.getClass().getSuperclass().toString()
         .endsWith("AbstractSparkJob")) {
       transferSetting(legacy, current, "JobOptions", String.class);
+    } else if (legacy.getClass().getSuperclass().toString()
+      .endsWith("AbstractHadoopJob")) {
+      transferSetting(legacy, current, "JobOptions", String.class);
     }
   }
 
@@ -620,7 +623,7 @@ public class LegacyFlowLoader implements FlowLoader {
    * legacy class name
    *
    * @param legacyFullyQualified the fully qualified class name of the legacy
-   *                             bean to find a match for
+   *          bean to find a match for
    * @return an instantiated {@code Step} that is equivalent to the legacy one
    * @throws WekaException if a match can't be found
    */
