@@ -233,7 +233,7 @@ public class LegacyFlowLoader implements FlowLoader {
     if (sourceNew == null || targetNew == null) {
       m_log.logWarning("Unable to make connection in new flow between legacy "
         + "steps " + sourceC.getCustomName() + " and "
-        + targetC.getCustomName());
+        + targetC.getCustomName() + " for connection '" + conn.getEventName());
 
       return;
     }
@@ -269,6 +269,8 @@ public class LegacyFlowLoader implements FlowLoader {
       manager.m_y = y;
 
       if (!(match instanceof Note)) {
+        System.err.println("Setting name '" + name + "' on new KF step "
+          + match.getClass().getCanonicalName());
         match.setName(name);
       }
 
@@ -643,15 +645,18 @@ public class LegacyFlowLoader implements FlowLoader {
         .getCanonicalName());
 
     Step result = null;
-    for (String s : steps) {
-      if (s.endsWith(clazzNameOnly)) {
-        try {
-          result =
-            (Step) PluginManager.getPluginInstance(
-              weka.knowledgeflow.steps.Step.class.getCanonicalName(), s);
-          break;
-        } catch (Exception ex) {
-          throw new WekaException(ex);
+    if (steps != null) {
+      for (String s : steps) {
+        String sClazzNameOnly = s.substring(s.lastIndexOf(".") + 1);
+        if (sClazzNameOnly.equals(clazzNameOnly)) {
+          try {
+            result =
+              (Step) PluginManager.getPluginInstance(
+                weka.knowledgeflow.steps.Step.class.getCanonicalName(), s);
+            break;
+          } catch (Exception ex) {
+            throw new WekaException(ex);
+          }
         }
       }
     }
