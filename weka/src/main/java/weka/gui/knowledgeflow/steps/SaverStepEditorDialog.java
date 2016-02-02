@@ -115,5 +115,6 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
         e.printStackTrace();
       }
     }
+    super.okPressed(); // just in case saver has a customizer
   }
 }
