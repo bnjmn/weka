@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    Join.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Environment;
@@ -18,6 +39,12 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Knowledge Flow step that wraps {@code weka.core.converters.Loader}s.
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
 @KFStep(name = "Loader", category = "DataSources",
   toolTipText = "Weka loader wrapper", iconPath = "")
 public class Loader extends WekaAlgorithmWrapper implements Serializable {
@@ -41,26 +68,51 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
   /** For measuring the overall flow throughput */
   protected StreamThroughput m_flowThroughput;
 
+  /**
+   * Get the class of the wrapped algorithm
+   *
+   * @return the class of the wrapped algorithm
+   */
   @Override
   public Class getWrappedAlgorithmClass() {
     return weka.core.converters.Loader.class;
   }
 
+  /**
+   * Set the wrapped algorithm to use
+   *
+   * @param algo the algorithm to use
+   */
   @Override
   public void setWrappedAlgorithm(Object algo) {
     super.setWrappedAlgorithm(algo);
     m_defaultIconPath = StepVisual.BASE_ICON_PATH + "DefaultDataSource.gif";
   }
 
+  /**
+   * Convenience method - calls {@code getWrappedAlgorithm()}
+   *
+   * @return the wrapped loader
+   */
   public weka.core.converters.Loader getLoader() {
     return (weka.core.converters.Loader) getWrappedAlgorithm();
   }
 
+  /**
+   * Convenience method - calls {@code setWrappedAlgorithm()}
+   *
+   * @param loader the loader to use
+   */
   @ProgrammaticProperty
   public void setLoader(weka.core.converters.Loader loader) {
     setWrappedAlgorithm(loader);
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
 
@@ -90,6 +142,11 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
     m_instanceData = new Data(StepManager.CON_INSTANCE);
   }
 
+  /**
+   * Start executing
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void start() throws WekaException {
     if (m_noOutputs) {
@@ -204,6 +261,16 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
     }
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -230,12 +297,30 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
     return null;
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     // doesn't accept incoming connections
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> outgoing = new ArrayList<String>();
@@ -256,6 +341,14 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
     return outgoing;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.LoaderStepEditorDialog";

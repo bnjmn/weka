@@ -117,7 +117,7 @@ public interface Step {
   /**
    * Process an incoming data payload (if the step accepts incoming connections)
    * 
-   * @param data the payload to process
+   * @param data the data to process
    * @throws WekaException if a problem occurs
    */
   void processIncoming(Data data) throws WekaException;

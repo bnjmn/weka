@@ -92,16 +92,31 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    * @param callback the callback to use
    * @param resourceIntensive true if this task is cpu/memory intensive
    */
-  public StepTask(Step source, StepTaskCallback<T> callback, boolean resourceIntensive) {
+  public StepTask(Step source, StepTaskCallback<T> callback,
+    boolean resourceIntensive) {
     m_log = new LogHandler(source);
     m_callback = callback;
     m_resourceIntensive = resourceIntensive;
   }
 
+  /**
+   * Set whether this {@code StepTask} is resource intensive (cpu/memory) or
+   * not. By default, a {@code StepTask} is resource intensive
+   *
+   * @param resourceIntensive false if this {@code StepTask} is not resource
+   *          intensive
+   */
   public void setResourceIntensive(boolean resourceIntensive) {
     m_resourceIntensive = resourceIntensive;
   }
 
+  /**
+   * Get whether this {@code StepTask} is resource intensive (cpu/memory) or
+   * not. By default, a {@code StepTask} is resource intensive
+   *
+   * @return false if this {@code StepTask} is not resource
+   *          intensive
+   */
   public boolean isResourceIntensive() {
     return m_resourceIntensive;
   }

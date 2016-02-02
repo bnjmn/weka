@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    ModelPerformanceChart.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Attribute;
@@ -22,6 +43,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * A Step that collects and displays either classifier error plots or
+ * threshold curves
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -236,6 +260,15 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -255,6 +288,15 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     return result;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -264,6 +306,12 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     return result;
   }
 
+  /**
+   * Add a threshold plot to the offscreen data collection
+   *
+   * @param thresholdD the plot data to add
+   * @throws WekaException if a problem occurs
+   */
   protected void addOffscreenThresholdPlot(PlotData2D thresholdD)
     throws WekaException {
     m_offscreenPlotData.add(thresholdD.getPlotInstances());
@@ -319,6 +367,12 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     }
   }
 
+  /**
+   * Add an error plot to the offscreen plot collection
+   *
+   * @param plotData the plot to add
+   * @throws WekaException if a problem occurs
+   */
   protected void addOffscreenErrorPlot(PlotData2D plotData)
     throws WekaException {
     Instances predictedI = plotData.getPlotInstances();
@@ -461,6 +515,12 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     }
   }
 
+  /**
+   * Process incoming data
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public synchronized void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
@@ -513,6 +573,26 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     getStepManager().finished();
   }
 
+  /**
+   * When running in a graphical execution environment a step can make one or
+   * more popup Viewer components available. These might be used to display
+   * results, graphics etc. Returning null indicates that the step has no such
+   * additional graphical views. The map returned by this method should be keyed
+   * by action name (e.g. "View results"), and values should be fully qualified
+   * names of the corresponding StepInteractiveView implementation. Furthermore,
+   * the contents of this map can (and should) be dependent on whether a
+   * particular viewer should be made available - i.e. if execution hasn't
+   * occurred yet, or if a particular incoming connection type is not present,
+   * then it might not be possible to view certain results.
+   *
+   * Viewers can implement StepInteractiveView directly (in which case they need
+   * to extends JPanel), or extends the AbstractInteractiveViewer class. The
+   * later extends JPanel, uses a BorderLayout, provides a "Close" button and a
+   * method to add additional buttons.
+   *
+   * @return a map of viewer component names, or null if this step has no
+   *         graphical views
+   */
   @Override
   public Map<String, String> getInteractiveViewers() {
     Map<String, String> views = new LinkedHashMap<String, String>();
@@ -525,10 +605,20 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     return views;
   }
 
+  /**
+   * Get the plots currently stored in this step
+   *
+   * @return
+   */
   public List<PlotData2D> getPlots() {
     return m_plots;
   }
 
+  /**
+   * Returns true if the plots being stored are threshold plots
+   *
+   * @return true if the plots are threshold plots
+   */
   public boolean isDataIsThresholdData() {
     return m_dataIsThresholdData;
   }
@@ -544,6 +634,11 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     }
   }
 
+  /**
+   * Retrieve the data (plots) stored in this step
+   *
+   * @return the data stored in this step
+   */
   @Override
   public Object retrieveData() {
     Object[] onAndOffScreen = new Object[2];
@@ -554,6 +649,12 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     return onAndOffScreen;
   }
 
+  /**
+   * Restore the data (plots) for this step
+   *
+   * @param data the data to set
+   * @throws WekaException if a problem occurs
+   */
   @SuppressWarnings("unchecked")
   @Override
   public void restoreData(Object data) throws WekaException {
@@ -578,11 +679,24 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     }
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     // nothing to do
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.ModelPerformanceChartStepEditorDialog";
