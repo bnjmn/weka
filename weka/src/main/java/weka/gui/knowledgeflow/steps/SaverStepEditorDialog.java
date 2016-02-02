@@ -1,16 +1,5 @@
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
-import weka.core.converters.DatabaseConverter;
 import weka.core.converters.FileSourcedConverter;
 import weka.gui.EnvironmentField;
 import weka.gui.FileEnvironmentField;
@@ -18,6 +7,15 @@ import weka.gui.PropertySheetPanel;
 import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.Saver;
 import weka.knowledgeflow.steps.Step;
+
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.SwingConstants;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -41,10 +39,8 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
     Saver wrappedStep = (Saver) step;
     if (wrappedStep.getSaver() instanceof FileSourcedConverter) {
       setupFileSaver(wrappedStep);
-    } else if (wrappedStep.getSaver() instanceof DatabaseConverter) {
-      super.setStepToEdit(step);
     } else {
-
+      super.setStepToEdit(step);
     }
   }
 

@@ -268,17 +268,15 @@ public class LegacyFlowLoader implements FlowLoader {
       manager.m_x = x;
       manager.m_y = y;
 
-      if (!(match instanceof Note)) {
-        System.err.println("Setting name '" + name + "' on new KF step "
-          + match.getClass().getCanonicalName());
-        match.setName(name);
-      }
-
       // copy settings...
       if (!(comp instanceof WekaWrapper)) {
         copySettingsNonWrapper(comp, match);
       } else {
         copySettingsWrapper((WekaWrapper) comp, (WekaAlgorithmWrapper) match);
+      }
+
+      if (!(match instanceof Note)) {
+        match.setName(name);
       }
 
       return manager;
