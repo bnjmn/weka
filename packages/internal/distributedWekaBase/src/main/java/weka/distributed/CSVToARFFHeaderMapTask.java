@@ -21,6 +21,24 @@
 
 package weka.distributed;
 
+import au.com.bytecode.opencsv.CSVParser;
+import com.clearspring.analytics.stream.quantile.TDigest;
+import distributed.core.DistributedJobConfig;
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Range;
+import weka.core.SparseInstance;
+import weka.core.Utils;
+import weka.core.stats.ArffSummaryNumericMetric;
+import weka.core.stats.NominalStats;
+import weka.core.stats.NumericStats;
+import weka.core.stats.Stats;
+import weka.core.stats.StringStats;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;
@@ -28,14 +46,14 @@ import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.*;
-
-import weka.core.*;
-import weka.core.stats.*;
-import au.com.bytecode.opencsv.CSVParser;
-
-import com.clearspring.analytics.stream.quantile.TDigest;
-import distributed.core.DistributedJobConfig;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeSet;
+import java.util.Vector;
 
 /**
  * A map task that processes incoming lines in CSV format and builds up header
@@ -133,11 +151,32 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * numeric attributes
    */
   protected boolean m_treatZeroAsMissing;
+
+  /** Whether to suppress command line options relating to quantile estimation */
+  protected boolean m_suppressQuantileOptions;
+
   /** Whether to perform quantile estimation too */
   protected boolean m_estimateQuantiles = false;
   /** The compression level for the TDigest quantile estimator */
   protected double m_quantileCompression = NumericStats.Q_COMPRESSION;
   protected int m_parsingErrors;
+
+  /**
+   * Constructor
+   */
+  public CSVToARFFHeaderMapTask() {
+    this(false);
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param suppressQuantileOptions true if commandline options relating to
+   *          quantile estimation are to be suppressed
+   */
+  public CSVToARFFHeaderMapTask(boolean suppressQuantileOptions) {
+    m_suppressQuantileOptions = suppressQuantileOptions;
+  }
 
   /**
    * Update the summary statistics for a given attribute with the given value
@@ -401,7 +440,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         + "\t(default: -none-)", "D", 1, "-D <range>"));
 
     result.add(new Option(
-      "\tThe date formatting string to use to parse date values.\n"
+      "\tThe date formatting string to use to parse/format date values.\n"
         + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")", "format", 1,
       "-format <date format>"));
 
@@ -416,18 +455,20 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       + "\tSpecify as a comma separated list (e.g. \",'" + " (default: \",')",
       "E", 1, "-E <enclosures>"));
 
-    result.add(new Option(
-            "\tInclude quartile estimates (and histograms) in summary attributes.\n\t"
-                    + "Note that this adds quite a bit to computation time",
-            "compute-quartiles", 0, "-compute-quartiles"));
+    if (!m_suppressQuantileOptions) {
+      result.add(new Option(
+        "\tInclude quartile estimates (and histograms) in summary attributes.\n\t"
+          + "Note that this adds quite a bit to computation time",
+        "compute-quartiles", 0, "-compute-quartiles"));
 
-    result
-      .add(new Option(
-        "\tThe compression level to use when computing estimated quantiles.\n\t"
-          + "Higher values result in less compression and more accurate estimates\n\t"
-          + "at the expense of time and space (default="
-          + NumericStats.Q_COMPRESSION + ").", "compression", 1,
-        "-compression <number>"));
+      result
+        .add(new Option(
+          "\tThe compression level to use when computing estimated quantiles.\n\t"
+            + "Higher values result in less compression and more accurate estimates\n\t"
+            + "at the expense of time and space (default="
+            + NumericStats.Q_COMPRESSION + ").", "compression", 1,
+          "-compression <number>"));
+    }
 
     return result.elements();
   }
@@ -466,12 +507,14 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     result.add("-F");
     result.add(getFieldSeparator());
 
-    if (getComputeQuartilesAsPartOfSummaryStats()) {
-      result.add("-compute-quartiles");
-    }
+    if (!m_suppressQuantileOptions) {
+      if (getComputeQuartilesAsPartOfSummaryStats()) {
+        result.add("-compute-quartiles");
+      }
 
-    result.add("-compression");
-    result.add("" + getCompressionLevelForQuartileEstimation());
+      result.add("-compression");
+      result.add("" + getCompressionLevelForQuartileEstimation());
+    }
 
     if (getTreatZerosAsMissing()) {
       result.add("-treat-zeros-as-missing");
@@ -541,12 +584,14 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
     setTreatZerosAsMissing(Utils.getFlag("treat-zeros-as-missing", options));
 
-    setComputeQuartilesAsPartOfSummaryStats(Utils.getFlag(
-      "compute-quartiles", options)); //$NON-NLS-1$
+    if (!m_suppressQuantileOptions) {
+      setComputeQuartilesAsPartOfSummaryStats(Utils.getFlag(
+        "compute-quartiles", options)); //$NON-NLS-1$
 
-    tmpStr = Utils.getOption("compression", options);
-    if (tmpStr.length() > 0) {
-      setCompressionLevelForQuartileEstimation(Double.parseDouble(tmpStr));
+      tmpStr = Utils.getOption("compression", options);
+      if (tmpStr.length() > 0) {
+        setCompressionLevelForQuartileEstimation(Double.parseDouble(tmpStr));
+      }
     }
 
     while (true) {
@@ -1001,6 +1046,147 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   }
 
   /**
+   * Process a tokenized row of values. attNames may be non-null for the first
+   * row and is optional. If not supplied then names will be generated on
+   * receiving the first row of data. An exception will be raised on subsequent
+   * rows that don't have the same number of fields as seen in the first row
+   *
+   * @param fieldVals the row values to process
+   * @param attNames the names of the attributes (fields)
+   * @exception if the number of fields in the current row does not match the
+   *              number of attribute names
+   */
+  public void processRowValues(Object[] fieldVals, List<String> attNames)
+    throws DistributedWekaException, IOException {
+
+    if (m_attributeTypes == null) {
+      if (attNames != null && fieldVals.length != attNames.size()) {
+        throw new IOException("Expected " + attNames.size()
+          + " fields, but got " + fieldVals.length + " for row");
+      }
+
+      if (attNames == null) {
+        generateNames(fieldVals.length);
+      } else {
+        m_attributeNames = attNames;
+      }
+
+      // process ranges etc.
+      processRanges(fieldVals.length, TYPE.UNDETERMINED);
+      processNominalSpecs(fieldVals.length);
+    }
+
+    if (fieldVals.length != m_attributeNames.size()) {
+      throw new IOException("Expected " + m_attributeNames.size()
+        + " fields, but got " + fieldVals.length + " for row");
+    }
+
+    // should try to alert the user to all data issues in this phase (i.e.
+    // before getting to the model building). E.g. unparseable dates,
+    // numbers etc.
+    for (int i = 0; i < fieldVals.length; i++) {
+      if (fieldVals[i] != null
+        && !fieldVals[i].toString().equals(m_MissingValue)
+        && fieldVals[i].toString().trim().length() != 0) {
+        if (m_attributeTypes[i] == TYPE.NUMERIC
+          || m_attributeTypes[i] == TYPE.UNDETERMINED) {
+          try {
+            double value = Double.parseDouble(fieldVals[i].toString());
+            m_attributeTypes[i] = TYPE.NUMERIC;
+
+            if (m_computeSummaryStats) {
+              updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
+                value, null, false, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
+            }
+          } catch (NumberFormatException ex) {
+
+            if (m_attributeTypes[i] == TYPE.UNDETERMINED) {
+              // assume its an enumerated value
+              m_attributeTypes[i] = TYPE.NOMINAL;
+              TreeSet<String> ts = new TreeSet<String>();
+
+              String defaultLabel = m_nominalDefaultVals.get(i);
+              String toAdd = defaultLabel;
+              if (defaultLabel != null && fieldVals[i].equals(defaultLabel)) {
+                // don't add it if it's the default label
+              } else {
+                ts.add(fieldVals[i].toString());
+                toAdd = fieldVals[i].toString();
+              }
+              m_nominalVals.put(i, ts);
+
+              if (m_computeSummaryStats) {
+                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                  toAdd, true, false, m_treatZeroAsMissing,
+                  m_estimateQuantiles, m_quantileCompression);
+              }
+            } else {
+              m_attributeTypes[i] = TYPE.STRING;
+              if (m_computeSummaryStats) {
+                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                  fieldVals[i].toString(), false, true, m_treatZeroAsMissing,
+                  m_estimateQuantiles, m_quantileCompression);
+              }
+            }
+          }
+        } else if (m_attributeTypes[i] == TYPE.DATE) {
+          // check that date is parseable
+          Date d = fieldVals[i] instanceof Date ? (Date) fieldVals[i] : null;
+          if (d == null) {
+            try {
+              d = m_formatter.parse(fieldVals[i].toString());
+            } catch (ParseException e) {
+              throw new DistributedWekaException(e);
+            }
+          }
+          if (m_computeSummaryStats) {
+            updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
+              d.getTime(), null, false, false, m_treatZeroAsMissing,
+              m_estimateQuantiles, m_quantileCompression);
+          }
+
+        } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
+          String defaultLabel = m_nominalDefaultVals.get(i);
+          if (defaultLabel != null) {
+            String toUpdate = defaultLabel;
+            if (m_nominalVals.get(i).contains(fieldVals[i])) {
+              toUpdate = fieldVals[i].toString();
+            }
+
+            if (m_computeSummaryStats) {
+              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                toUpdate, true, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
+            }
+          } else {
+            m_nominalVals.get(i).add(fieldVals[i].toString());
+            if (m_computeSummaryStats) {
+              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+                fieldVals[i].toString(), true, false, m_treatZeroAsMissing,
+                m_estimateQuantiles, m_quantileCompression);
+            }
+          }
+        } else if (m_attributeTypes[i] == TYPE.STRING) {
+          if (m_computeSummaryStats) {
+            updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
+              fieldVals[i].toString(), false, true, m_treatZeroAsMissing,
+              m_estimateQuantiles, m_quantileCompression);
+          }
+        }
+      } else {
+        // missing value
+        if (m_computeSummaryStats) {
+          updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
+            Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
+            m_attributeTypes[i] == TYPE.STRING, m_treatZeroAsMissing,
+            m_estimateQuantiles, m_quantileCompression);
+        }
+      }
+    }
+  }
+
+  /**
    * Process a row of data coming into the map. Split the row into fields and
    * initialize if this is the first row seen. attNames may be non-null for the
    * first row and is optional. If not supplied then names will be generated on
@@ -1033,21 +1219,6 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       m_parser = new CSVParser(m_FieldSeparator.charAt(0), encl, '\\');
 
       fields = m_parser.parseLine(row);
-
-      if (attNames != null && fields.length != attNames.size()) {
-        throw new IOException("Expected " + attNames.size()
-          + " fields, but got " + fields.length + " for row: " + row);
-      }
-
-      if (attNames == null) {
-        generateNames(fields.length);
-      } else {
-        m_attributeNames = attNames;
-      }
-
-      // process ranges etc.
-      processRanges(fields.length, TYPE.UNDETERMINED);
-      processNominalSpecs(fields.length);
     }
 
     // process the row
@@ -1063,113 +1234,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           + "\n\nFor line:\n" + row);
         return;
       }
-
-      if (fields.length != m_attributeNames.size()) {
-        throw new IOException("Expected " + m_attributeNames.size()
-          + " fields, but got " + fields.length + " for row: " + row);
-      }
     }
 
-    // should try to alert the user to all data issues in this phase (i.e.
-    // before getting to the model building). E.g. unparseable dates,
-    // numbers etc.
-    for (int i = 0; i < fields.length; i++) {
-      if (fields[i] != null && !fields[i].equals(m_MissingValue)
-        && fields[i].trim().length() != 0) {
-        if (m_attributeTypes[i] == TYPE.NUMERIC
-          || m_attributeTypes[i] == TYPE.UNDETERMINED) {
-          try {
-            double value = Double.parseDouble(fields[i]);
-            m_attributeTypes[i] = TYPE.NUMERIC;
-
-            if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-                value, null, false, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
-            }
-          } catch (NumberFormatException ex) {
-
-            if (m_attributeTypes[i] == TYPE.UNDETERMINED) {
-              // assume its an enumerated value
-              m_attributeTypes[i] = TYPE.NOMINAL;
-              TreeSet<String> ts = new TreeSet<String>();
-
-              String defaultLabel = m_nominalDefaultVals.get(i);
-              String toAdd = defaultLabel;
-              if (defaultLabel != null && fields[i].equals(defaultLabel)) {
-                // don't add it if it's the default label
-              } else {
-                ts.add(fields[i]);
-                toAdd = fields[i];
-              }
-              m_nominalVals.put(i, ts);
-
-              if (m_computeSummaryStats) {
-                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  toAdd, true, false, m_treatZeroAsMissing,
-                  m_estimateQuantiles, m_quantileCompression);
-              }
-            } else {
-              m_attributeTypes[i] = TYPE.STRING;
-              if (m_computeSummaryStats) {
-                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  fields[i], false, true, m_treatZeroAsMissing,
-                  m_estimateQuantiles, m_quantileCompression);
-              }
-            }
-          }
-        } else if (m_attributeTypes[i] == TYPE.DATE) {
-          // check that date is parseable
-          Date d = null;
-          try {
-            d = m_formatter.parse(fields[i]);
-          } catch (ParseException e) {
-            throw new DistributedWekaException(e);
-          }
-          if (m_computeSummaryStats) {
-            updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-              d.getTime(), null, false, false, m_treatZeroAsMissing,
-              m_estimateQuantiles, m_quantileCompression);
-          }
-
-        } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
-          String defaultLabel = m_nominalDefaultVals.get(i);
-          if (defaultLabel != null) {
-            String toUpdate = defaultLabel;
-            if (m_nominalVals.get(i).contains(fields[i])) {
-              toUpdate = fields[i];
-            }
-
-            if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                toUpdate, true, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
-            }
-          } else {
-            m_nominalVals.get(i).add(fields[i]);
-            if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                fields[i], true, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
-            }
-          }
-        } else if (m_attributeTypes[i] == TYPE.STRING) {
-          if (m_computeSummaryStats) {
-            updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-              fields[i], false, true, m_treatZeroAsMissing,
-              m_estimateQuantiles, m_quantileCompression);
-          }
-        }
-      } else {
-        // missing value
-        if (m_computeSummaryStats) {
-          updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-            Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
-            m_attributeTypes[i] == TYPE.STRING, m_treatZeroAsMissing,
-            m_estimateQuantiles, m_quantileCompression);
-        }
-      }
-    }
+    processRowValues(fields, attNames);
   }
 
   /**
@@ -1587,7 +1654,6 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    *          header as opposed to being added to the header (i.e. accumulating
    *          in the header).
    * @param parsed the array of parsed CSV values
-   * @param sparse true if the new instance is to be a sparse instance
    * @return an Instance
    * @throws Exception if a problem occurs
    */
@@ -1613,24 +1679,46 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    */
   public Instance makeInstance(Instances trainingHeader,
     boolean setStringValues, String[] parsed, boolean sparse) throws Exception {
+    return makeInstanceFromObjectRow(trainingHeader, setStringValues, parsed,
+      sparse);
+  }
+
+  /**
+   * Utility method for Constructing an instance given an array of Objects
+   *
+   * @param trainingHeader the header to associate the instance with. Does not
+   *          add the new instance to this data set; just gives the instance a
+   *          reference to the header
+   * @param setStringValues true if any string values should be set in the
+   *          header as opposed to being added to the header (i.e. accumulating
+   *          in the header).
+   * @param row the array of Object values
+   * @param sparse true if the new instance is to be a sparse instance
+   * @return an Instance
+   * @throws Exception if a problem occurs
+   */
+  public Instance makeInstanceFromObjectRow(Instances trainingHeader,
+    boolean setStringValues, Object[] row, boolean sparse) throws Exception {
+
     double[] vals = new double[trainingHeader.numAttributes()];
 
     for (int i = 0; i < trainingHeader.numAttributes(); i++) {
-      if (parsed[i] == null || parsed[i].equals(getMissingValue())
-        || parsed[i].trim().length() == 0) {
+      if (row[i] == null || row[i].toString().equals(getMissingValue())
+        || row[i].toString().trim().length() == 0) {
         vals[i] = Utils.missingValue();
         continue;
       }
+
       Attribute current = trainingHeader.attribute(i);
       if (current.isString()) {
         if (setStringValues) {
-          current.setStringValue(parsed[i]);
+          current.setStringValue(row[i].toString());
           vals[i] = 0;
         } else {
-          vals[i] = current.addStringValue(parsed[i]);
+          vals[i] = current.addStringValue(row[i].toString());
         }
       } else if (current.isNominal()) {
-        int index = current.indexOfValue(parsed[i]);
+        int index = current.indexOfValue(row[i].toString());
 
         if (index < 0) {
           if (m_nominalDefaultVals.get(i) != null) {
@@ -1638,34 +1726,38 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
           }
 
           if (index < 0) {
-            throw new Exception("Can't find nominal value '" + parsed[i]
-              + "' in list of values for " + "attribute '" + current.name()
-              + "'");
+            throw new Exception("Can't find nominal value '"
+              + row[i].toString() + "' in list of values for " + "attribute '"
+              + current.name() + "'");
           }
         }
         vals[i] = index;
       } else if (current.isDate()) {
-        try {
-          double val = current.parseDate(parsed[i]);
-          vals[i] = val;
-        } catch (ParseException p) {
-          throw new Exception(p);
+        double val = 0;
+        if (row[i] instanceof Date) {
+          val = ((Date) row[i]).getTime();
+        } else {
+          try {
+            val = current.parseDate(row[i].toString());
+          } catch (ParseException p) {
+            throw new Exception(p);
+          }
         }
+        vals[i] = val;
       } else if (current.isNumeric()) {
-        try {
-          double val = Double.parseDouble(parsed[i]);
-          vals[i] = val;
-        } catch (NumberFormatException n) {
-          throw new Exception(n);
+        if (row[i] instanceof Number) {
+          vals[i] = ((Number) row[i]).doubleValue();
+        } else {
+          try {
+            vals[i] = Double.parseDouble(row[i].toString());
+          } catch (NumberFormatException n) {
+            throw new Exception(n);
+          }
         }
-      } else {
-        throw new Exception("Unsupported attribute type: "
-          + Attribute.typeToString(current));
       }
     }
 
     Instance result = null;
-
     if (sparse) {
       result = new SparseInstance(1.0, vals);
     } else {
