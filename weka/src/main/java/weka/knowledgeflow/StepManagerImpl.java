@@ -290,8 +290,8 @@ public class StepManagerImpl implements StepManager {
   @Override
   public Settings getSettings() {
     if (getExecutionEnvironment() == null) {
-      throw new IllegalStateException(
-        "There is no execution environment " + "available!");
+      throw new IllegalStateException("There is no execution environment "
+        + "available!");
     }
     return getExecutionEnvironment().getSettings();
   }
@@ -354,9 +354,7 @@ public class StepManagerImpl implements StepManager {
    * @param log the log to use
    */
   public void setLog(Logger log) {
-    if (m_log == null) {
-      m_log = new LogHandler(getManagedStep());
-    }
+    m_log = new LogHandler(getManagedStep());
 
     m_log.setLogger(log);
   }
@@ -614,8 +612,8 @@ public class StepManagerImpl implements StepManager {
    * @param step the source step component that is connecting with given
    *          connection type
    */
-  public void addIncomingConnection(String connectionName,
-    StepManagerImpl step) {
+  public void
+    addIncomingConnection(String connectionName, StepManagerImpl step) {
     List<StepManager> steps = m_connectedByTypeIncoming.get(connectionName);
     if (steps == null) {
       steps = new ArrayList<StepManager>();
@@ -692,19 +690,17 @@ public class StepManagerImpl implements StepManager {
    * @return a list of connected steps
    */
   @Override
-  public List<StepManager>
-    getIncomingConnectedStepsOfConnectionType(String connectionName) {
-    return m_connectedByTypeIncoming.get(connectionName) != null
-      ? m_connectedByTypeIncoming.get(connectionName)
-      : new ArrayList<StepManager>();
+  public List<StepManager> getIncomingConnectedStepsOfConnectionType(
+    String connectionName) {
+    return m_connectedByTypeIncoming.get(connectionName) != null ? m_connectedByTypeIncoming
+      .get(connectionName) : new ArrayList<StepManager>();
   }
 
   @Override
-  public List<StepManager>
-    getOutgoingConnectedStepsOfConnectionType(String connectionName) {
-    return m_connectedByTypeOutgoing.get(connectionName) != null
-      ? m_connectedByTypeOutgoing.get(connectionName)
-      : new ArrayList<StepManager>();
+  public List<StepManager> getOutgoingConnectedStepsOfConnectionType(
+    String connectionName) {
+    return m_connectedByTypeOutgoing.get(connectionName) != null ? m_connectedByTypeOutgoing
+      .get(connectionName) : new ArrayList<StepManager>();
   }
 
   private StepManager getConnectedStepWithName(String stepName,
@@ -915,11 +911,10 @@ public class StepManagerImpl implements StepManager {
         notifyOutputListeners(d);
       }
 
-      for (Map.Entry<StepManagerImpl, List<Data>> e : stepsToSendTo
-        .entrySet()) {
+      for (Map.Entry<StepManagerImpl, List<Data>> e : stepsToSendTo.entrySet()) {
         if (!e.getKey().isStopRequested()) {
-          m_executionEnvironment.sendDataToStep(e.getKey(),
-            e.getValue().toArray(new Data[e.getValue().size()]));
+          m_executionEnvironment.sendDataToStep(e.getKey(), e.getValue()
+            .toArray(new Data[e.getValue().size()]));
         }
       }
     }
@@ -952,8 +947,7 @@ public class StepManagerImpl implements StepManager {
         }
       }
 
-      if (namedTarget != null
-        && !namedTarget.isStopRequested()) {
+      if (namedTarget != null && !namedTarget.isStopRequested()) {
         m_executionEnvironment.sendDataToStep(namedTarget, data);
       } else {
         // TODO log an error here and stop?
@@ -1128,7 +1122,7 @@ public class StepManagerImpl implements StepManager {
     if (getIncomingConnectedStepsOfConnectionType(connectionName).size() == 1) {
       return ((StepManagerImpl) getIncomingConnectedStepsOfConnectionType(
         connectionName).get(0)).getManagedStep()
-          .outputStructureForConnectionType(connectionName);
+        .outputStructureForConnectionType(connectionName);
     }
 
     return null;
@@ -1218,7 +1212,7 @@ public class StepManagerImpl implements StepManager {
    * Log an error
    *
    * @param message the message to log
-   * @param cause   the optional Throwable to log
+   * @param cause the optional Throwable to log
    */
   @Override
   public void logError(String message, Throwable cause) {
@@ -1248,7 +1242,7 @@ public class StepManagerImpl implements StepManager {
    * Log a message at the supplied logging level
    *
    * @param message the message to write
-   * @param level   the level for the message
+   * @param level the level for the message
    */
   @Override
   public void log(String message, LoggingLevel level) {
@@ -1298,10 +1292,10 @@ public class StepManagerImpl implements StepManager {
   public Step getInfoStep(Class stepClass) throws WekaException {
     Step info = getInfoStep();
     if (!(info.getClass() == stepClass)) {
-      throw new WekaException(
-        "The managed step (" + info.getClass().getCanonicalName() + ") is not "
-          + "not an instance of the required class: "
-          + stepClass.getCanonicalName());
+      throw new WekaException("The managed step ("
+        + info.getClass().getCanonicalName() + ") is not "
+        + "not an instance of the required class: "
+        + stepClass.getCanonicalName());
     }
 
     return info;
@@ -1320,8 +1314,8 @@ public class StepManagerImpl implements StepManager {
       return getManagedStep();
     }
 
-    throw new WekaException(
-      "There are no outgoing info connections from " + "this step!");
+    throw new WekaException("There are no outgoing info connections from "
+      + "this step!");
   }
 
   /**
@@ -1374,8 +1368,8 @@ public class StepManagerImpl implements StepManager {
    */
   protected static boolean connectionIsIncremental(Data conn) {
     return conn.getConnectionName().equalsIgnoreCase(StepManager.CON_INSTANCE)
-      || conn.getConnectionName()
-        .equalsIgnoreCase(StepManager.CON_INCREMENTAL_CLASSIFIER)
+      || conn.getConnectionName().equalsIgnoreCase(
+        StepManager.CON_INCREMENTAL_CLASSIFIER)
       || conn.getConnectionName().equalsIgnoreCase(StepManager.CON_CHART)
       || conn.getPayloadElement(StepManager.CON_AUX_DATA_IS_INCREMENTAL, false);
   }

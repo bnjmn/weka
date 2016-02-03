@@ -48,7 +48,7 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
     String className = algo.getClass().getCanonicalName();
     String name = className.substring(className.lastIndexOf(".") + 1);
     String packageName = className.substring(0, className.lastIndexOf("."));
-      setName(name);
+    setName(name);
 
     m_defaultPackageIconPath = StepVisual.BASE_ICON_PATH + packageName + ".gif";
     m_iconPath = StepVisual.BASE_ICON_PATH + name + ".gif";

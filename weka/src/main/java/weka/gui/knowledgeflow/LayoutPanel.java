@@ -821,6 +821,8 @@ public class LayoutPanel extends PrintablePanel {
         if (name != null) {
           m_visLayout.renameStep(oldName, name);
           m_visLayout.setEdited(true);
+          revalidate();
+          repaint();
         }
       }
     });
