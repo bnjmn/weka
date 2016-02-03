@@ -21,9 +21,8 @@
 
 package weka.distributed;
 
-import java.io.Serializable;
-import java.util.*;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableBatchProcessor;
@@ -32,11 +31,27 @@ import weka.classifiers.meta.AggregateableFilteredClassifier;
 import weka.classifiers.meta.AggregateableFilteredClassifierUpdateable;
 import weka.classifiers.meta.FilteredClassifier;
 import weka.classifiers.meta.FilteredClassifierUpdateable;
-import weka.core.*;
-import weka.filters.*;
+import weka.core.Aggregateable;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.MakePreconstructedFilter;
+import weka.filters.MultiFilter;
+import weka.filters.PreconstructedFilter;
+import weka.filters.StreamableFilter;
 import weka.filters.unsupervised.instance.ReservoirSample;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * A map task for building classifiers. Can handle batch and incremental
