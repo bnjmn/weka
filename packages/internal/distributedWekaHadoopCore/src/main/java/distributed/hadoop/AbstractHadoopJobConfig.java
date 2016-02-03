@@ -21,10 +21,10 @@
 
 package distributed.hadoop;
 
-import java.util.Properties;
-
-import weka.core.Utils;
 import distributed.core.DistributedJobConfig;
+import weka.core.Utils;
+
+import java.util.Properties;
 
 /**
  * Base job config for Hadoop-related jobs to extend
@@ -106,8 +106,8 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @param host the name of the host the job tracker is running on
    */
   public void setJobTrackerHost(String host) {
-    setProperty(JOBTRACKER_HOST,
-      DistributedJobConfig.isEmpty(host) ? DEFAULT_HOST : host);
+    setProperty(JOBTRACKER_HOST, host);
+    //DistributedJobConfig.isEmpty(host) ? DEFAULT_HOST : host);
   }
 
   /**
@@ -134,9 +134,9 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @param port the port that the job tracker is running on
    */
   public void setJobTrackerPort(String port) {
-    setProperty(JOBTRACKER_PORT,
-      DistributedJobConfig.isEmpty(port) ? (isHadoop2() ? DEFAULT_PORT_YARN
-        : DEFAULT_PORT) : port);
+    setProperty(JOBTRACKER_PORT, port);
+      //DistributedJobConfig.isEmpty(port) ? (isHadoop2() ? DEFAULT_PORT_YARN
+//        : DEFAULT_PORT) : port);
   }
 
   /**

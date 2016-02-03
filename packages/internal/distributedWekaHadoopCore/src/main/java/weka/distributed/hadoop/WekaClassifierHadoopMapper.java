@@ -21,25 +21,12 @@
 
 package weka.distributed.hadoop;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileReader;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.util.zip.GZIPOutputStream;
-
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.LongWritable;
 import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Attribute;
@@ -52,7 +39,19 @@ import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.WekaClassifierMapTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
-import distributed.core.DistributedJobConfig;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Mapper implementation for the WekaClassifierHadoopJob

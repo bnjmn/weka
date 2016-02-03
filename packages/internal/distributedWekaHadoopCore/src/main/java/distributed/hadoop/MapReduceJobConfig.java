@@ -21,13 +21,7 @@
 
 package distributed.hadoop;
 
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
-
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.io.BytesWritable;
@@ -42,12 +36,17 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.input.TextInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.mapreduce.lib.output.TextOutputFormat;
-
 import weka.core.Environment;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import distributed.core.DistributedJobConfig;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * The main job configuration used by Weka Hadoop jobs
@@ -132,15 +131,15 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     "mapreduce.input.fileinputformat.split.maxsize";
 
   /**
-   * Internal key for the Hadoop 1 property for the maximum number of number
-   * of reducers to run per node
+   * Internal key for the Hadoop 1 property for the maximum number of number of
+   * reducers to run per node
    */
   public static final String HADOOP_TASKTRACKER_REDUCE_TASKS_MAXIMUM =
     "mapred.tasktracker.reduce.tasks.maximum";
 
   /**
-   * Internal key for the Hadoop 2 property for the maximum number of number
-   * of reducers to run per node
+   * Internal key for the Hadoop 2 property for the maximum number of number of
+   * reducers to run per node
    */
   public static final String HADOOP2_TASKTRACKER_REDUCE_TASKS_MAXIMUM =
     "mapreduce.tasktracker.reduce.tasks.maximum";
@@ -159,13 +158,13 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
     // defaults
     if (AbstractHadoopJobConfig.isHadoop2()) {
       // default port for resource manager
-      setJobTrackerPort("8032");
+      setJobTrackerPort(AbstractHadoopJobConfig.DEFAULT_PORT_YARN);
     } else {
-      setJobTrackerPort("8020");
+      setJobTrackerPort(AbstractHadoopJobConfig.DEFAULT_PORT);
     }
     setJobTrackerHost("localhost");
     getHDFSConfig().setHDFSHost("localhost");
-    getHDFSConfig().setHDFSPort("8021");
+    getHDFSConfig().setHDFSPort("8020");
 
     // some defaults for Weka style jobs. Mappers tend to create
     // some sort of object (classifier, instances etc.) to be
@@ -249,8 +248,11 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
 
     opts.add("-jobtracker-host");
     opts.add(getJobTrackerHost());
-    opts.add("-jobtracker-port");
-    opts.add(getJobTrackerPort());
+
+    if (!DistributedJobConfig.isEmpty(getJobTrackerPort())) {
+      opts.add("-jobtracker-port");
+      opts.add(getJobTrackerPort());
+    }
 
     if (!DistributedJobConfig.isEmpty(getNumberOfMaps())) {
       opts.add("-num-maps");
@@ -740,7 +742,13 @@ public class MapReduceJobConfig extends AbstractHadoopJobConfig implements
   public Job configureForHadoop(String jobName, Configuration conf,
     Environment env) throws IOException, ClassNotFoundException {
 
-    String jobTracker = getJobTrackerHost() + ":" + getJobTrackerPort();
+    String jobTrackerPort = getJobTrackerPort();
+    if (DistributedJobConfig.isEmpty(jobTrackerPort)) {
+      jobTrackerPort =
+        AbstractHadoopJobConfig.isHadoop2() ? AbstractHadoopJobConfig.DEFAULT_PORT_YARN
+          : AbstractHadoopJobConfig.DEFAULT_PORT;
+    }
+    String jobTracker = getJobTrackerHost() + ":" + jobTrackerPort;
     if (DistributedJobConfig.isEmpty(jobTracker)) {
       System.err.println("No "
         + (AbstractHadoopJobConfig.isHadoop2() ? "resource manager "

@@ -21,6 +21,17 @@
 
 package weka.distributed.hadoop;
 
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
+import weka.distributed.DistributedWekaException;
+
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
@@ -32,18 +43,6 @@ import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.zip.GZIPOutputStream;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.distributed.CSVToARFFHeaderMapTask;
-import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
-import weka.distributed.DistributedWekaException;
 
 /**
  * Mapper implementation for the ArffHeaderHadoop job

@@ -21,6 +21,19 @@
 
 package weka.distributed.hadoop;
 
+import distributed.core.DistributedJobConfig;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.io.BytesWritable;
+import org.apache.hadoop.io.LongWritable;
+import org.apache.hadoop.io.Text;
+import org.apache.hadoop.mapreduce.Mapper;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Utils;
+import weka.distributed.CSVToARFFHeaderMapTask;
+import weka.distributed.CSVToARFFHeaderReduceTask;
+import weka.distributed.CorrelationMatrixMapTask;
+
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -28,20 +41,6 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.zip.GZIPOutputStream;
-
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.BytesWritable;
-import org.apache.hadoop.io.LongWritable;
-import org.apache.hadoop.io.Text;
-import org.apache.hadoop.mapreduce.Mapper;
-
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Utils;
-import weka.distributed.CSVToARFFHeaderMapTask;
-import weka.distributed.CSVToARFFHeaderReduceTask;
-import weka.distributed.CorrelationMatrixMapTask;
-import distributed.core.DistributedJobConfig;
 
 /**
  * Hadoop Mapper implementation for the correlation matrix job. Computes a full

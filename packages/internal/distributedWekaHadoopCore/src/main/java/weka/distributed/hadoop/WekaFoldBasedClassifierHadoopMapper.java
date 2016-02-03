@@ -21,12 +21,10 @@
 
 package weka.distributed.hadoop;
 
-import java.io.IOException;
-
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.BytesWritable;
 import org.apache.hadoop.io.Text;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.UpdateableClassifier;
 import weka.core.Environment;
@@ -37,7 +35,8 @@ import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.WekaClassifierMapTask;
 import weka.filters.Filter;
 import weka.filters.PreconstructedFilter;
-import distributed.core.DistributedJobConfig;
+
+import java.io.IOException;
 
 /**
  * Mapper implementation for the model-building phase of the evaluation job.

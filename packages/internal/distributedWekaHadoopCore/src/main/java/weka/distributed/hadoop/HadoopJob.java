@@ -21,6 +21,23 @@
 
 package weka.distributed.hadoop;
 
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
+import distributed.hadoop.HDFSUtils;
+import distributed.hadoop.MapReduceJobConfig;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.mapred.TaskCompletionEvent;
+import org.apache.hadoop.mapreduce.Job;
+import weka.core.ClassloaderUtil;
+import weka.core.Environment;
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.core.WekaPackageManager;
+import weka.distributed.DistributedWekaException;
+
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
@@ -29,25 +46,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.mapred.TaskCompletionEvent;
-import org.apache.hadoop.mapreduce.Job;
-
-import weka.core.ClassloaderUtil;
-import weka.core.Environment;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.core.WekaPackageManager;
-import weka.distributed.DistributedWekaException;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
-import distributed.hadoop.AbstractHadoopJobConfig;
-import distributed.hadoop.HDFSUtils;
-import distributed.hadoop.MapReduceJobConfig;
 
 /**
  * Abstract base class for Hadoop jobs. Contains routines for installing Weka
@@ -733,22 +731,8 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
    * @param message the message to log
    */
   @Override
-  protected void logMessage(String message) {
-    if (m_log != null) {
-      m_log.logMessage(m_statusMessagePrefix + message);
-    }
+  public void logMessage(String message) {
+    super.logMessage(message);
     m_hadoopLog.info(message);
-  }
-
-  /**
-   * Send a message to the status
-   * 
-   * @param message the message to status
-   */
-  @Override
-  protected void statusMessage(String message) {
-    if (m_log != null) {
-      m_log.statusMessage(m_statusMessagePrefix + message);
-    }
   }
 }

@@ -21,20 +21,12 @@
 
 package weka.distributed.hadoop;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
-import java.util.Vector;
-
+import distributed.core.DistributedJob;
+import distributed.core.DistributedJobConfig;
 import distributed.hadoop.AbstractHadoopJobConfig;
+import distributed.hadoop.HDFSConfig;
+import distributed.hadoop.HDFSUtils;
+import distributed.hadoop.MapReduceJobConfig;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -42,7 +34,6 @@ import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.mapreduce.Job;
-
 import weka.clusterers.CentroidSketch;
 import weka.clusterers.ClusterUtils;
 import weka.clusterers.Clusterer;
@@ -66,11 +57,19 @@ import weka.distributed.KMeansReduceTask;
 import weka.filters.Filter;
 import weka.gui.beans.ClustererProducer;
 import weka.gui.beans.TextProducer;
-import distributed.core.DistributedJob;
-import distributed.core.DistributedJobConfig;
-import distributed.hadoop.HDFSConfig;
-import distributed.hadoop.HDFSUtils;
-import distributed.hadoop.MapReduceJobConfig;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * Hadoop job for building a k-means clusterer usining either random centroid or
@@ -492,7 +491,7 @@ public class KMeansClustererHadoopJob extends HadoopJob implements
    */
   public String kMeansParallelInitStepsTipText() {
     return "The number of iterations of the k-means|| initialization routine to perform. "
-      + "Only applies if initialize using random centroids has not been turned on.";
+      + "Only applies if initializeFlow using random centroids has not been turned on.";
   }
 
   /**

@@ -21,17 +21,16 @@
 
 package distributed.hadoop;
 
-import java.util.Enumeration;
-import java.util.Map;
-import java.util.Vector;
-
+import distributed.core.DistributedJobConfig;
 import org.apache.hadoop.conf.Configuration;
-
 import weka.core.Environment;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
-import distributed.core.DistributedJobConfig;
+
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.Vector;
 
 /**
  * Config for HDFS filesystem related properties
@@ -118,10 +117,14 @@ public class HDFSConfig extends AbstractHadoopJobConfig implements
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
 
-    result.add("-hdfs-host");
-    result.add(getHDFSHost());
-    result.add("-hdfs-port");
-    result.add(getHDFSPort());
+    if (!DistributedJobConfig.isEmpty(getHDFSHost())) {
+      result.add("-hdfs-host");
+      result.add(getHDFSHost());
+    }
+    if (!DistributedJobConfig.isEmpty(getHDFSPort())) {
+      result.add("-hdfs-port");
+      result.add(getHDFSPort());
+    }
 
     String[] superOpts = super.getOptions();
     for (String s : superOpts) {
