@@ -157,6 +157,39 @@ public abstract class DistributedJob implements EnvironmentHandler,
   }
 
   /**
+   * Utility method to convert a row of values into an Instance
+   *
+   * @param row the row of data to convert to an Instance
+   * @param rowHelper the configured CSVToARFFHeaderMap task to use for getting
+   *          default nominal values from
+   * @param headerNoSummary the header of the data (sans summary attributes)
+   *          that contains attribute information for the instance
+   * @param setStringVals true if the values of string attributes are to be set
+   *          on the header (rather than accumulate in the header).
+   * @param sparse true if a sparse instance should be created instead of a
+   *          dense one
+   * @return an Instance
+   * @throws IOException if a problem occurs
+   */
+  public static Instance objectRowToInstance(Object[] row,
+    CSVToARFFHeaderMapTask rowHelper, Instances headerNoSummary,
+    boolean setStringVals, boolean sparse) throws IOException {
+
+    if (row.length != headerNoSummary.numAttributes()) {
+      throw new IOException("The supplied Object[] row contains a different "
+        + "number of values than there are attributes in the supplied "
+        + "ARFF header");
+    }
+
+    try {
+      return rowHelper.makeInstanceFromObjectRow(headerNoSummary,
+        setStringVals, row, sparse);
+    } catch (Exception ex) {
+      throw new IOException(ex);
+    }
+  }
+
+  /**
    * Convert a stack trace from a Throwable to a string
    *
    * @param throwable the Throwable to get the stack trace from
@@ -296,7 +329,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    *
    * @param message the message to log
    */
-  protected void logMessage(String message) {
+  public void logMessage(String message) {
     if (m_log != null) {
       m_log.logMessage(m_statusMessagePrefix + message);
     } else {
@@ -309,7 +342,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    *
    * @param message the message to status
    */
-  protected void statusMessage(String message) {
+  public void statusMessage(String message) {
     if (m_log != null) {
       m_log.statusMessage(m_statusMessagePrefix + message);
     } else {
@@ -322,7 +355,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    *
    * @param ex the exception to extract the stack trace from
    */
-  protected void logMessage(Throwable ex) {
+  public void logMessage(Throwable ex) {
     if (m_log != null) {
       String stackTrace = stackTraceToString(ex);
       m_log.logMessage(stackTrace);
@@ -335,7 +368,7 @@ public abstract class DistributedJob implements EnvironmentHandler,
    * @param message the message to log
    * @param ex the Exception to extract the stack trace from
    */
-  protected void logMessage(String message, Throwable ex) {
+  public void logMessage(String message, Throwable ex) {
     logMessage(message);
     logMessage(ex);
   }
