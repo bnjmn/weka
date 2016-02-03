@@ -21,16 +21,7 @@
 
 package weka.distributed;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.List;
-
 import org.junit.Test;
-
 import weka.classifiers.Classifier;
 import weka.classifiers.meta.AggregateableFilteredClassifier;
 import weka.classifiers.meta.AggregateableFilteredClassifierUpdateable;
@@ -44,6 +35,14 @@ import weka.filters.MakePreconstructedFilter;
 import weka.filters.MultiFilter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Remove;
+
+import java.io.BufferedReader;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 /**
  * Test class for classifier building map and reduce tasks
