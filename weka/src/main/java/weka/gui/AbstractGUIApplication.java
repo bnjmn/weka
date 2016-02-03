@@ -22,7 +22,7 @@
 package weka.gui;
 
 import weka.core.Settings;
-import weka.knowledgeflow.LogHandler;
+import weka.knowledgeflow.LogManager;
 
 import javax.swing.*;
 import java.awt.*;
@@ -182,7 +182,7 @@ public abstract class AbstractGUIApplication extends JPanel implements
    */
   @Override
   public void showErrorDialog(Exception cause) {
-    String stackTrace = LogHandler.stackTraceToString(cause);
+    String stackTrace = LogManager.stackTraceToString(cause);
 
     Object[] options = null;
 

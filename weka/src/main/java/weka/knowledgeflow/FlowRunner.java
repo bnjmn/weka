@@ -59,7 +59,7 @@ public class FlowRunner implements FlowExecutor {
   protected transient Logger m_log = new SimpleLogger();
 
   /** Local log handler for FlowRunner-specific logging */
-  protected transient LogHandler m_logHandler;
+  protected transient LogManager m_logHandler;
 
   /** The level to at which to log at */
   protected LoggingLevel m_loggingLevel = LoggingLevel.BASIC;
@@ -330,7 +330,7 @@ public class FlowRunner implements FlowExecutor {
       throw new WekaException("No flow to execute!");
     }
 
-    m_logHandler = new LogHandler(m_log);
+    m_logHandler = new LogManager(m_log);
     m_logHandler.setLoggingLevel(m_loggingLevel);
     m_logHandler.m_statusMessagePrefix = "FlowRunner$" + hashCode() + "|";
     List<StepManagerImpl> startPoints = m_flow.findPotentialStartPoints();
@@ -369,7 +369,7 @@ public class FlowRunner implements FlowExecutor {
       throw new WekaException("No flow to execute!");
     }
 
-    m_logHandler = new LogHandler(m_log);
+    m_logHandler = new LogManager(m_log);
     m_logHandler.m_statusMessagePrefix = "FlowRunner$" + hashCode() + "|";
     setLoggingLevel(m_execEnv.getSettings().getSetting(KFDefaults.APP_ID,
       KFDefaults.LOGGING_LEVEL_KEY, LoggingLevel.BASIC,

@@ -96,7 +96,7 @@ public class LegacyFlowLoader implements FlowLoader {
   protected Vector<BeanConnection> m_connections;
 
   /** Log to use */
-  protected LogHandler m_log;
+  protected LogManager m_log;
 
   /**
    * Constructor
@@ -111,7 +111,7 @@ public class LegacyFlowLoader implements FlowLoader {
    */
   @Override
   public void setLog(Logger log) {
-    m_log = new LogHandler(log, false);
+    m_log = new LogManager(log, false);
   }
 
   /**

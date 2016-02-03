@@ -122,7 +122,7 @@ public class StepManagerImpl implements StepManager {
   protected Settings m_settings = new Settings("weka", KFDefaults.APP_ID);
 
   /** The log to use */
-  protected LogHandler m_log;
+  protected LogManager m_log;
 
   /** For measuring performance of instance streams */
   protected transient StreamThroughput m_throughput;
@@ -333,7 +333,7 @@ public class StepManagerImpl implements StepManager {
    */
   public void setLoggingLevel(LoggingLevel newLevel) {
     if (m_log == null) {
-      m_log = new LogHandler(getManagedStep());
+      m_log = new LogManager(getManagedStep());
     }
     m_log.setLoggingLevel(newLevel);
   }
@@ -354,9 +354,9 @@ public class StepManagerImpl implements StepManager {
    * @param log the log to use
    */
   public void setLog(Logger log) {
-    m_log = new LogHandler(getManagedStep());
+    m_log = new LogManager(getManagedStep());
 
-    m_log.setLogger(log);
+    m_log.setLog(log);
   }
 
   /**

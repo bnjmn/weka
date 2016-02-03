@@ -40,7 +40,7 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
   protected transient StepTaskCallback<T> m_callback;
 
   /** The log to use */
-  protected LogHandler m_log;
+  protected LogManager m_log;
 
   /** True if this is a high resource (cpu/memory) task */
   protected boolean m_resourceIntensive = true;
@@ -94,7 +94,7 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    */
   public StepTask(Step source, StepTaskCallback<T> callback,
     boolean resourceIntensive) {
-    m_log = new LogHandler(source);
+    m_log = new LogManager(source);
     m_callback = callback;
     m_resourceIntensive = resourceIntensive;
   }
@@ -147,7 +147,7 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    *
    * @return the LogHandler
    */
-  protected final LogHandler getLogHandler() {
+  protected final LogManager getLogHandler() {
     return m_log;
   }
 
@@ -157,7 +157,7 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    *
    * @param log the log to use
    */
-  protected final void setLogHandler(LogHandler log) {
+  protected final void setLogHandler(LogManager log) {
     m_log = log;
   }
 

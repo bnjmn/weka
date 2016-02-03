@@ -21,6 +21,7 @@
 
 package weka.knowledgeflow;
 
+import weka.core.LogHandler;
 import weka.core.OptionHandler;
 import weka.core.Utils;
 import weka.gui.Logger;
@@ -39,7 +40,7 @@ import java.io.StringWriter;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class LogHandler {
+public class LogManager implements LogHandler {
 
   /** Prefix to use for status messages */
   protected String m_statusMessagePrefix = "";
@@ -63,7 +64,7 @@ public class LogHandler {
    * 
    * @param source the source {@code Step}
    */
-  public LogHandler(Step source) {
+  public LogManager(Step source) {
     m_status = true;
     String prefix = (source != null ? source.getName() : "Unknown") + "$";
 
@@ -90,7 +91,7 @@ public class LogHandler {
    * 
    * @param log the log to wrap
    */
-  public LogHandler(Logger log) {
+  public LogManager(Logger log) {
     this(log, true);
   }
 
@@ -101,7 +102,7 @@ public class LogHandler {
    * @param status true if warning and error messages should be output to the
    *          status area as well as to the log
    */
-  public LogHandler(Logger log, boolean status) {
+  public LogManager(Logger log, boolean status) {
     m_log = log;
     m_status = status;
   }
@@ -125,7 +126,7 @@ public class LogHandler {
    *
    * @param log the log to wrap
    */
-  public void setLogger(Logger log) {
+  public void setLog(Logger log) {
     m_log = log;
   }
 
