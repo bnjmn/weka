@@ -330,11 +330,10 @@ public class FlowRunner implements FlowExecutor {
       throw new WekaException("No flow to execute!");
     }
 
-    List<StepManagerImpl> startPoints = initializeFlow();
     if (m_startSequentially) {
-      runSequentially(startPoints);
+      runSequentially();
     } else {
-      runParallel(startPoints);
+      runParallel();
     }
   }
 
@@ -357,9 +356,9 @@ public class FlowRunner implements FlowExecutor {
 
     m_logHandler = new LogManager(m_log);
     m_logHandler.m_statusMessagePrefix = "FlowRunner$" + hashCode() + "|";
-    setLoggingLevel(m_execEnv.getSettings().getSetting(KFDefaults.APP_ID,
-      KFDefaults.LOGGING_LEVEL_KEY, LoggingLevel.BASIC,
-      Environment.getSystemWide()));
+    setLoggingLevel(m_execEnv.getSettings().getSetting(
+      KFDefaults.MAIN_PERSPECTIVE_ID, KFDefaults.LOGGING_LEVEL_KEY,
+      LoggingLevel.BASIC, Environment.getSystemWide()));
     m_logHandler.setLoggingLevel(m_loggingLevel);
 
     List<StepManagerImpl> startPoints = m_flow.findPotentialStartPoints();
