@@ -56,17 +56,8 @@ import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
 import weka.classifiers.functions.neural.SigmoidUnit;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Randomizable;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 
@@ -1468,17 +1459,14 @@ public class MultilayerPerceptron extends AbstractClassifier implements
   private Instances setClassType(Instances inst) throws Exception {
     if (inst != null) {
       // x bounds
-      double min = Double.POSITIVE_INFINITY;
-      double max = Double.NEGATIVE_INFINITY;
-      double value;
       m_attributeRanges = new double[inst.numAttributes()];
       m_attributeBases = new double[inst.numAttributes()];
       for (int noa = 0; noa < inst.numAttributes(); noa++) {
-        min = Double.POSITIVE_INFINITY;
-        max = Double.NEGATIVE_INFINITY;
+        double min = Double.POSITIVE_INFINITY;
+        double max = Double.NEGATIVE_INFINITY;
         for (int i = 0; i < inst.numInstances(); i++) {
           if (!inst.instance(i).isMissing(noa)) {
-            value = inst.instance(i).value(noa);
+            double value = inst.instance(i).value(noa);
             if (value < min) {
               min = value;
             }
@@ -1487,23 +1475,29 @@ public class MultilayerPerceptron extends AbstractClassifier implements
             }
           }
         }
-
         m_attributeRanges[noa] = (max - min) / 2;
         m_attributeBases[noa] = (max + min) / 2;
-        if (noa != inst.classIndex() && m_normalizeAttributes) {
-          for (int i = 0; i < inst.numInstances(); i++) {
-            if (m_attributeRanges[noa] != 0) {
-              inst.instance(i).setValue(
-                noa,
-                (inst.instance(i).value(noa) - m_attributeBases[noa])
-                  / m_attributeRanges[noa]);
+      }
+
+      if (m_normalizeAttributes) {
+        for (int i = 0; i < inst.numInstances(); i++) {
+          Instance currentInstance = inst.instance(i);
+          double[] instance = new double[inst.numAttributes()];
+          for (int noa = 0; noa < inst.numAttributes(); noa++) {
+            if (noa != inst.classIndex()) {
+              if (m_attributeRanges[noa] != 0) {
+                instance[noa] = (currentInstance.value(noa) - m_attributeBases[noa]) / m_attributeRanges[noa];
+              } else {
+                instance[noa] = currentInstance.value(noa) - m_attributeBases[noa];
+              }
             } else {
-              inst.instance(i).setValue(noa,
-                inst.instance(i).value(noa) - m_attributeBases[noa]);
+              instance[noa] = currentInstance.value(noa);
             }
           }
+          inst.set(i, new DenseInstance(currentInstance.weight(), instance));
         }
       }
+
       if (inst.classAttribute().isNumeric()) {
         m_numeric = true;
       } else {
@@ -2114,18 +2108,20 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     m_currentInstance = (Instance) m_currentInstance.copy();
 
     if (m_normalizeAttributes) {
+      double[] instance = new double[m_currentInstance.numAttributes()];
       for (int noa = 0; noa < m_instances.numAttributes(); noa++) {
         if (noa != m_instances.classIndex()) {
           if (m_attributeRanges[noa] != 0) {
-            m_currentInstance.setValue(noa,
-              (m_currentInstance.value(noa) - m_attributeBases[noa])
-                / m_attributeRanges[noa]);
+            instance[noa] = (m_currentInstance.value(noa) - m_attributeBases[noa]) / m_attributeRanges[noa];
           } else {
-            m_currentInstance.setValue(noa, m_currentInstance.value(noa)
-              - m_attributeBases[noa]);
+            instance[noa] = m_currentInstance.value(noa) - m_attributeBases[noa];
           }
+        } else {
+          instance[noa] = m_currentInstance.value(noa);
         }
       }
+      m_currentInstance = new DenseInstance(m_currentInstance.weight(), instance);
+      m_currentInstance.setDataset(m_instances);
     }
     resetNetwork();
 
