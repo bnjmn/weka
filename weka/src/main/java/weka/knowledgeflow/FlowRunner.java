@@ -330,21 +330,7 @@ public class FlowRunner implements FlowExecutor {
       throw new WekaException("No flow to execute!");
     }
 
-    m_logHandler = new LogManager(m_log);
-    m_logHandler.setLoggingLevel(m_loggingLevel);
-    m_logHandler.m_statusMessagePrefix = "FlowRunner$" + hashCode() + "|";
-    List<StepManagerImpl> startPoints = m_flow.findPotentialStartPoints();
-    if (startPoints.size() == 0) {
-      m_logHandler.logError("FlowRunner: there don't appear to be any "
-        + "start points to launch!", null);
-      return;
-    }
-
-    if (!m_flow.initFlow(this)) {
-      throw new WekaException(
-        "Flow did not initializeFlow properly - check log.");
-    }
-
+    List<StepManagerImpl> startPoints = initializeFlow();
     if (m_startSequentially) {
       runSequentially(startPoints);
     } else {
