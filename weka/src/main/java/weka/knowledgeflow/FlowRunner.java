@@ -22,12 +22,12 @@
 package weka.knowledgeflow;
 
 import weka.core.Environment;
+import weka.core.PluginManager;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.WekaException;
 import weka.core.WekaPackageManager;
 import weka.gui.Logger;
-import weka.core.PluginManager;
 import weka.gui.knowledgeflow.KnowledgeFlowApp;
 import weka.knowledgeflow.steps.Note;
 
@@ -325,7 +325,7 @@ public class FlowRunner implements FlowExecutor {
    *
    * @throws WekaException if a problem occurs
    */
-  protected void run() throws WekaException {
+  public void run() throws WekaException {
     if (m_flow == null) {
       throw new WekaException("No flow to execute!");
     }
@@ -368,7 +368,8 @@ public class FlowRunner implements FlowExecutor {
       m_logHandler.logError("FlowRunner: there don't appear to be any "
         + "start points to launch!", null);
       for (ExecutionFinishedCallback c : m_callbacks) {
-        c.executionFinished();;
+        c.executionFinished();
+        ;
       }
 
       return null;
@@ -542,7 +543,7 @@ public class FlowRunner implements FlowExecutor {
   /**
    * Wait until all the steps are no longer busy
    */
-  private void waitUntilFinished() {
+  public void waitUntilFinished() {
     try {
       Thread.sleep(500);
       while (true) {
