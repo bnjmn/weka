@@ -100,10 +100,7 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
     }
 
     // filter data to binary
-    Instances instances = new Instances(bayesNet.m_Instances);
-    while (instances.numInstances() > 0) {
-      instances.delete(0);
-    }
+    Instances instances = new Instances(bayesNet.m_Instances, bayesNet.m_Instances.numInstances());
     for (int iAttribute = instances.numAttributes() - 1; iAttribute >= 0; iAttribute--) {
       if (iAttribute != instances.classIndex()) {
         ArrayList<String> values = new ArrayList<String>();
@@ -117,17 +114,19 @@ public class MultiNomialBMAEstimator extends BayesNetEstimator {
 
     for (int iInstance = 0; iInstance < bayesNet.m_Instances.numInstances(); iInstance++) {
       Instance instanceOrig = bayesNet.m_Instances.instance(iInstance);
-      Instance instance = new DenseInstance(instances.numAttributes());
+      double[] instance = new double[instances.numAttributes()];
       for (int iAttribute = 0; iAttribute < instances.numAttributes(); iAttribute++) {
         if (iAttribute != instances.classIndex()) {
           if (instanceOrig.value(iAttribute) > 0) {
-            instance.setValue(iAttribute, 1);
+            instance[iAttribute] = 1;
           }
         } else {
-          instance.setValue(iAttribute, instanceOrig.value(iAttribute));
+          instance[iAttribute] = instanceOrig.value(iAttribute);
         }
       }
+      instances.add(new DenseInstance(instanceOrig.weight(), instance));
     }
+
     // ok, now all data is binary, except the class attribute
     // now learn the empty and tree network
 
