@@ -94,6 +94,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   /** The maximum set number in the batch of sets being processed */
   protected int m_maxSetNum;
 
+  protected AtomicInteger m_taskCount;
+
   protected void stringToList(String l) {
     if (l != null && l.length() > 0) {
       String[] parts = l.split(",");
@@ -208,6 +210,16 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     m_isReset = true;
     m_PlotInstances = null;
     m_aggregatedPlotInstances = null;
+    m_taskCount = new AtomicInteger(0);
+  }
+
+  @Override
+  public void stop() {
+    super.stop();
+
+    if (m_taskCount.get() == 0 && isStopRequested()) {
+      getStepManager().interrupted();
+    }
   }
 
   /** for generating plottable instance with predictions appended. */
@@ -294,6 +306,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
             m_metricsList, getErrorPlotPointSizeProportionalToMargin(),
             evalLabel, new EvaluationCallback());
         getStepManager().getExecutionEnvironment().submitTask(evalTask);
+        m_taskCount.incrementAndGet();
       } else {
         getStepManager().interrupted();
       }
@@ -450,7 +463,6 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           testData.classAttribute());
         getStepManager().outputData(threshData);
       }
-      getStepManager().statusMessage("Finished");
       getStepManager().finished();
     }
     if (isStopRequested()) {
@@ -578,6 +590,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
    */
   protected static class EvaluationTask extends StepTask<Object[]> {
 
+    private static final long serialVersionUID = -686972773536075889L;
+
     protected weka.classifiers.Classifier m_classifier;
     protected Instances m_trainData;
     protected Instances m_testData;
@@ -699,6 +713,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       } else {
         getStepManager().interrupted();
       }
+      m_taskCount.decrementAndGet();
     }
 
     @Override
@@ -707,6 +722,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       Integer setNum = (Integer) failedResult.getResult()[4];
       getStepManager().logError("Evaluation for fold " + setNum + " failed",
         failedResult.getError());
+      m_taskCount.decrementAndGet();
     }
   }
 }

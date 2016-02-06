@@ -586,7 +586,7 @@ public class FlowRunner implements FlowExecutor {
     while (iter.hasNext()) {
       iter.next().stopStep();
     }
-    System.err.println("Stopped all steps...");
+    System.err.println("Asked all steps to stop...");
     m_wasStopped = true;
   }
 
