@@ -103,8 +103,8 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
   }
 
   /**
-   * Set the saver instance that is wrapped by this step. Convenience
-   * method that delegates to {@code setWrappedAlgorithm()}.
+   * Set the saver instance that is wrapped by this step. Convenience method
+   * that delegates to {@code setWrappedAlgorithm()}.
    *
    * @param saver the saver instance that is wrapped by this step
    */
@@ -151,16 +151,18 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
 
     int numNonInstanceInputs =
       getStepManager().numIncomingConnectionsOfType(StepManager.CON_DATASET)
+        + getStepManager().numIncomingConnectionsOfType(
+          StepManager.CON_TRAININGSET)
         + getStepManager()
-          .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET)
-      + getStepManager().numIncomingConnectionsOfType(StepManager.CON_TESTSET);
+          .numIncomingConnectionsOfType(StepManager.CON_TESTSET);
 
     int numInstanceInput =
       getStepManager().numIncomingConnectionsOfType(StepManager.CON_INSTANCE);
 
     if (numNonInstanceInputs > 0 && numInstanceInput > 0) {
-      WekaException cause = new WekaException(
-        "Can't have both instance and batch-based incomming connections!");
+      WekaException cause =
+        new WekaException(
+          "Can't have both instance and batch-based incomming connections!");
       cause.fillInStackTrace();
       getStepManager().logError(cause.getMessage(), cause);
       throw new WekaException(cause);
@@ -184,14 +186,15 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
       weka.core.converters.Saver saver =
         (weka.core.converters.Saver) new SerializedObject(m_saver).getObject();
       if (m_saver instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) saver).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) saver).setEnvironment(getStepManager()
+          .getExecutionEnvironment().getEnvironmentVariables());
       }
 
       String fileName = sanitizeFilename(data.relationName());
 
-      String additional = setNum != null && (setNum + maxSetNum != 2)
-        ? "_" + connectionName + "_" + setNum + "_of_" + maxSetNum : "";
+      String additional =
+        setNum != null && (setNum + maxSetNum != 2) ? "_" + connectionName
+          + "_" + setNum + "_of_" + maxSetNum : "";
 
       if (!m_isDBSaver) {
         saver.setDirAndPrefix(fileName, additional);
@@ -206,8 +209,8 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
       saver.setInstances(data);
 
       getStepManager().logBasic("Saving " + data.relationName() + additional);
-      getStepManager()
-        .statusMessage("Saving " + data.relationName() + additional);
+      getStepManager().statusMessage(
+        "Saving " + data.relationName() + additional);
       saver.writeBatch();
 
       if (!isStopRequested()) {
@@ -236,15 +239,16 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
 
     if (m_saver == null) {
       try {
-        m_saver = (weka.core.converters.Saver) new SerializedObject(
-          getWrappedAlgorithm()).getObject();
+        m_saver =
+          (weka.core.converters.Saver) new SerializedObject(
+            getWrappedAlgorithm()).getObject();
       } catch (Exception ex) {
         throw new WekaException(ex);
       }
 
       if (m_saver instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) m_saver).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) m_saver).setEnvironment(getStepManager()
+          .getExecutionEnvironment().getEnvironmentVariables());
       }
     }
 
@@ -292,8 +296,8 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
     try {
       if (streamEnd) {
         m_saver.writeIncremental(null);
-        getStepManager()
-          .throughputFinished(new Data(StepManagerImpl.CON_INSTANCE));
+        getStepManager().throughputFinished(
+          new Data(StepManagerImpl.CON_INSTANCE));
         return;
       }
 
@@ -319,30 +323,30 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
   @Override
   public List<String> getIncomingConnectionTypes() {
 
-    int numInstance = getStepManager()
-      .getIncomingConnectedStepsOfConnectionType(StepManager.CON_INSTANCE)
-      .size();
+    int numInstance =
+      getStepManager().getIncomingConnectedStepsOfConnectionType(
+        StepManager.CON_INSTANCE).size();
 
-    int numNonInstance = getStepManager()
-      .getIncomingConnectedStepsOfConnectionType(StepManager.CON_DATASET).size()
-      + getStepManager()
-        .getIncomingConnectedStepsOfConnectionType(StepManager.CON_TRAININGSET)
-        .size()
-      + getStepManager()
-        .getIncomingConnectedStepsOfConnectionType(StepManager.CON_TESTSET)
-        .size();
+    int numNonInstance =
+      getStepManager().getIncomingConnectedStepsOfConnectionType(
+        StepManager.CON_DATASET).size()
+        + getStepManager().getIncomingConnectedStepsOfConnectionType(
+          StepManager.CON_TRAININGSET).size()
+        + getStepManager().getIncomingConnectedStepsOfConnectionType(
+          StepManager.CON_TESTSET).size();
 
     if (numInstance + numNonInstance == 0) {
-      return Arrays.asList(StepManager.CON_DATASET, StepManager.CON_TRAININGSET,
-        StepManager.CON_TESTSET, StepManager.CON_INSTANCE);
+      return Arrays.asList(StepManager.CON_DATASET,
+        StepManager.CON_TRAININGSET, StepManager.CON_TESTSET,
+        StepManager.CON_INSTANCE);
     }
 
     return new ArrayList<String>();
   }
 
   /**
-   * Get a list of outgoing connection types that this step can produce at
-   * this time
+   * Get a list of outgoing connection types that this step can produce at this
+   * time
    *
    * @return a list of outgoing connection types
    */
@@ -361,8 +365,9 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
    * @return the cleansed filename
    */
   protected String sanitizeFilename(String filename) {
-    filename = filename.replaceAll("\\\\", "_").replaceAll(":", "_")
-      .replaceAll("/", "_");
+    filename =
+      filename.replaceAll("\\\\", "_").replaceAll(":", "_")
+        .replaceAll("/", "_");
     filename =
       Utils.removeSubstring(filename, "weka.filters.supervised.instance.");
     filename =
@@ -391,6 +396,14 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
     return filename;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.SaverStepEditorDialog";

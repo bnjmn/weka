@@ -49,24 +49,43 @@ import java.util.Map;
   iconPath = KFGUIConsts.BASE_ICON_PATH + "DiamondPlain.gif")
 public class SetVariables extends BaseStep {
 
+  /** Separators for internal variable specification */
   public static final String SEP1 = "@@vv@@";
   public static final String SEP2 = "@v@v";
 
   private static final long serialVersionUID = 8042350408846800738L;
 
+  /** Holds variables in internal representation */
   protected String m_internalRep = "";
+
+  /** Map of variables to set */
   protected Map<String, String> m_varsToSet =
     new LinkedHashMap<String, String>();
 
+  /**
+   * Set the variables to set (in internal representation)
+   *
+   * @param rep the variables to set
+   */
   @ProgrammaticProperty
   public void setVarsInternalRep(String rep) {
     m_internalRep = rep;
   }
 
+  /**
+   * Get the variables to set (in internal representation)
+   *
+   * @return the variables to set
+   */
   public String getVarsInternalRep() {
     return m_internalRep;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
 
@@ -92,21 +111,54 @@ public class SetVariables extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return new ArrayList<String>();
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return new ArrayList<String>();
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.SetVariablesStepEditorDialog";
   }
 
+  /**
+   * Convert a string in the internal variable representation to a map
+   * of variables + values
+   *
+   * @param internalRep the variables in internal represenation
+   * @return a map of variables + values
+   */
   public static Map<String, String> internalToMap(String internalRep) {
     Map<String, String> varsToSet = new LinkedHashMap<String, String>();
     if (internalRep != null || internalRep.length() > 0) {

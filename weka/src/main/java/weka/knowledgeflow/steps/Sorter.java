@@ -33,7 +33,7 @@ import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -93,7 +93,10 @@ public class Sorter extends BaseStep {
   /** format of instances for current incoming connection (if any) */
   protected Instances m_connectedFormat;
 
+  /** True if we've been reset */
   protected boolean m_isReset;
+
+  /** True if processing streaming data */
   protected boolean m_streaming;
 
   /** To (re)use when streaming */
@@ -162,6 +165,11 @@ public class Sorter extends BaseStep {
     return m_sortDetails;
   }
 
+  /**
+   * Initialize the step.
+   *
+   * @throws WekaException if a problem occurs during initialization
+   */
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
@@ -171,6 +179,15 @@ public class Sorter extends BaseStep {
     m_streamingData = new Data(StepManager.CON_INSTANCE);
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() == 0) {
@@ -181,6 +198,15 @@ public class Sorter extends BaseStep {
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -204,6 +230,11 @@ public class Sorter extends BaseStep {
     return result;
   }
 
+  /**
+   * Initialize given the supplied instances structure
+   *
+   * @param structure the structure to initialize with
+   */
   protected void init(Instances structure) {
     m_connectedFormat = structure;
     List<SortRule> sortRules = new ArrayList<SortRule>();
@@ -240,6 +271,12 @@ public class Sorter extends BaseStep {
     }
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     if (m_isReset) {
@@ -272,6 +309,12 @@ public class Sorter extends BaseStep {
     }
   }
 
+  /**
+   * Process batch data
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   protected void processBatch(Data data) throws WekaException {
     getStepManager().processing();
 
@@ -297,6 +340,12 @@ public class Sorter extends BaseStep {
     getStepManager().outputData(outputD);
   }
 
+  /**
+   * Process incremental data
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   protected void processIncremental(Data data) throws WekaException {
     if (isStopRequested()) {
       return;
@@ -326,6 +375,11 @@ public class Sorter extends BaseStep {
     }
   }
 
+  /**
+   * Output any buffered instances
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void emitBufferedInstances() throws WekaException {
     if (isStopRequested()) {
       return;
@@ -433,7 +487,7 @@ public class Sorter extends BaseStep {
         return;
       }
       InstanceHolder holder = merger.remove(0);
-      holder.m_instance.setDataset( tempHeader );
+      holder.m_instance.setDataset(tempHeader);
 
       if (m_stringAttIndexes != null) {
         for (String attName : m_stringAttIndexes.keySet()) {
@@ -526,6 +580,12 @@ public class Sorter extends BaseStep {
     }
   }
 
+  /**
+   * Sort the buffer
+   *
+   * @param write true if the buffer sould be written to a tmp file
+   * @throws Exception if a problem occurs
+   */
   private void sortBuffer(boolean write) throws Exception {
     getStepManager().logBasic("Sorting in memory buffer");
     Collections.sort(m_incrementalBuffer, m_sortComparator);
@@ -778,6 +838,14 @@ public class Sorter extends BaseStep {
     }
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.SorterStepEditorDialog";

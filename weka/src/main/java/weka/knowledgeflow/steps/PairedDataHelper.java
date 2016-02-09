@@ -336,10 +336,6 @@ public class PairedDataHelper<P> implements java.io.Serializable {
   /**
    * Interface for processors of paired data to implement. See the description
    * in the class documentation of PairedDataHelper.
-   *
-   * @param
-   *          <P>
-   *          the type of the result produced by the processPrimary() method.
    */
   public interface PairedProcessor<P> {
     P processPrimary(Integer setNum, Integer maxSetNum, Data data,

@@ -619,10 +619,20 @@ public class PredictionAppender extends BaseStep {
     return newData;
   }
 
+  /**
+   * Set whether to append probability distributions rather than predicted classes
+   *
+   * @param append true to append probability distributions
+   */
   public void setAppendProbabilities(boolean append) {
     m_appendProbabilities = append;
   }
 
+  /**
+   * Get whether to append probability distributions rather than predicted classes
+   *
+   * @return true if probability distributions are to be appended
+   */
   @OptionMetadata(displayName = "Append probabilities",
     description = "Append probabilities")
   public boolean getAppendProbabilities() {

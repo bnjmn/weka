@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    SerializedModelSaver.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.classifiers.UpdateableBatchProcessor;
@@ -10,7 +31,7 @@ import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
-import javax.swing.JFileChooser;
+import javax.swing.*;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -19,6 +40,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * Step that can save models encapsulated in incoming {@code Data} objects to
+ * the filesystem.
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -29,13 +53,14 @@ public class SerializedModelSaver extends BaseStep {
 
   private static final long serialVersionUID = -8343162241983197708L;
 
+  /** Stores the header of data used to build an incremental model */
   protected Instances m_incrementalHeader;
 
   /**
    * How often to save an incremental classifier (<= 0 means only at the end of
    * the stream)
    */
-  protected int m_incrementalSaveSchedule = 0;
+  protected int m_incrementalSaveSchedule;
 
   /**
    * Whether to include the relation name of the data in the file name for the
@@ -56,6 +81,11 @@ public class SerializedModelSaver extends BaseStep {
   /** Counter for use when processing incremental classifier connections */
   protected int m_counter;
 
+  /**
+   * Set the directory to save to
+   *
+   * @param directory the directory to save to
+   */
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.SAVE_DIALOG,
     directoriesOnly = true)
   @OptionMetadata(displayName = "Output directory",
@@ -64,6 +94,11 @@ public class SerializedModelSaver extends BaseStep {
     m_directory = directory;
   }
 
+  /**
+   * Get the directory to save to
+   *
+   * @return the directory to save to
+   */
   public File getOutputDirectory() {
     return m_directory;
   }
@@ -78,6 +113,13 @@ public class SerializedModelSaver extends BaseStep {
     return m_filenamePrefix;
   }
 
+  /**
+   * Set how frequently to save an incremental model
+   *
+   * @param schedule how often (i.e. every x updates) to save the model. <= 0
+   *          indicates that the save will happen just once, at the end of the
+   *          stream.
+   */
   @OptionMetadata(displayName = "Incremental save schedule",
     description = "How frequently to save incremental classifiers ("
       + "<= 0 indicates that the save will happen just once, at the "
@@ -86,10 +128,22 @@ public class SerializedModelSaver extends BaseStep {
     m_incrementalSaveSchedule = schedule;
   }
 
+  /**
+   * Get how frequently to save an incremental model
+   *
+   * @return how often (i.e. every x updates) to save the model. <= 0 indicates
+   *         that the save will happen just once, at the end of the stream.
+   */
   public int getIncrementalSaveSchedule() {
     return m_incrementalSaveSchedule;
   }
 
+  /**
+   * Set whether to include the relation name as part of the filename
+   *
+   * @param includeRelationName true to include the relation name as part of the
+   *          filename
+   */
   @OptionMetadata(
     displayName = "Include relation name in file name",
     description = "Whether to include the relation name of the data as part of the "
@@ -99,10 +153,24 @@ public class SerializedModelSaver extends BaseStep {
     m_includeRelationName = includeRelationName;
   }
 
+  /**
+   * Get whether to include the relation name as part of the filename
+   *
+   * @return true if the relation name will be included as part of the filename
+   */
   public boolean getIncludeRelationNameInFilename() {
     return m_includeRelationName;
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -114,6 +182,15 @@ public class SerializedModelSaver extends BaseStep {
     return result;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return new ArrayList<String>();
@@ -125,6 +202,12 @@ public class SerializedModelSaver extends BaseStep {
     m_counter = 0;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     Object modelToSave = null;
