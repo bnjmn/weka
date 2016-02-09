@@ -666,8 +666,6 @@ public class RELAGGS extends SimpleBatchFilter implements
 
     m_SelectedRange.setUpper(inputFormat.numAttributes() - 1);
 
-    ArrayList<Integer> indicesOfUnmodifiedInputAttributes = new ArrayList<Integer>();
-    ArrayList<Integer> indicesOfUnmodifiedOutputAttributes = new ArrayList<Integer>();
     atts = new ArrayList<Attribute>();
     clsIndex = -1;
     for (i = 0; i < inputFormat.numAttributes(); i++) {
@@ -675,23 +673,17 @@ public class RELAGGS extends SimpleBatchFilter implements
       if (i == inputFormat.classIndex()) {
         clsIndex = atts.size();
         atts.add((Attribute) inputFormat.attribute(i).copy());
-        indicesOfUnmodifiedInputAttributes.add(i);
-        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
       if (!inputFormat.attribute(i).isRelationValued()) {
         atts.add((Attribute) inputFormat.attribute(i).copy());
-        indicesOfUnmodifiedInputAttributes.add(i);
-        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
       if (!m_SelectedRange.isInRange(i)) {
         Attribute relAtt = inputFormat.attribute(i);
         atts.add(new Attribute(relAtt.name(), new Instances(relAtt.relation(), 0), atts.size()));
-        indicesOfUnmodifiedInputAttributes.add(i);
-        indicesOfUnmodifiedOutputAttributes.add(atts.size() - 1);
         continue;
       }
 
@@ -744,20 +736,6 @@ public class RELAGGS extends SimpleBatchFilter implements
     // generate new format
     result = new Instances(inputFormat.relationName(), atts, 0);
     result.setClassIndex(clsIndex);
-
-    // Set up input locators
-    int[] indices = new int[indicesOfUnmodifiedInputAttributes.size()];
-    for (i = 0; i < indices.length; i++) {
-      indices[i] = indicesOfUnmodifiedInputAttributes.get(i);
-    }
-    initInputLocators(inputFormat, indices);
-
-    // Set up output locators
-    indices = new int[indicesOfUnmodifiedOutputAttributes.size()];
-    for (i = 0; i < indices.length; i++) {
-      indices[i] = indicesOfUnmodifiedOutputAttributes.get(i);
-    }
-    initOutputLocators(result, indices);
 
     return result;
   }
@@ -822,9 +800,6 @@ public class RELAGGS extends SimpleBatchFilter implements
     // convert data
     for (k = 0; k < instances.numInstances(); k++) {
       inst = instances.instance(k);
-
-      // First copy string and relational values from input to output
-      copyValues(inst, true, inst.dataset(), result);
 
       double[] values = new double[result.numAttributes()];
       l = 0;
