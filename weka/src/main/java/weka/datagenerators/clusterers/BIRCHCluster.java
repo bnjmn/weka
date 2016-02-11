@@ -1408,16 +1408,17 @@ public class BIRCHCluster extends ClusterGenerator implements
       numAtts++;
     }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
-
+    double[] data = new double[numAtts];
     for (int i = 0; i < getNumAttributes(); i++) {
-      example.setValue(i, randomG.nextGaussian() * stdDev + center[i]);
+      data[i] = randomG.nextGaussian() * stdDev + center[i];
     }
 
     if (getClassFlag()) {
-      example.setClassValue(cName);
+      data[format.classIndex()] = format.classAttribute().indexOfValue(cName);
     }
+
+    example = new DenseInstance(1.0, data);
+    example.setDataset(format);
 
     return example;
   }
