@@ -814,12 +814,8 @@ public class HierarchicalClusterer extends AbstractClusterer implements
     for (int j = 0; j < m_instances.numAttributes(); j++) {
       fValues1[j] /= cluster.size();
     }
-    // set up two instances for distance function
-    Instance centroid = (Instance) m_instances.instance(cluster.elementAt(0))
-      .copy();
-    for (int j = 0; j < m_instances.numAttributes(); j++) {
-      centroid.setValue(j, fValues1[j]);
-    }
+    // set up instance for distance function
+    Instance centroid = m_instances.instance(cluster.elementAt(0)).copy(fValues1);
     double fESS = 0;
     for (int i = 0; i < cluster.size(); i++) {
       Instance instance = m_instances.instance(cluster.elementAt(i));
