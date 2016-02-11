@@ -148,6 +148,20 @@ public class DenseInstance extends AbstractInstance {
   }
 
   /**
+   * Copies the instance but fills up its values based on the given array
+   * of doubles. The copy has access to the same dataset.
+   *
+   * @param values the array with new values
+   * @return the new instance
+   */
+  public Instance copy(double[] values) {
+
+    DenseInstance result = new DenseInstance(this.m_Weight, values);
+    result.m_Dataset = m_Dataset;
+    return result;
+  }
+
+  /**
    * Returns the index of the attribute stored at the given position. Just
    * returns the given value.
    * 

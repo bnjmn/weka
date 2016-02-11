@@ -151,15 +151,32 @@ public class BinarySparseInstance extends SparseInstance {
   }
 
   /**
-   * Produces a shallow copy of this instance. The copy doesn't have access to a
-   * dataset.
-   * 
+   * Produces a shallow copy of this instance. The copy has access to the same
+   * dataset. (if you want to make a copy that doesn't have access to the
+   * dataset, use <code>new BinarySparseInstance(instance)</code>
+   *
    * @return the shallow copy
    */
   @Override
   public Object copy() {
 
-    return new BinarySparseInstance(this);
+    BinarySparseInstance result = new BinarySparseInstance(this);
+    result.m_Dataset = m_Dataset;
+    return result;
+  }
+
+  /**
+   * Copies the instance but fills up its values based on the given array
+   * of doubles. The copy has access to the same dataset.
+   *
+   * @param values the array with new values
+   * @return the new instance
+   */
+  public Instance copy(double[] values) {
+
+    BinarySparseInstance result = new BinarySparseInstance(this.m_Weight, values);
+    result.m_Dataset = m_Dataset;
+    return result;
   }
 
   /**
