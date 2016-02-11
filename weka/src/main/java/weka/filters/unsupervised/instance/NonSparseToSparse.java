@@ -56,8 +56,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
 
   protected boolean m_encodeMissingAsZero = false;
 
-  protected boolean m_insertDummyNominalFirstValue = false;
-
   /**
    * Returns a string describing this filter
    * 
@@ -102,8 +100,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
 
     Vector<Option> result = new Vector<Option>();
     result.add(new Option("\tTreat missing values as zero.", "M", 0, "-M"));
-    result.add(new Option("\tAdd a dummy first value for nominal attributes.",
-      "F", 0, "-F"));
 
     return result.elements();
   }
@@ -112,7 +108,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
   public void setOptions(String[] options) throws Exception {
 
     m_encodeMissingAsZero = Utils.getFlag('M', options);
-    m_insertDummyNominalFirstValue = Utils.getFlag('F', options);
 
     Utils.checkForRemainingOptions(options);
   }
@@ -124,10 +119,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
 
     if (m_encodeMissingAsZero) {
       result.add("-M");
-    }
-
-    if (m_insertDummyNominalFirstValue) {
-      result.add("-F");
     }
 
     return result.toArray(new String[result.size()]);
@@ -162,42 +153,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
   }
 
   /**
-   * Set whether to insert a dummy first value in the definition for each
-   * nominal attribute or not.
-   * 
-   * @param d true if a dummy value is to be inserted for each nominal
-   *          attribute.
-   */
-  public void setInsertDummyNominalFirstValue(boolean d) {
-    m_insertDummyNominalFirstValue = d;
-  }
-
-  /**
-   * Get whether a dummy first value will be inserted in the definition of each
-   * nominal attribute.
-   * 
-   * @return true if a dummy first value will be inserted for each nominal
-   *         attribute.
-   */
-  public boolean getInsertDummyNominalFirstValue() {
-    return m_insertDummyNominalFirstValue;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String insertDummyNominalFirstValueTipText() {
-    return "Insert a dummy value before the first declared value "
-      + "for all nominal attributes. Useful when converting market "
-      + "basket data that has been encoded for Apriori to sparse format. "
-      + "Typically used in conjuction with treat missing values as zero.";
-
-  }
-
-  /**
    * Sets the format of the input instances.
    * 
    * @param instanceInfo an Instances object containing the input instance
@@ -211,26 +166,6 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
 
     super.setInputFormat(instanceInfo);
     Instances instNew = instanceInfo;
-
-    if (m_insertDummyNominalFirstValue) {
-      ArrayList<Attribute> atts = new ArrayList<Attribute>();
-      for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-        if (instanceInfo.attribute(i).isNominal()) {
-          ArrayList<String> labels = new ArrayList<String>();
-          labels.add("_d");
-          for (int j = 0; j < instanceInfo.attribute(j).numValues(); j++) {
-            labels.add(instanceInfo.attribute(i).value(j));
-          }
-          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(),
-            labels);
-          newAtt.setWeight(instanceInfo.attribute(i).weight());
-          atts.add(newAtt);
-        } else {
-          atts.add(instanceInfo.attribute(i));
-        }
-      }
-      instNew = new Instances(instanceInfo.relationName(), atts, 0);
-    }
 
     setOutputFormat(instNew);
     return true;
@@ -258,7 +193,7 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
       m_NewBatch = false;
     }
 
-    if (m_encodeMissingAsZero && !m_insertDummyNominalFirstValue) {
+    if (m_encodeMissingAsZero) {
       Instance tempInst = (Instance) instance.copy();
       tempInst.setDataset(getInputFormat());
 
@@ -270,26 +205,10 @@ public class NonSparseToSparse extends Filter implements UnsupervisedFilter,
       instance = tempInst;
     }
 
-    if (m_insertDummyNominalFirstValue) {
-      double[] values = instance.toDoubleArray();
-      for (int i = 0; i < instance.numAttributes(); i++) {
-        if (instance.attribute(i).isNominal()) {
-          if (!Utils.isMissingValue(values[i])) {
-            values[i]++;
-          }
-        }
-        if (m_encodeMissingAsZero && Utils.isMissingValue(values[i])) {
-          values[i] = 0;
-        }
-      }
-      newInstance = new SparseInstance(instance.weight(), values);
-      newInstance.setDataset(getOutputFormat());
-      push(newInstance, false); // No need to copy
-    } else {
-      newInstance = new SparseInstance(instance);
-      newInstance.setDataset(instance.dataset());
-      push(newInstance, false); // No need to copy
-    }
+    newInstance = new SparseInstance(instance);
+    newInstance.setDataset(instance.dataset());
+    push(newInstance, false); // No need to copy
+
 
     /*
      * Instance inst = new SparseInstance(instance);
