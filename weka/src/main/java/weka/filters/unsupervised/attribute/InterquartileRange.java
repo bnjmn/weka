@@ -944,22 +944,18 @@ public class InterquartileRange extends SimpleBatchFilter {
       values = new double[numAttNew];
       System.arraycopy(instOld.toDoubleArray(), 0, values, 0, numAttOld);
 
-      // generate new instance
-      instNew = new DenseInstance(1.0, values);
-      instNew.setDataset(result);
-
       // per attribute?
       if (!getDetectionPerAttribute()) {
         // outlier?
         if (isOutlier(instOld)) {
-          instNew.setValue(m_OutlierAttributePosition[0], 1);
+          values[m_OutlierAttributePosition[0]] = 1;
         }
         // extreme value?
         if (isExtremeValue(instOld)) {
-          instNew.setValue(m_OutlierAttributePosition[0] + 1, 1);
+          values[m_OutlierAttributePosition[0] + 1] = 1;
           // tag extreme values also as outliers?
           if (getExtremeValuesAsOutliers()) {
-            instNew.setValue(m_OutlierAttributePosition[0], 1);
+            values[m_OutlierAttributePosition[0]] = 1;
           }
         }
       } else {
@@ -971,23 +967,27 @@ public class InterquartileRange extends SimpleBatchFilter {
 
           // outlier?
           if (isOutlier(instOld, m_AttributeIndices[i])) {
-            instNew.setValue(m_OutlierAttributePosition[i], 1);
+            values[m_OutlierAttributePosition[i]] = 1;
           }
           // extreme value?
           if (isExtremeValue(instOld, m_AttributeIndices[i])) {
-            instNew.setValue(m_OutlierAttributePosition[i] + 1, 1);
+            values[m_OutlierAttributePosition[i] + 1] = 1;
             // tag extreme values also as outliers?
             if (getExtremeValuesAsOutliers()) {
-              instNew.setValue(m_OutlierAttributePosition[i], 1);
+              values[m_OutlierAttributePosition[i]] = 1;
             }
           }
           // add multiplier?
           if (getOutputOffsetMultiplier()) {
-            instNew.setValue(m_OutlierAttributePosition[i] + 2,
-              calculateMultiplier(instOld, m_AttributeIndices[i]));
+            values[m_OutlierAttributePosition[i] + 2] =
+              calculateMultiplier(instOld, m_AttributeIndices[i]);
           }
         }
       }
+
+      // generate new instance
+      instNew = new DenseInstance(1.0, values);
+      instNew.setDataset(result);
 
       // copy possible strings, relational values...
       copyValues(instNew, false, instOld.dataset(), outputFormatPeek());
