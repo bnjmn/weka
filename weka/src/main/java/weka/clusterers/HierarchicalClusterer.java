@@ -780,14 +780,8 @@ public class HierarchicalClusterer extends AbstractClusterer implements
         fValues1[j] /= cluster1.size();
         fValues2[j] /= cluster2.size();
       }
-      // set up two instances for distance function
-      Instance instance1 = (Instance) m_instances.instance(0).copy();
-      Instance instance2 = (Instance) m_instances.instance(0).copy();
-      for (int j = 0; j < m_instances.numAttributes(); j++) {
-        instance1.setValue(j, fValues1[j]);
-        instance2.setValue(j, fValues2[j]);
-      }
-      fBestDist = m_DistanceFunction.distance(instance1, instance2);
+      fBestDist = m_DistanceFunction.distance(m_instances.instance(0).copy(fValues1),
+              m_instances.instance(0).copy(fValues2));
       break;
     case WARD: {
       // finds the distance of the change in caused by merging the cluster.
