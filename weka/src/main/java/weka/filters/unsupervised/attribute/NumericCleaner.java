@@ -24,14 +24,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
@@ -488,12 +482,12 @@ public class NumericCleaner extends SimpleStreamFilter {
    */
   @Override
   protected Instance process(Instance instance) throws Exception {
-    Instance result;
+
     int i;
     double val;
     double factor;
 
-    result = (Instance) instance.copy();
+    double[] result = new double[instance.numAttributes()];
 
     if (m_Decimals > -1) {
       factor = StrictMath.pow(10, m_Decimals);
@@ -501,9 +495,13 @@ public class NumericCleaner extends SimpleStreamFilter {
       factor = 1;
     }
 
-    for (i = 0; i < result.numAttributes(); i++) {
+    for (i = 0; i < instance.numAttributes(); i++) {
+
+      // Save old value for the moment
+      result[i] = instance.value(i);
+
       // only numeric attributes
-      if (!result.attribute(i).isNumeric()) {
+      if (!instance.attribute(i).isNumeric()) {
         continue;
       }
 
@@ -513,46 +511,46 @@ public class NumericCleaner extends SimpleStreamFilter {
       }
 
       // skip class?
-      if ((result.classIndex() == i) && (!m_IncludeClass)) {
+      if ((instance.classIndex() == i) && (!m_IncludeClass)) {
         continue;
       }
 
       // too small?
-      if (result.value(i) < m_MinThreshold) {
+      if (result[i] < m_MinThreshold) {
         if (getDebug()) {
-          System.out.println("Too small: " + result.value(i) + " -> "
+          System.out.println("Too small: " + result[i] + " -> "
             + m_MinDefault);
         }
-        result.setValue(i, m_MinDefault);
+        result[i] = m_MinDefault;
       }
       // too big?
-      else if (result.value(i) > m_MaxThreshold) {
+      else if (result[i] > m_MaxThreshold) {
         if (getDebug()) {
-          System.out.println("Too big: " + result.value(i) + " -> "
+          System.out.println("Too big: " + result[i] + " -> "
             + m_MaxDefault);
         }
-        result.setValue(i, m_MaxDefault);
+        result[i] = m_MaxDefault;
       }
       // too close?
-      else if ((result.value(i) - m_CloseTo < m_CloseToTolerance)
-        && (m_CloseTo - result.value(i) < m_CloseToTolerance)
-        && (result.value(i) != m_CloseTo)) {
+      else if ((result[i] - m_CloseTo < m_CloseToTolerance)
+        && (m_CloseTo - result[i] < m_CloseToTolerance)
+        && (result[i] != m_CloseTo)) {
         if (getDebug()) {
-          System.out.println("Too close: " + result.value(i) + " -> "
+          System.out.println("Too close: " + result[i] + " -> "
             + m_CloseToDefault);
         }
-        result.setValue(i, m_CloseToDefault);
+        result[i] = m_CloseToDefault;
       }
 
       // decimals?
-      if (m_Decimals > -1 && !result.isMissing(i)) {
-        val = result.value(i);
+      if (m_Decimals > -1 && !Utils.isMissingValue(result[i])) {
+        val = result[i];
         val = StrictMath.round(val * factor) / factor;
-        result.setValue(i, val);
+        result[i] = val;
       }
     }
 
-    return result;
+    return instance.copy(result);
   }
 
   /**
