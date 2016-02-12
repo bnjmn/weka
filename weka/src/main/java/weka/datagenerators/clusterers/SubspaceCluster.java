@@ -163,12 +163,6 @@ public class SubspaceCluster extends ClusterGenerator {
   /** if nominal, store number of values */
   protected int[] m_numValues;
 
-  /** store global min values */
-  protected double[] m_globalMinValue;
-
-  /** store global max values */
-  protected double[] m_globalMaxValue;
-
   /** cluster type: uniform/random */
   public static final int UNIFORM_RANDOM = 0;
   /** cluster type: total uniform */
@@ -559,6 +553,12 @@ public class SubspaceCluster extends ClusterGenerator {
     // check whether all the attributes are covered
     count = new int[getNumAttributes()];
     for (i = 0; i < getNumAttributes(); i++) {
+      if (m_nominalCols.isInRange(i)) {
+        count[i]++;
+      }
+      if (m_booleanCols.isInRange(i)) {
+        count[i]++;
+      }
       for (n = 0; n < getClusters().length; n++) {
         cl = (SubspaceClusterDefinition) getClusters()[n];
         r = new Range(cl.getAttrIndexRange());
@@ -785,14 +785,12 @@ public class SubspaceCluster extends ClusterGenerator {
 
     boolean makeInteger = cl.isInteger();
     int num = -1;
-    Instance example = null;
     int numAtts = m_NumAttributes;
     if (getClassFlag()) {
       numAtts++;
     }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
+    double[] values = new double[numAtts];
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
@@ -821,15 +819,18 @@ public class SubspaceCluster extends ClusterGenerator {
             value = Math.round(value);
           }
         }
-        example.setValue(i, value);
+        values[i] = value;
       } else {
-        example.setMissing(i);
+        values[i] = Utils.missingValue();
       }
     }
 
     if (getClassFlag()) {
-      example.setClassValue(cName);
+      values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
     }
+
+    DenseInstance example = new DenseInstance(1.0, values);
+    example.setDataset(format);
 
     return example;
   }
@@ -845,15 +846,11 @@ public class SubspaceCluster extends ClusterGenerator {
   private void generateUniformExamples(Instances format, int numInstances,
     SubspaceClusterDefinition cl, String cName) {
 
-    Instance example = null;
     int numAtts = m_NumAttributes;
     if (getClassFlag()) {
       numAtts++;
     }
-
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
-    boolean[] attributes = cl.getAttributes();
+   boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
     double[] diff = new double[minValue.length];
@@ -863,20 +860,24 @@ public class SubspaceCluster extends ClusterGenerator {
     }
 
     for (int j = 0; j < numInstances; j++) {
+      double[] values = new double[numAtts];
       int num = -1;
       for (int i = 0; i < m_NumAttributes; i++) {
         if (attributes[i]) {
           num++;
           double value = minValue[num]
             + (diff[num] * ((double) j / (double) (numInstances - 1)));
-          example.setValue(i, value);
+          values[i] = value;
         } else {
-          example.setMissing(i);
+          values[i] = Utils.missingValue();
         }
       }
       if (getClassFlag()) {
-        example.setClassValue(cName);
+        values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
       }
+
+      DenseInstance example = new DenseInstance(1.0, values);
+      example.setDataset(format);
       format.add(example);
     }
   }
@@ -892,14 +893,12 @@ public class SubspaceCluster extends ClusterGenerator {
   private void generateUniformIntegerExamples(Instances format,
     int numInstances, SubspaceClusterDefinition cl, String cName) {
 
-    Instance example = null;
     int numAtts = m_NumAttributes;
     if (getClassFlag()) {
       numAtts++;
     }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
+    double[] values = new double[numAtts];
     boolean[] attributes = cl.getAttributes();
     double[] minValue = cl.getMinValue();
     double[] maxValue = cl.getMaxValue();
@@ -921,28 +920,30 @@ public class SubspaceCluster extends ClusterGenerator {
     // initialize with smallest values combination
     for (int i = 0; i < m_NumAttributes; i++) {
       if (attributes[i]) {
-        example.setValue(i, minInt[i]);
+        values[i] = minInt[i];
         intValue[i] = minInt[i];
       } else {
-        example.setMissing(i);
+        values[i] = Utils.missingValue();
       }
     }
     if (getClassFlag()) {
-      example.setClassValue(cName);
+      values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
     }
+
+    DenseInstance example = new DenseInstance(1.0, values);
+    example.setDataset(format);
+
     int added = 0;
     int attr = 0;
     // do while not added all
     do {
       // add all for one value combination
       for (int k = 0; k < numEach; k++) {
-        format.add(example);
-        example = (Instance) example.copy();
+        format.add(example); // Instance will be copied here
         added++;
       }
       if (rest > 0) {
-        format.add(example);
-        example = (Instance) example.copy();
+        format.add(example); // Instance will be copied here
         added++;
         rest--;
       }
@@ -978,19 +979,17 @@ public class SubspaceCluster extends ClusterGenerator {
     Random random, SubspaceClusterDefinition cl, String cName) {
 
     boolean makeInteger = cl.isInteger();
-    Instance example = null;
     int numAtts = m_NumAttributes;
     if (getClassFlag()) {
       numAtts++;
     }
 
-    example = new DenseInstance(numAtts);
-    example.setDataset(format);
     boolean[] attributes = cl.getAttributes();
     double[] meanValue = cl.getMeanValue();
     double[] stddevValue = cl.getStddevValue();
 
     for (int j = 0; j < numInstances; j++) {
+      double[] values = new double[numAtts];
       int num = -1;
       for (int i = 0; i < m_NumAttributes; i++) {
         if (attributes[i]) {
@@ -1000,14 +999,17 @@ public class SubspaceCluster extends ClusterGenerator {
           if (makeInteger) {
             value = Math.round(value);
           }
-          example.setValue(i, value);
+          values[i] = value;
         } else {
-          example.setMissing(i);
+          values[i] = Utils.missingValue();
         }
       }
       if (getClassFlag()) {
-        example.setClassValue(cName);
+        values[format.classIndex()] = format.classAttribute().indexOfValue(cName);
       }
+
+      DenseInstance example = new DenseInstance(1.0, values);
+      example.setDataset(format);
       format.add(example);
     }
   }

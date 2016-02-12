@@ -125,11 +125,11 @@ public abstract class ClusterGenerator extends DataGenerator {
 
     tmpStr = Utils.getOption('b', options);
     setBooleanIndices(tmpStr);
-    m_booleanCols.setUpper(getNumAttributes());
+    m_booleanCols.setUpper(getNumAttributes() - 1);
 
     tmpStr = Utils.getOption('m', options);
     setNominalIndices(tmpStr);
-    m_nominalCols.setUpper(getNumAttributes());
+    m_nominalCols.setUpper(getNumAttributes() - 1);
 
     // check indices
     tmpStr = checkIndices();
@@ -159,12 +159,12 @@ public abstract class ClusterGenerator extends DataGenerator {
 
     if (!getBooleanCols().toString().equalsIgnoreCase("empty")) {
       result.add("-b");
-      result.add("" + getBooleanCols());
+      result.add("" + getBooleanCols().getRanges());
     }
 
     if (!getNominalCols().toString().equalsIgnoreCase("empty")) {
       result.add("-m");
-      result.add("" + getNominalCols());
+      result.add("" + getNominalCols().getRanges());
     }
 
     return result.toArray(new String[result.size()]);
@@ -334,8 +334,7 @@ public abstract class ClusterGenerator extends DataGenerator {
    * @return empty string if no problem, otherwise error message
    */
   protected String checkIndices() {
-    for (int i = 1; i < getNumAttributes() + 1; i++) {
-      m_booleanCols.isInRange(i);
+    for (int i = 0; i < getNumAttributes(); i++) {
       if (m_booleanCols.isInRange(i) && m_nominalCols.isInRange(i)) {
         return "Error in attribute type: Attribute " + i
           + " is set boolean and nominal.";

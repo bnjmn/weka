@@ -113,17 +113,11 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
   /** global indices of the attributes of the cluster */
   protected int[] m_attrIndices;
 
-  /** ranges of each attribute (min); not used if gaussian */
-  protected double[] m_minValue;
+  /** min or mean */
+  protected double[] m_valueA;
 
-  /** ranges of each attribute (max); not used if gaussian */
-  protected double[] m_maxValue;
-
-  /** mean ; only used if gaussian */
-  protected double[] m_meanValue;
-
-  /** standarddev; only used if gaussian */
-  protected double[] m_stddevValue;
+  /** max or stddev */
+  protected double[] m_valueB;
 
   /**
    * initializes the cluster, without a parent cluster (necessary for GOE)
@@ -292,19 +286,12 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
     setAttrIndexRange(fromToStr);
 
     tmpStr = Utils.getOption('D', options);
-    if (isGaussian()) {
-      if (tmpStr.length() != 0) {
-        setMeanStddev(tmpStr);
-      } else {
-        setMeanStddev(defaultMeanStddev());
-      }
-    } else {
-      if (tmpStr.length() != 0) {
+    if (tmpStr.length() != 0) {
         setValuesList(tmpStr);
-      } else {
+    } else {
         setValuesList(defaultValuesList());
-      }
     }
+
 
     tmpStr = Utils.getOption('N', options);
     if (tmpStr.length() != 0) {
@@ -336,19 +323,16 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
     if (isRandom()) {
       result.add("-A");
       result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getValuesList());
     } else if (isUniform()) {
       result.add("-U");
       result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getValuesList());
     } else if (isGaussian()) {
       result.add("-G");
       result.add("" + getAttrIndexRange());
-      result.add("-D");
-      result.add("" + getMeanStddev());
     }
+ 
+    result.add("-D");
+    result.add("" + getValuesList());
 
     result.add("-N");
     result.add("" + getInstNums());
@@ -372,12 +356,12 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
       if (m_attributes[i]) {
         if (isGaussian()) {
           text.append(" Attribute: " + i);
-          text.append(" Mean: " + m_meanValue[j]);
-          text.append(" StdDev: " + m_stddevValue[j] + "\n%");
+          text.append(" Mean: " + m_valueA[j]);
+          text.append(" StdDev: " + m_valueB[j] + "\n%");
         } else {
           text.append(" Attribute: " + i);
-          text.append(" Range: " + m_minValue[j]);
-          text.append(" - " + m_maxValue[j] + "\n%");
+          text.append(" Range: " + m_valueA[j]);
+          text.append(" - " + m_valueB[j] + "\n%");
         }
         j++;
       }
@@ -387,7 +371,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Make a string from the cluster features.
-   * 
+   *
    * @return the cluster features as string
    */
   @Override
@@ -400,7 +384,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * sets the parent datagenerator this cluster belongs to
-   * 
+   *
    * @param parent the parent datagenerator
    */
   public void setParent(SubspaceCluster parent) {
@@ -410,7 +394,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default attribute index range
-   * 
+   *
    * @return the default attribute index range
    */
   protected String defaultAttrIndexRange() {
@@ -420,7 +404,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
   /**
    * Sets which attributes are used in the cluster attributes among the
    * selection will be discretized.
-   * 
+   *
    * @param rangeList a string representing the list of attributes. Since the
    *          string will typically come from a user, attributes are indexed
    *          from 1. <br/>
@@ -459,7 +443,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the attribute range(s).
-   * 
+   *
    * @return the attribute range(s).
    */
   public String getAttrIndexRange() {
@@ -468,7 +452,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -481,19 +465,19 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
   }
 
   public double[] getMinValue() {
-    return m_minValue;
+    return m_valueA;
   }
 
   public double[] getMaxValue() {
-    return m_maxValue;
+    return m_valueB;
   }
 
   public double[] getMeanValue() {
-    return m_meanValue;
+    return m_valueA;
   }
 
   public double[] getStddevValue() {
-    return m_stddevValue;
+    return m_valueB;
   }
 
   public int getNumInstances() {
@@ -502,7 +486,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default cluster type
-   * 
+   *
    * @return the default cluster type
    */
   protected SelectedTag defaultClusterType() {
@@ -512,7 +496,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Gets the cluster type.
-   * 
+   *
    * @return the cluster type
    * @see SubspaceCluster#TAGS_CLUSTERTYPE
    */
@@ -522,7 +506,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the cluster type.
-   * 
+   *
    * @param value the new cluster type.
    * @see SubspaceCluster#TAGS_CLUSTERTYPE
    */
@@ -534,7 +518,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -544,7 +528,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default cluster sub type
-   * 
+   *
    * @return the default cluster sub type
    */
   protected SelectedTag defaultClusterSubType() {
@@ -554,7 +538,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Gets the cluster sub type.
-   * 
+   *
    * @return the cluster sub type
    * @see SubspaceCluster#TAGS_CLUSTERSUBTYPE
    */
@@ -565,7 +549,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the cluster sub type.
-   * 
+   *
    * @param value the new cluster sub type.
    * @see SubspaceCluster#TAGS_CLUSTERSUBTYPE
    */
@@ -577,7 +561,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -587,7 +571,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * checks, whether cluster type is random
-   * 
+   *
    * @return true if cluster type is random
    */
   public boolean isRandom() {
@@ -596,7 +580,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * checks, whether cluster type is uniform
-   * 
+   *
    * @return true if cluster type is uniform
    */
   public boolean isUniform() {
@@ -605,7 +589,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * checks, whether cluster type is gaussian
-   * 
+   *
    * @return true if cluster type is gaussian
    */
   public boolean isGaussian() {
@@ -614,7 +598,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * checks, whether cluster sub type is continuous
-   * 
+   *
    * @return true if cluster sub type is continuous
    */
   public boolean isContinuous() {
@@ -623,16 +607,16 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * checks, whether cluster sub type is integer
-   * 
+   *
    * @return true if cluster sub type is integer
    */
   public boolean isInteger() {
-    return (m_clustertype == SubspaceCluster.INTEGER);
+    return (m_clustersubtype == SubspaceCluster.INTEGER);
   }
 
   /**
    * Sets the upper and lower boundary for instances for this cluster.
-   * 
+   *
    * @param fromTo the string containing the upper and lower boundary for
    *          instances per cluster separated by ..
    */
@@ -654,7 +638,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
   /**
    * Get a string with the upper and lower boundary for the number of instances
    * for this cluster.
-   * 
+   *
    * @return the string containing the upper and lower boundary for instances
    *         per cluster separated by ..
    */
@@ -665,7 +649,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -675,7 +659,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default min number of instances
-   * 
+   *
    * @return the default min number of instances
    */
   protected int defaultMinInstNum() {
@@ -684,7 +668,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Gets the lower boundary for instances per cluster.
-   * 
+   *
    * @return the the lower boundary for instances per cluster
    */
   public int getMinInstNum() {
@@ -693,7 +677,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the lower boundary for instances per cluster.
-   * 
+   *
    * @param newMinInstNum new lower boundary for instances per cluster
    */
   public void setMinInstNum(int newMinInstNum) {
@@ -702,7 +686,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -712,7 +696,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default max number of instances
-   * 
+   *
    * @return the default max number of instances
    */
   protected int defaultMaxInstNum() {
@@ -721,7 +705,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Gets the upper boundary for instances per cluster.
-   * 
+   *
    * @return the upper boundary for instances per cluster
    */
   public int getMaxInstNum() {
@@ -730,7 +714,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the upper boundary for instances per cluster.
-   * 
+   *
    * @param newMaxInstNum new upper boundary for instances per cluster
    */
   public void setMaxInstNum(int newMaxInstNum) {
@@ -739,7 +723,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -749,7 +733,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the real number of instances for this cluster.
-   * 
+   *
    * @param r random number generator
    */
   public void setNumInstances(Random r) {
@@ -762,7 +746,7 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * returns the default values list
-   * 
+   *
    * @return the default values list
    */
   protected String defaultValuesList() {
@@ -771,19 +755,19 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Sets the ranges for each attribute.
-   * 
+   *
    * @param fromToList the string containing the upper and lower boundary for
    *          instances per cluster separated by ..
    * @throws Exception if values are not correct in number or value
    */
   public void setValuesList(String fromToList) throws Exception {
-    m_minValue = new double[m_numClusterAttributes];
-    m_maxValue = new double[m_numClusterAttributes];
-    setValuesList(fromToList, m_minValue, m_maxValue, "D");
+    m_valueA = new double[m_numClusterAttributes];
+    m_valueB = new double[m_numClusterAttributes];
+    setValuesList(fromToList, m_valueA, m_valueB, "D");
     SubspaceCluster parent = (SubspaceCluster) getParent();
 
     for (int i = 0; i < m_numClusterAttributes; i++) {
-      if (m_minValue[i] > m_maxValue[i]) {
+      if ((!isGaussian()) && (m_valueA[i] > m_valueB[i])) {
         throw new Exception("Min must be smaller than max.");
       }
 
@@ -791,30 +775,30 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
         // boolean values are only 0.0 and 1.0
         if (parent.isBoolean(m_attrIndices[i])) {
           parent.getNumValues()[m_attrIndices[i]] = 2;
-          if (((m_minValue[i] != 0.0) && (m_minValue[i] != 1.0))
-            || ((m_maxValue[i] != 0.0) && (m_maxValue[i] != 1.0))) {
+          if (((m_valueA[i] != 0.0) && (m_valueA[i] != 1.0))
+            || ((m_valueB[i] != 0.0) && (m_valueB[i] != 1.0))) {
             throw new Exception("Ranges for boolean must be 0 or 1 only.");
           }
         }
 
         if (parent.isNominal(m_attrIndices[i])) {
           // nominal values: attributes range might have to be enlarged
-          double rest = m_minValue[i] - Math.rint(m_minValue[i]);
+          double rest = m_valueA[i] - Math.rint(m_valueA[i]);
           if (rest != 0.0) {
             throw new Exception(" Ranges for nominal must be integer");
           }
-          rest = m_maxValue[i] - Math.rint(m_maxValue[i]);
+          rest = m_valueB[i] - Math.rint(m_valueB[i]);
           if (rest != 0.0) {
             throw new Exception("Ranges for nominal must be integer");
           }
-          if (m_minValue[i] < 0.0) {
+          if (m_valueA[i] < 0.0) {
             throw new Exception(
               "Range for nominal must start with number 0.0 or higher");
           }
-          if (m_maxValue[i] + 1 > parent.getNumValues()[m_attrIndices[i]]) {
+          if (m_valueB[i] + 1 > parent.getNumValues()[m_attrIndices[i]]) {
             // add new values to attribute
             // (actual format is not yet defined)
-            parent.getNumValues()[m_attrIndices[i]] = (int) m_maxValue[i] + 1;
+            parent.getNumValues()[m_attrIndices[i]] = (int) m_valueB[i] + 1;
           }
         }
       }
@@ -830,12 +814,12 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
     result = "";
 
-    if (m_minValue != null) {
-      for (i = 0; i < m_minValue.length; i++) {
+    if (m_valueA != null) {
+      for (i = 0; i < m_valueA.length; i++) {
         if (i > 0) {
           result += ",";
         }
-        result += "" + m_minValue[i] + "," + m_maxValue[i];
+        result += "" + m_valueA[i] + "," + m_valueB[i];
       }
     }
 
@@ -844,63 +828,12 @@ public class SubspaceClusterDefinition extends ClusterDefinition {
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
   public String valuesListTipText() {
-    return "The range for each each attribute as string.";
-  }
-
-  /**
-   * returns the default mean/stddev list
-   */
-  protected String defaultMeanStddev() {
-    return "0,1.0";
-  }
-
-  /**
-   * Sets mean and standarddeviation.
-   * 
-   * @param meanstddev the string containing the upper and lower boundary for
-   *          instances per cluster separated by ..
-   * @throws Exception if values are not correct in number or value
-   */
-  public void setMeanStddev(String meanstddev) throws Exception {
-    m_meanValue = new double[m_numClusterAttributes];
-    m_stddevValue = new double[m_numClusterAttributes];
-    setValuesList(meanstddev, m_meanValue, m_stddevValue, "D");
-  }
-
-  /**
-   * returns the current mean/stddev setup
-   */
-  public String getMeanStddev() {
-    String result;
-    int i;
-
-    result = "";
-
-    if (m_meanValue != null) {
-      for (i = 0; i < m_meanValue.length; i++) {
-        if (i > 0) {
-          result += ",";
-        }
-        result += "" + m_meanValue[i] + "," + m_stddevValue[i];
-      }
-    }
-
-    return result;
-  }
-
-  /**
-   * Returns the tip text for this property
-   * 
-   * @return tip text for this property suitable for displaying in the
-   *         explorer/experimenter gui
-   */
-  public String meanStddevTipText() {
-    return "The mean and stddev, in case of gaussian.";
+    return "The min (mean) and max (standard deviation) for each attribute as a comma-separated string.";
   }
 
   /**
