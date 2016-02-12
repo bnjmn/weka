@@ -390,6 +390,7 @@ public class PluginManager {
    */
   public static void addPlugin(String interfaceName, String name,
     String concreteType, boolean maintainInsertionOrder) {
+
     if (PLUGINS.get(interfaceName) == null) {
       Map<String, String> pluginsOfInterfaceType =
         maintainInsertionOrder ? new LinkedHashMap<String, String>()
@@ -426,6 +427,18 @@ public class PluginManager {
     if (PLUGINS.get(interfaceName) != null) {
       PLUGINS.get(interfaceName).remove(name);
     }
+  }
+
+  /**
+   * Checks if a named plugin exists in the map of registered plugins
+   *
+   * @param interfaceType the fully qualified interface name of the plugin type
+   * @param name the name/short description of the plugin to get
+   * @return true if the named plugin exists
+   */
+  public static boolean pluginRegistered(String interfaceType, String name) {
+    Map<String, String> pluginsOfInterfaceType = PLUGINS.get(interfaceType);
+    return pluginsOfInterfaceType.get(name) != null;
   }
 
   /**
