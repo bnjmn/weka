@@ -618,54 +618,56 @@ public class PerspectiveManager extends JPanel {
 
     if (pluginPerspectiveImpls != null) {
       for (String impl : pluginPerspectiveImpls) {
-        try {
-          Object perspective =
-            PluginManager.getPluginInstance(PERSPECTIVE_INTERFACE, impl);
+        if (!impl.equals(m_mainPerspective.getClass().getCanonicalName())) {
+          try {
+            Object perspective =
+              PluginManager.getPluginInstance(PERSPECTIVE_INTERFACE, impl);
 
-          if (!(perspective instanceof Perspective)) {
-            weka.core.logging.Logger.log(Logger.Level.WARNING,
-              "[PerspectiveManager] " + impl + " is not an instance"
-                + PERSPECTIVE_INTERFACE + ". Skipping...");
-          }
+            if (!(perspective instanceof Perspective)) {
+              weka.core.logging.Logger.log(Logger.Level.WARNING,
+                "[PerspectiveManager] " + impl + " is not an instance"
+                  + PERSPECTIVE_INTERFACE + ". Skipping...");
+            }
 
-          boolean ok = true;
-          if (m_allowedPerspectiveClassPrefixes.size() > 0) {
-            ok = false;
-            for (String prefix : m_allowedPerspectiveClassPrefixes) {
-              if (impl.startsWith(prefix)) {
-                ok = true;
-                break;
+            boolean ok = true;
+            if (m_allowedPerspectiveClassPrefixes.size() > 0) {
+              ok = false;
+              for (String prefix : m_allowedPerspectiveClassPrefixes) {
+                if (impl.startsWith(prefix)) {
+                  ok = true;
+                  break;
+                }
               }
             }
-          }
 
-          if (m_disallowedPerspectiveClassPrefixes.size() > 0) {
-            for (String prefix : m_disallowedPerspectiveClassPrefixes) {
-              if (impl.startsWith(prefix)) {
-                ok = false;
-                break;
+            if (m_disallowedPerspectiveClassPrefixes.size() > 0) {
+              for (String prefix : m_disallowedPerspectiveClassPrefixes) {
+                if (impl.startsWith(prefix)) {
+                  ok = false;
+                  break;
+                }
               }
             }
-          }
 
-          if (impl.equals(m_mainPerspective.getClass().getCanonicalName())) {
-            // main perspective is always part of the application and we dont
-            // want it to appear as an option in the list of perspectives to
-            // choose from in the preferences dialog
-            ok = false;
-          }
+            if (impl.equals(m_mainPerspective.getClass().getCanonicalName())) {
+              // main perspective is always part of the application and we dont
+              // want it to appear as an option in the list of perspectives to
+              // choose from in the preferences dialog
+              ok = false;
+            }
 
-          if (ok) {
-            m_perspectiveCache.put(impl, (Perspective) perspective);
-            String perspectiveTitle =
-              ((Perspective) perspective).getPerspectiveTitle();
-            m_perspectiveNameLookup.put(perspectiveTitle, impl);
-            settings.applyDefaults(((Perspective) perspective)
-              .getDefaultSettings());
+            if (ok) {
+              m_perspectiveCache.put(impl, (Perspective) perspective);
+              String perspectiveTitle =
+                ((Perspective) perspective).getPerspectiveTitle();
+              m_perspectiveNameLookup.put(perspectiveTitle, impl);
+              settings.applyDefaults(((Perspective) perspective)
+                .getDefaultSettings());
+            }
+          } catch (Exception e) {
+            e.printStackTrace();
+            m_mainApp.showErrorDialog(e);
           }
-        } catch (Exception e) {
-          e.printStackTrace();
-          m_mainApp.showErrorDialog(e);
         }
       }
     }
@@ -899,8 +901,8 @@ public class PerspectiveManager extends JPanel {
      * Get whether the perspectives toolbar should be visible in the GUI at
      * application startup
      *
-     * @return true if the perspectives toolbar should be visible at
-     *          application startup
+     * @return true if the perspectives toolbar should be visible at application
+     *         startup
      */
     public boolean getPerspectivesToolbarVisibleOnStartup() {
       return m_perspectivesToolbarVisibleOnStartup;
