@@ -1,5 +1,23 @@
 package weka.gui.knowledgeflow;
 
+import weka.core.PluginManager;
+import weka.core.Utils;
+import weka.core.WekaException;
+import weka.gui.GenericObjectEditor;
+import weka.gui.GenericPropertiesCreator;
+import weka.gui.HierarchyPropertyParser;
+import weka.gui.knowledgeflow.VisibleLayout.LayoutOperation;
+import weka.knowledgeflow.steps.KFStep;
+import weka.knowledgeflow.steps.Step;
+import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
+
+import javax.swing.Icon;
+import javax.swing.JTree;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeCellRenderer;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.InputEvent;
@@ -16,25 +34,6 @@ import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
-
-import javax.swing.Icon;
-import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
-import weka.core.Utils;
-import weka.core.WekaException;
-import weka.gui.GenericObjectEditor;
-import weka.gui.GenericPropertiesCreator;
-import weka.gui.HierarchyPropertyParser;
-import weka.core.PluginManager;
-import weka.gui.knowledgeflow.VisibleLayout.LayoutOperation;
-import weka.knowledgeflow.steps.KFStep;
-import weka.knowledgeflow.steps.Step;
-import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
 public class StepTree extends JTree {
 
@@ -73,13 +72,12 @@ public class StepTree extends JTree {
     addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        if (((e.getModifiers()
-          & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+        if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
           || e.isAltDown()) {
           m_mainPerspective.setFlowLayoutOperation(LayoutOperation.NONE);
           m_mainPerspective.setPalleteSelectedStep(null);
-          m_mainPerspective
-            .setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+          m_mainPerspective.setCursor(Cursor
+            .getPredefinedCursor(Cursor.DEFAULT_CURSOR));
           StepTree.this.clearSelection();
         }
 
@@ -95,13 +93,13 @@ public class StepTree extends JTree {
                 try {
                   StepVisual visual =
                     ((StepTreeLeafDetails) userObject).instantiateStep();
-                  m_mainPerspective.setCursor(
-                    Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
+                  m_mainPerspective.setCursor(Cursor
+                    .getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
                   if (m_mainPerspective.getDebug()) {
                     System.err.println("Instantiated " + visual.getStepName());
                   }
-                  m_mainPerspective
-                    .setPalleteSelectedStep(visual.getStepManager());
+                  m_mainPerspective.setPalleteSelectedStep(visual
+                    .getStepManager());
                 } catch (Exception ex) {
                   m_mainPerspective.showErrorDialog(ex);
                 }
@@ -131,6 +129,7 @@ public class StepTree extends JTree {
     // due to the package loading process, they would get added after
     // any plugin steps. This would stuff up the ordering we want in
     // the design palette
+
     InputStream inputStream =
       getClass().getClassLoader().getResourceAsStream(STEP_LIST_PROPS);
     Properties builtinSteps = new Properties();
@@ -148,7 +147,20 @@ public class StepTree extends JTree {
     Set<String> stepClasses =
       PluginManager.getPluginNamesOfType("weka.knowledgeflow.steps.Step");
     if (stepClasses != null && stepClasses.size() > 0) {
-      populateTree(stepClasses, jtreeRoot, GOEProps);
+      // filtering here because the LegacyFlowLoader adds all builtin
+      // steps to the PluginManager. This is really only necessary if
+      // a KnowledgeFlowApp is constructed a second time, as the first
+      // time round StepTree gets constructed before the LegacyFlowLoader
+      // class gets loaded into the classpath (and thus populates the
+      // PluginManager). We can remove this filtering when LegacyFlowLoader
+      // is no longer needed.
+      Set<String> filteredStepClasses = new LinkedHashSet<String>();
+      for (String plugin : stepClasses) {
+        if (!stepClassNames.contains(plugin)) {
+          filteredStepClasses.add(plugin);
+        }
+      }
+      populateTree(filteredStepClasses, jtreeRoot, GOEProps);
     }
   }
 
@@ -160,8 +172,7 @@ public class StepTree extends JTree {
           (Step) Beans.instantiate(getClass().getClassLoader(), stepClass);
         // check for ignore
         if (toAdd.getClass().getAnnotation(StepTreeIgnore.class) != null
-          || toAdd.getClass()
-            .getAnnotation(weka.gui.beans.KFIgnore.class) != null) {
+          || toAdd.getClass().getAnnotation(weka.gui.beans.KFIgnore.class) != null) {
           continue;
         }
 
@@ -216,7 +227,7 @@ public class StepTree extends JTree {
 
   protected void processPackage(HierarchyPropertyParser hpp,
     DefaultMutableTreeNode parentFolder, WekaAlgorithmWrapper wrapper)
-      throws Exception {
+    throws Exception {
 
     String[] primaryPackages = hpp.childrenValues();
     for (String primaryPackage : primaryPackages) {
@@ -227,11 +238,10 @@ public class StepTree extends JTree {
           Beans.instantiate(this.getClass().getClassLoader(), algName);
 
         if (wrappedA.getClass().getAnnotation(StepTreeIgnore.class) == null
-          && wrappedA.getClass()
-            .getAnnotation(weka.gui.beans.KFIgnore.class) == null) {
-          WekaAlgorithmWrapper wrapperCopy = (WekaAlgorithmWrapper) Beans
-            .instantiate(this.getClass().getClassLoader(),
-              wrapper.getClass().getCanonicalName());
+          && wrappedA.getClass().getAnnotation(weka.gui.beans.KFIgnore.class) == null) {
+          WekaAlgorithmWrapper wrapperCopy =
+            (WekaAlgorithmWrapper) Beans.instantiate(this.getClass()
+              .getClassLoader(), wrapper.getClass().getCanonicalName());
           wrapperCopy.setWrappedAlgorithm(wrappedA);
           StepTreeLeafDetails leafData = new StepTreeLeafDetails(wrapperCopy);
           DefaultMutableTreeNode wrapperLeafNode = new InvisibleNode(leafData);
@@ -254,8 +264,8 @@ public class StepTree extends JTree {
     }
   }
 
-  protected DefaultMutableTreeNode
-    getCategoryFolder(DefaultMutableTreeNode jtreeRoot, String category) {
+  protected DefaultMutableTreeNode getCategoryFolder(
+    DefaultMutableTreeNode jtreeRoot, String category) {
     DefaultMutableTreeNode targetFolder = null;
 
     @SuppressWarnings("unchecked")
