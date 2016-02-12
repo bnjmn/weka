@@ -954,16 +954,17 @@ public class KDTree
   protected boolean candidateIsFullOwner(KDTreeNode node, Instance candidate,
       Instance competitor) throws Exception {
     // get extreme point
-    Instance extreme = (Instance)candidate.copy();
+    double[] extreme = new double[m_Instances.numAttributes()];
     for (int i = 0; i < m_Instances.numAttributes(); i++) {
       if ((competitor.value(i) - candidate.value(i)) > 0) {
-        extreme.setValue(i, node.m_NodeRanges[i][MAX]);
+        extreme[i] = node.m_NodeRanges[i][MAX];
       } else {
-        extreme.setValue(i, node.m_NodeRanges[i][MIN]);
+        extreme[i] = node.m_NodeRanges[i][MIN];
       }
     }
-    boolean isFullOwner = m_EuclideanDistance.distance(extreme, candidate) < m_EuclideanDistance
-        .distance(extreme, competitor);
+    Instance extremeI = candidate.copy(extreme);
+    boolean isFullOwner = m_EuclideanDistance.distance(extremeI, candidate) < m_EuclideanDistance
+        .distance(extremeI, competitor);
 
     return isFullOwner;
   }
