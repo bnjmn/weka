@@ -65,6 +65,11 @@ public class TextSaver extends BaseStep {
   /** Default location to write to, in case a file has not been explicitly set */
   protected String m_defaultFile = "";
 
+  /**
+   * Set the file to save to
+   *
+   * @param f the file to save to
+   */
   @OptionMetadata(displayName = "File to save to",
     description = "The file to save textual results to", displayOrder = 1)
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
@@ -73,10 +78,20 @@ public class TextSaver extends BaseStep {
     m_file = f;
   }
 
+  /**
+   * Get the file to save to
+   *
+   * @return the file to save to
+   */
   public File getFile() {
     return m_file;
   }
 
+  /**
+   * Set whether the file should be appended to rather than overwritten
+   *
+   * @param append true to append
+   */
   @OptionMetadata(displayName = "Append to file",
     description = "Append to file, rather than re-create for each incoming "
       + "texual result", displayOrder = 2)
@@ -84,10 +99,20 @@ public class TextSaver extends BaseStep {
     m_append = append;
   }
 
+  /**
+   * get whether the file should be appended to rather than overwritten
+   *
+   * @return true if the file will be appended to
+   */
   public boolean getAppend() {
     return m_append;
   }
 
+  /**
+   * Set whether the title string will be written to the file
+   *
+   * @param w true to write the title string
+   */
   @OptionMetadata(displayName = "Write title string",
     description = "Whether to output the title string associated "
       + "with each textual result", displayOrder = 3)
@@ -95,10 +120,20 @@ public class TextSaver extends BaseStep {
     m_writeTitleString = w;
   }
 
+  /**
+   * Get whether the title string will be written to the file
+   *
+   * @return true if the title string will be written
+   */
   public boolean getWriteTitleString() {
     return m_writeTitleString;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     m_defaultFile = getFile().toString();
@@ -111,16 +146,40 @@ public class TextSaver extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return Arrays.asList(StepManager.CON_TEXT);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return null;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public synchronized void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
@@ -179,11 +238,20 @@ public class TextSaver extends BaseStep {
     }
   }
 
+  /**
+   * Get default settings for the step (if any). Returning null indicates that
+   * the step has no user-editable defaults.
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new TextSaverDefaults();
   }
 
+  /**
+   * Defaults for the {@TextSaver} step
+   */
   public static final class TextSaverDefaults extends Defaults {
 
     public static final String ID = "weka.knowledgeflow.steps.textsaver";
@@ -196,6 +264,9 @@ public class TextSaver extends BaseStep {
 
     private static final long serialVersionUID = -2739579935119189195L;
 
+    /**
+     * Constructor
+     */
     public TextSaverDefaults() {
       super(ID);
       m_defaults.put(DEFAULT_FILE_KEY, DEFAULT_FILE);

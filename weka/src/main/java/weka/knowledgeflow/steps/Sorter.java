@@ -671,16 +671,28 @@ public class Sorter extends BaseStep {
   }
 
   /**
-   * Comparator that applies the sort rules
+   * Comparator that applies the sort rules to {@code InstanceHolder}s
    */
   protected static class SortComparator implements Comparator<InstanceHolder> {
 
+    /** The rules to apply */
     protected List<SortRule> m_sortRules;
 
+    /**
+     * Constructor
+     *
+     * @param sortRules the rules to apply
+     */
     public SortComparator(List<SortRule> sortRules) {
       m_sortRules = sortRules;
     }
 
+    /**
+     * @param o1 the first {@code InstanceHolder} to compare
+     * @param o2 the second {@code InstanceHolder} to compare
+     * @return the result of the comparison - the first rule that returns a
+     *         non-zero comparison value
+     */
     @Override
     public int compare(InstanceHolder o1, InstanceHolder o2) {
 
@@ -701,19 +713,37 @@ public class Sorter extends BaseStep {
    */
   public static class SortRule implements Comparator<InstanceHolder> {
 
+    /** Name or index of the attribute to compare on */
     protected String m_attributeNameOrIndex;
+
+    /** The actual attribute to compare on */
     protected Attribute m_attribute;
 
+    /** True for descending instead of ascending order */
     protected boolean m_descending;
 
+    /**
+     * Constructor
+     * 
+     * @param att the name or index of the attribute to compare on
+     * @param descending true if order should be descending
+     */
     public SortRule(String att, boolean descending) {
       m_attributeNameOrIndex = att;
       m_descending = descending;
     }
 
+    /**
+     * Constructor
+     */
     public SortRule() {
     }
 
+    /**
+     * Constructor
+     *
+     * @param setup the definition of a sort rule
+     */
     public SortRule(String setup) {
       parseFromInternal(setup);
     }
@@ -729,10 +759,20 @@ public class Sorter extends BaseStep {
       m_descending = parts[1].equalsIgnoreCase("Y");
     }
 
+    /**
+     * Gets the rule in internal format
+     *
+     * @return the rule in internal format
+     */
     public String toStringInternal() {
       return m_attributeNameOrIndex + "@@SR@@" + (m_descending ? "Y" : "N");
     }
 
+    /**
+     * Prints the rule in human readable format
+     *
+     * @return a human readable formatted rule
+     */
     @Override
     public String toString() {
       StringBuffer res = new StringBuffer();
@@ -743,22 +783,49 @@ public class Sorter extends BaseStep {
       return res.toString();
     }
 
+    /**
+     * Set the name or index of the attribute to sort on
+     *
+     * @param att the name or index of tha attribute to sort on
+     */
     public void setAttribute(String att) {
       m_attributeNameOrIndex = att;
     }
 
+    /**
+     * Get the name or index of the attribute to sort on
+     *
+     * @return the name or index of the attribute to sort on
+     */
     public String getAttribute() {
       return m_attributeNameOrIndex;
     }
 
+    /**
+     * Set whether the sort should be descending rather than ascending
+     *
+     * @param d true for a descending sort
+     */
     public void setDescending(boolean d) {
       m_descending = d;
     }
 
+    /**
+     * Return true if the sort is descending
+     * 
+     * @return true if the sort is descending
+     */
     public boolean getDescending() {
       return m_descending;
     }
 
+    /**
+     * Initialize the rule
+     * 
+     * @param env the environment variables to use
+     * @param structure the structure of the instances that the rule will
+     *          opperate on
+     */
     public void init(Environment env, Instances structure) {
       String attNameI = m_attributeNameOrIndex;
       try {
@@ -788,6 +855,13 @@ public class Sorter extends BaseStep {
       }
     }
 
+    /**
+     * Compare two instances according to the rule
+     *
+     * @param o1 the first instance
+     * @param o2 the second instance
+     * @return the result of the comparison
+     */
     @Override
     public int compare(InstanceHolder o1, InstanceHolder o2) {
 

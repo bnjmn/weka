@@ -103,12 +103,22 @@ public class SerializedModelSaver extends BaseStep {
     return m_directory;
   }
 
+  /**
+   * Set the text to prepend to the filename
+   *
+   * @param filenamePrefix the prefix to add to the filename
+   */
   @OptionMetadata(displayName = "Filename prefix",
     description = "A prefix to prepend to the filename", displayOrder = 1)
   public void setFilenamePrefix(String filenamePrefix) {
     m_filenamePrefix = filenamePrefix;
   }
 
+  /**
+   * Get the text to prepend to the filename
+   *
+   * @return the prefix to add to the filename
+   */
   public String getFilenamePrefix() {
     return m_filenamePrefix;
   }
@@ -196,6 +206,9 @@ public class SerializedModelSaver extends BaseStep {
     return new ArrayList<String>();
   }
 
+  /**
+   * Initialize the step
+   */
   @Override
   public void stepInit() {
     m_incrementalHeader = null;

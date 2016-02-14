@@ -1,6 +1,28 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    TrainTestSplitMaker.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Instances;
+import weka.core.OptionMetadata;
 import weka.core.WekaException;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
@@ -11,60 +33,79 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 
-@KFStep(name = "TrainTestSplitMaker", category = "Evaluation",
-  toolTipText = "Create a random train/test split",
+/**
+ * A step that creates a random train/test split from an incoming data set.
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
+@KFStep(
+  name = "TrainTestSplitMaker",
+  category = "Evaluation",
+  toolTipText = "A step that randomly splits incoming data into a training and test set",
   iconPath = KFGUIConsts.BASE_ICON_PATH + "TrainTestSplitMaker.gif")
 public class TrainTestSplitMaker extends BaseStep {
 
   private static final long serialVersionUID = 7685026723199727685L;
 
+  /** Default split percentage */
   protected String m_trainPercentageS = "66";
 
+  /** Default seed for the random number generator */
   protected String m_seedS = "1";
 
+  /** Resolved percentage */
   protected double m_trainPercentage = 66.0;
 
+  /** Resolved seed */
   protected long m_seed = 1L;
 
-  @Override
-  public String globalInfo() {
-    return "A step that randomly splits incoming data into a training and test set";
-  }
-
   /**
-   * Tip text info for this property
-   * 
-   * @return a <code>String</code> value
+   * Set the training percentage
+   *
+   * @param percent the training percentage
    */
-  public String trainPercentTipText() {
-    return "The percentage of data to go into the training set";
-  }
-
+  @OptionMetadata(displayName = "Training percentage",
+    description = "The percentage of data to go into the training set",
+    displayOrder = 1)
   public void setTrainPercent(String percent) {
     m_trainPercentageS = percent;
   }
 
+  /**
+   * Get the training percentage
+   *
+   * @return the training percentage
+   */
   public String getTrainPercent() {
     return m_trainPercentageS;
   }
 
   /**
-   * Tip text for this property
-   * 
-   * @return a <code>String</code> value
+   * Set the random seed to use
+   *
+   * @param seed the random seed to use
    */
-  public String seedTipText() {
-    return "The randomization seed";
-  }
-
+  @OptionMetadata(displayName = "Random seed", description = "The random seed",
+    displayOrder = 2)
   public void setSeed(String seed) {
     m_seedS = seed;
   }
 
+  /**
+   * Get the random seed to use
+   *
+   * @return the random seed to use
+   */
   public String getSeed() {
     return m_seedS;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     String seed = getStepManager().environmentSubstitute(getSeed());
@@ -78,11 +119,17 @@ public class TrainTestSplitMaker extends BaseStep {
     try {
       m_trainPercentage = Double.parseDouble(tP);
     } catch (NumberFormatException ex) {
-      getStepManager()
-        .logWarning("Unable to parse train percentage value: " + tP);
+      getStepManager().logWarning(
+        "Unable to parse train percentage value: " + tP);
     }
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
@@ -118,6 +165,15 @@ public class TrainTestSplitMaker extends BaseStep {
     getStepManager().finished();
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() > 0) {
@@ -128,39 +184,61 @@ public class TrainTestSplitMaker extends BaseStep {
       StepManager.CON_TESTSET);
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
-    return getStepManager().numIncomingConnections() > 0
-      ? Arrays.asList(StepManager.CON_TRAININGSET, StepManager.CON_TESTSET)
+    return getStepManager().numIncomingConnections() > 0 ? Arrays.asList(
+      StepManager.CON_TRAININGSET, StepManager.CON_TESTSET)
       : new ArrayList<String>();
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
 
     // we produce training and testset connections
-    if ((!connectionName.equals(StepManager.CON_TRAININGSET)
-      && !connectionName.equals(StepManager.CON_TESTSET))
+    if ((!connectionName.equals(StepManager.CON_TRAININGSET) && !connectionName
+      .equals(StepManager.CON_TESTSET))
       || getStepManager().numIncomingConnections() == 0) {
       return null;
     }
 
     // our output structure is the same as whatever kind of input we are getting
-    Instances strucForDatasetCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_DATASET);
+    Instances strucForDatasetCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_DATASET);
     if (strucForDatasetCon != null) {
       return strucForDatasetCon;
     }
 
-    Instances strucForTestsetCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_TESTSET);
+    Instances strucForTestsetCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_TESTSET);
     if (strucForTestsetCon != null) {
       return strucForTestsetCon;
     }
 
-    Instances strucForTrainingCon = getStepManager()
-      .getIncomingStructureForConnectionType(StepManager.CON_TRAININGSET);
+    Instances strucForTrainingCon =
+      getStepManager().getIncomingStructureForConnectionType(
+        StepManager.CON_TRAININGSET);
     if (strucForTestsetCon != null) {
       return strucForTrainingCon;
     }

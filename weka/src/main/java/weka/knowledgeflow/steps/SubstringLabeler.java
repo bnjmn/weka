@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    SubstringLabeler.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Environment;
@@ -19,6 +40,14 @@ import java.util.List;
 import java.util.Map;
 
 /**
+ * Step that appends a label to incoming instances according to substring
+ * matches in string attributes. Multiple match "rules" can be
+ * specified - these get applied in the order that they are defined. Each rule
+ * can be applied to one or more user-specified input String attributes.
+ * Attributes can be specified using either a range list (e.g 1,2-10,last) or by
+ * a comma separated list of attribute names (where "/first" and "/last" are
+ * special strings indicating the first and last attribute respectively).
+ * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -151,6 +180,11 @@ public class SubstringLabeler extends BaseStep {
     return m_attName;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
@@ -158,6 +192,15 @@ public class SubstringLabeler extends BaseStep {
     m_streaming = false;
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     return getStepManager().numIncomingConnections() == 0 ? Arrays.asList(
@@ -165,6 +208,15 @@ public class SubstringLabeler extends BaseStep {
       StepManager.CON_TRAININGSET, StepManager.CON_TESTSET) : null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
@@ -179,6 +231,12 @@ public class SubstringLabeler extends BaseStep {
     return result;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     Instances structure;
@@ -226,6 +284,12 @@ public class SubstringLabeler extends BaseStep {
     }
   }
 
+  /**
+   * Processes a streaming data object
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   protected void processStreaming(Data data) throws WekaException {
     getStepManager().throughputUpdateStart();
     Instance toProcess = data.getPrimaryPayload();
@@ -241,6 +305,12 @@ public class SubstringLabeler extends BaseStep {
     }
   }
 
+  /**
+   * Process a batch data object
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   protected void processBatch(Data data) throws WekaException {
     if (isStopRequested()) {
       return;
@@ -274,6 +344,16 @@ public class SubstringLabeler extends BaseStep {
     getStepManager().outputData(outputD);
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -309,6 +389,14 @@ public class SubstringLabeler extends BaseStep {
     return null;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.SubstringLabelerStepEditorDialog";

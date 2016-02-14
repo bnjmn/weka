@@ -91,12 +91,26 @@ public class SubstringReplacer extends BaseStep {
     return m_matchReplaceDetails;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
     m_streamingData = new Data(StepManager.CON_INSTANCE);
   }
 
+  /**
+   * Get a list of incoming connection types that this step can accept. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and any existing incoming connections. E.g. a step might be able to accept
+   * one (and only one) incoming batch data connection.
+   *
+   * @return a list of incoming connections that this step can accept given its
+   *         current state
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() == 0) {
@@ -106,6 +120,15 @@ public class SubstringReplacer extends BaseStep {
     return null;
   }
 
+  /**
+   * Get a list of outgoing connection types that this step can produce. Ideally
+   * (and if appropriate), this should take into account the state of the step
+   * and the incoming connections. E.g. depending on what incoming connection is
+   * present, a step might be able to produce a trainingSet output, a testSet
+   * output or neither, but not both.
+   *
+   * @return a list of outgoing connections that this step can produce
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     if (getStepManager().numIncomingConnections() > 0) {
@@ -114,6 +137,12 @@ public class SubstringReplacer extends BaseStep {
     return null;
   }
 
+  /**
+   * Process an incoming data payload (if the step accepts incoming connections)
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
     Instance inst = data.getPrimaryPayload();
@@ -143,6 +172,16 @@ public class SubstringReplacer extends BaseStep {
     }
   }
 
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *          structure for
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
@@ -162,6 +201,14 @@ public class SubstringReplacer extends BaseStep {
     return null;
   }
 
+  /**
+   * Return the fully qualified name of a custom editor component (JComponent)
+   * to use for editing the properties of the step. This method can return null,
+   * in which case the system will dynamically generate an editor using the
+   * GenericObjectEditor
+   *
+   * @return the fully qualified name of a step editor component
+   */
   @Override
   public String getCustomEditorForStep() {
     return "weka.gui.knowledgeflow.steps.SubstringReplacerStepEditorDialog";

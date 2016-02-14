@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    WekaAlgorithmWrapper.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.knowledgeflow.steps;
 
 import weka.core.Utils;
@@ -6,6 +27,13 @@ import weka.gui.knowledgeflow.StepVisual;
 
 import java.io.Serializable;
 
+/**
+ * A step that wraps a class of standard Weka algorithm (e.g. filter, classifier,
+ * clusterer etc.)
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
 public abstract class WekaAlgorithmWrapper extends BaseStep implements
   Serializable {
 
@@ -26,8 +54,14 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
    */
   protected String m_defaultIconPath;
 
+  /** The wrapped algorithm */
   protected Object m_wrappedAlgorithm;
 
+  /**
+   * Get global "help" info. Returns the global info of the wrapped algorithm
+   *
+   * @return global "help" info
+   */
   @Override
   public String globalInfo() {
     if (getWrappedAlgorithm() != null) {
@@ -36,12 +70,22 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
     return super.globalInfo();
   }
 
+  /**
+   * Get the wrapped algorithm
+   *
+   * @return the wrapped algorithm
+   */
   @NotPersistable
   @ProgrammaticProperty
   public Object getWrappedAlgorithm() {
     return m_wrappedAlgorithm;
   }
 
+  /**
+   * Set the wrapped algorithm
+   *
+   * @param algo the algorithm to wrao
+   */
   public void setWrappedAlgorithm(Object algo) {
     m_wrappedAlgorithm = algo;
 
@@ -54,6 +98,11 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
     m_iconPath = StepVisual.BASE_ICON_PATH + name + ".gif";
   }
 
+  /**
+   * Get the path to the icon for this wrapped algorithm
+   *
+   * @return the path to the icon
+   */
   public String getIconPath() {
     return m_iconPath;
   }
