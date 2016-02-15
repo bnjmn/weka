@@ -776,6 +776,7 @@ public class StepManagerImpl implements StepManager {
       m_outputListeners.get(outputConnectionName);
     if (listenersForConnectionType == null) {
       listenersForConnectionType = new ArrayList<StepOutputListener>();
+      m_outputListeners.put(outputConnectionName, listenersForConnectionType);
     }
 
     if (!listenersForConnectionType.contains(listener)) {
