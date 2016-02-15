@@ -368,7 +368,6 @@ public class FlowRunner implements FlowExecutor {
         + "start points to launch!", null);
       for (ExecutionFinishedCallback c : m_callbacks) {
         c.executionFinished();
-        ;
       }
 
       return null;
