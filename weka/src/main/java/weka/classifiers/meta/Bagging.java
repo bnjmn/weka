@@ -682,12 +682,13 @@ public class Bagging
       }
     }
 
+    m_Numeric = m_data.classAttribute().isNumeric();
+
     buildClassifiers();
 
     // calc OOB error?
     if (getCalcOutOfBag()) {
       m_OutOfBagEvaluationObject = new Evaluation(m_data);
-      m_Numeric = m_data.classAttribute().isNumeric();
 
       for (int i = 0; i < m_data.numInstances(); i++) {
         double vote;
