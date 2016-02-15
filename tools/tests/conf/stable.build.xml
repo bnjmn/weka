@@ -356,8 +356,7 @@
       <arg value="${svn_password}"/>
       <arg value="${repository.URL}/${weka_branch}/weka"/>
       <classpath>
-        <pathelement location="${ant.home}/lib/svnkit.jar" />
-        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+            <pathelement path="${java.class.path}"/>
       </classpath>
     </java>
   </target>
@@ -377,8 +376,7 @@
       <arg value="-v"/>
       <arg value="${repository.URL}/${weka_branch}/weka/src/main/java/weka"/>
       <classpath>
-        <pathelement location="${ant.home}/lib/svnkit.jar" />
-        <pathelement location="${ant.home}/lib/svnkit-cli.jar" />
+            <pathelement path="${java.class.path}"/>
       </classpath>
     </java>
   </target>
