@@ -31,6 +31,7 @@ import java.util.ArrayList;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableParallelIteratedSingleClassifierEnhancer;
+import weka.classifiers.evaluation.Evaluation;
 import weka.core.AdditionalMeasureProducer;
 import weka.core.Aggregateable;
 import weka.core.Instance;
@@ -81,7 +82,13 @@ import weka.core.PartitionGenerator;
  * 
  * <pre> -O
  *  Calculate the out of bag error.</pre>
- * 
+ *
+ * <pre> -store-out-of-bag-predictions
+ *  Whether to store out of bag predictions in internal evaluation object.</pre>
+ *
+ * <pre> -output-out-of-bag-complexity-statistics
+ *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.</pre>
+ *
  * <pre> -represent-copies-using-weights
  *  Represent copies of instances using weights rather than explicitly.</pre>
  * 
@@ -160,9 +167,18 @@ public class Bagging
   /** Whether to represent copies of instances using weights rather than explicitly */
   protected boolean m_RepresentUsingWeights = false;
 
-  /** The out of bag error that has been calculated */
-  protected double m_OutOfBagError;  
-    
+  /** The evaluation object holding the out of bag error, etc. */
+  protected Evaluation m_OutOfBagEvaluationObject = null;
+
+  /** Whether to store the out of bag predictions in the evaluation object. */
+  private boolean m_StoreOutOfBagPredictions = false;
+
+  /** Whether to output complexity-based statistics when OOB-evaluation is performed. */
+  private boolean m_OutputOutOfBagComplexityStatistics;
+
+  /** Whether class is numeric. */
+  private boolean m_Numeric = false;
+
   /**
    * Constructor.
    */
@@ -226,7 +242,7 @@ public class Bagging
   @Override
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(3);
+    Vector<Option> newVector = new Vector<Option>(4);
 
     newVector.addElement(new Option(
               "\tSize of each bag, as a percentage of the\n" 
@@ -235,6 +251,12 @@ public class Bagging
     newVector.addElement(new Option(
               "\tCalculate the out of bag error.",
               "O", 0, "-O"));
+    newVector.addElement(new Option(
+              "\tWhether to store out of bag predictions in internal evaluation object.",
+              "-store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
+    newVector.addElement(new Option(
+              "\tWhether to output complexity-based statistics when out-of-bag evaluation is performed.",
+              "-output-out-of-bag-complexity-statistics", 0, "-output-out-of-bag-complexity-statistics"));
     newVector.addElement(new Option(
               "\tRepresent copies of instances using weights rather than explicitly.",
               "-represent-copies-using-weights", 0, "-represent-copies-using-weights"));
@@ -257,7 +279,13 @@ public class Bagging
    * 
    * <pre> -O
    *  Calculate the out of bag error.</pre>
-   * 
+   *
+   * <pre> -store-out-of-bag-predictions
+   *  Whether to store out of bag predictions in internal evaluation object.</pre>
+   *
+   * <pre> -output-out-of-bag-complexity-statistics
+   *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.</pre>
+   *
    * <pre> -represent-copies-using-weights
    *  Represent copies of instances using weights rather than explicitly.</pre>
    * 
@@ -329,6 +357,10 @@ public class Bagging
 
     setCalcOutOfBag(Utils.getFlag('O', options));
 
+    setStoreOutOfBagPredictions(Utils.getFlag("store-out-of-bag-predictions", options));
+
+    setOutputOutOfBagComplexityStatistics(Utils.getFlag("output-out-of-bag-complexity-statistics", options));
+
     setRepresentCopiesUsingWeights(Utils.getFlag("represent-copies-using-weights", options));
 
     super.setOptions(options);
@@ -351,6 +383,14 @@ public class Bagging
 
     if (getCalcOutOfBag()) { 
         options.add("-O");
+    }
+
+    if (getStoreOutOfBagPredictions()) {
+        options.add("-store-out-of-bag-predictions");
+    }
+
+    if (getOutputOutOfBagComplexityStatistics()) {
+        options.add("-output-out-of-bag-complexity-statistics");
     }
 
     if (getRepresentCopiesUsingWeights()) {
@@ -425,6 +465,35 @@ public class Bagging
    * @return tip text for this property suitable for
    * displaying in the explorer/experimenter gui
    */
+  public String storeOutOfBagPredictionsTipText() {
+    return "Whether to store the out-of-bag predictions.";
+  }
+
+  /**
+   * Set whether the out of bag predictions are stored.
+   *
+   * @param storeOutOfBag whether the out of bag predictions are stored
+   */
+  public void setStoreOutOfBagPredictions(boolean storeOutOfBag) {
+
+    m_StoreOutOfBagPredictions = storeOutOfBag;
+  }
+
+  /**
+   * Get whether the out of bag predictions are stored.
+   *
+   * @return whether the out of bag predictions are stored
+   */
+  public boolean getStoreOutOfBagPredictions() {
+
+    return m_StoreOutOfBagPredictions;
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
   public String calcOutOfBagTipText() {
     return "Whether the out-of-bag error is calculated.";
   }
@@ -448,16 +517,53 @@ public class Bagging
 
     return m_CalcOutOfBag;
   }
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String outputOutOfBagComplexityStatisticsTipText() {
+
+    return "Whether to output complexity-based statistics when out-of-bag evaluation is performed.";
+  }
+
+  /**
+   * Gets whether complexity statistics are output when OOB estimation is performed.
+   *
+   * @return whether statistics are calculated
+   */
+  public boolean getOutputOutOfBagComplexityStatistics() {
+
+    return m_OutputOutOfBagComplexityStatistics;
+  }
+
+  /**
+   * Sets whether complexity statistics are output when OOB estimation is performed.
+   *
+   * @param b whether statistics are calculated
+   */
+  public void setOutputOutOfBagComplexityStatistics(boolean b) {
+
+    m_OutputOutOfBagComplexityStatistics = b;
+  }
 
   /**
    * Gets the out of bag error that was calculated as the classifier
-   * was built.
+   * was built. Returns error rate in classification case and
+   * mean absolute error in regression case.
    *
-   * @return the out of bag error 
+   * @return the out of bag error; -1 if out-of-bag-error has not be estimated
    */
   public double measureOutOfBagError() {
-    
-    return m_OutOfBagError;
+
+    if (m_OutOfBagEvaluationObject == null) {
+      return -1;
+    }
+    if (m_Numeric) {
+      return m_OutOfBagEvaluationObject.meanAbsoluteError();
+    } else {
+      return m_OutOfBagEvaluationObject.errorRate();
+    }
   }
   
   /**
@@ -523,7 +629,17 @@ public class Bagging
     
     return bagData;
   }
-  
+
+  /**
+   * Returns the out-of-bag evaluation object.
+   *
+   * @return the out-of-bag evaluation object; null if out-of-bag error hasn't been calculated
+   */
+  public Evaluation getOutOfBagEvaluationObject() {
+
+    return m_OutOfBagEvaluationObject;
+  }
+
   /**
    * Bagging method.
    *
@@ -540,55 +656,54 @@ public class Bagging
     // Has user asked to represent copies using weights?
     if (getRepresentCopiesUsingWeights() && !(m_Classifier instanceof WeightedInstancesHandler)) {
       throw new IllegalArgumentException("Cannot represent copies using weights when " +
-                                         "base learner in bagging does not implement " +
-                                         "WeightedInstancesHandler.");
+              "base learner in bagging does not implement " +
+              "WeightedInstancesHandler.");
     }
 
     // get fresh Instances object
     m_data = new Instances(data);
-   
+
     super.buildClassifier(m_data);
 
     if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
       throw new IllegalArgumentException("Bag size needs to be 100% if " +
-					 "out-of-bag error is to be calculated!");
+              "out-of-bag error is to be calculated!");
     }
 
     m_random = new Random(m_Seed);
-    
+
     m_inBag = null;
     if (m_CalcOutOfBag)
       m_inBag = new boolean[m_Classifiers.length][];
-    
-    for (int j = 0; j < m_Classifiers.length; j++) {      
+
+    for (int j = 0; j < m_Classifiers.length; j++) {
       if (m_Classifier instanceof Randomizable) {
-	((Randomizable) m_Classifiers[j]).setSeed(m_random.nextInt());
+        ((Randomizable) m_Classifiers[j]).setSeed(m_random.nextInt());
       }
     }
-    
+
     buildClassifiers();
-    
+
     // calc OOB error?
     if (getCalcOutOfBag()) {
-      double outOfBagCount = 0.0;
-      double errorSum = 0.0;
-      boolean numeric = m_data.classAttribute().isNumeric();
-      
+      m_OutOfBagEvaluationObject = new Evaluation(m_data);
+      m_Numeric = m_data.classAttribute().isNumeric();
+
       for (int i = 0; i < m_data.numInstances(); i++) {
         double vote;
         double[] votes;
-        if (numeric)
+        if (m_Numeric)
           votes = new double[1];
         else
           votes = new double[m_data.numClasses()];
-        
+
         // determine predictions for instance
         int voteCount = 0;
         for (int j = 0; j < m_Classifiers.length; j++) {
           if (m_inBag[j][i])
             continue;
-          
-          if (numeric) {
+
+          if (m_Numeric) {
             double pred = m_Classifiers[j].classifyInstance(m_data.instance(i));
             if (!Utils.isMissingValue(pred)) {
               votes[0] += pred;
@@ -597,51 +712,31 @@ public class Bagging
           } else {
             voteCount++;
             double[] newProbs = m_Classifiers[j].distributionForInstance(m_data.instance(i));
-            // average the probability estimates
+            // sum the probability estimates
             for (int k = 0; k < newProbs.length; k++) {
               votes[k] += newProbs[k];
             }
           }
         }
-        
+
         // "vote"
-        if (numeric) {
-          if (voteCount == 0) {
-            vote = Utils.missingValue();
-          } else {
-            vote = votes[0] / voteCount;    // average
+        if (m_Numeric) {
+          if (voteCount > 0) {
+            votes[0] /= voteCount;
+            m_OutOfBagEvaluationObject.evaluationForSingleInstance(votes, m_data.instance(i), getStoreOutOfBagPredictions());
           }
         } else {
-          if (Utils.eq(Utils.sum(votes), 0)) {            
-            vote = Utils.missingValue();
-          } else {
-            vote = Utils.maxIndex(votes);   // predicted class
-            Utils.normalize(votes);
-          }
-        }
-        
-        // error for instance
-        if (!Utils.isMissingValue(vote) && !m_data.instance(i).classIsMissing()) {
-          outOfBagCount += m_data.instance(i).weight();
-          if (numeric) {
-            errorSum += StrictMath.abs(vote - m_data.instance(i).classValue()) 
-              * m_data.instance(i).weight();
-          }
-          else {
-            if (vote != m_data.instance(i).classValue())
-              errorSum += m_data.instance(i).weight();
+          double sum = Utils.sum(votes);
+          if (sum > 0) {
+            Utils.normalize(votes, sum);
+            m_OutOfBagEvaluationObject.evaluationForSingleInstance(votes, m_data.instance(i), getStoreOutOfBagPredictions());
           }
         }
       }
-      
-      if (outOfBagCount > 0) {
-        m_OutOfBagError = errorSum / outOfBagCount;
-      }
+    } else {
+      m_OutOfBagEvaluationObject = null;
     }
-    else {
-      m_OutOfBagError = 0;
-    }
-    
+
     // save memory
     m_data = null;
   }
@@ -657,23 +752,23 @@ public class Bagging
   @Override
   public double[] distributionForInstance(Instance instance) throws Exception {
 
-    double [] sums = new double [instance.numClasses()], newProbs; 
-    
+    double[] sums = new double[instance.numClasses()], newProbs;
+
     double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
-      if (instance.classAttribute().isNumeric() == true) {
+      if (m_Numeric) {
         double pred = m_Classifiers[i].classifyInstance(instance);
         if (!Utils.isMissingValue(pred)) {
           sums[0] += pred;
           numPreds++;
         }
       } else {
-	newProbs = m_Classifiers[i].distributionForInstance(instance);
-	for (int j = 0; j < newProbs.length; j++)
-	  sums[j] += newProbs[j];
+        newProbs = m_Classifiers[i].distributionForInstance(instance);
+        for (int j = 0; j < newProbs.length; j++)
+          sums[j] += newProbs[j];
       }
     }
-    if (instance.classAttribute().isNumeric() == true) {
+    if (m_Numeric) {
       if (numPreds == 0) {
         sums[0] = Utils.missingValue();
       } else {
@@ -705,9 +800,7 @@ public class Bagging
       text.append(m_Classifiers[i].toString() + "\n\n");
     
     if (m_CalcOutOfBag) {
-      text.append("Out of bag error: "
-		  + Utils.doubleToString(m_OutOfBagError, 4)
-		  + "\n\n");
+      text.append(m_OutOfBagEvaluationObject.toSummaryString("*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
     }
 
     return text.toString();
