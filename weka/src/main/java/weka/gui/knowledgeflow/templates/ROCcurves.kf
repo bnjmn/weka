@@ -199,7 +199,7 @@
 				"classifier" : {
 					"type" : "optionHandler",
 					"class" : "weka.classifiers.trees.RandomForest",
-					"options" : "-I 100 -K 0 -S 1 -num-slots 1"
+					"options" : "-I 100 -S 1 -num-slots 1 -- -K 0"
 				},
 				"loadClassifierFileName" : "",
 				"name" : "RandomForest",
