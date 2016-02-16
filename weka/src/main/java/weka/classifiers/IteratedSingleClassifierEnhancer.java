@@ -46,7 +46,14 @@ public abstract class IteratedSingleClassifierEnhancer
   protected Classifier[] m_Classifiers;
 
   /** The number of iterations. */
-  protected int m_NumIterations = 10;
+  protected int m_NumIterations = defaultNumberOfIterations();
+
+  /**
+   * The default number of iterations to perform.
+   */
+  protected int defaultNumberOfIterations() {
+    return 10;
+  }
 
   /**
    * Stump method for building the classifiers.
@@ -74,7 +81,7 @@ public abstract class IteratedSingleClassifierEnhancer
 
     newVector.addElement(new Option(
           "\tNumber of iterations.\n"
-          + "\t(default 10)",
+          + "\t(current value " + getNumIterations() + ")",
           "I", 1, "-I <num>"));
 
     newVector.addAll(Collections.list(super.listOptions()));
@@ -102,7 +109,7 @@ public abstract class IteratedSingleClassifierEnhancer
     if (iterations.length() != 0) {
       setNumIterations(Integer.parseInt(iterations));
     } else {
-      setNumIterations(10);
+      setNumIterations(defaultNumberOfIterations());
     }
 
     super.setOptions(options);

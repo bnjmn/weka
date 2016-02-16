@@ -29,11 +29,7 @@ import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * Class to store information about an option.
@@ -566,6 +562,58 @@ public class Option implements RevisionHandler {
     Object handler = Utils.forName(null, optionHandler, optHandlerSpec);
 
     return handler;
+  }
+
+  /**
+   * Removes an option from a given list of options.
+   *
+   * @param list the list to reduce
+   * @param name the name of the option
+   */
+  public static void deleteOption(List<Option> list, String name) {
+
+    for (Iterator<Option> iter = list.listIterator(); iter.hasNext(); ) {
+      Option a = iter.next();
+      if (a.name().equals(name)) {
+        iter.remove();
+      }
+    }
+  }
+
+  /**
+   * Removes an option from a given list of strings that specifies options.
+   * This method is for an option that has a parameter value.
+   *
+   * @param list the list to reduce
+   * @param name the name of the option (including hyphen)
+   */
+  public static void deleteOptionString(List<String> list, String name) {
+
+    for (Iterator<String> iter = list.listIterator(); iter.hasNext(); ) {
+      String a = iter.next();
+      if (a.equals(name)) {
+        iter.remove();
+        iter.next();
+        iter.remove();
+      }
+    }
+  }
+
+  /**
+   * Removes an option from a given list of strings that specifies options.
+   * This method is for an option without a parameter value (i.e., a flag).
+   *
+   * @param list the list to reduce
+   * @param name the name of the option (including hyphen)
+   */
+  public static void deleteFlagString(List<String> list, String name) {
+
+    for (Iterator<String> iter = list.listIterator(); iter.hasNext(); ) {
+      String a = iter.next();
+      if (a.equals(name)) {
+        iter.remove();
+      }
+    }
   }
 
   /**

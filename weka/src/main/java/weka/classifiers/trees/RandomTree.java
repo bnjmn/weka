@@ -57,7 +57,7 @@ import weka.core.WeightedInstancesHandler;
  * 
  * <pre> -K &lt;number of attributes&gt;
  *  Number of attributes to randomly investigate. (default 0)
- *  (&lt;0 = int(log_2(#predictors)+1)).</pre>
+ *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
  * 
  * <pre> -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.
@@ -412,7 +412,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
     newVector.addElement(new Option(
       "\tNumber of attributes to randomly investigate.\t(default 0)\n"
-        + "\t(<0 = int(log_2(#predictors)+1)).", "K", 1,
+        + "\t(<1 = int(log_2(#predictors)+1)).", "K", 1,
       "-K <number of attributes>"));
 
     newVector.addElement(new Option(
@@ -495,7 +495,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * 
    * <pre> -K &lt;number of attributes&gt;
    *  Number of attributes to randomly investigate. (default 0)
-   *  (&lt;0 = int(log_2(#predictors)+1)).</pre>
+   *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
    * 
    * <pre> -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf.

@@ -83,6 +83,9 @@ import weka.core.PartitionGenerator;
  * <pre> -O
  *  Calculate the out of bag error.</pre>
  *
+ * <pre> -print
+ *  Print the individual classifiers in the output</pre>
+ *
  * <pre> -store-out-of-bag-predictions
  *  Whether to store out of bag predictions in internal evaluation object.</pre>
  *
@@ -179,6 +182,9 @@ public class Bagging
   /** Whether class is numeric. */
   private boolean m_Numeric = false;
 
+  /** Whether to print individual ensemble members in output.*/
+  private boolean m_printClassifiers;
+
   /**
    * Constructor.
    */
@@ -230,7 +236,7 @@ public class Bagging
    */
   @Override
   protected String defaultClassifierString() {
-    
+
     return "weka.classifiers.trees.REPTree";
   }
 
@@ -253,13 +259,15 @@ public class Bagging
               "O", 0, "-O"));
     newVector.addElement(new Option(
               "\tWhether to store out of bag predictions in internal evaluation object.",
-              "-store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
+              "store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
     newVector.addElement(new Option(
               "\tWhether to output complexity-based statistics when out-of-bag evaluation is performed.",
-              "-output-out-of-bag-complexity-statistics", 0, "-output-out-of-bag-complexity-statistics"));
+              "output-out-of-bag-complexity-statistics", 0, "-output-out-of-bag-complexity-statistics"));
     newVector.addElement(new Option(
               "\tRepresent copies of instances using weights rather than explicitly.",
-              "-represent-copies-using-weights", 0, "-represent-copies-using-weights"));
+              "represent-copies-using-weights", 0, "-represent-copies-using-weights"));
+    newVector.addElement(new Option(
+              "\tPrint the individual classifiers in the output", "print", 0, "-print"));
 
     newVector.addAll(Collections.list(super.listOptions()));
  
@@ -279,6 +287,9 @@ public class Bagging
    * 
    * <pre> -O
    *  Calculate the out of bag error.</pre>
+   *
+   * <pre> -print
+   *  Print the individual classifiers in the output</pre>
    *
    * <pre> -store-out-of-bag-predictions
    *  Whether to store out of bag predictions in internal evaluation object.</pre>
@@ -337,7 +348,7 @@ public class Bagging
    * 
    * <pre> -R
    *  Spread initial count over all class values (i.e. don't use 1 per value)</pre>
-   * 
+   *
    <!-- options-end -->
    *
    * Options after -- are passed to the designated classifier.<p>
@@ -362,6 +373,8 @@ public class Bagging
     setOutputOutOfBagComplexityStatistics(Utils.getFlag("output-out-of-bag-complexity-statistics", options));
 
     setRepresentCopiesUsingWeights(Utils.getFlag("represent-copies-using-weights", options));
+
+    setPrintClassifiers(Utils.getFlag("print", options));
 
     super.setOptions(options);
     
@@ -395,6 +408,10 @@ public class Bagging
 
     if (getRepresentCopiesUsingWeights()) {
         options.add("-represent-copies-using-weights");
+    }
+
+    if (getPrintClassifiers()) {
+      options.add("-print");
     }
 
     Collections.addAll(options, super.getOptions());
@@ -453,7 +470,7 @@ public class Bagging
   /**
    * Get whether copies of instances are represented using weights rather than explicitly.
    *
-   * @return whether the out of bag error is calculated
+   * @return whether copies of instances are represented using weights rather than explicitly
    */
   public boolean getRepresentCopiesUsingWeights() {
 
@@ -545,6 +562,34 @@ public class Bagging
   public void setOutputOutOfBagComplexityStatistics(boolean b) {
 
     m_OutputOutOfBagComplexityStatistics = b;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String printClassifiersTipText() {
+    return "Print the individual classifiers in the output";
+  }
+
+  /**
+   * Set whether to print the individual ensemble classifiers in the output
+   *
+   * @param print true if the individual classifiers are to be printed
+   */
+  public void setPrintClassifiers(boolean print) {
+    m_printClassifiers = print;
+  }
+
+  /**
+   * Get whether to print the individual ensemble classifiers in the output
+   *
+   * @return true if the individual classifiers are to be printed
+   */
+  public boolean getPrintClassifiers() {
+    return m_printClassifiers;
   }
 
   /**
@@ -796,10 +841,12 @@ public class Bagging
       return "Bagging: No model built yet.";
     }
     StringBuffer text = new StringBuffer();
-    text.append("All the base classifiers: \n\n");
-    for (int i = 0; i < m_Classifiers.length; i++)
-      text.append(m_Classifiers[i].toString() + "\n\n");
-    
+    text.append("Bagging with " + getNumIterations() + " iterations and base learner\n\n" + getClassifierSpec());
+    if (getPrintClassifiers()) {
+      text.append("All the base classifiers: \n\n");
+      for (int i = 0; i < m_Classifiers.length; i++)
+        text.append(m_Classifiers[i].toString() + "\n\n");
+    }
     if (m_CalcOutOfBag) {
       text.append(m_OutOfBagEvaluationObject.toSummaryString("*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
     }
