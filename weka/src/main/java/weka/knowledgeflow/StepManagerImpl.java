@@ -1074,9 +1074,11 @@ public class StepManagerImpl implements StepManager {
 
     for (Map.Entry<String, List<StepManager>> e : m_connectedByTypeOutgoing
       .entrySet()) {
-      size += e.getValue().size();
+      size += e.getValue().size() - (m_adjustForGraphicalRendering ? 1 : 0);
     }
-
+    if (size < 0) {
+      size = 0;
+    }
     return size;
   }
 
