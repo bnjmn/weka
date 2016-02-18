@@ -250,6 +250,30 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
         ((EnvironmentHandler) m_saver).setEnvironment(getStepManager()
           .getExecutionEnvironment().getEnvironmentVariables());
       }
+
+      if (data.getConnectionName().equalsIgnoreCase(StepManager.CON_INSTANCE)) {
+        // incremental saving
+        Instance forStructure =
+          (Instance) data.getPayloadElement(StepManager.CON_INSTANCE);
+        if (forStructure != null) {
+          // processing();
+          m_saver.setRetrieval(weka.core.converters.Saver.INCREMENTAL);
+          String fileName = sanitizeFilename(forStructure.dataset().relationName());
+          try {
+            m_saver.setDirAndPrefix(fileName, "");
+          } catch (Exception ex) {
+            throw new WekaException(ex);
+          }
+          m_saver.setInstances(forStructure.dataset());
+
+          if (m_isDBSaver) {
+            if (((DatabaseSaver) m_saver).getRelationForTableName()) {
+              ((DatabaseSaver) m_saver).setTableName(fileName);
+              ((DatabaseSaver) m_saver).setRelationForTableName(false);
+            }
+          }
+        }
+      }
     }
 
     if (data.getConnectionName().equals(StepManager.CON_DATASET)
@@ -266,28 +290,6 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
       saveBatch(theData, setNum, maxSetNum, data.getConnectionName());
 
       return;
-    }
-
-    // incremental saving
-    Instance forStructure =
-      (Instance) data.getPayloadElement(StepManager.CON_INSTANCE);
-    if (forStructure != null) {
-      // processing();
-      m_saver.setRetrieval(weka.core.converters.Saver.INCREMENTAL);
-      String fileName = sanitizeFilename(forStructure.dataset().relationName());
-      try {
-        m_saver.setDirAndPrefix(fileName, "");
-      } catch (Exception ex) {
-        throw new WekaException(ex);
-      }
-      m_saver.setInstances(forStructure.dataset());
-
-      if (m_isDBSaver) {
-        if (((DatabaseSaver) m_saver).getRelationForTableName()) {
-          ((DatabaseSaver) m_saver).setTableName(fileName);
-          ((DatabaseSaver) m_saver).setRelationForTableName(false);
-        }
-      }
     }
 
     Instance toSave =
