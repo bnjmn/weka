@@ -35,7 +35,7 @@ import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
- * Implements the the Nystroem method for feature extraction using a kernel function.<br>
+ * Implements the Nystroem method for feature extraction using a kernel function.<br>
  * <br>
  * For more information on the algorithm, see<br>
  * <br>
@@ -133,7 +133,7 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
      * @return true if SVD is to be used
      */
     @OptionMetadata(
-            displayName = "Whether to use singular value decomposition instead of eigendecomposition.",
+            displayName = "Use SVD and not eigendecomposition",
             description = "Whether to use singular value decomposition instead of eigendecomposition.",
             displayOrder = 3,
             commandLineParamName = "use-svd",
@@ -153,7 +153,7 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
      * @return the filter
      */
     @OptionMetadata(
-            displayName = "The filter to use, which should be a filter that takes a sample of instances.",
+            displayName = "Filter for sampling instances",
             description = "The filter to use, which should be a filter that takes a sample of instances.",
             displayOrder = 2,
             commandLineParamName = "F",
@@ -182,7 +182,7 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
      * @return 		the current kernel
      */
     @OptionMetadata(
-            displayName = "The kernel function to use.",
+            displayName = "Kernel function",
             description = "The kernel function to use.", displayOrder = 1,
             commandLineParamName = "K",
             commandLineParamSynopsis = "-K <kernel specification>")
@@ -208,7 +208,7 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
      */
     @Override
     public String globalInfo() {
-        return "Implements the the Nystroem method for feature extraction using a kernel function.\n\n" +
+        return "Implements the Nystroem method for feature extraction using a kernel function.\n\n" +
                 "For more information on the algorithm, see\n\n" + getTechnicalInformation().toString();
     }
 

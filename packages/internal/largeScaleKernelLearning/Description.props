@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=largeScaleKernelLearning
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2016-02-22
+
+# Title (required)
+Title=A package that contains filters for large-scale kernel-based learning
+
+Category=Preprocessing
+
+# Author (required)
+Author=Eibe Frank
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=This package provides filters to enable kernel-based learning from large datasets. It currently only contains the Nystroem method.
+
+#Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/largeScaleKernelLearning1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/largeScaleKernelLearning
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.6)
