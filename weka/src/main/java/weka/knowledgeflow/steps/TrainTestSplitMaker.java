@@ -239,7 +239,7 @@ public class TrainTestSplitMaker extends BaseStep {
     Instances strucForTrainingCon =
       getStepManager().getIncomingStructureForConnectionType(
         StepManager.CON_TRAININGSET);
-    if (strucForTestsetCon != null) {
+    if (strucForTrainingCon != null) {
       return strucForTrainingCon;
     }
 
