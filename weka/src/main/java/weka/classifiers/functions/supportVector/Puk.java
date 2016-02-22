@@ -405,6 +405,7 @@ public class Puk extends CachedKernel implements TechnicalInformationHandler {
     result.enable(Capability.NUMERIC_ATTRIBUTES);
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
 
     return result;
   }

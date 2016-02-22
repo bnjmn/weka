@@ -257,6 +257,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel implements Copyable {
     result.enable(Capability.NOMINAL_ATTRIBUTES);
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
 
     return result;
   }

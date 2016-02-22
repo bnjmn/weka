@@ -1568,6 +1568,7 @@ public class StringKernel extends Kernel implements TechnicalInformationHandler 
     result.enable(Capability.STRING_ATTRIBUTES);
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
 
     return result;
   }
