@@ -35,18 +35,58 @@ import java.util.ArrayList;
 
 /**
  <!-- globalinfo-start -->
+ * Implements the the Nystroem method for feature extraction using a kernel function.<br>
+ * <br>
+ * For more information on the algorithm, see<br>
+ * <br>
+ * Tianbao Yang, Yu-Feng Li, Mehrdad Mahdavi, Rong Jin, Zhi-Hua Zhou: Nystr"{o}m Method vs Random Fourier Features: A Theoretical and Empirical Comparison. In: Proc 26th Annual Conference on Neural Information Processing Systems, 485--493, 2012.
+ * <br><br>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{Yang2012,
+ *    author = {Tianbao Yang and Yu-Feng Li and Mehrdad Mahdavi and Rong Jin and Zhi-Hua Zhou},
+ *    booktitle = {Proc 26th Annual Conference on Neural Information Processing Systems},
+ *    pages = {485--493},
+ *    title = {Nystr"{o}m Method vs Random Fourier Features: A Theoretical and Empirical Comparison},
+ *    year = {2012},
+ *    URL = {http://papers.nips.cc/paper/4588-nystrom-method-vs-random-fourier-features-a-theoretical-and-empirical-comparison}
+ * }
+ * </pre>
+ * <br><br>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -K &lt;kernel specification&gt;
+ *  The kernel function to use.</pre>
+ * 
+ * <pre> -F &lt;filter specification&gt;
+ *  The filter to use, which should be a filter that takes a sample of instances.</pre>
+ * 
+ * <pre> -use-svd
+ *  Whether to use singular value decomposition instead of eigendecomposition.</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, filter is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, filter capabilities are not checked before filter is built
+ *  (use with caution).</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 12341 $
  */
-public class Nystroem extends SimpleBatchFilter {
+public class Nystroem extends SimpleBatchFilter implements TechnicalInformationHandler {
+
+    /** for serialization */
+    static final long serialVersionUID = -251931442147263433L;
 
     /** Constant to avoid division by zero. */
     public static double SMALL = 1e-6;
@@ -67,23 +107,57 @@ public class Nystroem extends SimpleBatchFilter {
     protected Matrix m_WeightingMatrix;
 
     /**
+     * Returns the Capabilities of this filter.
+     *
+     * @return the capabilities of this object
+     * @see Capabilities
+     */
+    @Override
+    public Capabilities getCapabilities() {
+
+        Capabilities result = getKernel().getCapabilities();
+        result.setOwner(this);
+
+        result.setMinimumNumberInstances(0);
+
+        result.enableAllClasses();
+        result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+        result.enable(Capabilities.Capability.NO_CLASS);
+
+        return result;
+    }
+
+    /**
      * Gets whether to use singular value decomposition instead of eigendecomposition.
      *
      * @return true if SVD is to be used
      */
+    @OptionMetadata(
+            displayName = "Whether to use singular value decomposition instead of eigendecomposition.",
+            description = "Whether to use singular value decomposition instead of eigendecomposition.",
+            displayOrder = 3,
+            commandLineParamName = "use-svd",
+            commandLineParamSynopsis = "-use-svd",
+            commandLineParamIsFlag = true)
     public boolean getUseSVD() { return m_useSVD; }
 
     /**
      * Sets whether to use singular value decomposition instead of eigendecomposition.
      * @param flag true if singular value decomposition is to be used.
      */
-    public void setUseSVD(boolean flag) {m_useSVD = flag; }
+   public void setUseSVD(boolean flag) {m_useSVD = flag; }
 
     /**
      * Gets the filter that is used for sub sampling.
      *
      * @return the filter
      */
+    @OptionMetadata(
+            displayName = "The filter to use, which should be a filter that takes a sample of instances.",
+            description = "The filter to use, which should be a filter that takes a sample of instances.",
+            displayOrder = 2,
+            commandLineParamName = "F",
+            commandLineParamSynopsis = "-F <filter specification>")
     public Filter getFilter() { return m_Filter; }
 
     /**
@@ -107,14 +181,23 @@ public class Nystroem extends SimpleBatchFilter {
      *
      * @return 		the current kernel
      */
+    @OptionMetadata(
+            displayName = "The kernel function to use.",
+            description = "The kernel function to use.", displayOrder = 1,
+            commandLineParamName = "K",
+            commandLineParamSynopsis = "-K <kernel specification>")
     public Kernel getKernel() {
         return m_Kernel;
     }
 
+    /**
+     * Default constructor. Sets filter to Resample filter without replacement and sample size percentage to 10%.
+     * The kernel is set to PolyKernel with default options.
+     */
     public Nystroem() {
         m_Filter = new Resample();
         ((Resample)m_Filter).setNoReplacement(true);
-        ((Resample)m_Filter).setSampleSizePercent(100);
+        ((Resample)m_Filter).setSampleSizePercent(10);
         m_Kernel = new PolyKernel();
     }
 
@@ -125,9 +208,28 @@ public class Nystroem extends SimpleBatchFilter {
      */
     @Override
     public String globalInfo() {
-        return "Implements the the Nystroem method for feature extraction using a kernel function.";
+        return "Implements the the Nystroem method for feature extraction using a kernel function.\n\n" +
+                "For more information on the algorithm, see\n\n" + getTechnicalInformation().toString();
     }
 
+    /**
+     * Returns a reference to the algorithm implemented by this class.
+     *
+     * @return a reference to the algorithm implemented by this class
+     */
+    @Override
+    public TechnicalInformation getTechnicalInformation() {
+
+        TechnicalInformation result = new TechnicalInformation(TechnicalInformation.Type.INPROCEEDINGS);
+        result.setValue(TechnicalInformation.Field.AUTHOR, "Tianbao Yang and Yu-Feng Li and Mehrdad Mahdavi and Rong Jin and Zhi-Hua Zhou");
+        result.setValue(TechnicalInformation.Field.TITLE, "Nystr\"{o}m Method vs Random Fourier Features: A Theoretical and Empirical Comparison");
+        result.setValue(TechnicalInformation.Field.BOOKTITLE, "Proc 26th Annual Conference on Neural Information Processing Systems");
+        result.setValue(TechnicalInformation.Field.PAGES, "485--493");
+        result.setValue(TechnicalInformation.Field.YEAR, "2012");
+        result.setValue(TechnicalInformation.Field.URL, "http://papers.nips.cc/paper/4588-nystrom-method-vs-random-fourier-features-a-theoretical-and-empirical-comparison");
+
+        return result;
+    }
     /**
      * Returns whether to allow the determineOutputFormat(Instances) method access
      * to the full dataset rather than just the header.
@@ -246,7 +348,7 @@ public class Nystroem extends SimpleBatchFilter {
         if (hasClass) {
             atts.add((Attribute) inputFormat.classAttribute().copy());
         }
-        Instances d = new Instances("", atts, 0);
+        Instances d = new Instances(inputFormat.relationName(), atts, 0);
         d.setClassIndex(d.numAttributes() - 1);
         return d;
     }
@@ -301,3 +403,4 @@ public class Nystroem extends SimpleBatchFilter {
         runFilter(new Nystroem(), argv);
     }
 }
+
