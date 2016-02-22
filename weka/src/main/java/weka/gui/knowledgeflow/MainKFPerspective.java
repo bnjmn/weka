@@ -356,6 +356,22 @@ public class MainKFPerspective extends AbstractPerspective {
   }
 
   /**
+   * Get the title of the tab at the supplied index
+   *
+   * @param index the index of the tab to get the title for
+   * @return the title of the tab
+   * @throws IllegalArgumentException if the index is out of range
+   */
+  public synchronized String getTabTitle(int index) {
+    if (index < getNumTabs() && index >= 0) {
+      return m_flowTabs.getTitleAt(index);
+    }
+
+    throw new IllegalArgumentException("Tab index " + index
+      + " is out of range!");
+  }
+
+  /**
    * Set the active (visible) tab
    *
    * @param tabIndex the index of the tab to make active
