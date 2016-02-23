@@ -350,6 +350,8 @@ public class RegOptimizer implements OptionHandler, Serializable,
       m_alphaStar = null;
       m_kernel = null;
 
+    } else {
+      m_kernel.clean();
     }
     m_bModelBuilt = true;
   }

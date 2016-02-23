@@ -99,17 +99,6 @@ public class PolyKernel extends CachedKernel {
   }
 
   /**
-   * Frees the cache used by the kernel.
-   */
-  @Override
-  public void clean() {
-    if (getExponent() == 1.0) {
-      m_data = null;
-    }
-    super.clean();
-  }
-
-  /**
    * Creates a new <code>PolyKernel</code> instance.
    * 
    * @param data the training dataset used.
