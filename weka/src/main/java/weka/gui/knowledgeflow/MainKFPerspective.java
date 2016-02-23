@@ -360,14 +360,14 @@ public class MainKFPerspective extends AbstractPerspective {
    *
    * @param index the index of the tab to get the title for
    * @return the title of the tab
-   * @throws IllegalArgumentException if the index is out of range
+   * @throws IndexOutOfBoundsException if the index is out of range
    */
   public synchronized String getTabTitle(int index) {
     if (index < getNumTabs() && index >= 0) {
       return m_flowTabs.getTitleAt(index);
     }
 
-    throw new IllegalArgumentException("Tab index " + index
+    throw new IndexOutOfBoundsException("Tab index " + index
       + " is out of range!");
   }
 
@@ -492,6 +492,22 @@ public class MainKFPerspective extends AbstractPerspective {
     }
 
     return null;
+  }
+
+  /**
+   * Get the flow layout at the supplied index
+   *
+   * @param index the index of the flow layout to get
+   * @return the flow layout at the index
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public VisibleLayout getLayoutAt(int index) {
+    if (index >= 0 && index < m_flowGraphs.size()) {
+      return m_flowGraphs.get(index);
+    }
+
+    throw new IndexOutOfBoundsException("Flow index " + index
+      + " is out of range!");
   }
 
   /**
