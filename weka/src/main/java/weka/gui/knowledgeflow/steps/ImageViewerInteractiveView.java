@@ -21,17 +21,11 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.util.Map;
+import weka.core.WekaException;
+import weka.gui.ResultHistoryPanel;
+import weka.gui.knowledgeflow.BaseInteractiveViewer;
+import weka.gui.knowledgeflow.StepVisual;
+import weka.knowledgeflow.steps.ImageViewer;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -43,13 +37,17 @@ import javax.swing.JToolBar;
 import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.core.WekaException;
-import weka.gui.ResultHistoryPanel;
-import weka.gui.knowledgeflow.BaseInteractiveViewer;
-import weka.gui.knowledgeflow.StepVisual;
-import weka.knowledgeflow.steps.DataVisualizer;
-import weka.knowledgeflow.steps.ImageViewer;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.Map;
 
 /**
  * Interactive viewer for the ImageViewer step
@@ -137,6 +135,10 @@ public class ImageViewerInteractiveView extends BaseInteractiveViewer {
         m_plotter.repaint();
         first = false;
       }
+    }
+
+    if (m_history.getList().getModel().getSize() > 0) {
+      m_history.getList().setSelectedIndex(0);
     }
 
     m_clearButton.addActionListener(new ActionListener() {
