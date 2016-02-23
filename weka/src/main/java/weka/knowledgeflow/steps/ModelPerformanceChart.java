@@ -43,8 +43,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A Step that collects and displays either classifier error plots or
- * threshold curves
+ * A Step that collects and displays either classifier error plots or threshold
+ * curves
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
@@ -310,9 +310,10 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
    * Add a threshold plot to the offscreen data collection
    *
    * @param thresholdD the plot data to add
+   * @return the image that was added
    * @throws WekaException if a problem occurs
    */
-  protected void addOffscreenThresholdPlot(PlotData2D thresholdD)
+  protected BufferedImage addOffscreenThresholdPlot(PlotData2D thresholdD)
     throws WekaException {
     m_offscreenPlotData.add(thresholdD.getPlotInstances());
     m_thresholdSeriesTitles.add(thresholdD.getPlotName());
@@ -353,15 +354,8 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
       series.add(temp);
     }
     try {
-      BufferedImage osi =
-        m_offscreenRenderer.renderXYLineChart(defWidth, defHeight, series,
-          xAxis, yAxis, options);
-
-      Data imageD = new Data(StepManager.CON_IMAGE);
-      imageD.setPayloadElement(StepManager.CON_IMAGE, osi);
-      imageD.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-        thresholdD.getPlotName());
-      getStepManager().outputData(StepManager.CON_IMAGE, imageD);
+      return m_offscreenRenderer.renderXYLineChart(defWidth, defHeight, series,
+        xAxis, yAxis, options);
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
@@ -371,9 +365,10 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
    * Add an error plot to the offscreen plot collection
    *
    * @param plotData the plot to add
+   * @return the image that was added
    * @throws WekaException if a problem occurs
    */
-  protected void addOffscreenErrorPlot(PlotData2D plotData)
+  protected BufferedImage addOffscreenErrorPlot(PlotData2D plotData)
     throws WekaException {
     Instances predictedI = plotData.getPlotInstances();
     if (predictedI.classAttribute().isNominal()) {
@@ -503,13 +498,8 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     defHeight = Integer.parseInt(height);
 
     try {
-      BufferedImage osi =
-        m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight,
-          m_offscreenPlotData, xAxis, yAxis, options);
-
-      Data imageD = new Data(StepManager.CON_IMAGE);
-      imageD.setPayloadElement(StepManager.CON_IMAGE, osi);
-      getStepManager().outputData(StepManager.CON_IMAGE, imageD);
+      return m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight,
+        m_offscreenPlotData, xAxis, yAxis, options);
     } catch (Exception e1) {
       throw new WekaException(e1);
     }
@@ -543,7 +533,10 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
         // configure renderer if necessary
         setupOffscreenRenderer();
         m_offscreenPlotData = new ArrayList<Instances>();
-        addOffscreenErrorPlot(errorD);
+        BufferedImage bi = addOffscreenErrorPlot(errorD);
+        Data imageD = new Data(StepManager.CON_IMAGE);
+        imageD.setPayloadElement(StepManager.CON_IMAGE, bi);
+        getStepManager().outputData(StepManager.CON_IMAGE, imageD);
       }
     } else if (data.getConnectionName().equals(StepManager.CON_THRESHOLD_DATA)) {
       if (m_plots.size() == 0) {
@@ -560,13 +553,18 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
       if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_IMAGE) > 0) {
         // configure renderer if necessary
         setupOffscreenRenderer();
-        if (m_offscreenPlotData == null
+        if (m_offscreenPlotData == null || m_offscreenPlotData.size() == 0
           || !m_offscreenPlotData.get(0).relationName()
             .equals(thresholdD.getPlotInstances().relationName())) {
           m_offscreenPlotData = new ArrayList<Instances>();
           m_thresholdSeriesTitles = new ArrayList<String>();
         }
-        addOffscreenThresholdPlot(thresholdD);
+        BufferedImage bi = addOffscreenThresholdPlot(thresholdD);
+        Data imageD = new Data(StepManager.CON_IMAGE);
+        imageD.setPayloadElement(StepManager.CON_IMAGE, bi);
+        imageD.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+          thresholdD.getPlotName());
+        getStepManager().outputData(StepManager.CON_IMAGE, imageD);
       }
     }
 

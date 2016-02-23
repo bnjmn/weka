@@ -49,7 +49,7 @@ public class ImageViewer extends BaseStep {
   private static final long serialVersionUID = -4055716444227948343L;
 
   /** Holds the received images */
-  protected transient Map<String, BufferedImage> m_images =
+  protected Map<String, BufferedImage> m_images =
     new LinkedHashMap<String, BufferedImage>();
 
   /**
