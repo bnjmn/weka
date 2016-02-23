@@ -27,10 +27,8 @@ import weka.knowledgeflow.StepManagerImpl;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import java.awt.BorderLayout;
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * A step editor dialog that uses the GOE mechanism to provide property editors.
@@ -44,10 +42,23 @@ public class GOEStepEditorDialog extends StepEditorDialog {
   /** For serialization */
   private static final long serialVersionUID = -2500973437145276268L;
 
+  /** The {@code StepManager} for the step being edited */
   protected StepManagerImpl m_manager;
+
+  /** Holds a copy of the step (for restoring after cancel) */
   protected Step m_stepOriginal;
 
+  /**
+   * Main editor for the step - used for editing properties of the step or
+   * properties of a wrapped algorithm (if the step is a subclass of
+   * {@code WekaAlgorithmWrapper}.
+   */
   protected PropertySheetPanel m_editor = new PropertySheetPanel();
+
+  /**
+   * Secondary editor. Used for additional properties that belong to a Step that
+   * extends {@code WekaAlgorithmWrapper}
+   */
   protected PropertySheetPanel m_secondaryEditor;
 
   /** The main holder panel */
@@ -56,10 +67,18 @@ public class GOEStepEditorDialog extends StepEditorDialog {
   /** The panel that contains the main editor */
   protected JPanel m_primaryEditorHolder = new JPanel();
 
+  /**
+   * Constructor
+   */
   public GOEStepEditorDialog() {
     super();
   }
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   @Override
   protected void setStepToEdit(Step step) {
     // override (and don't call super) as
@@ -80,6 +99,11 @@ public class GOEStepEditorDialog extends StepEditorDialog {
     layoutEditor();
   }
 
+  /**
+   * Make a copy of the original step
+   * 
+   * @param step the step to copy
+   */
   protected void copyOriginal(Step step) {
     m_manager = (StepManagerImpl) step.getStepManager();
     m_stepToEdit = step;
@@ -91,6 +115,12 @@ public class GOEStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Adds the primary editor panel to the layout
+   * 
+   * @param borderLayoutPos the position in a {@code BorderLayout} in which to
+   *          add the primary editor panel
+   */
   protected void addPrimaryEditorPanel(String borderLayoutPos) {
     String className =
       m_stepToEdit instanceof WekaAlgorithmWrapper ? ((WekaAlgorithmWrapper) m_stepToEdit)
@@ -119,6 +149,12 @@ public class GOEStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Add the secondary editor panel
+   * 
+   * @param borderLayoutPos the position in a {@code BorderLayout} in which to
+   *          add the secondary editor panel
+   */
   protected void addSecondaryEditorPanel(String borderLayoutPos) {
     if (m_stepToEdit instanceof WekaAlgorithmWrapper) {
       m_secondaryEditor = new PropertySheetPanel(false);
@@ -137,6 +173,9 @@ public class GOEStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Called when the cancel button is pressed
+   */
   @Override
   protected void cancelPressed() {
     // restore original state
@@ -145,6 +184,9 @@ public class GOEStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     if (m_editor.hasCustomizer()) {

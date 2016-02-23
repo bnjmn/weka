@@ -24,13 +24,13 @@ package weka.gui.knowledgeflow;
 import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Memory;
+import weka.core.PluginManager;
 import weka.core.Settings;
 import weka.gui.AbstractGUIApplication;
 import weka.gui.GenericObjectEditor;
 import weka.gui.LookAndFeel;
 import weka.gui.Perspective;
 import weka.gui.PerspectiveManager;
-import weka.core.PluginManager;
 import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionEnvironment;
 import weka.knowledgeflow.KFDefaults;
@@ -62,14 +62,27 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
    */
   protected static KnowledgeFlowApp m_kfApp;
 
+  /** Settings for the Knowledge Flow */
   protected Settings m_kfProperties;
 
+  /** Main perspective of the Knowledge Flow */
   protected MainKFPerspective m_mainPerspective;
 
+  /**
+   * Constructor
+   */
   public KnowledgeFlowApp() {
     this(true);
   }
 
+  /**
+   * Constructor
+   * 
+   * @param layoutComponent true if the Knowledge Flow should layout the
+   *          application using the default layout - i.e. the perspectives
+   *          toolbar at the north of a {@code BorderLayout} and the
+   *          {@code PerspectiveManager} at the center
+   */
   public KnowledgeFlowApp(boolean layoutComponent) {
     super(layoutComponent, "weka.gui.knowledgeflow", "weka.gui.SimpleCLIPanel");
 
@@ -86,16 +99,31 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     }
   }
 
+  /**
+   * Get the name of this application
+   *
+   * @return the name of the application
+   */
   @Override
   public String getApplicationName() {
     return KFDefaults.APP_NAME;
   }
 
+  /**
+   * Get the ID of this application
+   *
+   * @return the ID of the application
+   */
   @Override
   public String getApplicationID() {
     return KFDefaults.APP_ID;
   }
 
+  /**
+   * Get the main perspective of this application
+   *
+   * @return the main perspective of the application
+   */
   @Override
   public Perspective getMainPerspective() {
     if (m_mainPerspective == null) {
@@ -104,11 +132,21 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     return m_mainPerspective;
   }
 
+  /**
+   * Get the {@code PerspectiveManager} used by this application
+   *
+   * @return the {@code PerspectiveManager}
+   */
   @Override
   public PerspectiveManager getPerspectiveManager() {
     return m_perspectiveManager;
   }
 
+  /**
+   * Get the settings for this application
+   *
+   * @return the settings for this application
+   */
   @Override
   public Settings getApplicationSettings() {
     if (m_kfProperties == null) {
@@ -140,11 +178,19 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     return m_kfProperties;
   }
 
+  /**
+   * Get the default settings for this application
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getApplicationDefaults() {
     return new KFDefaults();
   }
 
+  /**
+   * Apply (changed) settings
+   */
   @Override
   public void settingsChanged() {
     boolean showTipText =
@@ -156,6 +202,9 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     m_mainPerspective.m_stepTree.setShowLeafTipText(showTipText);
   }
 
+  /**
+   * General default settings for the Knowledge Flow
+   */
   public static class KnowledgeFlowGeneralDefaults extends Defaults {
 
     private static final long serialVersionUID = 6957165806947500265L;
@@ -200,6 +249,11 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
     }
   }
 
+  /**
+   * Main method for launching this application
+   *
+   * @param args command line args
+   */
   public static void main(String[] args) {
     try {
       LookAndFeel.setLookAndFeel(KFDefaults.APP_ID, KFDefaults.APP_ID

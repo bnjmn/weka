@@ -53,6 +53,4 @@ public class KFGUIConsts {
   /** Props for templates */
   protected static final String TEMPLATE_PROPERTY_FILE =
     "weka/gui/knowledgeflow/templates/templates.props";
-
-
 }

@@ -62,7 +62,11 @@ public class LayoutPanel extends PrintablePanel {
 
   /** For serialization */
   private static final long serialVersionUID = 4988098224376217099L;
+
+  /** Grid spacing */
   protected int m_gridSpacing;
+
+  /** The flow contained in this LayoutPanel as a visible (graphical) flow */
   protected VisibleLayout m_visLayout;
 
   protected int m_currentX;
@@ -73,6 +77,11 @@ public class LayoutPanel extends PrintablePanel {
   /** Thread for loading data for perspectives */
   protected Thread m_perspectiveDataLoadThread;
 
+  /**
+   * Constructor
+   *
+   * @param vis the {@code VisibleLayout} to display
+   */
   public LayoutPanel(VisibleLayout vis) {
     super();
     m_visLayout = vis;
@@ -86,6 +95,9 @@ public class LayoutPanel extends PrintablePanel {
         KFDefaults.GRID_SPACING);
   }
 
+  /**
+   * Configure mouse listener
+   */
   protected void setupMouseListener() {
     addMouseListener(new MouseAdapter() {
       @Override
@@ -182,7 +194,7 @@ public class LayoutPanel extends PrintablePanel {
               }
             } else if ((me.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK
               || me.isAltDown()) {
-              stepContextualMenu(me.getPoint(), step, (int) (p.getX() / z),
+              stepContextualMenu(step, (int) (p.getX() / z),
                 (int) (p.getY() / z));
               return;
             } else {
@@ -283,6 +295,9 @@ public class LayoutPanel extends PrintablePanel {
     });
   }
 
+  /**
+   * Configure mouse motion listener
+   */
   protected void setupMouseMotionListener() {
     addMouseMotionListener(new MouseMotionAdapter() {
 
@@ -415,6 +430,11 @@ public class LayoutPanel extends PrintablePanel {
     }
   }
 
+  /**
+   * Render the labels for each step in the layout
+   *
+   * @param gx the graphics context to use
+   */
   protected void paintStepLabels(Graphics gx) {
     gx.setFont(new Font(null, Font.PLAIN, m_visLayout.getMainPerspective()
       .getSetting(KFDefaults.STEP_LABEL_FONT_SIZE_KEY,
@@ -587,6 +607,13 @@ public class LayoutPanel extends PrintablePanel {
     }
   }
 
+  /**
+   * Popup a contextual menu on the canvas that provides options for cutting,
+   * pasting, deleting selected steps etc.
+   *
+   * @param x the x coordinate to pop up at
+   * @param y the y coordinate to pop up at
+   */
   protected void canvasContextualMenu(final int x, final int y) {
     Map<String, List<StepManagerImpl[]>> closestConnections =
       m_visLayout.findClosestConnections(new Point(x, y), 10);
@@ -734,6 +761,9 @@ public class LayoutPanel extends PrintablePanel {
     contextualMenu.show(this, (int) px, (int) py);
   }
 
+  /**
+   * Initiate the process of adding a note to the canvas
+   */
   protected void initiateAddNote() {
     Note n = new Note();
     StepManagerImpl noteManager = new StepManagerImpl(n);
@@ -745,8 +775,15 @@ public class LayoutPanel extends PrintablePanel {
       Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR));
   }
 
-  protected void stepContextualMenu(Point pt, final StepVisual step,
-    final int x, final int y) {
+  /**
+   * Popup the contextual menu for when a step is right clicked on
+   *
+   * @param step the step that was clicked on
+   * @param x the x coordiante to pop up at
+   * @param y the y coordinate to pop up at
+   */
+  protected void stepContextualMenu(final StepVisual step, final int x,
+    final int y) {
     PopupMenu stepContextMenu = new PopupMenu();
     boolean executing = m_visLayout.isExecuting();
 
@@ -1040,6 +1077,14 @@ public class LayoutPanel extends PrintablePanel {
     }
   }
 
+  /**
+   * Initate the process of connecting two steps.
+   *
+   * @param connType the type of the connection to create
+   * @param source the source step of the connection
+   * @param x the x coordinate at which the connection starts
+   * @param y the y coordinate at which the connection starts
+   */
   protected void initiateConnection(String connType, StepVisual source, int x,
     int y) {
     // unselect any selected steps on the layaout
@@ -1075,6 +1120,20 @@ public class LayoutPanel extends PrintablePanel {
     m_visLayout.getMainPerspective().notifyIsDirty();
   }
 
+  /**
+   * Add a menu item to a contextual menu for accessing any interactive viewers
+   * that a step might provide
+   *
+   * @param step the step in question
+   * @param entryText the text of the menu entry
+   * @param enabled true if the menu entry is to be enabled
+   * @param viewerClassName the fully qualified name of the viewer that is
+   *          associated with the menu entry
+   * @param viewerImpl an instance of the viewer itself. If null, then the fully
+   *          qualified viewer class name will be used to instantiate an
+   *          instance
+   * @param stepContextMenu the menu to add the item to
+   */
   protected void addInteractiveViewMenuItem(final StepVisual step,
     String entryText, boolean enabled, final String viewerClassName,
     final StepInteractiveViewer viewerImpl, PopupMenu stepContextMenu) {
@@ -1090,6 +1149,13 @@ public class LayoutPanel extends PrintablePanel {
     stepContextMenu.add(viewItem);
   }
 
+  /**
+   * Popup a dialog containing a particular interactive step viewer
+   *
+   * @param step the step that provides the viewer
+   * @param viewerClassName the fully qualified name of the viewer
+   * @param viewerImpl the actual instance of the viewer
+   */
   protected void popupStepInteractiveViewer(StepVisual step,
     String viewerClassName, StepInteractiveViewer viewerImpl) {
     try {
@@ -1126,6 +1192,11 @@ public class LayoutPanel extends PrintablePanel {
     }
   }
 
+  /**
+   * Popup an editor dialog for a given step
+   *
+   * @param step the step to popup the editor dialog for
+   */
   protected void popupStepEditorDialog(StepVisual step) {
     String custEditor =
       step.getStepManager().getManagedStep().getCustomEditorForStep();
@@ -1193,6 +1264,9 @@ public class LayoutPanel extends PrintablePanel {
     return val;
   }
 
+  /**
+   * Snaps selected steps to the grid
+   */
   protected void snapSelectedToGrid() {
     List<StepVisual> selected = m_visLayout.getSelectedSteps();
     for (StepVisual s : selected) {
