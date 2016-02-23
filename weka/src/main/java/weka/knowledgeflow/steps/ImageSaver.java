@@ -75,12 +75,22 @@ public class ImageSaver extends BaseStep {
   protected ImageFormat m_defaultFormat;
 
   /**
+   * Gets incremented by 1 for each image received during execution. Can be used
+   * (via the image_count variable) to ensure that each image gets saved to a
+   * different file when there are multiple images expected during execution.
+   */
+  protected int m_imageCounter;
+
+  /**
    * Set the file to save to
    *
    * @param f the file to save to
    */
-  @OptionMetadata(displayName = "File to save to",
-    description = "The file to save textual results to", displayOrder = 1)
+  @OptionMetadata(
+    displayName = "File to save to",
+    description = "<html>The file to save an image to<br>The variable 'image_count' may be "
+      + "used as<br>part of the filename/path in order to differentiate<br>"
+      + "multiple images.</html>", displayOrder = 1)
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
     directoriesOnly = false)
   public void setFile(File f) {
@@ -123,6 +133,7 @@ public class ImageSaver extends BaseStep {
    */
   @Override
   public void stepInit() throws WekaException {
+    m_imageCounter = 1;
     m_defaultFile = getFile().toString();
     if (m_defaultFile == null || m_defaultFile.length() == 0) {
       File defaultF =
@@ -186,13 +197,16 @@ public class ImageSaver extends BaseStep {
     ImageFormat formatToUse =
       m_format == ImageFormat.DEFAULT ? m_defaultFormat : m_format;
     BufferedImage content = data.getPrimaryPayload();
+    getStepManager().getExecutionEnvironment().getEnvironmentVariables()
+      .addVariable("image_count", "" + m_imageCounter++);
     String fileName = getFile().toString();
     if (fileName == null || fileName.length() == 0) {
       fileName = m_defaultFile;
     }
     fileName = environmentSubstitute(fileName);
     if (!(new File(fileName)).isDirectory()) {
-      if (!fileName.toLowerCase().endsWith(formatToUse.toString().toLowerCase())) {
+      if (!fileName.toLowerCase()
+        .endsWith(formatToUse.toString().toLowerCase())) {
         fileName += "." + formatToUse.toString().toLowerCase();
       }
       File file = new File(fileName);

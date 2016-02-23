@@ -735,6 +735,10 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
       }
 
       m_completedImages.put(m_currentDescription, m_osi);
+      Data imageOut = new Data(StepManager.CON_IMAGE, m_osi);
+      imageOut.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+        m_currentDescription);
+      getStepManager().outputData(imageOut);
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
