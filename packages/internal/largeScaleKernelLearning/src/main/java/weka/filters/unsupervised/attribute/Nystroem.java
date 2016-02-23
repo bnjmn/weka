@@ -269,6 +269,7 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
                 khatM.set(j, i, khatM.get(i, j));
             }
         }
+        m_Kernel.clean();
 
         if (m_Debug) {
             Matrix kbM = new Matrix(n, m);
