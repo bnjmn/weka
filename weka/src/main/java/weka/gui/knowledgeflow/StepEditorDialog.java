@@ -28,19 +28,8 @@ import weka.gui.PropertyDialog;
 import weka.gui.SettingsEditor;
 import weka.knowledgeflow.steps.Step;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextPane;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Window;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -62,31 +51,51 @@ import java.lang.reflect.Method;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public abstract class StepEditorDialog extends JPanel
-  implements EnvironmentHandler {
+public abstract class StepEditorDialog extends JPanel implements
+  EnvironmentHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -4860182109190301676L;
 
+  /** True if the step's properties have been altered */
   protected boolean m_isEdited;
 
+  /** Environment variables */
   protected Environment m_env = Environment.getSystemWide();
 
+  /** Holder for buttons */
   protected JPanel m_buttonHolder = new JPanel(new GridLayout(1, 0));
+
+  /** OK button */
   protected JButton m_okBut = new JButton("OK");
+
+  /** Cancel button */
   protected JButton m_cancelBut = new JButton("Cancel");
+
+  /** Settings button */
   protected JButton m_settingsBut = new JButton("Settings");
 
+  /** Reference to the main perspective */
   protected MainKFPerspective m_mainPerspective;
 
+  /** Parent window */
   protected Window m_parent;
 
+  /** Listener to be informed when the window closes */
   protected ClosingListener m_closingListener;
 
+  /** The step to edit */
   protected Step m_stepToEdit;
+
+  /** Buffer to hold the help text */
   protected StringBuilder m_helpText = new StringBuilder();
+
+  /** About button */
   protected JButton m_helpBut = new JButton("About");
 
+  /**
+   * Constructor
+   */
   public StepEditorDialog() {
     setLayout(new BorderLayout());
 
@@ -109,27 +118,59 @@ public abstract class StepEditorDialog extends JPanel
     });
   }
 
+  /**
+   * Set the main perspective
+   *
+   * @param main the main perspective
+   */
   protected void setMainPerspective(MainKFPerspective main) {
     m_mainPerspective = main;
   }
 
+  /**
+   * Get the main knowledgeflow perspective
+   *
+   * @return the main knowledge flow perspective
+   */
   protected MainKFPerspective getMainPerspective() {
     return m_mainPerspective;
   }
 
+  /**
+   * Show an error dialog
+   *
+   * @param cause an exception to show in the dialog
+   */
   protected void showErrorDialog(Exception cause) {
     m_mainPerspective.showErrorDialog(cause);
   }
 
+  /**
+   * Show an information dialog
+   * 
+   * @param information the information to show
+   * @param title the title for the dialog
+   * @param isWarning true if this is a warning rather than general information
+   */
   protected void showInfoDialog(Object information, String title,
     boolean isWarning) {
     m_mainPerspective.showInfoDialog(information, title, isWarning);
   }
 
+  /**
+   * Get the step being edited
+   *
+   * @return
+   */
   protected Step getStepToEdit() {
     return m_stepToEdit;
   }
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   protected void setStepToEdit(Step step) {
     m_stepToEdit = step;
 
@@ -140,11 +181,18 @@ public abstract class StepEditorDialog extends JPanel
     layoutEditor();
   }
 
+  /**
+   * Layout the editor. This is a no-op method that subclasses should override
+   */
   protected void layoutEditor() {
     // subclasses can override to add their
     // stuff to the center of the borderlayout
   }
 
+  /**
+   * Adds a button for popping up a settings editor. Is only visible if the step
+   * being edited provides default settings
+   */
   protected void addSettingsButton() {
     getMainPerspective().getMainApplication().getApplicationSettings()
       .applyDefaults(getStepToEdit().getDefaultSettings());
@@ -153,10 +201,10 @@ public abstract class StepEditorDialog extends JPanel
       @Override
       public void actionPerformed(ActionEvent e) {
         try {
-          SettingsEditor.showSingleSettingsEditor(
-            getMainPerspective().getMainApplication().getApplicationSettings(),
-            getStepToEdit().getDefaultSettings().getID(),
-            getStepToEdit().getName(), StepEditorDialog.this);
+          SettingsEditor.showSingleSettingsEditor(getMainPerspective()
+            .getMainApplication().getApplicationSettings(), getStepToEdit()
+            .getDefaultSettings().getID(), getStepToEdit().getName(),
+            StepEditorDialog.this);
         } catch (IOException ex) {
           showErrorDialog(ex);
         }
@@ -164,18 +212,38 @@ public abstract class StepEditorDialog extends JPanel
     });
   }
 
+  /**
+   * Set the parent window of this dialog
+   *
+   * @param parent the parent window
+   */
   protected void setParentWindow(Window parent) {
     m_parent = parent;
   }
 
+  /**
+   * Set a closing listener
+   *
+   * @param c the closing listener
+   */
   protected void setClosingListener(ClosingListener c) {
     m_closingListener = c;
   }
 
+  /**
+   * Returns true if the properties of the step being edited have been changed
+   *
+   * @return true if the step has been edited
+   */
   protected boolean isEdited() {
     return m_isEdited;
   }
 
+  /**
+   * Set whether the step's properties have changed or not
+   *
+   * @param edited true if the step has been edited
+   */
   protected void setEdited(boolean edited) {
     m_isEdited = edited;
   }
@@ -193,10 +261,18 @@ public abstract class StepEditorDialog extends JPanel
     }
   }
 
+  /**
+   * Called when the OK button is pressed. This is a no-op method - subclasses
+   * should override
+   */
   protected void okPressed() {
     // subclasses to override
   }
 
+  /**
+   * Called when the Cancel button is pressed. This is a no-op method -
+   * subclasses should override
+   */
   protected void cancelPressed() {
     // subclasses to override
   }
@@ -214,6 +290,11 @@ public abstract class StepEditorDialog extends JPanel
     }
   }
 
+  /**
+   * Creates an "about" panel to add to the dialog
+   *
+   * @param step the step from which to extract help info
+   */
   protected void createAboutPanel(Step step) {
     String globalFirstSentence = "";
     String globalInfo = Utils.getGlobalInfo(step, false);
@@ -225,9 +306,9 @@ public abstract class StepEditorDialog extends JPanel
       try {
         Method gI = step.getClass().getMethod("globalInfo");
         String globalInfoNoHTML = gI.invoke(step).toString();
-        globalFirstSentence = globalInfoNoHTML.contains(".")
-          ? globalInfoNoHTML.substring(0, globalInfoNoHTML.indexOf('.'))
-          : globalInfoNoHTML;
+        globalFirstSentence =
+          globalInfoNoHTML.contains(".") ? globalInfoNoHTML.substring(0,
+            globalInfoNoHTML.indexOf('.')) : globalInfoNoHTML;
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -313,17 +394,26 @@ public abstract class StepEditorDialog extends JPanel
     jd.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
     jd.pack();
     jd.setSize(400, 350);
-    jd.setLocation(
-      aboutPanel.getTopLevelAncestor().getLocationOnScreen().x
-        + aboutPanel.getTopLevelAncestor().getSize().width,
-      aboutPanel.getTopLevelAncestor().getLocationOnScreen().y);
+    jd.setLocation(aboutPanel.getTopLevelAncestor().getLocationOnScreen().x
+      + aboutPanel.getTopLevelAncestor().getSize().width, aboutPanel
+      .getTopLevelAncestor().getLocationOnScreen().y);
     jd.setVisible(true);
   }
 
+  /**
+   * Get environment variables
+   *
+   * @return environment variables
+   */
   public Environment getEnvironment() {
     return m_env;
   }
 
+  /**
+   * Set environment variables
+   *
+   * @param env the environment variables to use
+   */
   @Override
   public void setEnvironment(Environment env) {
     m_env = env;
@@ -353,6 +443,6 @@ public abstract class StepEditorDialog extends JPanel
    * Interface for those that want to be notified when this dialog closes
    */
   public interface ClosingListener {
-      void closing();
+    void closing();
   }
 }

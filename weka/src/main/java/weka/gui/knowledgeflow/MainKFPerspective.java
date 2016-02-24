@@ -634,10 +634,21 @@ public class MainKFPerspective extends AbstractPerspective {
       .ordinal();
   }
 
+  /**
+   * Get the main toolbar
+   *
+   * @return the main toolbar
+   */
   public MainKFPerspectiveToolBar getMainToolBar() {
     return m_mainToolBar;
   }
 
+  /**
+   * Set active status of this perspective. True indicates that this perspective
+   * is the visible active perspective in the application
+   *
+   * @param active true if this perspective is the active one
+   */
   @Override
   public void setActive(boolean active) {
     if (active) {
@@ -653,21 +664,45 @@ public class MainKFPerspective extends AbstractPerspective {
     }
   }
 
+  /**
+   * Get an ordered list of menus to appear in the main menu bar. Return null
+   * for no menus
+   *
+   * @return a list of menus to appear in the main menu bar or null for no menus
+   */
   @Override
   public List<JMenu> getMenus() {
     return m_mainToolBar.getMenus();
   }
 
+  /**
+   * Get the default settings for this perspective (or null if there are none)
+   *
+   * @return the default settings for this perspective, or null if the
+   *         perspective does not have any settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new KFDefaults();
   }
 
+  /**
+   * Returns true if this perspective is OK with being an active perspective -
+   * i.e. the user can click on this perspective at this time in the perspective
+   * toolbar. For example, a Perspective might return false from this method if
+   * it needs a set of instances to operate but none have been supplied yet.
+   *
+   * @return true if this perspective can be active at the current time
+   */
   @Override
   public boolean okToBeActive() {
     return true;
   }
 
+  /**
+   * Called when the user alters settings. The settings altered by the user are
+   * not necessarily ones related to this perspective
+   */
   @Override
   public void settingsChanged() {
     Settings settings = getMainApplication().getApplicationSettings();
@@ -680,6 +715,12 @@ public class MainKFPerspective extends AbstractPerspective {
     }
   }
 
+  /**
+   * Returns true if this perspective can do something meaningful with a set of
+   * instances
+   *
+   * @return true if this perspective accepts instances
+   */
   @Override
   public boolean acceptsInstances() {
     // allow instances only if running in the Workbench and the user has
@@ -700,6 +741,11 @@ public class MainKFPerspective extends AbstractPerspective {
     return false;
   }
 
+  /**
+   * Set instances (if this perspective can use them)
+   *
+   * @param instances the instances
+   */
   @Override
   public void setInstances(Instances instances) {
     addUntitledTab();

@@ -1,12 +1,31 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ * MainKFPerspectiveToolBar.java
+ * Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ */
+
 package weka.gui.knowledgeflow;
 
-import static weka.gui.knowledgeflow.StepVisual.loadIcon;
+import weka.core.Utils;
+import weka.core.WekaException;
+import weka.knowledgeflow.Flow;
 
-import java.awt.BorderLayout;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.MenuItem;
-import java.awt.PopupMenu;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -17,33 +36,24 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
-
-import weka.core.Utils;
-import weka.core.WekaException;
-import weka.knowledgeflow.Flow;
+import static weka.gui.knowledgeflow.StepVisual.loadIcon;
 
 /**
+ * Class that provides the main editing widget toolbar and menu items
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class MainKFPerspectiveToolBar extends JPanel {
 
+  private static final long serialVersionUID = -157986423490835642L;
+
+  /** Path to the icons for the toolbar */
   public static String ICON_PATH = "weka/gui/knowledgeflow/icons/";
+
+  /** Reference to the main knowledge flow perspective */
   protected MainKFPerspective m_mainPerspective;
+
   /** holds a map of widgets, keyed by widget name */
   protected Map<String, JComponent> m_widgetMap =
     new HashMap<String, JComponent>();
@@ -55,8 +65,14 @@ public class MainKFPerspectiveToolBar extends JPanel {
   protected Map<String, JMenuItem> m_menuItemMap =
     new HashMap<String, JMenuItem>();
 
+  /** True if menu items corresponding to the toolbar widgets should be shown */
   protected boolean m_showMenus;
 
+  /**
+   * Constructor
+   *
+   * @param mainKFPerspective the main knowledge flow perspective
+   */
   public MainKFPerspectiveToolBar(MainKFPerspective mainKFPerspective) {
     super();
 
@@ -870,13 +886,28 @@ public class MainKFPerspectiveToolBar extends JPanel {
     add(fixedTools, BorderLayout.EAST);
   }
 
+  /**
+   * Add a widget to a toolbar
+   *
+   * @param toolBar the toolbar to add to
+   * @param widgetName the name of the widget
+   * @param widget the widget component itself
+   */
   protected void addWidgetToToolBar(JToolBar toolBar, String widgetName,
     JComponent widget) {
     toolBar.add(widget);
     m_widgetMap.put(widgetName, widget);
   }
 
-  public void addMenuItemToMenu(String topMenu, String menuItem,
+  /**
+   * Add a menu item to a named menu
+   *
+   * @param topMenu the name of the menu to add to
+   * @param menuItem the entry text for the item itself
+   * @param action the action associated with the menu item
+   * @param accelerator the keystroke accelerator to associate with the item
+   */
+  protected void addMenuItemToMenu(String topMenu, String menuItem,
     final Action action, KeyStroke accelerator) {
     JMenuItem newItem = m_menuItemMap.get(menuItem);
     if (newItem != null) {
@@ -905,6 +936,13 @@ public class MainKFPerspectiveToolBar extends JPanel {
     m_menuItemMap.put(menuItem, newItem);
   }
 
+  /**
+   * Enable/disable a named widget
+   * 
+   * @param widgetName the name of the widget to enable/disable
+   * @param enable true if the widget should be enabled; false otherwise
+   * @see {@code Widget} enum
+   */
   public void enableWidget(String widgetName, boolean enable) {
     JComponent widget = m_widgetMap.get(widgetName);
     if (widget != null) {
@@ -936,7 +974,11 @@ public class MainKFPerspectiveToolBar extends JPanel {
     return m_menuItemMap.get(menuItemName);
   }
 
-  public static enum Widgets {
+  /**
+   * Enum containing all the widgets provided by the toolbar. The toString()
+   * method provides the corresponding menu entry text for each widget.
+   */
+  public enum Widgets {
     ZOOM_IN_BUTTON("Zoom In"), ZOOM_OUT_BUTTON("Zoom Out"), SELECT_ALL_BUTTON(
       "Select All"), CUT_BUTTON("Cut"), COPY_BUTTON("Copy"), DELETE_BUTTON(
       "Delete"), PASTE_BUTTON("Paste"), UNDO_BUTTON("Undo"), NOTE_BUTTON(
@@ -960,6 +1002,11 @@ public class MainKFPerspectiveToolBar extends JPanel {
     }
   }
 
+  /**
+   * Get the list of menus
+   *
+   * @return a list of {@code JMenu}s
+   */
   public List<JMenu> getMenus() {
     List<JMenu> menuList = new ArrayList<JMenu>();
     for (Map.Entry<String, JMenu> e : m_menuMap.entrySet()) {

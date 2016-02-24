@@ -47,6 +47,11 @@ public class NoteVisual extends StepVisual {
   /** Adjustment for the font size */
   protected int m_fontSizeAdjust = -1;
 
+  /**
+   * Set the {@code StepManagerImpl} for the step covered by this visual
+   *
+   * @param manager the step manager to wrap
+   */
   @Override
   public void setStepManager(StepManagerImpl manager) {
     super.setStepManager(manager);

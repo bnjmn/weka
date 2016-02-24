@@ -1078,7 +1078,7 @@ public class LayoutPanel extends PrintablePanel {
   }
 
   /**
-   * Initate the process of connecting two steps.
+   * Initiate the process of connecting two steps.
    *
    * @param connType the type of the connection to create
    * @param source the source step of the connection

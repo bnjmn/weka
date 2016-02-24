@@ -21,10 +21,15 @@
 
 package weka.gui.knowledgeflow;
 
+import javax.swing.border.AbstractBorder;
 import java.awt.*;
 
-import javax.swing.border.AbstractBorder;
-
+/**
+ * Border implementation that provides a drop shadow
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
 public class ShadowBorder extends AbstractBorder {
 
   /**
@@ -72,18 +77,20 @@ public class ShadowBorder extends AbstractBorder {
    * @param c the component for which this border insets value applies
    * @return a new Insets object initialized as stated above.
    */
+  @Override
   public Insets getBorderInsets(Component c) {
     return new Insets(1, 1, m_width + 1, m_width + 1);
   }
 
   /**
-   * Reinitializes the <code>insets</code> parameter with this ShadowBorder's
+   * Reinitialies the <code>insets</code> parameter with this ShadowBorder's
    * current Insets.
    * 
    * @param c the component for which this border insets value applies
    * @param insets the object to be reinitialized
    * @return the given <code>insets</code> object
    */
+  @Override
   public Insets getBorderInsets(Component c, Insets insets) {
     insets.top = 1;
     insets.left = 1;
@@ -97,6 +104,7 @@ public class ShadowBorder extends AbstractBorder {
    * 
    * @return true
    */
+  @Override
   public boolean isBorderOpaque() {
     return true;
   }
@@ -104,13 +112,14 @@ public class ShadowBorder extends AbstractBorder {
   /**
    * Paints the drop shadow border around the given component.
    * 
-   * @param c - the component for which this border is being painted
-   * @param g - the paint graphics
-   * @param x - the x position of the painted border
-   * @param y - the y position of the painted border
-   * @param width - the width of the painted border
-   * @param height - the height of the painted border
+   * @param c the component for which this border is being painted
+   * @param g the paint graphics
+   * @param x the x position of the painted border
+   * @param y the y position of the painted border
+   * @param width the width of the painted border
+   * @param height the height of the painted border
    */
+  @Override
   public void paintBorder(Component c, Graphics g, int x, int y, int width,
     int height) {
     Color old_color = g.getColor();
