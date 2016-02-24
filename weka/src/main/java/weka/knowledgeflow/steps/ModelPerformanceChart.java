@@ -666,15 +666,6 @@ public class ModelPerformanceChart extends BaseStep implements DataCollector {
     // m_offscreenPlotData = ((List<Instances>) ((Object[]) data)[1]);
     m_dataIsThresholdData = ((Boolean) ((Object[]) data)[1]);
     m_offscreenPlotData = new ArrayList<Instances>();
-
-    // need to generate the outgoing Image data...
-    for (PlotData2D pd : m_plots) {
-      if (m_dataIsThresholdData) {
-        addOffscreenErrorPlot(pd);
-      } else {
-        addOffscreenErrorPlot(pd);
-      }
-    }
   }
 
   /**

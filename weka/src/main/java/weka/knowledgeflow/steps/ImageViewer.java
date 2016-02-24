@@ -26,7 +26,11 @@ import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -44,7 +48,7 @@ import java.util.Map;
 @KFStep(name = "ImageViewer", category = "Visualization",
   toolTipText = "View images", iconPath = KFGUIConsts.BASE_ICON_PATH
     + "StripChart.gif")
-public class ImageViewer extends BaseStep {
+public class ImageViewer extends BaseStep implements DataCollector {
 
   private static final long serialVersionUID = -4055716444227948343L;
 
@@ -101,8 +105,7 @@ public class ImageViewer extends BaseStep {
       throw new WekaException("Data does not seem to contain an image!");
     }
 
-    String date =
-      (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
+    String date = (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
     if (imageTitle != null) {
       imageTitle = date + imageTitle;
     } else {
@@ -129,8 +132,8 @@ public class ImageViewer extends BaseStep {
 
   /**
    * Gets a list of classes of viewers that can be popped up in the GUI
-   * Knowledge Flow from this step, given that we have received and stored
-   * some image data.
+   * Knowledge Flow from this step, given that we have received and stored some
+   * image data.
    *
    * @return a list of viewer classes
    */
@@ -144,5 +147,87 @@ public class ImageViewer extends BaseStep {
     }
 
     return views;
+  }
+
+  /**
+   * Retrieve the data stored in this step. This is a map of png image data (as
+   * raw bytes), keyed by image name.
+   *
+   * @return the data stored in this step
+   */
+  @Override
+  public Object retrieveData() {
+    // As BufferedImage is not serializable, we need to store raw
+    // png bytes in a map.
+    return bufferedImageMapToSerializableByteMap(m_images);
+  }
+
+  /**
+   * Restore data for this step. Argument is expected to be a map of png image
+   * data (as raw bytes) keyed by image name
+   *
+   * @param data the data to set
+   * @throws WekaException if a problem occurs
+   */
+  @SuppressWarnings("unchecked")
+  @Override
+  public void restoreData(Object data) throws WekaException {
+    if (!(data instanceof Map)) {
+      throw new IllegalArgumentException("Argument for restoring data must "
+        + "be a map");
+    }
+
+  }
+
+  /**
+   * Utility method to convert a map of {@code byte[]} png image data to
+   * a map of {@code BufferedImage}
+   *
+   * @param dataMap the map containing raw png byte arrays
+   * @return a map of {@code BufferedImage}s
+   * @throws IOException if a problem occurs
+   */
+  public static Map<String, BufferedImage> byteArrayImageMapToBufferedImageMap(
+    Map<String, byte[]> dataMap) throws IOException {
+    Map<String, BufferedImage> restored =
+      new LinkedHashMap<String, BufferedImage>();
+    // need to restore from map of raw png byte data
+    Map<String, byte[]> serializableMap = (Map<String, byte[]>) dataMap;
+    for (Map.Entry<String, byte[]> e : serializableMap.entrySet()) {
+      String title = e.getKey();
+      byte[] png = e.getValue();
+      ByteArrayInputStream bais = new ByteArrayInputStream(png);
+
+      BufferedImage bi = ImageIO.read(bais);
+      if (bi != null) {
+        restored.put(title, bi);
+      }
+    }
+    return restored;
+  }
+
+  /**
+   * Utility method to convert a map of {@code BufferedImage} to a map of byte
+   * arrays (that hold each image as png bytes)
+   *
+   * @param images the map of {@code BufferedImage}s to convert
+   * @return a map of png byte arrays
+   */
+  public static Map<String, byte[]> bufferedImageMapToSerializableByteMap(
+    Map<String, BufferedImage> images) {
+    Map<String, byte[]> serializableMap = new LinkedHashMap<String, byte[]>();
+    for (Map.Entry<String, BufferedImage> e : images.entrySet()) {
+      String title = e.getKey();
+      BufferedImage b = e.getValue();
+      ByteArrayOutputStream baos = new ByteArrayOutputStream();
+      try {
+        ImageIO.write(b, "png", baos);
+        serializableMap.put(title, baos.toByteArray());
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      }
+    }
+
+    return serializableMap;
   }
 }
