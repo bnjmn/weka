@@ -24,10 +24,10 @@ package weka.knowledgeflow.steps;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionMetadata;
+import weka.core.PluginManager;
 import weka.core.WekaException;
 import weka.gui.ProgrammaticProperty;
 import weka.gui.beans.OffscreenChartRenderer;
-import weka.core.PluginManager;
 import weka.gui.beans.WekaOffscreenChartRenderer;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.gui.visualize.PlotData2D;
@@ -230,22 +230,24 @@ public class DataVisualizer extends BaseStep implements DataCollector {
         m_offscreenRenderer = new WekaOffscreenChartRenderer();
       } else {
         try {
-          Object r = PluginManager.getPluginInstance(
-            "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
+          Object r =
+            PluginManager.getPluginInstance(
+              "weka.gui.beans.OffscreenChartRenderer", m_offscreenRendererName);
           if (r != null && r instanceof weka.gui.beans.OffscreenChartRenderer) {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default
-            getStepManager()
-              .logWarning("Offscreen renderer '" + getOffscreenRendererName()
+            getStepManager().logWarning(
+              "Offscreen renderer '" + getOffscreenRendererName()
                 + "' is not available, using default weka chart renderer "
                 + "instead");
             m_offscreenRenderer = new WekaOffscreenChartRenderer();
           }
         } catch (Exception ex) {
+          ex.printStackTrace();
           // use built-in default
-          getStepManager()
-            .logWarning("Offscreen renderer '" + getOffscreenRendererName()
+          getStepManager().logWarning(
+            "Offscreen renderer '" + getOffscreenRendererName()
               + "' is not available, using default weka chart renderer "
               + "instead");
           m_offscreenRenderer = new WekaOffscreenChartRenderer();
@@ -285,21 +287,28 @@ public class DataVisualizer extends BaseStep implements DataCollector {
     pd.setPlotName(title);
     m_plots.add(pd);
 
-    if (getStepManager()
-      .numOutgoingConnectionsOfType(StepManager.CON_IMAGE) > 0) {
+    if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_IMAGE) > 0) {
       setupOffscreenRenderer();
-      createOffscreenPlot(pd);
+      BufferedImage osi = createOffscreenPlot(pd);
+
+      Data imageData = new Data(StepManager.CON_IMAGE, osi);
+      if (relationName.length() > 10) {
+        relationName = relationName.substring(0, 10);
+      }
+      imageData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+        relationName + ":" + m_xAxis + "," + m_yAxis);
+      getStepManager().outputData(imageData);
     }
     getStepManager().finished();
   }
 
-  protected void createOffscreenPlot(PlotData2D pd) {
+  protected BufferedImage createOffscreenPlot(PlotData2D pd)
+    throws WekaException {
     setupOffscreenRenderer();
 
     List<Instances> offscreenPlotInstances = new ArrayList<Instances>();
     Instances predictedI = pd.getPlotInstances();
-    if (predictedI.classIndex() >= 0
-      && predictedI.classAttribute().isNominal()) {
+    if (predictedI.classIndex() >= 0 && predictedI.classAttribute().isNominal()) {
       // set up multiple series - one for each class
       Instances[] classes = new Instances[predictedI.numClasses()];
       for (int i = 0; i < predictedI.numClasses(); i++) {
@@ -356,24 +365,15 @@ public class DataVisualizer extends BaseStep implements DataCollector {
     defWidth = Integer.parseInt(width);
     defHeight = Integer.parseInt(height);
 
-    try {
-      getStepManager().logDetailed("Creating image");
-      BufferedImage osi = predictedI.relationName().startsWith("__")
-        ? m_offscreenRenderer.renderXYLineChart(defWidth, defHeight,
-          offscreenPlotInstances, xAxis, yAxis, options)
-        : m_offscreenRenderer.renderXYScatterPlot(defWidth, defHeight,
-          offscreenPlotInstances, xAxis, yAxis, options);
+    getStepManager().logDetailed("Creating image");
 
-      Data imageData = new Data(StepManager.CON_IMAGE, osi);
-      String relationName = predictedI.relationName();
-      if (relationName.length() > 10) {
-        relationName = relationName.substring(0, 10);
-      }
-      imageData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-        relationName + ":" + m_xAxis + "," + m_yAxis);
-      getStepManager().outputData(imageData);
-    } catch (Exception e1) {
-      e1.printStackTrace();
+    try {
+      return predictedI.relationName().startsWith("__") ? m_offscreenRenderer
+        .renderXYLineChart(defWidth, defHeight, offscreenPlotInstances, xAxis,
+          yAxis, options) : m_offscreenRenderer.renderXYScatterPlot(defWidth,
+        defHeight, offscreenPlotInstances, xAxis, yAxis, options);
+    } catch (Exception e) {
+      throw new WekaException(e);
     }
   }
 
@@ -412,8 +412,8 @@ public class DataVisualizer extends BaseStep implements DataCollector {
 
   @Override
   public List<String> getOutgoingConnectionTypes() {
-    return getStepManager().numIncomingConnections() > 0
-      ? Arrays.asList(StepManager.CON_IMAGE) : new ArrayList<String>();
+    return getStepManager().numIncomingConnections() > 0 ? Arrays
+      .asList(StepManager.CON_IMAGE) : new ArrayList<String>();
   }
 
   @Override

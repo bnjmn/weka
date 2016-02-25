@@ -631,6 +631,7 @@ public class WekaPackageManager {
     try {
       PluginManager.addFromProperties(propsFile);
     } catch (Exception ex) {
+      ex.printStackTrace();
     }
   }
 

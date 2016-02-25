@@ -47,7 +47,7 @@ import java.util.Map;
  * @version $Revision: $
  */
 @KFStep(name = "AttributeSummarizer", category = "Visualization",
-  toolTipText = "Visualize datasets in a scatter plot matrix",
+  toolTipText = "Visualize datasets in a matrix of histograms",
   iconPath = KFGUIConsts.BASE_ICON_PATH + "AttributeSummarizer.gif")
 public class AttributeSummarizer extends BaseSimpleDataVisualizer {
 

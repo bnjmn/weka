@@ -214,7 +214,13 @@ public class PluginManager {
         if (implementations != null && implementations.length() > 0) {
           String[] parts = implementations.split(",");
           for (String impl : parts) {
-            PluginManager.addPlugin(baseType, impl.trim(), impl.trim(),
+            impl = impl.trim();
+            String name = impl;
+            if (impl.charAt(0) == '[') {
+              name = impl.substring(1, impl.indexOf(']'));
+              impl = impl.substring(impl.indexOf(']') + 1);
+            }
+            PluginManager.addPlugin(baseType, name.trim(), impl,
               maintainInsertionOrder);
           }
         }
