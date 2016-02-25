@@ -102,6 +102,9 @@ public class StepVisual extends JPanel {
     }
   }
 
+  /**
+   * Constructor
+   */
   protected StepVisual() {
     this(null);
   }

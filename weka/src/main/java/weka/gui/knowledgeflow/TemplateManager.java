@@ -85,6 +85,11 @@ public class TemplateManager {
       .numResourcesForWithGroupID(KFGUIConsts.KF_PLUGIN_TEMPLATE_KEY);
   }
 
+  /**
+   * Get descriptions for the built-in knowledge flow templates
+   *
+   * @return descriptions for the built-in templates
+   */
   public List<String> getBuiltinTemplateDescriptions() {
     List<String> result = new ArrayList<String>();
 
@@ -99,6 +104,11 @@ public class TemplateManager {
     return result;
   }
 
+  /**
+   * Get descriptions for plugin knowledge flow templates
+   *
+   * @return descriptions for plugin templates
+   */
   public List<String> getPluginTemplateDescriptions() {
     List<String> result = new ArrayList<String>();
 
@@ -113,6 +123,13 @@ public class TemplateManager {
     return result;
   }
 
+  /**
+   * Get the flow for the supplied description
+   *
+   * @param flowDescription the description of the template flow to get
+   * @return the template flow
+   * @throws WekaException if the template does not exist
+   */
   public Flow getTemplateFlow(String flowDescription) throws WekaException {
     Flow result = null;
     try {
@@ -135,6 +152,14 @@ public class TemplateManager {
     return result;
   }
 
+  /**
+   * Get the built-in template flow corresponding to the description
+   *
+   * @param flowDescription the description of the template flow to get
+   * @return the flow
+   * @throws IOException if an IO error occurs
+   * @throws WekaException if a problem occurs
+   */
   public Flow getBuiltinTemplateFlow(String flowDescription)
     throws IOException, WekaException {
     InputStream flowStream = PluginManager.getPluginResourceAsStream(
@@ -144,6 +169,14 @@ public class TemplateManager {
     return loader.readFlow(flowStream);
   }
 
+  /**
+   * Get the plugin template flow corresponding to the description
+   *
+   * @param flowDescription the description of the template flow to get
+   * @return the flow
+   * @throws IOException if an IO error occurs
+   * @throws WekaException if a problem occurs
+   */
   public Flow getPluginTemplateFlow(String flowDescription)
     throws IOException, WekaException {
     InputStream flowStream = PluginManager.getPluginResourceAsStream(

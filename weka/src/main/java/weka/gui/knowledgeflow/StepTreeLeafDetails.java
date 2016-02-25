@@ -1,10 +1,25 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    StepTreeLeafDetails.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow;
-
-import java.beans.Beans;
-import java.io.Serializable;
-import java.lang.annotation.Annotation;
-
-import javax.swing.Icon;
 
 import weka.core.Utils;
 import weka.knowledgeflow.StepManagerImpl;
@@ -12,6 +27,18 @@ import weka.knowledgeflow.steps.KFStep;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
+import javax.swing.*;
+import java.beans.Beans;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+
+/**
+ * Maintains information about a step in the {@code StepTree} - e.g. tool tip
+ * text, wrapped algorithm name (in the case of a {@code WekaAlgorithmWrapper}.
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
 public class StepTreeLeafDetails implements Serializable {
 
   /**
@@ -40,10 +67,22 @@ public class StepTreeLeafDetails implements Serializable {
   /** If a tool tip text is set, whether to show it or not */
   protected boolean m_showTipText = true;
 
+  /**
+   * Constructor
+   *
+   * @param step the step to wrap in this {@code StepTreeLeafDetails} instance
+   */
   public StepTreeLeafDetails(Object step) {
     this(step, true);
   }
 
+  /**
+   * Constructor
+   *
+   * @param step the step to wrap in this {@code StepTreeLeafDetails} instance
+   * @param showTipText true if the tool tip text should be shown for this
+   *          instance
+   */
   public StepTreeLeafDetails(Object step, boolean showTipText) {
     m_stepClazz = step.getClass();
 
