@@ -643,10 +643,27 @@ public class StepManagerImpl implements StepManager {
    * @param connectionName the name of the type of connection to add
    * @param step the target step component that is receiving the given
    *          connection type
+   *          it can't accept the connection at the present time
+   * @return true if the connection was successful
+   */
+  public boolean addOutgoingConnection(String connectionName, StepManagerImpl step) {
+    return addOutgoingConnection(connectionName, step, false);
+  }
+
+  /**
+   * Add an outgoing connection (comprising of the type of connection and
+   * associated target step) to this step of the specified type. Connection is
+   * only made if the target step will accept the connection type at this time
+   *
+   * @param connectionName the name of the type of connection to add
+   * @param step the target step component that is receiving the given
+   *          connection type
+   * @param force whether to force the connection, even if the target step says
+   *          it can't accept the connection at the present time
    * @return true if the connection was successful
    */
   public boolean addOutgoingConnection(String connectionName,
-    StepManagerImpl step) {
+    StepManagerImpl step, boolean force) {
 
     // if target step can accept this connection type at this time then
     // create outgoing connection on this step and incoming connection
@@ -654,7 +671,7 @@ public class StepManagerImpl implements StepManager {
     boolean connSuccessful = false;
     List<String> targetCanAccept =
       step.getManagedStep().getIncomingConnectionTypes();
-    if (targetCanAccept.contains(connectionName)) {
+    if (targetCanAccept.contains(connectionName) || force) {
       List<StepManager> steps = m_connectedByTypeOutgoing.get(connectionName);
       if (steps == null) {
         steps = new ArrayList<StepManager>();

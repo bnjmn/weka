@@ -66,8 +66,9 @@ public class Flow {
     if (flowLoaders != null) {
       try {
         for (String f : flowLoaders) {
-          FlowLoader fl = (FlowLoader) PluginManager
-            .getPluginInstance(FlowLoader.class.getCanonicalName(), f);
+          FlowLoader fl =
+            (FlowLoader) PluginManager.getPluginInstance(
+              FlowLoader.class.getCanonicalName(), f);
           String extension = fl.getFlowFileExtension();
           String description = fl.getFlowFileExtensionDescription();
           FLOW_FILE_EXTENSIONS.add(new ExtensionFileFilter("." + extension,
@@ -103,10 +104,11 @@ public class Flow {
     if (availableLoaders != null) {
       try {
         for (String l : availableLoaders) {
-          FlowLoader candidate = (FlowLoader) PluginManager
-            .getPluginInstance(FlowLoader.class.getCanonicalName(), l);
-          if (candidate.getFlowFileExtension()
-            .equalsIgnoreCase(flowFileExtension)) {
+          FlowLoader candidate =
+            (FlowLoader) PluginManager.getPluginInstance(
+              FlowLoader.class.getCanonicalName(), l);
+          if (candidate.getFlowFileExtension().equalsIgnoreCase(
+            flowFileExtension)) {
             result = candidate;
             break;
           }
@@ -133,13 +135,14 @@ public class Flow {
   public static Flow loadFlow(File flowFile, Logger log) throws WekaException {
     String extension = "kf";
     if (flowFile.toString().lastIndexOf('.') > 0) {
-      extension = flowFile.toString().substring(
-        flowFile.toString().lastIndexOf('.') + 1, flowFile.toString().length());
+      extension =
+        flowFile.toString().substring(flowFile.toString().lastIndexOf('.') + 1,
+          flowFile.toString().length());
     }
     FlowLoader toUse = getFlowLoader(extension, log);
     if (toUse == null) {
-      throw new WekaException(
-        "Was unable to find a loader for flow file: " + flowFile.toString());
+      throw new WekaException("Was unable to find a loader for flow file: "
+        + flowFile.toString());
     }
     return toUse.readFlow(flowFile);
   }
@@ -167,8 +170,7 @@ public class Flow {
    * @return the loaded flow
    * @throws WekaException if a problem occurs
    */
-  public static Flow loadFlow(Reader r, FlowLoader loader)
-    throws WekaException {
+  public static Flow loadFlow(Reader r, FlowLoader loader) throws WekaException {
     return loader.readFlow(r);
   }
 
@@ -301,14 +303,33 @@ public class Flow {
    * connectionType. The connection will be successful only if both source and
    * target are actually part of this Flow, and the target is able to accept the
    * connection at this time.
-   * 
+   *
    * @param source the StepManager for the source step
    * @param target the StepManager for the target step
    * @param connectionType the connection type to use
+   *          says it can accept the connection type at this time)
    * @return true if the connection was successful
    */
   public synchronized boolean connectSteps(StepManagerImpl source,
     StepManagerImpl target, String connectionType) {
+    return connectSteps(source, target, connectionType, false);
+  }
+
+  /**
+   * Connect the supplied source and target steps using the given
+   * connectionType. The connection will be successful only if both source and
+   * target are actually part of this Flow, and the target is able to accept the
+   * connection at this time.
+   *
+   * @param source the StepManager for the source step
+   * @param target the StepManager for the target step
+   * @param connectionType the connection type to use
+   * @param force true to force the connection (i.e. even if the target step
+   *          says it can accept the connection type at this time)
+   * @return true if the connection was successful
+   */
+  public synchronized boolean connectSteps(StepManagerImpl source,
+    StepManagerImpl target, String connectionType, boolean force) {
     boolean connSuccessful = false;
     // make sure we contain both these steps!
     if (findStep(source.getName()) == source
@@ -317,7 +338,7 @@ public class Flow {
       // this takes care of ensuring that the target can accept
       // the connection at this time and the creation of the
       // incoming connection on the target
-      connSuccessful = source.addOutgoingConnection(connectionType, target);
+      connSuccessful = source.addOutgoingConnection(connectionType, target, force);
     }
     return connSuccessful;
   }
@@ -345,8 +366,8 @@ public class Flow {
     throws WekaException {
 
     if (!m_flowSteps.containsKey(oldName)) {
-      throw new WekaException(
-        "Step " + oldName + " does not seem to be part of the flow!");
+      throw new WekaException("Step " + oldName
+        + " does not seem to be part of the flow!");
     }
 
     StepManagerImpl toRename = m_flowSteps.remove(oldName);

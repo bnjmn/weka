@@ -637,7 +637,7 @@ public class JSONFlowUtils {
         }
 
         if (targetManager != null) {
-          manager.addOutgoingConnection(conName, targetManager);
+          manager.addOutgoingConnection(conName, targetManager, true);
         }
       }
     }

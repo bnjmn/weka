@@ -240,7 +240,7 @@ public class LegacyFlowLoader implements FlowLoader {
 
     String evntName = conn.getEventName();
 
-    flow.connectSteps(sourceNew, targetNew, evntName);
+    flow.connectSteps(sourceNew, targetNew, evntName, true);
   }
 
   /**
