@@ -1143,6 +1143,7 @@ public class MISMO extends AbstractClassifier implements
     // class
     result.disableAllClasses();
     result.disableAllClassDependencies();
+    result.disable(Capability.NO_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
 
