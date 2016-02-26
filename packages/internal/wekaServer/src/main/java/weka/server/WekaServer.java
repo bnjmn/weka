@@ -420,11 +420,11 @@ public class WekaServer implements CommandlineRunnable {
     getSchedule.addServlet(new ServletHolder(new GetScheduleServlet(m_taskMap,
       this)), "/*");
 
-    // static test servlet
+    /* // static test servlet
     Context testStatic =
       new Context(contexts, StaticTestServlet.CONTEXT_PATH, Context.SESSIONS);
     testStatic.addServlet(new ServletHolder(new StaticTestServlet(m_taskMap,
-      this)), "/*");
+      this)), "/*"); */
 
     m_jettyServer.setHandlers((securityHandler != null) ? new Handler[] {
       securityHandler, contexts } : new Handler[] { contexts });
