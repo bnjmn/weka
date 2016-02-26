@@ -32,7 +32,6 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
-import weka.core.ResampleUtils;
 import weka.core.SelectedTag;
 import weka.core.Statistics;
 import weka.core.Tag;
@@ -51,7 +50,6 @@ import weka.filters.unsupervised.attribute.Standardize;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Random;
 import java.util.Vector;
 
 /**
@@ -268,6 +266,7 @@ public class GaussianProcesses extends RandomizableClassifier implements
     // class
     result.disableAllClasses();
     result.disableAllClassDependencies();
+    result.disable(Capability.NO_CLASS);
     result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.DATE_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
