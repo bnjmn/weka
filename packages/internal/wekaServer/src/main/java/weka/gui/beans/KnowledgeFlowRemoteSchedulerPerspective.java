@@ -20,6 +20,55 @@
 
 package weka.gui.beans;
 
+import com.toedter.calendar.JDateChooser;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.mortbay.jetty.security.Password;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.WekaPackageManager;
+import weka.experiment.TaskStatusInfo;
+import weka.gui.ListSelectorDialog;
+import weka.gui.beans.KnowledgeFlowApp.KFPerspective;
+import weka.gui.beans.KnowledgeFlowApp.MainKFPerspective;
+import weka.gui.beans.xml.XMLBeans;
+import weka.server.ExecuteTaskServlet;
+import weka.server.GetScheduleServlet;
+import weka.server.GetTaskListServlet;
+import weka.server.GetTaskResultServlet;
+import weka.server.GetTaskStatusServlet;
+import weka.server.NamedTask;
+import weka.server.RootServlet;
+import weka.server.Schedule;
+import weka.server.WekaServer;
+import weka.server.WekaServlet;
+import weka.server.WekaTaskMap;
+import weka.server.knowledgeFlow.legacy.LegacyScheduledNamedKFTask;
+import weka.server.knowledgeFlow.legacy.LegacyUnscheduledNamedKFTask;
+import weka.server.knowledgeFlow.legacy.FlowRunnerRemote;
+
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.Icon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JTabbedPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.plaf.basic.BasicButtonUI;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -51,58 +100,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 import java.util.zip.GZIPInputStream;
-
-import javax.swing.AbstractButton;
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.Icon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.plaf.basic.BasicButtonUI;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.mortbay.jetty.security.Password;
-
-import weka.core.Environment;
-import weka.core.Instances;
-import weka.core.WekaPackageManager;
-import weka.experiment.TaskStatusInfo;
-import weka.gui.ListSelectorDialog;
-import weka.gui.beans.KnowledgeFlowApp.KFPerspective;
-import weka.gui.beans.KnowledgeFlowApp.MainKFPerspective;
-import weka.gui.beans.xml.XMLBeans;
-import weka.server.ExecuteTaskServlet;
-import weka.server.GetScheduleServlet;
-import weka.server.GetTaskListServlet;
-import weka.server.GetTaskResultServlet;
-import weka.server.GetTaskStatusServlet;
-import weka.server.NamedTask;
-import weka.server.RootServlet;
-import weka.server.Schedule;
-import weka.server.WekaServer;
-import weka.server.WekaServlet;
-import weka.server.WekaTaskMap;
-import weka.server.knowledgeFlow.FlowRunnerRemote;
-import weka.server.knowledgeFlow.ScheduledNamedKFTask;
-import weka.server.knowledgeFlow.UnscheduledNamedKFTask;
-
-import com.toedter.calendar.JDateChooser;
 
 /**
  * Class that provides a Knowledge Flow perspective for executing, scheduling
@@ -971,10 +968,10 @@ public class KnowledgeFlowRemoteSchedulerPerspective extends JPanel implements
           params = null;
         }
         if (sched == null) {
-          taskToRun = new UnscheduledNamedKFTask(FlowRunnerRemote.NAME_PREFIX
+          taskToRun = new LegacyUnscheduledNamedKFTask(FlowRunnerRemote.NAME_PREFIX
             + flowName, flowXML, m_sequentialCheck.isSelected(), params);
         } else {
-          taskToRun = new ScheduledNamedKFTask(FlowRunnerRemote.NAME_PREFIX
+          taskToRun = new LegacyScheduledNamedKFTask(FlowRunnerRemote.NAME_PREFIX
             + flowName, flowXML, m_sequentialCheck.isSelected(), params, sched);
         }
 

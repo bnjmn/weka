@@ -21,7 +21,12 @@
 
 package weka.server;
 
+import weka.core.Option;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+
 import java.io.Serializable;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -30,10 +35,6 @@ import java.util.Enumeration;
 import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Vector;
-
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Utils;
 
 /**
  * Class for configuring a recurring or one-off schedule.
@@ -82,6 +83,15 @@ public class Schedule implements Serializable, OptionHandler {
     public String toString() {
       return m_stringVal;
     }
+
+    public static Repeat stringToValue(String r) {
+      for (Repeat rp : Repeat.values()) {
+        if (rp.toString().equalsIgnoreCase(r)) {
+          return rp;
+        }
+      }
+      return null;
+    }
   }
 
   public static enum OccurrenceWithinMonth {
@@ -97,6 +107,15 @@ public class Schedule implements Serializable, OptionHandler {
     @Override
     public String toString() {
       return m_stringVal;
+    }
+
+    public static OccurrenceWithinMonth stringToValue(String o) {
+      for (OccurrenceWithinMonth m : OccurrenceWithinMonth.values()) {
+        if (m.toString().equalsIgnoreCase(o)) {
+          return m;
+        }
+      }
+      return null;
     }
   }
 
@@ -293,52 +312,14 @@ public class Schedule implements Serializable, OptionHandler {
     while ((dow = Utils.getOption("day-of-week", options)).length() > 0) {
       dow = dow.toLowerCase();
       if (dow.length() > 0) {
-        if (dow.equals("mon") || dow.equals("monday")) {
-          m_dayOfTheWeek.add(Calendar.MONDAY);
-        } else if (dow.equals("tue") || dow.equals("tuesday")) {
-          m_dayOfTheWeek.add(Calendar.TUESDAY);
-        } else if (dow.equals("wed") || dow.equals("wednesday")) {
-          m_dayOfTheWeek.add(Calendar.WEDNESDAY);
-        } else if (dow.equals("thu") || dow.equals("thursday")) {
-          m_dayOfTheWeek.add(Calendar.THURSDAY);
-        } else if (dow.equals("fri") || dow.equals("friday")) {
-          m_dayOfTheWeek.add(Calendar.FRIDAY);
-        } else if (dow.equals("sat") || dow.equals("saturday")) {
-          m_dayOfTheWeek.add(Calendar.SATURDAY);
-        } else if (dow.equals("sun") || dow.equals("sunday")) {
-          m_dayOfTheWeek.add(Calendar.SUNDAY);
-        }
+        m_dayOfTheWeek.add(stringDOWToCalendarDOW(dow));
       }
     }
 
     String moy = Utils.getOption("month-of-year", options);
     moy = moy.toLowerCase();
     if (moy.length() > 0) {
-      if (moy.equals("jan") || moy.equals("january")) {
-        m_monthOfTheYear = Calendar.JANUARY;
-      } else if (moy.equals("feb") || moy.equals("february")) {
-        m_monthOfTheYear = Calendar.FEBRUARY;
-      } else if (moy.equals("mar") || moy.equals("march")) {
-        m_monthOfTheYear = Calendar.MARCH;
-      } else if (moy.equals("apr") || moy.equals("april")) {
-        m_monthOfTheYear = Calendar.APRIL;
-      } else if (moy.equals("may")) {
-        m_monthOfTheYear = Calendar.MAY;
-      } else if (moy.equals("jun") || moy.equals("june")) {
-        m_monthOfTheYear = Calendar.JUNE;
-      } else if (moy.equals("jul") || moy.equals("july")) {
-        m_monthOfTheYear = Calendar.JULY;
-      } else if (moy.equals("aug") || moy.equals("august")) {
-        m_monthOfTheYear = Calendar.AUGUST;
-      } else if (moy.equals("sep") || moy.equals("september")) {
-        m_monthOfTheYear = Calendar.SEPTEMBER;
-      } else if (moy.equals("oct") || moy.equals("october")) {
-        m_monthOfTheYear = Calendar.OCTOBER;
-      } else if (moy.equals("nov") || moy.equals("november")) {
-        m_monthOfTheYear = Calendar.NOVEMBER;
-      } else if (moy.equals("dec") || moy.equals("december")) {
-        m_monthOfTheYear = Calendar.DECEMBER;
-      }
+      m_monthOfTheYear = stringMonthToCalendarMonth(moy);
     }
 
     String dom = Utils.getOption("day-of-month", options);
@@ -365,6 +346,108 @@ public class Schedule implements Serializable, OptionHandler {
       throw new Exception("Problem with configuration of Schedule: "
         + configCheck);
     }
+  }
+
+  public static int stringMonthToCalendarMonth(String moy) {
+    moy = moy.toLowerCase().trim();
+    if (moy.equals("jan") || moy.equals("january")) {
+      return Calendar.JANUARY;
+    } else if (moy.equals("feb") || moy.equals("february")) {
+      return Calendar.FEBRUARY;
+    } else if (moy.equals("mar") || moy.equals("march")) {
+      return Calendar.MARCH;
+    } else if (moy.equals("apr") || moy.equals("april")) {
+      return Calendar.APRIL;
+    } else if (moy.equals("may")) {
+      return Calendar.MAY;
+    } else if (moy.equals("jun") || moy.equals("june")) {
+      return Calendar.JUNE;
+    } else if (moy.equals("jul") || moy.equals("july")) {
+      return Calendar.JULY;
+    } else if (moy.equals("aug") || moy.equals("august")) {
+      return Calendar.AUGUST;
+    } else if (moy.equals("sep") || moy.equals("september")) {
+      return Calendar.SEPTEMBER;
+    } else if (moy.equals("oct") || moy.equals("october")) {
+      return Calendar.OCTOBER;
+    } else if (moy.equals("nov") || moy.equals("november")) {
+      return Calendar.NOVEMBER;
+    } else if (moy.equals("dec") || moy.equals("december")) {
+      return Calendar.DECEMBER;
+    }
+
+    throw new IllegalArgumentException("Unrecognised month of the year");
+  }
+
+  public static String calendarMonthToString(int moy) {
+    String result = null;
+    if (moy == Calendar.JANUARY) {
+      result = "jan";
+    } else if (moy == Calendar.FEBRUARY) {
+      result = "feb";
+    } else if (moy == Calendar.MARCH) {
+      result = "mar";
+    } else if (moy == Calendar.APRIL) {
+      result = "apr";
+    } else if (moy == Calendar.MAY) {
+      result = "may";
+    } else if (moy == Calendar.JUNE) {
+      result = "jun";
+    } else if (moy == Calendar.JULY) {
+      result = "jul";
+    } else if (moy == Calendar.AUGUST) {
+      result = "aug";
+    } else if (moy == Calendar.SEPTEMBER) {
+      result = "sep";
+    } else if (moy == Calendar.OCTOBER) {
+      result = "oct";
+    } else if (moy == Calendar.NOVEMBER) {
+      result = "nov";
+    } else if (moy == Calendar.DECEMBER) {
+      result = "dec";
+    }
+
+    return result;
+  }
+
+  public static int stringDOWToCalendarDOW(String dow) {
+    dow = dow.toLowerCase().trim();
+    if (dow.startsWith("mon")) {
+      return Calendar.MONDAY;
+    } else if (dow.startsWith("tue")) {
+      return Calendar.TUESDAY;
+    } else if (dow.startsWith("wed")) {
+      return Calendar.WEDNESDAY;
+    } else if (dow.startsWith("thu")) {
+      return Calendar.THURSDAY;
+    } else if (dow.startsWith("fri")) {
+      return Calendar.FRIDAY;
+    } else if (dow.startsWith("sat")) {
+      return Calendar.SATURDAY;
+    } else if (dow.startsWith("sun")) {
+      return Calendar.SUNDAY;
+    }
+    throw new IllegalArgumentException("Unrecogised day of the week");
+  }
+
+  public static String calendarDOWToString(int dow) {
+    String result = null;
+    if (dow == Calendar.MONDAY) {
+      result = "mon";
+    } else if (dow == Calendar.TUESDAY) {
+      result = "tue";
+    } else if (dow == Calendar.WEDNESDAY) {
+      result = "wed";
+    } else if (dow == Calendar.THURSDAY) {
+      result = "thu";
+    } else if (dow == Calendar.FRIDAY) {
+      result = "fri";
+    } else if (dow == Calendar.SATURDAY) {
+      result = "sat";
+    } else if (dow == Calendar.SUNDAY) {
+      result = "sun";
+    }
+    return result;
   }
 
   public void setStartDate(Date d) {
@@ -1201,5 +1284,16 @@ public class Schedule implements Serializable, OptionHandler {
     }
 
     return 0L;
+  }
+
+  protected Date parseDate(Object date) throws ParseException {
+    if (date == null) {
+      return null;
+    }
+
+    SimpleDateFormat sdf = new SimpleDateFormat();
+    sdf.applyPattern(m_dateFormat);
+
+    return sdf.parse(date.toString());
   }
 }

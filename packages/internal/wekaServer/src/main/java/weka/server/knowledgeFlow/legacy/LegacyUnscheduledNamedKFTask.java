@@ -19,7 +19,22 @@
  *
  */
 
-package weka.server.knowledgeFlow;
+package weka.server.knowledgeFlow.legacy;
+
+import weka.core.Environment;
+import weka.core.LogHandler;
+import weka.experiment.TaskStatusInfo;
+import weka.gui.Logger;
+import weka.gui.beans.BeanCommon;
+import weka.gui.beans.BeanConnection;
+import weka.gui.beans.BeanInstance;
+import weka.gui.beans.FlowRunner;
+import weka.gui.beans.HeadlessEventCollector;
+import weka.gui.beans.xml.XMLBeans;
+import weka.server.NamedTask;
+import weka.server.WekaServer;
+import weka.server.WekaTaskMap;
+import weka.server.logging.ServerLogger;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -39,26 +54,11 @@ import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
-import weka.core.Environment;
-import weka.core.LogHandler;
-import weka.experiment.TaskStatusInfo;
-import weka.gui.Logger;
-import weka.gui.beans.BeanCommon;
-import weka.gui.beans.BeanConnection;
-import weka.gui.beans.BeanInstance;
-import weka.gui.beans.FlowRunner;
-import weka.gui.beans.HeadlessEventCollector;
-import weka.gui.beans.xml.XMLBeans;
-import weka.server.NamedTask;
-import weka.server.WekaServer;
-import weka.server.WekaTaskMap;
-import weka.server.logging.ServerLogger;
-
 /**
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision$
+ * @version $Revision: 10248 $
  */
-public class UnscheduledNamedKFTask implements NamedTask, LogHandler,
+public class LegacyUnscheduledNamedKFTask implements NamedTask, LogHandler,
   Serializable {
 
   /**
@@ -82,7 +82,7 @@ public class UnscheduledNamedKFTask implements NamedTask, LogHandler,
   protected transient ServerLogger m_log;
 
   /**
-   * flow parameters (i.e. environmt variables set on the client side that need
+   * flow parameters (i.e. environment variables set on the client side that need
    * to be set on the server side for the flow)
    */
   protected Map<String, String> m_parameters;
@@ -104,7 +104,7 @@ public class UnscheduledNamedKFTask implements NamedTask, LogHandler,
    * @param sequential true if start points are to run sequentially
    * @param parameters parameters for the flow
    */
-  public UnscheduledNamedKFTask(String name, StringBuffer xmlFlow,
+  public LegacyUnscheduledNamedKFTask(String name, StringBuffer xmlFlow,
     boolean sequential, Map<String, String> parameters) {
     m_name = name;
     m_flowXML = xmlFlow;

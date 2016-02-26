@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>wekaServer</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.5-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>wekaServer</name>
@@ -95,7 +95,7 @@ Simple server for executing Weka tasks.
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.10,)</version>
+      <version>[3.7.13,)</version>
     </dependency>
 
     <dependency>
@@ -167,7 +167,7 @@ Simple server for executing Weka tasks.
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.10,)</version>
+      <version>[3.7.13,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

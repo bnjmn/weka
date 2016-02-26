@@ -19,24 +19,13 @@
  *
  */
 
-package weka.server.knowledgeFlow;
-
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Vector;
+package weka.server.knowledgeFlow.legacy;
 
 import org.apache.commons.httpclient.Header;
 import org.apache.commons.httpclient.HttpClient;
 import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
 import org.apache.commons.httpclient.methods.PostMethod;
 import org.apache.commons.httpclient.methods.RequestEntity;
-
 import weka.core.CommandlineRunnable;
 import weka.core.Environment;
 import weka.core.Option;
@@ -50,11 +39,21 @@ import weka.server.Schedule;
 import weka.server.WekaServer;
 import weka.server.WekaServlet;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Vector;
+
 /**
  * Execute a KnowledgeFlow on a remote server from the command line
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision$
+ * @version $Revision: 10248 $
  */
 public class FlowRunnerRemote implements CommandlineRunnable {
 
@@ -163,10 +162,10 @@ public class FlowRunnerRemote implements CommandlineRunnable {
     NamedTask taskToRun = null;
 
     if (m_schedule == null) {
-      taskToRun = new UnscheduledNamedKFTask(NAME_PREFIX + m_name, m_flowXML,
+      taskToRun = new LegacyUnscheduledNamedKFTask(NAME_PREFIX + m_name, m_flowXML,
         m_sequential, m_parameters);
     } else {
-      taskToRun = new ScheduledNamedKFTask(NAME_PREFIX + m_name, m_flowXML,
+      taskToRun = new LegacyScheduledNamedKFTask(NAME_PREFIX + m_name, m_flowXML,
         m_sequential, m_parameters, m_schedule);
 
     }
@@ -286,6 +285,10 @@ public class FlowRunnerRemote implements CommandlineRunnable {
     return result.toString();
   }
 
+  @Override public void preExecution() throws Exception {
+
+  }
+
   @Override
   public void run(Object toRun, String[] args) {
 
@@ -316,7 +319,7 @@ public class FlowRunnerRemote implements CommandlineRunnable {
             System.exit(1);
           }
           flowFile = args[i];
-        } else if (args[i].equalsIgnoreCase("-seqential")) {
+        } else if (args[i].equalsIgnoreCase("-sequential")) {
           m_sequential = true;
           i++;
         } else if (args[i].equalsIgnoreCase("-server")) {
@@ -373,6 +376,10 @@ public class FlowRunnerRemote implements CommandlineRunnable {
         e.printStackTrace();
       }
     }
+  }
+
+  @Override public void postExecution() throws Exception {
+
   }
 
   /**

@@ -27,6 +27,7 @@
         <dependency org="com.jgoodies" name="jgoodies-common" rev="${dependency.jgoodies-common.revision}" transitive="false" conf="default->default" changing="false" />
         <dependency org="com.jgoodies" name="jgoodies-looks" rev="${dependency.jgoodies-looks.revision}" transitive="false" conf="default->default" changing="false" />
         <dependency org="org.mortbay.jetty" name="servlet-api-2.5" rev="${dependency.servlet-api.revision}" transitive="false" conf="default->default" changing="false" />
+<dependency org="io.fastjson" name="boon" rev="0.33"/>
 
 
 <!--    <dependency org="pentaho.weka" name="pdm-3.7-ce" rev="${dependency.weka.revision}" transitive="false" conf="default->default" changing="true" /> -->

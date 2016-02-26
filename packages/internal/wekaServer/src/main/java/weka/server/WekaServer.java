@@ -21,6 +21,37 @@
 
 package weka.server;
 
+import org.apache.commons.httpclient.Credentials;
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
+import org.apache.commons.httpclient.UsernamePasswordCredentials;
+import org.apache.commons.httpclient.auth.AuthScope;
+import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
+import org.apache.commons.httpclient.methods.PostMethod;
+import org.apache.commons.httpclient.methods.RequestEntity;
+import org.mortbay.jetty.Connector;
+import org.mortbay.jetty.Handler;
+import org.mortbay.jetty.Server;
+import org.mortbay.jetty.bio.SocketConnector;
+import org.mortbay.jetty.handler.ContextHandlerCollection;
+import org.mortbay.jetty.security.Constraint;
+import org.mortbay.jetty.security.ConstraintMapping;
+import org.mortbay.jetty.security.HashUserRealm;
+import org.mortbay.jetty.security.Password;
+import org.mortbay.jetty.security.SecurityHandler;
+import org.mortbay.jetty.servlet.Context;
+import org.mortbay.jetty.servlet.ServletHolder;
+import weka.core.CommandlineRunnable;
+import weka.core.Environment;
+import weka.core.LogHandler;
+import weka.core.WekaPackageManager;
+import weka.experiment.Task;
+import weka.experiment.TaskStatusInfo;
+import weka.gui.Logger;
+import weka.server.WekaTaskMap.WekaTaskEntry;
+import weka.server.logging.ServerLogger;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -50,38 +81,6 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
-import org.apache.commons.httpclient.Credentials;
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.MultiThreadedHttpConnectionManager;
-import org.apache.commons.httpclient.UsernamePasswordCredentials;
-import org.apache.commons.httpclient.auth.AuthScope;
-import org.apache.commons.httpclient.methods.ByteArrayRequestEntity;
-import org.apache.commons.httpclient.methods.PostMethod;
-import org.apache.commons.httpclient.methods.RequestEntity;
-import org.mortbay.jetty.Connector;
-import org.mortbay.jetty.Handler;
-import org.mortbay.jetty.Server;
-import org.mortbay.jetty.bio.SocketConnector;
-import org.mortbay.jetty.handler.ContextHandlerCollection;
-import org.mortbay.jetty.security.Constraint;
-import org.mortbay.jetty.security.ConstraintMapping;
-import org.mortbay.jetty.security.HashUserRealm;
-import org.mortbay.jetty.security.Password;
-import org.mortbay.jetty.security.SecurityHandler;
-import org.mortbay.jetty.servlet.Context;
-import org.mortbay.jetty.servlet.ServletHolder;
-
-import weka.core.CommandlineRunnable;
-import weka.core.Environment;
-import weka.core.LogHandler;
-import weka.core.WekaPackageManager;
-import weka.experiment.Task;
-import weka.experiment.TaskStatusInfo;
-import weka.gui.Logger;
-import weka.server.WekaTaskMap.WekaTaskEntry;
-import weka.server.logging.ServerLogger;
-
 /**
  * The main server program that launches tasks (either locally or on registered
  * remote slaves).
@@ -92,8 +91,9 @@ import weka.server.logging.ServerLogger;
 public class WekaServer implements CommandlineRunnable {
 
   /** Server root directory */
-  public static final String SERVER_ROOT_DIRECTORY = WekaPackageManager.WEKA_HOME
-    .toString() + File.separator + "server" + File.separator;
+  public static final String SERVER_ROOT_DIRECTORY =
+    WekaPackageManager.WEKA_HOME.toString() + File.separator + "server"
+      + File.separator;
 
   /** Subdirectory for task persistence */
   public static final String TASK_PERSISTENCE_DIRECTORY = SERVER_ROOT_DIRECTORY
@@ -240,8 +240,8 @@ public class WekaServer implements CommandlineRunnable {
     ByteArrayOutputStream ostream = new ByteArrayOutputStream();
     OutputStream os = ostream;
     ObjectOutputStream p;
-    p = new ObjectOutputStream(new BufferedOutputStream(
-      new GZIPOutputStream(os)));
+    p =
+      new ObjectOutputStream(new BufferedOutputStream(new GZIPOutputStream(os)));
 
     p.writeObject(toSerialize);
     p.flush();
@@ -295,8 +295,9 @@ public class WekaServer implements CommandlineRunnable {
 
     m_jettyServer = new Server();
 
-    String wekaServerPasswordPath = WekaPackageManager.WEKA_HOME.toString()
-      + File.separator + "server" + File.separator + "weka.pwd";
+    String wekaServerPasswordPath =
+      WekaPackageManager.WEKA_HOME.toString() + File.separator + "server"
+        + File.separator + "weka.pwd";
     File wekaServerPasswordFile = new File(wekaServerPasswordPath);
     boolean useAuth = wekaServerPasswordFile.exists();
 
@@ -353,69 +354,76 @@ public class WekaServer implements CommandlineRunnable {
     ContextHandlerCollection contexts = new ContextHandlerCollection();
 
     // Root context
-    Context root = new Context(contexts, RootServlet.CONTEXT_PATH,
-      Context.SESSIONS);
+    Context root =
+      new Context(contexts, RootServlet.CONTEXT_PATH, Context.SESSIONS);
     RootServlet rootServlet = new RootServlet(m_taskMap, this);
     root.addServlet(new ServletHolder(rootServlet), "/*");
 
     // Execute task
-    Context executeTask = new Context(contexts,
-      ExecuteTaskServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context executeTask =
+      new Context(contexts, ExecuteTaskServlet.CONTEXT_PATH, Context.SESSIONS);
     executeTask.addServlet(new ServletHolder(new ExecuteTaskServlet(m_taskMap,
       this)), "/*");
 
     // Task status
-    Context taskStatus = new Context(contexts,
-      GetTaskStatusServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context taskStatus =
+      new Context(contexts, GetTaskStatusServlet.CONTEXT_PATH, Context.SESSIONS);
     taskStatus.addServlet(new ServletHolder(new GetTaskStatusServlet(m_taskMap,
       this)), "/*");
 
     // Purge task
-    Context purgeTask = new Context(contexts, PurgeTaskServlet.CONTEXT_PATH,
-      Context.SESSIONS);
+    Context purgeTask =
+      new Context(contexts, PurgeTaskServlet.CONTEXT_PATH, Context.SESSIONS);
     purgeTask.addServlet(new ServletHolder(
       new PurgeTaskServlet(m_taskMap, this)), "/*");
 
     // Add slave
-    Context addSlave = new Context(contexts, AddSlaveServlet.CONTEXT_PATH,
-      Context.SESSIONS);
+    Context addSlave =
+      new Context(contexts, AddSlaveServlet.CONTEXT_PATH, Context.SESSIONS);
     addSlave.addServlet(
       new ServletHolder(new AddSlaveServlet(m_taskMap, this)), "/*");
 
     // Server load factor
-    Context loadFactor = new Context(contexts,
-      GetServerLoadServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context loadFactor =
+      new Context(contexts, GetServerLoadServlet.CONTEXT_PATH, Context.SESSIONS);
     loadFactor.addServlet(new ServletHolder(new GetServerLoadServlet(m_taskMap,
       this)), "/*");
 
     // Set task status (from slave)
-    Context setTaskStatus = new Context(contexts,
-      SetTaskStatusServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context setTaskStatus =
+      new Context(contexts, SetTaskStatusServlet.CONTEXT_PATH, Context.SESSIONS);
     setTaskStatus.addServlet(new ServletHolder(new SetTaskStatusServlet(
       m_taskMap, this)), "/*");
 
     // Set last executon for task (from slave)
-    Context setLastExecution = new Context(contexts,
-      SetLastExecutionServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context setLastExecution =
+      new Context(contexts, SetLastExecutionServlet.CONTEXT_PATH,
+        Context.SESSIONS);
     setLastExecution.addServlet(new ServletHolder(new SetLastExecutionServlet(
       m_taskMap, this)), "/*");
 
     // Get task list servlet
-    Context getTaskList = new Context(contexts,
-      GetTaskListServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context getTaskList =
+      new Context(contexts, GetTaskListServlet.CONTEXT_PATH, Context.SESSIONS);
     getTaskList.addServlet(new ServletHolder(new GetTaskListServlet(m_taskMap,
       this)), "/*");
 
     // Get task result servlet
-    Context getTaskResult = new Context(contexts,
-      GetTaskResultServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context getTaskResult =
+      new Context(contexts, GetTaskResultServlet.CONTEXT_PATH, Context.SESSIONS);
     getTaskResult.addServlet(new ServletHolder(new GetTaskResultServlet(
       m_taskMap, this)), "/*");
 
     // Get schedule servlet
-    Context getSchedule = new Context(contexts,
-      GetScheduleServlet.CONTEXT_PATH, Context.SESSIONS);
+    Context getSchedule =
+      new Context(contexts, GetScheduleServlet.CONTEXT_PATH, Context.SESSIONS);
     getSchedule.addServlet(new ServletHolder(new GetScheduleServlet(m_taskMap,
+      this)), "/*");
+
+    // static test servlet
+    Context testStatic =
+      new Context(contexts, StaticTestServlet.CONTEXT_PATH, Context.SESSIONS);
+    testStatic.addServlet(new ServletHolder(new StaticTestServlet(m_taskMap,
       this)), "/*");
 
     m_jettyServer.setHandlers((securityHandler != null) ? new Handler[] {
@@ -605,9 +613,9 @@ public class WekaServer implements CommandlineRunnable {
       m_executorPool.shutdownNow();
     }
 
-    m_executorPool = new ThreadPoolExecutor(m_numExecutionSlots,
-      m_numExecutionSlots, 120, TimeUnit.SECONDS,
-      new LinkedBlockingQueue<Runnable>());
+    m_executorPool =
+      new ThreadPoolExecutor(m_numExecutionSlots, m_numExecutionSlots, 120,
+        TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
   }
 
   /**
@@ -869,10 +877,12 @@ public class WekaServer implements CommandlineRunnable {
       }
 
       TaskHolder holder = new TaskHolder(entry, task);
-      File persist = new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_"
-        + m_port + File.separator + entry.toString());
-      ObjectOutputStream oos = new ObjectOutputStream(new BufferedOutputStream(
-        new FileOutputStream(persist)));
+      File persist =
+        new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_" + m_port
+          + File.separator + entry.toString());
+      ObjectOutputStream oos =
+        new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+          persist)));
       oos.writeObject(holder);
       oos.flush();
       oos.close();
@@ -899,8 +909,8 @@ public class WekaServer implements CommandlineRunnable {
       }
     }
 
-    File tmpFile = new File(TASK_TEMP_DIRECTORY
-      + UUID.randomUUID().toString().trim());
+    File tmpFile =
+      new File(TASK_TEMP_DIRECTORY + UUID.randomUUID().toString().trim());
 
     return tmpFile;
   }
@@ -923,8 +933,8 @@ public class WekaServer implements CommandlineRunnable {
           url = url.replace(" ", "%20");
           url += SetLastExecutionServlet.CONTEXT_PATH;
           url += "/?name=" + entry.toString();
-          SimpleDateFormat sdf = new SimpleDateFormat(
-            SetLastExecutionServlet.DATE_FORMAT);
+          SimpleDateFormat sdf =
+            new SimpleDateFormat(SetLastExecutionServlet.DATE_FORMAT);
           String formattedDate = sdf.format(entry.getLastExecution());
           url += "&lastExecution=" + formattedDate;
 
@@ -933,8 +943,8 @@ public class WekaServer implements CommandlineRunnable {
           post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
           // Get HTTP client
-          HttpClient client = ConnectionManager.getSingleton()
-            .createHttpClient();
+          HttpClient client =
+            ConnectionManager.getSingleton().createHttpClient();
           ConnectionManager.addCredentials(client, m_username, m_password);
 
           // Execute request
@@ -1012,8 +1022,8 @@ public class WekaServer implements CommandlineRunnable {
           post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
           // Get HTTP client
-          HttpClient client = ConnectionManager.getSingleton()
-            .createHttpClient();
+          HttpClient client =
+            ConnectionManager.getSingleton().createHttpClient();
           ConnectionManager.addCredentials(client, m_username, m_password);
 
           // Execute request
@@ -1091,8 +1101,8 @@ public class WekaServer implements CommandlineRunnable {
           // leave tasks that were sent to us from another server for twice as
           // long in
           // order to give the master a chance to tell us to purge them
-          long pI = (t.getCameFromMaster() ? (purgeInterval * 2)
-            : purgeInterval);
+          long pI =
+            (t.getCameFromMaster() ? (purgeInterval * 2) : purgeInterval);
 
           if (nowMilli - milli > pI) {
             doPurge = true;
@@ -1100,16 +1110,16 @@ public class WekaServer implements CommandlineRunnable {
         }
       } else {
         Date lastExecuted = t.getLastExecution();
-        Date nextExecution = ((Scheduled) task).getSchedule().nextExecution(
-          lastExecuted);
+        Date nextExecution =
+          ((Scheduled) task).getSchedule().nextExecution(lastExecuted);
         if (nextExecution == null && lastExecuted != null) {
           long milli = lastExecuted.getTime();
 
           // leave tasks that were sent to us from another server for twice as
           // long in
           // order to give the master a chance to tell us to purge them
-          long pI = (t.getCameFromMaster() ? (purgeInterval * 2)
-            : purgeInterval);
+          long pI =
+            (t.getCameFromMaster() ? (purgeInterval * 2) : purgeInterval);
 
           if (nowMilli - milli > pI) {
             doPurge = true;
@@ -1133,8 +1143,8 @@ public class WekaServer implements CommandlineRunnable {
           post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
           // Get HTTP client
-          HttpClient client = ConnectionManager.getSingleton()
-            .createHttpClient();
+          HttpClient client =
+            ConnectionManager.getSingleton().createHttpClient();
           ConnectionManager.addCredentials(client, m_username, m_password);
 
           // Execute request
@@ -1192,8 +1202,9 @@ public class WekaServer implements CommandlineRunnable {
     }
 
     // try and remove the persisted task
-    File persist = new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_"
-      + m_port + File.separator + entry.toString());
+    File persist =
+      new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_" + m_port
+        + File.separator + entry.toString());
 
     if (persist.exists()) {
       if (!persist.delete()) {
@@ -1210,8 +1221,9 @@ public class WekaServer implements CommandlineRunnable {
       if (!checkPersistenceSubDir()) {
         return;
       }
-      File persistDir = new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_"
-        + m_port + File.separator);
+      File persistDir =
+        new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_" + m_port
+          + File.separator);
       File[] contents = persistDir.listFiles();
       /*
        * System.out.println("Checking persisted tasks...");
@@ -1219,8 +1231,8 @@ public class WekaServer implements CommandlineRunnable {
        */
       for (File f : contents) {
         System.out.println(f.toString());
-        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(f)));
+        ObjectInputStream ois =
+          new ObjectInputStream(new BufferedInputStream(new FileInputStream(f)));
         Object holder = ois.readObject();
         ois.close();
         ois = null;
@@ -1267,8 +1279,8 @@ public class WekaServer implements CommandlineRunnable {
    * @return true if the directory exists (or was created successfully)
    */
   private boolean checkPersistenceSubDir() {
-    File persistSubD = new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_"
-      + m_port);
+    File persistSubD =
+      new File(TASK_PERSISTENCE_DIRECTORY + m_hostname + "_" + m_port);
     if (!persistSubD.exists()) {
       if (!persistSubD.mkdir()) {
         System.err
@@ -1512,6 +1524,11 @@ public class WekaServer implements CommandlineRunnable {
   }
 
   @Override
+  public void preExecution() throws Exception {
+
+  }
+
+  @Override
   public void run(Object toRun, String[] args) throws IllegalArgumentException {
     if (!(toRun instanceof WekaServer)) {
       throw new IllegalArgumentException(
@@ -1618,6 +1635,11 @@ public class WekaServer implements CommandlineRunnable {
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+  @Override
+  public void postExecution() throws Exception {
+
   }
 
   /**

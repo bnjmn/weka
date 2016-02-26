@@ -21,6 +21,15 @@
 
 package weka.server;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import weka.core.LogHandler;
+import weka.server.logging.ServerLogger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -31,17 +40,7 @@ import java.io.PrintWriter;
 import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-
-import weka.core.LogHandler;
-import weka.server.logging.ServerLogger;
+import java.util.Map;
 
 /**
  * Purge one or more tasks from the server. Deletes all persisted copies too.
@@ -83,14 +82,21 @@ public class PurgeTaskServlet extends WekaServlet {
     throws ServletException, IOException {
 
     String taskName = request.getParameter("name");
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String clientParamLegacy = request.getParameter(Legacy.LEGACY_CLIENT_KEY);
+    String jsonClientParam = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientLegacy =
+      clientParamLegacy != null && clientParamLegacy.equalsIgnoreCase("y");
+    boolean clientNew =
+      jsonClientParam != null && jsonClientParam.equalsIgnoreCase("y");
     PrintWriter outWriter = null;
     ObjectOutputStream outStream = null;
 
     response.setStatus(HttpServletResponse.SC_OK);
-    if (client) {
+    if (clientLegacy) {
       response.setContentType("application/octet-stream");
+    } else if (clientNew) {
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("application/json");
     } else {
       response.setCharacterEncoding("UTF-8");
       response.setContentType("text/html;charset=UTF-8");
@@ -116,13 +122,21 @@ public class PurgeTaskServlet extends WekaServlet {
     // NamedTask task = m_taskMap.getTask(taskName);
     try {
       if (!allOK) {
-        if (client) {
-          String errorResult = WekaServlet.RESPONSE_ERROR
-            + ": Can't find task(s) " + unfoundTasks;
+        if (clientLegacy) {
+          String errorResult =
+            WekaServlet.RESPONSE_ERROR + ": Can't find task(s) " + unfoundTasks;
           OutputStream out = response.getOutputStream();
           outStream = new ObjectOutputStream(new BufferedOutputStream(out));
           outStream.writeObject(errorResult);
           outStream.flush();
+        } else if (clientNew) {
+          outWriter = response.getWriter();
+          Map<String, Object> errorResponse =
+            JSONProtocol.createErrorResponseMap("Can't find task(s) "
+              + unfoundTasks);
+          String errorJ = JSONProtocol.encodeToJSONString(errorResponse);
+          outWriter.println(errorJ);
+          outWriter.flush();
         } else {
           outWriter = response.getWriter();
 
@@ -172,11 +186,11 @@ public class PurgeTaskServlet extends WekaServlet {
           }
         }
 
-        if (client) {
+        if (clientLegacy) {
           String result = null;
           if (remotePurgeProblems.length() == 0) {
-            result = WekaServlet.RESPONSE_OK + ": Task(s) '" + taskName
-              + "' removed.";
+            result =
+              WekaServlet.RESPONSE_OK + ": Task(s) '" + taskName + "' removed.";
           } else {
             result = WekaServlet.RESPONSE_ERROR + ": " + remotePurgeProblems;
           }
@@ -184,6 +198,20 @@ public class PurgeTaskServlet extends WekaServlet {
           outStream = new ObjectOutputStream(new BufferedOutputStream(out));
           outStream.writeObject(result);
           outStream.flush();
+        } else if (clientNew) {
+          outWriter = response.getWriter();
+          Map<String, Object> resultResponse = null;
+          if (remotePurgeProblems.length() == 0) {
+            resultResponse =
+              JSONProtocol.createOKResponseMap("Task(s) '" + taskName
+                + "' removed.");
+          } else {
+            resultResponse =
+              JSONProtocol.createErrorResponseMap(remotePurgeProblems);
+          }
+          String responseJ = JSONProtocol.encodeToJSONString(resultResponse);
+          outWriter.println(responseJ);
+          outWriter.flush();
         } else {
           outWriter = response.getWriter();
 
@@ -208,9 +236,10 @@ public class PurgeTaskServlet extends WekaServlet {
         }
       }
     } catch (Exception ex) {
-      if (client && outStream != null) {
-        String errorResult = WekaServlet.RESPONSE_ERROR
-          + ": An error occurred while trying" + " to purge task: " + taskName;
+      if (clientLegacy && outStream != null) {
+        String errorResult =
+          WekaServlet.RESPONSE_ERROR + ": An error occurred while trying"
+            + " to purge task: " + taskName;
         /*
          * OutputStream out = response.getOutputStream(); Ob = new
          * ObjectOutputStream(new BufferedOutputStream(out));
@@ -220,10 +249,19 @@ public class PurgeTaskServlet extends WekaServlet {
       } else {
         // PrintWriter out = response.getWriter();
         if (outWriter != null) {
-          outWriter.println(WekaServlet.RESPONSE_ERROR
-            + ": An error occurred while " + "trying to purge task: "
-            + taskName);
-          outWriter.println("</BODY>\n</HTML>");
+          if (!clientNew) {
+            outWriter.println(WekaServlet.RESPONSE_ERROR
+              + ": An error occurred while " + "trying to purge task: "
+              + taskName);
+            outWriter.println("</BODY>\n</HTML>");
+          } else {
+            Map<String, Object> errorResponse =
+              JSONProtocol.createErrorResponseMap("An error occurred "
+                + "while trying to purge task " + taskName + ": "
+                + ex.getMessage());
+            String responseJ = JSONProtocol.encodeToJSONString(errorResponse);
+            outWriter.println(responseJ);
+          }
         }
       }
       ex.printStackTrace();
@@ -257,8 +295,8 @@ public class PurgeTaskServlet extends WekaServlet {
       post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client,
         m_server.getUsername(), m_server.getPassword());
 
@@ -269,8 +307,9 @@ public class PurgeTaskServlet extends WekaServlet {
       if (result == 401) {
         System.err.println("[WekaServer] Unable to purge remote task '"
           + origTaskID + "' - authentication required.\n");
-        ok = "Unable to purge remote task '" + origTaskID
-          + "' - authentication required for slave (" + slave + ")";
+        ok =
+          "Unable to purge remote task '" + origTaskID
+            + "' - authentication required for slave (" + slave + ")";
       } else {
 
         // the response
@@ -282,18 +321,19 @@ public class PurgeTaskServlet extends WekaServlet {
             + "trying to purge task : '" + origTaskID
             + "' from remote server (" + slave + "). Remote " + "task ID : "
             + remoteTaskID);
-          ok = "A problem occurred while " + "trying to purge task : '"
-            + origTaskID + "' from remote server (" + slave + "). Remote "
-            + "task ID : " + remoteTaskID;
+          ok =
+            "A problem occurred while " + "trying to purge task : '"
+              + origTaskID + "' from remote server (" + slave + "). Remote "
+              + "task ID : " + remoteTaskID;
         }
       }
     } catch (Exception ex) {
       System.err.println("[WekaServer] A problem occurred while "
         + "trying to purge task : '" + origTaskID + "' from remote server: "
         + slave + " (" + ex.getMessage() + ")");
-      ok = "A problem occurred while " + "trying to purge task : '"
-        + origTaskID + "' from remote server: " + slave + " ("
-        + ex.getMessage() + ")";
+      ok =
+        "A problem occurred while " + "trying to purge task : '" + origTaskID
+          + "' from remote server: " + slave + " (" + ex.getMessage() + ")";
     } finally {
       if (is != null) {
         try {

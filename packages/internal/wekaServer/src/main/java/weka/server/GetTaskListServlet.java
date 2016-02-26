@@ -21,6 +21,9 @@
 
 package weka.server;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -28,10 +31,7 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Returns a list of tasks registered with this Weka server instance.
@@ -76,12 +76,19 @@ public class GetTaskListServlet extends WekaServlet {
       return;
     }
 
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String clientParamLegacy = request.getParameter(Legacy.LEGACY_CLIENT_KEY);
+    String clientParamNew = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientLegacy =
+      clientParamLegacy != null && clientParamLegacy.equalsIgnoreCase("y");
+    boolean clientNew =
+      clientParamNew != null && clientParamNew.equalsIgnoreCase("y");
 
     response.setStatus(HttpServletResponse.SC_OK);
-    if (client) {
+    if (clientLegacy) {
       response.setContentType("application/octet-stream");
+    } else if (clientNew) {
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("application/json");
     } else {
       response.setCharacterEncoding("UTF-8");
       response.setContentType("text/html;charset=UTF-8");
@@ -98,12 +105,20 @@ public class GetTaskListServlet extends WekaServlet {
     PrintWriter out = null;
 
     try {
-      if (client) {
+      if (clientLegacy) {
         OutputStream outS = response.getOutputStream();
 
         oos = new ObjectOutputStream(new BufferedOutputStream(outS));
         oos.writeObject(taskNames);
         oos.flush();
+      } else if (clientNew) {
+        Map<String, Object> jResponse =
+          JSONProtocol.createOKResponseMap("OK. Task list");
+        jResponse.put(JSONProtocol.RESPONSE_PAYLOAD_KEY, taskNames);
+        String encodedResponse = JSONProtocol.encodeToJSONString(jResponse);
+        out = response.getWriter();
+        out.println(encodedResponse);
+        out.flush();
       } else {
         out = response.getWriter();
 
@@ -126,6 +141,11 @@ public class GetTaskListServlet extends WekaServlet {
       if (oos != null) {
         oos.writeObject(WekaServlet.RESPONSE_ERROR + " " + ex.getMessage());
         oos.flush();
+      } else if (out != null && clientNew) {
+        Map<String, Object> jError =
+          JSONProtocol.createErrorResponseMap(ex.getMessage());
+        String encodedError = JSONProtocol.encodeToJSONString(jError);
+        out.println(encodedError);
       } else if (out != null) {
         out.println("An error occured while getting task list:<br><br>");
         out.println("<pre>\n" + ex.getMessage() + "</pre>");

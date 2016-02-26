@@ -19,11 +19,7 @@
  *
  */
 
-package weka.server.knowledgeFlow;
-
-import java.io.Serializable;
-import java.util.Date;
-import java.util.Map;
+package weka.server.knowledgeFlow.legacy;
 
 import weka.core.LogHandler;
 import weka.experiment.TaskStatusInfo;
@@ -32,13 +28,18 @@ import weka.server.NamedTask;
 import weka.server.Schedule;
 import weka.server.Scheduled;
 
+import java.io.Serializable;
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Task for executing a Knowledge Flow process at a scheduled time
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
- * @version $Revision$
+ * @version $Revision: 10248 $
  */
-public class ScheduledNamedKFTask implements NamedTask, Scheduled, LogHandler,
+public class LegacyScheduledNamedKFTask
+  implements NamedTask, Scheduled, LogHandler,
   Serializable {
 
   /**
@@ -47,7 +48,7 @@ public class ScheduledNamedKFTask implements NamedTask, Scheduled, LogHandler,
   private static final long serialVersionUID = -1931422976728468000L;
 
   /** Delegate for the actual execution */
-  protected UnscheduledNamedKFTask m_namedTask;
+  protected LegacyUnscheduledNamedKFTask m_namedTask;
 
   /** The schedule to use for execution */
   protected Schedule m_schedule;
@@ -62,9 +63,9 @@ public class ScheduledNamedKFTask implements NamedTask, Scheduled, LogHandler,
    * @param parameters environment variables and values
    * @param schedule the schedule for the task
    */
-  public ScheduledNamedKFTask(String name, StringBuffer xmlFlow,
+  public LegacyScheduledNamedKFTask(String name, StringBuffer xmlFlow,
     boolean sequential, Map<String, String> parameters, Schedule schedule) {
-    m_namedTask = new UnscheduledNamedKFTask(name, xmlFlow, sequential,
+    m_namedTask = new LegacyUnscheduledNamedKFTask(name, xmlFlow, sequential,
       parameters);
     m_schedule = schedule;
   }

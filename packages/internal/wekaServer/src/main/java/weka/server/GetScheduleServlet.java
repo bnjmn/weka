@@ -21,16 +21,16 @@
 
 package weka.server;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import java.util.Map;
 
 /**
  * Returns the schedule associated with a task. An error message is returned if
@@ -80,18 +80,27 @@ public class GetScheduleServlet extends WekaServlet {
     InputStream in = request.getInputStream();
     ObjectOutputStream oos = null;
 
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String clientParamLegacy = request.getParameter(Legacy.LEGACY_CLIENT_KEY);
+    String clientParamNew = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientLegacy =
+      clientParamLegacy != null && clientParamLegacy.equalsIgnoreCase("y");
+    boolean clientNew =
+      clientParamNew != null && clientParamNew.equalsIgnoreCase("y");
+
     String taskName = request.getParameter("name");
 
     NamedTask task = m_taskMap.getTask(taskName);
 
-    if (client) {
+    if (clientLegacy) {
       // response.setCharacterEncoding("UTF-8");
       // response.setContentType("text/plain");
       response.setContentType("application/octet-stream");
       OutputStream outS = response.getOutputStream();
       oos = new ObjectOutputStream(new BufferedOutputStream(outS));
+    } else if (clientNew) {
+      out = response.getWriter();
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("application/json");
     } else {
       out = response.getWriter();
       response.setCharacterEncoding("UTF-8");
@@ -105,48 +114,72 @@ public class GetScheduleServlet extends WekaServlet {
 
     try {
       if (task == null) {
-        if (client) {
-          String errorResult = WekaServlet.RESPONSE_ERROR
-            + ": Can't find task " + taskName;
+        if (clientLegacy) {
+          String errorResult =
+            WekaServlet.RESPONSE_ERROR + ": Can't find task " + taskName;
           oos.writeObject(errorResult);
           oos.flush();
+        } else if (clientNew) {
+          Map<String, Object> errorJ =
+            JSONProtocol.createErrorResponseMap("Can't find task " + taskName);
+          String encodedResponse = JSONProtocol.encodeToJSONString(errorJ);
+          out.println(encodedResponse);
+          out.flush();
         } else {
           out
             .println(WekaServlet.RESPONSE_ERROR + ": Unknown task " + taskName);
         }
       } else if (!(task instanceof Scheduled)) {
-        if (client) {
-          String errorResult = WekaServlet.RESPONSE_ERROR + "'" + taskName
-            + "' " + "is not a scheduled task.";
+        if (clientLegacy) {
+          String errorResult =
+            WekaServlet.RESPONSE_ERROR + "'" + taskName + "' "
+              + "is not a scheduled task.";
           oos.writeObject(errorResult);
           oos.flush();
+        } else if (clientNew) {
+          Map<String, Object> errorJ =
+            JSONProtocol.createErrorResponseMap("'" + taskName
+              + "' is not a scheduled task");
+          String encodedResponse = JSONProtocol.encodeToJSONString(errorJ);
+          out.println(encodedResponse);
+          out.flush();
         } else {
           out.println(WekaServlet.RESPONSE_ERROR + "'" + taskName + "' "
             + "is not a scheduled task.");
         }
       } else {
         Schedule sched = ((Scheduled) task).getSchedule();
-        if (client) {
+        if (clientLegacy) {
           oos.writeObject(sched);
           oos.flush();
+        } else if (clientNew) {
+          Map<String, Object> scheduleJ = JSONProtocol.scheduleToJsonMap(sched);
+          Map<String, Object> jResponse =
+            JSONProtocol.createOKResponseMap("OK. Schedule");
+          JSONProtocol.addPayloadMap(jResponse, scheduleJ,
+            JSONProtocol.SCHEDULE_PAYLOAD_ID);
+
+          String encodedResonse = JSONProtocol.encodeToJSONString(jResponse);
+          out.println(encodedResonse);
+          out.flush();
         } else {
-          String optionsString = weka.core.Utils
-            .joinOptions(sched.getOptions());
+          String optionsString =
+            weka.core.Utils.joinOptions(sched.getOptions());
           out.println(optionsString + "<p>");
         }
       }
     } catch (Exception ex) {
-      if (client && oos != null) {
+      if (clientLegacy && oos != null) {
         oos.writeObject(WekaServlet.RESPONSE_ERROR + " " + ex.getMessage());
         oos.flush();
-      } else if (out != null) {
+      } else if (out != null && !clientNew) {
         out.println("<p><pre>");
         ex.printStackTrace(out);
         out.println("</pre>\n");
       }
       ex.printStackTrace();
     } finally {
-      if (!client && out != null) {
+      if (!clientLegacy && !clientNew && out != null) {
         out.println("</BODY>\n</HTML>");
       }
 
@@ -159,6 +192,5 @@ public class GetScheduleServlet extends WekaServlet {
         oos = null;
       }
     }
-
   }
 }

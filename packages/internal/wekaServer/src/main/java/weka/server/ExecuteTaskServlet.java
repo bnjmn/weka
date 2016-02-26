@@ -21,24 +21,25 @@
 
 package weka.server;
 
+import weka.core.LogHandler;
+import weka.experiment.Task;
+import weka.server.WekaTaskMap.WekaTaskEntry;
+import weka.server.logging.ServerLogger;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import weka.core.LogHandler;
-import weka.experiment.Task;
-import weka.server.WekaTaskMap.WekaTaskEntry;
-import weka.server.logging.ServerLogger;
 
 /**
  * Accepts a task for execution. Tasks are added to a Map and may get executed
@@ -84,22 +85,33 @@ public class ExecuteTaskServlet extends WekaServlet {
       return;
     }
 
-    PrintWriter out = null;
-    InputStream in = request.getInputStream();
+    InputStream in = null;
+    BufferedReader inReader = null;
     ObjectOutputStream oos = null;
+    PrintWriter out = null;
 
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String legacyClientParam = request.getParameter(Legacy.LEGACY_CLIENT_KEY);
+    String jsonClientParam = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientLegacy =
+      legacyClientParam != null && legacyClientParam.equalsIgnoreCase("y");
+    boolean clientNew =
+      jsonClientParam != null && jsonClientParam.equalsIgnoreCase("y");
     String masterParam = request.getParameter("master");
-    boolean fromMaster = (masterParam != null && masterParam
-      .equalsIgnoreCase("y"));
+    boolean fromMaster =
+      masterParam != null && masterParam.equalsIgnoreCase("y");
 
-    if (client) {
+    if (clientLegacy) {
+      in = request.getInputStream();
       // response.setCharacterEncoding("UTF-8");
       // response.setContentType("text/plain");
       response.setContentType("application/octet-stream");
       OutputStream outS = response.getOutputStream();
       oos = new ObjectOutputStream(new BufferedOutputStream(outS));
+    } else if (clientNew) {
+      inReader = request.getReader();
+      out = response.getWriter();
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("application/json");
     } else {
       out = response.getWriter();
       response.setCharacterEncoding("UTF-8");
@@ -115,11 +127,22 @@ public class ExecuteTaskServlet extends WekaServlet {
     Object task = null;
     WekaTaskEntry entry = null;
     try {
-      // Deserialize the task
-      ois = new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(
-        in)));
+      if (clientLegacy) {
+        // Deserialize the task
+        ois =
+          new ObjectInputStream(
+            new BufferedInputStream(new GZIPInputStream(in)));
 
-      task = ois.readObject();
+        task = ois.readObject();
+      } else if (clientNew) {
+        // Deserialize the json
+        StringBuilder b = new StringBuilder();
+        String line = "";
+        while ((line = inReader.readLine()) != null) {
+          b.append(line);
+        }
+        task = JSONProtocol.jsonToNamedTask(b.toString());
+      }
 
       if (!(task instanceof Task)) {
         throw new Exception(
@@ -145,20 +168,26 @@ public class ExecuteTaskServlet extends WekaServlet {
         ((LogHandler) task).setLog(sl);
       }
 
-      if (client) {
-        if (task instanceof Scheduled) {
-          // make sure we save this task in case we go down...
-          m_server.persistTask(entry, (NamedTask) task);
-        }
+      if (task instanceof Scheduled) {
+        // make sure we save this task in case we go down...
+        m_server.persistTask(entry, (NamedTask) task);
+      }
 
-        // ask the task to persist any resources
-        if (task instanceof NamedTask) {
-          ((NamedTask) task).persistResources();
-        }
+      // ask the task to persist any resources
+      if (task instanceof NamedTask) {
+        ((NamedTask) task).persistResources();
+      }
 
-        // send the task name + id to the client
+      // send the task name + id to the client
+      if (clientLegacy) {
         oos.writeObject(entry.toString());
         oos.flush();
+      } else if (clientNew) {
+        Map<String, Object> responseJ =
+          JSONProtocol.createOKResponseMap(entry.toString());
+        String encodedResponse = JSONProtocol.encodeToJSONString(responseJ);
+        out.println(encodedResponse);
+        out.flush();
       } else {
         // out = response.getWriter();
         String startOrScheduled = " started";
@@ -171,7 +200,7 @@ public class ExecuteTaskServlet extends WekaServlet {
         out.println("</H1>");
       }
     } catch (Exception ex) {
-      if (client && oos != null) {
+      if (clientLegacy) {
         oos.writeObject(WekaServlet.RESPONSE_ERROR + " " + ex.getMessage());
         oos.flush();
       } else {
@@ -191,7 +220,7 @@ public class ExecuteTaskServlet extends WekaServlet {
         oos = null;
       }
 
-      if (!client && out != null) {
+      if (!clientLegacy && !clientNew && out != null) {
         out.println("<p>");
         out.println("</BODY>");
         out.println("</HTML>");

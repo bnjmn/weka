@@ -21,6 +21,14 @@
 
 package weka.server;
 
+import org.apache.commons.httpclient.Header;
+import org.apache.commons.httpclient.HttpClient;
+import org.apache.commons.httpclient.methods.PostMethod;
+import weka.experiment.TaskStatusInfo;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -30,18 +38,9 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.util.Map;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.httpclient.Header;
-import org.apache.commons.httpclient.HttpClient;
-import org.apache.commons.httpclient.methods.PostMethod;
-
-import weka.experiment.TaskStatusInfo;
 
 /**
  * Get the result of a task (if available). For clients it returns the
@@ -90,11 +89,15 @@ public class GetTaskResultServlet extends WekaServlet {
     }
 
     String taskName = request.getParameter("name");
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String clientParamLegacy = request.getParameter("client");
+    String jsonClientParam = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientNew =
+      jsonClientParam != null && jsonClientParam.equalsIgnoreCase("y");
+    boolean clientLegacy =
+      clientParamLegacy != null && clientParamLegacy.equalsIgnoreCase("y");
 
     response.setStatus(HttpServletResponse.SC_OK);
-    if (client) {
+    if (clientLegacy) {
       response.setContentType("application/octet-stream");
     } else {
       response.setCharacterEncoding("UTF-8");
@@ -108,14 +111,22 @@ public class GetTaskResultServlet extends WekaServlet {
     NamedTask task = m_taskMap.getTask(taskName);
     try {
       if (task == null) {
-        if (client) {
-          String errorResult = WekaServlet.RESPONSE_ERROR
-            + ": Can't find task " + taskName;
+        if (clientLegacy) {
+          String errorResult =
+            WekaServlet.RESPONSE_ERROR + ": Can't find task " + taskName;
           OutputStream outS = response.getOutputStream();
-          oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(outS)));
+          oos =
+            new ObjectOutputStream(new BufferedOutputStream(
+              new GZIPOutputStream(outS)));
           oos.writeObject(errorResult);
           oos.flush();
+        } else if (clientNew) {
+          Map<String, Object> errorResponse =
+            JSONProtocol.createErrorResponseMap("Can't find task: " + taskName);
+          String responseJ = JSONProtocol.encodeToJSONString(errorResponse);
+          out = response.getWriter();
+          out.println(responseJ);
+          out.flush();
         } else {
           out = response.getWriter();
 
@@ -147,14 +158,15 @@ public class GetTaskResultServlet extends WekaServlet {
           status = getResultRemote(m_server, slave, remoteTaskID, taskName);
         }
 
-        if (client) {
+        if (clientLegacy) {
           // is actually the same as GetTaskStatusServlet, since the task status
           // object encapsulates the result
           OutputStream outS = response.getOutputStream();
 
           // send status (and result if ready) back to client
-          oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(outS)));
+          oos =
+            new ObjectOutputStream(new BufferedOutputStream(
+              new GZIPOutputStream(outS)));
           oos.writeObject(status);
           oos.flush();
 
@@ -162,6 +174,16 @@ public class GetTaskResultServlet extends WekaServlet {
           // collected the
           // result now
           task.freeMemory();
+        } else if (clientNew) {
+          Map<String, Object> responseMap =
+            JSONProtocol.createOKResponseMap("OK. TaskResult");
+          Map<String, Object> taskInfoMap =
+            JSONProtocol.taskStatusInfoToJsonMap(status, true);
+          responseMap.put(JSONProtocol.RESPONSE_PAYLOAD_KEY, taskInfoMap);
+          String responseJ = JSONProtocol.encodeToJSONString(responseMap);
+          out = response.getWriter();
+          out.println(responseJ);
+          out.flush();
         } else {
           out = response.getWriter();
 
@@ -203,6 +225,13 @@ public class GetTaskResultServlet extends WekaServlet {
       if (oos != null) {
         oos.writeObject(WekaServlet.RESPONSE_ERROR + " " + ex.getMessage());
         oos.flush();
+      } else if (clientNew && out != null) {
+        Map<String, Object> errorResponse =
+          JSONProtocol
+            .createErrorResponseMap("An error occurred while getting task result: "
+              + ex.getMessage());
+        String errorJ = JSONProtocol.encodeToJSONString(errorResponse);
+        out.println(errorJ);
       } else if (out != null) {
         out.println("An error occured while getting task result:<br><br>");
         out.println("<pre>\n" + ex.getMessage() + "</pre>");
@@ -215,7 +244,9 @@ public class GetTaskResultServlet extends WekaServlet {
       }
 
       if (out != null) {
-        out.println("</BODY>\n</HTML>\n");
+        if (!clientNew) {
+          out.println("</BODY>\n</HTML>\n");
+        }
         out.close();
         out = null;
       }
@@ -239,8 +270,8 @@ public class GetTaskResultServlet extends WekaServlet {
       post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client, server.getUsername(),
         server.getPassword());
 
@@ -255,8 +286,9 @@ public class GetTaskResultServlet extends WekaServlet {
 
         // the response
         is = post.getResponseBodyAsStream();
-        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(is)));
+        ObjectInputStream ois =
+          new ObjectInputStream(
+            new BufferedInputStream(new GZIPInputStream(is)));
         Object response = ois.readObject();
         if (response.toString().startsWith(WekaServlet.RESPONSE_ERROR)) {
           System.err

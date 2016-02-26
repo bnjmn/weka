@@ -21,16 +21,16 @@
 
 package weka.server;
 
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.Map;
 import java.util.Set;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * Returns the load of this Weka server instance.
@@ -75,18 +75,25 @@ public class GetServerLoadServlet extends WekaServlet {
       return;
     }
 
-    String clientParam = request.getParameter("client");
-    boolean client = (clientParam != null && clientParam.equalsIgnoreCase("y"));
+    String clientParamLegacy = request.getParameter(Legacy.LEGACY_CLIENT_KEY);
+    String clientParamNew = request.getParameter(JSONProtocol.JSON_CLIENT_KEY);
+    boolean clientLegacy =
+      clientParamLegacy != null && clientParamLegacy.equalsIgnoreCase("y");
+    boolean clientNew =
+      clientParamNew != null && clientParamNew.equalsIgnoreCase("y");
 
     response.setStatus(HttpServletResponse.SC_OK);
-    if (client) {
+    if (clientLegacy) {
       response.setContentType("application/octet-stream");
+    } else if (clientNew) {
+      response.setCharacterEncoding("UTF-8");
+      response.setContentType("application/json");
     } else {
       response.setCharacterEncoding("UTF-8");
       response.setContentType("text/html;charset=UTF-8");
     }
 
-    Double loadFactor = new Double(m_server.getServerLoad());
+    Double loadFactor = m_server.getServerLoad();
     ObjectOutputStream oos = null;
     PrintWriter out = null;
 
@@ -97,8 +104,9 @@ public class GetServerLoadServlet extends WekaServlet {
       // slaves that we have registered
       Set<String> slaves = m_server.getSlaves();
       for (String slave : slaves) {
-        double load = RootServlet.getSlaveLoad(slave, m_server.getUsername(),
-          m_server.getPassword());
+        double load =
+          RootServlet.getSlaveLoad(slave, m_server.getUsername(),
+            m_server.getPassword());
         if (load >= 0 && load < loadFactor) {
           loadFactor = load;
         }
@@ -106,13 +114,21 @@ public class GetServerLoadServlet extends WekaServlet {
     }
 
     try {
-      if (client) {
+      if (clientLegacy) {
         OutputStream outS = response.getOutputStream();
 
         // send load factor back to client
         oos = new ObjectOutputStream(new BufferedOutputStream(outS));
         oos.writeObject(loadFactor);
         oos.flush();
+      } else if (clientNew) {
+        Map<String, Object> jResponse =
+          JSONProtocol.createOKResponseMap("OK. Server load");
+        jResponse.put(JSONProtocol.RESPONSE_PAYLOAD_KEY, loadFactor);
+        String encodedResponse = JSONProtocol.encodeToJSONString(jResponse);
+        out = response.getWriter();
+        out.println(encodedResponse);
+        out.flush();
       } else {
         out = response.getWriter();
 
