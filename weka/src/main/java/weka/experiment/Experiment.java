@@ -1246,6 +1246,10 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
       } else {
         exp = read(expFile);
 
+        if (exp instanceof RemoteExperiment) {
+          throw new Exception("Cannot run remote experiment using Experiment class. Use RemoteExperiment class instead!");
+        }
+
         // allow extra datasets to be added to pre-loaded experiment from
         // command line
         String dataName;
