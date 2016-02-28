@@ -618,7 +618,11 @@ public class BoundaryPanel extends JPanel {
       }
 
       // average
-      Utils.normalize(sumOfProbsForRegion, sumOfSums);
+      if (sumOfSums > 0) {
+        Utils.normalize(sumOfProbsForRegion, sumOfSums);
+      } else {
+        throw new Exception("Arithmetic underflow. Please increase value of kernel bandwidth parameter (k).");
+      }
 
       // cache
       if ((i < m_panelHeight) && (j < m_panelWidth)) {
