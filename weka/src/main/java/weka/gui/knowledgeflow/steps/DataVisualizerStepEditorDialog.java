@@ -34,6 +34,10 @@ public class DataVisualizerStepEditorDialog extends
 
   private static final long serialVersionUID = -6032558757326543902L;
 
+  /**
+   * Get the name of the offscreen renderer and options from the step
+   * being edited
+   */
   @Override
   protected void getCurrentSettings() {
     m_currentRendererName =
@@ -42,6 +46,9 @@ public class DataVisualizerStepEditorDialog extends
       ((DataVisualizer) getStepToEdit()).getOffscreenAdditionalOpts();
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     ((DataVisualizer) getStepToEdit())

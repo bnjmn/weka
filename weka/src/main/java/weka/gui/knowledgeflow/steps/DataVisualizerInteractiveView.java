@@ -21,25 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JSplitPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.core.WekaException;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.knowledgeflow.BaseInteractiveViewer;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 import weka.knowledgeflow.steps.DataVisualizer;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
 
 /**
  * Interactive viewer for the DataVisualizer step
@@ -50,19 +45,37 @@ import weka.knowledgeflow.steps.DataVisualizer;
 public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = 5345799787154266282L;
+
+  /** Holds results  */
   protected ResultHistoryPanel m_history;
+
+  /** The actual visualization */
   protected VisualizePanel m_visPanel = new VisualizePanel();
+
+  /** Button for clearing all results */
   protected JButton m_clearButton = new JButton("Clear results");
 
+  /** Split pane for separating result list from visualization */
   protected JSplitPane m_splitPane;
 
+  /** Curent plot data */
   protected PlotData2D m_currentPlot;
 
+  /**
+   * Get the name of this viewer
+   *
+   * @return the name of this viewer
+   */
   @Override
   public String getViewerName() {
     return "Data Visualizer";
   }
 
+  /**
+   * Initialize and layout the viewer
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
