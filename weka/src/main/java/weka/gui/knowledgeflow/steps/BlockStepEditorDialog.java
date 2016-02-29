@@ -45,6 +45,9 @@ public class BlockStepEditorDialog extends StepEditorDialog {
   /** The combo box for choosing the step to block on */
   protected JComboBox<String> m_stepToBlockBox = new JComboBox<String>();
 
+  /**
+   * Layout the component
+   */
   @Override
   public void layoutEditor() {
     m_stepToBlockBox.setEditable(true);
@@ -68,6 +71,9 @@ public class BlockStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Called when OK is pressed
+   */
   @Override
   public void okPressed() {
 

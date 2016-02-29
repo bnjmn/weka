@@ -1,10 +1,25 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    ClassAssignerStepEditorDialog.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
-
-import java.awt.BorderLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
 
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -13,6 +28,9 @@ import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.steps.ClassAssigner;
 import weka.knowledgeflow.steps.Step;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Step editor dialog for the ClassAssigner step
@@ -23,8 +41,14 @@ import weka.knowledgeflow.steps.Step;
 public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
   private static final long serialVersionUID = 3105898651212196539L;
 
+  /** Combo box for selecting the class attribute */
   protected JComboBox<String> m_classCombo = new JComboBox<String>();
 
+  /**
+   * Set the step being edited
+   *
+   * @param step the step to edit
+   */
   @Override
   public void setStepToEdit(Step step) {
     copyOriginal(step);
@@ -74,6 +98,11 @@ public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
     }
   }
 
+  /**
+   * Populate the class combo box using the supplied instances structure
+   *
+   * @param incomingStructure the instances structure to use
+   */
   protected void setComboToClass(Instances incomingStructure) {
     String stepC = ((ClassAssigner) getStepToEdit()).getClassColumn();
     if (stepC != null && stepC.length() > 0) {
@@ -103,6 +132,9 @@ public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
     }
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     String selected = m_classCombo.getSelectedItem().toString();

@@ -1,25 +1,44 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    BoundaryPlotterInteractiveView.java
+ *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
-
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.util.Map;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
 
 import weka.core.WekaException;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.knowledgeflow.BaseInteractiveViewer;
 import weka.knowledgeflow.steps.BoundaryPlotter;
 
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
+import java.util.Map;
+
 /**
+ * Interactive viewer component for the boundary plotter step
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -29,16 +48,27 @@ public class BoundaryPlotterInteractiveView extends BaseInteractiveViewer
   private static final long serialVersionUID = 5567187861739468636L;
   protected JButton m_clearButton = new JButton("Clear results");
 
+  /** Holds a list of plots */
   protected ResultHistoryPanel m_history;
 
   /** Panel for displaying the image */
   protected ImageViewerInteractiveView.ImageDisplayer m_plotter;
 
+  /**
+   * Get the name of this viewer
+   *
+   * @return the name of this viewer
+   */
   @Override
   public String getViewerName() {
     return "Boundary Visualizer";
   }
 
+  /**
+   * Initialize/layout the viewer
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
@@ -128,6 +158,9 @@ public class BoundaryPlotterInteractiveView extends BaseInteractiveViewer
     ((BoundaryPlotter) getStep()).setRenderingListener(this);
   }
 
+  /**
+   * Called when there is an update to rendering of the current image
+   */
   @Override
   public void renderingImageUpdate() {
     m_plotter.repaint();
@@ -146,11 +179,19 @@ public class BoundaryPlotterInteractiveView extends BaseInteractiveViewer
     }
   }
 
+  /**
+   * Called when a row of the image being plotted has been completed
+   *
+   * @param row the index of the row that was completed
+   */
   @Override
   public void currentPlotRowCompleted(int row) {
     m_plotter.repaint();
   }
 
+  /**
+   * Called when the viewer's window is closed
+   */
   @Override
   public void closePressed() {
     ((BoundaryPlotter) getStep()).removeRenderingListener(this);

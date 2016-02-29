@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    ClassifierPerformanceEvaluatorStepEditorDialog.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
 
 import weka.gui.EvaluationMetricSelectionDialog;
@@ -24,14 +45,24 @@ public class ClassifierPerformanceEvaluatorStepEditorDialog extends
 
   private static final long serialVersionUID = -4459460141076392499L;
 
+  /** Button for popping up the evaluation metrics selector dialog */
   protected JButton m_showEvalDialog = new JButton("Evaluation metrics...");
 
+  /** Holds selected evaluation metrics */
   protected List<String> m_evaluationMetrics = new ArrayList<String>();
 
+  /**
+   * Constructor
+   */
   public ClassifierPerformanceEvaluatorStepEditorDialog() {
     super();
   }
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   @Override
   public void setStepToEdit(Step step) {
     copyOriginal(step);
@@ -64,6 +95,9 @@ public class ClassifierPerformanceEvaluatorStepEditorDialog extends
     });
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     StringBuilder b = new StringBuilder();

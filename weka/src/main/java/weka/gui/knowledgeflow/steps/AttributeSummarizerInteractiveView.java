@@ -21,19 +21,6 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JSplitPane;
-import javax.swing.ListSelectionModel;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.core.Defaults;
 import weka.core.Instances;
 import weka.core.Settings;
@@ -45,6 +32,14 @@ import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.steps.AttributeSummarizer;
 
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.MouseEvent;
+
 /**
  * Interactive viewer for the AttributeSummarizer step
  *
@@ -55,22 +50,37 @@ public class AttributeSummarizerInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = -8080574605631027263L;
 
+  /** Holds results */
   protected ResultHistoryPanel m_history;
 
+  /** Holds the actual visualization */
   protected AttributeSummaryPerspective m_summarizer =
     new AttributeSummaryPerspective();
 
+  /** Button for clearing all results */
   protected JButton m_clearButton = new JButton("Clear results");
 
+  /** Split pane to separate result list from visualization */
   protected JSplitPane m_splitPane;
 
+  /** The instances being visualized */
   protected Instances m_currentInstances;
 
+  /**
+   * The name of this viewer
+   *
+   * @return
+   */
   @Override
   public String getViewerName() {
     return "Attribute Summarizer";
   }
 
+  /**
+   * Initialize the viewer - layout widgets etc.
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
@@ -154,11 +164,21 @@ public class AttributeSummarizerInteractiveView extends BaseInteractiveViewer {
     });
   }
 
+  /**
+   * Get the default settings for this viewer
+   *
+   * @return the default settings for this viewer
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new AttributeSummaryPerspective().getDefaultSettings();
   }
 
+  /**
+   * Apply user-changed settings
+   *
+   * @param settings the settings object that might (or might not) have been
+   */
   @Override
   public void applySettings(Settings settings) {
     m_summarizer.setInstances(m_currentInstances, getSettings());
