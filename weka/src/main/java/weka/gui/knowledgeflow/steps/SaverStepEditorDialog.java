@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    SaverStepEditorDialog.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
 
 import weka.core.converters.FileSourcedConverter;
@@ -8,31 +29,48 @@ import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.Saver;
 import weka.knowledgeflow.steps.Step;
 
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
+import javax.swing.*;
+import java.awt.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 
 /**
+ * Editor dialog for the saver step
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class SaverStepEditorDialog extends GOEStepEditorDialog {
 
+  private static final long serialVersionUID = -8353826767500440827L;
+
+  /**
+   * Field for specifying either the file prefix to use or the actual filename
+   * itself
+   */
   protected EnvironmentField m_prefixOrFile;
+
+  /** Field for specifying the directory to save into */
   protected FileEnvironmentField m_directory;
 
+  /** Label for the directory field */
   protected JLabel m_dirLab = new JLabel("Directory ", SwingConstants.RIGHT);
+
+  /** Label for the file/prefix field */
   protected JLabel m_prefLab = new JLabel("Prefix ", SwingConstants.RIGHT);
 
+  /**
+   * Constructor
+   */
   public SaverStepEditorDialog() {
     super();
   }
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   public void setStepToEdit(Step step) {
     copyOriginal(step);
 
@@ -44,6 +82,11 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
     }
   }
 
+  /**
+   * Setup for editing file-based savers
+   *
+   * @param wrappedStep the step to edit
+   */
   protected void setupFileSaver(final Saver wrappedStep) {
     addPrimaryEditorPanel(BorderLayout.NORTH);
     m_prefixOrFile = new EnvironmentField();
@@ -98,12 +141,18 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
     });
   }
 
+  /**
+   * Setup for other types of savers
+   */
   protected void setupOther() {
     addPrimaryEditorPanel(BorderLayout.NORTH);
     addSecondaryEditorPanel(BorderLayout.CENTER);
     add(m_editorHolder, BorderLayout.CENTER);
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     if (((Saver) m_stepToEdit).getSaver() instanceof FileSourcedConverter) {

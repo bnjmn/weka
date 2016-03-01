@@ -58,18 +58,31 @@ import java.util.Map;
 public class ImageViewerInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = -6652203133445653870L;
+
+  /** Button for clearing the results */
   protected JButton m_clearButton = new JButton("Clear results");
 
+  /** A panel for holding a list of results */
   protected ResultHistoryPanel m_history;
 
   /** Panel for displaying the image */
   protected ImageDisplayer m_plotter;
 
+  /**
+   * Get the name of the viewer
+   *
+   * @return the name of the viewer
+   */
   @Override
   public String getViewerName() {
     return "Image Viewer";
   }
 
+  /**
+   * Initialize the viewer and the layout
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
@@ -177,6 +190,12 @@ public class ImageViewerInteractiveView extends BaseInteractiveViewer {
      */
     private static final long serialVersionUID = 5648976848887609072L;
 
+    /**
+     * Constructor
+     *
+     * @param p a {@code ResultHistoryPanel} to add
+     * @param id the {@code ImageDisplayer} to add
+     */
     public MainPanel(ResultHistoryPanel p, final ImageDisplayer id) {
       super();
       setLayout(new BorderLayout());

@@ -57,18 +57,33 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = 275603100387301133L;
 
+  /** Holds a list of results */
   protected ResultHistoryPanel m_history;
+
+  /** The actual visualization */
   protected MatrixPanel m_matrixPanel = new MatrixPanel();
 
+  /** Button for clearing the results list */
   protected JButton m_clearButton = new JButton("Clear results");
 
+  /** Split pane for separating the result list and visualization */
   protected JSplitPane m_splitPane;
 
+  /**
+   * Get the name of the viewer
+   *
+   * @return the name of the viewer
+   */
   @Override
   public String getViewerName() {
     return "Scatter Plot Matrix";
   }
 
+  /**
+   * Initialize the viewer
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
@@ -161,6 +176,11 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
     applySettings(getSettings());
   }
 
+  /**
+   * Apply any changes to the settings
+   *
+   * @param settings the settings object that might (or might not) have been
+   */
   @Override
   public void applySettings(Settings settings) {
     int pointSize =
@@ -178,6 +198,11 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
     m_matrixPanel.updatePanel();
   }
 
+  /**
+   * Get the default settings of this viewer
+   *
+   * @return the default settings
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new ScatterPlotMatrixPerspective().getDefaultSettings();

@@ -30,31 +30,47 @@ import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizeUtils;
 import weka.knowledgeflow.steps.ModelPerformanceChart;
 
-import javax.swing.JButton;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
 
 /**
+ * Interactive viewer for the ModelPerformanceChart step
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class ModelPerformanceChartInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = 8818417648798221980L;
+
+  /** Button for clearing results */
   protected JButton m_clearButton = new JButton("Clear results");
+
+  /** The actual visualization */
   protected VisualizePanel m_visPanel = new VisualizePanel();
 
+  /** ID used for identifying settings */
   protected static final String ID =
     "weka.gui.knowledgeflow.steps.ModelPerformanceChartInteractiveView";
 
+  /**
+   * Get the name of this viewer
+   *
+   * @return the name of this viewer
+   */
   @Override
   public String getViewerName() {
     return "Model Performance Chart";
   }
 
+  /**
+   * Initialize and layout the viewer
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void init() throws WekaException {
     addButton(m_clearButton);
@@ -91,6 +107,11 @@ public class ModelPerformanceChartInteractiveView extends BaseInteractiveViewer 
     applySettings(getSettings());
   }
 
+  /**
+   * Get default settings for this viewer
+   *
+   * @return the default settings of this viewer
+   */
   @Override
   public Defaults getDefaultSettings() {
     Defaults d = new VisualizeUtils.VisualizeDefaults();
@@ -99,6 +120,12 @@ public class ModelPerformanceChartInteractiveView extends BaseInteractiveViewer 
     return d;
   }
 
+  /**
+   * Apply any user changes in the supplied settings object
+   *
+   * @param settings the settings object that might (or might not) have been
+   *          altered by the user
+   */
   @Override
   public void applySettings(Settings settings) {
     m_visPanel.applySettings(settings, ID);

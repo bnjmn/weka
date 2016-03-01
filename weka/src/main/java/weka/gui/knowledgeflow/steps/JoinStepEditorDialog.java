@@ -21,30 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.core.Instances;
 import weka.core.WekaException;
 import weka.gui.EnvironmentField;
 import weka.gui.JListHelper;
 import weka.gui.knowledgeflow.StepEditorDialog;
 import weka.knowledgeflow.steps.Join;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
 
 /**
  * Step editor dialog for the Join step
@@ -56,24 +46,47 @@ public class JoinStepEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = -2648770811063889717L;
 
+  /** Combo box for selecting a key field to add from the first instance stream */
   protected JComboBox m_firstKeyFields = new EnvironmentField.WideComboBox();
+
+  /** Combo box for selecting a the key field to add from the second instance stream */
   protected JComboBox m_secondKeyFields = new EnvironmentField.WideComboBox();
 
+  /** List of selected key fields for the first instance stream */
   protected JList m_firstList = new JList();
+
+  /** List of selected key fields for the second instance stream */
   protected JList m_secondList = new JList();
   protected DefaultListModel<String> m_firstListModel;
   protected DefaultListModel<String> m_secondListModel;
 
+  /** Add button for the first instance stream */
   protected JButton m_addOneBut = new JButton("Add");
+
+  /** Delete button for the first instance stream */
   protected JButton m_deleteOneBut = new JButton("Delete");
+
+  /** Move up button for the first instance stream */
   protected JButton m_upOneBut = new JButton("Up");
+
+  /** Move down button for the first instance stream */
   protected JButton m_downOneBut = new JButton("Down");
 
+  /** Add button for the second instance stream */
   protected JButton m_addTwoBut = new JButton("Add");
+
+  /** Delete button for the second instance stream */
   protected JButton m_deleteTwoBut = new JButton("Delete");
+
+  /** Move up button for the second instance stream */
   protected JButton m_upTwoBut = new JButton("Up");
+
+  /** Move down button for the second instance stream */
   protected JButton m_downTwoBut = new JButton("Down");
 
+  /**
+   * Initialize the step editor dialog
+   */
   @SuppressWarnings("unchecked")
   protected void initialize() {
     m_firstListModel = new DefaultListModel<String>();
@@ -102,6 +115,9 @@ public class JoinStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Layout the editor
+   */
   @Override
   @SuppressWarnings("unchecked")
   protected void layoutEditor() {
@@ -331,6 +347,9 @@ public class JoinStepEditorDialog extends StepEditorDialog {
     });
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     StringBuilder b = new StringBuilder();
