@@ -92,33 +92,14 @@ import weka.gui.ProgrammaticProperty;
  * <pre> -print
  *  Print the individual classifiers in the output</pre>
  * 
- * <pre> -S &lt;num&gt;
- *  Random number seed.
- *  (default 1)</pre>
+ * <pre> -I &lt;num&gt;
+ *  Number of iterations.
+ *  (current value 100)</pre>
  * 
  * <pre> -num-slots &lt;num&gt;
  *  Number of execution slots.
  *  (default 1 - i.e. no parallelism)
  *  (use 0 to auto-detect number of cores)</pre>
- * 
- * <pre> -I &lt;num&gt;
- *  Number of iterations.
- *  (current value 100)</pre>
- * 
- * <pre> -output-debug-info
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -do-not-check-capabilities
- *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
- * 
- * <pre> -num-decimal-places
- *  The number of decimal places for the output of numbers in the model (default 2).</pre>
- * 
- * <pre> 
- * Options specific to classifier weka.classifiers.trees.RandomTree:
- * </pre>
  * 
  * <pre> -K &lt;number of attributes&gt;
  *  Number of attributes to randomly investigate. (default 0)
@@ -426,14 +407,13 @@ public class RandomForest extends Bagging {
                     + "\t(current value " + getNumIterations() + ")",
             "I", 1, "-I <num>"));
 
-    newVector.addElement(new Option(
-            "\tRandom number seed.\n"
-                    + "\t(default 1)",
-            "S", 1, "-S <num>"));
+    newVector.addElement(new Option("\tNumber of execution slots.\n"
+            + "\t(default 1 - i.e. no parallelism)\n"
+            + "\t(use 0 to auto-detect number of cores)", "num-slots", 1,
+            "-num-slots <num>"));
 
     // Add base classifier options
     List<Option> list = Collections.list(((OptionHandler)getClassifier()).listOptions());
-    Option.deleteOption(list, "S");
     newVector.addAll(list);
 
     return newVector.elements();
@@ -467,16 +447,20 @@ public class RandomForest extends Bagging {
       result.add("-print");
     }
 
-    result.add("-S");
-    result.add("" + getSeed());
-
     result.add("-I");
     result.add("" + getNumIterations());
 
+    result.add("-num-slots");
+    result.add("" + getNumExecutionSlots());
+
+    if (getDoNotCheckCapabilities()) {
+      result.add("-do-not-check-capabilities");
+    }
+
     // Add base classifier options
     Vector<String> classifierOptions = new Vector<String>();
-    Collections.addAll(classifierOptions, ((OptionHandler)getClassifier()).getOptions());
-    Option.deleteOptionString(classifierOptions, "-S");
+    Collections.addAll(result, ((OptionHandler)getClassifier()).getOptions());
+    Option.deleteOptionString(classifierOptions, "-do-not-check-capabilities");
     result.addAll(classifierOptions);
 
     return result.toArray(new String[result.size()]);
@@ -505,33 +489,14 @@ public class RandomForest extends Bagging {
    * <pre> -print
    *  Print the individual classifiers in the output</pre>
    * 
-   * <pre> -S &lt;num&gt;
-   *  Random number seed.
-   *  (default 1)</pre>
+   * <pre> -I &lt;num&gt;
+   *  Number of iterations.
+   *  (current value 100)</pre>
    * 
    * <pre> -num-slots &lt;num&gt;
    *  Number of execution slots.
    *  (default 1 - i.e. no parallelism)
    *  (use 0 to auto-detect number of cores)</pre>
-   * 
-   * <pre> -I &lt;num&gt;
-   *  Number of iterations.
-   *  (current value 100)</pre>
-   * 
-   * <pre> -output-debug-info
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
-   * 
-   * <pre> -do-not-check-capabilities
-   *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
-   * 
-   * <pre> -num-decimal-places
-   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
-   * 
-   * <pre> 
-   * Options specific to classifier weka.classifiers.trees.RandomTree:
-   * </pre>
    * 
    * <pre> -K &lt;number of attributes&gt;
    *  Number of attributes to randomly investigate. (default 0)
@@ -596,13 +561,6 @@ public class RandomForest extends Bagging {
 
     setPrintClassifiers(Utils.getFlag("print", options));
 
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
-    } else {
-      setSeed(1);
-    }
-
     String iterations = Utils.getOption('I', options);
     if (iterations.length() != 0) {
       setNumIterations(Integer.parseInt(iterations));
@@ -610,12 +568,22 @@ public class RandomForest extends Bagging {
       setNumIterations(defaultNumberOfIterations());
     }
 
-    // Set base classifier and options
-    String s = Utils.getOption('S', options);
-    if (s.length() > 0) {
-      throw new IllegalArgumentException("RandomForest: seed for random tree cannot be specified.");
+    String numSlots = Utils.getOption("num-slots", options);
+    if (numSlots.length() != 0) {
+      setNumExecutionSlots(Integer.parseInt(numSlots));
+    } else {
+      setNumExecutionSlots(1);
     }
-    setClassifier(AbstractClassifier.forName(defaultClassifierString(), options));
+
+    RandomTree classifier = ((RandomTree)AbstractClassifier.forName(defaultClassifierString(), options));
+    setDoNotCheckCapabilities(classifier.getDoNotCheckCapabilities());
+    setSeed(classifier.getSeed());
+    setDebug(classifier.getDebug());
+    setNumFeatures(classifier.getNumDecimalPlaces());
+    classifier.setDoNotCheckCapabilities(true);
+
+    // Set base classifier and options
+    setClassifier(classifier);
 
     Utils.checkForRemainingOptions(options);
   }
