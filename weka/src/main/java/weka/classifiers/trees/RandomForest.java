@@ -23,6 +23,7 @@ package weka.classifiers.trees;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
@@ -400,10 +401,40 @@ public class RandomForest extends Bagging {
 
     Vector<Option> newVector = new Vector<Option>();
 
-    newVector.addAll(Collections.list(super.listOptions()));
+    newVector.addElement(new Option(
+            "\tSize of each bag, as a percentage of the\n"
+                    + "\ttraining set size. (default 100)",
+            "P", 1, "-P"));
 
-    Option.deleteOption(newVector, "W");
-    Option.deleteOption(newVector, "represent-copies-using-weights");
+    newVector.addElement(new Option(
+            "\tCalculate the out of bag error.",
+            "O", 0, "-O"));
+
+    newVector.addElement(new Option(
+            "\tWhether to store out of bag predictions in internal evaluation object.",
+            "store-out-of-bag-predictions", 0, "-store-out-of-bag-predictions"));
+
+    newVector.addElement(new Option(
+            "\tWhether to output complexity-based statistics when out-of-bag evaluation is performed.",
+            "output-out-of-bag-complexity-statistics", 0, "-output-out-of-bag-complexity-statistics"));
+
+    newVector.addElement(new Option(
+            "\tPrint the individual classifiers in the output", "print", 0, "-print"));
+
+    newVector.addElement(new Option(
+            "\tNumber of iterations.\n"
+                    + "\t(current value " + getNumIterations() + ")",
+            "I", 1, "-I <num>"));
+
+    newVector.addElement(new Option(
+            "\tRandom number seed.\n"
+                    + "\t(default 1)",
+            "S", 1, "-S <num>"));
+
+    // Add base classifier options
+    List<Option> list = Collections.list(((OptionHandler)getClassifier()).listOptions());
+    Option.deleteOption(list, "S");
+    newVector.addAll(list);
 
     return newVector.elements();
   }
@@ -417,10 +448,36 @@ public class RandomForest extends Bagging {
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
 
-    Collections.addAll(result, super.getOptions());
+    result.add("-P");
+    result.add("" + getBagSizePercent());
 
-    Option.deleteOptionString(result, "-W");
-    Option.deleteFlagString(result, "-represent-copies-using-weights");
+    if (getCalcOutOfBag()) {
+      result.add("-O");
+    }
+
+    if (getStoreOutOfBagPredictions()) {
+      result.add("-store-out-of-bag-predictions");
+    }
+
+    if (getOutputOutOfBagComplexityStatistics()) {
+      result.add("-output-out-of-bag-complexity-statistics");
+    }
+
+    if (getPrintClassifiers()) {
+      result.add("-print");
+    }
+
+    result.add("-S");
+    result.add("" + getSeed());
+
+    result.add("-I");
+    result.add("" + getNumIterations());
+
+    // Add base classifier options
+    Vector<String> classifierOptions = new Vector<String>();
+    Collections.addAll(classifierOptions, ((OptionHandler)getClassifier()).getOptions());
+    Option.deleteOptionString(classifierOptions, "-S");
+    result.addAll(classifierOptions);
 
     return result.toArray(new String[result.size()]);
   }
@@ -524,24 +581,43 @@ public class RandomForest extends Bagging {
   @Override
   public void setOptions(String[] options) throws Exception {
 
-    for (String s : options) {
-      if (s.equals("-W") || s.equals("-represent-copies-using-weights")) {
-        throw new IllegalArgumentException("Option " + s + " not permitted by RandomForest (always enabled).");
-      }
+    String bagSize = Utils.getOption('P', options);
+    if (bagSize.length() != 0) {
+      setBagSizePercent(Integer.parseInt(bagSize));
+    } else {
+      setBagSizePercent(100);
     }
 
-    String[] ops = new String[options.length + 1];
-    System.arraycopy(options, 0, ops, 1, options.length);
-    ops[0] = "-represent-copies-using-weights";
+    setCalcOutOfBag(Utils.getFlag('O', options));
 
-    super.setOptions(ops);
+    setStoreOutOfBagPredictions(Utils.getFlag("store-out-of-bag-predictions", options));
 
-    Utils.checkForRemainingOptions(ops);
+    setOutputOutOfBagComplexityStatistics(Utils.getFlag("output-out-of-bag-complexity-statistics", options));
 
-    // Clear options in original array
-    for (int i = 0; i < options.length; i++) {
-      options[i] = "";
+    setPrintClassifiers(Utils.getFlag("print", options));
+
+    String seed = Utils.getOption('S', options);
+    if (seed.length() != 0) {
+      setSeed(Integer.parseInt(seed));
+    } else {
+      setSeed(1);
     }
+
+    String iterations = Utils.getOption('I', options);
+    if (iterations.length() != 0) {
+      setNumIterations(Integer.parseInt(iterations));
+    } else {
+      setNumIterations(defaultNumberOfIterations());
+    }
+
+    // Set base classifier and options
+    String s = Utils.getOption('S', options);
+    if (s.length() > 0) {
+      throw new IllegalArgumentException("RandomForest: seed for random tree cannot be specified.");
+    }
+    setClassifier(AbstractClassifier.forName(defaultClassifierString(), options));
+
+    Utils.checkForRemainingOptions(options);
   }
 
   /**

@@ -20,23 +20,17 @@
 
 package weka.core;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.ObjectStreamClass;
-import java.io.OutputStream;
-import java.io.Serializable;
+import java.io.*;
 import java.util.Vector;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 /**
  * A helper class for determining serialVersionUIDs and checking whether classes
  * contain one and/or need one. One can also serialize and deserialize objects
- * to and fro files or streams.
+ * to and from files or streams.
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -45,6 +39,19 @@ public class SerializationHelper implements RevisionHandler {
 
   /** the field name of serialVersionUID. */
   public final static String SERIAL_VERSION_UID = "serialVersionUID";
+
+  /**
+   * Copies an object using piped streams. This can be used to copy large objects that cannot be
+   * serialised to a byte array because the resulting byte array would exceed the size limit for arrays.
+   *
+   * @param toCopy the object to copy
+   * @return the copied object
+   * @throws Exception if object cannot be serialised successfully
+   */
+  public static Object deepCopy(final Object toCopy) throws Exception {
+
+    return new SerializedObject(toCopy).getObject();
+  }
 
   /**
    * checks whether a class is serializable.

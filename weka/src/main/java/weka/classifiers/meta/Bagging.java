@@ -664,11 +664,13 @@ public class Bagging
       m_inBag[iteration] = new boolean[m_data.numInstances()];
       bagData = m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights());
     } else {
-      bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
       if (bagSize < m_data.numInstances()) {
+        bagData = m_data.resampleWithWeights(r, false); // Need to turn off representation using weights in this case.
         bagData.randomize(r);
         Instances newBagData = new Instances(bagData, 0, bagSize);
         bagData = newBagData;
+      } else {
+        bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
       }
     }
     
