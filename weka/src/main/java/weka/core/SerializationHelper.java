@@ -22,10 +22,6 @@ package weka.core;
 
 import java.io.*;
 import java.util.Vector;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 /**
  * A helper class for determining serialVersionUIDs and checking whether classes
@@ -39,19 +35,6 @@ public class SerializationHelper implements RevisionHandler {
 
   /** the field name of serialVersionUID. */
   public final static String SERIAL_VERSION_UID = "serialVersionUID";
-
-  /**
-   * Copies an object using piped streams. This can be used to copy large objects that cannot be
-   * serialised to a byte array because the resulting byte array would exceed the size limit for arrays.
-   *
-   * @param toCopy the object to copy
-   * @return the copied object
-   * @throws Exception if object cannot be serialised successfully
-   */
-  public static Object deepCopy(final Object toCopy) throws Exception {
-
-    return new SerializedObject(toCopy).getObject();
-  }
 
   /**
    * checks whether a class is serializable.
