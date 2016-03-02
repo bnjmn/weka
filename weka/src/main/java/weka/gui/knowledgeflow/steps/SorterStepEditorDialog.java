@@ -21,24 +21,6 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.core.Instances;
 import weka.core.WekaException;
 import weka.gui.JListHelper;
@@ -46,6 +28,15 @@ import weka.gui.PropertySheetPanel;
 import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.Sorter;
 import weka.knowledgeflow.steps.Step;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 
 /**
  * Step editor dialog for the Sorter step
@@ -57,17 +48,35 @@ public class SorterStepEditorDialog extends GOEStepEditorDialog {
 
   private static final long serialVersionUID = -1258170590422372948L;
 
+  /** Combo box for selecting attribute to sort on */
   protected JComboBox<String> m_attCombo = new JComboBox<String>();
+
+  /** Combo box for choosing to sort descending or not */
   protected JComboBox<String> m_descending = new JComboBox<String>();
 
+  /** Holds the individual sorting criteria */
   protected JList<Sorter.SortRule> m_list = new JList<Sorter.SortRule>();
+
+  /** List model for sort rules */
   protected DefaultListModel<Sorter.SortRule> m_listModel;
 
+  /** Button for creating a new rule */
   protected JButton m_newBut = new JButton("New");
+
+  /** Button for deleting a selected rule */
   protected JButton m_deleteBut = new JButton("Delete");
+
+  /** Button for moving a rule up in the list */
   protected JButton m_upBut = new JButton("Move up");
+
+  /** Button for moving a rule down in the list */
   protected JButton m_downBut = new JButton("Move down");
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   @Override
   protected void setStepToEdit(Step step) {
     copyOriginal(step);
@@ -125,6 +134,11 @@ public class SorterStepEditorDialog extends GOEStepEditorDialog {
     }
   }
 
+  /**
+   * Creates the sort panel
+   *
+   * @return a {@code JPanel}
+   */
   protected JPanel createSorterPanel() {
     JPanel sorterPanel = new JPanel(new BorderLayout());
 
@@ -293,6 +307,9 @@ public class SorterStepEditorDialog extends GOEStepEditorDialog {
     return sorterPanel;
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     StringBuilder buff = new StringBuilder();

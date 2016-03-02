@@ -1,23 +1,25 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    StripChartInteractiveView.java
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
-
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Image;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 import weka.core.Defaults;
 import weka.core.Environment;
@@ -27,6 +29,14 @@ import weka.gui.knowledgeflow.BaseInteractiveViewer;
 import weka.gui.visualize.PrintableComponent;
 import weka.knowledgeflow.steps.StripChart;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Implements the actual strip chart view
  *
@@ -35,6 +45,8 @@ import weka.knowledgeflow.steps.StripChart;
  */
 public class StripChartInteractiveView extends BaseInteractiveViewer implements
   StripChart.PlotNotificationListener {
+
+  private static final long serialVersionUID = 7697752421621805402L;
 
   /** default colours for colouring lines */
   protected Color[] m_colorList = { Color.green, Color.red,
@@ -103,6 +115,9 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
   /** Previous data point */
   private double[] m_previousY = new double[1];
 
+  /**
+   * Initialize the viewer
+   */
   @Override
   public void init() {
     m_plotPanel = new StripPlotter();
@@ -136,12 +151,19 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     applySettings(getSettings());
   }
 
+  /**
+   * Called when the close button is pressed
+   */
   @Override
   public void closePressed() {
     ((StripChart) getStep())
       .removePlotNotificationListener(StripChartInteractiveView.this);
   }
 
+  /**
+   * Called by the KnowledgeFlow application once the enclosing JFrame is
+   * visible
+   */
   @Override
   public void nowVisible() {
     m_parent.setSize(600, 180);
@@ -167,11 +189,23 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     return (int) temp;
   }
 
+  /**
+   * Get the name of this viewer
+   *
+   * @return the name of this viewer
+   */
   @Override
   public String getViewerName() {
     return "Strip Chart";
   }
 
+  /**
+   * Set the entries for the legend
+   *
+   * @param legendEntries a list of legend entries
+   * @param min initial minimum for the series being plotted
+   * @param max initial maximum for the series being plotted
+   */
   @Override
   public void setLegend(List<String> legendEntries, double min, double max) {
     m_legendText = legendEntries;
@@ -181,6 +215,12 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     m_legendPanel.repaint();
   }
 
+  /**
+   * Pre-process a data point
+   *
+   * @param dataPoint the data point to process
+   * @return the data point
+   */
   protected double[] preProcessDataPoint(double[] dataPoint) {
     // check for out of scale values
     for (double element : dataPoint) {
@@ -206,6 +246,11 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     return dataPoint;
   }
 
+  /**
+   * Accept and process a data point
+   *
+   * @param dataPoint the data point to process
+   */
   @Override
   public void acceptDataPoint(double[] dataPoint) {
     if (m_xCount % ((StripChart) getStep()).getRefreshFreq() != 0) {
@@ -414,11 +459,21 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
     return numString;
   }
 
+  /**
+   * Get the default settings for this viewer
+   *
+   * @return the default settings for this viewer
+   */
   @Override
   public Defaults getDefaultSettings() {
     return new StripChartInteractiveViewDefaults();
   }
 
+  /**
+   * Apply settings from the supplied settings object
+   *
+   * @param settings the settings object that might (or might not) have been
+   */
   @Override
   public void applySettings(Settings settings) {
     m_BackgroundColor =
@@ -443,6 +498,9 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
       m_LegendPanelBorderColor));
   }
 
+  /**
+   * Class defining default settings for this viewer
+   */
   protected static final class StripChartInteractiveViewDefaults extends
     Defaults {
 

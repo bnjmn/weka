@@ -21,30 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.gui.EnvironmentField;
 import weka.gui.JListHelper;
 import weka.gui.beans.SubstringReplacerRules;
 import weka.gui.knowledgeflow.StepEditorDialog;
 import weka.knowledgeflow.steps.SubstringReplacer;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * Step editor dialog for the SubstringReplacer step
@@ -56,20 +46,43 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = 7804721324137987443L;
 
+  /** Field for specifying the attributes to match on */
   protected EnvironmentField m_attListField;
+
+  /** Field for specifying the string/regex to match */
   protected EnvironmentField m_matchField;
+
+  /** Field for specifying the value to replace a match with */
   protected EnvironmentField m_replaceField;
+
+  /** Checkbox to specify that the match is a regex */
   protected JCheckBox m_regexCheck = new JCheckBox();
+
+  /** Checkbox for specifying that case should be ignored when matching */
   protected JCheckBox m_ignoreCaseCheck = new JCheckBox();
+
+  /** Holds the list of match rules */
   protected JList<SubstringReplacerRules.SubstringReplacerMatchRule> m_list =
     new JList<SubstringReplacerRules.SubstringReplacerMatchRule>();
+
+  /** List model */
   protected DefaultListModel<SubstringReplacerRules.SubstringReplacerMatchRule> m_listModel;
 
+  /** Button for adding a new match rule */
   protected JButton m_newBut = new JButton("New");
+
+  /** Button for deleting a match rule */
   protected JButton m_deleteBut = new JButton("Delete");
+
+  /** Button for moving a match rule up in the list */
   protected JButton m_upBut = new JButton("Move up");
+
+  /** Button for moving a match rule down in the list */
   protected JButton m_downBut = new JButton("Move down");
 
+  /**
+   * Initialize the editor
+   */
   protected void initialize() {
     String mrString =
       ((SubstringReplacer) getStepToEdit()).getMatchReplaceDetails();
@@ -93,6 +106,9 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Layout the editor dialog
+   */
   @Override
   protected void layoutEditor() {
     initialize();
@@ -304,6 +320,9 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
     });
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     StringBuilder buff = new StringBuilder();

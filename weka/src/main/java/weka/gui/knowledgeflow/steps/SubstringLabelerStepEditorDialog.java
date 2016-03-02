@@ -21,30 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
 import weka.gui.EnvironmentField;
 import weka.gui.JListHelper;
 import weka.gui.beans.SubstringLabelerRules;
 import weka.gui.knowledgeflow.StepEditorDialog;
 import weka.knowledgeflow.steps.SubstringLabeler;
+
+import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * Step editor dialog for the SubstringLabeler step
@@ -56,24 +46,58 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = 2386951012941540643L;
 
+  /** Field for specifying the name of the new attribute to create */
   protected EnvironmentField m_matchAttNameField;
+
+  /** Field for specifying the attributes to match on */
   protected EnvironmentField m_attListField;
+
+  /** Field for specifying the string/regex to match */
   protected EnvironmentField m_matchField;
+
+  /** Field for specifying the label to assign if match is positive */
   protected EnvironmentField m_labelField;
+
+  /** Checkbox to specify that the match is a regex */
   protected JCheckBox m_regexCheck = new JCheckBox();
+
+  /** Checkbox for specifying that case should be ignored when matching */
   protected JCheckBox m_ignoreCaseCheck = new JCheckBox();
+
+  /**
+   * Checkbox for making a binary label attribute into a nominal one (rather
+   * than numeric)
+   */
   protected JCheckBox m_nominalBinaryCheck = new JCheckBox();
+
+  /**
+   * Checkbox for specifying that non-matching instances should be consumed
+   * rather than having the match attribute value set to missing value
+   */
   protected JCheckBox m_consumeNonMatchingCheck = new JCheckBox();
 
+  /** Holds the list of match rules */
   protected JList<SubstringLabelerRules.SubstringLabelerMatchRule> m_list =
     new JList<SubstringLabelerRules.SubstringLabelerMatchRule>();
+
+  /** List model */
   protected DefaultListModel<SubstringLabelerRules.SubstringLabelerMatchRule> m_listModel;
 
+  /** Button for adding a new match rule */
   protected JButton m_newBut = new JButton("New");
+
+  /** Button for deleting a match rule */
   protected JButton m_deleteBut = new JButton("Delete");
+
+  /** Button for moving a match rule up in the list */
   protected JButton m_upBut = new JButton("Move up");
+
+  /** Button for moving a match rule down in the list */
   protected JButton m_downBut = new JButton("Move down");
 
+  /**
+   * Initialize the dialog
+   */
   protected void initialize() {
     String mlString = ((SubstringLabeler) getStepToEdit()).getMatchDetails();
     m_listModel =
@@ -96,6 +120,9 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Layout the editor dialog
+   */
   @Override
   protected void layoutEditor() {
     initialize();
@@ -333,6 +360,9 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
     });
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     StringBuilder buff = new StringBuilder();
