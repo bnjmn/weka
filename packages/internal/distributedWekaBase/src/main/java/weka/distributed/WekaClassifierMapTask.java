@@ -417,22 +417,16 @@ public class WekaClassifierMapTask implements OptionHandler,
         // }
 
         int totalClassifiersRequested =
-          isRandomForest ? ((weka.classifiers.trees.RandomForest) m_classifier)
-            .getNumTrees()
-            : ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
-              .getNumIterations();
+          ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
+            .getNumIterations();
 
         int classifiersPerMap = totalClassifiersRequested / nM;
         if (classifiersPerMap < 1) {
           classifiersPerMap = 1;
         }
-        if (isRandomForest) {
-          ((weka.classifiers.trees.RandomForest) m_classifier)
-            .setNumTrees(classifiersPerMap);
-        } else {
-          ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
-            .setNumIterations(classifiersPerMap);
-        }
+        ((weka.classifiers.IteratedSingleClassifierEnhancer) m_classifier)
+          .setNumIterations(classifiersPerMap);
+
         System.err.println("[ClassifierMapTask] total maps to be run " + nM
           + " total base classifiers requested " + totalClassifiersRequested
           + " classifiers per map " + classifiersPerMap);
