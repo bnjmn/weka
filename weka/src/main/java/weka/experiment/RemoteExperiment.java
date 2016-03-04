@@ -292,15 +292,15 @@ public class RemoteExperiment extends Experiment {
   /** The status of each of the sub-experiments */
   protected int[] m_subExpComplete;
 
-  /**
-   * If true, then sub experiments are created on the basis of data sets rather
-   * than run number.
-   */
+  /** If true, then sub experiments are created on the basis of data sets. */
   protected boolean m_splitByDataSet = true;
+
+  /** If true, then sub experiments are created on the basis of properties */
+  protected boolean m_splitByProperty = false;
 
   /**
    * Returns true if sub experiments are to be created on the basis of data
-   * set..
+   * set.
    * 
    * @return a <code>boolean</code> value indicating whether sub experiments are
    *         to be created on the basis of data set (true) or run number
@@ -319,6 +319,34 @@ public class RemoteExperiment extends Experiment {
    */
   public void setSplitByDataSet(boolean sd) {
     m_splitByDataSet = sd;
+    if (sd) {
+      m_splitByProperty = false; // Cannot split based on both dataset and property
+    }
+  }
+
+  /**
+   * Returns true if sub experiments are to be created on the basis of property.
+   *
+   * @return a <code>boolean</code> value indicating whether sub experiments are
+   *         to be created on the basis of data set (true) or run number
+   *         (false).
+   */
+  public boolean getSplitByProperty() {
+    return m_splitByProperty;
+  }
+
+  /**
+   * Set whether sub experiments are to be created on the basis of property.
+   *
+   * @param sd true if sub experiments are to be created on the basis of data
+   *          set. Otherwise sub experiments are created on the basis of run
+   *          number.
+   */
+  public void setSplitByProperty(boolean sd) {
+    m_splitByProperty = sd;
+    if (sd) {
+      m_splitByDataSet = false; // Cannot split based on both dataset and property
+    }
   }
 
   /**
@@ -532,6 +560,8 @@ public class RemoteExperiment extends Experiment {
     int numExps;
     if (getSplitByDataSet()) {
       numExps = m_baseExperiment.getDatasets().size();
+    } else if (getSplitByProperty()) {
+      numExps = m_baseExperiment.getPropertyArrayLength();
     } else {
       numExps = getRunUpper() - getRunLower() + 1;
     }
@@ -547,6 +577,14 @@ public class RemoteExperiment extends Experiment {
         DefaultListModel temp = new DefaultListModel();
         temp.addElement(m_baseExperiment.getDatasets().get(i));
         m_subExperiments[i].setDatasets(temp);
+        m_subExpQueue.push(new Integer(i));
+      }
+    } else if (getSplitByProperty()) {
+      for (int i = 0; i < m_baseExperiment.getPropertyArrayLength(); i++) {
+        m_subExperiments[i] = (Experiment) so.getObject();
+        Object[] a = new Object[1];
+        a[0] = m_baseExperiment.getPropertyArrayValue(i);
+        m_subExperiments[i].setPropertyArray(a);
         m_subExpQueue.push(new Integer(i));
       }
     } else {
@@ -680,7 +718,8 @@ public class RemoteExperiment extends Experiment {
     }
 
     if ((getSplitByDataSet() && (m_baseExperiment.getDatasets().size() == m_finishedCount))
-      || (!getSplitByDataSet() && ((getRunUpper() - getRunLower() + 1) == m_finishedCount))) {
+            || (getSplitByProperty() && (m_baseExperiment.getPropertyArrayLength() == m_finishedCount))
+      || (!getSplitByDataSet() && !getSplitByProperty() && (getRunUpper() - getRunLower() + 1) == m_finishedCount)) {
       notifyListeners(false, true, false, "Experiment completed successfully.");
       notifyListeners(false, true, true, postExperimentInfo());
       return;
@@ -726,9 +765,17 @@ public class RemoteExperiment extends Experiment {
         m_subExpComplete[wexp] = TaskStatusInfo.PROCESSING;
         RemoteExperimentSubTask expSubTsk = new RemoteExperimentSubTask();
         expSubTsk.setExperiment(m_subExperiments[wexp]);
-        String subTaskType = (getSplitByDataSet()) ? "dataset :"
-          + ((File) m_subExperiments[wexp].getDatasets().elementAt(0))
-            .getName() : "run :" + m_subExperiments[wexp].getRunLower();
+        String subTaskType = null;
+        if (getSplitByDataSet()) {
+          subTaskType = "dataset: "
+                  + ((File) m_subExperiments[wexp].getDatasets().elementAt(0))
+                  .getName();
+        } else if (getSplitByProperty()) {
+          subTaskType = "property: " + m_subExperiments[wexp].getPropertyArrayValue(0).getClass().getName() + " :" +
+                  m_subExperiments[wexp].getPropertyArrayValue(0);
+        } else {
+          subTaskType = "run: " + m_subExperiments[wexp].getRunLower();
+        }
         try {
           String name = "//" + ((String) m_remoteHosts.elementAt(ah))
             + "/RemoteEngine";
