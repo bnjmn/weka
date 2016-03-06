@@ -28,28 +28,7 @@ import weka.core.packageManagement.Dependency;
 import weka.core.packageManagement.Package;
 import weka.core.packageManagement.PackageConstraint;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultCellEditor;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JEditorPane;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JProgressBar;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import javax.swing.event.ListSelectionEvent;
@@ -57,13 +36,7 @@ import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumnModel;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -72,6 +45,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
@@ -158,6 +132,12 @@ public class PackageManager extends JPanel {
   protected List<Package> m_allPackages;
   protected List<Package> m_installedPackages;
   protected List<Package> m_availablePackages;
+
+  protected Map<String, String> m_packageDescriptions =
+    new HashMap<String, String>();
+  protected List<Package> m_searchResults = new ArrayList<Package>();
+  protected JTextField m_searchField = new JTextField(15);
+  protected JLabel m_searchHitsLab = new JLabel("");
 
   /** The column in the table to sort the entries by */
   protected int m_sortColumn = 0;
@@ -1840,6 +1820,9 @@ public class PackageManager extends JPanel {
     m_allBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        m_searchResults.clear();
+        m_searchField.setText("");
+        m_searchHitsLab.setText("");
         m_table.clearSelection();
         updateTable();
         updateInstallUninstallButtonEnablement();
@@ -1849,6 +1832,9 @@ public class PackageManager extends JPanel {
     m_availableBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        m_searchResults.clear();
+        m_searchField.setText("");
+        m_searchHitsLab.setText("");
         m_table.clearSelection();
         updateTable();
         updateInstallUninstallButtonEnablement();
@@ -1858,6 +1844,9 @@ public class PackageManager extends JPanel {
     m_installedBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
+        m_searchResults.clear();
+        m_searchField.setText("");
+        m_searchHitsLab.setText("");
         m_table.clearSelection();
         updateTable();
         updateInstallUninstallButtonEnablement();
@@ -1995,6 +1984,69 @@ public class PackageManager extends JPanel {
     m_browserTools = new JToolBar();
     m_browserTools.add(m_backB);
     m_browserTools.add(m_homeB);
+
+    m_searchField = new JTextField(15);
+    JPanel searchHolder = new JPanel(new BorderLayout());
+    JPanel temp = new JPanel(new BorderLayout());
+    JLabel searchLab = new JLabel("Package search ");
+    searchLab
+      .setToolTipText("Type search terms (comma separated) and hit <Enter>");
+    temp.add(searchLab, BorderLayout.WEST);
+    temp.add(m_searchField, BorderLayout.CENTER);
+    searchHolder.add(temp, BorderLayout.WEST);
+    JButton clearSearchBut = new JButton("Clear");
+    clearSearchBut.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        m_searchField.setText("");
+        m_searchHitsLab.setText("");
+        updateTable();
+      }
+    });
+    JPanel clearAndHitsHolder = new JPanel(new BorderLayout());
+    clearAndHitsHolder.add(clearSearchBut, BorderLayout.WEST);
+    clearAndHitsHolder.add(m_searchHitsLab, BorderLayout.EAST);
+    temp.add(clearAndHitsHolder, BorderLayout.EAST);
+    m_browserTools.addSeparator();
+    m_browserTools.add(searchHolder);
+    Dimension d = m_searchField.getSize();
+    m_searchField.setMaximumSize(new Dimension(150, 20));
+    m_searchField.setEnabled(m_packageDescriptions.size() > 0);
+
+    m_searchField.addActionListener(new ActionListener() {
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        List<Package> toSearch =
+          m_allBut.isSelected() ? m_allPackages
+            : m_availableBut.isSelected() ? m_availablePackages
+              : m_installedPackages;
+
+        m_searchResults.clear();
+        String searchString = m_searchField.getText();
+        if (searchString != null && searchString.length() > 0) {
+          String[] terms = searchString.split(",");
+          for (Package p : toSearch) {
+            String name = p.getName();
+            String description = m_packageDescriptions.get(name);
+            if (description != null) {
+              for (String t : terms) {
+                if (description.contains(t.trim().toLowerCase())) {
+                  m_searchResults.add(p);
+                  break;
+                }
+              }
+            }
+          }
+
+          m_searchHitsLab.setText(" (Search hits: " + m_searchResults.size()
+            + ")");
+        } else {
+          m_searchHitsLab.setText("");
+        }
+        updateTable();
+      }
+    });
+
     m_browserTools.setFloatable(false);
 
     // create the new packages available icon
@@ -2131,19 +2183,60 @@ public class PackageManager extends JPanel {
     return pic;
   }
 
-  /*
-   * private String getRepVersions(String packageName, String packageVersion) {
-   * List<Object> repVersions = m_packageVersionsLookup.get(packageName);
-   * StringBuffer repString = new StringBuffer();
-   * 
-   * if (repVersions.size() > 1) { repString.append("("); for (int i = 0; i <
-   * repVersions.size(); i++) { if (!repVersions.get(i).equals(packageVersion))
-   * { repString.append(repVersions.get(i).toString()); if (i <
-   * repVersions.size() - 1) { repString.append(", "); } } }
-   * repString.append(")"); } else { return ""; }
-   * 
-   * return repString.toString(); }
-   */
+  private void updateTableForPackageList(List<Package> packageList) {
+    m_table.clearSelection();
+    m_model.setRowCount(packageList.size());
+    int row = 0;
+    for (Package p : packageList) {
+      m_model.setValueAt(p.getName(), row, getColumnIndex(PACKAGE_COLUMN));
+      String installedV = "";
+      if (p.isInstalled()) {
+        try {
+          Package installed =
+            WekaPackageManager.getInstalledPackageInfo(p.getName());
+          installedV =
+            installed.getPackageMetaDataElement("Version").toString();
+        } catch (Exception ex) {
+          ex.printStackTrace();
+          displayErrorDialog("An error has occurred while trying to obtain"
+            + " installed package info", ex);
+        }
+      }
+
+      String category = "";
+      if (p.getPackageMetaDataElement("Category") != null) {
+        category = p.getPackageMetaDataElement("Category").toString();
+      }
+
+      List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
+      Object repositoryV = "-----";
+      if (catAndVers != null) {
+        // handle non-repository packages
+        @SuppressWarnings("unchecked")
+        List<Object> repVersions = (List<Object>) catAndVers.get(1);
+        repositoryV = repVersions.get(0);
+      }
+      // String repString = getRepVersions(p.getName(), repositoryV);
+      // repositoryV = repositoryV + " " + repString;
+
+      m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
+      m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
+      m_model.setValueAt(repositoryV, row, getColumnIndex(REPOSITORY_COLUMN));
+      if (catAndVers != null) {
+        String loadStatus = (String) catAndVers.get(2);
+        m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
+      } else {
+        // handle non-repository packages
+        File packageRoot =
+          new File(WekaPackageManager.getPackageHome().toString()
+            + File.separator + p.getName());
+        boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+        String loadStatus = loaded ? "Yes" : "No - check log";
+        m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
+      }
+      row++;
+    }
+  }
 
   private void updateTable() {
 
@@ -2170,96 +2263,21 @@ public class PackageManager extends JPanel {
       }
     }
 
+    if (m_searchField.getText() != null && m_searchField.getText().length() > 0) {
+      updateTableForPackageList(m_searchResults);
+      return;
+    }
+
     if (m_allBut.isSelected()) {
-      m_model.setRowCount(m_allPackages.size());
-
       Collections.sort(m_allPackages, m_packageComparator);
-      int row = 0;
-      for (Package p : m_allPackages) {
-        m_model.setValueAt(p.getName(), row, getColumnIndex(PACKAGE_COLUMN));
-
-        String category = "";
-        if (p.getPackageMetaDataElement("Category") != null) {
-          category = (String) p.getPackageMetaDataElement("Category");
-        }
-        m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
-
-        String installedV = "";
-        Object repositoryV = p.getPackageMetaDataElement("Version");
-        // String repString = getRepVersions(p.getName(), repositoryV);
-        // String[] repVersions = getRepVersions2(p.getName(), repositoryV);
-        // repositoryV = repositoryV + " " + repString;
-
-        if (p.isInstalled()) {
-          try {
-            Package installed =
-              WekaPackageManager.getInstalledPackageInfo(p.getName());
-            installedV =
-              installed.getPackageMetaDataElement("Version").toString();
-          } catch (Exception ex) {
-            ex.printStackTrace();
-            displayErrorDialog("An error has occurred while trying to obtain"
-              + " installed package info", ex);
-          }
-        }
-        m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
-        m_model.setValueAt(repositoryV, row, getColumnIndex(REPOSITORY_COLUMN));
-        List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
-        String loadStatus = (String) catAndVers.get(2);
-        m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
-        row++;
-      }
-
-      m_table.revalidate();
-      m_table.repaint();
+      updateTableForPackageList(m_allPackages);
     } else if (m_installedBut.isSelected()) {
       try {
         if (m_installedPackages == null) {
           m_installedPackages = WekaPackageManager.getInstalledPackages();
         }
 
-        m_model.setRowCount(m_installedPackages.size());
-
-        int row = 0;
-        for (Package p : m_installedPackages) {
-          m_model.setValueAt(p.getName(), row, getColumnIndex(PACKAGE_COLUMN));
-
-          String installedV = p.getPackageMetaDataElement("Version").toString();
-          String category = "";
-          if (p.getPackageMetaDataElement("Category") != null) {
-            category = p.getPackageMetaDataElement("Category").toString();
-          }
-
-          List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
-          Object repositoryV = "-----";
-          if (catAndVers != null) {
-            // handle non-repository packages
-            @SuppressWarnings("unchecked")
-            List<Object> repVersions = (List<Object>) catAndVers.get(1);
-            repositoryV = repVersions.get(0);
-          }
-          // String repString = getRepVersions(p.getName(), repositoryV);
-          // repositoryV = repositoryV + " " + repString;
-
-          m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
-          m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
-          m_model.setValueAt(repositoryV, row,
-            getColumnIndex(REPOSITORY_COLUMN));
-          if (catAndVers != null) {
-            String loadStatus = (String) catAndVers.get(2);
-            m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
-          } else {
-            // handle non-repository packages
-            File packageRoot =
-              new File(WekaPackageManager.getPackageHome().toString()
-                + File.separator + p.getName());
-            boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
-            String loadStatus = (loaded) ? "Yes" : "No - check log";
-            m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
-          }
-          row++;
-        }
-
+        updateTableForPackageList(m_installedPackages);
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -2269,49 +2287,7 @@ public class PackageManager extends JPanel {
           m_availablePackages =
             WekaPackageManager.getAvailableCompatiblePackages();
         }
-
-        m_model.setRowCount(m_availablePackages.size());
-
-        int row = 0;
-        for (Package p : m_availablePackages) {
-          m_model.setValueAt(p.getName(), row, getColumnIndex(PACKAGE_COLUMN));
-          String category = "";
-          if (p.getPackageMetaDataElement("Category") != null) {
-            category = p.getPackageMetaDataElement("Category").toString();
-          }
-
-          //String installedV = "";
-          String installedV = "";
-          if (p.isInstalled()) {
-            try {
-              Package installed =
-                WekaPackageManager.getInstalledPackageInfo(p.getName());
-              installedV =
-                installed.getPackageMetaDataElement("Version").toString();
-            } catch (Exception ex) {
-              ex.printStackTrace();
-              displayErrorDialog("An error has occurred while trying to obtain"
-                + " installed package info", ex);
-            }
-          }
-
-          List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
-          // @SuppressWarnings("unchecked")
-          // List<Object> repVersions = (List<Object>) catAndVers.get(1);
-          // Object repositoryV = repVersions.get(0);
-          Object repositoryV =
-            p.getPackageMetaDataElement("Version").toString();
-          // String repString = getRepVersions(p.getName(), repositoryV);
-          // repositoryV = repositoryV + " " + repString;
-
-          m_model.setValueAt(category, row, getColumnIndex(CATEGORY_COLUMN));
-          m_model.setValueAt(installedV, row, getColumnIndex(INSTALLED_COLUMN));
-          m_model.setValueAt(repositoryV, row,
-            getColumnIndex(REPOSITORY_COLUMN));
-          String loadStatus = (String) catAndVers.get(2);
-          m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
-          row++;
-        }
+        updateTableForPackageList(m_availablePackages);
       } catch (Exception ex) {
         ex.printStackTrace();
       }
@@ -2386,6 +2362,7 @@ public class PackageManager extends JPanel {
 
   private void getPackagesAndEstablishLookup() throws Exception {
     m_allPackages = WekaPackageManager.getAllPackages();
+    m_installedPackages = WekaPackageManager.getInstalledPackages();
 
     // now fill the lookup map
     m_packageLookupInfo = new TreeMap<String, List<Object>>();
@@ -2416,6 +2393,51 @@ public class PackageManager extends JPanel {
       catAndVers.add(loadStatus);
       m_packageLookupInfo.put(packageName, catAndVers);
     }
+
+    // Load all repCache package descriptions into the search lookup
+    for (Package p : m_allPackages) {
+      String name = p.getName();
+      File repLatest =
+        new File(WekaPackageManager.WEKA_HOME.toString() + File.separator
+          + "repCache" + File.separator + name + File.separator
+          + "Latest.props");
+      if (repLatest.exists() && repLatest.isFile()) {
+        String packageDescription = loadPropsText(repLatest);
+
+        m_packageDescriptions.put(name, packageDescription);
+      }
+    }
+
+    // Now process all installed packages and add to the search
+    // just in case there are some unofficial packages
+    for (Package p : m_installedPackages) {
+      if (!m_packageDescriptions.containsKey(p.getName())) {
+        String name = p.getName();
+        File instDesc =
+          new File(WekaPackageManager.PACKAGES_DIR.toString() + File.separator
+            + name + File.separator + "Description.props");
+        if (instDesc.exists() && instDesc.isFile()) {
+          m_packageDescriptions.put(name, loadPropsText(instDesc));
+        }
+      }
+    }
+  }
+
+  private String loadPropsText(File propsToLoad) throws IOException {
+    BufferedReader br = new BufferedReader(new FileReader(propsToLoad));
+    StringBuilder builder = new StringBuilder();
+    String line = null;
+    try {
+      while ((line = br.readLine()) != null) {
+        if (!line.startsWith("#")) {
+          builder.append(line.toLowerCase()).append("\n");
+        }
+      }
+    } finally {
+      br.close();
+    }
+
+    return builder.toString();
   }
 
   private void getAllPackages() {
