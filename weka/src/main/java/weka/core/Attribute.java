@@ -356,7 +356,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   }
 
   /**
-   * Tests if given attribute is equal to this attribute.
+   * Tests if given attribute is equal to this attribute. Attribute indices are ignored in the comparison.
    * 
    * @param other the Object to be compared to this attribute
    * @return true if the given attribute is equal to this attribute
@@ -379,6 +379,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   /**
    * Tests if given attribute is equal to this attribute. If they're not the
    * same a message detailing why they differ will be returned, otherwise null.
+   * Attribute indices are ignored in the comparison.
    * 
    * @param other the Object to be compared to this attribute
    * @return null if the given attribute is equal to this attribute
