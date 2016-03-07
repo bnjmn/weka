@@ -610,6 +610,7 @@
          <include name="weka/**/*.arff"/>
          <include name="weka/**/DatabaseUtils.props.*"/>
          <include name="weka/gui/beans/README*"/>
+         <include name="weka/gui/knowledgeflow/README*"/>
          <include name="**/*.cup"/>
          <include name="**/*.flex"/>
          <include name="**/*.jflex"/>
