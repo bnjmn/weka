@@ -1,0 +1,205 @@
+===============================================================
+KnowledgeFlow GUI Quick Primer
+===============================================================
+
+What's new in the KnowledgeFlow:
+
+The KnowledgeFlow has been completely rewritten in Weka 3.8.0/3.9.0.
+This includes a new underlying engine that is fully multithreaded 
+and supports pluggable execution environments.
+
+New features include:
+
+* Automatic execution of individual steps in separate threads
+* Single threaded execution for streaming flows
+* Separate executor service for resource intensive steps and tasks
+* Support for attribute selection and boudary visualization
+* JSON-based flow persistence
+* Support for loading legacy .kfml flows
+* Settings and preferences at the application and perspective level
+* User-configurable logging level
+* New and simplified API
+
+Introduction:
+
+The KnowledgeFlow provides an alternative to the Explorer as a
+graphical front end to Weka's core algorithms. It presents a
+"data-flow" inspired interface to Weka. The user can select Weka
+steps from a pallete, place them on a layout canvas and connect
+them together in order to form a "knowledge flow" for processing and
+analyzing data. At present, all of Weka's classifiers, filters,
+clusterers, loaders and savers are available in the KnowledgeFlow
+along with some extra tools.
+
+The KnowledgeFlow can handle data either incrementally or in batches
+(the Explorer handles batch data only). Of course learning from data
+incrementally requires a classifier that can be updated on an instance
+by instance basis. There are a number of schemes that can handle data
+incrementally: NaiveBayesUpdateable, IB1, IBk, LWR (locally weighted
+regression), SGD, SPegasos, Cobweb and RacedIncrementalLogitBoost.
+
+Features of the KnowledgeFlow:
+
+* intuitive data flow style layout
+* process data in batches or incrementally 
+* process multiple batches or streams in parallel! (each separate flow 
+  executes in its own thread). Alternatively, multiple streams can be
+  executed sequentially, in a user-specified order
+* chain filters together
+* view models produced by classifiers for each fold in a cross validation
+* visualize performance of incremental classifiers during 
+  processing (scrolling plots of classification accuracy, RMS error, 
+  predictions etc)
+* access additional non flow-based functionality through plugin 
+  "perspectives"
+
+Steps available in the KnowledgeFlow:
+
+DataSources:
+  All of Weka's loaders are available
+
+DataSinks:
+  All of Weka's savers are available
+
+Filters:
+  All of Weka's filters are available
+
+Classifiers:
+  All of Weka's classifiers are available
+
+Clusterers:
+  All of Weka's clusterers are available
+
+Attribute selection:
+  All of Weka's attribute and subset evaluators
+  All of Weka's search strategies
+
+Evaluation:
+  TrainingSetMaker - make a data set into a training set
+  TestSetMaker - make a data set into a test set
+  CrossValidationFoldMaker - split any data set, training set or test set
+    into folds
+  TrainTestSplitMaker - split any data set, training set or test set into
+    a training set and a test set
+  ClassAssigner - assign a column to be the class for any data set, training
+    set or test set
+  ClassValuePicker - choose a class value to be considered as the "positive"
+    class. This is useful when generating data for ROC style curves (see
+    below)
+  ClassifierPerformanceEvaluator - evaluate the performance of batch
+    trained/tested classifiers
+  IncrementalClassifierEvaluator - evaluate the performance of incrementally
+    trained classifiers
+  ClustererPerformanceEvaluator - evaluate the performance of batch
+    trained/tested clusterers
+  PredictionAppender - append classifier predictions to a test set. For
+    discrete class problems, can either append predicted class labels or
+    probability distributions
+  SerializedModelSaver - save a classifier out to a file for later use.
+
+Visualization:
+  DataVisualizer - step that can pop up a panel for visualizing data in
+    a single large 2D scatter plot
+  ScatterPlotMatrix - step that can pop up a panel containing a matrix of
+    small scatter plots (clicking on a small plot pops up a large scatter 
+    plot)
+  AttributeSummarizer - step that can pop up a panel containing a matrix
+    of histogram plots - one for each of the attributes in the input data
+  ModelPerformanceChart - step that can pop up a panel for visualizing
+    threshold (i.e. ROC style) curves.
+  TextViewer - step for showing textual data. Can show data sets, 
+    classification performance statistics etc.
+  GraphViewer - step that can pop up a panel for visualizing tree based
+    models
+  StripChart - step that can pop up a panel that displays a scrolling
+    plot of data (used for viewing the online performance of incremental
+    classifiers)
+  CostBenefitAnalysis - interactively and graphically explore the effects 
+    of changing costs/benefits and adjusting prediction thresholds.
+  ImageViewer - step for visualizing static images.
+
+Plugin steps - various packages, installable via the package manager,
+provide plugin Knowledge Flow steps and perspectives.
+
+---------------
+
+Launching the KnowledgeFlow:
+
+The Weka GUI Chooser window is used to launch Weka's graphical
+environments. Select the button labeled "KnowledgeFlow" to start the
+KnowledgeFlow. Alternatively, you can launch the KnowledgeFlow from a
+terminal window by typing "java weka.gui.beans.KnowledgeFlow".
+
+EXAMPLE:
+-----------------
+Setting up a flow to load an arff file (batch mode) and
+perform a cross validation using J48 (Weka's C4.5 implementation). NOTE,
+this example ("Cross validation") can be accessed from the Templates 
+button (third in from the right in the toolbar) in the KnowledgeFlow
+UI.
+
+First start the KnowlegeFlow.
+
+Next expand the DataSources entry in the tree and choose "ArffLoader"
+from the toolbar (the mouse pointer will change to a "cross hairs").
+
+Next place the ArffLoader step on the layout area by clicking
+somewhere on the layout (A copy of the ArffLoader icon will appear on
+the layout area).
+
+Next specify an arff file to load by first right clicking the mouse
+over the ArffLoader icon on the layout. A pop-up menu will
+appear. Select "Configure" under "Edit" in the list from this menu and
+browse to the location of your arff file. Alternatively, you can
+double-click on the icon to bring up the configuration dialog (if
+the step in question has one).
+
+Next expand the "Evaluation" entry in the tree and choose the
+"ClassAssigner" (allows you to choose which column to be the class)
+step from the toolbar. Place this on the layout.
+
+Now connect the ArffLoader to the ClassAssigner: first right click
+over the ArffLoader and select the "dataSet" under "Connections" in
+the menu. A "rubber band" line will appear. Move the mouse over the
+ClassAssigner step and left click - a red line labeled "dataSet"
+will connect the two steps.
+
+Next right click over the ClassAssigner and choose "Configure" from
+the menu. This will pop up a window from which you can specify which
+column is the class in your data (last is the default).
+
+Next grab a "CrossValidationFoldMaker" step from Evaluation
+and place it on the layout. Connect the ClassAssigner to the
+CrossValidationFoldMaker by right clicking over "ClassAssigner" and
+selecting "dataSet" from under "Connections" in the menu.
+
+Next expand the "Classifiers" entry in the tree, then the "trees"
+sub-entry and select the "J48" step. Place it on the layout.
+
+Connect the CrossValidationFoldMaker to J48 TWICE by first choosing
+"trainingSet" and then "testSet" from the pop-up menu for the
+CrossValidationFoldMaker.
+
+Next go back to the "Evaluation" entry and place a
+"ClassifierPerformanceEvaluator" step on the layout. Connect J48
+to this step by selecting the "batchClassifier" entry from the
+pop-up menu for J48.
+
+Next expand the "Visualization" entry and place a "TextViewer"
+step on the layout. Connect the ClassifierPerformanceEvaluator to
+the TextViewer by selecting the "text" entry from the pop-up menu for
+ClassifierPerformanceEvaluator.
+
+Now start the flow executing by pressing the blue "play" icon at the
+top-left of the display. Progress information for the executing
+steps willa appear in the "Status" area and "Log" at the bottom
+of the window.
+
+When finished you can view the results by choosing show results from
+the pop-up menu for the TextViewer step.
+
+Other cool things to add to this flow: connect a TextViewer and/or a
+GraphViewer to J48 in order to view the textual or graphical
+representations of the trees produced for each fold of the cross
+validation (this is something that is not possible in the Explorer).
+-----------------------------
