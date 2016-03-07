@@ -34,6 +34,9 @@ import java.util.List;
  * Base classes for GUI perspectives to extend. Clients that extend this class
  * and make use of the {@code @PerspectiveInfo} annotation will only need to
  * override/implement a few methods.
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
  */
 public abstract class AbstractPerspective extends JPanel
   implements Perspective {

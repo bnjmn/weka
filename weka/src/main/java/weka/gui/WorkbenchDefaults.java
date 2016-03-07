@@ -27,6 +27,8 @@ import weka.core.Settings;
 import java.util.List;
 
 /**
+ * Default settings for the Workbench app.
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -50,6 +52,9 @@ public class WorkbenchDefaults extends Defaults {
   protected static final int LOG_MESSAGE_FONT_SIZE = -1;
   private static final long serialVersionUID = 7881327795923189743L;
 
+  /**
+   * Constructor
+   */
   public WorkbenchDefaults() {
     super(APP_ID);
 
