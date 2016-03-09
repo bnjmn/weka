@@ -56,10 +56,10 @@ import java.util.Set;
 @KFStep(
   name = "MakeResourceIntensive",
   category = "Flow",
-  toolTipText = "<html>Makes downstream connected steps resource intensive (or not).<br>"
+  toolTipText = "Makes downstream connected steps resource intensive (or not)."
     + " This shifts "
     + "processing of such steps between the main step executor<br>"
-    + "service and the high resource executor service or vice versa.</html>",
+    + "service and the high resource executor service or vice versa.",
   iconPath = KFGUIConsts.BASE_ICON_PATH + "DiamondPlain.gif")
 public class MakeResourceIntensive extends BaseStep {
 
