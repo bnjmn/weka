@@ -60,7 +60,7 @@ public class BlockStepEditorDialog extends StepEditorDialog {
     }
 
     JPanel p = new JPanel(new BorderLayout());
-    p.setBorder(BorderFactory.createTitledBorder("Choose class attribute"));
+    p.setBorder(BorderFactory.createTitledBorder("Choose step to wait for"));
     p.add(m_stepToBlockBox, BorderLayout.NORTH);
 
     add(p, BorderLayout.CENTER);
