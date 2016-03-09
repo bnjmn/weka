@@ -77,10 +77,6 @@ public class MainKFPerspective extends AbstractPerspective {
   /** File extension for undo point files */
   public static final String FILE_EXTENSION_JSON = ".kf";
 
-  /** Property file that lists built-in steps */
-  protected static final String STEP_LIST_PROPS =
-    "weka/knowledgeflow/steps/steps.props";
-
   /** For serialization */
   private static final long serialVersionUID = 3986047323839299447L;
 
@@ -106,7 +102,7 @@ public class MainKFPerspective extends AbstractPerspective {
   protected StepTree m_stepTree;
 
   /** The paste buffer */
-  protected String m_pasteBuffer = null;
+  protected String m_pasteBuffer;
 
   /** The file chooser for loading/saving layout files */
   protected JFileChooser m_FileChooser = new JFileChooser(new File(
@@ -122,14 +118,6 @@ public class MainKFPerspective extends AbstractPerspective {
    * Construct a new MainKFPerspective
    */
   public MainKFPerspective() {
-
-    /*
-     * // Add the built-in steps to the plugin manager try {
-     * PluginManager.addFromProperties(getClass().getClassLoader()
-     * .getResourceAsStream(STEP_LIST_PROPS), true); } catch (Exception e) {
-     * e.printStackTrace(); return; }
-     */
-
     m_isLoaded = true;
     m_isActive = true;
     setLayout(new BorderLayout());
