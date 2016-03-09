@@ -53,7 +53,13 @@ import java.util.Map;
  */
 @KFStep(name = "SubstringLabeler", category = "Tools",
   toolTipText = "Label instances according to substring matches in String "
-    + "attributes", iconPath = KFGUIConsts.BASE_ICON_PATH + "DefaultFilter.gif")
+    + "attributes "
+    + "The user can specify the attributes to match "
+    + "against and associated label to create by defining 'match' rules. A new attribute is appended "
+    + "to the data to contain the label. Rules are applied in order when processing instances, and the "
+    + "label associated with the first matching rule is applied. Non-matching instances can either receive "
+    + "a missing value for the label attribute or be 'consumed' (i.e. they are not output).",
+  iconPath = KFGUIConsts.BASE_ICON_PATH + "DefaultFilter.gif")
 public class SubstringLabeler extends BaseStep {
 
   private static final long serialVersionUID = 1409175779108600014L;

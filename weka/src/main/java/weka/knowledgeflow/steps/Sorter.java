@@ -57,7 +57,14 @@ import java.util.Map;
  * @version $Revision: $
  */
 @KFStep(name = "Sorter", category = "Tools",
-  toolTipText = "Sort instances in ascending or descending order",
+  toolTipText = "Sort instances in ascending or descending order according "
+    + "to the values of user-specified attributes. Instances can be sorted "
+    + "according to multiple attributes (defined in order). Handles datasets "
+    + "larger than can be fit into main memory via instance connections and "
+    + "specifying the in-memory buffer size. Implements a merge-sort by writing "
+    + "the sorted in-memory buffer to a file when full and then interleaving "
+    + "instances from the disk-based file(s) when the incoming stream has "
+    + "finished.",
   iconPath = KFGUIConsts.BASE_ICON_PATH + "Sorter.gif")
 public class Sorter extends BaseStep {
 
