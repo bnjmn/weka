@@ -1,0 +1,150 @@
+{
+	"flow_name" : "Prediction boundaries",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "104,60"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.BoundaryPlotter",
+			"properties" : {
+				"XAttName" : "petallength",
+				"YAttName" : "petalwidth",
+				"baseForSampling" : "2",
+				"computeMaxRowsInParallel" : 10,
+				"imageHeight" : 400,
+				"imageWidth" : 400,
+				"kernelBandwidth" : "3",
+				"name" : "BoundaryPlotter",
+				"numLocationsPerPixel" : "2",
+				"plotTrainingData" : true
+			},
+			"connections" : {
+				"image" : [
+					"ImageSaver"
+				]
+			},
+			"coordinates" : "277,254"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "/last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"BoundaryPlotter"
+				]
+			},
+			"coordinates" : "104,254"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.functions.Logistic",
+					"options" : "-R 1.0E-8 -M -1"
+				},
+				"loadClassifierFileName" : "",
+				"name" : "Logistic",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"info" : [
+					"BoundaryPlotter"
+				]
+			},
+			"coordinates" : "446,62"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Clusterer",
+			"properties" : {
+				"clusterer" : {
+					"type" : "optionHandler",
+					"class" : "weka.clusterers.EM",
+					"options" : "-I 100 -N 5 -X 10 -max -1 -ll-cv 1.0E-6 -ll-iter 1.0E-6 -M 1.0E-6 -K 10 -num-slots 1 -S 100"
+				},
+				"loadClustererFileName" : "",
+				"name" : "EM"
+			},
+			"connections" : {
+				"info" : [
+					"BoundaryPlotter"
+				]
+			},
+			"coordinates" : "277,60"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageSaver",
+			"properties" : {
+				"file" : "${user.home}/bp${image_count}.png",
+				"format" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.steps.ImageSaver$ImageFormat",
+					"value" : "DEFAULT"
+				},
+				"name" : "ImageSaver"
+			},
+			"connections" : {
+			},
+			"coordinates" : "501,254"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It loads an ARFF file as a resource from the classpath. If you want \nto use your own data, edit the ArffLoader.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "23,11"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Double click to\nspecify the class\nattribute"
+			},
+			"connections" : {
+			},
+			"coordinates" : "94,342"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Double click to configure\nboundary plotting options.\nRight click and select\n\"Show plots\" to see\nresults."
+			},
+			"connections" : {
+			},
+			"coordinates" : "240,346"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "Saves each rendered plot\nas a png file named\nbp${image_count}.png,\nwhere the variable image_count\nis incremented for each subsequent\nplot."
+			},
+			"connections" : {
+			},
+			"coordinates" : "465,338"
+		}
+	]
+}
