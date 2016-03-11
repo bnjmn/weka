@@ -929,30 +929,40 @@ public class KernelFilter extends SimpleBatchFilter implements
     }
 
     // backup class attribute and remove it
-    double[] classes = instances.attributeToDoubleArray(instances.classIndex());
     int classIndex = instances.classIndex();
-    Attribute classAttribute = (Attribute) instances.classAttribute().copy();
-    instances.setClassIndex(-1);
-    instances.deleteAttributeAt(classIndex);
+    double[] classes = null;
+    Attribute classAttribute = null;
+    if (classIndex >= 0) {
+      classes = instances.attributeToDoubleArray(instances.classIndex());
+      classAttribute = (Attribute) instances.classAttribute().copy();
+      instances.setClassIndex(-1);
+      instances.deleteAttributeAt(classIndex);
+    }
 
     // generate new header
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     for (int j = 0; j < m_NumTrainInstances; j++) {
       atts.add(new Attribute("Kernel " + j));
     }
-    atts.add(classAttribute);
+    if (classIndex >= 0) {
+      atts.add(classAttribute);
+    }
     Instances result = new Instances("Kernel", atts, 0);
-    result.setClassIndex(result.numAttributes() - 1);
+    if (classIndex >= 0) {
+      result.setClassIndex(result.numAttributes() - 1);
+    }
 
     // compute matrix
     for (int i = 0; i < instances.numInstances(); i++) {
-      double[] k = new double[m_NumTrainInstances + 1];
+      double[] k = new double[m_NumTrainInstances + ((classIndex >= 0) ? 1 : 0)];
 
       for (int j = 0; j < m_NumTrainInstances; j++) {
         double v = m_ActualKernel.eval(-1, j, instances.instance(i));
         k[j] = v;
       }
-      k[k.length - 1] = classes[i];
+      if (classIndex >= 0) {
+        k[k.length - 1] = classes[i];
+      }
 
       // create new instance
       Instance in = new DenseInstance(1.0, k);
