@@ -1,3 +1,24 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    WorkbenchApp
+ *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui;
 
 import weka.core.Capabilities;
@@ -17,6 +38,9 @@ import java.io.IOException;
 import java.util.List;
 
 /**
+ * One app to rule them all, one app to find them, one app to
+ * bring them all and with perspectives bind them.
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
@@ -36,8 +60,12 @@ public class WorkbenchApp extends AbstractGUIApplication {
   /** The main perspective for this application */
   protected PreprocessPanel m_mainPerspective;
 
+  /** Settings for the Workbench */
   protected Settings m_workbenchSettings;
 
+  /**
+   * Constructor
+   */
   public WorkbenchApp() {
     super(true, new String[0], new String[] {
       weka.gui.knowledgeflow.AttributeSummaryPerspective.class
@@ -57,16 +85,32 @@ public class WorkbenchApp extends AbstractGUIApplication {
     }
   }
 
+  /**
+   * Get the name of this application
+   *
+   * @return the name of this application
+   */
   @Override
   public String getApplicationName() {
     return WorkbenchDefaults.APP_NAME;
   }
 
+  /**
+   * Get the ID of this application
+   *
+   * @return the ID of this application
+   */
   @Override
   public String getApplicationID() {
     return WorkbenchDefaults.APP_ID;
   }
 
+  /**
+   * Get the main perspective of this application. In this case the
+   * Preprocess panel is the main perspective.
+   *
+   * @return the main perspective of this application
+   */
   @Override
   public Perspective getMainPerspective() {
     if (m_mainPerspective == null) {
@@ -75,17 +119,9 @@ public class WorkbenchApp extends AbstractGUIApplication {
     return m_mainPerspective;
   }
 
-  /* @Override
-  public Settings getApplicationSettings() {
-
-    if (m_workbenchSettings == null) {
-      m_workbenchSettings = new Settings("weka", WorkbenchDefaults.APP_ID);
-      m_workbenchSettings.applyDefaults(new WorkbenchDefaults());
-    }
-
-    return m_workbenchSettings;
-  } */
-
+  /**
+   * Called when the user changes settings
+   */
   @Override
   public void settingsChanged() {
     GenericObjectEditor.setShowGlobalInfoToolTips(getApplicationSettings()
@@ -95,6 +131,11 @@ public class WorkbenchApp extends AbstractGUIApplication {
         Environment.getSystemWide()));
   }
 
+  /**
+   * Notify filter capabilities listeners of changes
+   *
+   * @param filter the Capabilities object relating to filters
+   */
   public void notifyCapabilitiesFilterListeners(Capabilities filter) {
     for (Perspective p : getPerspectiveManager().getVisiblePerspectives()) {
       if (p instanceof Explorer.CapabilitiesFilterChangeListener) {
@@ -105,11 +146,21 @@ public class WorkbenchApp extends AbstractGUIApplication {
     }
   }
 
+  /**
+   * Get the default settings for this application
+   *
+   * @return the default settings for this application
+   */
   @Override
   public Defaults getApplicationDefaults() {
     return new WorkbenchDefaults();
   }
 
+  /**
+   * Main method.
+   *
+   * @param args command line arguments for the Workbench
+   */
   public static void main(String[] args) {
     try {
       LookAndFeel.setLookAndFeel(WorkbenchDefaults.APP_ID,
