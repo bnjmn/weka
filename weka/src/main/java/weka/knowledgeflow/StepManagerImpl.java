@@ -891,15 +891,21 @@ public class StepManagerImpl implements StepManager {
       notifyOutputListeners(data);
     }
   }
-
+  
   /**
-   * Output one or more Data objects to downstream connected Steps. Data
-   * object(s) must have a connection type set (so that they can be routed to
-   * the appropriate downstream Steps). Also notifies any registered
-   * StepOutputListeners.
+   * Output one or more Data objects to all relevant steps. Populates the source
+   * in each Data object for the client, HOWEVER, the client must have populated
+   * the connection type in each Data object to be output so that the
+   * StepManager knows which connected steps to send the data to. Also notifies
+   * any registered {@code StepOutputListeners}. Note that the downstream
+   * step(s)' processIncoming() method is called in a separate thread for batch
+   * connections. Furthermore, if multiple Data objects are supplied via the
+   * varargs argument, and a target step will receive more than one of the Data
+   * objects, then they will be passed on to the step in question sequentially
+   * within the same thread of execution.
    *
    * @param data one or more Data objects to be sent
-   * @throws WekaException
+   * @throws WekaException if a problem occurs
    */
   @Override
   public void outputData(Data... data) throws WekaException {
