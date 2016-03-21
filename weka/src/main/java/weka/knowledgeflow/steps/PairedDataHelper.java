@@ -58,7 +58,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *       protected PairedDataHelper<MyFunkyMainResult> m_helper;
  *       ...
  *       public void stepInit() {
- *         m_helper = new TrainTestHelper<MyFunkyMainResult>(this, this,
+ *         m_helper = new PairedDataHelper<MyFunkyMainResult>(this, this,
  *         StepManager.[CON_WHATEVER_YOUR_PRIMARY_CONNECTION_IS],
  *         StepManager.[CON_WHATEVER_YOUR_SECONDARY_CONNECTION_IS]);
  * 
