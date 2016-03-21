@@ -635,6 +635,21 @@
         <include name="org/**/*"/>
       </patternset>
     </unzip>
+    <unzip src="${lib}/mtj.jar" dest="${build}/classes">
+      <patternset>
+        <include name="no/uib/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/core.jar" dest="${build}/classes">
+      <patternset>
+        <include name="com/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/arpack_combined_all.jar" dest="${build}/classes">
+      <patternset>
+        <include name="org/**/*"/>
+      </patternset>
+    </unzip>
   </target>
 
   <!-- Make the javadocs -->
