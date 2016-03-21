@@ -181,6 +181,14 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
   private Instances m_structure;
 
   /**
+   * Constructor that sets the default number of decimal places to 4.
+   */
+  public Logistic() {
+
+    setNumDecimalPlaces(4);
+  }
+
+  /**
    * Returns a string describing this classifier
    * 
    * @return a description of the classifier suitable for displaying in the
@@ -960,12 +968,12 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
     // check against coefficients and odds ratios
     for (int j = 1; j <= m_NumPredictors; j++) {
       for (int k = 0; k < m_NumClasses - 1; k++) {
-        if (Utils.doubleToString(m_Par[j][k], 12, 4).trim().length() > colWidth) {
-          colWidth = Utils.doubleToString(m_Par[j][k], 12, 4).trim().length();
+        if (Utils.doubleToString(m_Par[j][k], 8 + getNumDecimalPlaces(), getNumDecimalPlaces()).trim().length() > colWidth) {
+          colWidth = Utils.doubleToString(m_Par[j][k], 8 + getNumDecimalPlaces(), getNumDecimalPlaces()).trim().length();
         }
         double ORc = Math.exp(m_Par[j][k]);
         String t = " "
-          + ((ORc > 1e10) ? "" + ORc : Utils.doubleToString(ORc, 12, 4));
+          + ((ORc > 1e10) ? "" + ORc : Utils.doubleToString(ORc, 8 + getNumDecimalPlaces(), getNumDecimalPlaces()));
         if (t.trim().length() > colWidth) {
           colWidth = t.trim().length();
         }
@@ -998,7 +1006,7 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
       if (i != m_structure.classIndex()) {
         temp.append(Utils.padRight(m_structure.attribute(i).name(), attLength));
         for (int k = 0; k < m_NumClasses - 1; k++) {
-          temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 12, 4)
+          temp.append(Utils.padLeft(Utils.doubleToString(m_Par[j][k], 8 + getNumDecimalPlaces(), getNumDecimalPlaces())
             .trim(), colWidth));
         }
         temp.append("\n");
@@ -1009,7 +1017,7 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
     temp.append(Utils.padRight("Intercept", attLength));
     for (int k = 0; k < m_NumClasses - 1; k++) {
       temp.append(Utils.padLeft(
-        Utils.doubleToString(m_Par[0][k], 10, 4).trim(), colWidth));
+        Utils.doubleToString(m_Par[0][k], 6 + getNumDecimalPlaces(), getNumDecimalPlaces()).trim(), colWidth));
     }
     temp.append("\n");
 
@@ -1035,7 +1043,7 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
         for (int k = 0; k < m_NumClasses - 1; k++) {
           double ORc = Math.exp(m_Par[j][k]);
           String ORs = " "
-            + ((ORc > 1e10) ? "" + ORc : Utils.doubleToString(ORc, 12, 4));
+            + ((ORc > 1e10) ? "" + ORc : Utils.doubleToString(ORc, 8 + getNumDecimalPlaces(), getNumDecimalPlaces()));
           temp.append(Utils.padLeft(ORs.trim(), colWidth));
         }
         temp.append("\n");
