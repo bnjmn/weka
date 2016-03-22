@@ -138,16 +138,14 @@ public class VisibleLayout extends JPanel {
     p1.setLayout(new BorderLayout());
     JScrollPane js = new JScrollPane(m_layout);
     p1.add(js, BorderLayout.CENTER);
-    js.getVerticalScrollBar()
-      .setUnitIncrement(KFDefaults.SCROLL_BAR_INCREMENT_LAYOUT);
-    js.getHorizontalScrollBar()
-      .setUnitIncrement(KFDefaults.SCROLL_BAR_INCREMENT_LAYOUT);
+    js.getVerticalScrollBar().setUnitIncrement(
+      KFDefaults.SCROLL_BAR_INCREMENT_LAYOUT);
+    js.getHorizontalScrollBar().setUnitIncrement(
+      KFDefaults.SCROLL_BAR_INCREMENT_LAYOUT);
 
-    m_layout.setSize(
-      m_mainPerspective.getSetting(KFDefaults.LAYOUT_WIDTH_KEY,
-        KFDefaults.LAYOUT_WIDTH),
-      m_mainPerspective.getSetting(KFDefaults.LAYOUT_HEIGHT_KEY,
-        KFDefaults.LAYOUT_HEIGHT));
+    m_layout.setSize(m_mainPerspective.getSetting(KFDefaults.LAYOUT_WIDTH_KEY,
+      KFDefaults.LAYOUT_WIDTH), m_mainPerspective.getSetting(
+      KFDefaults.LAYOUT_HEIGHT_KEY, KFDefaults.LAYOUT_HEIGHT));
     Dimension d = m_layout.getPreferredSize();
     m_layout.setMinimumSize(d);
     m_layout.setPreferredSize(d);
@@ -288,6 +286,9 @@ public class VisibleLayout extends JPanel {
     setSelectedSteps(new ArrayList<StepVisual>());
     m_mainPerspective.getMainToolBar().disableWidgets(
       MainKFPerspectiveToolBar.Widgets.DELETE_BUTTON.toString());
+    m_mainPerspective.getMainToolBar().enableWidget(
+      MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
+      m_flow.size() > 0);
     m_layout.repaint();
   }
 
@@ -355,8 +356,9 @@ public class VisibleLayout extends JPanel {
    */
   protected void addUndoPoint() {
     try {
-      File tempFile = File.createTempFile("knowledgeflow",
-        MainKFPerspective.FILE_EXTENSION_JSON);
+      File tempFile =
+        File.createTempFile("knowledgeflow",
+          MainKFPerspective.FILE_EXTENSION_JSON);
       tempFile.deleteOnExit();
       JSONFlowUtils.writeFlow(m_flow, tempFile);
       m_undoBuffer.push(tempFile);
@@ -365,8 +367,8 @@ public class VisibleLayout extends JPanel {
         KFDefaults.MAX_UNDO_POINTS_KEY, KFDefaults.MAX_UNDO_POINTS)) {
         m_undoBuffer.remove(0);
       }
-      m_mainPerspective.getMainToolBar()
-        .enableWidgets(MainKFPerspectiveToolBar.Widgets.UNDO_BUTTON.toString());
+      m_mainPerspective.getMainToolBar().enableWidgets(
+        MainKFPerspectiveToolBar.Widgets.UNDO_BUTTON.toString());
     } catch (Exception ex) {
       m_logPanel
         .logMessage("[KnowledgeFlow] a problem occurred while trying to "
@@ -499,8 +501,12 @@ public class VisibleLayout extends JPanel {
     m_layout.add(visual);
     visual.setLocation(x, y);
 
-    m_mainPerspective
-      .setCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+    m_mainPerspective.setCursor(Cursor
+      .getPredefinedCursor(Cursor.DEFAULT_CURSOR));
+
+    m_mainPerspective.getMainToolBar().enableWidget(
+      MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
+      m_flow.size() > 0);
   }
 
   /**
@@ -718,23 +724,23 @@ public class VisibleLayout extends JPanel {
    *          sequentially rather than in parallel
    * @throws WekaException if a problem occurs
    */
-  public synchronized void executeFlow(boolean sequential)
-    throws WekaException {
+  public synchronized void executeFlow(boolean sequential) throws WekaException {
     if (isExecuting()) {
       throw new WekaException("The flow is already executing!");
     }
     if (m_flowExecutor == null) {
-      m_flowExecutor = new FlowRunner(
-        m_mainPerspective.getMainApplication().getApplicationSettings());
+      m_flowExecutor =
+        new FlowRunner(m_mainPerspective.getMainApplication()
+          .getApplicationSettings());
       m_flowExecutor.setLogger(m_logPanel);
     }
-    m_flowExecutor.setSettings(
-      m_mainPerspective.getMainApplication().getApplicationSettings());
+    m_flowExecutor.setSettings(m_mainPerspective.getMainApplication()
+      .getApplicationSettings());
     m_mainPerspective.getMainToolBar().disableWidgets(
       MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
       MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());
-    m_mainPerspective.getMainToolBar()
-      .enableWidgets(MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
+    m_mainPerspective.getMainToolBar().enableWidgets(
+      MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
 
     m_flowExecutor.getExecutionEnvironment().setEnvironmentVariables(m_env);
     m_isExecuting = true;
@@ -747,9 +753,8 @@ public class VisibleLayout extends JPanel {
           if (m_flowExecutor.wasStopped()) {
             m_logPanel.setMessageOnAll(false, "Stopped.");
           }
-          m_mainPerspective.getMainToolBar()
-            .enableWidgets(MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON
-              .toString(),
+          m_mainPerspective.getMainToolBar().enableWidgets(
+            MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
             MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());
           m_mainPerspective.getMainToolBar().disableWidgets(
             MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
@@ -822,8 +827,8 @@ public class VisibleLayout extends JPanel {
    * @param connectionName the type of connection to check for
    * @return a list of steps that can accept the supplied connection type
    */
-  protected List<StepManagerImpl>
-    findStepsThatCanAcceptConnection(String connectionName) {
+  protected List<StepManagerImpl> findStepsThatCanAcceptConnection(
+    String connectionName) {
 
     List<StepManagerImpl> result = new ArrayList<StepManagerImpl>();
     for (StepManagerImpl step : m_flow.getSteps()) {
@@ -847,8 +852,8 @@ public class VisibleLayout extends JPanel {
    *         is a list of 2 element arrays, where each array contains source and
    *         target steps for the connection in question
    */
-  protected Map<String, List<StepManagerImpl[]>>
-    findClosestConnections(Point point, int delta) {
+  protected Map<String, List<StepManagerImpl[]>> findClosestConnections(
+    Point point, int delta) {
 
     Map<String, List<StepManagerImpl[]>> closestConnections =
       new HashMap<String, List<StepManagerImpl[]>>();
@@ -862,12 +867,14 @@ public class VisibleLayout extends JPanel {
           String connName = outCons.getKey();
           StepVisual sourceVisual = sourceManager.getStepVisual();
           StepVisual targetVisual = targetManager.getStepVisual();
-          Point bestSourcePt = sourceVisual.getClosestConnectorPoint(
-            new Point(targetVisual.getX() + targetVisual.getWidth() / 2,
-              targetVisual.getY() + targetVisual.getHeight() / 2));
-          Point bestTargetPt = targetVisual.getClosestConnectorPoint(
-            new Point(sourceVisual.getX() + sourceVisual.getWidth() / 2,
-              sourceVisual.getY() + sourceVisual.getHeight() / 2));
+          Point bestSourcePt =
+            sourceVisual.getClosestConnectorPoint(new Point(targetVisual.getX()
+              + targetVisual.getWidth() / 2, targetVisual.getY()
+              + targetVisual.getHeight() / 2));
+          Point bestTargetPt =
+            targetVisual.getClosestConnectorPoint(new Point(sourceVisual.getX()
+              + sourceVisual.getWidth() / 2, sourceVisual.getY()
+              + sourceVisual.getHeight() / 2));
 
           int minx = (int) Math.min(bestSourcePt.getX(), bestTargetPt.getX());
           int maxx = (int) Math.max(bestSourcePt.getX(), bestTargetPt.getX());
@@ -881,8 +888,9 @@ public class VisibleLayout extends JPanel {
             // formulate ax + by + c = 0
             double a = bestSourcePt.getY() - bestTargetPt.getY();
             double b = bestTargetPt.getX() - bestSourcePt.getX();
-            double c = (bestSourcePt.getX() * bestTargetPt.getY())
-              - (bestTargetPt.getX() * bestSourcePt.getY());
+            double c =
+              (bestSourcePt.getX() * bestTargetPt.getY())
+                - (bestTargetPt.getX() * bestSourcePt.getY());
 
             double distance =
               Math.abs((a * point.getX()) + (b * point.getY()) + c);
@@ -956,8 +964,7 @@ public class VisibleLayout extends JPanel {
       @Override
       public void mouseClicked(MouseEvent e) {
         if (logPanel.getStatusTable().rowAtPoint(e.getPoint()) == 0) {
-          if (((e.getModifiers()
-            & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+          if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
             || e.isAltDown()) {
             System.gc();
             Runtime currR = Runtime.getRuntime();
@@ -969,10 +976,12 @@ public class VisibleLayout extends JPanel {
                 + String.format("%,d", freeM) + " / "
                 + String.format("%,d", totalM) + " / "
                 + String.format("%,d", maxM));
-            logPanel.statusMessage(
-              "@!@[KnowledgeFlow]|Memory (free/total/max.) in bytes: "
-                + String.format("%,d", freeM) + " / "
-                + String.format("%,d", totalM) + " / "
+            logPanel
+              .statusMessage("@!@[KnowledgeFlow]|Memory (free/total/max.) in bytes: "
+                + String.format("%,d", freeM)
+                + " / "
+                + String.format("%,d", totalM)
+                + " / "
                 + String.format("%,d", maxM));
           }
         }
@@ -1079,6 +1088,10 @@ public class VisibleLayout extends JPanel {
       MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString(),
       MainKFPerspectiveToolBar.Widgets.SAVE_FLOW_BUTTON.toString(),
       MainKFPerspectiveToolBar.Widgets.SAVE_FLOW_AS_BUTTON.toString());
+
+    m_mainPerspective.getMainToolBar().enableWidget(
+      MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
+      m_flow.size() > 0);
   }
 
   /**
@@ -1096,8 +1109,8 @@ public class VisibleLayout extends JPanel {
     /** For serialization */
     private static final long serialVersionUID = -2224509243343105276L;
 
-    public synchronized void setMessageOnAll(boolean mainKFLine,
-      String message) {
+    public synchronized void
+      setMessageOnAll(boolean mainKFLine, String message) {
       for (String key : m_tableIndexes.keySet()) {
         if (!mainKFLine && key.equals("[KnowledgeFlow]")) {
           continue;
@@ -1118,8 +1131,9 @@ public class VisibleLayout extends JPanel {
    * @return the serialized Flow
    * @throws WekaException if a problem occurs
    */
-  public static String serializeStepsToJSON(List<StepVisual> steps, String name)
-    throws WekaException {
+  public static String
+    serializeStepsToJSON(List<StepVisual> steps, String name)
+      throws WekaException {
     if (steps.size() > 0) {
       List<StepManagerImpl> toCopy = new ArrayList<StepManagerImpl>();
       for (StepVisual s : steps) {
