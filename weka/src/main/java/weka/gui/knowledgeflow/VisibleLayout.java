@@ -430,6 +430,10 @@ public class VisibleLayout extends JPanel {
       m_layout.add(visual);
     }
 
+    m_mainPerspective.getMainToolBar().enableWidget(
+      MainKFPerspectiveToolBar.Widgets.SELECT_ALL_BUTTON.toString(),
+      m_flow.size() > 0);
+
     m_layout.revalidate();
     m_layout.repaint();
   }
