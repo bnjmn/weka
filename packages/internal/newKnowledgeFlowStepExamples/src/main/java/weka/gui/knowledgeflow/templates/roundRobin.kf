@@ -1,0 +1,95 @@
+{
+	"flow_name" : "roundRobin",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"instance" : [
+					"RoundRobin"
+				]
+			},
+			"coordinates" : "39,13"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.InstanceStreamToBatchMaker",
+			"properties" : {
+				"name" : "InstanceStreamToBatchMaker"
+			},
+			"connections" : {
+				"dataSet" : [
+					"StatsCalculator"
+				]
+			},
+			"coordinates" : "239,53"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "599,213"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RoundRobin",
+			"properties" : {
+				"name" : "RoundRobin"
+			},
+			"connections" : {
+				"instance" : [
+					"InstanceStreamToBatchMaker",
+					"InstanceStreamToBatchMaker2"
+				]
+			},
+			"coordinates" : "39,213"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.InstanceStreamToBatchMaker",
+			"properties" : {
+				"name" : "InstanceStreamToBatchMaker2"
+			},
+			"connections" : {
+				"dataSet" : [
+					"StatsCalculator2"
+				]
+			},
+			"coordinates" : "239,333"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.StatsCalculator",
+			"properties" : {
+				"attName" : "petallength",
+				"name" : "StatsCalculator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "399,53"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.StatsCalculator",
+			"properties" : {
+				"attName" : "petalwidth",
+				"name" : "StatsCalculator2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "439,333"
+		}
+	]
+}

@@ -1,0 +1,2 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.StatsCalculator,weka.knowledgeflow.steps.RoundRobin,weka.knowledgeflow.steps.ExampleClassifier
+*resources*=[weka.knowledgeflow.plugin.templates|KF Examples: StatsCalculator|weka/gui/knowledgeflow/templates/statsCalculator.kf],[weka.knowledgeflow.plugin.templates|KF Examples: RoundRobin|weka/gui/knowledgeflow/templates/roundRobin.kf],[weka.knowledgeflow.plugin.templates|KF Examples: ExampleClassifier|weka/gui/knowledgeflow/templates/exampleClassifier.kf]

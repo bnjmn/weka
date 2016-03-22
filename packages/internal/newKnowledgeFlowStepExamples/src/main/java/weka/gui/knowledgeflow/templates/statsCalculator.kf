@@ -1,0 +1,48 @@
+{
+	"flow_name" : "statsCalculator",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "weka/gui/knowledgeflow/templates/iris.arff",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"StatsCalculator"
+				]
+			},
+			"coordinates" : "13,12"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.StatsCalculator",
+			"properties" : {
+				"attName" : "petallength",
+				"name" : "StatsCalculator"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"dataSet" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "213,12"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "413,12"
+		}
+	]
+}
