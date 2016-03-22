@@ -22,14 +22,20 @@
 \section{Introduction}
 
 The KnowledgeFlow provides an alternative to the Explorer as a
-graphical front end to WEKA's core algorithms. 
+graphical front end to WEKA's core algorithms. Weka 3.8.0 and 3.9.0
+contain a new implementation of the KnowledgeFlow - this new
+implementation is more efficient, has a simpler API than the old
+version, and now lives in the \verb+weka.knowledgeflow+ and
+\verb+weka.gui.knowledgeflow+ packages. The old Knowledge Flow
+implementation is still available in the \verb+weka.gui.beans+
+package.
 
 \begin{center}
-  \includegraphics[angle=270,width=10cm]{images/knowledgeflow/knowledgeflow.eps}
+  \includegraphics[width=10cm]{images/knowledgeflow/knowledgeflow.eps}
 \end{center}
 
 The KnowledgeFlow presents a \textit{data-flow} inspired interface to
-WEKA. The user can select WEKA components from a palette, place them
+WEKA. The user can select WEKA steps from a palette, place them
 on a layout canvas and connect them together in order to form a
 \textit{knowledge flow} for processing and analyzing data. At present,
 all of WEKA's classifiers, filters, clusterers, associators, loaders
@@ -76,10 +82,10 @@ The KnowledgeFlow offers the following features:
 \begin{itemize}
 	\item intuitive data flow style layout
 	\item process data in batches or incrementally 
-	\item process multiple batches or streams in parallel (each separate flow 
-  	executes in its own thread)
-        \item process multiple streams sequentially via a user-specified order of
-          execution
+	\item launch multiple start points in parallel
+        \item launch multiple start points sequentially in a user-defined order
+        \item fully multi-threaded - each step in a flow executes in its own thread (except for those processing streaming data)
+        \item single threaded execution for streaming flows
 	\item chain filters together
 	\item view models produced by classifiers for each fold in a cross validation
 	\item visualize performance of incremental classifiers during 
@@ -90,15 +96,26 @@ The KnowledgeFlow offers the following features:
 \end{itemize}
 
 \newpage
-\section{Components}
-Components available in the KnowledgeFlow:
+\section{Flow Steps}
+Steps available in the KnowledgeFlow:
 
 \subsection{DataSources} All of WEKA's loaders are available.
 %\begin{center}
 	%\epsfig{file=images/knowledgeflow/components_datasources.eps,height=2cm}
 %\end{center}
 
-\subsection{DataSinks} All of WEKA's savers are available.
+\subsection{DataSinks} All of WEKA's savers are available. Along with the
+following KnowledgeFlow-specific ones:
+
+\begin{itemize}  
+\item \textit{TextSaver} - save text carried by a text connection out to a file.
+\item \textit{ImageSaver} - save the image data carried by an image connection
+out to a file in either PNG or GIF format.
+\item \textit{SerializedModelSaver} - save the classifier or clusterer
+  encapsulated in a batchClassifier, incrementalClassifier or batchClusterer
+  connection out to a file.
+\end{itemize}
+
 %\begin{center}
 %	\epsfig{file=images/knowledgeflow/components_datasinks.eps,height=2cm}
 %\end{center}
@@ -117,6 +134,9 @@ Components available in the KnowledgeFlow:
 %\begin{center}
 %	\epsfig{file=images/knowledgeflow/components_clusterers.eps,height=2cm}
 %\end{center}
+
+\subsection{Attribute selection} All of WEKA's attribute and subset evaluators
+are available, along with all of the search methods.
 
 \subsection{Evaluation}
 %\begin{center}
@@ -146,40 +166,92 @@ Components available in the KnowledgeFlow:
 	\item \textit{PredictionAppender} - append classifier predictions to a test 
 	set. For discrete class problems, can either append predicted class labels or
 	probability distributions.
-        \item \textit{SerializedModelSaver} - save the classifier or clusterer
-          encapsulated in a batchClassifier, incrementalClassifier or batchClusterer
-          connection/event out to a file.
 \end{itemize}
 
-\newpage
 \subsection{Visualization}
 %\begin{center}
 %	\epsfig{file=images/knowledgeflow/components_visualization.eps,height=2cm}
 %\end{center}
 
 \begin{itemize}
-	\item \textit{DataVisualizer} - component that can pop up a panel for 
+	\item \textit{DataVisualizer} - a step that can pop up a panel for 
 	visualizing data in a single large 2D scatter plot.
-	\item \textit{ScatterPlotMatrix} - component that can pop up a panel 
+	\item \textit{ScatterPlotMatrix} - a step that can pop up a panel 
 	containing a matrix of small scatter plots (clicking on a small plot 
 	pops up a large scatter plot).
-	\item \textit{AttributeSummarizer} - component that can pop up a panel 
+	\item \textit{AttributeSummarizer} - a step that can pop up a panel 
 	containing a matrix of histogram plots - one for each of the attributes 
 	in the input data.
-	\item \textit{ModelPerformanceChart} - component that can pop up a 
+	\item \textit{ModelPerformanceChart} - a step that can pop up a 
 	panel for visualizing threshold (i.e. ROC style) curves.
-        \item \textit{CostBenefitAnalysis} - component that can popup a graphical
+        \item \textit{CostBenefitAnalysis} - a step that can popup a graphical
           tool for exploring cost/benefit tradeoffs by interactively selecting
           different population sizes from a ranked list of prospects or by 
           varying the threshold on the predicted probability of the positive class. It
           displays both a cumulative gains chart and a cost/benefit plot.
-	\item \textit{TextViewer} - component for showing textual data. Can show 
+	\item \textit{TextViewer} - a step for showing textual data. Can show 
 	data sets, classification performance statistics etc.
-	\item \textit{GraphViewer} - component that can pop up a panel for 
+	\item \textit{GraphViewer} - a step that can pop up a panel for 
 	visualizing tree based models.
-	\item \textit{StripChart} - component that can pop up a panel that displays 
+	\item \textit{StripChart} - a step that can pop up a panel that displays 
 	a scrolling plot of data (used for viewing the online performance of 
 	incremental classifiers).
+        \item \textit{ImageViewer} - a step that can popup a visualization for static
+          image data.
+        \item \textit{BoundaryPlotter} - a step that accepts a dataSet, along with one
+          or more info connections from classifiers or clusterers to execute, and generates
+          prediction boundary plots. The resulting plots can be viewed in a popup visualization.
+\end{itemize}
+
+\subsection{Flow}
+
+\begin{itemize}
+  \item \textit{SetVariables} - set the values of variables used in the flow. This is useful for
+    testing flows that use variables before they are executed in an environment where the variables
+    will have meaningful values. This step does not need to be connected to any others - just place
+    one on the layout.
+  \item \textit{MakeResourceIntensive} - a step that alters which executor service is used to
+    execute the step immediately downstream. By default, most steps execute in the main executor
+    service. However, there is a secondary executor service, using a limited number of threads, 
+    available for executing high resource (cpu/memory) tasks and steps. The Classifier step 
+    executes in the high resource executor by default because it could potentially process
+    many cross-validation folds - this way it won't starve other steps of CPU or memory
+    resources. The \textit{MakeResourceIntensive} can be used to force a step to use a particular
+    executor service.
+  \item \textit{Block} - a step that blocks incoming connections until a specified step in the flow
+    has finished executing.
+  \item \textit{Appender} - appends incoming batches or streams of data into one batch/stream. All
+    inputs must be of the same type (i.e. all batch or all stream). An amalgamated output is created
+    that is a combination of all the incoming attributes.
+  \item \textit{FlowByExpression} - a step that splits incoming instances (or instance streams) 
+    according to the evaluation of a logical expression. The expression can test the values of
+    one or more incoming attributes. The test can involve constants or comparing the value of
+    one attribute's values to another.
+  \item \textit{InstanceStreamToBatchMaker} - converts an incoming instance stream to a batch
+    (i.e. accepts an instance connection and outputs a dataSet connection).
+  \item \textit{Join} - a step that performs an inner join on two incoming dataSet or instance
+    stream connections. \textbf{Important}: assumes that both inputs are sorted in ascending order
+    of the key fields. A \textit{Sorter} step can be used to sort data before it is input to \textit{Join}.
+
+\end{itemize}
+
+\subsection{Tools}
+
+\begin{itemize}
+   \item \textit{Sorter} - a step that sorts incoming instances in ascending or descending order
+     according to the values of user-specified attributes. Instances can be sorted according to
+     multiple attributes (defined in order). Handles datasets larger than can be fit into main
+     memory via instance connections and specifying the in-memory buffer size. Implements a 
+     merge sort by writing the sorted in-memory buffer to a file when full, and then interleaving
+     instances from the disk-based file(s) when the incoming stream has finished.
+   \item \textit{SubstringReplacer} - replaces substrings in \textit{String} attributes using either
+     a literal match-and-replace, or regular expression matching.
+   \item \textit{SubstringLabeler} - a step that labels instances according to substring or regular
+     expression matches in \textit{String} attributes. The user can specify the attributes to match
+     against and associated label to create by defining ``match'' rules. A new attribute is appended
+     to the data to contain the label. Rules are applied in order when processing instances, and the
+     label associated with the first matching rule is applied. Non-matching instances can either receive
+     a missing value for the label attribute or be ``consumed'' (i.e. they are not output).
 \end{itemize}
 
 %%%%%%%%%%%%
@@ -209,7 +281,7 @@ appears when the ``templates'' button in the toolbar is clicked.
           choose \textit{ArffLoader} (the mouse pointer will change to
           a \textit{cross hairs}).
 
-	\item Next place the ArffLoader component on the layout area by clicking
+	\item Next place the ArffLoader step on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
 	the layout area).
 
@@ -221,19 +293,19 @@ appears when the ``templates'' button in the toolbar is clicked.
 	\item Next click expand the \textit{Evaluation} entry in the
           \textit{Design} panel and choose the \textit{ClassAssigner}
           (allows you to choose which column to be the class)
-          component from the toolbar. Place this on the layout.
+          step from the toolbar. Place this on the layout.
 
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
 	the menu. A \textit{rubber band} line will appear. Move the mouse over the
-	ClassAssigner component and left click - a red line labeled \textit{dataSet}
-	will connect the two components.
+	ClassAssigner step and left click - a red line labeled \textit{dataSet}
+	will connect the two steps.
 
 	\item Next right click over the ClassAssigner and choose \textit{Configure} from
 	the menu. This will pop up a window from which you can specify which
 	column is the class in your data (last is the default).
 
-	\item Next grab a \textit{CrossValidationFoldMaker} component
+	\item Next grab a \textit{CrossValidationFoldMaker} step
           from the Evaluation entry in the \textit{Design} panel and
           place it on the layout. Connect the ClassAssigner to the
           CrossValidationFoldMaker by right clicking over
@@ -242,7 +314,7 @@ appears when the ``templates'' button in the toolbar is clicked.
 
 	\item Next expand the \textit{Classifiers} entry and then the
           \textit{trees} sub-entry in the \textit{Design} panel and
-          choose the \textit{J48} component. Place a J48 component on
+          choose the \textit{J48} step. Place a J48 step on
           the layout.
 
 	\item Connect the CrossValidationFoldMaker to J48 TWICE by first choosing
@@ -250,24 +322,24 @@ appears when the ``templates'' button in the toolbar is clicked.
 	CrossValidationFoldMaker.
 
 	\item Next go back to the \textit{Evaluation} entry and place
-          a \textit{ClassifierPerformanceEvaluator} component on the
-          layout. Connect J48 to this component by selecting the
+          a \textit{ClassifierPerformanceEvaluator} step on the
+          layout. Connect J48 to this step by selecting the
           \textit{batchClassifier} entry from the pop-up menu for J48.
 
 	\item Next go to the \textit{Visualization} entry and place a \textit{TextViewer}
-	component on the layout. Connect the ClassifierPerformanceEvaluator to
+	step on the layout. Connect the ClassifierPerformanceEvaluator to
 	the TextViewer by selecting the \textit{text} entry from the pop-up menu for
 	ClassifierPerformanceEvaluator.
 
 	\item Now start the flow executing by pressing the
           \textit{play} button on the toolbar at the top of the
-          window. Progress information for each component in the flow
+          window. Progress information for each step in the flow
           will appear in the \textit{Status} area and \textit{Log} at
           the bottom of the window.
 \end{itemize}
 
 When finished you can view the results by choosing \textit{Show results} from
-the pop-up menu for the \textit{TextViewer} component.
+the pop-up menu for the \textit{TextViewer} step.
 
 Other cool things to add to this flow: connect a \textit{TextViewer} and/or a
 \textit{GraphViewer} to J48 in order to view the textual or graphical
@@ -299,7 +371,7 @@ as well \cite{multipleroc}.
           panel and choose \textit{ArffLoader} (the mouse pointer will
           change to a \textit{cross hairs}).
 
-	\item Next place the ArffLoader component on the layout area by clicking
+	\item Next place the ArffLoader step on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
 	the layout area).
 
@@ -311,13 +383,13 @@ as well \cite{multipleroc}.
 	\item Next click the \textit{Evaluation} entry in the
           \textit{Design} panel and choose the \textit{ClassAssigner}
           (allows you to choose which column to be the class)
-          component from the toolbar. Place this on the layout.
+          step from the toolbar. Place this on the layout.
 
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
 	the menu. A \textit{rubber band} line will appear. Move the mouse over the
-	ClassAssigner component and left click - a red line labeled \textit{dataSet}
-	will connect the two components.
+	ClassAssigner step and left click - a red line labeled \textit{dataSet}
+	will connect the two stepss.
 
 	\item Next right click over the ClassAssigner and choose \textit{Configure} from
 	the menu. This will pop up a window from which you can specify which
@@ -325,12 +397,12 @@ as well \cite{multipleroc}.
 
 	\item Next choose the \textit{ClassValuePicker} (allows you to
           choose which class label to be evaluated in the ROC)
-          component from \textit{Evaluation}. Place this on
+          step from \textit{Evaluation}. Place this on
           the layout and right click over \textit{ClassAssigner} and
           select \textit{dataSet} from under \textit{Connections} in
           the menu and connect it with the \textit{ClassValuePicker}.
 
-	\item Next grab a \textit{CrossValidationFoldMaker} component
+	\item Next grab a \textit{CrossValidationFoldMaker} step
           from \textit{Evaluation} and place it on the layout. Connect
           the ClassAssigner to the CrossValidationFoldMaker by right
           clicking over \textit{ClassAssigner} and selecting
@@ -338,8 +410,8 @@ as well \cite{multipleroc}.
           menu.
 
 	\item Next click on the \textit{Classifiers} entry in the
-          \textit{Design} panel and choose the \textit{J48} component
-          from the \textit{trees} sub-entry. Place a J48 component on
+          \textit{Design} panel and choose the \textit{J48} step
+          from the \textit{trees} sub-entry. Place a J48 step on
           the layout.
 
 	\item Connect the CrossValidationFoldMaker to J48 TWICE by first choosing
@@ -349,19 +421,19 @@ as well \cite{multipleroc}.
 	\item Repeat these two steps with the RandomForest classifier.
 
 	\item Next go back to \textit{Evaluation} and place a
-	\textit{ClassifierPerformanceEvaluator} component on the layout. Connect J48
-	to this component by selecting the \textit{batchClassifier} entry from the
+	\textit{ClassifierPerformanceEvaluator} step on the layout. Connect J48
+	to this step by selecting the \textit{batchClassifier} entry from the
 	pop-up menu for J48. Add another \textit{ClassifierPerformanceEvaluator} for
 	RandomForest and connect them via \textit{batchClassifier} as well.
 
 	\item Next go to the \textit{Visualization} entry and place a 
-	\textit{ModelPerformanceChart} component on the layout. Connect both 
+	\textit{ModelPerformanceChart} step on the layout. Connect both 
 	ClassifierPerformanceEvaluators to the ModelPerformanceChart by selecting 
 	the \textit{thresholdData} entry from the pop-up menu for ClassifierPerformanceEvaluator.
 
 	\item Now start the flow executing by pressing the
           \textit{play} button on the toolbar at the top of the
-          window. Progress information for each component in the flow
+          window. Progress information for each step in the flow
           will appear in the \textit{Status} bar and \textit{Log} at
           the bottom of the window.
 	
@@ -387,7 +459,7 @@ Some classifiers, clusterers and filters in Weka can handle data
 incrementally in a streaming fashion. Here is an example of training
 and testing \textit{naive Bayes} incrementally. The results are sent
 to a \textit{TextViewer} and predictions are plotted by a
-\textit{StripChart} component. This example can be accessed from the
+\textit{StripChart} step. This example can be accessed from the
 ``Learn and evaluate naive Bayes incrementally'' entry of the popup menu that
 appears when the ``templates'' button in the toolbar is clicked.
 
@@ -400,7 +472,7 @@ appears when the ``templates'' button in the toolbar is clicked.
           panel and choose \textit{ArffLoader} (the mouse pointer will
           change to a \textit{cross hairs}).
 
-	\item Next place the ArffLoader component on the layout area by clicking
+	\item Next place the ArffLoader step on the layout area by clicking
 	somewhere on the layout (a copy of the ArffLoader icon will appear on
 	the layout area).
 
@@ -417,14 +489,14 @@ appears when the ``templates'' button in the toolbar is clicked.
 	\item Now connect the ArffLoader to the ClassAssigner: first right click
 	over the ArffLoader and select the \textit{dataSet} under \textit{Connections} in
 	the menu. A \textit{rubber band} line will appear. Move the mouse over the
-	ClassAssigner component and left click - a red line labeled \textit{dataSet}
-	will connect the two components.
+	ClassAssigner step and left click - a red line labeled \textit{dataSet}
+	will connect the two steps.
 
 	\item Next right click over the \textit{ClassAssigner} and choose \textit{Configure} from
 	the menu. This will pop up a window from which you can specify which
 	column is the class in your data (last is the default).
 
-        \item Now grab a \textit{NaiveBayesUpdateable} component from the \textit{bayes}
+        \item Now grab a \textit{NaiveBayesUpdateable} step from the \textit{bayes}
         section of the \textit{Classifiers} entry and place it on the layout.
 
         \item Next connect the \textit{ClassAssigner} to \textit{NaiveBayesUpdateable}
@@ -434,11 +506,11 @@ appears when the ``templates'' button in the toolbar is clicked.
         entry onto the layout and connect \textit{NaiveBayesUpdateable} to it using a
         \textit{incrementalClassifier} connection.
 
-        \item Next place a \textit{TextViewer} component from the \textit{Visualization}
+        \item Next place a \textit{TextViewer} step from the \textit{Visualization}
         entry on the Layout. Connect the \textit{IncrementalClassifierEvaluator} to
         it using a \textit{text} connection.
 
-        \item Next place a \textit{StripChart} component from the \textit{Visualization}
+        \item Next place a \textit{StripChart} step from the \textit{Visualization}
         entry on the layout and connect \textit{IncrementalClassifierEvaluator} to it
         using a \textit{chart} connection.
 
@@ -478,33 +550,26 @@ home directory. Jar files containing plugin components for the
 KnowledgeFlow need to be bundled into a package archive. Information
 on the structure of a Weka package is given in the Appendix (Chapter
 19). In order to tell the KnowledgeFlow which classes in the jar file
-to instantiate as components, a second file called \verb=Beans.props=
-needs to be included in the top-level directory of the package. This
-file contains a list of fully qualified class names to be
-instantiated. Successfully instantiated components will appear in a
-``Plugins'' tab in the KnowledgeFlow user interface. Below is an
-example listing of a jar file that contains the classes of a
-KnowledgeFlow plugin. This jar file, along with the associated
-Beans.props file, is part of an official Weka package called
-``kfKettle''.
+to instantiate as components, a second file called
+\verb=PlugnManager.props= needs to be included in the top-level
+directory of the package. This file contains key/value entries, where
+the key specifies an interface or base class, and the value is a
+comma-separated list of concrete implementations.  For example, if
+we'd developed a new Knowledge Flow step called \verb=FunkyStep=, then
+the PluginManager.props file would contain the following entry:
 
 \begin{verbatim}
-cygnus:~ mhall$ jar tvf kettleKF.jar 
-     0 Wed Feb 20 14:01:34 NZDT 2008 META-INF/
-    70 Wed Feb 20 14:01:34 NZDT 2008 META-INF/MANIFEST.MF
-     0 Tue Feb 19 14:59:08 NZDT 2008 weka/
-     0 Tue Feb 19 14:59:08 NZDT 2008 weka/gui/
-     0 Wed Feb 20 13:55:52 NZDT 2008 weka/gui/beans/
-     0 Wed Feb 20 13:56:36 NZDT 2008 weka/gui/beans/icons/
-  2812 Wed Feb 20 14:01:20 NZDT 2008 weka/gui/beans/icons/KettleInput.gif
-  2812 Wed Feb 20 14:01:18 NZDT 2008 weka/gui/beans/icons/KettleInput_animated.gif
-  1839 Wed Feb 20 13:59:08 NZDT 2008 weka/gui/beans/KettleInput.class
-   174 Tue Feb 19 15:27:24 NZDT 2008 weka/gui/beans/KettleInputBeanInfo.class
-
-cygnus:~ mhall$ more Beans.props 
-# Specifies the tools to go into the Plugins toolbar
-weka.gui.beans.KnowledgeFlow.Plugins=weka.gui.beans.KettleInput
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.FunkyStep
 \end{verbatim}
+
+If we had developed a new perspective (see the next section) called
+\verb=FunkyPerspective=, then an entry such as the following would
+make it appear in the Knowledge Flow (and Workbench).
+
+\begin{verbatim}
+weka.gui.Perspective=weka.gui.knowledgeflow.FunkyPerspective
+\end{verbatim}
+
 
 \subsection{Perspectives}
 From Weka 3.7.4, the KnowledgeFlow offers a new type of plugin, called
