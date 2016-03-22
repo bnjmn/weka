@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=netlibNativeLinux
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2016-03-22
+
+# Title (required)
+Title=netlib-java wrappers and native libraries for BLAS, LAPACK and ARPACK under Linux
+
+Category=Linear Algebra
+
+# Author (required)
+Author=The Weka team
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=This package is a library-only package specific for Linux. It provides native libraries for linear algebra, including both a reference and system-tuned version. The system-tuned version will require libraries for BLAS, LAPACK and ARPACK compiled for your system to be available in your PATH. The native reference implementation should work out-of-the-box. After installing this package, several Weka schemes (such as linear regression and PCA) will use the native libraries for matrix operations.
+
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/netlibNativeLinux1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/netlibNativeLinux
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.14-SNAPSHOT)
