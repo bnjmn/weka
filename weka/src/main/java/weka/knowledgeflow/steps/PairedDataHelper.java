@@ -27,6 +27,7 @@ import weka.knowledgeflow.StepManager;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -61,36 +62,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  *         m_helper = new PairedDataHelper<MyFunkyMainResult>(this, this,
  *         StepManager.[CON_WHATEVER_YOUR_PRIMARY_CONNECTION_IS],
  *         StepManager.[CON_WHATEVER_YOUR_SECONDARY_CONNECTION_IS]);
- * 
+ *
  *         ...
  *       }
- * 
+ *
  *       public void processIncoming(Data data) throws WekaException {
  *         // delegate to our helper to handle primary/secondary synchronization
  *         // issues
  *         m_helper.process(data);
  *       }
- * 
+ *
  *       public MyFunkyMainResult processPrimary(Integer setNum, Integer maxSetNun,
  *         Data data, PairedDataHelper<MyFunkyMainResult> helper) throws WekaException {
  *           SomeDataTypeToProcess someData = data.getPrimaryPayload();
- * 
+ *
  *           MyFunkyMainResult processor = new MyFunkyMainResult();
  *           // do some processing using MyFunkyMainResult and SomeDataToProcess
  *           ...
  *           // output some data to downstream steps if necessary
  *           ...
- * 
+ *
  *           return processor;
  *       }
- * 
+ *
  *       public void processSecondary(Integer setNum, Integer maxSetNum, Data data,
  *         PairedDataHelper<MyFunkyMainResult> helper) throws WekaException {
  *         SomeDataTypeToProcess someData = data.getPrimaryPayload();
- * 
+ *
  *         // get the MyFunkyMainResult for this set number
  *         MyFunkyMainResult result = helper.getIndexedPrimaryResult(setNum);
- * 
+ *
  *         // do some stuff with the result and the secondary data
  *         ...
  *         // output some data to downstream steps if necessary
@@ -111,17 +112,17 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    * PairedProcessor.processPrimary()
    */
   protected Map<String, Map<Integer, Object>> m_namedIndexedStore =
-    new HashMap<String, Map<Integer, Object>>();
+    new ConcurrentHashMap<String, Map<Integer, Object>>();
 
   /** Storage of the indexed primary result */
-  protected Map<Integer, P> m_primaryResultMap = new HashMap<Integer, P>();
+  protected Map<Integer, P> m_primaryResultMap = new ConcurrentHashMap<Integer, P>();
 
   /**
    * Holds the secondary data objects, if they arrive before the corresponding
    * primary has been computed
    */
   protected Map<Integer, Data> m_secondaryDataMap =
-    new HashMap<Integer, Data>();
+    new ConcurrentHashMap<Integer, Data>();
 
   /** The type of connection to route to PairedProcessor.processPrimary() */
   protected String m_primaryConType;
@@ -293,7 +294,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    * @param name the name of the store to create
    */
   public void createNamedIndexedStore(String name) {
-    m_namedIndexedStore.put(name, new HashMap<Integer, Object>());
+    m_namedIndexedStore.put(name, new ConcurrentHashMap<Integer, Object>());
   }
 
   /**
@@ -323,7 +324,7 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    * @param index the index to associate with the value
    * @param value the value to store
    */
-  public void addIndexedValueToNamedStore(String storeName, Integer index,
+  public synchronized void addIndexedValueToNamedStore(String storeName, Integer index,
     Object value) {
     Map<Integer, Object> store = m_namedIndexedStore.get(storeName);
     if (store == null) {
