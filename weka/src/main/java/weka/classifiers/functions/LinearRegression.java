@@ -23,13 +23,14 @@ package weka.classifiers.functions;
 
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.Vector;
+
+import no.uib.cipr.matrix.*;
+import no.uib.cipr.matrix.Matrix;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.evaluation.RegressionAnalysis;
 import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.matrix.Matrix;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -453,7 +454,7 @@ public class LinearRegression extends AbstractClassifier implements
    */
   @Override
   public Enumeration<Option> listOptions() {
-    Vector<Option> newVector = new Vector<Option>();
+    java.util.Vector<Option> newVector = new java.util.Vector<Option>();
 
     newVector.addElement(new Option("\tSet the attribute selection method"
       + " to use. 1 = None, 2 = Greedy.\n" + "\t(default 0 = M5' method)", "S",
@@ -507,7 +508,7 @@ public class LinearRegression extends AbstractClassifier implements
    */
   @Override
   public String[] getOptions() {
-    Vector<String> result = new Vector<String>();
+    java.util.Vector<String> result = new java.util.Vector<String>();
 
     result.add("-S");
     result.add("" + getAttributeSelectionMethod().getSelectedTag().getID());
@@ -1046,17 +1047,18 @@ public class LinearRegression extends AbstractClassifier implements
     }
 
     // Check whether there are still attributes left
-    Matrix independent = null, dependent = null;
+    Matrix independentTransposed = null;
+    Vector dependent = null;
     if (numAttributes > 0) {
-      independent = new Matrix(m_TransformedData.numInstances(), numAttributes);
-      dependent = new Matrix(m_TransformedData.numInstances(), 1);
+      independentTransposed = new DenseMatrix(numAttributes, m_TransformedData.numInstances());
+      dependent = new DenseVector(m_TransformedData.numInstances());
       for (int i = 0; i < m_TransformedData.numInstances(); i++) {
         Instance inst = m_TransformedData.instance(i);
         double sqrt_weight = Math.sqrt(inst.weight());
-        int column = 0;
+        int row = 0;
         for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
           if (j == m_ClassIndex) {
-            dependent.set(i, 0, inst.classValue() * sqrt_weight);
+            dependent.set(i, inst.classValue() * sqrt_weight);
           } else {
             if (selectedAttributes[j]) {
               double value = inst.value(j) - m_Means[j];
@@ -1066,8 +1068,8 @@ public class LinearRegression extends AbstractClassifier implements
               if (!m_checksTurnedOff) {
                 value /= m_StdDevs[j];
               }
-              independent.set(i, column, value * sqrt_weight);
-              column++;
+              independentTransposed.set(row, i, value * sqrt_weight);
+              row++;
             }
           }
         }
@@ -1079,10 +1081,32 @@ public class LinearRegression extends AbstractClassifier implements
     // by the ridge constant.)
     double[] coefficients = new double[numAttributes + 1];
     if (numAttributes > 0) {
-      double[] coeffsWithoutIntercept =
-        independent.regression(dependent, m_Ridge).getCoefficients();
-      System.arraycopy(coeffsWithoutIntercept, 0, coefficients, 0,
-        numAttributes);
+
+      Vector aTy = independentTransposed.mult(dependent, new DenseVector(numAttributes));
+      Matrix aTa = new UpperSymmDenseMatrix(numAttributes).rank1(independentTransposed);
+      independentTransposed = null;
+      dependent = null;
+
+      boolean success = true;
+      Vector coeffsWithoutIntercept = null;
+      double ridge = getRidge();
+      do {
+        for (int i = 0; i < numAttributes; i++) {
+          aTa.add(i, i, ridge);
+        }
+        try {
+          coeffsWithoutIntercept = aTa.solve(aTy, new DenseVector(numAttributes));
+          success = true;
+        } catch (Exception ex) {
+          for (int i = 0; i < numAttributes; i++) {
+            aTa.add(i, i, -ridge);
+          }
+          ridge *= 10;
+          success = false;
+        }
+      } while (!success);
+
+      System.arraycopy(((DenseVector)coeffsWithoutIntercept).getData(), 0, coefficients, 0, numAttributes);
     }
     coefficients[numAttributes] = m_ClassMean;
 
