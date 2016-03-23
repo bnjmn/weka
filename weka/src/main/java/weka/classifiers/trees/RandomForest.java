@@ -459,8 +459,8 @@ public class RandomForest extends Bagging {
 
     // Add base classifier options
     Vector<String> classifierOptions = new Vector<String>();
-    Collections.addAll(result, ((OptionHandler)getClassifier()).getOptions());
-    Option.deleteOptionString(classifierOptions, "-do-not-check-capabilities");
+    Collections.addAll(classifierOptions, ((OptionHandler)getClassifier()).getOptions());
+    Option.deleteFlagString(classifierOptions, "-do-not-check-capabilities");
     result.addAll(classifierOptions);
 
     return result.toArray(new String[result.size()]);
