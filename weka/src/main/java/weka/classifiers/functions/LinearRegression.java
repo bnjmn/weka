@@ -147,6 +147,8 @@ public class LinearRegression extends AbstractClassifier implements
   protected boolean m_Minimal = false;
   /** Model already built? */
   protected boolean m_ModelBuilt = false;
+  /** True if the model is a zero R one */
+  protected boolean m_isZeroR;
   /** The degrees of freedom of the regression model */
   private int m_df;
   /** The R-squared value of the regression model */
@@ -219,6 +221,15 @@ public class LinearRegression extends AbstractClassifier implements
   @Override
   public void buildClassifier(Instances data) throws Exception {
     m_ModelBuilt = false;
+    m_isZeroR = false;
+
+    if (data.numInstances() == 1) {
+      m_Coefficients = new double[1];
+      m_Coefficients[0] = data.instance(0).classValue();
+      m_SelectedAttributes = new boolean[data.numAttributes()];
+      m_isZeroR = true;
+      return;
+    }
 
     if (!m_checksTurnedOff) {
       // can classifier handle the data?
@@ -337,7 +348,7 @@ public class LinearRegression extends AbstractClassifier implements
 
     // Transform the input instance
     Instance transformedInstance = instance;
-    if (!m_checksTurnedOff) {
+    if (!m_checksTurnedOff && !m_isZeroR) {
       m_TransformFilter.input(transformedInstance);
       m_TransformFilter.batchFinished();
       transformedInstance = m_TransformFilter.output();
