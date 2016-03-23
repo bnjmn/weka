@@ -536,6 +536,7 @@ public class ND extends RandomizableSingleClassifierEnhancer implements
       filter.setNumeric(false);
       filter.setInputFormat(data);
       FilteredClassifier classifier = new FilteredClassifier();
+      classifier.setDoNotCheckForModifiedClassAttribute(true);
       if (data.numInstances() > 0) {
         classifier
           .setClassifier(AbstractClassifier.makeCopies(m_Classifier, 1)[0]);
