@@ -137,6 +137,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   /** The instance structure of the filtered instances */
   protected Instances m_FilteredInstances;
 
+  /** Flag that can be set to true if class attribute is not to be checked for modifications by the filer. */
+  protected boolean m_DoNotCheckForModifiedClassAttribute = false;
+
   /**
    * Returns a string describing this classifier
    * 
@@ -166,6 +169,14 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   protected String defaultFilterString() {
 
     return "weka.filters.supervised.attribute.Discretize";
+  }
+
+  /**
+   * Use this method to determine whether classifier checks whether class attribute has been modified by filter.
+   */
+  public void setDoNotCheckForModifiedClassAttribute(boolean flag) {
+
+    m_DoNotCheckForModifiedClassAttribute = flag;
   }
 
   /**
@@ -544,7 +555,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     Attribute classAttribute = (Attribute)data.classAttribute().copy();
     m_Filter.setInputFormat(data); // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
-    if (!classAttribute.equals(data.classAttribute())) {
+    if ((!classAttribute.equals(data.classAttribute())) && (!m_DoNotCheckForModifiedClassAttribute)) {
       throw new IllegalArgumentException("Cannot proceed: " + getFilterSpec() + " has modified the class attribute!");
     }
     // t.stop();
