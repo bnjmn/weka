@@ -23,4 +23,16 @@ An overview of the libraries used in Weka:
   Version: 0.18
   URL: http://www.edankert.com/bounce/index.html
 
+- mtj.jar
+  Version: 1.0.4
+  URL: https://github.com/fommil/matrix-toolkits-java
+
+- arpack_combined_all.jar
+  Version: 0.1
+  URL: http://icl.cs.utk.edu/f2j/
+
+- core.jar
+  Version: 1.1.2
+  URL: https://github.com/fommil/netlib-java
+
 Version: $Revision$
