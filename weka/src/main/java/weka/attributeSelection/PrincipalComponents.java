@@ -25,10 +25,12 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import no.uib.cipr.matrix.*;
+import no.uib.cipr.matrix.Matrix;
+
 import weka.core.*;
 import weka.core.Capabilities.Capability;
 import weka.core.matrix.EigenvalueDecomposition;
-import weka.core.matrix.Matrix;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.*;
 
@@ -109,7 +111,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
   private int m_numInstances;
 
   /** Correlation/covariance matrix for the original data */
-  private double[][] m_correlation;
+  private UpperSymmDenseMatrix m_correlation;
 
   private double[] m_means;
   private double[] m_stdDevs;
@@ -529,9 +531,10 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
 
     fillCovariance();
 
-    EigenvalueDecomposition eig = new Matrix(m_correlation).eig();
-    m_eigenvectors = eig.getV().copy().getArray();
-    m_eigenvalues = eig.getRealEigenvalues().clone();
+    SymmDenseEVD evd = SymmDenseEVD.factorize(m_correlation);
+
+    m_eigenvectors = Matrices.getArray(evd.getEigenvectors());
+    m_eigenvalues = evd.getEigenvalues();
 
     /*
      * for (int i = 0; i < m_numAttribs; i++) { for (int j = 0; j <
@@ -618,7 +621,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
    * @return the correlation or covariance matrix
    */
   public double[][] getCorrelationMatrix() {
-    return m_correlation;
+    return Matrices.getArray(m_correlation);
   }
 
   /**
@@ -716,18 +719,17 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     }
 
     // now compute the covariance matrix
-    m_correlation = new double[m_numAttribs][m_numAttribs];
+    m_correlation = new UpperSymmDenseMatrix(m_numAttribs);
     for (int i = 0; i < m_numAttribs; i++) {
       for (int j = i; j < m_numAttribs; j++) {
 
         double cov = 0;
-        for (Instance inst: m_trainInstances) {
+        for (Instance inst : m_trainInstances) {
           cov += inst.value(i) * inst.value(j);
         }
 
         cov /= m_trainInstances.numInstances() - 1;
-        m_correlation[i][j] = cov;
-        m_correlation[j][i] = cov;
+        m_correlation.set(i, j, cov);
       }
     }
   }
@@ -753,7 +755,7 @@ public class PrincipalComponents extends UnsupervisedAttributeEvaluator
     // tomorrow
     String corrCov = (m_center) ? "Covariance " : "Correlation ";
     result
-      .append(corrCov + "matrix\n" + matrixToString(m_correlation) + "\n\n");
+      .append(corrCov + "matrix\n" + matrixToString(Matrices.getArray(m_correlation)) + "\n\n");
     result.append("eigenvalue\tproportion\tcumulative\n");
     for (int i = m_numAttribs - 1; i > (m_numAttribs - numVectors - 1); i--) {
       cumulative += m_eigenvalues[m_sortedEigens[i]];
