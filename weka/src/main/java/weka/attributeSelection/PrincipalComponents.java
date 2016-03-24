@@ -26,11 +26,9 @@ import java.util.Enumeration;
 import java.util.Vector;
 
 import no.uib.cipr.matrix.*;
-import no.uib.cipr.matrix.Matrix;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.matrix.EigenvalueDecomposition;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.*;
 
