@@ -24,12 +24,12 @@ package weka.filters.unsupervised.attribute;
 import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.core.*;
-import weka.core.matrix.EigenvalueDecomposition;
-import weka.core.matrix.Matrix;
-import weka.core.matrix.SingularValueDecomposition;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.unsupervised.instance.Resample;
+
+import no.uib.cipr.matrix.*;
+import no.uib.cipr.matrix.Matrix;
 
 import java.util.ArrayList;
 
@@ -262,17 +262,16 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
         m_Kernel.buildKernel(m_Sample);
         int m = m_Sample.numInstances();
         int n = inputFormat.numInstances();
-        Matrix khatM = new Matrix(m, m);
+        Matrix khatM = new UpperSymmDenseMatrix(m);
         for (int i = 0; i < m; i++) {
             for (int j = i; j < m; j++) {
                 khatM.set(i, j, m_Kernel.eval(i, j, m_Sample.instance(i)));
-                khatM.set(j, i, khatM.get(i, j));
             }
         }
         m_Kernel.clean();
 
         if (m_Debug) {
-            Matrix kbM = new Matrix(n, m);
+            Matrix kbM = new DenseMatrix(n, m);
             for (int i = 0; i < n; i++) {
                 for (int j = 0; j < m; j++) {
                     kbM.set(i, j, m_Kernel.eval(-1, j, inputFormat.instance(i)));
@@ -280,10 +279,10 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
             }
 
             // Calculate SVD of kernel matrix
-            SingularValueDecomposition svd = new SingularValueDecomposition(khatM);
+            SVD svd = SVD.factorize(khatM);
 
-            double[] singularValues = svd.getSingularValues();
-            Matrix sigmaI = new Matrix(m, m);
+            double[] singularValues = svd.getS();
+            Matrix sigmaI = new UpperSymmDenseMatrix(m);
             for (int i = 0; i < singularValues.length; i++) {
                 if (singularValues[i] > SMALL) {
                     sigmaI.set(i, i, 1.0 / singularValues[i]);
@@ -291,22 +290,22 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
             }
 
             System.err.println("U :\n" + svd.getU());
-            System.err.println("V :\n" + svd.getV());
+            System.err.println("Vt :\n" + svd.getVt());
             System.err.println("Reciprocal of singular values :\n" + sigmaI);
 
-            Matrix pseudoInverse = svd.getV().times(sigmaI).times(svd.getU().transpose());
+            Matrix pseudoInverse = svd.getU().mult(sigmaI, new DenseMatrix(m,m)).mult(svd.getVt(), new DenseMatrix(m,m));
 
             // Compute reduced-rank version
-            Matrix khatr = kbM.times(pseudoInverse).times(kbM.transpose());
+            Matrix khatr = kbM.mult(pseudoInverse, new DenseMatrix(n, m)).mult(kbM.transpose(new DenseMatrix(m, n)), new DenseMatrix(n,n));
 
             System.err.println("Reduced rank matrix: \n" + khatr);
         }
 
         // Compute weighting matrix
         if (getUseSVD()) {
-            SingularValueDecomposition svd = new SingularValueDecomposition(khatM);
-            double[] e = svd.getSingularValues();
-            Matrix dhatr = new Matrix(e.length, e.length);
+            SVD svd = SVD.factorize(khatM);
+            double[] e = svd.getS();
+            Matrix dhatr = new UpperSymmDenseMatrix(e.length);
             for (int i = 0; i < e.length; i++) {
                 if (Math.sqrt(e[i]) > SMALL) {
                     dhatr.set(i, i, 1.0 / Math.sqrt(e[i]));
@@ -314,26 +313,27 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
             }
             if (m_Debug) {
                 System.err.println("U matrix :\n" + svd.getU());
-                System.err.println("V matrix :\n" + svd.getV());
-                System.err.println("Singluar value matrix \n" + svd.getS());
+                System.err.println("Vt matrix :\n" + svd.getVt());
+                System.err.println("Singluar values \n" + Utils.arrayToString(svd.getS()));
                 System.err.println("Reciprocal of square root of singular values :\n" + dhatr);
             }
-            m_WeightingMatrix = dhatr.times(svd.getV().transpose());
+            m_WeightingMatrix = dhatr.mult(svd.getVt(), new DenseMatrix(m,m));
         } else {
-            EigenvalueDecomposition evd = new EigenvalueDecomposition(khatM);
-            double[] e = evd.getRealEigenvalues();
-            Matrix dhatr = new Matrix(e.length, e.length);
+
+            SymmDenseEVD evd = SymmDenseEVD.factorize(khatM);
+            double[] e = evd.getEigenvalues();
+            Matrix dhatr = new UpperSymmDenseMatrix(e.length);
             for (int i = 0; i < e.length; i++) {
                 if (Math.sqrt(e[i]) > SMALL) {
                     dhatr.set(i, i, 1.0 / Math.sqrt(e[i]));
                 }
             }
             if (m_Debug) {
-                System.err.println("Eigenvector matrix :\n" + evd.getV());
-                System.err.println("Eigenvalue matrix \n" + evd.getD());
+                System.err.println("Eigenvector matrix :\n" + evd.getEigenvectors());
+                System.err.println("Eigenvalues \n" + Utils.arrayToString(evd.getEigenvalues()));
                 System.err.println("Reciprocal of square root of eigenvalues :\n" + dhatr);
             }
-            m_WeightingMatrix = dhatr.times(evd.getV().transpose());
+            m_WeightingMatrix = dhatr.mult(evd.getEigenvectors().transpose(), new DenseMatrix(m,m));
         }
 
         if (m_Debug) {
@@ -368,14 +368,14 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
         boolean hasClass = (instances.classIndex() >= 0);
         int m = m_Sample.numInstances();
         for (Instance inst : instances) {
-            Matrix n = new Matrix(transformed.numAttributes() - ((hasClass) ? 1 : 0), 1);
+            Vector n = new DenseVector(m);
             for (int i = 0; i < m; i++) {
-                n.set(i, 0, m_Kernel.eval(-1, i, inst));
+                n.set(i, m_Kernel.eval(-1, i, inst));
             }
-            Matrix newInst = m_WeightingMatrix.times(n);
+            Vector newInst = m_WeightingMatrix.mult(n, new DenseVector(m));
             double[] newVals = new double[m + ((hasClass) ? 1 : 0)];
             for (int i = 0; i < m; i++) {
-                newVals[i] = newInst.get(i, 0);
+                newVals[i] = newInst.get(i);
             }
             if (hasClass) {
                 newVals[transformed.classIndex()] = inst.classValue();

@@ -6,10 +6,10 @@
 PackageName=largeScaleKernelLearning
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2016-03-01
+Date=2016-03-24
 
 # Title (required)
 Title=A package that contains filters for large-scale kernel-based learning
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=This package provides filters to enable kernel-based learning from large datasets. It currently only contains the Nystroem method.
 
-Changes=Fixed memory leak: kernel was not cleaned after use.
+Changes=Switched from JAMA matrix package to MTJ for speed.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/largeScaleKernelLearning1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/largeScaleKernelLearning1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/largeScaleKernelLearning
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/largeScaleKernelLearning
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.6)
+Depends=weka (>=3.7.14-SNAPSHOT)
