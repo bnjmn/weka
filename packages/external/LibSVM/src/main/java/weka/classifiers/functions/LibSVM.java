@@ -63,7 +63,7 @@ import java.util.Vector;
  * A wrapper class for the libsvm library. This wrapper supports the classifiers implemented in the libsvm
  * library, including one-class SVMs.<br>
  * Note: To be consistent with other SVMs in WEKA, the target attribute is now normalized before "
- * SVM regression is performed.<br>
+ * SVM regression is performed, if normalization is turned on.<br>
  * <br>
  * Yasser EL-Manzalawy (2005). WLSVM. URL http://www.cs.iastate.edu/~yasser/wlsvm/.<br/>
  * <br>
@@ -331,7 +331,7 @@ public class LibSVM
     return "A wrapper class for the libsvm library. This wrapper supports the classifiers implemented in the libsvm "
             + "library, including one-class SVMs.\n"
             + "Note: To be consistent with other SVMs in WEKA, the target attribute is now normalized before "
-            + "SVM regression is performed.\n"
+            + "SVM regression is performed, if normalization is turned on.\n"
     + "\n"
     + getTechnicalInformation().toString();
   }
@@ -1648,17 +1648,22 @@ public class LibSVM
     // if the data actually does have missing values
     getCapabilities().testWithFail(insts);
 
-    double y0 = insts.instance(0).classValue();
-    int index = 1;
-    while (index < insts.numInstances() && insts.instance(index).classValue() == y0) {
-      index++;
+    double y0 = Double.NaN;
+    double y1 = y0;
+    int index = -1;
+    if (!insts.classAttribute().isNominal()) {
+      y0 = insts.instance(0).classValue();
+      index = 1;
+      while (index < insts.numInstances() && insts.instance(index).classValue() == y0) {
+        index++;
+      }
+      if (index == insts.numInstances()) {
+        // degenerate case, all class values are equal
+        // we don't want to deal with this, too much hassle
+        throw new Exception("All class values are the same. At least two class values should be different");
+      }
+      y1 = insts.instance(index).classValue();
     }
-    if (index == insts.numInstances()) {
-      // degenerate case, all class values are equal
-      // we don't want to deal with this, too much hassle
-      throw new Exception("All class values are the same. At least two class values should be different");
-    }
-    double y1 = insts.instance(index).classValue();
 
     if (getNormalize()) {
       m_Filter = new Normalize();
@@ -1667,14 +1672,19 @@ public class LibSVM
       insts = Filter.useFilter(insts, m_Filter);
     }
 
-    if (m_Filter != null) {
-      double z0 = insts.instance(0).classValue();
-      double z1 = insts.instance(index).classValue();
-      m_x1 = (y0-y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
-      m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
+    if (!insts.classAttribute().isNominal()) {
+      if (m_Filter != null) {
+        double z0 = insts.instance(0).classValue();
+        double z1 = insts.instance(index).classValue();
+        m_x1 = (y0 - y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+        m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
+      } else {
+        m_x1 = 1.0;
+        m_x0 = 0.0;
+      }
     } else {
-      m_x1 = 1.0;
-      m_x0 = 0.0;
+      m_x0 = Double.NaN;
+      m_x1 = m_x0;
     }
 
     // nominal to binary
