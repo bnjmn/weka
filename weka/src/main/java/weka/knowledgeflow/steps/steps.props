@@ -1,5 +1,5 @@
 weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.Loader,weka.knowledgeflow.steps.Saver,\
-weka.knowledgeflow.steps.Filter,\
+weka.knowledgeflow.steps.DataGenerator,weka.knowledgeflow.steps.Filter,\
 weka.knowledgeflow.steps.Classifier,weka.knowledgeflow.steps.Clusterer,\
 weka.knowledgeflow.steps.Associator,weka.knowledgeflow.steps.ASEvaluator,\
 weka.knowledgeflow.steps.ASSearchStrategy,\
