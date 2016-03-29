@@ -21,7 +21,6 @@
 
 package weka.classifiers.bayes;
 
-import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.bayes.blr.GaussianPriorImpl;
 import weka.classifiers.bayes.blr.LaplacePriorImpl;
@@ -383,6 +382,16 @@ public class BayesianLogisticRegression extends AbstractClassifier
 
     m_PriorUpdate.computelogLikelihood(BetaVector, m_Instances);
     m_PriorUpdate.computePenalty(BetaVector, Hyperparameters);
+
+    // Housekeeping!
+    m_Instances = new Instances(m_Instances, 0);
+    m_PriorUpdate.clean();
+    DeltaBeta = null;
+    DeltaUpdate = null;
+    Delta = null;
+    Hyperparameters = null;
+    R = null;
+    DeltaR = null;
   }
 
   /**
