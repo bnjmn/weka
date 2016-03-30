@@ -38,75 +38,103 @@ import weka.core.stopwords.StopwordsHandler;
 import weka.core.tokenizers.Tokenizer;
 
 /**
- <!-- globalinfo-start -->
- * Writes a dictionary constructed from string attributes in incoming instances to a destination.
- * <br><br>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-start --> Writes a dictionary constructed from string
+ * attributes in incoming instances to a destination. <br>
+ * <br>
+ * <!-- globalinfo-end -->
  *
- <!-- options-start -->
- * Valid options are: <p>
+ * <!-- options-start --> Valid options are:
+ * <p>
  * 
- * <pre> -binary-dict
- *  Save as a binary serialized dictionary</pre>
+ * <pre>
+ * -binary-dict
+ *  Save as a binary serialized dictionary
+ * </pre>
  * 
- * <pre> -R &lt;range&gt;
+ * <pre>
+ * -R &lt;range&gt;
  *  Specify range of attributes to act on. This is a comma separated list of attribute
- *  indices, with "first" and "last" valid values.</pre>
+ *  indices, with "first" and "last" valid values.
+ * </pre>
  * 
- * <pre> -V
+ * <pre>
+ * -V
  *  Set attributes selection mode. If false, only selected attributes in the range will
- *  be worked on. If true, only non-selected attributes will be processed</pre>
+ *  be worked on. If true, only non-selected attributes will be processed
+ * </pre>
  * 
- * <pre> -L
- *  Convert all tokens to lowercase when matching against dictionary entries.</pre>
+ * <pre>
+ * -L
+ *  Convert all tokens to lowercase when matching against dictionary entries.
+ * </pre>
  * 
- * <pre> -stemmer &lt;spec&gt;
- *  The stemming algorithm (classname plus parameters) to use.</pre>
+ * <pre>
+ * -stemmer &lt;spec&gt;
+ *  The stemming algorithm (classname plus parameters) to use.
+ * </pre>
  * 
- * <pre> -stopwords-handler &lt;spec&gt;
- *  The stopwords handler to use (default = Null)</pre>
+ * <pre>
+ * -stopwords-handler &lt;spec&gt;
+ *  The stopwords handler to use (default = Null)
+ * </pre>
  * 
- * <pre> -tokenizer &lt;spec&gt;
+ * <pre>
+ * -tokenizer &lt;spec&gt;
  *  The tokenizing algorithm (classname plus parameters) to use.
- *  (default: weka.core.tokenizers.WordTokenizer)</pre>
+ *  (default: weka.core.tokenizers.WordTokenizer)
+ * </pre>
  * 
- * <pre> -P &lt;integer&gt;
+ * <pre>
+ * -P &lt;integer&gt;
  *  Prune the dictionary every x instances
- *  (default = 0 - i.e. no periodic pruning)</pre>
+ *  (default = 0 - i.e. no periodic pruning)
+ * </pre>
  * 
- * <pre> -W &lt;integer&gt;
- *  The number of words (per class if there is a class attribute assigned) to attempt to keep.</pre>
+ * <pre>
+ * -W &lt;integer&gt;
+ *  The number of words (per class if there is a class attribute assigned) to attempt to keep.
+ * </pre>
  * 
- * <pre> -M &lt;integer&gt;
+ * <pre>
+ * -M &lt;integer&gt;
  *  The minimum term frequency to use when pruning the dictionary
- *  (default = 1).</pre>
+ *  (default = 1).
+ * </pre>
  * 
- * <pre> -O
+ * <pre>
+ * -O
  *  If this is set, the maximum number of words and the
  *  minimum term frequency is not enforced on a per-class
  *  basis but based on the documents in all the classes
- *  (even if a class attribute is set).</pre>
+ *  (even if a class attribute is set).
+ * </pre>
  * 
- * <pre> -sort
- *  Sort the dictionary alphabetically</pre>
+ * <pre>
+ * -sort
+ *  Sort the dictionary alphabetically
+ * </pre>
  * 
- * <pre> -i &lt;the input file&gt;
- *  The input file</pre>
+ * <pre>
+ * -i &lt;the input file&gt;
+ *  The input file
+ * </pre>
  * 
- * <pre> -o &lt;the output file&gt;
- *  The output file</pre>
+ * <pre>
+ * -o &lt;the output file&gt;
+ *  The output file
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision$
  */
-public class DictionarySaver extends AbstractFileSaver
-  implements BatchConverter, IncrementalConverter {
+public class DictionarySaver extends AbstractFileSaver implements
+  BatchConverter, IncrementalConverter {
 
   private static final long serialVersionUID = -19891905988830722L;
 
-  protected OutputStream m_binaryStream;
+  protected transient OutputStream m_binaryStream;
 
   /**
    * The dictionary builder to use
@@ -187,9 +215,8 @@ public class DictionarySaver extends AbstractFileSaver
   @OptionMetadata(displayName = "Range of attributes to operate on",
     description = "Specify range of attributes to act on. This is a comma "
       + "separated list of attribute\nindices, with \"first\" and "
-      + "\"last\" valid values.",
-    commandLineParamName = "R", commandLineParamSynopsis = "-R <range>",
-    displayOrder = 4)
+      + "\"last\" valid values.", commandLineParamName = "R",
+    commandLineParamSynopsis = "-R <range>", displayOrder = 4)
   public void setAttributeIndices(String rangeList) {
     m_dictionaryBuilder.setAttributeIndices(rangeList);
   }
@@ -208,13 +235,15 @@ public class DictionarySaver extends AbstractFileSaver
    *
    * @param invert the new invert setting
    */
-  @OptionMetadata(displayName = "Invert selection",
+  @OptionMetadata(
+    displayName = "Invert selection",
     description = "Set attributes selection mode. "
       + "If false, only selected attributes in the range will\nbe worked on. If true, "
       + "only non-selected attributes will be processed",
     commandLineParamName = "V", commandLineParamSynopsis = "-V",
     commandLineParamIsFlag = true, displayOrder = 5)
-  public void setInvertSelection(boolean invert) {
+  public
+    void setInvertSelection(boolean invert) {
     m_dictionaryBuilder.setInvertSelection(invert);
   }
 
@@ -236,9 +265,9 @@ public class DictionarySaver extends AbstractFileSaver
    */
   @OptionMetadata(displayName = "Lower case tokens",
     description = "Convert all tokens to lowercase when matching against "
-      + "dictionary entries.",
-    commandLineParamName = "L", commandLineParamSynopsis = "-L",
-    commandLineParamIsFlag = true, displayOrder = 10)
+      + "dictionary entries.", commandLineParamName = "L",
+    commandLineParamSynopsis = "-L", commandLineParamIsFlag = true,
+    displayOrder = 10)
   public void setLowerCaseTokens(boolean downCaseTokens) {
     m_dictionaryBuilder.setLowerCaseTokens(downCaseTokens);
   }
@@ -302,12 +331,14 @@ public class DictionarySaver extends AbstractFileSaver
    *
    * @param value the configured tokenizing algorithm
    */
-  @OptionMetadata(displayName = "Tokenizer",
+  @OptionMetadata(
+    displayName = "Tokenizer",
     description = "The tokenizing algorithm (classname plus parameters) to use.\n"
       + "(default: weka.core.tokenizers.WordTokenizer)",
     commandLineParamName = "tokenizer",
     commandLineParamSynopsis = "-tokenizer <spec>", displayOrder = 13)
-  public void setTokenizer(Tokenizer value) {
+  public
+    void setTokenizer(Tokenizer value) {
     m_dictionaryBuilder.setTokenizer(value);
   }
 
@@ -337,12 +368,14 @@ public class DictionarySaver extends AbstractFileSaver
    * @param newPeriodicPruning the rate at which the dictionary is periodically
    *          pruned
    */
-  @OptionMetadata(displayName = "Periodic pruning rate",
+  @OptionMetadata(
+    displayName = "Periodic pruning rate",
     description = "Prune the "
       + "dictionary every x instances\n(default = 0 - i.e. no periodic pruning)",
     commandLineParamName = "P", commandLineParamSynopsis = "-P <integer>",
     displayOrder = 14)
-  public void setPeriodicPruning(long newPeriodicPruning) {
+  public
+    void setPeriodicPruning(long newPeriodicPruning) {
     m_periodicPruningRate = newPeriodicPruning;
   }
 
@@ -364,12 +397,13 @@ public class DictionarySaver extends AbstractFileSaver
    * @param newWordsToKeep the target number of words in the output vector (per
    *          class if assigned).
    */
-  @OptionMetadata(displayName = "Number of words to attempt to keep",
+  @OptionMetadata(
+    displayName = "Number of words to attempt to keep",
     description = "The number of words (per class if there is a class attribute "
-      + "assigned) to attempt to keep.",
-    commandLineParamName = "W", commandLineParamSynopsis = "-W <integer>",
-    displayOrder = 15)
-  public void setWordsToKeep(int newWordsToKeep) {
+      + "assigned) to attempt to keep.", commandLineParamName = "W",
+    commandLineParamSynopsis = "-W <integer>", displayOrder = 15)
+  public
+    void setWordsToKeep(int newWordsToKeep) {
     m_dictionaryBuilder.setWordsToKeep(newWordsToKeep);
   }
 
@@ -387,12 +421,13 @@ public class DictionarySaver extends AbstractFileSaver
    *
    * @param newMinTermFreq The new MinTermFreq value.
    */
-  @OptionMetadata(displayName = "Minimum term frequency",
+  @OptionMetadata(
+    displayName = "Minimum term frequency",
     description = "The minimum term frequency to use when pruning the dictionary\n"
-      + "(default = 1).",
-    commandLineParamName = "M", commandLineParamSynopsis = "-M <integer>",
-    displayOrder = 16)
-  public void setMinTermFreq(int newMinTermFreq) {
+      + "(default = 1).", commandLineParamName = "M",
+    commandLineParamSynopsis = "-M <integer>", displayOrder = 16)
+  public
+    void setMinTermFreq(int newMinTermFreq) {
     m_dictionaryBuilder.setMinTermFreq(newMinTermFreq);
   }
 
@@ -415,11 +450,11 @@ public class DictionarySaver extends AbstractFileSaver
     description = "If this is set, the maximum number of words and the\n"
       + "minimum term frequency is not enforced on a per-class\n"
       + "basis but based on the documents in all the classes\n"
-      + "(even if a class attribute is set).",
-    commandLineParamName = "O", commandLineParamSynopsis = "-O",
-    commandLineParamIsFlag = true, displayOrder = 17)
-  public void
-    setDoNotOperateOnPerClassBasis(boolean newDoNotOperateOnPerClassBasis) {
+      + "(even if a class attribute is set).", commandLineParamName = "O",
+    commandLineParamSynopsis = "-O", commandLineParamIsFlag = true,
+    displayOrder = 17)
+  public void setDoNotOperateOnPerClassBasis(
+    boolean newDoNotOperateOnPerClassBasis) {
     m_dictionaryBuilder
       .setDoNotOperateOnPerClassBasis(newDoNotOperateOnPerClassBasis);
   }
@@ -493,18 +528,26 @@ public class DictionarySaver extends AbstractFileSaver
       if (structure == null) {
         setWriteMode(CANCEL);
         if (inst != null) {
-          throw new IOException(
-            "Structure (header Information) has to be set " + "in advance");
+          throw new IOException("Structure (header Information) has to be set "
+            + "in advance");
         }
       } else {
-        m_dictionaryBuilder.reset();
-        try {
-          m_dictionaryBuilder.setup(structure);
-        } catch (Exception ex) {
-          throw new IOException(ex);
-        }
-        setWriteMode(WRITE);
+        setWriteMode(STRUCTURE_READY);
       }
+      writeMode = getWriteMode();
+    }
+    if (writeMode == CANCEL) {
+      cancel();
+    }
+
+    if (writeMode == STRUCTURE_READY) {
+      m_dictionaryBuilder.reset();
+      try {
+        m_dictionaryBuilder.setup(structure);
+      } catch (Exception ex) {
+        throw new IOException(ex);
+      }
+      setWriteMode(WRITE);
       writeMode = getWriteMode();
     }
 
@@ -516,6 +559,11 @@ public class DictionarySaver extends AbstractFileSaver
       if (inst != null) {
         m_dictionaryBuilder.processInstance(inst);
       } else {
+        try {
+          m_dictionaryBuilder.finalizeDictionary();
+        } catch (Exception e) {
+          throw new IOException(e);
+        }
         if (retrieveFile() == null && getWriter() == null) {
           if (getSaveBinaryDictionary()) {
             throw new IOException(
@@ -523,7 +571,11 @@ public class DictionarySaver extends AbstractFileSaver
           }
           m_dictionaryBuilder.saveDictionary(System.out);
         } else {
-          m_dictionaryBuilder.saveDictionary(getWriter());
+          if (getSaveBinaryDictionary()) {
+            m_dictionaryBuilder.saveDictionary(m_binaryStream);
+          } else {
+            m_dictionaryBuilder.saveDictionary(getWriter());
+          }
         }
 
         resetStructure();
@@ -561,8 +613,7 @@ public class DictionarySaver extends AbstractFileSaver
 
     if (retrieveFile() == null && getWriter() == null) {
       if (getSaveBinaryDictionary()) {
-        throw new IOException(
-          "Can't output binary dictionary to standard out!");
+        throw new IOException("Can't output binary dictionary to standard out!");
       }
 
       m_dictionaryBuilder.saveDictionary(System.out);
@@ -608,4 +659,3 @@ public class DictionarySaver extends AbstractFileSaver
     runFileSaver(new DictionarySaver(), args);
   }
 }
-
