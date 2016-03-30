@@ -21,6 +21,13 @@
 
 package weka.knowledgeflow.steps;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import weka.core.Drawable;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -31,17 +38,10 @@ import weka.core.Utils;
 import weka.core.WekaException;
 import weka.gui.FilePropertyMetadata;
 import weka.gui.ProgrammaticProperty;
+import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
-
-import javax.swing.JFileChooser;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Step that wraps a Weka clusterer. Handles trainingSet and testSet incoming
@@ -128,7 +128,7 @@ public class Clusterer extends WekaAlgorithmWrapper
     description = "Optional "
       + "path to a clusterer to load at execution time (only applies when using "
       + "testSet connections)")
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = false)
   public void setLoadClustererFileName(File filename) {
     m_loadModelFileName = filename;

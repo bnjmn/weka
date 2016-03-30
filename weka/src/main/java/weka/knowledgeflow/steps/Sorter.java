@@ -21,19 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import weka.core.Attribute;
-import weka.core.Environment;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
-import weka.core.WekaException;
-import weka.gui.FilePropertyMetadata;
-import weka.gui.ProgrammaticProperty;
-import weka.gui.knowledgeflow.KFGUIConsts;
-import weka.knowledgeflow.Data;
-import weka.knowledgeflow.StepManager;
-
-import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -49,6 +36,18 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionMetadata;
+import weka.core.WekaException;
+import weka.gui.FilePropertyMetadata;
+import weka.gui.ProgrammaticProperty;
+import weka.gui.knowledgeflow.KFGUIConsts;
+import weka.knowledgeflow.Data;
+import weka.knowledgeflow.StepManager;
 
 /**
  * Step for sorting instances according to one or more attributes.
@@ -135,7 +134,7 @@ public class Sorter extends BaseStep {
    *
    * @param tempDir the temp dir to use
    */
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = true)
   @OptionMetadata(displayName = "Directory for temp files",
     description = "Where to store temporary files when spilling to disk",

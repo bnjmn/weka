@@ -21,6 +21,13 @@
 
 package weka.knowledgeflow.steps;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
@@ -35,18 +42,11 @@ import weka.core.Utils;
 import weka.core.WekaException;
 import weka.gui.FilePropertyMetadata;
 import weka.gui.ProgrammaticProperty;
+import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.LoggingLevel;
 import weka.knowledgeflow.StepManager;
-
-import javax.swing.JFileChooser;
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Step that wraps a Weka classifier. Handles instance, trainingSet and testSet
@@ -221,7 +221,7 @@ public class Classifier extends WekaAlgorithmWrapper
     description = "Optional "
       + "Path to a classifier to load at execution time (only applies when using "
       + "testSet or instance connections)")
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = false)
   public void setLoadClassifierFileName(File filename) {
     m_loadModelFileName = filename;

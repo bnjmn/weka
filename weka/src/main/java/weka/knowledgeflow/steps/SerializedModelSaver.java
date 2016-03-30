@@ -21,6 +21,13 @@
 
 package weka.knowledgeflow.steps;
 
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 import weka.classifiers.UpdateableBatchProcessor;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -30,14 +37,6 @@ import weka.gui.FilePropertyMetadata;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
-
-import javax.swing.*;
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Step that can save models encapsulated in incoming {@code Data} objects to
@@ -86,7 +85,7 @@ public class SerializedModelSaver extends BaseStep {
    *
    * @param directory the directory to save to
    */
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.SAVE_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.SAVE_DIALOG,
     directoriesOnly = true)
   @OptionMetadata(displayName = "Output directory",
     description = "The directory to save models to", displayOrder = 0)

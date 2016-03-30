@@ -21,16 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import weka.core.Defaults;
-import weka.core.OptionMetadata;
-import weka.core.Settings;
-import weka.core.WekaException;
-import weka.gui.FilePropertyMetadata;
-import weka.gui.knowledgeflow.KFGUIConsts;
-import weka.knowledgeflow.Data;
-import weka.knowledgeflow.StepManager;
-
-import javax.swing.JFileChooser;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -39,6 +29,15 @@ import java.io.OutputStreamWriter;
 import java.io.Writer;
 import java.util.Arrays;
 import java.util.List;
+
+import weka.core.Defaults;
+import weka.core.OptionMetadata;
+import weka.core.Settings;
+import weka.core.WekaException;
+import weka.gui.FilePropertyMetadata;
+import weka.gui.knowledgeflow.KFGUIConsts;
+import weka.knowledgeflow.Data;
+import weka.knowledgeflow.StepManager;
 
 /**
  * Step for saving textual data to a file.
@@ -72,7 +71,7 @@ public class TextSaver extends BaseStep {
    */
   @OptionMetadata(displayName = "File to save to",
     description = "The file to save textual results to", displayOrder = 1)
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = false)
   public void setFile(File f) {
     m_file = f;
