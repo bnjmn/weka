@@ -591,7 +591,7 @@
       debug="${debug}"
       includeantruntime="false"
       deprecation="${deprecation}"
-      source="1.6" target="1.6">
+      source="1.7" target="1.7">
 
       <classpath refid="project.class.path" /> 
     </javac>
@@ -703,7 +703,7 @@
             debug="${debug}"
             includeantruntime="false"
             deprecation="${deprecation}"
-            source="1.6" target="1.6">
+            source="1.7" target="1.7">
        <classpath refid="project.class.path" /> 
      </javac>
      <copy todir="${build}/testcases" >
@@ -952,7 +952,7 @@
                 shortname="Weka"
                 arguments=""
                 workingdirectory="/Users"
-                jvmversion="1.6+">
+                jvmversion="1.7+">
       <javaproperty name="java.library.path" value="$APP_PACKAGE/Contents/Resources"/>
       <jarfileset dir="weka-${release}/weka-${release}">
         <include name="weka.jar"/>
