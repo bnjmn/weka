@@ -261,7 +261,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @return the attribute type
    */
   public int getType(int columnIndex) {
-    return getType(0, columnIndex);
+    return getType(-1, columnIndex);
   }
 
   /**
