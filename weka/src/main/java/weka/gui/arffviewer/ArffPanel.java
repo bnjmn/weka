@@ -21,6 +21,24 @@
 
 package weka.gui.arffviewer;
 
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.gui.ComponentHelper;
+import weka.gui.JTableHelper;
+import weka.gui.ListSelectorDialog;
+
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.TableModelEvent;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Toolkit;
@@ -35,25 +53,6 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Vector;
-
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.event.TableModelEvent;
-
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.gui.ComponentHelper;
-import weka.gui.JTableHelper;
-import weka.gui.ListSelectorDialog;
 
 /**
  * A Panel representing an ARFF-Table and the associated filename.
@@ -95,6 +94,7 @@ public class ArffPanel extends JPanel implements ActionListener,
   private JMenuItem menuItemSortInstances;
   private JMenuItem menuItemDeleteSelectedInstance;
   private JMenuItem menuItemDeleteAllSelectedInstances;
+  private JMenuItem menuItemInsertInstance;
   private JMenuItem menuItemSearch;
   private JMenuItem menuItemClearSearch;
   private JMenuItem menuItemUndo;
@@ -196,6 +196,8 @@ public class ArffPanel extends JPanel implements ActionListener,
     menuItemOptimalColWidth.addActionListener(this);
     menuItemOptimalColWidths = new JMenuItem("Optimal column width (all)");
     menuItemOptimalColWidths.addActionListener(this);
+    menuItemInsertInstance =
+      new JMenuItem("Insert new instance");
 
     // row popup
     menuItemUndo = new JMenuItem("Undo");
@@ -208,9 +210,10 @@ public class ArffPanel extends JPanel implements ActionListener,
     menuItemClearSearch.addActionListener(this);
     menuItemDeleteSelectedInstance = new JMenuItem("Delete selected instance");
     menuItemDeleteSelectedInstance.addActionListener(this);
-    menuItemDeleteAllSelectedInstances = new JMenuItem(
-      "Delete ALL selected instances");
+    menuItemDeleteAllSelectedInstances =
+      new JMenuItem("Delete ALL selected instances");
     menuItemDeleteAllSelectedInstances.addActionListener(this);
+    menuItemInsertInstance.addActionListener(this);
 
     // table
     m_TableArff = new ArffTable();
@@ -271,6 +274,7 @@ public class ArffPanel extends JPanel implements ActionListener,
       m_PopupRows.addSeparator();
       m_PopupRows.add(menuItemDeleteSelectedInstance);
       m_PopupRows.add(menuItemDeleteAllSelectedInstances);
+      m_PopupRows.add(menuItemInsertInstance);
     }
   }
 
@@ -662,8 +666,9 @@ public class ArffPanel extends JPanel implements ActionListener,
       return;
     }
 
-    value = ComponentHelper.showInputBox(m_TableArff.getParent(), title, msg,
-      m_LastSearch);
+    value =
+      ComponentHelper.showInputBox(m_TableArff.getParent(), title, msg,
+        m_LastSearch);
 
     // cancelled?
     if (value == null) {
@@ -674,8 +679,9 @@ public class ArffPanel extends JPanel implements ActionListener,
 
     // replacement
     if (o == menuItemReplaceValues) {
-      valueNew = ComponentHelper.showInputBox(m_TableArff.getParent(), title,
-        "New value", m_LastReplace);
+      valueNew =
+        ComponentHelper.showInputBox(m_TableArff.getParent(), title,
+          "New value", m_LastReplace);
       if (valueNew == null) {
         return;
       }
@@ -834,8 +840,9 @@ public class ArffPanel extends JPanel implements ActionListener,
       return;
     }
 
-    newName = ComponentHelper.showInputBox(getParent(), "Rename attribute...",
-      "Enter new Attribute name", model.getAttributeAt(m_CurrentCol).name());
+    newName =
+      ComponentHelper.showInputBox(getParent(), "Rename attribute...",
+        "Enter new Attribute name", model.getAttributeAt(m_CurrentCol).name());
     if (newName == null) {
       return;
     }
@@ -857,6 +864,22 @@ public class ArffPanel extends JPanel implements ActionListener,
     }
 
     ((ArffSortedTableModel) m_TableArff.getModel()).deleteInstanceAt(index);
+  }
+
+  /**
+   * Add an instance at the currently selected index. If no instance is
+   * selected then adds a new instance at the end of the dataset.
+   */
+  public void addInstance() {
+    int index = m_TableArff.getSelectedRow();
+    ((ArffSortedTableModel) m_TableArff.getModel()).insertInstance(index);
+  }
+
+  /**
+   * Add an instance at the end of the dataset
+   */
+  public void addInstanceAtEnd() {
+    ((ArffSortedTableModel) m_TableArff.getModel()).insertInstance(-1);
   }
 
   /**
@@ -907,8 +930,9 @@ public class ArffPanel extends JPanel implements ActionListener,
     String searchString;
 
     // display dialog
-    searchString = ComponentHelper.showInputBox(getParent(), "Search...",
-      "Enter the string to search for", m_LastSearch);
+    searchString =
+      ComponentHelper.showInputBox(getParent(), "Search...",
+        "Enter the string to search for", m_LastSearch);
     if (searchString != null) {
       m_LastSearch = searchString;
     }
@@ -973,6 +997,8 @@ public class ArffPanel extends JPanel implements ActionListener,
       deleteInstance();
     } else if (o == menuItemDeleteAllSelectedInstances) {
       deleteInstances();
+    } else if (o == menuItemInsertInstance) {
+      addInstance();
     } else if (o == menuItemSortInstances) {
       sortInstances();
     } else if (o == menuItemSearch) {
@@ -1001,9 +1027,10 @@ public class ArffPanel extends JPanel implements ActionListener,
     boolean popup;
 
     col = m_TableArff.columnAtPoint(e.getPoint());
-    popup = ((e.getButton() == MouseEvent.BUTTON3) && (e.getClickCount() == 1))
-      || ((e.getButton() == MouseEvent.BUTTON1) && (e.getClickCount() == 1)
-        && e.isAltDown() && !e.isControlDown() && !e.isShiftDown());
+    popup =
+      ((e.getButton() == MouseEvent.BUTTON3) && (e.getClickCount() == 1))
+        || ((e.getButton() == MouseEvent.BUTTON1) && (e.getClickCount() == 1)
+          && e.isAltDown() && !e.isControlDown() && !e.isShiftDown());
     popup = popup && (getInstances() != null);
 
     if (e.getSource() == m_TableArff.getTableHeader()) {

@@ -21,15 +21,15 @@
 
 package weka.gui.arffviewer;
 
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.TableModel;
-
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Undoable;
 import weka.core.converters.AbstractFileLoader;
 import weka.gui.SortedTableModel;
+
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.TableModel;
 
 /**
  * A sorter for the ARFF-Viewer - necessary because of the custom CellRenderer.
@@ -167,7 +167,7 @@ public class ArffSortedTableModel
    * @return			the attribute type
    */
   public int getType(int columnIndex) {
-    return ((ArffTableModel) getModel()).getType(mIndices[0], columnIndex);
+    return ((ArffTableModel) getModel()).getType(mIndices.length > 0 ? mIndices[0] : -1, columnIndex);
   }
   
   /**
@@ -225,6 +225,16 @@ public class ArffSortedTableModel
    */
   public void deleteInstanceAt(int rowIndex) {
     ((ArffTableModel) getModel()).deleteInstanceAt(mIndices[rowIndex]);
+  }
+
+  /**
+   * Insert a new instance (all values 0) at the given index. If index is < 0,
+   * then inserts at the end of the dataset
+   *
+   * @param index the index to insert at
+   */
+  public void insertInstance(int index) {
+    ((ArffTableModel) getModel()).insertInstance(index);
   }
   
   /**
