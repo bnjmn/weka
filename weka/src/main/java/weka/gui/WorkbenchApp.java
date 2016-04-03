@@ -164,7 +164,7 @@ public class WorkbenchApp extends AbstractGUIApplication {
   public static void main(String[] args) {
     try {
       LookAndFeel.setLookAndFeel(WorkbenchDefaults.APP_ID,
-        WorkbenchDefaults.APP_ID + ".lookAndFeel");
+        WorkbenchDefaults.APP_ID + ".lookAndFeel", WorkbenchDefaults.LAF);
     } catch (IOException ex) {
       ex.printStackTrace();
     }

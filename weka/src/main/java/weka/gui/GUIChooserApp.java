@@ -1709,7 +1709,7 @@ public class GUIChooserApp extends JFrame {
         "Note: a restart is required for this setting to come into effect");
 
     /** Default value for LAF */
-    protected static final String LAF = "";
+    protected static final String LAF = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
 
     private static final long serialVersionUID = -8524894440289936685L;
 
@@ -1745,7 +1745,7 @@ public class GUIChooserApp extends JFrame {
       "Logging started");
     try {
       LookAndFeel.setLookAndFeel(GUIChooserDefaults.APP_ID,
-        GUIChooserDefaults.APP_ID + ".lookAndFeel");
+        GUIChooserDefaults.APP_ID + ".lookAndFeel", GUIChooserDefaults.LAF);
     } catch (IOException ex) {
       ex.printStackTrace();
     }

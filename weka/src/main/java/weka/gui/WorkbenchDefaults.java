@@ -40,7 +40,7 @@ public class WorkbenchDefaults extends Defaults {
   protected static final Settings.SettingKey LAF_KEY = new Settings.SettingKey(
     APP_ID + ".lookAndFeel", "Look and feel for UI",
     "Note: a restart is required for this setting to come into effect");
-  protected static final String LAF = "";
+  protected static final String LAF = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
   protected static final Settings.SettingKey SHOW_JTREE_TIP_TEXT_KEY =
     new Settings.SettingKey(APP_ID + ".showGlobalInfoTipText",
       "Show scheme tool tips in tree view", "");

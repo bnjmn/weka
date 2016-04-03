@@ -257,7 +257,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
   public static void main(String[] args) {
     try {
       LookAndFeel.setLookAndFeel(KFDefaults.APP_ID, KFDefaults.APP_ID
-        + ".lookAndFeel");
+        + ".lookAndFeel", KFDefaults.LAF);
     } catch (IOException ex) {
       ex.printStackTrace();
     }
