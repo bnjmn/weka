@@ -278,8 +278,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     if ((rowIndex < 0) && columnIndex > 0 && columnIndex < getColumnCount()) {
       result = m_Data.attribute(columnIndex - 1).type();
-    } else if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex > 0)
-      && (columnIndex < getColumnCount())) {
+    } else if ((rowIndex >= 0) && (rowIndex < getRowCount())
+      && (columnIndex > 0) && (columnIndex < getColumnCount())) {
       result = m_Data.instance(rowIndex).attribute(columnIndex - 1).type();
     }
 
@@ -435,6 +435,16 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
       addUndoPoint();
     }
     double[] vals = new double[m_Data.numAttributes()];
+
+    // set any string or relational attribute values to missing
+    // in the new instance, just in case this is the very first
+    // instance in the dataset.
+    for (int i = 0; i < m_Data.numAttributes(); i++) {
+      if (m_Data.attribute(i).isString()
+        || m_Data.attribute(i).isRelationValued()) {
+        vals[i] = Utils.missingValue();
+      }
+    }
     Instance toAdd = new DenseInstance(1.0, vals);
     if (index < 0) {
       m_Data.add(toAdd);
