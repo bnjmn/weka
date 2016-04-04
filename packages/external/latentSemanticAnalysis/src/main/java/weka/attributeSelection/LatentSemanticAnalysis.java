@@ -23,31 +23,28 @@ package weka.attributeSelection;
 
 import weka.core.Attribute;
 import weka.core.Capabilities;
-import weka.core.Check;
-import weka.core.CheckOptionHandler;
-import weka.core.FastVector;
 import weka.core.Instance;
 import weka.core.DenseInstance;
 import weka.core.Instances;
-import weka.core.matrix.Matrix;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.Capabilities.Capability;
-import weka.core.matrix.SingularValueDecomposition;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Normalize;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
-import java.util.Vector;
+
+import no.uib.cipr.matrix.*;
+import no.uib.cipr.matrix.Matrix;
+
 
 /**
  <!-- globalinfo-start -->
@@ -121,7 +118,7 @@ implements AttributeTransformer, OptionHandler {
   private Matrix m_u = null;
   
   /** Will hold the singular values */
-  private Matrix m_s = null;
+  private double[] m_s = null;
   
   /** Will hold the right singular values */
   private Matrix m_v = null;
@@ -171,7 +168,7 @@ implements AttributeTransformer, OptionHandler {
    * @return an enumeration of all the available options.
    **/
   public Enumeration listOptions () {
-    Vector options = new Vector(4);
+    java.util.Vector options = new java.util.Vector(4);
     options.addElement(new Option("\tNormalize input data.", "N", 0, "-N"));
     
     options.addElement(new Option("\tRank approximation used in LSA. \n" +
@@ -417,7 +414,7 @@ implements AttributeTransformer, OptionHandler {
     
     // vector to hold indices of attributes to delete (class attribute, 
     // attributes that are all missing, or attributes with one distinct value)
-    Vector attributesToRemove = new Vector();
+    ArrayList<Integer> attributesToRemove = new ArrayList<Integer>();
     
     // if data has a class attribute
     if (m_trainInstances.classIndex() >= 0) {
@@ -426,7 +423,7 @@ implements AttributeTransformer, OptionHandler {
       m_classIndex = m_trainInstances.classIndex();
       
       // set class attribute to be removed
-      attributesToRemove.addElement(new Integer(m_classIndex));
+      attributesToRemove.add(new Integer(m_classIndex));
     }
     // make copy of training data so the class values (if set) can be appended to final 
     // transformed instances and so that we can check header compatibility
@@ -447,7 +444,7 @@ implements AttributeTransformer, OptionHandler {
     // delete any attributes with only one distinct value or are all missing
     for (int i = 0; i < m_trainInstances.numAttributes(); i++) {
       if (m_trainInstances.numDistinctValues(i) <= 1) {
-        attributesToRemove.addElement(new Integer(i));
+        attributesToRemove.add(new Integer(i));
       }
     }
     
@@ -456,7 +453,7 @@ implements AttributeTransformer, OptionHandler {
       m_attributeFilter = new Remove();
       int [] todelete = new int[attributesToRemove.size()];
       for (int i = 0; i < attributesToRemove.size(); i++) {
-        todelete[i] = ((Integer)(attributesToRemove.elementAt(i))).intValue();
+        todelete[i] = ((Integer)(attributesToRemove.get(i))).intValue();
       }
       m_attributeFilter.setAttributeIndicesArray(todelete);
       m_attributeFilter.setInvertSelection(false);
@@ -476,26 +473,27 @@ implements AttributeTransformer, OptionHandler {
     for (int i = 0; i < m_numAttributes; i++) {
       trainValues[i] = m_trainInstances.attributeToDoubleArray(i);
     }
-    Matrix trainMatrix = new Matrix(trainValues);
+    Matrix trainMatrix = new DenseMatrix(trainValues);
     // svd requires rows >= columns, so transpose data if necessary
     if (m_numAttributes < m_numInstances) {
       m_transpose = true;
-      trainMatrix = trainMatrix.transpose();
+      trainMatrix = trainMatrix.transpose(new DenseMatrix(trainMatrix.numColumns(), trainMatrix.numRows()));
     }
-    SingularValueDecomposition trainSVD = trainMatrix.svd();
+    SVD trainSVD = SVD.factorize(trainMatrix);
     m_u = trainSVD.getU(); // left singular vectors
     m_s = trainSVD.getS(); // singular values
-    m_v = trainSVD.getV(); // right singular vectors
-    
+    Matrix Vt = trainSVD.getVt();
+    m_v = Vt.transpose(new DenseMatrix(Vt.numColumns(), Vt.numRows())); // right singular vectors
+
     // find actual rank to use
-    int maxSingularValues = trainSVD.rank();
-    double[] singularDiag = trainSVD.getSingularValues();
-    //    for (int i = 0; i < m_s.getRowDimension(); i++) {
-    for (int i = 0; i < singularDiag.length; i++) {
-      // m_sumSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
-      m_sumSquaredSingularValues += singularDiag[i] * singularDiag[i];
+    int maxSingularValues = 0;
+    for (int i = 0; i < m_s.length; i++) {
+      if (m_s[i] * m_s[i] > 0) {
+        maxSingularValues++;
+      }
+      m_sumSquaredSingularValues += m_s[i] * m_s[i];
     }
-    if (maxSingularValues == 0) { // no nonzero singular values (shouldn't happen)
+    if (m_sumSquaredSingularValues == 0) { // no nonzero singular values (shouldn't happen)
       // reset values from computation
       m_s = null;
       m_u = null;
@@ -508,10 +506,8 @@ implements AttributeTransformer, OptionHandler {
       m_actualRank = maxSingularValues;
     } else if (m_rank < 1.0) { // determine how many singular values to include for desired coverage
       double currentSumOfSquaredSingularValues = 0.0;
-      //for (int i = 0; i < m_s.getRowDimension() && m_actualRank == -1; i++) {
-      for (int i = 0; i < singularDiag.length && m_actualRank == -1; i++) {
-        //currentSumOfSquaredSingularValues += m_s.get(i, i) * m_s.get(i, i);
-        currentSumOfSquaredSingularValues += singularDiag[i] * singularDiag[i];
+      for (int i = 0; i < m_s.length && m_actualRank == -1; i++) {
+        currentSumOfSquaredSingularValues += m_s[i] * m_s[i];
         if (currentSumOfSquaredSingularValues / m_sumSquaredSingularValues >= m_rank) {
           m_actualRank = i + 1;
         }
@@ -527,11 +523,27 @@ implements AttributeTransformer, OptionHandler {
       m_u = m_v;
       m_v = tempMatrix;
     }
-    m_u = m_u.getMatrix(0, m_u.getRowDimension() - 1, 0, m_actualRank - 1);
-    m_s = m_s.getMatrix(0, m_actualRank - 1, 0, m_actualRank - 1);
-    m_v = m_v.getMatrix(0, m_v.getRowDimension() - 1, 0, m_actualRank - 1);
-    m_transformationMatrix = m_u.times(m_s.inverse());
-    
+
+    System.err.println(m_u);
+    System.err.println(m_v);
+
+    int[] rowsToKeep = new int[m_u.numRows()];
+    int[] columnsToKeep = new int[m_actualRank];
+    for (int i = 0; i < rowsToKeep.length; i++) {
+      rowsToKeep[i] = i;
+    }
+    for (int i = 0; i < columnsToKeep.length; i++) {
+      columnsToKeep[i] = i;
+    }
+    m_u = Matrices.getSubMatrix(m_u, rowsToKeep, columnsToKeep).copy();
+    m_s = Arrays.copyOf(m_s, m_actualRank);
+    m_v = Matrices.getSubMatrix(m_v, rowsToKeep, columnsToKeep).copy();
+    Matrix s = new UpperSymmDenseMatrix(m_actualRank);
+    for (int i = 0; i < m_s.length; i++) {
+      s.set(i, i, 1.0 / m_s[i]);
+    }
+    m_transformationMatrix = m_u.mult(s, new DenseMatrix(m_u.numRows(), m_u.numColumns()));
+
     //create dataset header for transformed instances
     m_transformedFormat = setOutputFormat();
   }
@@ -556,28 +568,33 @@ implements AttributeTransformer, OptionHandler {
     if (numAttributesInName <= 0 || numAttributesInName >= m_numAttributes) {
       numAttributesInName = m_numAttributes;
     }
-    FastVector attributes = new FastVector(m_outputNumAttributes);
+    ArrayList<Attribute> attributes = new ArrayList<Attribute>(m_outputNumAttributes);
     for (int i = 0; i < m_actualRank; i++) {
       // create attribute name
       String attributeName = "";
-      double [] attributeCoefficients = 
-        m_transformationMatrix.getMatrix(0, m_numAttributes - 1, i, i).getColumnPackedCopy();
+      int[] rowsToKeep = new int[m_transformationMatrix.numRows()];
+      int[] columnsToKeep = new int[1];
+      for (int j = 0; j < rowsToKeep.length; j++) {
+        rowsToKeep[j] = j;
+      }
+      columnsToKeep[0] = i;
+      Matrix attributeCoefficients = Matrices.getSubMatrix(m_transformationMatrix, rowsToKeep, columnsToKeep).copy();
       for (int j = 0; j < numAttributesInName; j++) {
         if (j > 0) {
           attributeName += "+";
         }
-        attributeName += Utils.doubleToString(attributeCoefficients[j], 5, 3);
+        attributeName += Utils.doubleToString(attributeCoefficients.get(j, 0), 5, 3);
         attributeName += m_trainInstances.attribute(j).name();
       }
       if (numAttributesInName < m_numAttributes) {
         attributeName += "...";
       }
       // add attribute
-      attributes.addElement(new Attribute(attributeName));
+      attributes.add(new Attribute(attributeName));
     }
     // add original class attribute if present
     if (m_hasClass) {
-      attributes.addElement(m_trainHeader.classAttribute().copy());
+      attributes.add((Attribute)m_trainHeader.classAttribute().copy());
     }
     // create blank header
     Instances outputFormat = new Instances(m_trainInstances.relationName() + "_LSA", 
@@ -660,7 +677,7 @@ implements AttributeTransformer, OptionHandler {
     }
     
     //return the square of the corresponding singular value
-    return (m_s.get(att, att) * m_s.get(att, att)) / m_sumSquaredSingularValues;
+    return (m_s[att] * m_s[att]) / m_sumSquaredSingularValues;
   }
   
   /**
@@ -709,12 +726,11 @@ implements AttributeTransformer, OptionHandler {
     if (m_hasClass) { // copy class value
       newValues[m_outputNumAttributes - 1] = instance.classValue();
     }
-    double [][] oldInstanceValues = new double[1][m_numAttributes];
-    oldInstanceValues[0] = tempInstance.toDoubleArray();
-    Matrix instanceVector = new Matrix(oldInstanceValues); // old attribute values
-    instanceVector = instanceVector.times(m_transformationMatrix); // new attribute values
+    double [] oldInstanceValues = tempInstance.toDoubleArray();
+    Vector instanceVector = new DenseVector(m_s.length); // old attribute values
+    instanceVector = m_transformationMatrix.transMult(new DenseVector(oldInstanceValues), instanceVector); // new attribute values
     for (int i = 0; i < m_actualRank; i++) {
-      newValues[i] = instanceVector.get(0, i);
+      newValues[i] = instanceVector.get(i);
     }
     
     // return newly transformed instance
@@ -752,7 +768,7 @@ implements AttributeTransformer, OptionHandler {
     result.append("\n\nSingularValue\tLatentVariable#\n");
     // create single array of singular values rather than diagonal matrix
     for (int i = 0; i < m_actualRank; i++) {
-      result.append(Utils.doubleToString(m_s.get(i, i), 9, 5) + "\t" + (i + 1) + "\n");
+      result.append(Utils.doubleToString(m_s[i], 9, 5) + "\t" + (i + 1) + "\n");
     }
     
     // print attribute vectors
@@ -763,8 +779,8 @@ implements AttributeTransformer, OptionHandler {
       result.append("LatentVariable#" + (i + 1) + "\t");
     }
     result.append("AttributeName\n");
-    for (int i = 0; i < m_u.getRowDimension(); i++) { // for each attribute
-      for (int j = 0; j < m_u.getColumnDimension(); j++) { // for each latent variable
+    for (int i = 0; i < m_u.numRows(); i++) { // for each attribute
+      for (int j = 0; j < m_u.numColumns(); j++) { // for each latent variable
         result.append(Utils.doubleToString(m_u.get(i, j), 9, 5) + "\t\t");
       }
       result.append(m_trainInstances.attribute(i).name() + "\n");
@@ -778,8 +794,8 @@ implements AttributeTransformer, OptionHandler {
       result.append("Instance#" + (i + 1) + "\t");
     }
     result.append("LatentVariable#\n");
-    for (int i = 0; i < m_v.getColumnDimension(); i++) { // for each instance
-      for (int j = 0; j < m_v.getRowDimension(); j++) { // for each latent variable
+    for (int i = 0; i < m_v.numColumns(); i++) { // for each instance
+      for (int j = 0; j < m_v.numRows(); j++) { // for each latent variable
         // going down columns instead of across rows because we're
         // printing v' but have v stored
         result.append(Utils.doubleToString(m_v.get(j, i), 9, 5) + "\t");
