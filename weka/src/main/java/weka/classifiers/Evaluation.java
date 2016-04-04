@@ -263,19 +263,19 @@ public class Evaluation implements Serializable, Summarizable, RevisionHandler {
    * is to display all built in metrics and plugin metrics that haven't been
    * globally disabled.
    * 
-   * @param display a list of metric names to have appear in the output
+   * @return a list of metric names to have appear in the output
    */
   public List<String> getMetricsToDisplay() {
     return m_delegate.getMetricsToDisplay();
   }
-
+  
   /**
-   * Remove the supplied list of metrics from the list of those to display.
-   * 
-   * @param metricsNotToDisplay
+   * Toggle the output of the metrics specified in the supplied list.
+   *
+   * @param metricsToToggle a list of metrics to toggle
    */
-  public void dontDisplayMetrics(List<String> metricsNotToDisplay) {
-    m_delegate.dontDisplayMetrics(metricsNotToDisplay);
+  public void toggleEvalMetrics(List<String> metricsToToggle) {
+    m_delegate.toggleEvalMetrics(metricsToToggle);
   }
 
   /**
