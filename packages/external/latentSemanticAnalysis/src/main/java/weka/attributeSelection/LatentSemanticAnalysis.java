@@ -524,9 +524,6 @@ implements AttributeTransformer, OptionHandler {
       m_v = tempMatrix;
     }
 
-    System.err.println(m_u);
-    System.err.println(m_v);
-
     int[] rowsToKeep = new int[m_u.numRows()];
     int[] columnsToKeep = new int[m_actualRank];
     for (int i = 0; i < rowsToKeep.length; i++) {
@@ -537,6 +534,10 @@ implements AttributeTransformer, OptionHandler {
     }
     m_u = Matrices.getSubMatrix(m_u, rowsToKeep, columnsToKeep).copy();
     m_s = Arrays.copyOf(m_s, m_actualRank);
+    rowsToKeep = new int[m_v.numRows()];
+    for (int i = 0; i < rowsToKeep.length; i++) {
+      rowsToKeep[i] = i;
+    }
     m_v = Matrices.getSubMatrix(m_v, rowsToKeep, columnsToKeep).copy();
     Matrix s = new UpperSymmDenseMatrix(m_actualRank);
     for (int i = 0; i < m_s.length; i++) {
@@ -571,7 +572,7 @@ implements AttributeTransformer, OptionHandler {
     ArrayList<Attribute> attributes = new ArrayList<Attribute>(m_outputNumAttributes);
     for (int i = 0; i < m_actualRank; i++) {
       // create attribute name
-      String attributeName = "";
+      String attributeName = "att" + i + ":";
       int[] rowsToKeep = new int[m_transformationMatrix.numRows()];
       int[] columnsToKeep = new int[1];
       for (int j = 0; j < rowsToKeep.length; j++) {
@@ -650,12 +651,8 @@ implements AttributeTransformer, OptionHandler {
         newValues[m_outputNumAttributes - 1] = currentInstance.classValue();
       }
       //create new instance with recorded values and add to output dataset
-      Instance newInstance;
-      if (currentInstance instanceof SparseInstance) {
-        newInstance = new SparseInstance(currentInstance.weight(), newValues);
-      } else {
-        newInstance = new DenseInstance(currentInstance.weight(), newValues);
-      }
+      Instance newInstance = new DenseInstance(currentInstance.weight(), newValues);
+
       output.add(newInstance);
     }
     
