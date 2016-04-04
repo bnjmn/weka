@@ -198,6 +198,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   public ClassifierPerformanceEvaluator() {
     super();
     m_metricsList = Evaluation.getAllEvaluationMetricNames();
+    m_metricsList.remove("Coverage");
+    m_metricsList.remove("Region size");
     StringBuilder b = new StringBuilder();
     for (String s : m_metricsList) {
       b.append(s).append(",");

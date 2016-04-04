@@ -367,6 +367,8 @@ public class ClassifierPanel extends AbstractPerspective implements
    * Creates the classifier panel.
    */
   public ClassifierPanel() {
+    m_selectedEvalMetrics.remove("Coverage");
+    m_selectedEvalMetrics.remove("Region size");
 
     // Connect / configure the components
     m_OutText.setEditable(false);
