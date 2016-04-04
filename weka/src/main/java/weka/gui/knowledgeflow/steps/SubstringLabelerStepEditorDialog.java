@@ -27,10 +27,19 @@ import weka.gui.beans.SubstringLabelerRules;
 import weka.gui.knowledgeflow.StepEditorDialog;
 import weka.knowledgeflow.steps.SubstringLabeler;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -262,6 +271,7 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
           if (!m_deleteBut.isEnabled()) {
             m_deleteBut.setEnabled(true);
           }
+          checkUpDown();
 
           Object entry = m_list.getSelectedValue();
           if (entry != null) {
@@ -303,6 +313,7 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
         }
 
         m_list.setSelectedIndex(m_listModel.size() - 1);
+        checkUpDown();
       }
     });
 
@@ -313,6 +324,7 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
         if (selected >= 0) {
           m_listModel.removeElementAt(selected);
 
+          checkUpDown();
           if (m_listModel.size() <= 1) {
             m_upBut.setEnabled(false);
             m_downBut.setEnabled(false);
@@ -325,6 +337,7 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveUp(m_list);
+        checkUpDown();
       }
     });
 
@@ -332,6 +345,7 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveDown(m_list);
+        checkUpDown();
       }
     });
 
@@ -358,6 +372,17 @@ public class SubstringLabelerStepEditorDialog extends StepEditorDialog {
         }
       }
     });
+  }
+
+  /**
+   * Set the enabled state of the up and down buttons based on the currently
+   * selected row in the table
+   */
+  protected void checkUpDown() {
+    if (m_list.getSelectedValue() != null && m_listModel.size() > 1) {
+      m_upBut.setEnabled(m_list.getSelectedIndex() > 0);
+      m_downBut.setEnabled(m_list.getSelectedIndex() < m_listModel.size() - 1);
+    }
   }
 
   /**
