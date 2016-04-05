@@ -1881,6 +1881,11 @@ public class ClassifierPanel extends AbstractPerspective implements
               } else if (saveVis && plotInstances != null
                 && plotInstances.canPlot(false)) {
                 m_CurrentVis = new VisualizePanel();
+                if (getMainApplication() != null) {
+                  Settings settings = getMainApplication().getApplicationSettings();
+                  m_CurrentVis.applySettings(settings,
+                    weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+                }
                 m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
                 m_CurrentVis.setLog(m_Log);
                 m_CurrentVis.addPlot(plotInstances.getPlotData(cname));
@@ -2156,6 +2161,11 @@ public class ClassifierPanel extends AbstractPerspective implements
             MarginCurve tc = new MarginCurve();
             Instances result = tc.getCurve(preds);
             VisualizePanel vmc = new VisualizePanel();
+            if (getMainApplication() != null) {
+              Settings settings = getMainApplication().getApplicationSettings();
+              m_CurrentVis.applySettings(settings,
+                weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+            }
             vmc.setName(result.relationName());
             vmc.setLog(m_Log);
             PlotData2D tempd = new PlotData2D(result);
@@ -2291,6 +2301,11 @@ public class ClassifierPanel extends AbstractPerspective implements
               CostCurve cc = new CostCurve();
               Instances result = cc.getCurve(preds, classValue);
               VisualizePanel vmc = new VisualizePanel();
+              if (getMainApplication() != null) {
+                Settings settings = getMainApplication().getApplicationSettings();
+                m_CurrentVis.applySettings(settings,
+                  weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+              }
               vmc.setLog(m_Log);
               vmc.setName(result.relationName() + ". (Class value "
                 + classAtt.value(classValue) + ")");
@@ -3094,6 +3109,11 @@ public class ClassifierPanel extends AbstractPerspective implements
                 && plotInstances.getPlotInstances() != null
                 && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
+                if (getMainApplication() != null) {
+                  Settings settings = getMainApplication().getApplicationSettings();
+                  m_CurrentVis.applySettings(settings,
+                    weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+                }
                 m_CurrentVis.setName(name + " ("
                   + userTestStructure.relationName() + ")");
                 m_CurrentVis.setLog(m_Log);
