@@ -1029,6 +1029,11 @@ public class ClustererPanel extends AbstractPerspective implements
           } finally {
             if ((plotInstances != null) && plotInstances.canPlot(true)) {
               m_CurrentVis = new VisualizePanel();
+              if (getMainApplication() != null) {
+                Settings settings = getMainApplication().getApplicationSettings();
+                m_CurrentVis.applySettings(settings,
+                  weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+              }
               m_CurrentVis.setName(name + " (" + inst.relationName() + ")");
               m_CurrentVis.setLog(m_Log);
               try {
@@ -1734,6 +1739,11 @@ public class ClustererPanel extends AbstractPerspective implements
           } finally {
             if (plotInstances != null) {
               m_CurrentVis = new VisualizePanel();
+              if (getMainApplication() != null) {
+                Settings settings = getMainApplication().getApplicationSettings();
+                m_CurrentVis.applySettings(settings,
+                  weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
+              }
               m_CurrentVis.setName(name + " (" + userTest.relationName() + ")");
               m_CurrentVis.setLog(m_Log);
               try {
