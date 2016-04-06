@@ -62,8 +62,8 @@ import weka.knowledgeflow.StepManager;
 @KFStep(name = "Classifier", category = "Classifiers",
   toolTipText = "Weka classifier wrapper", iconPath = "",
   resourceIntensive = true)
-public class Classifier extends WekaAlgorithmWrapper
-  implements PairedDataHelper.PairedProcessor<weka.classifiers.Classifier> {
+public class Classifier extends WekaAlgorithmWrapper implements
+  PairedDataHelper.PairedProcessor<weka.classifiers.Classifier> {
 
   /** For serialization */
   private static final long serialVersionUID = 8326706942962123155L;
@@ -109,8 +109,8 @@ public class Classifier extends WekaAlgorithmWrapper
   protected transient PairedDataHelper<weka.classifiers.Classifier> m_trainTestHelper;
 
   /** Reusable data for incremental streaming classifiers */
-  protected Data m_incrementalData =
-    new Data(StepManager.CON_INCREMENTAL_CLASSIFIER);
+  protected Data m_incrementalData = new Data(
+    StepManager.CON_INCREMENTAL_CLASSIFIER);
 
   /** True if we've been reset */
   protected boolean m_isReset;
@@ -151,25 +151,30 @@ public class Classifier extends WekaAlgorithmWrapper
       m_trainedClassifier = null;
       m_trainTestHelper = null;
       m_incrementalData = new Data(StepManager.CON_INCREMENTAL_CLASSIFIER);
-      m_classifierTemplate = AbstractClassifier
-        .makeCopy((weka.classifiers.Classifier) getWrappedAlgorithm());
+      m_classifierTemplate =
+        AbstractClassifier
+          .makeCopy((weka.classifiers.Classifier) getWrappedAlgorithm());
 
       if (m_classifierTemplate instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) m_classifierTemplate).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) m_classifierTemplate)
+          .setEnvironment(getStepManager().getExecutionEnvironment()
+            .getEnvironmentVariables());
       }
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
 
     // create and initialize our train/test pair helper if necessary
-    if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET) > 0) {
-      m_trainTestHelper = new PairedDataHelper<weka.classifiers.Classifier>(
-        this, this, StepManager.CON_TRAININGSET,
-        getStepManager()
-          .numIncomingConnectionsOfType(StepManager.CON_TESTSET) > 0
-            ? StepManager.CON_TESTSET : null);
+    if (getStepManager().numIncomingConnectionsOfType(
+      StepManager.CON_TRAININGSET) > 0) {
+      m_trainTestHelper =
+        new PairedDataHelper<weka.classifiers.Classifier>(
+          this,
+          this,
+          StepManager.CON_TRAININGSET,
+          getStepManager()
+            .numIncomingConnectionsOfType(StepManager.CON_TESTSET) > 0 ? StepManager.CON_TESTSET
+            : null);
     }
 
     m_isReset = true;
@@ -177,10 +182,12 @@ public class Classifier extends WekaAlgorithmWrapper
       m_classifierTemplate instanceof UpdateableClassifier;
 
     if (getLoadClassifierFileName() != null
-      && getLoadClassifierFileName().toString().length() > 0 && getStepManager()
-        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET) == 0) {
-      String resolvedFileName = getStepManager()
-        .environmentSubstitute(getLoadClassifierFileName().toString());
+      && getLoadClassifierFileName().toString().length() > 0
+      && getStepManager().numIncomingConnectionsOfType(
+        StepManager.CON_TRAININGSET) == 0) {
+      String resolvedFileName =
+        getStepManager().environmentSubstitute(
+          getLoadClassifierFileName().toString());
       try {
         getStepManager().logBasic("Loading classifier: " + resolvedFileName);
         loadModel(resolvedFileName);
@@ -193,9 +200,10 @@ public class Classifier extends WekaAlgorithmWrapper
       && getStepManager()
         .numIncomingConnectionsOfType(StepManager.CON_INSTANCE) > 0
       && !m_classifierIsIncremental) {
-      getStepManager().logWarning("Loaded classifier is not an incremental one "
-        + "- will only be able to evaluate, and not update, on the incoming "
-        + "instance stream.");
+      getStepManager().logWarning(
+        "Loaded classifier is not an incremental one "
+          + "- will only be able to evaluate, and not update, on the incoming "
+          + "instance stream.");
     }
   }
 
@@ -217,7 +225,8 @@ public class Classifier extends WekaAlgorithmWrapper
    *
    * @param filename the name of the file to load the model from
    */
-  @OptionMetadata(displayName = "Classifier model to load",
+  @OptionMetadata(
+    displayName = "Classifier model to load",
     description = "Optional "
       + "Path to a classifier to load at execution time (only applies when using "
       + "testSet or instance connections)")
@@ -243,10 +252,12 @@ public class Classifier extends WekaAlgorithmWrapper
    *
    * @param reset true if the classifier should be reset
    */
-  @OptionMetadata(displayName = "Reset incremental classifier",
+  @OptionMetadata(
+    displayName = "Reset incremental classifier",
     description = "Reset classifier (if it is incremental) at the start of the incoming "
       + "instance stream")
-  public void setResetIncrementalClassifier(boolean reset) {
+  public
+    void setResetIncrementalClassifier(boolean reset) {
     m_resetIncrementalClassifier = reset;
   }
 
@@ -266,9 +277,11 @@ public class Classifier extends WekaAlgorithmWrapper
    *
    * @param update true if an incremental classifier should be updated
    */
-  @OptionMetadata(displayName = "Update incremental classifier",
+  @OptionMetadata(
+    displayName = "Update incremental classifier",
     description = " Update an incremental classifier on incoming instance stream")
-  public void setUpdateIncrementalClassifier(boolean update) {
+  public
+    void setUpdateIncrementalClassifier(boolean update) {
     m_updateIncrementalClassifier = true;
   }
 
@@ -279,17 +292,19 @@ public class Classifier extends WekaAlgorithmWrapper
         m_isReset = false;
         Instances incomingStructure = null;
         if (data.getConnectionName().equals(StepManager.CON_INSTANCE)) {
-          incomingStructure = new Instances(
-            ((Instance) data.getPayloadElement(StepManager.CON_INSTANCE))
-              .dataset(),
-            0);
+          incomingStructure =
+            new Instances(
+              ((Instance) data.getPayloadElement(StepManager.CON_INSTANCE))
+                .dataset(),
+              0);
         } else {
           incomingStructure =
             (Instances) data.getPayloadElement(data.getConnectionName());
         }
         if (incomingStructure.classAttribute() == null) {
-          getStepManager().logWarning(
-            "No class index is set in the data - using last attribute as class");
+          getStepManager()
+            .logWarning(
+              "No class index is set in the data - using last attribute as class");
           incomingStructure
             .setClassIndex(incomingStructure.numAttributes() - 1);
         }
@@ -297,35 +312,37 @@ public class Classifier extends WekaAlgorithmWrapper
         if (data.getConnectionName().equals(StepManager.CON_INSTANCE)) {
           m_streaming = true;
           if (m_trainedClassifier == null) {
-            m_trainedClassifier = weka.classifiers.AbstractClassifier
-              .makeCopy(m_classifierTemplate);
+            m_trainedClassifier =
+              weka.classifiers.AbstractClassifier
+                .makeCopy(m_classifierTemplate);
             getStepManager().logBasic("Initialising incremental classifier");
             m_trainedClassifier.buildClassifier(incomingStructure);
             m_trainedClassifierHeader = incomingStructure;
-          } else
-            if (m_resetIncrementalClassifier && m_classifierIsIncremental) {
+          } else if (m_resetIncrementalClassifier && m_classifierIsIncremental) {
             // make a copy here, just in case buildClassifier() implementations
             // do not re-initialize the classifier correctly
-            m_trainedClassifier = weka.classifiers.AbstractClassifier
-              .makeCopy(m_classifierTemplate);
+            m_trainedClassifier =
+              weka.classifiers.AbstractClassifier
+                .makeCopy(m_classifierTemplate);
             m_trainedClassifierHeader = incomingStructure;
             getStepManager().logBasic("Resetting incremental classifier");
             m_trainedClassifier.buildClassifier(m_trainedClassifierHeader);
           }
 
           getStepManager()
-            .logBasic(m_updateIncrementalClassifier && m_classifierIsIncremental
-              ? "Training incrementally" : "Predicting incrementally");
-        } else
-          if (data.getConnectionName().equals(StepManager.CON_TRAININGSET)) {
+            .logBasic(
+              m_updateIncrementalClassifier && m_classifierIsIncremental ? "Training incrementally"
+                : "Predicting incrementally");
+        } else if (data.getConnectionName().equals(StepManager.CON_TRAININGSET)) {
           m_trainedClassifierHeader = incomingStructure;
         }
 
         if (m_trainedClassifierHeader != null
           && !incomingStructure.equalHeaders(m_trainedClassifierHeader)) {
           if (!(m_trainedClassifier instanceof InputMappedClassifier)) {
-            throw new WekaException("Structure of incoming data does not match "
-              + "that of the trained classifier");
+            throw new WekaException(
+              "Structure of incoming data does not match "
+                + "that of the trained classifier");
           }
         }
       }
@@ -373,13 +390,13 @@ public class Classifier extends WekaAlgorithmWrapper
         classifierDesc += " " + optsString;
       }
       if (classifier instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) classifier).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) classifier).setEnvironment(getStepManager()
+          .getExecutionEnvironment().getEnvironmentVariables());
       }
 
       // retain the training data
-      helper.addIndexedValueToNamedStore("trainingSplits", setNum,
-        trainingData);
+      helper
+        .addIndexedValueToNamedStore("trainingSplits", setNum, trainingData);
       if (!isStopRequested()) {
         getStepManager().logBasic(
           "Building " + classifierDesc + " on " + trainingData.relationName()
@@ -396,12 +413,29 @@ public class Classifier extends WekaAlgorithmWrapper
           m_trainedClassifier = classifier;
         }
         classifier.buildClassifier((Instances) trainingData);
-        getStepManager().logDetailed("Finished building " + classifierDesc
-          + "on " + trainingData.relationName() + " for fold/set " + setNum
-          + " out of " + maxSetNum);
+        getStepManager().logDetailed(
+          "Finished building " + classifierDesc + "on "
+            + trainingData.relationName() + " for fold/set " + setNum
+            + " out of " + maxSetNum);
 
         outputTextData(classifier, setNum);
         outputGraphData(classifier, setNum);
+
+        if (getStepManager().numIncomingConnectionsOfType(
+          StepManager.CON_TESTSET) == 0) {
+          // output a batch classifier for just the trained model
+          Data batchClassifier =
+            new Data(StepManager.CON_BATCH_CLASSIFIER, classifier);
+          batchClassifier.setPayloadElement(
+            StepManager.CON_AUX_DATA_TRAININGSET, trainingData);
+          batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM,
+            setNum);
+          batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
+            maxSetNum);
+          batchClassifier
+            .setPayloadElement(StepManager.CON_AUX_DATA_LABEL, getName());
+          getStepManager().outputData(batchClassifier);
+        }
       }
       return classifier;
     } catch (Exception ex) {
@@ -433,8 +467,9 @@ public class Classifier extends WekaAlgorithmWrapper
     Instances trainingSplit =
       helper.getIndexedValueFromNamedStore("trainingSplits", setNum);
 
-    getStepManager().logBasic("Dispatching model for set " + setNum + " out of "
-      + maxSetNum + " to output");
+    getStepManager().logBasic(
+      "Dispatching model for set " + setNum + " out of " + maxSetNum
+        + " to output");
 
     Data batchClassifier =
       new Data(StepManager.CON_BATCH_CLASSIFIER, classifier);
@@ -445,8 +480,8 @@ public class Classifier extends WekaAlgorithmWrapper
     batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, setNum);
     batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
       maxSetNum);
-    batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_LABEL,
-      getName());
+    batchClassifier
+      .setPayloadElement(StepManager.CON_AUX_DATA_LABEL, getName());
     getStepManager().outputData(batchClassifier);
   }
 
@@ -510,8 +545,8 @@ public class Classifier extends WekaAlgorithmWrapper
       // data that the stream has finished
       m_incrementalData.setPayloadElement(
         StepManager.CON_INCREMENTAL_CLASSIFIER, m_trainedClassifier);
-      m_incrementalData
-        .setPayloadElement(StepManager.CON_AUX_DATA_TEST_INSTANCE, null);
+      m_incrementalData.setPayloadElement(
+        StepManager.CON_AUX_DATA_TEST_INSTANCE, null);
       // getStepManager().outputData(m_incrementalData);
 
       outputTextData(m_trainedClassifier, -1);
@@ -556,8 +591,7 @@ public class Classifier extends WekaAlgorithmWrapper
   protected void outputTextData(weka.classifiers.Classifier classifier,
     int setNum) throws WekaException {
 
-    if (getStepManager()
-      .numOutgoingConnectionsOfType(StepManager.CON_TEXT) == 0) {
+    if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_TEXT) == 0) {
       return;
     }
 
@@ -566,16 +600,18 @@ public class Classifier extends WekaAlgorithmWrapper
     String modelString = classifier.toString();
     String titleString = classifier.getClass().getName();
 
-    titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
-      titleString.length());
-    modelString = "=== Classifier model ===\n\n" + "Scheme:   " + titleString
-      + "\n" + "Relation: " + m_trainedClassifierHeader.relationName() + "\n\n"
-      + modelString;
+    titleString =
+      titleString.substring(titleString.lastIndexOf('.') + 1,
+        titleString.length());
+    modelString =
+      "=== Classifier model ===\n\n" + "Scheme:   " + titleString + "\n"
+        + "Relation: " + m_trainedClassifierHeader.relationName() + "\n\n"
+        + modelString;
     titleString = "Model: " + titleString;
 
     textData.setPayloadElement(StepManager.CON_TEXT, modelString);
-    textData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-      titleString);
+    textData
+      .setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE, titleString);
 
     if (setNum != -1) {
       textData.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, setNum);
@@ -595,8 +631,7 @@ public class Classifier extends WekaAlgorithmWrapper
   protected void outputGraphData(weka.classifiers.Classifier classifier,
     int setNum) throws WekaException {
     if (classifier instanceof Drawable) {
-      if (getStepManager()
-        .numOutgoingConnectionsOfType(StepManager.CON_GRAPH) == 0) {
+      if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_GRAPH) == 0) {
         return;
       }
 
@@ -604,10 +639,12 @@ public class Classifier extends WekaAlgorithmWrapper
         String graphString = ((Drawable) classifier).graph();
         int graphType = ((Drawable) classifier).graphType();
         String grphTitle = classifier.getClass().getCanonicalName();
-        grphTitle = grphTitle.substring(grphTitle.lastIndexOf('.') + 1,
-          grphTitle.length());
-        grphTitle = "Set " + setNum + " ("
-          + m_trainedClassifierHeader.relationName() + ") " + grphTitle;
+        grphTitle =
+          grphTitle.substring(grphTitle.lastIndexOf('.') + 1,
+            grphTitle.length());
+        grphTitle =
+          "Set " + setNum + " (" + m_trainedClassifierHeader.relationName()
+            + ") " + grphTitle;
         Data graphData = new Data(StepManager.CON_GRAPH);
         graphData.setPayloadElement(StepManager.CON_GRAPH, graphString);
         graphData.setPayloadElement(StepManager.CON_AUX_DATA_GRAPH_TITLE,
@@ -624,8 +661,9 @@ public class Classifier extends WekaAlgorithmWrapper
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
-    int numTraining = getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
+    int numTraining =
+      getStepManager()
+        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
     int numTesting =
       getStepManager().numIncomingConnectionsOfType(StepManager.CON_TESTSET);
     int numInstance =
@@ -650,8 +688,9 @@ public class Classifier extends WekaAlgorithmWrapper
   public List<String> getOutgoingConnectionTypes() {
     List<String> result = new ArrayList<String>();
     if (getStepManager().numIncomingConnections() > 0) {
-      int numTraining = getStepManager()
-        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
+      int numTraining =
+        getStepManager().numIncomingConnectionsOfType(
+          StepManager.CON_TRAININGSET);
       int numTesting =
         getStepManager().numIncomingConnectionsOfType(StepManager.CON_TESTSET);
       int numInstance =
@@ -685,8 +724,9 @@ public class Classifier extends WekaAlgorithmWrapper
   protected void loadModel(String filePath) throws Exception {
     ObjectInputStream is = null;
     try {
-      is = new ObjectInputStream(
-        new BufferedInputStream(new FileInputStream(new File(filePath))));
+      is =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(
+          new File(filePath))));
 
       m_trainedClassifier = (weka.classifiers.Classifier) is.readObject();
 
@@ -701,8 +741,9 @@ public class Classifier extends WekaAlgorithmWrapper
       try {
         m_trainedClassifierHeader = (Instances) is.readObject();
       } catch (Exception ex) {
-        getStepManager().logWarning("Model file '" + filePath
-          + "' does not seem to contain an Instances header");
+        getStepManager().logWarning(
+          "Model file '" + filePath
+            + "' does not seem to contain an Instances header");
       }
     } finally {
       if (is != null) {
