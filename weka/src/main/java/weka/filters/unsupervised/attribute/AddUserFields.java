@@ -445,7 +445,7 @@ public class AddUserFields extends Filter implements OptionHandler,
           + "\tstring for parsing specific date values can be specified by suffixing\n"
           + "\tthe type specification - e.g. \"myTime@date:MM-dd-yyyy@08-23-2009\"."
           + "This option may be specified multiple times", "A", 1,
-        "-A <name:type:value>"));
+        "-A <name@type@value>"));
 
     return newVector.elements();
   }
