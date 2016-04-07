@@ -25,7 +25,6 @@ import weka.core.WekaException;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -62,36 +61,36 @@ import java.util.concurrent.atomic.AtomicInteger;
  *         m_helper = new PairedDataHelper<MyFunkyMainResult>(this, this,
  *         StepManager.[CON_WHATEVER_YOUR_PRIMARY_CONNECTION_IS],
  *         StepManager.[CON_WHATEVER_YOUR_SECONDARY_CONNECTION_IS]);
- *
+ * 
  *         ...
  *       }
- *
+ * 
  *       public void processIncoming(Data data) throws WekaException {
  *         // delegate to our helper to handle primary/secondary synchronization
  *         // issues
  *         m_helper.process(data);
  *       }
- *
+ * 
  *       public MyFunkyMainResult processPrimary(Integer setNum, Integer maxSetNun,
  *         Data data, PairedDataHelper<MyFunkyMainResult> helper) throws WekaException {
  *           SomeDataTypeToProcess someData = data.getPrimaryPayload();
- *
+ * 
  *           MyFunkyMainResult processor = new MyFunkyMainResult();
  *           // do some processing using MyFunkyMainResult and SomeDataToProcess
  *           ...
  *           // output some data to downstream steps if necessary
  *           ...
- *
+ * 
  *           return processor;
  *       }
- *
+ * 
  *       public void processSecondary(Integer setNum, Integer maxSetNum, Data data,
  *         PairedDataHelper<MyFunkyMainResult> helper) throws WekaException {
  *         SomeDataTypeToProcess someData = data.getPrimaryPayload();
- *
+ * 
  *         // get the MyFunkyMainResult for this set number
  *         MyFunkyMainResult result = helper.getIndexedPrimaryResult(setNum);
- *
+ * 
  *         // do some stuff with the result and the secondary data
  *         ...
  *         // output some data to downstream steps if necessary
@@ -115,7 +114,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
     new ConcurrentHashMap<String, Map<Integer, Object>>();
 
   /** Storage of the indexed primary result */
-  protected Map<Integer, P> m_primaryResultMap = new ConcurrentHashMap<Integer, P>();
+  protected Map<Integer, P> m_primaryResultMap =
+    new ConcurrentHashMap<Integer, P>();
 
   /**
    * Holds the secondary data objects, if they arrive before the corresponding
@@ -169,8 +169,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
     String connType = data.getConnectionName();
     if (connType.equals(m_primaryConType)) {
       processPrimary(data);
-    } else
-      if (m_secondaryConType != null && connType.equals(m_secondaryConType)) {
+    } else if (m_secondaryConType != null
+      && connType.equals(m_secondaryConType)) {
       processSecondary(data);
     } else {
       throw new WekaException("Illegal connection/data type: " + connType);
@@ -184,6 +184,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
         m_secondaryDataMap.clear();
         m_namedIndexedStore.clear();
       }
+    } else {
+      m_ownerStep.getStepManager().interrupted();
     }
   }
 
@@ -207,8 +209,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
 
     if (setNum == 1) {
       m_ownerStep.getStepManager().processing();
-      m_ownerStep.getStepManager()
-        .statusMessage("Processing set/fold " + setNum + " out of " + maxSetNum);
+      m_ownerStep.getStepManager().statusMessage(
+        "Processing set/fold " + setNum + " out of " + maxSetNum);
     }
 
     if (!m_ownerStep.getStepManager().isStopRequested()) {
@@ -216,6 +218,9 @@ public class PairedDataHelper<P> implements java.io.Serializable {
       if (result != null) {
         m_primaryResultMap.put(setNum, result);
       }
+    } else {
+      m_ownerStep.getStepManager().interrupted();
+      return;
     }
 
     Data waitingSecondary = m_secondaryDataMap.get(setNum);
@@ -251,6 +256,9 @@ public class PairedDataHelper<P> implements java.io.Serializable {
 
     if (!m_ownerStep.getStepManager().isStopRequested()) {
       m_processor.processSecondary(setNum, maxSetNum, data, this);
+    } else {
+      m_ownerStep.getStepManager().interrupted();
+      return;
     }
 
     m_setCount.decrementAndGet();
@@ -324,8 +332,8 @@ public class PairedDataHelper<P> implements java.io.Serializable {
    * @param index the index to associate with the value
    * @param value the value to store
    */
-  public synchronized void addIndexedValueToNamedStore(String storeName, Integer index,
-    Object value) {
+  public synchronized void addIndexedValueToNamedStore(String storeName,
+    Integer index, Object value) {
     Map<Integer, Object> store = m_namedIndexedStore.get(storeName);
     if (store == null) {
       createNamedIndexedStore(storeName);
