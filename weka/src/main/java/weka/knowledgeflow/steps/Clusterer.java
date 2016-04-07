@@ -21,13 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import java.io.BufferedInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.ObjectInputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import weka.core.Drawable;
 import weka.core.EnvironmentHandler;
 import weka.core.Instance;
@@ -43,6 +36,13 @@ import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Step that wraps a Weka clusterer. Handles trainingSet and testSet incoming
  * connections
@@ -53,8 +53,8 @@ import weka.knowledgeflow.StepManager;
 @KFStep(name = "Clusterer", category = "Clusterers",
   toolTipText = "Weka clusterer wrapper", iconPath = "",
   resourceIntensive = true)
-public class Clusterer extends WekaAlgorithmWrapper
-  implements PairedDataHelper.PairedProcessor<weka.clusterers.Clusterer> {
+public class Clusterer extends WekaAlgorithmWrapper implements
+  PairedDataHelper.PairedProcessor<weka.clusterers.Clusterer> {
 
   private static final long serialVersionUID = 3275754421525338036L;
   /**
@@ -124,7 +124,8 @@ public class Clusterer extends WekaAlgorithmWrapper
    *
    * @param filename the name of the file to load the model from
    */
-  @OptionMetadata(displayName = "Clusterer model to load",
+  @OptionMetadata(
+    displayName = "Clusterer model to load",
     description = "Optional "
       + "path to a clusterer to load at execution time (only applies when using "
       + "testSet connections)")
@@ -167,25 +168,30 @@ public class Clusterer extends WekaAlgorithmWrapper
     }
 
     try {
-      m_clustererTemplate = weka.clusterers.AbstractClusterer
-        .makeCopy((weka.clusterers.Clusterer) getWrappedAlgorithm());
+      m_clustererTemplate =
+        weka.clusterers.AbstractClusterer
+          .makeCopy((weka.clusterers.Clusterer) getWrappedAlgorithm());
 
       if (m_clustererTemplate instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) m_clustererTemplate).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) m_clustererTemplate)
+          .setEnvironment(getStepManager().getExecutionEnvironment()
+            .getEnvironmentVariables());
       }
     } catch (Exception ex) {
       throw new WekaException(ex);
     }
 
     // create and initialize our train/test pair helper if necessary
-    if (getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET) > 0) {
-      m_trainTestHelper = new PairedDataHelper<weka.clusterers.Clusterer>(this,
-        this, StepManager.CON_TRAININGSET,
-        getStepManager()
-          .numIncomingConnectionsOfType(StepManager.CON_TESTSET) > 0
-            ? StepManager.CON_TESTSET : null);
+    if (getStepManager().numIncomingConnectionsOfType(
+      StepManager.CON_TRAININGSET) > 0) {
+      m_trainTestHelper =
+        new PairedDataHelper<weka.clusterers.Clusterer>(
+          this,
+          this,
+          StepManager.CON_TRAININGSET,
+          getStepManager()
+            .numIncomingConnectionsOfType(StepManager.CON_TESTSET) > 0 ? StepManager.CON_TESTSET
+            : null);
     }
 
     m_isReset = true;
@@ -193,10 +199,12 @@ public class Clusterer extends WekaAlgorithmWrapper
     m_incrementalData = new Data(StepManager.CON_INCREMENTAL_CLUSTERER);
 
     if (getLoadClustererFileName() != null
-      && getLoadClustererFileName().toString().length() > 0 && getStepManager()
-        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET) == 0) {
-      String resolvedFileName = getStepManager()
-        .environmentSubstitute(getLoadClustererFileName().toString());
+      && getLoadClustererFileName().toString().length() > 0
+      && getStepManager().numIncomingConnectionsOfType(
+        StepManager.CON_TRAININGSET) == 0) {
+      String resolvedFileName =
+        getStepManager().environmentSubstitute(
+          getLoadClustererFileName().toString());
       try {
         loadModel(resolvedFileName);
       } catch (Exception ex) {
@@ -239,8 +247,7 @@ public class Clusterer extends WekaAlgorithmWrapper
             }
             // TODO - support incremental training at some point?
           }
-        } else
-          if (data.getConnectionName().equals(StepManager.CON_TRAININGSET)) {
+        } else if (data.getConnectionName().equals(StepManager.CON_TRAININGSET)) {
           m_trainedClustererHeader = incomingStructure;
         }
 
@@ -303,8 +310,9 @@ public class Clusterer extends WekaAlgorithmWrapper
   @Override
   public List<String> getIncomingConnectionTypes() {
     List<String> result = new ArrayList<String>();
-    int numTraining = getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
+    int numTraining =
+      getStepManager()
+        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
     int numTesting =
       getStepManager().numIncomingConnectionsOfType(StepManager.CON_TESTSET);
 
@@ -336,8 +344,9 @@ public class Clusterer extends WekaAlgorithmWrapper
    */
   @Override
   public List<String> getOutgoingConnectionTypes() {
-    int numTraining = getStepManager()
-      .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
+    int numTraining =
+      getStepManager()
+        .numIncomingConnectionsOfType(StepManager.CON_TRAININGSET);
     int numTesting =
       getStepManager().numIncomingConnectionsOfType(StepManager.CON_TESTSET);
 
@@ -368,8 +377,9 @@ public class Clusterer extends WekaAlgorithmWrapper
   protected void loadModel(String filePath) throws Exception {
     ObjectInputStream is = null;
     try {
-      is = new ObjectInputStream(
-        new BufferedInputStream(new FileInputStream(new File(filePath))));
+      is =
+        new ObjectInputStream(new BufferedInputStream(new FileInputStream(
+          new File(filePath))));
 
       m_trainedClusterer = (weka.clusterers.Clusterer) is.readObject();
 
@@ -377,8 +387,9 @@ public class Clusterer extends WekaAlgorithmWrapper
       try {
         m_trainedClustererHeader = (Instances) is.readObject();
       } catch (Exception ex) {
-        getStepManager().logWarning("Model file '" + filePath
-          + "' does not seem to contain an Instances header");
+        getStepManager().logWarning(
+          "Model file '" + filePath
+            + "' does not seem to contain an Instances header");
       }
     } finally {
       if (is != null) {
@@ -395,11 +406,11 @@ public class Clusterer extends WekaAlgorithmWrapper
    * @param setNum the set number of the data used to generate the graph
    * @throws WekaException if a problem occurs
    */
-  protected void outputGraphData(weka.clusterers.Clusterer clusterer,
-    int setNum) throws WekaException {
+  protected void
+    outputGraphData(weka.clusterers.Clusterer clusterer, int setNum)
+      throws WekaException {
     if (clusterer instanceof Drawable) {
-      if (getStepManager()
-        .numOutgoingConnectionsOfType(StepManager.CON_GRAPH) == 0) {
+      if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_GRAPH) == 0) {
         return;
       }
 
@@ -407,10 +418,12 @@ public class Clusterer extends WekaAlgorithmWrapper
         String graphString = ((Drawable) clusterer).graph();
         int graphType = ((Drawable) clusterer).graphType();
         String grphTitle = clusterer.getClass().getCanonicalName();
-        grphTitle = grphTitle.substring(grphTitle.lastIndexOf('.') + 1,
-          grphTitle.length());
-        grphTitle = "Set " + setNum + " ("
-          + m_trainedClustererHeader.relationName() + ") " + grphTitle;
+        grphTitle =
+          grphTitle.substring(grphTitle.lastIndexOf('.') + 1,
+            grphTitle.length());
+        grphTitle =
+          "Set " + setNum + " (" + m_trainedClustererHeader.relationName()
+            + ") " + grphTitle;
         Data graphData = new Data(StepManager.CON_GRAPH);
         graphData.setPayloadElement(StepManager.CON_GRAPH, graphString);
         graphData.setPayloadElement(StepManager.CON_AUX_DATA_GRAPH_TITLE,
@@ -432,11 +445,11 @@ public class Clusterer extends WekaAlgorithmWrapper
    * @param setNum the set number of the training data
    * @throws WekaException if a problem occurs
    */
-  protected void outputTextData(weka.clusterers.Clusterer clusterer, int setNum)
-    throws WekaException {
+  protected void
+    outputTextData(weka.clusterers.Clusterer clusterer, int setNum)
+      throws WekaException {
 
-    if (getStepManager()
-      .numOutgoingConnectionsOfType(StepManager.CON_TEXT) == 0) {
+    if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_TEXT) == 0) {
       return;
     }
 
@@ -445,22 +458,51 @@ public class Clusterer extends WekaAlgorithmWrapper
     String modelString = clusterer.toString();
     String titleString = clusterer.getClass().getName();
 
-    titleString = titleString.substring(titleString.lastIndexOf('.') + 1,
-      titleString.length());
-    modelString = "=== Clusterer model ===\n\n" + "Scheme:   " + titleString
-      + "\n" + "Relation: " + m_trainedClustererHeader.relationName() + "\n\n"
-      + modelString;
+    titleString =
+      titleString.substring(titleString.lastIndexOf('.') + 1,
+        titleString.length());
+    modelString =
+      "=== Clusterer model ===\n\n" + "Scheme:   " + titleString + "\n"
+        + "Relation: " + m_trainedClustererHeader.relationName() + "\n\n"
+        + modelString;
     titleString = "Model: " + titleString;
 
     textData.setPayloadElement(StepManager.CON_TEXT, modelString);
-    textData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-      titleString);
+    textData
+      .setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE, titleString);
 
     if (setNum != -1) {
       textData.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, setNum);
     }
 
     getStepManager().outputData(textData);
+  }
+
+  /**
+   * Output batch clusterer data to downstream steps
+   *
+   * @param clusterer the clusterer to outpit
+   * @param setNum the set number of the current dataset
+   * @param maxSetNum the maximum set number
+   * @param trainingSplit the training data
+   * @param testSplit the test data, or null if there is no test data
+   * @throws WekaException if a problem occurs
+   */
+  protected void outputBatchClusterer(weka.clusterers.Clusterer clusterer,
+    int setNum, int maxSetNum, Instances trainingSplit, Instances testSplit)
+    throws WekaException {
+    Data batchClusterer = new Data(StepManager.CON_BATCH_CLUSTERER, clusterer);
+    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_TRAININGSET,
+      trainingSplit);
+    if (testSplit != null) {
+      batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_TESTSET,
+        testSplit);
+    }
+    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, setNum);
+    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
+      maxSetNum);
+    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_LABEL, getName());
+    getStepManager().outputData(batchClusterer);
   }
 
   /**
@@ -492,13 +534,13 @@ public class Clusterer extends WekaAlgorithmWrapper
       }
 
       if (clusterer instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) clusterer).setEnvironment(
-          getStepManager().getExecutionEnvironment().getEnvironmentVariables());
+        ((EnvironmentHandler) clusterer).setEnvironment(getStepManager()
+          .getExecutionEnvironment().getEnvironmentVariables());
       }
 
       // retain the training data
-      helper.addIndexedValueToNamedStore("trainingSplits", setNum,
-        trainingData);
+      helper
+        .addIndexedValueToNamedStore("trainingSplits", setNum, trainingData);
 
       if (!isStopRequested()) {
         getStepManager().logBasic(
@@ -513,12 +555,19 @@ public class Clusterer extends WekaAlgorithmWrapper
 
         clusterer.buildClusterer(trainingData);
 
-        getStepManager().logDetailed("Finished building " + clustererDesc
-          + "on " + trainingData.relationName() + " for fold/set " + setNum
-          + " out of " + maxSetNum);
+        getStepManager().logDetailed(
+          "Finished building " + clustererDesc + "on "
+            + trainingData.relationName() + " for fold/set " + setNum
+            + " out of " + maxSetNum);
 
         outputTextData(clusterer, setNum);
         outputGraphData(clusterer, setNum);
+
+        if (getStepManager().numIncomingConnectionsOfType(
+          StepManager.CON_TESTSET) == 0) {
+          // output a butch clusterer for just the trained model
+          outputBatchClusterer(clusterer, setNum, maxSetNum, trainingData, null);
+        }
       }
       return clusterer;
     } catch (Exception ex) {
@@ -550,18 +599,10 @@ public class Clusterer extends WekaAlgorithmWrapper
     Instances trainingSplit =
       helper.getIndexedValueFromNamedStore("trainingSplits", setNum);
 
-    getStepManager().logBasic("Dispatching model for set " + setNum + " out of "
-      + maxSetNum + " to output");
+    getStepManager().logBasic(
+      "Dispatching model for set " + setNum + " out of " + maxSetNum
+        + " to output");
 
-    Data batchClusterer = new Data(StepManager.CON_BATCH_CLUSTERER, clusterer);
-    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_TRAININGSET,
-      trainingSplit);
-    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_TESTSET,
-      testSplit);
-    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, setNum);
-    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
-      maxSetNum);
-    batchClusterer.setPayloadElement(StepManager.CON_AUX_DATA_LABEL, getName());
-    getStepManager().outputData(batchClusterer);
+    outputBatchClusterer(clusterer, setNum, maxSetNum, trainingSplit, testSplit);
   }
 }
