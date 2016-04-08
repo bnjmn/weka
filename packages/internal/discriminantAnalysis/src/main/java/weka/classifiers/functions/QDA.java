@@ -34,7 +34,7 @@ import java.util.Enumeration;
 
 /**
  * <!-- globalinfo-start -->
- * Generates a QDA model by fitting a multivariate Gaussian to each class and applying Bayes' rule
+ * Generates a QDA model by fitting a multivariate Gaussian to each class using maximum likelihood and applying Bayes' rule.
  * <p/>
  * <!-- globalinfo-end -->
  *
@@ -82,7 +82,7 @@ public class QDA extends AbstractClassifier {
    * Global info for this classifier.
    */
   public String globalInfo() {
-    return "Generates a QDA model by fitting a multivariate Gaussian to each class and applying Bayes' rule.";
+    return "Generates a QDA model by fitting a multivariate Gaussian to each class using maximum likelihood and applying Bayes' rule.";
   }
 
   /**
