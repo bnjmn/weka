@@ -23,6 +23,8 @@ package weka.estimators;
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Matrix;
 
+import java.io.Serializable;
+
 /**
  * Implementation of Multivariate Distribution Estimation using Normal
  * Distribution.
@@ -32,7 +34,7 @@ import no.uib.cipr.matrix.Matrix;
  * @version $Revision$
  * 
  */
-public class MultivariateGaussianEstimator implements MultivariateEstimator {
+public class MultivariateGaussianEstimator implements MultivariateEstimator, Serializable {
 
   /** Mean vector */
   protected Vector mean;
