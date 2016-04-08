@@ -130,6 +130,7 @@ import java.util.Enumeration;
  * 
  * @author Kurt Driessens (kurtd@cs.waikato.ac.nz)
  * @author Remco Bouckaert (remco@cs.waikato.ac.nz)
+ * @author Eibe Frank, University of Waikato
  * @version $Revision$
  */
 public class GaussianProcesses extends RandomizableClassifier implements
