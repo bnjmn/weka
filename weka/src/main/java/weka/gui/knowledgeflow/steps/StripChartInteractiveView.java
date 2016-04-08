@@ -496,6 +496,12 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
       BorderFactory.createEtchedBorder(Color.gray, Color.darkGray), "Legend",
       TitledBorder.CENTER, TitledBorder.DEFAULT_POSITION, lf,
       m_LegendPanelBorderColor));
+
+    m_colorList[m_colorList.length - 1] =
+      settings.getSetting(StripChartInteractiveViewDefaults.ID,
+        StripChartInteractiveViewDefaults.X_LABEL_COLOR_KEY,
+        StripChartInteractiveViewDefaults.X_LABEL_COLOR,
+        Environment.getSystemWide());
   }
 
   /**
@@ -515,12 +521,19 @@ public class StripChartInteractiveView extends BaseInteractiveViewer implements
       new Settings.SettingKey(ID + ".legendBorderColor", "Legend border color",
         "Legend border color");
     protected static final Color LEGEND_BORDER_COLOR = new Color(253, 255, 61);
+
+    protected static final Settings.SettingKey X_LABEL_COLOR_KEY =
+      new Settings.SettingKey(ID + ".xLabelColor", "Color for x label text",
+        "Color for x label text");
+    protected static final Color X_LABEL_COLOR = Color.white;
+
     private static final long serialVersionUID = 2247370679260844812L;
 
     public StripChartInteractiveViewDefaults() {
       super(ID);
       m_defaults.put(BACKGROUND_COLOR_KEY, BACKGROUND_COLOR);
       m_defaults.put(LEGEND_BORDER_COLOR_KEY, LEGEND_BORDER_COLOR);
+      m_defaults.put(X_LABEL_COLOR_KEY, X_LABEL_COLOR);
     }
   }
 }
