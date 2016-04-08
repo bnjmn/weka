@@ -61,7 +61,8 @@ import java.util.Collections;
  *  (use with caution).</pre>
  * 
  * <!-- options-end -->
- * 
+ *
+ * @author Eibe Frank, University of Waikato
  * @version $Revision: 10382 $
  */
 public class FLDA extends AbstractClassifier {
@@ -202,7 +203,7 @@ public class FLDA extends AbstractClassifier {
     // Center data for each class
     Matrix[] data = getCenteredData(insts, classCounts, centroids);
 
-    // Computer scatter matrix and add ridge
+    // Compute scatter matrix and add ridge
     Matrix scatter = new UpperSymmDenseMatrix(data[0].numRows()).rank1(data[0]).
             add(new UpperSymmDenseMatrix(data[1].numRows()).rank1(data[1]));
     for (int i = 0; i < scatter.numColumns(); i++) {
@@ -247,7 +248,11 @@ public class FLDA extends AbstractClassifier {
     dist[0] = 1 - dist[1];
     return dist;
   }
-    
+
+  /**
+   * Outputs description of classifier as a string.
+   * @return the description
+   */
   public String toString() {
 
     if (m_Weights == null) {
