@@ -72,9 +72,16 @@ public class ArffHeaderSparkJob extends AbstractSparkJob {
     List<BufferedImage> charts =
       ((weka.distributed.spark.ArffHeaderSparkJob) m_runningJob)
         .getSummaryCharts();
+    List<String> attNames =
+      ((weka.distributed.spark.ArffHeaderSparkJob) m_runningJob)
+      .getSummaryChartAttNames();
+
     if (charts != null && charts.size() > 0) {
-      for (BufferedImage i : charts) {
-        Data imageData = new Data(StepManager.CON_IMAGE, i);
+      for (int i = 0; i < charts.size(); i++) {
+	BufferedImage image = charts.get(i);
+        Data imageData = new Data(StepManager.CON_IMAGE, image);
+	imageData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+				    attNames.get(i));
         getStepManager().outputData(imageData);
         try {
           Thread.sleep(10);

@@ -128,6 +128,9 @@ public class ArffHeaderSparkJob extends SparkJob implements
   protected List<BufferedImage> m_summaryCharts =
     new ArrayList<BufferedImage>();
 
+  /** Holds the names of the attributes in the summary charts */
+  protected List<String> m_summaryChartAttNames = new ArrayList<String>();
+
   /**
    * Constructor
    */
@@ -625,6 +628,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
             .attribute(i).name(), os, chartWidth, chartHeight);
         if (chart != null) {
           m_summaryCharts.add(chart);
+	  m_summaryChartAttNames.add(name);
         }
       } else {
         NumericAttributeBinData binStats =
@@ -640,6 +644,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
             chartWidth, chartHeight);
         if (chart != null) {
           m_summaryCharts.add(chart);
+	  m_summaryChartAttNames.add(name);
         }
       }
     }
@@ -652,6 +657,15 @@ public class ArffHeaderSparkJob extends SparkJob implements
    */
   public List<BufferedImage> getSummaryCharts() {
     return m_summaryCharts;
+  }
+
+  /**
+   * Get the names of the attributes in the summary charts
+   *
+   * @return the names of the attributes in the summary charts
+   */
+  public List<String> getSummaryChartAttNames() {
+    return m_summaryChartAttNames;
   }
 
   @Override
