@@ -24,7 +24,7 @@ An overview of the libraries used in Weka:
   URL: http://www.edankert.com/bounce/index.html
 
 - mtj.jar
-  Version: 1.0.4
+  Version: 1.0.4 (modified Matrix.java to extend Serializable)
   URL: https://github.com/fommil/matrix-toolkits-java
 
 - arpack_combined_all.jar
