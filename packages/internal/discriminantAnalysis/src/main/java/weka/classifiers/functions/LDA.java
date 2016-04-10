@@ -14,17 +14,15 @@
  */
 
 /*
- *    QDA.java
+ *    LDA.java
  *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
  *
  */
 package weka.classifiers.functions;
 
 import weka.classifiers.AbstractClassifier;
-
 import weka.core.*;
 import weka.core.Capabilities.Capability;
-
 import weka.estimators.MultivariateGaussianEstimator;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.RemoveUseless;
@@ -34,7 +32,7 @@ import java.util.Enumeration;
 
 /**
  * <!-- globalinfo-start -->
- * Generates a QDA. The covariance matrices are estimated using maximum likelihood from the per-class data.
+ * Generates an LDA model. The covariance matrix is estimated using maximum likelihood from the pooled data.
  * <p/>
  * <!-- globalinfo-end -->
  *
@@ -58,16 +56,22 @@ import java.util.Enumeration;
  * @author Eibe Frank, University of Waikato
  * @version $Revision: 10382 $
  */
-public class QDA extends AbstractClassifier implements WeightedInstancesHandler {
+public class LDA extends AbstractClassifier implements WeightedInstancesHandler {
   
   /** for serialization */
-  static final long serialVersionUID = -9113383498193689291L;
+  static final long serialVersionUID = -8213283598193689271L;
 
   /** Holds header of training date */
   protected Instances m_Data;
   
-  /** The per-class estimators */
-  protected MultivariateGaussianEstimator[] m_Estimators;
+  /** The pooled estimator */
+  protected MultivariateGaussianEstimator m_Estimator;
+
+  /** The per-class mean vectors */
+  protected double[][] m_Means;
+
+  /** The global mean */
+  protected double[] m_GlobalMean;
 
   /** The logs of the prior probabilities */
   protected double[] m_LogPriors;
@@ -82,7 +86,7 @@ public class QDA extends AbstractClassifier implements WeightedInstancesHandler 
    * Global info for this classifier.
    */
   public String globalInfo() {
-    return "Generates a QDA model. The covariance matrices are estimated using maximum likelihood from the per-class data.";
+    return "Generates an LDA model. The covariance matrix is estimated using maximum likelihood from the pooled data.";
   }
 
   /**
@@ -222,53 +226,53 @@ public class QDA extends AbstractClassifier implements WeightedInstancesHandler 
     insts = Filter.useFilter(insts, m_RemoveUseless);
     insts.deleteWithMissingClass();
 
-    // Establish class counts, etc.
-    int[] counts = new int[insts.numClasses()];
+    // Collect data into arrays and compute per-class mean vectors
     double[] sumOfWeightsPerClass = new double[insts.numClasses()];
+    m_Means = new double[insts.numClasses()][insts.numAttributes() - 1];
+    m_GlobalMean = new double[insts.numAttributes() - 1];
+    double sumOfWeights = 0;
+    double[][] data = new double[insts.numInstances()][insts.numAttributes() - 1];
+    double[] weights = new double[insts.numInstances()];
     for (int i = 0; i < insts.numInstances(); i++) {
       Instance inst = insts.instance(i);
+      weights[i] = inst.weight();
       int classIndex = (int) inst.classValue();
-      counts[classIndex]++;
-      sumOfWeightsPerClass[classIndex] += inst.weight();
-    }
-
-    // Collect relevant data into array
-    double[][][] data = new double[insts.numClasses()][][];
-    double[][] weights = new double[insts.numClasses()][];
-    for (int i = 0; i < insts.numClasses(); i++) {
-      data[i] = new double[counts[i]][insts.numAttributes() - 1];
-      weights[i] = new double[counts[i]];
-    }
-    int[] currentCount = new int[insts.numClasses()];
-    for (int i = 0; i < insts.numInstances(); i++) {
-      Instance inst = insts.instance(i);
-      int classIndex = (int) inst.classValue();
-      weights[classIndex][currentCount[classIndex]] = inst.weight();
+      sumOfWeightsPerClass[classIndex] += weights[i];
+      sumOfWeights += weights[i];
       int index = 0;
-      double[] row = data[classIndex][currentCount[classIndex]++];
-      for (int j = 0; j < inst.numAttributes(); j++) {
+      for (int j = 0; j < insts.numAttributes(); j++) {
         if (j != insts.classIndex()) {
-          row[index++] = inst.value(j);
+          double val = inst.value(j);
+          data[i][index] = val;
+          m_Means[classIndex][index] += weights[i] * val;
+          m_GlobalMean[index] += weights[i] * val;
+          index++;
         }
       }
     }
-
-    // Establish estimator for each class
-    m_Estimators = new MultivariateGaussianEstimator[insts.numClasses()];
     for (int i = 0; i < insts.numClasses(); i++) {
-      if (sumOfWeightsPerClass[i] > 0) {
-        m_Estimators[i] = new MultivariateGaussianEstimator();
-        m_Estimators[i].setRidge(getRidge());
-        m_Estimators[i].estimate(data[i], weights[i]);
+      for (int j = 0; j < m_Means[i].length; j++) {
+        if (sumOfWeightsPerClass[i] > 0) {
+          m_Means[i][j] /= sumOfWeightsPerClass[i];
+        }
       }
     }
+    for (int j = 0; j < m_GlobalMean.length; j++) {
+      m_GlobalMean[j] /= sumOfWeights;
+    }
+
+    // Compute pooled estimator
+    m_Estimator = new MultivariateGaussianEstimator();
+    m_Estimator.setRidge(getRidge());
+    m_Estimator.estimate(data, weights);
 
     // Establish prior probabilities for each class
     m_LogPriors = new double[insts.numClasses()];
-    double sumOfWeights = Utils.sum(sumOfWeightsPerClass);
     for (int i = 0; i < insts.numClasses(); i++) {
       if (sumOfWeightsPerClass[i] > 0) {
         m_LogPriors[i] = Math.log(sumOfWeightsPerClass[i]) - Math.log(sumOfWeights);
+      } else {
+        m_LogPriors[i] = Double.MAX_VALUE; // Can never be attained otherwise
       }
     }
 
@@ -286,17 +290,18 @@ public class QDA extends AbstractClassifier implements WeightedInstancesHandler 
     inst = m_RemoveUseless.output();
     
     // Convert instance to array
-    double[] values = new double[inst.numAttributes() - 1];
-    int index = 0;
-    for (int i = 0; i < m_Data.numAttributes(); i++) {
-      if (i != m_Data.classIndex()) {
-        values[index++] = inst.value(i);
-      }
-    }
     double[] posteriorProbs = new double[m_Data.numClasses()];
+    double[] values = new double[inst.numAttributes() - 1];
     for (int i = 0; i < m_Data.numClasses(); i++) {
-      if (m_Estimators[i] != null) {
-        posteriorProbs[i] = m_Estimators[i].logDensity(values) + m_LogPriors[i];
+      if (m_LogPriors[i] != Double.MAX_VALUE) {
+        int index = 0;
+        for (int j = 0; j < m_Data.numAttributes(); j++) {
+          if (j != m_Data.classIndex()) {
+            values[index] = inst.value(j) - m_Means[i][index] + m_GlobalMean[index];
+            index++;
+          }
+        }
+        posteriorProbs[i] = m_Estimator.logDensity(values) + m_LogPriors[i];
       } else {
         posteriorProbs[i] = -Double.MAX_VALUE;
       }
@@ -315,16 +320,26 @@ public class QDA extends AbstractClassifier implements WeightedInstancesHandler 
       return "No model has been built yet.";
     }
     StringBuffer result = new StringBuffer();
-    result.append("QDA model (multivariate Gaussian for each class)\n\n");
+    result.append("LDA model (multivariate Gaussian for each class)\n\n");
 
+    result.append("Pooled estimator\n\n" + m_Estimator + "\n\n");
     for (int i = 0; i < m_Data.numClasses(); i++) {
-      if (m_Estimators[i] != null) {
-        result.append("Estimates for class " + m_Data.classAttribute().value(i) + "\n\n");
+      if (m_LogPriors[i] != Double.MAX_VALUE) {
+        result.append("Estimates for class value " + m_Data.classAttribute().value(i) + "\n\n");
         result.append("Natural logarithm of class prior probability: " +
                 Utils.doubleToString(m_LogPriors[i], getNumDecimalPlaces()) + "\n");
         result.append("Class prior probability: " +
                 Utils.doubleToString(Math.exp(m_LogPriors[i]), getNumDecimalPlaces()) + "\n\n");
-        result.append("Multivariate Gaussian estimator:\n\n" + m_Estimators[i] + "\n");
+        int index = 0;
+        result.append("Mean vector:\n\n");
+        for (int j = 0; j < m_Data.numAttributes(); j++) {
+          if (j != m_Data.classIndex()) {
+            result.append(m_Data.attribute(index).name() + ": " +
+                    Utils.doubleToString(m_Means[i][index], getNumDecimalPlaces()) + "\n");
+            index++;
+          }
+        }
+        result.append("\n");
       }
     }
     return result.toString();
@@ -342,12 +357,12 @@ public class QDA extends AbstractClassifier implements WeightedInstancesHandler 
   }
   
   /**
-   * Generates an QDA classifier.
+   * Generates an LDA classifier.
    * 
    * @param argv the options
    */
   public static void main(String [] argv){  
-    runClassifier(new QDA(), argv);
+    runClassifier(new LDA(), argv);
   }
 }
 
