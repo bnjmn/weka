@@ -380,7 +380,7 @@
     <!-- non-jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7'"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9'"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -390,7 +390,7 @@
     <!-- non-jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -x64 true"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -x64 true"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -399,7 +399,7 @@
     <!-- jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer with JRE included"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -jre ${jre}"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -jre ${jre}"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -408,7 +408,7 @@
     <!-- jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer with JRE included"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-7 -link-prefix 'Weka 3.7' -x64 true -jre ${jre_64}"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -x64 true -jre ${jre_64}"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
