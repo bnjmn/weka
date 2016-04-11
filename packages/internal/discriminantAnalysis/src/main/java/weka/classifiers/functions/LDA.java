@@ -226,59 +226,55 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
     insts = Filter.useFilter(insts, m_RemoveUseless);
     insts.deleteWithMissingClass();
 
-    // Collect data into arrays and compute per-class mean vectors
+
+    // Establish class counts, etc.
+    int[] counts = new int[insts.numClasses()];
     double[] sumOfWeightsPerClass = new double[insts.numClasses()];
-    m_Means = new double[insts.numClasses()][insts.numAttributes() - 1];
-    m_GlobalMean = new double[insts.numAttributes() - 1];
-    double sumOfWeights = 0;
-    double[][] data = new double[insts.numInstances()][insts.numAttributes() - 1];
-    double[] weights = new double[insts.numInstances()];
     for (int i = 0; i < insts.numInstances(); i++) {
       Instance inst = insts.instance(i);
-      weights[i] = inst.weight();
       int classIndex = (int) inst.classValue();
-      sumOfWeightsPerClass[classIndex] += weights[i];
-      sumOfWeights += weights[i];
-      int index = 0;
-      for (int j = 0; j < insts.numAttributes(); j++) {
-        if (j != insts.classIndex()) {
-          double val = inst.value(j);
-          data[i][index] = val;
-          m_Means[classIndex][index] += weights[i] * val;
-          m_GlobalMean[index] += weights[i] * val;
-          index++;
-        }
-      }
-    }
-    for (int i = 0; i < insts.numClasses(); i++) {
-      for (int j = 0; j < m_Means[i].length; j++) {
-        if (sumOfWeightsPerClass[i] > 0) {
-          m_Means[i][j] /= sumOfWeightsPerClass[i];
-        }
-      }
-    }
-    for (int j = 0; j < m_GlobalMean.length; j++) {
-      m_GlobalMean[j] /= sumOfWeights;
+      counts[classIndex]++;
+      sumOfWeightsPerClass[classIndex] += inst.weight();
     }
 
-    // Compute pooled estimator
+    // Collect relevant data into array
+    double[][][] data = new double[insts.numClasses()][][];
+    double[][] weights = new double[insts.numClasses()][];
+    for (int i = 0; i < insts.numClasses(); i++) {
+      data[i] = new double[counts[i]][insts.numAttributes() - 1];
+      weights[i] = new double[counts[i]];
+    }
+    int[] currentCount = new int[insts.numClasses()];
+    for (int i = 0; i < insts.numInstances(); i++) {
+      Instance inst = insts.instance(i);
+      int classIndex = (int) inst.classValue();
+      weights[classIndex][currentCount[classIndex]] = inst.weight();
+      int index = 0;
+      double[] row = data[classIndex][currentCount[classIndex]++];
+      for (int j = 0; j < inst.numAttributes(); j++) {
+        if (j != insts.classIndex()) {
+          row[index++] = inst.value(j);
+        }
+      }
+    }
+
+    // Establish pooled estimator
     m_Estimator = new MultivariateGaussianEstimator();
     m_Estimator.setRidge(getRidge());
-    m_Estimator.estimate(data, weights);
+    m_Means = m_Estimator.estimatePooled(data, weights);
+    m_GlobalMean = m_Estimator.getMean();
 
     // Establish prior probabilities for each class
     m_LogPriors = new double[insts.numClasses()];
+    double sumOfWeights = Utils.sum(sumOfWeightsPerClass);
     for (int i = 0; i < insts.numClasses(); i++) {
       if (sumOfWeightsPerClass[i] > 0) {
         m_LogPriors[i] = Math.log(sumOfWeightsPerClass[i]) - Math.log(sumOfWeights);
-      } else {
-        m_LogPriors[i] = Double.MAX_VALUE; // Can never be attained otherwise
       }
     }
 
     // Store header only
-    m_Data = new Instances(insts, 0);
-  }   
+    m_Data = new Instances(insts, 0); }
     
   /**
    * Output class probabilities using Bayes' rule.
@@ -293,7 +289,7 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
     double[] posteriorProbs = new double[m_Data.numClasses()];
     double[] values = new double[inst.numAttributes() - 1];
     for (int i = 0; i < m_Data.numClasses(); i++) {
-      if (m_LogPriors[i] != Double.MAX_VALUE) {
+      if (m_Means[i] != null) {
         int index = 0;
         for (int j = 0; j < m_Data.numAttributes(); j++) {
           if (j != m_Data.classIndex()) {
@@ -324,7 +320,7 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
 
     result.append("Pooled estimator\n\n" + m_Estimator + "\n\n");
     for (int i = 0; i < m_Data.numClasses(); i++) {
-      if (m_LogPriors[i] != Double.MAX_VALUE) {
+      if (m_Means[i] != null) {
         result.append("Estimates for class value " + m_Data.classAttribute().value(i) + "\n\n");
         result.append("Natural logarithm of class prior probability: " +
                 Utils.doubleToString(m_LogPriors[i], getNumDecimalPlaces()) + "\n");
