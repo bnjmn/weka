@@ -4048,7 +4048,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText
       .append("-toggle <comma-separated list of evaluation metric names>\n");
     optionsText
-      .append("\tComma separated list of metric names not to toggle in the output.\n\t"
+      .append("\tComma separated list of metric names to toggle in the output.\n\t"
         + "All metrics are output by default with the exception of 'Coverage' and "
         + "'Region size'.\n\t");
     optionsText.append("Available metrics:\n\t");
