@@ -893,13 +893,6 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
         System.out.println(m_CommandHistory.get(i));
       }
       System.out.println();
-    } else if (commandArgs[0].equals("break")) {
-      if (m_RunThread == null) {
-        System.err.println("Nothing is currently running.");
-      } else {
-        System.out.println("[Interrupt...]");
-        m_RunThread.interrupt();
-      }
     } else if (commandArgs[0].equals("kill")) {
       if (m_RunThread == null) {
         System.err.println("Nothing is currently running.");
@@ -975,7 +968,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
       } else {
         // Print a help message
         System.out.println("Command must be one of:\n"
-          + "\tjava <classname> <args> [ > file]\n" + "\tbreak\n" + "\tkill\n"
+          + "\tjava <classname> <args> [ > file]\n" + "\tkill\n"
           + "\tcapabilities <classname> <args>\n" + "\tcls\n" + "\thistory\n"
           + "\texit\n" + "\thelp <command>\n");
       }
