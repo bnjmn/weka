@@ -141,6 +141,7 @@ public class Run {
       boolean noScan = false;
       boolean noLoad = false;
       boolean matchAnywhere = false;
+      boolean dontPromptIfMultipleMatches = false;
 
       if (Utils.getFlag("list-packages", args)) {
         weka.core.WekaPackageManager.loadPackages(true, true, false);
@@ -160,6 +161,11 @@ public class Run {
 
       if (Utils.getFlag("match-anywhere", args)) {
         matchAnywhere = true;
+        schemeIndex++;
+      }
+
+      if (Utils.getFlag("do-not-prompt-if-multiple-matches", args)) {
+        dontPromptIfMultipleMatches = true;
         schemeIndex++;
       }
 
@@ -189,6 +195,15 @@ public class Run {
           // System.exit(1);
           return;
         } else if (prunedMatches.size() > 1) {
+          if (dontPromptIfMultipleMatches) {
+            System.out.println("There are multiple matches:");
+            for (int i = 0; i < prunedMatches.size(); i++) {
+              System.out.println("\t" + (i + 1) + ") " + prunedMatches.get(i));
+            }
+            System.out.println("\nPlease make your scheme name more specific "
+              + "(i.e. qualify it with more of the package name).");
+            return;
+          }
           java.io.BufferedReader br = new java.io.BufferedReader(
             new java.io.InputStreamReader(System.in));
           boolean done = false;

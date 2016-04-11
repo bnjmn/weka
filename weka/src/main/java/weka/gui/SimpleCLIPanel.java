@@ -76,8 +76,8 @@ import java.util.Vector;
 @PerspectiveInfo(ID = "simplecli", title = "Simple CLI",
   toolTipText = "Simple CLI for Weka",
   iconPath = "weka/gui/weka_icon_new_small.png")
-public class SimpleCLIPanel extends ScriptingPanel
-  implements ActionListener, Perspective {
+public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
+  Perspective {
 
   /** for serialization. */
   private static final long serialVersionUID = 1089039734615114942L;
@@ -112,8 +112,8 @@ public class SimpleCLIPanel extends ScriptingPanel
           + "This file should be named \"" + PROPERTY_FILE + "\" and\n"
           + "should be placed either in your user home (which is set\n"
           + "to \"" + System.getProperties().getProperty("user.home") + "\")\n"
-          + "or the directory that java was started from\n",
-        "SimpleCLI", JOptionPane.ERROR_MESSAGE);
+          + "or the directory that java was started from\n", "SimpleCLI",
+        JOptionPane.ERROR_MESSAGE);
     }
   }
 
@@ -246,6 +246,9 @@ public class SimpleCLIPanel extends ScriptingPanel
     /** Stores the command line arguments to pass to the main method. */
     String[] m_CommandArgs;
 
+    /** True if the class to be executed is weka.Run */
+    protected boolean m_classIsRun;
+
     /**
      * Sets up the class runner thread.
      * 
@@ -256,9 +259,20 @@ public class SimpleCLIPanel extends ScriptingPanel
     public ClassRunner(Class<?> theClass, String[] commandArgs)
       throws Exception {
 
+      m_classIsRun = theClass == weka.Run.class;
+
       setDaemon(true);
       Class<?>[] argTemplate = { String[].class };
       m_CommandArgs = commandArgs;
+      if (m_classIsRun) {
+        if (!commandArgs[0].equalsIgnoreCase("-h")
+          && !commandArgs[0].equalsIgnoreCase("-help")) {
+          m_CommandArgs = new String[commandArgs.length + 1];
+          System
+            .arraycopy(commandArgs, 0, m_CommandArgs, 1, commandArgs.length);
+          m_CommandArgs[0] = "-do-not-prompt-if-multiple-matches";
+        }
+      }
       m_MainMethod = theClass.getMethod("main", argTemplate);
       if (((m_MainMethod.getModifiers() & Modifier.STATIC) == 0)
         || (m_MainMethod.getModifiers() & Modifier.PUBLIC) == 0) {
@@ -327,8 +341,8 @@ public class SimpleCLIPanel extends ScriptingPanel
         outNew.flush();
         outNew.close();
         System.setOut(outOld);
-        System.out
-          .println("Finished redirecting output to '" + outFilename + "'.");
+        System.out.println("Finished redirecting output to '" + outFilename
+          + "'.");
       }
     }
   }
@@ -548,9 +562,9 @@ public class SimpleCLIPanel extends ScriptingPanel
 
             if (match) {
               if (prefix != null) {
-                result
-                  .add(partial.substring(0, partial.length() - prefix.length())
-                    + name);
+                result.add(partial.substring(0,
+                  partial.length() - prefix.length())
+                  + name);
               } else {
                 if (partial.endsWith("\\") || partial.endsWith("/")) {
                   result.add(partial + name);
@@ -857,12 +871,12 @@ public class SimpleCLIPanel extends ScriptingPanel
             for (int i = 2; i < commandArgs.length; i++) {
               args.add(commandArgs[i]);
             }
-            ((OptionHandler) obj)
-              .setOptions(args.toArray(new String[args.size()]));
+            ((OptionHandler) obj).setOptions(args.toArray(new String[args
+              .size()]));
           }
           Capabilities caps = ((CapabilitiesHandler) obj).getCapabilities();
-          System.out
-            .println(caps.toString().replace("[", "\n").replace("]", "\n"));
+          System.out.println(caps.toString().replace("[", "\n")
+            .replace("]", "\n"));
         } else {
           System.out.println("'" + commandArgs[1] + "' is not a "
             + CapabilitiesHandler.class.getName() + "!");
@@ -917,8 +931,8 @@ public class SimpleCLIPanel extends ScriptingPanel
         if (frame instanceof JInternalFrame) {
           ((JInternalFrame) frame).doDefaultCloseAction();
         } else {
-          ((Window) frame).dispatchEvent(
-            new WindowEvent((Window) frame, WindowEvent.WINDOW_CLOSING));
+          ((Window) frame).dispatchEvent(new WindowEvent((Window) frame,
+            WindowEvent.WINDOW_CLOSING));
         }
       }
 
@@ -937,20 +951,21 @@ public class SimpleCLIPanel extends ScriptingPanel
           + "file to write to, e.g.:\n" + "  java some.Class > ."
           + File.separator + "some.txt");
       } else if (help && commandArgs[1].equals("break")) {
-        System.out.println(
-          "break\n\n" + "Attempts to nicely interrupt the running job, "
-            + "if any. If this doesn't respond in an\n"
-            + "acceptable time, use \"kill\".\n");
+        System.out.println("break\n\n"
+          + "Attempts to nicely interrupt the running job, "
+          + "if any. If this doesn't respond in an\n"
+          + "acceptable time, use \"kill\".\n");
       } else if (help && commandArgs[1].equals("kill")) {
-        System.out.println(
-          "kill\n\n" + "Kills the running job, if any. You should only "
-            + "use this if the job doesn't respond to\n" + "\"break\".\n");
+        System.out.println("kill\n\n"
+          + "Kills the running job, if any. You should only "
+          + "use this if the job doesn't respond to\n" + "\"break\".\n");
       } else if (help && commandArgs[1].equals("capabilities")) {
-        System.out.println("capabilities <classname> <args>\n\n"
-          + "Lists the capabilities of the specified class.\n"
-          + "If the class is a " + OptionHandler.class.getName() + " then\n"
-          + "trailing options after the classname will be\n"
-          + "set as well.\n");
+        System.out
+          .println("capabilities <classname> <args>\n\n"
+            + "Lists the capabilities of the specified class.\n"
+            + "If the class is a " + OptionHandler.class.getName() + " then\n"
+            + "trailing options after the classname will be\n"
+            + "set as well.\n");
       } else if (help && commandArgs[1].equals("cls")) {
         System.out.println("cls\n\n" + "Clears the output area.\n");
       } else if (help && commandArgs[1].equals("history")) {
@@ -959,10 +974,10 @@ public class SimpleCLIPanel extends ScriptingPanel
         System.out.println("exit\n\n" + "Exits the SimpleCLI program.\n");
       } else {
         // Print a help message
-        System.out.println(
-          "Command must be one of:\n" + "\tjava <classname> <args> [ > file]\n"
-            + "\tbreak\n" + "\tkill\n" + "\tcapabilities <classname> <args>\n"
-            + "\tcls\n" + "\thistory\n" + "\texit\n" + "\thelp <command>\n");
+        System.out.println("Command must be one of:\n"
+          + "\tjava <classname> <args> [ > file]\n" + "\tbreak\n" + "\tkill\n"
+          + "\tcapabilities <classname> <args>\n" + "\tcls\n" + "\thistory\n"
+          + "\texit\n" + "\thelp <command>\n");
       }
     }
   }
@@ -1043,8 +1058,8 @@ public class SimpleCLIPanel extends ScriptingPanel
                 String common = m_Completion.getCommonPrefix(list);
 
                 // just extending by separator is not a real extension
-                if ((search.toLowerCase() + File.separator)
-                  .equals(common.toLowerCase())) {
+                if ((search.toLowerCase() + File.separator).equals(common
+                  .toLowerCase())) {
                   common = search;
                 }
 
@@ -1193,8 +1208,9 @@ public class SimpleCLIPanel extends ScriptingPanel
     }
 
     try {
-      filename = System.getProperties().getProperty("user.home")
-        + File.separatorChar + FILENAME;
+      filename =
+        System.getProperties().getProperty("user.home") + File.separatorChar
+          + FILENAME;
       stream = new BufferedOutputStream(new FileOutputStream(filename));
       PROPERTIES.store(stream, "SimpleCLI");
       stream.close();
