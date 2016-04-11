@@ -226,6 +226,11 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
     insts = Filter.useFilter(insts, m_RemoveUseless);
     insts.deleteWithMissingClass();
 
+    if (insts.numInstances() == 0) {
+      m_Data = new Instances(insts, 0);
+      m_Means = new double[insts.numClasses()][];
+      return;
+    }
 
     // Establish class counts, etc.
     int[] counts = new int[insts.numClasses()];
@@ -312,7 +317,7 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
    */
   public String toString() {
 
-    if (m_LogPriors == null) {
+    if (m_Means == null) {
       return "No model has been built yet.";
     }
     StringBuffer result = new StringBuffer();
