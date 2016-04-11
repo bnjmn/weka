@@ -22,25 +22,26 @@ package weka.estimators;
 
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Matrix;
+import weka.core.Utils;
 
 import java.io.Serializable;
 
 /**
- * Implementation of Multivariate Distribution Estimation using Normal
+ * Implementation of maximum likelihood Multivariate Distribution Estimation using Normal
  * Distribution.
  * 
  * @author Uday Kamath, PhD, George Mason University
  * @author Eibe Frank, University of Waikato
  * @version $Revision$
- * 
+ *
  */
 public class MultivariateGaussianEstimator implements MultivariateEstimator, Serializable {
 
   /** Mean vector */
-  protected Vector mean;
+  protected DenseVector mean;
 
   /** Inverse of covariance matrix */
-  protected Matrix covarianceInverse;
+  protected UpperSPDDenseMatrix covarianceInverse;
 
   /** Factor to make density integrate to one (log of this factor) */
   protected double lnconstant;
@@ -66,8 +67,16 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
   }
 
   /**
+   * Returns the mean vector.
+   */
+  public double[] getMean() {
+
+    return mean.getData();
+  }
+
+  /**
    * Returns the log of the density value for the given vector.
-   * 
+   *
    * @param valuePassed input vector
    * @return log density based on given distribution
    */
@@ -103,8 +112,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
 
     // Compute inverse of covariance matrix
     DenseCholesky chol = new DenseCholesky(observations[0].length, true).factor((UpperSPDDenseMatrix)cov);
-    covarianceInverse = chol.solve(Matrices.identity(observations[0].length));
-    covarianceInverse = new UpperSPDDenseMatrix(covarianceInverse); // Convert from DenseMatrix
+    covarianceInverse = new UpperSPDDenseMatrix(chol.solve(Matrices.identity(observations[0].length)));
 
     double logDeterminant = 0;
     for (int i = 0; i < observations[0].length; i++) {
@@ -115,17 +123,77 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
   }
 
   /**
+   * Generates pooled estimator for linear discriminant analysis based on the given groups of
+   * observations and weight vectors. The pooled covariance matrix is the weighted mean
+   * of the per-group covariance matrices. The pooled mean vector is the mean vector for all observations.
+   *
+   * @return the per group mean vectors
+   */
+  public double[][] estimatePooled(double[][][] observations, double[][] weights) {
+
+    // Establish number of attributes and number of classes
+    int m = -1;
+    int c = observations.length;
+    for (int i = 0; i < observations.length; i++) {
+      if (observations[i].length > 0) {
+        m = observations[i][0].length;
+      }
+    }
+    if (m == -1) {
+      throw new IllegalArgumentException("Cannot compute pooled estimates with no data.");
+    }
+
+    // Compute per-group covariance matrices and mean vectors
+    Matrix[] groupCovariance = new Matrix[c];
+    DenseVector[] groupMean = new DenseVector[c];
+    double[] groupWeights = new double[c];
+    for (int i = 0; i < groupCovariance.length; i++) {
+      if (observations[i].length > 0) {
+        groupMean[i] = weightedMean(observations[i], weights[i]);
+        groupCovariance[i] = weightedCovariance(observations[i], weights[i], groupMean[i]);
+        groupWeights[i] = Utils.sum(weights[i]);
+      }
+    }
+    Utils.normalize(groupWeights);
+
+    // Pool covariance matrices and means
+    double[][] means = new double[c][];
+    Matrix cov = new UpperSPDDenseMatrix(m);
+    mean = new DenseVector(groupMean[0].size());
+    for (int i = 0; i < c; i++) {
+      if (observations[i].length > 0) {
+        cov = cov.add(groupWeights[i], groupCovariance[i]);
+        mean = (DenseVector) mean.add(groupWeights[i], groupMean[i]);
+        means[i] = groupMean[i].getData();
+      }
+    }
+
+    // Compute inverse of covariance matrix
+    DenseCholesky chol = new DenseCholesky(m, true).factor((UpperSPDDenseMatrix)cov);
+    covarianceInverse = new UpperSPDDenseMatrix(chol.solve(Matrices.identity(m)));
+
+    double logDeterminant = 0;
+    for (int i = 0; i < m; i++) {
+      logDeterminant += Math.log(chol.getU().get(i, i));
+    }
+    logDeterminant *= 2;
+    lnconstant = -(Log2PI * m + logDeterminant) * 0.5;
+
+    return means;
+  }
+
+  /**
    * Computes the mean vector
    * @param matrix the data (assumed to contain at least one row)
    * @param weights the observation weights
    * @return the weighted mean
    */
-  private Vector weightedMean(double[][] matrix, double[] weights) {
+  private DenseVector weightedMean(double[][] matrix, double[] weights) {
 
     int rows = matrix.length;
     int cols = matrix[0].length;
 
-    Vector mean = new DenseVector(cols);
+    DenseVector mean = new DenseVector(cols);
 
     // for each row
     double sumOfWeights = 0;
@@ -153,7 +221,7 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
    * @param mean The values' mean vector.
    * @return The covariance matrix.
    */
-  private Matrix weightedCovariance(double[][] matrix, double[] weights,  Vector mean) {
+  private UpperSPDDenseMatrix weightedCovariance(double[][] matrix, double[] weights,  Vector mean) {
 
     int rows = matrix.length;
     int cols = matrix[0].length;
@@ -227,7 +295,6 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
 
     MultivariateEstimator mv1 = new MultivariateGaussianEstimator();
     mv1.estimate(dataset1, new double[]{0.7, 0.2, 0.05, 0.05});
-    //mv1.estimate(dataset1, null);
 
     System.err.println(mv1);
 
@@ -259,7 +326,6 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
 
     MultivariateEstimator mv = new MultivariateGaussianEstimator();
     mv.estimate(dataset, new double[]{2, 0.2, 0.05, 0.05});
-    //mv.estimate(dataset, null);
 
     System.err.println(mv);
 
@@ -300,7 +366,6 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
 
     MultivariateEstimator mv3 = new MultivariateGaussianEstimator();
     mv3.estimate(dataset3, new double[]{1, 0.2, 0.05, 0.05, 1});
-    //mv3.estimate(dataset3, null);
 
     System.err.println(mv3);
 
@@ -320,5 +385,105 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
         }
       }
     }
-    System.err.println("Approximate integral: " + integral3); }
+    System.err.println("Approximate integral: " + integral3);
+
+    double[][][] dataset4 = new double[2][][];
+    dataset4[0] = new double[2][3];
+    dataset4[1] = new double[3][3];
+    dataset4[0][0][0] = 0.49;
+    dataset4[0][0][1] = 0.51;
+    dataset4[0][0][2] = 0.53;
+    dataset4[0][1][0] = 0.49;
+    dataset4[0][1][1] = 0.51;
+    dataset4[0][1][2] = 0.53;
+    dataset4[1][0][0] = 0.46;
+    dataset4[1][0][1] = 0.47;
+    dataset4[1][0][2] = 0.52;
+    dataset4[1][1][0] = 0.51;
+    dataset4[1][1][1] = 0.49;
+    dataset4[1][1][2] = 0.47;
+    dataset4[1][2][0] = 0.55;
+    dataset4[1][2][1] = 0.52;
+    dataset4[1][2][2] = 0.54;
+    double[][] weights = new double[2][];
+    weights[0] = new double[] {1, 3};
+    weights[1] = new double[] {2, 1, 1};
+
+    MultivariateGaussianEstimator mv4 = new MultivariateGaussianEstimator();
+    mv4.estimatePooled(dataset4, weights);
+
+    System.err.println(mv4);
+
+    double integral4 = 0;
+    int numVals4 = 200;
+    for (int i = 0; i < numVals4; i++) {
+      for (int j = 0; j < numVals4; j++) {
+        for (int k = 0; k < numVals4; k++) {
+          double[] point = new double[3];
+          point[0] = (i + 0.5) * (1.0 / numVals4);
+          point[1] = (j + 0.5) * (1.0 / numVals4);
+          point[2] = (k + 0.5) * (1.0 / numVals4);
+          double logdens = mv.logDensity(point);
+          if (!Double.isNaN(logdens)) {
+            integral4 += Math.exp(logdens) / (numVals4 * numVals4 * numVals4);
+          }
+        }
+      }
+    }
+    System.err.println("Approximate integral: " + integral4);
+
+    double[][][] dataset5 = new double[2][][];
+    dataset5[0] = new double[4][3];
+    dataset5[1] = new double[4][3];
+    dataset5[0][0][0] = 0.49;
+    dataset5[0][0][1] = 0.51;
+    dataset5[0][0][2] = 0.53;
+    dataset5[0][1][0] = 0.49;
+    dataset5[0][1][1] = 0.51;
+    dataset5[0][1][2] = 0.53;
+    dataset5[0][2][0] = 0.49;
+    dataset5[0][2][1] = 0.51;
+    dataset5[0][2][2] = 0.53;
+    dataset5[0][3][0] = 0.49;
+    dataset5[0][3][1] = 0.51;
+    dataset5[0][3][2] = 0.53;
+    dataset5[1][0][0] = 0.46;
+    dataset5[1][0][1] = 0.47;
+    dataset5[1][0][2] = 0.52;
+    dataset5[1][1][0] = 0.46;
+    dataset5[1][1][1] = 0.47;
+    dataset5[1][1][2] = 0.52;
+    dataset5[1][2][0] = 0.51;
+    dataset5[1][2][1] = 0.49;
+    dataset5[1][2][2] = 0.47;
+    dataset5[1][3][0] = 0.55;
+    dataset5[1][3][1] = 0.52;
+    dataset5[1][3][2] = 0.54;
+    double[][] weights2 = new double[2][];
+    weights2[0] = new double[] {1, 1, 1, 1};
+    weights2[1] = new double[] {1, 1, 1, 1};
+
+    MultivariateGaussianEstimator mv5 = new MultivariateGaussianEstimator();
+    mv5.estimatePooled(dataset5, weights2);
+
+    System.err.println(mv5);
+
+    double integral5 = 0;
+    int numVals5 = 200;
+    for (int i = 0; i < numVals5; i++) {
+      for (int j = 0; j < numVals5; j++) {
+        for (int k = 0; k < numVals5; k++) {
+          double[] point = new double[3];
+          point[0] = (i + 0.5) * (1.0 / numVals5);
+          point[1] = (j + 0.5) * (1.0 / numVals5);
+          point[2] = (k + 0.5) * (1.0 / numVals5);
+          double logdens = mv.logDensity(point);
+          if (!Double.isNaN(logdens)) {
+            integral5 += Math.exp(logdens) / (numVals5 * numVals5 * numVals5);
+          }
+        }
+      }
+    }
+    System.err.println("Approximate integral: " + integral5);
+  }
 }
