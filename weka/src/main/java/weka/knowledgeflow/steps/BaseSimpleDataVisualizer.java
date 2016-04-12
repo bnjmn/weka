@@ -39,8 +39,8 @@ import java.util.List;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public abstract class BaseSimpleDataVisualizer extends BaseStep
-  implements DataCollector {
+public abstract class BaseSimpleDataVisualizer extends BaseStep implements
+  DataCollector {
 
   private static final long serialVersionUID = 4955068920302509451L;
 
@@ -56,9 +56,10 @@ public abstract class BaseSimpleDataVisualizer extends BaseStep
    * Process incoming data
    *
    * @param data the data to process
+   * @throws WekaException if a problem occurs
    */
   @Override
-  public synchronized void processIncoming(Data data) {
+  public synchronized void processIncoming(Data data) throws WekaException {
     processIncoming(data, true);
   }
 
@@ -69,8 +70,8 @@ public abstract class BaseSimpleDataVisualizer extends BaseStep
    * @param notifyFinished true to notify the Knowledge Flow environment that we
    *          have finished processing
    */
-  protected synchronized void processIncoming(Data data,
-    boolean notifyFinished) {
+  protected synchronized void
+    processIncoming(Data data, boolean notifyFinished) {
     getStepManager().processing();
     Instances toPlot = data.getPrimaryPayload();
     String name = (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());

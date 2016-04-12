@@ -21,14 +21,15 @@
 
 package weka.knowledgeflow.steps;
 
-import weka.gui.knowledgeflow.StepVisual;
-import weka.knowledgeflow.Data;
-import weka.knowledgeflow.StepManager;
-
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+
+import weka.core.WekaException;
+import weka.gui.knowledgeflow.StepVisual;
+import weka.knowledgeflow.Data;
+import weka.knowledgeflow.StepManager;
 
 /**
  * Step for collecting and visualizing graph output from Drawable schemes.
@@ -79,12 +80,16 @@ public class GraphViewer extends BaseSimpleDataVisualizer {
    * @throws WekaException if a problem occurs
    */
   @Override
-  public void processIncoming(Data data) {
+  public void processIncoming(Data data) throws WekaException {
     getStepManager().processing();
     String graphTitle =
       data.getPayloadElement(StepManager.CON_AUX_DATA_GRAPH_TITLE);
     getStepManager().logDetailed(graphTitle);
     m_data.add(data);
+
+    Data textOut = new Data(StepManager.CON_TEXT, data.getPrimaryPayload());
+    textOut.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE, graphTitle);
+    getStepManager().outputData(textOut);
     getStepManager().finished();
   }
 
