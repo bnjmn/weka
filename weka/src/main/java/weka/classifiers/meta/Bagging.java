@@ -185,6 +185,15 @@ public class Bagging
   /** Whether to print individual ensemble members in output.*/
   private boolean m_printClassifiers;
 
+  /** Random number generator */
+  protected Random m_random;
+
+  /** Used to indicate whether an instance is in a bag or not */
+  protected boolean[][] m_inBag;
+
+  /** Reference to the training data */
+  protected Instances m_data;
+
   /**
    * Constructor.
    */
@@ -641,11 +650,7 @@ public class Bagging
 					     + " not supported (Bagging)");
     }
   }
-  
-  protected Random m_random;
-  protected boolean[][] m_inBag;
-  protected Instances m_data;
-  
+
   /**
    * Returns a training set for a particular iteration.
    * 
@@ -738,7 +743,6 @@ public class Bagging
       m_OutOfBagEvaluationObject = new Evaluation(m_data);
 
       for (int i = 0; i < m_data.numInstances(); i++) {
-        double vote;
         double[] votes;
         if (m_Numeric)
           votes = new double[1];
@@ -786,6 +790,7 @@ public class Bagging
     }
 
     // save memory
+    m_inBag = null;
     m_data = null;
   }
 
@@ -850,7 +855,7 @@ public class Bagging
         text.append(m_Classifiers[i].toString() + "\n\n");
     }
     if (m_CalcOutOfBag) {
-      text.append(m_OutOfBagEvaluationObject.toSummaryString("*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
+      text.append(m_OutOfBagEvaluationObject.toSummaryString("\n\n*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
     }
 
     return text.toString();
