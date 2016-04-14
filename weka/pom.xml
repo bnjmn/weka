@@ -328,7 +328,7 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.8.1</version>
         <configuration>
-          <maxmemory>256m</maxmemory>
+          <maxmemory>1000m</maxmemory>
           <subpackages>weka:org</subpackages>
           <show>public</show>
           <outputDirectory>${project.basedir}/doc</outputDirectory>
