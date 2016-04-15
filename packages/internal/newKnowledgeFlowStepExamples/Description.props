@@ -9,7 +9,7 @@ PackageName=newKnowledgeFlowStepExamples
 Version=1.0.0
 
 #Date
-Date=2016-03-22
+Date=2016-04-14
 
 # Title (required)
 Title=Example Step implementations for the new Knowledge Flow, as described in the Weka manual
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/newKnowledgeFlowStepExamples
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.14-SNAPSHOT)
+Depends=weka (>=3.8.0)
