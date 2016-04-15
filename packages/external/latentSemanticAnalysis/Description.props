@@ -9,7 +9,7 @@ PackageName=latentSemanticAnalysis
 Version=1.0.4
 
 #Date
-Date=2016-04-05
+Date=2016-04-14
 
 # Title (required)
 Title=Performs latent semantic analysis and transformation of the data
@@ -41,4 +41,4 @@ URL=http://weka.sourceforge.net/doc.packages/latentSemanticAnalysis
 Related=PCA
 
 # Dependencies
-Depends=weka (>=3.7.14-SNAPSHOT)
+Depends=weka (>=3.8.0)
