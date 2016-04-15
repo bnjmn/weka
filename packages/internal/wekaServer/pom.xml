@@ -95,7 +95,7 @@ Simple server for executing Weka tasks.
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.13,)</version>
+      <version>[3.9.0,)</version>
     </dependency>
 
     <dependency>
@@ -167,7 +167,7 @@ Simple server for executing Weka tasks.
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.13,)</version>
+      <version>[3.9.0,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

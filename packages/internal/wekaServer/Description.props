@@ -8,7 +8,7 @@ PackageName=wekaServer
 Version=1.0.5
 
 #Date (year-month-day)
-Date=2016-02-26
+Date=2016-04-14
 
 # Title (required)
 Title=Simple server for executing Weka tasks.
@@ -44,7 +44,7 @@ Changes=Added new Knowledge Flow implementation
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.14-SNAPSHOT)
+Depends=weka (>=3.8.0)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
