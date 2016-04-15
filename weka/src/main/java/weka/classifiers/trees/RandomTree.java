@@ -1017,7 +1017,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       int maxIndex = Utils.maxIndex(m_ClassDistribution);
       String classValue = m_Info.classAttribute().isNominal() ? m_Info
         .classAttribute().value(maxIndex) : Utils.doubleToString(
-        m_ClassDistribution[0], 2);
+        m_ClassDistribution[0], getNumDecimalPlaces());
 
       num++;
       if (m_Attribute == -1) {
@@ -1032,9 +1032,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             + m_Info.attribute(m_Attribute).name());
           if (m_Info.attribute(m_Attribute).isNumeric()) {
             if (i == 0) {
-              text.append(" < " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" < " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             } else {
-              text.append(" >= " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" >= " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             }
           } else {
             text.append(" = " + m_Info.attribute(m_Attribute).value(i));
@@ -1073,14 +1073,14 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       }
 
       if (m_Info.classAttribute().isNumeric()) {
-        return " : " + Utils.doubleToString(classMean, 2) + " ("
-          + Utils.doubleToString(m_Distribution[1], 2) + "/"
-          + Utils.doubleToString(avgError, 2) + ")";
+        return " : " + Utils.doubleToString(classMean, getNumDecimalPlaces()) + " ("
+          + Utils.doubleToString(m_Distribution[1], getNumDecimalPlaces()) + "/"
+          + Utils.doubleToString(avgError, getNumDecimalPlaces()) + ")";
       }
 
       return " : " + m_Info.classAttribute().value(maxIndex) + " ("
-        + Utils.doubleToString(sum, 2) + "/"
-        + Utils.doubleToString(sum - maxCount, 2) + ")";
+        + Utils.doubleToString(sum, getNumDecimalPlaces()) + "/"
+        + Utils.doubleToString(sum - maxCount, getNumDecimalPlaces()) + ")";
     }
 
     /**
@@ -1118,14 +1118,14 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             text.append("|   ");
           }
           text.append(m_Info.attribute(m_Attribute).name() + " < "
-            + Utils.doubleToString(m_SplitPoint, 2));
+            + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
           text.append(m_Successors[0].toString(level + 1));
           text.append("\n");
           for (int j = 0; j < level; j++) {
             text.append("|   ");
           }
           text.append(m_Info.attribute(m_Attribute).name() + " >= "
-            + Utils.doubleToString(m_SplitPoint, 2));
+            + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
           text.append(m_Successors[1].toString(level + 1));
         }
 
@@ -1917,9 +1917,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             + " [label=\"");
           if (m_Info.attribute(m_Attribute).isNumeric()) {
             if (i == 0) {
-              text.append(" < " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" < " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             } else {
-              text.append(" >= " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" >= " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             }
           } else {
             text.append(" = "
