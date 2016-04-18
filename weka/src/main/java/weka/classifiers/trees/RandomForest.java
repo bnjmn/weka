@@ -357,6 +357,38 @@ public class RandomForest extends Bagging {
   }
 
   /**
+   * Set debugging mode.
+   *
+   * @param debug true if debug output should be printed
+   */
+  public void setDebug(boolean debug) {
+
+    super.setDebug(debug);
+    ((RandomTree)getClassifier()).setDebug(debug);
+  }
+
+  /**
+   * Set the number of decimal places.
+   */
+  public void setNumDecimalPlaces(int num) {
+
+    super.setNumDecimalPlaces(num);
+    ((RandomTree)getClassifier()).setNumDecimalPlaces(num);
+  }
+
+  /**
+   * Set the preferred batch size for batch prediction.
+   *
+   * @param size the batch size to use
+   */
+  @Override
+  public void setBatchSize(String size) {
+
+    super.setBatchSize(size);
+    ((RandomTree)getClassifier()).setBatchSize(size);
+  }
+
+  /**
    * Returns description of the bagged classifier.
    *
    * @return description of the bagged classifier as a string
@@ -579,7 +611,8 @@ public class RandomForest extends Bagging {
     setDoNotCheckCapabilities(classifier.getDoNotCheckCapabilities());
     setSeed(classifier.getSeed());
     setDebug(classifier.getDebug());
-    setNumFeatures(classifier.getNumDecimalPlaces());
+    setNumDecimalPlaces(classifier.getNumDecimalPlaces());
+    setBatchSize(classifier.getBatchSize());
     classifier.setDoNotCheckCapabilities(true);
 
     // Set base classifier and options
