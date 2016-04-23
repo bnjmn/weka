@@ -84,13 +84,9 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
   public double logDensity(double[] valuePassed) {
 
     // calculate mean subtractions
-    Vector subtractedMean = new DenseVector(mean.size());
-    for (int i = 0; i < valuePassed.length; i++) {
-      subtractedMean.set(i, valuePassed[i] - mean.get(i));
-    }
+    Vector x = new DenseVector(valuePassed);
 
-    return lnconstant -
-            0.5 * subtractedMean.dot(covarianceInverse.mult(subtractedMean, new DenseVector(subtractedMean.size())));
+    return lnconstant - 0.5 * x.dot(covarianceInverse.mult(x.add(-1.0, mean), new DenseVector(x.size())));
   }
 
   /**
@@ -107,8 +103,11 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
       }
     }
 
-    mean = weightedMean(observations, weights);
-    Matrix cov = weightedCovariance(observations, weights, mean);
+    DenseVector weightVector = new DenseVector(weights);
+    weightVector = weightVector.scale(1.0 / weightVector.norm(Vector.Norm.One));
+
+    mean = weightedMean(observations, weightVector);
+    Matrix cov = weightedCovariance(observations, weightVector, mean);
 
     // Compute inverse of covariance matrix
     DenseCholesky chol = new DenseCholesky(observations[0].length, true).factor((UpperSPDDenseMatrix)cov);
@@ -149,8 +148,10 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
     double[] groupWeights = new double[c];
     for (int i = 0; i < groupCovariance.length; i++) {
       if (observations[i].length > 0) {
-        groupMean[i] = weightedMean(observations[i], weights[i]);
-        groupCovariance[i] = weightedCovariance(observations[i], weights[i], groupMean[i]);
+	DenseVector weightVector = new DenseVector(weights[i]);
+	weightVector = weightVector.scale(1.0 / weightVector.norm(Vector.Norm.One));
+        groupMean[i] = weightedMean(observations[i], weightVector);
+        groupCovariance[i] = weightedCovariance(observations[i], weightVector, groupMean[i]);
         groupWeights[i] = Utils.sum(weights[i]);
       }
     }
@@ -185,43 +186,23 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
   /**
    * Computes the mean vector
    * @param matrix the data (assumed to contain at least one row)
-   * @param weights the observation weights
+   * @param weights the observation weights, normalized to sum to 1.
    * @return the weighted mean
    */
-  private DenseVector weightedMean(double[][] matrix, double[] weights) {
+  private DenseVector weightedMean(double[][] matrix, DenseVector weights) {
 
-    int rows = matrix.length;
-    int cols = matrix[0].length;
-
-    DenseVector mean = new DenseVector(cols);
-
-    // for each row
-    double sumOfWeights = 0;
-    for (int i = 0; i < rows; i++) {
-      double[] row = matrix[i];
-      double w = weights[i];
-
-      // for each column
-      for (int j = 0; j < cols; j++) {
-        mean.add(j, row[j] * w);
-      }
-      sumOfWeights += w;
-    }
-
-    mean.scale(1.0 / sumOfWeights);
-
-    return mean;
+    return (DenseVector)new DenseMatrix(matrix).transMult(weights, new DenseVector(matrix[0].length));
   }
 
   /**
    * Computes the estimate of the covariance matrix.
    *
    * @param matrix A multi-dimensional array containing the matrix values (assumed to contain at least one row).
-   * @param weights The observation weights.
+   * @param weights The observation weights, normalized to sum to 1.
    * @param mean The values' mean vector.
-   * @return The covariance matrix.
+   * @return The covariance matrix, including the ridge.
    */
-  private UpperSPDDenseMatrix weightedCovariance(double[][] matrix, double[] weights,  Vector mean) {
+  private UpperSPDDenseMatrix weightedCovariance(double[][] matrix, DenseVector weights,  Vector mean) {
 
     int rows = matrix.length;
     int cols = matrix[0].length;
@@ -230,25 +211,20 @@ public class MultivariateGaussianEstimator implements MultivariateEstimator, Ser
       throw new IllegalArgumentException("Length of the mean vector must match matrix.");
     }
 
-    Matrix covT = new DenseMatrix(cols, cols);
-    for (int i = 0; i < cols; i++) {
-      for (int j = i; j < cols; j++) {
-        double s = 0.0;
-        double sumOfWeights = 0;
-        for (int k = 0; k < rows; k++) {
-          s += weights[k] * (matrix[k][j] - mean.get(j)) * (matrix[k][i] - mean.get(i));
-          sumOfWeights += weights[k];
-        }
-        s /= sumOfWeights;
-        covT.set(i, j, s);
-        covT.set(j, i, s);
-        if (i == j) {
-          covT.add(i, j, m_Ridge);
-        }
+    // Create matrix with centered transposed data, weighted appropriately
+    DenseMatrix transposed = new DenseMatrix(cols, rows);
+    for (int i = 0; i < rows; i++) {
+      for (int j = 0; j < cols; j++) {
+        transposed.set(j, i, Math.sqrt(weights.get(i)) * (matrix[i][j] - mean.get(j)));
       }
     }
 
-    return new UpperSPDDenseMatrix(covT);
+    UpperSPDDenseMatrix covT = (UpperSPDDenseMatrix) new UpperSPDDenseMatrix(cols).rank1(transposed);
+    for (int i = 0; i < cols; i++) {
+      covT.add(i, i, m_Ridge);
+    }
+
+    return covT;
   }
 
   /**
