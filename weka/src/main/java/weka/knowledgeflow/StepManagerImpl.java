@@ -118,9 +118,6 @@ public class StepManagerImpl implements StepManager {
    */
   protected BaseExecutionEnvironment m_executionEnvironment;
 
-  /** Holds Knowledge Flow settings */
-  protected Settings m_settings = new Settings("weka", KFDefaults.APP_ID);
-
   /** The log to use */
   protected LogManager m_log;
 
