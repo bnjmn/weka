@@ -204,6 +204,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   protected Hashtable<Class<?>, String> m_ClassnameOverride = null;
 
+  /** true to suppress warnings about loading newer/older versions etc. */
+  protected boolean m_suppressWarnings;
+
   /**
    * initializes the serialization
    * 
@@ -212,6 +215,15 @@ public class XMLSerialization implements RevisionHandler {
   public XMLSerialization() throws Exception {
     super();
     clear();
+  }
+
+  /**
+   * Set whether to suppress warning messages or not
+   *
+   * @param suppress true to suppress warnings
+   */
+  public void setSuppressWarnings(boolean suppress) {
+    m_suppressWarnings = suppress;
   }
 
   /**
@@ -287,6 +299,9 @@ public class XMLSerialization implements RevisionHandler {
    * release. If the version differ, a warning is printed.
    */
   private void checkVersion() {
+    if (m_suppressWarnings) {
+      return;
+    }
     String versionStr;
     Version version;
 

@@ -288,6 +288,7 @@ public class XMLFileBasedMetaStore implements MetaStore {
 
         }
       };
+      ser.setSuppressWarnings(true);
       return ser;
     } catch (Exception ex) {
       ex.printStackTrace();
