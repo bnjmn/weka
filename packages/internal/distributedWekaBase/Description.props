@@ -32,7 +32,7 @@ Description=Provides generic configuration classes and distributed map/reduce ty
 Changes=Updated for changes to RandomForest in 3.8/3.9
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/project/weka/distributedWekaBase1.0.13.zip
+PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.0.13.zip
 http://downloads.sourceforge.net/project/caar/CAAR.zip
 
 # URL for further information
