@@ -5,10 +5,10 @@
 PackageName=distributedWekaSpark
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date (year-month-day)
-Date=2016-04-14
+Date=2016-04-27
 
 # Title (required)
 Title=Spark wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3
 Description=Provides Spark wrappers for the classes in distributedWekaBase. Includes generic Spark 1.1.1 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${user.home}/wekafiles/distributedWekaSpark/lib and copy in the spark-assembly-A.B.C-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
 
 # Changes in this release
-Changes=Now includes new Knowledge Flow implementations
+Changes=Dependency on distributedWekaBase needed to be updated to 1.0.13
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaSpark1.0.3.zip?download
+PackageURL=http://downloads.sourceforge.net/weka/distributedWekaSpark1.0.4.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2015/03/weka-and-spark.html
@@ -44,7 +44,7 @@ URL=http://markahall.blogspot.co.nz/2015/03/weka-and-spark.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.8.0), distributedWekaBase (>=1.0.12)
+Depends=weka (>=3.8.0), distributedWekaBase (>=1.0.13)
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
