@@ -33,7 +33,6 @@ Changes=Updated for changes to RandomForest in 3.8/3.9
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.0.13.zip
-http://downloads.sourceforge.net/project/caar/CAAR.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
