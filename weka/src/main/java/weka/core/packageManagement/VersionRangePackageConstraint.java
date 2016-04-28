@@ -767,4 +767,17 @@ public class VersionRangePackageConstraint extends PackageConstraint {
         
     return null;
   }
+
+  @Override
+  public String toString() {
+    String result = m_thePackage.getPackageMetaDataElement("PackageName")
+      .toString()
+      + " ("
+      + m_lowerConstraint
+      + m_lowerBound + "|"
+      + m_upperConstraint
+      + m_upperBound
+      + ")";
+    return result;
+  }
 }

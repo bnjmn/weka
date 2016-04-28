@@ -355,6 +355,7 @@ public class DefaultPackage extends Package implements Serializable {
             baseConstraint.setRangeConstraint(split[2], comp1, split[4], comp2);
 
             baseDep = new Dependency(this, baseConstraint);
+            baseDeps.add(baseDep);
           }
         }
       }
