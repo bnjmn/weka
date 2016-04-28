@@ -120,10 +120,12 @@ public class SetupModePanel
    */
   public void switchToAdvanced(Experiment exp) {
     switchTo(m_advancedPanel, exp);
+    m_ComboBoxPanels.setSelectedItem(m_advancedPanel);
   }
 
   /**
-   * Switches to the specified panel.
+   * Switches to the specified panel. Switching from advanced panel to simple panel without conversion
+   * is not permitted by this method.
    *
    * @param panel the panel to switch to
    * @param exp the experiment to configure
@@ -132,11 +134,15 @@ public class SetupModePanel
     if (exp == null)
       exp = m_CurrentPanel.getExperiment();
 
+    if (exp != null) {
+      if (!panel.setExperiment(exp)) {
+        m_ComboBoxPanels.setSelectedItem(m_CurrentPanel);
+        return;
+      }
+    }
+
     remove(m_CurrentPanel);
     m_CurrentPanel.cleanUpAfterSwitch();
-
-    if (exp != null)
-      panel.setExperiment(exp);
     add(panel, BorderLayout.CENTER);
     validate();
     repaint();
