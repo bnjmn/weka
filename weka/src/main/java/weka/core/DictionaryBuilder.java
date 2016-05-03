@@ -1475,6 +1475,7 @@ public class DictionaryBuilder implements Aggregateable<DictionaryBuilder>,
         if (index >= indexOffset) {
           double[] val = e.getValue();
           String word = m_outputFormat.attribute(index).name();
+          word = word.substring(m_Prefix.length());
           int[] idxAndDocCount = m_consolidatedDict.get(word);
           if (idxAndDocCount == null) {
             throw new Exception("This should never occur");
