@@ -95,13 +95,13 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.6,)</version>
+      <version>[3.8.0,)</version>
     </dependency>
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.6,)</version>
+      <version>[3.8.0,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
