@@ -29,7 +29,7 @@ import java.util.Vector;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class ListOptions implements OptionHandler, RevisionHandler {
+public class ListOptions implements OptionHandler, RevisionHandler, CommandlineRunnable {
 
   /** the classname */
   protected String m_Classname = ListOptions.class.getName();
@@ -135,8 +135,8 @@ public class ListOptions implements OptionHandler, RevisionHandler {
     Option option;
 
     result = new StringBuffer();
-
-    handler = (OptionHandler) Class.forName(getClassname()).newInstance();
+    
+    handler = (OptionHandler) Utils.forName(null, getClassname(), new String[0]);
 
     enm = handler.listOptions();
     while (enm.hasMoreElements()) {
@@ -164,7 +164,24 @@ public class ListOptions implements OptionHandler, RevisionHandler {
    * @param options the commandline options
    */
   public static void main(String[] options) {
-    ListOptions list = new ListOptions();
+    try {
+      ListOptions lo = new ListOptions();
+      lo.run(lo, options);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  @Override public void preExecution() throws Exception {
+  }
+
+  @Override public void run(Object toRun, String[] options) throws Exception {
+    if (!(toRun instanceof ListOptions)) {
+      throw new IllegalArgumentException("Object to run is not an instance "
+        + "of ListOptions!");
+    }
+
+    ListOptions list = (ListOptions) toRun;
 
     try {
       try {
@@ -183,5 +200,8 @@ public class ListOptions implements OptionHandler, RevisionHandler {
     } catch (Exception ex) {
       System.err.println(ex.getMessage());
     }
+  }
+
+  @Override public void postExecution() throws Exception {
   }
 }
