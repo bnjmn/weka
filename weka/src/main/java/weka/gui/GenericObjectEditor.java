@@ -1097,6 +1097,15 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   public static void registerEditor(String name, String value) {
+
+    // skip (and don't try to instantiate) the ShowGlobalInfoToolTip
+    // property as a class; and any other non-class properties. Makes
+    // the assumption that anything that should be instantiated is not
+    // in the default package.
+    if (!name.contains(".")) {
+      return;
+    }
+
     Class<?> baseCls;
     Class<?> cls;
 
