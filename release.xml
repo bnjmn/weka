@@ -229,6 +229,7 @@
       <runtime dir="${env.JAVA_HOME}" />
       <classpath file="${temp}/weka-${release}/weka.jar"/>
       <option value="-Xmx1024M"/>
+      <option value="-Xss20M"/>
     </bundleapp>
 
     <antcall target="dmg_${os}">
@@ -252,7 +253,7 @@
                 icon="weka/src/main/java/weka/gui/weka_icon_new.icns"
                 version="${release}"
                 verbose="true"
-                VMOptions="-Xmx1Gb"
+                VMOptions="-Xmx1Gb -Xss20M"
                 shortname="Weka-${release}"
                 arguments=""
                 workingdirectory="/Users"
