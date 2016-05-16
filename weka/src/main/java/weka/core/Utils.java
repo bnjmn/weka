@@ -1019,7 +1019,8 @@ public final class Utils implements RevisionHandler {
       }
       boolean escape = false;
       for (int n = 0; n < element.length(); n++) {
-        if (Character.isWhitespace(element.charAt(n))) {
+        if (Character.isWhitespace(element.charAt(n))
+          || element.charAt(n) == '"' || element.charAt(n) == '\'') {
           escape = true;
           break;
         }
