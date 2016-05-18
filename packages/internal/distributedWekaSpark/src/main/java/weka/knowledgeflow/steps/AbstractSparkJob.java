@@ -209,7 +209,7 @@ public abstract class AbstractSparkJob extends BaseStep {
         try {
           m_sparkLogAppender = m_runningJob.initJob(null);
         } catch (Exception ex) {
-          ex.printStackTrace();
+          m_runningJob = null;
           throw new WekaException(ex);
         }
         m_currentContext = m_runningJob.getSparkContext();
