@@ -296,6 +296,10 @@ public class JSONFlowUtils {
           addOptionHandler(name, (OptionHandler) propValue, properties);
         } else if (propValue instanceof Enum) {
           addEnum(name, (Enum) propValue, properties);
+        } else if (propValue instanceof File) {
+          String fString = propValue.toString();
+          fString = fString.replace('\\', '/');
+          properties.addPrimitive(name, fString);
         } else {
           properties.addPrimitive(name, propValue.toString());
         }
