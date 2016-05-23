@@ -55,7 +55,7 @@ This assumes that the Weka archive that you have downloaded has been
 extracted into a directory containing this README and that you haven't
 used an automatic installer (e.g. the one provided for Windows).
 
-Weka 3.7 requires Java 1.6 or higher. Depending on your platform you
+Weka 3.9 requires Java 1.7 or higher. Depending on your platform you
 may be able to just double-click on the weka.jar icon to run the
 graphical user interfaces for Weka. Otherwise, from a command-line
 (assuming you are in the directory containing weka.jar), type
