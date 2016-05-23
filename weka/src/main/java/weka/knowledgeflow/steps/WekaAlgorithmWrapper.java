@@ -98,7 +98,6 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
     // get set first by the flow loading process before setWrappedAlgorithm()
     // is invoked
     Annotation stepA = this.getClass().getAnnotation(KFStep.class);
-//    System.err.println(((KFStep)stepA).name());
     if (getName() == null || getName().length() == 0
       || (stepA != null && getName().equals(((KFStep) stepA).name()))) {
       setName(name);
