@@ -26,10 +26,11 @@ import weka.gui.ProgrammaticProperty;
 import weka.gui.knowledgeflow.StepVisual;
 
 import java.io.Serializable;
+import java.lang.annotation.Annotation;
 
 /**
- * A step that wraps a class of standard Weka algorithm (e.g. filter, classifier,
- * clusterer etc.)
+ * A step that wraps a class of standard Weka algorithm (e.g. filter,
+ * classifier, clusterer etc.)
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
@@ -96,7 +97,10 @@ public abstract class WekaAlgorithmWrapper extends BaseStep implements
     // preserve the existing name if already set (i.e. the name property might
     // get set first by the flow loading process before setWrappedAlgorithm()
     // is invoked
-    if (getName() == null || getName().length() == 0) {
+    Annotation stepA = this.getClass().getAnnotation(KFStep.class);
+//    System.err.println(((KFStep)stepA).name());
+    if (getName() == null || getName().length() == 0
+      || (stepA != null && getName().equals(((KFStep) stepA).name()))) {
       setName(name);
     }
 
