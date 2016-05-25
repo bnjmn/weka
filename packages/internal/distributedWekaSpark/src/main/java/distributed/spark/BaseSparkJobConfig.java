@@ -118,6 +118,7 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
           if (u.toString().endsWith("weka.jar")) {
             File f = new File(u.toURI());
             DEFAULT_WEKA_JAR_PATH = f.toString();
+            break;
           }
         }
       }
