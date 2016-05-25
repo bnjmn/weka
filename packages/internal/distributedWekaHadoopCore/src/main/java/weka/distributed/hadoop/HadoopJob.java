@@ -124,6 +124,7 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
           if (u.toString().endsWith("weka.jar")) {
             File f = new File(u.toURI());
             DEFAULT_WEKA_JAR_PATH = f.toString();
+            break;
           }
         }
       }
