@@ -121,13 +121,7 @@ public class MultiClassFLDA extends SimpleBatchFilter {
     totalWeight[aI] = 0;
     for (Instance inst : data) {
       if (!inst.classIsMissing()) {
-        int index = 0;
-        for (int j = 0; j < inst.numAttributes(); j++) {
-          if (j != inst.classIndex()) {
-            meanVector.add(index, inst.weight() * inst.value(index));
-            index++;
-          }
-        }
+        meanVector.add(inst.weight(), instanceToVector(inst));
         totalWeight[aI] += inst.weight();
       }
     }
@@ -136,35 +130,18 @@ public class MultiClassFLDA extends SimpleBatchFilter {
   }
 
   /**
-   * Computes the covariance matrix for the given dataset.
+   * Turns an instance with a class into a vector without a class.
    */
-  protected Matrix computeCovarianceMatrix(Instances data, Vector mean) {
+  protected Vector instanceToVector(Instance inst) {
 
-    double[] totalWeight = new double[1];
-    Vector meanVector = computeMean(data, totalWeight, 0);
-    for (int i = 0; i < meanVector.size(); i++) {
-      mean.set(i, meanVector.get(i));
-    }
-    Matrix C = new UpperSymmDenseMatrix(meanVector.size());
-    for (Instance inst : data) {
-      if (!inst.classIsMissing()) {
-        int i1 = 0;
-        for (int i = 0; i < inst.numAttributes(); i++) {
-          if (i != inst.classIndex()) {
-            int i2 = 0;
-            for (int j = 0; j < inst.numAttributes(); j++) {
-              if (j != inst.classIndex()) {
-                C.add(i1, i2, inst.weight() *
-                        (inst.value(i) - meanVector.get(i1)) * (inst.value(j) - meanVector.get(i2)));
-                i2++;
-              }
-            }
-            i1++;
-          }
-        }
+    Vector v = new DenseVector(inst.numAttributes() - 1);
+    int index = 0;
+    for (int i = 0; i < inst.numAttributes(); i++) {
+      if (i != inst.classIndex()){
+        v.set(index++, inst.value(i));
       }
     }
-    return C;
+    return v;
   }
 
   /**
@@ -181,8 +158,8 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       int m = inputFormat.numAttributes() - 1;
 
       // Compute global covariance matrix
-      Vector globalMean = new DenseVector(m);
-      Matrix Cw = computeCovarianceMatrix(inputFormat, globalMean);
+      double[] totalWeight = new double[1];
+      Vector globalMean = computeMean(inputFormat, totalWeight, 0);
 
       // Compute subset for each class
       Instances[] subsets = new Instances[inputFormat.numClasses()];
@@ -202,12 +179,27 @@ public class MultiClassFLDA extends SimpleBatchFilter {
         perClassMeans[i] = computeMean(subsets[i], perClassWeights, i);
       }
 
+      // Compute within-class scatter matrix
+      Matrix Cw = new UpperSymmDenseMatrix(m);
+      for (Instance inst : inputFormat) {
+        if (!inst.classIsMissing()) {
+          Vector diff = instanceToVector(inst);
+          diff = diff.add(-1.0, perClassMeans[(int) inst.classValue()]);
+          Cw = Cw.rank1(inst.weight(), diff);
+        }
+      }
+
       // Compute between-class scatter matrix
       Matrix Cb = new UpperSymmDenseMatrix(m);
       for (int i = 0; i < inputFormat.numClasses(); i++) {
         Vector diff = perClassMeans[i].copy();
         diff = diff.add(-1.0, globalMean);
         Cb = Cb.rank1(perClassWeights[i], diff);
+      }
+
+      if (m_Debug) {
+        System.err.println("Within-class scatter matrix :\n" + Cw);
+        System.err.println("Between-class scatter matrix :\n" + Cb);
       }
 
       // Compute inverse of within-class scatter matrix
@@ -225,12 +217,28 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       for (int i = 0; i < evs.length; i++) {
         D.set(i, i, Math.sqrt(evs[i]));
       }
+
+      if (m_Debug) {
+        System.err.println("evdCb : \n" + evdCb);
+        System.err.println("Sqrt of eigenvalues of Cb : \n" + D);
+        System.err.println("evCb times evCbTransposed : \n" + evCb.mult(evCb.transpose(new DenseMatrix(m,m)), new DenseMatrix(m, m)));
+      }
+
       Matrix temp = evCb.mult(D, new UpperSymmDenseMatrix(evs.length));
       Matrix sqrtCb = temp.mult(evCb.transpose(), new UpperSymmDenseMatrix(evs.length));
 
+      if (m_Debug) {
+        System.err.println("sqrtCb : \n" + sqrtCb);
+        System.err.println("sqrtCb times sqrtCb : \n" + sqrtCb.mult(sqrtCb, new DenseMatrix(m, m)));
+      }
+
       // Compute symmetric matrix using square root
-      Matrix symmMatrix = sqrtCb.mult(CwInverse, new DenseMatrix(evs.length, evs.length)).
-              mult(sqrtCb, new UpperSymmDenseMatrix(evs.length));
+      temp =  sqrtCb.mult(CwInverse, new DenseMatrix(evs.length, evs.length));
+      Matrix symmMatrix = temp.mult(sqrtCb, new UpperSymmDenseMatrix(evs.length));
+
+      if (m_Debug) {
+        System.err.println("Symmetric version of Cw : \n" + sqrtCb);
+      }
 
       // Perform eigendecomposition on symmetric matrix
       SymmDenseEVD evd = SymmDenseEVD.factorize(symmMatrix);
@@ -242,8 +250,8 @@ public class MultiClassFLDA extends SimpleBatchFilter {
 
       // Only keep non-zero eigenvectors
       ArrayList<Integer> indices = new ArrayList<Integer>();
-      for (int i = 0; i < evs.length; i++) {
-        if (Utils.gr(evs[i], 0)) {
+      for (int i = 0; i < evd.getEigenvalues().length; i++) {
+        if (Utils.gr(evd.getEigenvalues()[i], 0)) {
           indices.add(i);
         }
       }
