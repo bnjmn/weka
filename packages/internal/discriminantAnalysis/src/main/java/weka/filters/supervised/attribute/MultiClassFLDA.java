@@ -157,7 +157,7 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       // Determine number of attributes
       int m = inputFormat.numAttributes() - 1;
 
-      // Compute global covariance matrix
+      // Compute global mean
       double[] totalWeight = new double[1];
       Vector globalMean = computeMean(inputFormat, totalWeight, 0);
 
@@ -202,50 +202,52 @@ public class MultiClassFLDA extends SimpleBatchFilter {
         System.err.println("Between-class scatter matrix :\n" + Cb);
       }
 
-      // Compute inverse of within-class scatter matrix
-      Matrix I = new UpperSymmDenseMatrix(m);
-      for (int i = 0; i < I.numRows(); i++) {
-        I.set(i, i, 1.0);
-      }
-      Matrix CwInverse = Cw.solve(I, new DenseMatrix(I));
+      // Compute square root of inverse within-class scatter matrix
+      SymmDenseEVD evdCw = SymmDenseEVD.factorize(Cw);
+      Matrix evCw = evdCw.getEigenvectors();
+      double[] evs = evdCw.getEigenvalues();
 
-      // Compute square root of between-class scatter matrix
-      SymmDenseEVD evdCb = SymmDenseEVD.factorize(Cb);
-      Matrix evCb = evdCb.getEigenvectors();
-      double[] evs = evdCb.getEigenvalues();
+      // Eigenvectors for Cw and its inverse are the same. Eigenvalues of inverse are reciprocal of evs of original.
       Matrix D = new UpperSymmDenseMatrix(evs.length);
       for (int i = 0; i < evs.length; i++) {
-        D.set(i, i, Math.sqrt(evs[i]));
+        if (Utils.gr(evs[i], 0)) {
+          D.set(i, i, 1.0 / Math.sqrt(evs[i]));
+        } else {
+          throw new IllegalArgumentException("Found non-positive eigenvalue of within-class scatter matrix.");
+        }
       }
 
       if (m_Debug) {
-        System.err.println("evdCb : \n" + evdCb);
-        System.err.println("Sqrt of eigenvalues of Cb : \n" + D);
-        System.err.println("evCb times evCbTransposed : \n" + evCb.mult(evCb.transpose(new DenseMatrix(m,m)), new DenseMatrix(m, m)));
+        System.err.println("evCw : \n" + evCw);
+        System.err.println("Sqrt of reciprocal of eigenvalues of Cw: \n" + D);
+        System.err.println("evCw times evCwTransposed : \n" + evCw.mult(evCw.transpose(new DenseMatrix(m,m)), new DenseMatrix(m, m)));
       }
 
-      Matrix temp = evCb.mult(D, new UpperSymmDenseMatrix(evs.length));
-      Matrix sqrtCb = temp.mult(evCb.transpose(), new UpperSymmDenseMatrix(evs.length));
+      Matrix temp = evCw.mult(D, new DenseMatrix(m, m));
+      Matrix sqrtCwInverse = temp.mult(evCw.transpose(), new UpperSymmDenseMatrix(m));
 
       if (m_Debug) {
-        System.err.println("sqrtCb : \n" + sqrtCb);
-        System.err.println("sqrtCb times sqrtCb : \n" + sqrtCb.mult(sqrtCb, new DenseMatrix(m, m)));
+        System.err.println("sqrtCwInverse : \n" + sqrtCwInverse);
+        System.err.println("sqrtCwInverse times sqrtCwInverse : \n" + sqrtCwInverse.mult(sqrtCwInverse, new DenseMatrix(m, m)));
+        DenseMatrix I = Matrices.identity(m);
+        DenseMatrix CwInverse = I.copy();
+        System.err.println("CwInverse : \n" + Cw.solve(I, CwInverse));
       }
 
       // Compute symmetric matrix using square root
-      temp =  sqrtCb.mult(CwInverse, new DenseMatrix(evs.length, evs.length));
-      Matrix symmMatrix = temp.mult(sqrtCb, new UpperSymmDenseMatrix(evs.length));
+      temp =  sqrtCwInverse.mult(Cb, new DenseMatrix(m, m));
+      Matrix symmMatrix = temp.mult(sqrtCwInverse, new UpperSymmDenseMatrix(m));
 
       if (m_Debug) {
-        System.err.println("Symmetric version of Cw : \n" + sqrtCb);
+        System.err.println("Symmetric matrix : \n" + symmMatrix);
       }
 
       // Perform eigendecomposition on symmetric matrix
       SymmDenseEVD evd = SymmDenseEVD.factorize(symmMatrix);
 
       if (m_Debug) {
-        System.err.println("Eigenvector matrix :\n" + evd.getEigenvectors());
-        System.err.println("Eigenvalues \n" + Utils.arrayToString(evd.getEigenvalues()));
+        System.err.println("Eigenvectors of symmetric matrix :\n" + evd.getEigenvectors());
+        System.err.println("Eigenvalues of symmetric matrix :\n" + Utils.arrayToString(evd.getEigenvalues()) + "\n");
       }
 
       // Only keep non-zero eigenvectors
@@ -265,8 +267,15 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       }
       Matrix reducedMatrix = Matrices.getSubMatrix(evd.getEigenvectors(), rows, cols);
 
+      if (m_Debug) {
+        System.err.println("Eigenvectors with eigenvalues > eps :\n" + reducedMatrix);
+        for (int i = 0; i < reducedMatrix.numColumns(); i++) {
+          System.err.println(symmMatrix.mult(Matrices.getColumn(reducedMatrix,i), new DenseVector(m)));
+        }
+      }
+
       // Compute weighting Matrix
-      m_WeightingMatrix = sqrtCb.solve(reducedMatrix, new DenseMatrix(rows.length, cols.length)).
+      m_WeightingMatrix = sqrtCwInverse.mult(reducedMatrix, new DenseMatrix(rows.length, cols.length)).
               transpose(new DenseMatrix(cols.length, rows.length));
 
       if (m_Debug) {
@@ -296,14 +305,7 @@ public class MultiClassFLDA extends SimpleBatchFilter {
 
       Instances transformed = getOutputFormat();
       for (Instance inst : instances) {
-        Vector n = new DenseVector(inst.numAttributes() - 1);
-        int index = 0;
-        for (int i = 0; i < inst.numAttributes(); i++) {
-          if (i != inst.classIndex()) {
-            n.set(index++, inst.value(i));
-          }
-        }
-        Vector newInst = m_WeightingMatrix.mult(n, new DenseVector(m_WeightingMatrix.numRows()));
+        Vector newInst = m_WeightingMatrix.mult(instanceToVector(inst), new DenseVector(m_WeightingMatrix.numRows()));
         double[] newVals = new double[m_WeightingMatrix.numRows() + 1];
         for (int i = 0; i < m_WeightingMatrix.numRows(); i++) {
           newVals[i] = newInst.get(i);
