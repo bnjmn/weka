@@ -140,6 +140,9 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   /** The GUI component for editing values, created when needed. */
   protected GOEPanel m_EditorComponent;
 
+  /** True if the cancel button was pressed */
+  protected boolean m_CancelWasPressed;
+
   /** True if the GUI component is needed. */
   protected boolean m_Enabled = true;
 
@@ -796,6 +799,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         public void actionPerformed(ActionEvent e) {
 
           m_ChildPropertySheet.closingOK();
+          m_CancelWasPressed = false;
           m_Backup = copyObject(m_Object);
           if ((getTopLevelAncestor() != null)
             && (getTopLevelAncestor() instanceof Window)) {
@@ -812,6 +816,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         public void actionPerformed(ActionEvent e) {
 
           m_ChildPropertySheet.closingCancel();
+          m_CancelWasPressed = true;
           if (m_Backup != null) {
 
             m_Object = copyObject(m_Backup);
@@ -1371,6 +1376,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
   }
 
+  public boolean wasCancelPressed() {
+    return m_CancelWasPressed;
+  }
+
   /**
    * Sets the current Object. If the Object is in the Object chooser, this
    * becomes the selected item (and added to the chooser if necessary).
@@ -1398,6 +1407,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
 
     updateObjectNames();
+    m_CancelWasPressed = false;
   }
 
   /**

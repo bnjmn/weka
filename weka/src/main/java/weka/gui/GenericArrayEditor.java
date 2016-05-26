@@ -21,6 +21,20 @@
 
 package weka.gui;
 
+import weka.core.SerializedObject;
+
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.ListCellRenderer;
+import javax.swing.SwingConstants;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -44,21 +58,6 @@ import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
 import java.beans.PropertyEditorManager;
 import java.lang.reflect.Array;
-
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
-import javax.swing.SwingConstants;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-
-import weka.core.SerializedObject;
 
 /**
  * A PropertyEditor for arrays of objects that themselves have property editors.
@@ -160,9 +159,12 @@ public class GenericArrayEditor implements PropertyEditor {
                 y);
             }
             m_PD.setVisible(true);
-            m_ListModel.set(m_ElementList.getSelectedIndex(),
-              m_Editor.getValue());
-            m_Support.firePropertyChange("", null, null);
+            if (!(m_Editor instanceof GenericObjectEditor)
+                    || (!((GenericObjectEditor)m_Editor).wasCancelPressed())) {
+              m_ListModel.set(m_ElementList.getSelectedIndex(),
+                      m_Editor.getValue());
+              m_Support.firePropertyChange("", null, null);
+            }
           }
         } else if (e.getSource() == m_UpBut) {
           JListHelper.moveUp(m_ElementList);
