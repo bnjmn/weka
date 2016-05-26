@@ -210,8 +210,8 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       // Eigenvectors for Cw and its inverse are the same. Eigenvalues of inverse are reciprocal of evs of original.
       Matrix D = new UpperSymmDenseMatrix(evs.length);
       for (int i = 0; i < evs.length; i++) {
-        if (Utils.gr(evs[i], 0)) {
-          D.set(i, i, 1.0 / Math.sqrt(evs[i]));
+        if (evs[i] > 0) {
+          D.set(i, i, Math.sqrt(1.0 / evs[i]));
         } else {
           throw new IllegalArgumentException("Found non-positive eigenvalue of within-class scatter matrix.");
         }
@@ -227,7 +227,13 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       Matrix sqrtCwInverse = temp.mult(evCw.transpose(), new UpperSymmDenseMatrix(m));
 
       if (m_Debug) {
-        System.err.println("sqrtCwInverse : \n" + sqrtCwInverse);
+        System.err.println("sqrtCwInverse : \n");
+        for (int i = 0; i < sqrtCwInverse.numRows(); i++) {
+          for (int j = 0; j < sqrtCwInverse.numColumns(); j++) {
+            System.err.print(sqrtCwInverse.get(i, j) + "\t");
+          }
+          System.err.println();
+        }
         System.err.println("sqrtCwInverse times sqrtCwInverse : \n" + sqrtCwInverse.mult(sqrtCwInverse, new DenseMatrix(m, m)));
         DenseMatrix I = Matrices.identity(m);
         DenseMatrix CwInverse = I.copy();
@@ -270,7 +276,7 @@ public class MultiClassFLDA extends SimpleBatchFilter {
       if (m_Debug) {
         System.err.println("Eigenvectors with eigenvalues > eps :\n" + reducedMatrix);
         for (int i = 0; i < reducedMatrix.numColumns(); i++) {
-          System.err.println(symmMatrix.mult(Matrices.getColumn(reducedMatrix,i), new DenseVector(m)));
+          System.err.println(symmMatrix.mult(Matrices.getColumn(reducedMatrix, i), new DenseVector(m)));
         }
       }
 
@@ -279,7 +285,13 @@ public class MultiClassFLDA extends SimpleBatchFilter {
               transpose(new DenseMatrix(cols.length, rows.length));
 
       if (m_Debug) {
-        System.err.println("Weighting matrix: \n" + m_WeightingMatrix);
+        System.err.println("Weighting matrix: \n");
+        for (int i = 0; i < m_WeightingMatrix.numRows(); i++) {
+          for (int j = 0; j < m_WeightingMatrix.numColumns(); j++) {
+            System.err.print(m_WeightingMatrix.get(i, j) + "\t");
+          }
+          System.err.println();
+        }
       }
 
       // Construct header for output format
