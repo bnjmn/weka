@@ -1376,6 +1376,12 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     }
   }
 
+  /**
+   * True if the cancel button was used to close the editor.
+   *
+   * @return true if the cancel button was pressed the last time the
+   * editor was closed
+   */
   public boolean wasCancelPressed() {
     return m_CancelWasPressed;
   }
