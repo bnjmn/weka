@@ -474,10 +474,6 @@ public class LinearRegression extends AbstractClassifier implements
     newVector.addElement(new Option("\tDo not try to eliminate colinear"
       + " attributes.\n", "C", 0, "-C"));
 
-    newVector.addElement(new Option("\tSet the attribute selection method"
-      + " to use. 1 = None, 2 = Greedy.\n" + "\t(default 0 = M5' method)", "S",
-      1, "-S <number of selection method>"));
-
     newVector.addElement(new Option(
       "\tSet ridge parameter (default 1.0e-8).\n", "R", 1, "-R <double>"));
 
