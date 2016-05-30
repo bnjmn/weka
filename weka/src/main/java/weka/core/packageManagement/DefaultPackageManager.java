@@ -1282,6 +1282,8 @@ public class DefaultPackageManager extends PackageManager {
             new File(m_packageHome.toString(), INSTALLED_PACKAGE_CACHE_FILE))));
 
         installedP = (List) ois.readObject();
+      } catch (Exception ex) {
+        deleteInstalledPackageCacheFile();
       } finally {
         if (ois != null) {
           ois.close();
