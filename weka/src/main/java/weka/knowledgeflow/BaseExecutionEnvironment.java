@@ -240,13 +240,24 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   }
 
   /**
+   * Gets a new instance of the default flow executor suitable for
+   * use with this execution environment
+   *
+   * @return a new instance of the default flow executor suitable
+   * for use with this execution environment
+   */
+  public FlowExecutor getDefaultFlowExecutor() {
+    return new FlowRunner();
+  }
+
+  /**
    * Get the executor that will actually be responsible for running the flow.
    * This is not guaranteed to be available from this execution environment
    * until the flow is actually running (or at least initialized)
    * 
    * @return the executor that will be running the flow
    */
-  protected FlowExecutor getFlowExecutor() {
+  public FlowExecutor getFlowExecutor() {
     return m_flowExecutor;
   }
 
@@ -257,7 +268,7 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
    * 
    * @param executor the executor that will be running the flow
    */
-  protected void setFlowExecutor(FlowExecutor executor) {
+  public void setFlowExecutor(FlowExecutor executor) {
     m_flowExecutor = executor;
   }
 

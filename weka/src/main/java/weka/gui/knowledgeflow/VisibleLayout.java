@@ -23,8 +23,11 @@ package weka.gui.knowledgeflow;
 
 import weka.core.Copyright;
 import weka.core.Environment;
+import weka.core.PluginManager;
+import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.beans.LogPanel;
+import weka.knowledgeflow.BaseExecutionEnvironment;
 import weka.knowledgeflow.ExecutionFinishedCallback;
 import weka.knowledgeflow.Flow;
 import weka.knowledgeflow.FlowExecutor;
@@ -732,14 +735,32 @@ public class VisibleLayout extends JPanel {
     if (isExecuting()) {
       throw new WekaException("The flow is already executing!");
     }
+    Settings appSettings = m_mainPerspective.getMainApplication().getApplicationSettings();
     if (m_flowExecutor == null) {
-      m_flowExecutor =
-        new FlowRunner(m_mainPerspective.getMainApplication()
-          .getApplicationSettings());
+      String execName =
+        appSettings.getSetting(KFDefaults.APP_ID,
+          KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
+          KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV);
+      BaseExecutionEnvironment execE = null;
+      try {
+        execE =
+          (BaseExecutionEnvironment) PluginManager.getPluginInstance(
+            BaseExecutionEnvironment.class.getCanonicalName(), execName);
+      } catch (Exception ex) {
+        // drop through
+      }
+      if (execE == null) {
+        execE = new BaseExecutionEnvironment();
+      }
+      m_flowExecutor = execE.getDefaultFlowExecutor();
+
+      /*
+       * m_flowExecutor = new FlowRunner(m_mainPerspective.getMainApplication()
+       * .getApplicationSettings());
+       */
       m_flowExecutor.setLogger(m_logPanel);
     }
-    m_flowExecutor.setSettings(m_mainPerspective.getMainApplication()
-      .getApplicationSettings());
+    m_flowExecutor.setSettings(appSettings);
     m_mainPerspective.getMainToolBar().disableWidgets(
       MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
       MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());

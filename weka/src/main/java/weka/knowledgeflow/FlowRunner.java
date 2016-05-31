@@ -52,8 +52,7 @@ public class FlowRunner implements FlowExecutor {
   protected Flow m_flow;
 
   /** The execution environment */
-  protected transient BaseExecutionEnvironment m_execEnv =
-    new BaseExecutionEnvironment();
+  protected transient BaseExecutionEnvironment m_execEnv;
 
   /** The log to use */
   protected transient Logger m_log = new SimpleLogger();
@@ -104,6 +103,9 @@ public class FlowRunner implements FlowExecutor {
     // TODO probably need some command line options to override settings for
     // logging, execution environment etc.
 
+    // force the base execution environment class to be loaded so that it
+    // registers itself with the plugin manager
+    new BaseExecutionEnvironment();
     String execName =
       settings.getSetting(KFDefaults.APP_ID,
         KnowledgeFlowApp.KnowledgeFlowGeneralDefaults.EXECUTION_ENV_KEY,
@@ -119,9 +121,10 @@ public class FlowRunner implements FlowExecutor {
 
     if (execE != null) {
       m_execEnv = execE;
+    } else {
+      // default execution environment is headless
+      m_execEnv = new BaseExecutionEnvironment();
     }
-    // default execution environment is headless
-    m_execEnv = new BaseExecutionEnvironment();
     m_execEnv.setHeadless(true);
     m_execEnv.setFlowExecutor(this);
     m_execEnv.setLog(m_log);
