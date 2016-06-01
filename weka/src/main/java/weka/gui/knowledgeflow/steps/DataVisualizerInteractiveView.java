@@ -175,6 +175,7 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
         }
       });
 
+    m_visPanel.setPreferredSize(new Dimension(800, 600));
     m_splitPane =
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_history, m_visPanel);
 
@@ -208,7 +209,7 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
         }
       }
 
-      m_visPanel.setPreferredSize(new Dimension(800, 600));
+      applySettings(getSettings());
     }
 
     m_clearButton.addActionListener(new ActionListener() {
@@ -243,5 +244,6 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
   @Override
   public void applySettings(Settings settings) {
     m_visPanel.applySettings(settings, ID);
+    m_visPanel.repaint();
   }
 }
