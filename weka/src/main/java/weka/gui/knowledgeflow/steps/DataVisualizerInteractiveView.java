@@ -21,11 +21,14 @@
 
 package weka.gui.knowledgeflow.steps;
 
+import weka.core.Defaults;
+import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.knowledgeflow.BaseInteractiveViewer;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
+import weka.gui.visualize.VisualizeUtils;
 import weka.knowledgeflow.steps.DataVisualizer;
 
 import javax.swing.*;
@@ -60,6 +63,10 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
 
   /** Curent plot data */
   protected PlotData2D m_currentPlot;
+
+  /** ID used for identifying settings */
+  protected static final String ID =
+    "weka.gui.knowledgeflow.steps.DataVisualizerInteractiveView";
 
   /**
    * Get the name of this viewer
@@ -212,5 +219,29 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
         m_splitPane.remove(m_visPanel);
       }
     });
+  }
+
+  /**
+   * Get default settings for this viewer
+   *
+   * @return the default settings of this viewer
+   */
+  @Override
+  public Defaults getDefaultSettings() {
+    Defaults d = new VisualizeUtils.VisualizeDefaults();
+    d.setID(ID);
+
+    return d;
+  }
+
+  /**
+   * Apply any user changes in the supplied settings object
+   *
+   * @param settings the settings object that might (or might not) have been
+   *          altered by the user
+   */
+  @Override
+  public void applySettings(Settings settings) {
+    m_visPanel.applySettings(settings, ID);
   }
 }
