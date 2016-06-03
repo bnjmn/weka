@@ -264,8 +264,9 @@ public class MultiClassFLDA extends SimpleBatchFilter {
         }
       }
       int[] cols = new int[indices.size()];
-      for (int i = 0; i < indices.size(); i++) {
-        cols[i] = indices.get(i);
+      int index = 0;
+      for (int i = indices.size() - 1; i >= 0; i--) {
+        cols[index++] = indices.get(i);
       }
       int[] rows = new int[evd.getEigenvectors().numRows()];
       for (int i = 0; i < rows.length; i++) {
@@ -275,14 +276,14 @@ public class MultiClassFLDA extends SimpleBatchFilter {
 
       if (m_Debug) {
         System.err.println("Eigenvectors with eigenvalues > eps :\n" + reducedMatrix);
-        for (int i = 0; i < reducedMatrix.numColumns(); i++) {
-          System.err.println(symmMatrix.mult(Matrices.getColumn(reducedMatrix, i), new DenseVector(m)));
-        }
       }
 
       // Compute weighting Matrix
       m_WeightingMatrix = sqrtCwInverse.mult(reducedMatrix, new DenseMatrix(rows.length, cols.length)).
               transpose(new DenseMatrix(cols.length, rows.length));
+
+      // Note: we do not scale the matrix so that the new attributes have (unbiased) variance 1, like R's lda does.
+      // In our case, the sum of squares is 1. Also, R's lda always centers the data.
 
       if (m_Debug) {
         System.err.println("Weighting matrix: \n");
