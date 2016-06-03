@@ -22,6 +22,8 @@
 package weka.filters.supervised.attribute;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
 
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Matrix;
@@ -30,41 +32,32 @@ import weka.filters.SimpleBatchFilter;
 
 /**
  <!-- globalinfo-start -->
- * Implements multi-class LDA for dimensionality reduction.
+ * Implements Fisher's linear discriminant analysis for dimensionality reduction. Note that this implementation
+ * adds the value of the ridge parameter to the diagonal of the pooled within-class scatter matrix.
  <!-- globalinfo-end -->
  *
  <!-- options-start -->
- * Valid options are: <p>
+ * Valid options are: <p/>
  *
- * <pre> -output-debug-info
- *  If set, filter is run in debug mode and
- *  may output additional info to the console</pre>
- * 
- * <pre> -do-not-check-capabilities
- *  If set, filter capabilities are not checked before filter is built
- *  (use with caution).</pre>
- * 
+ * <pre> -R
+ *  The ridge parameter to add to the diagonal of the pooled within-class scatter matrix.
+ *  (default is 1e-6)</pre>
+ *
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 12341 $
  */
-public class MultiClassFLDA extends SimpleBatchFilter {
+public class MultiClassFLDA extends SimpleBatchFilter implements OptionHandler {
 
-  /**
-   * for serialization
-   */
-  static final long serialVersionUID = -251536442147283133L;
+  /** for serialization */
+  static final long serialVersionUID = -291536442147283133L;
 
-  /**
-   * Constant to avoid division by zero.
-   */
-  public static double SMALL = 1e-6;
-
-  /**
-   * Stores the weighting matrix.
-   */
+  /** Stores the weighting matrix. */
   protected Matrix m_WeightingMatrix;
+
+  /** Ridge parameter */
+  protected double m_Ridge = 1e-6;
 
   /**
    * Returns the Capabilities of this filter.
@@ -97,7 +90,103 @@ public class MultiClassFLDA extends SimpleBatchFilter {
    */
   @Override
   public String globalInfo() {
-    return "Implements multi-class LDA for dimensionality reduction.";
+
+    return "Implements Fisher's linear discriminant analysis for dimensionality reduction. Note that this implementation " +
+            "adds the value of the ridge parameter to the diagonal of the pooled within-class scatter matrix.";
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String ridgeTipText() {
+
+    return "The ridge parameter to add to the diagonal of the pooled within-class scatter matrix.";
+  }
+
+  /**
+   * Get the value of Ridge.
+   *
+   * @return Value of Ridge.
+   */
+  public double getRidge() {
+
+    return m_Ridge;
+  }
+
+  /**
+   * Set the value of Ridge.
+   *
+   * @param newRidge Value to assign to Ridge.
+   */
+  public void setRidge(double newRidge) {
+
+    m_Ridge = newRidge;
+  }
+
+  /**
+   * Returns an enumeration describing the available options.
+   *
+   * @return an enumeration of all the available options.
+   */
+  public Enumeration<Option> listOptions() {
+
+    java.util.Vector<Option> newVector = new java.util.Vector<Option>(7);
+
+    newVector.addElement(new Option(
+            "\tThe ridge parameter to add to the diagonal of the pooled within-class scatter matrix.\n"+
+                    "\t(default is 1e-6)",
+            "R", 0, "-R"));
+
+    newVector.addAll(Collections.list(super.listOptions()));
+
+    return newVector.elements();
+  }
+
+  /**
+   * Parses a given list of options. <p/>
+   *
+   * <!-- options-start -->
+   * Valid options are: <p/>
+   *
+   * <pre> -R
+   *  The ridge parameter to add to the diagonal of the pooled within-class scatter matrix.
+   *  (default is 1e-6)</pre>
+  *
+   * <!-- options-end -->
+   *
+   * @param options the list of options as an array of strings
+   * @throws Exception if an option is not supported
+   */
+  public void setOptions(String[] options) throws Exception {
+
+    String ridgeString = Utils.getOption('R', options);
+    if (ridgeString.length() != 0) {
+      setRidge(Double.parseDouble(ridgeString));
+    } else {
+      setRidge(1e-6);
+    }
+
+    super.setOptions(options);
+
+    Utils.checkForRemainingOptions(options);
+  }
+
+  /**
+   * Gets the current settings of IBk.
+   *
+   * @return an array of strings suitable for passing to setOptions()
+   */
+  public String [] getOptions() {
+
+    java.util.Vector<String> options = new java.util.Vector<String>();
+    options.add("-R"); options.add("" + getRidge());
+
+    Collections.addAll(options, super.getOptions());
+
+    return options.toArray(new String[0]);
   }
 
   /**
@@ -189,6 +278,10 @@ public class MultiClassFLDA extends SimpleBatchFilter {
         }
       }
 
+      // Add ridge to pooled within-class scatter matrix
+      for (int i = 0; i < Cw.numColumns(); i++) {
+        Cw.add(i, i, m_Ridge);
+      }
       // Compute between-class scatter matrix
       Matrix Cb = new UpperSymmDenseMatrix(m);
       for (int i = 0; i < inputFormat.numClasses(); i++) {
@@ -278,12 +371,15 @@ public class MultiClassFLDA extends SimpleBatchFilter {
         System.err.println("Eigenvectors with eigenvalues > eps :\n" + reducedMatrix);
       }
 
+      //
       // Compute weighting Matrix
+      //
+      // Note: we do not scale the matrix so that the new attributes have (unbiased) variance 1, like R's lda does.
+      // In our case, the *scatter matrix* of the new data is I (if no regularization is used).
+      // Also, R's lda always centers the data.
+      //
       m_WeightingMatrix = sqrtCwInverse.mult(reducedMatrix, new DenseMatrix(rows.length, cols.length)).
               transpose(new DenseMatrix(cols.length, rows.length));
-
-      // Note: we do not scale the matrix so that the new attributes have (unbiased) variance 1, like R's lda does.
-      // In our case, the sum of squares is 1. Also, R's lda always centers the data.
 
       if (m_Debug) {
         System.err.println("Weighting matrix: \n");

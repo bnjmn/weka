@@ -6,10 +6,10 @@
 PackageName=discriminantAnalysis
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2016-04-14
+Date=2016-06-03
 
 # Title (required)
 Title= Classes for linear and quadratic discriminant analysis
@@ -26,12 +26,13 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Contains Fisher's linear discriminant analysis (LDA), LDA, and quadratic discriminant analysis (QDA).
+Description=Contains Fisher's linear discriminant analysis (FLDA), LDA, and quadratic discriminant analysis (QDA) as
+classifiers. Also has a filter that implements Fisher's FLDA for dimensionality reduction.
 
-Changes=Now includes LDA and QDA and uses MTJ instead of JAMA for matrix calculations.
+Changes=Now also includes a filter to perform dimensionality reduction using Fisher's FLDA.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/discriminantAnalysis1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/discriminantAnalysis1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/discriminantAnalysis
