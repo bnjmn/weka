@@ -48,7 +48,7 @@ import weka.filters.SimpleBatchFilter;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 12341 $
  */
-public class MultiClassFLDA extends SimpleBatchFilter implements OptionHandler {
+public class MultiClassFLDA extends SimpleBatchFilter implements OptionHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -291536442147283133L;
