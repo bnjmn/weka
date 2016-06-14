@@ -34,9 +34,26 @@ import weka.knowledgeflow.StepManagerImpl;
 import weka.knowledgeflow.steps.Loader;
 import weka.knowledgeflow.steps.Note;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -270,7 +287,9 @@ public class LayoutPanel extends PrintablePanel {
             v.setDisplayConnectors(false);
           }
 
-          if (step != null) {
+          if (step != null
+            && step.getStepManager() != m_visLayout.getEditStep()
+              .getStepManager()) {
             // connection is valid because only valid connections will
             // have appeared in the contextual popup
 
