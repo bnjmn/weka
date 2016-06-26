@@ -199,7 +199,9 @@ public class Saver extends WekaAlgorithmWrapper implements Serializable {
       if (!m_isDBSaver) {
         saver.setDirAndPrefix(fileName, additional);
       } else {
-        ((DatabaseSaver) saver).setTableName(fileName);
+        if (((DatabaseSaver)saver).getRelationForTableName()) {
+          ((DatabaseSaver) saver).setTableName(fileName);
+        }
         ((DatabaseSaver) saver).setRelationForTableName(false);
         String setName = ((DatabaseSaver) saver).getTableName();
         setName =
