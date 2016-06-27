@@ -794,7 +794,7 @@ public class InputMappedClassifier extends SingleClassifierEnhancer implements
     return m_attributeMap[m_modelHeader.classIndex()];
   }
 
-  public Instance constructMappedInstance(Instance incoming) throws Exception {
+  public synchronized Instance constructMappedInstance(Instance incoming) throws Exception {
 
     boolean regenerateMapping = false;
 
