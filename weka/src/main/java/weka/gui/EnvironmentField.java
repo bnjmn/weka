@@ -21,6 +21,18 @@
 
 package weka.gui;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+
+import javax.swing.BorderFactory;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -36,20 +48,6 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyEditor;
 import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.ComboBoxModel;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.gui.CustomPanelSupplier;
 
 /**
  * Widget that displays a label and a combo box for selecting environment
@@ -191,12 +189,12 @@ public class EnvironmentField extends JPanel implements EnvironmentHandler,
           }
         });
 
-      m_combo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
+      /* m_combo.getEditor().getEditorComponent().addKeyListener(new KeyAdapter() {
         @Override
         public void keyReleased(KeyEvent e) {
           m_support.firePropertyChange("", null, null);
         }
-      });
+      }); */
 
       ((JTextField) m_combo.getEditor().getEditorComponent())
         .addFocusListener(new FocusAdapter() {
