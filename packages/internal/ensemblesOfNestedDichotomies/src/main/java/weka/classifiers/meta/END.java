@@ -15,7 +15,7 @@
 
 /*
  *    END.java
- *    Copyright (C) 2004-2005 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2004-2016 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -54,17 +54,7 @@ import weka.core.Utils;
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
- * 
- * <pre>
- * &#64;inproceedings{Dong2005,
- *    author = {Lin Dong and Eibe Frank and Stefan Kramer},
- *    booktitle = {PKDD},
- *    pages = {84-95},
- *    publisher = {Springer},
- *    title = {Ensembles of Balanced Nested Dichotomies for Multi-class Problems},
- *    year = {2005}
- * }
- * 
+ *
  * &#64;inproceedings{Frank2004,
  *    author = {Eibe Frank and Stefan Kramer},
  *    booktitle = {Twenty-first International Conference on Machine Learning},
@@ -248,14 +238,6 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
     TechnicalInformation additional;
 
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Lin Dong and Eibe Frank and Stefan Kramer");
-    result.setValue(Field.TITLE,
-      "Ensembles of Balanced Nested Dichotomies for Multi-class Problems");
-    result.setValue(Field.BOOKTITLE, "PKDD");
-    result.setValue(Field.YEAR, "2005");
-    result.setValue(Field.PAGES, "84-95");
-    result.setValue(Field.PUBLISHER, "Springer");
-
     additional = result.add(Type.INPROCEEDINGS);
     additional.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
     additional.setValue(Field.TITLE,
@@ -303,10 +285,11 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
 
     if (!(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ND)
       && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ClassBalancedND)
-      && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.DataNearBalancedND)) {
+      && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.DataNearBalancedND)
+            && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.FurthestCentroidND)
+            && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.RandomPairND)) {
       throw new IllegalArgumentException(
-        "END only works with ND, ClassBalancedND "
-          + "or DataNearBalancedND classifier");
+        "END only works with base classifiers in the nestedDichotomies package!");
     }
 
     m_hashtable = new Hashtable<String, Classifier>();
@@ -316,6 +299,7 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
 
     Random random = data.getRandomNumberGenerator(m_Seed);
     for (Classifier m_Classifier2 : m_Classifiers) {
+
 
       // Set the random number seed for the current classifier.
       ((Randomizable) m_Classifier2).setSeed(random.nextInt());
@@ -330,6 +314,12 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
       } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.DataNearBalancedND) {
         ((weka.classifiers.meta.nestedDichotomies.DataNearBalancedND) m_Classifier2)
           .setHashtable(m_hashtable);
+      } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.FurthestCentroidND) {
+        ((weka.classifiers.meta.nestedDichotomies.FurthestCentroidND) m_Classifier2)
+                .setHashtable(m_hashtable);
+      } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.RandomPairND) {
+        ((weka.classifiers.meta.nestedDichotomies.RandomPairND) m_Classifier2)
+                .setHashtable(m_hashtable);
       }
 
       // Build the classifier.
