@@ -45,7 +45,7 @@ public class FurthestCentroidNDTest
   }
 
   public static Test suite() {
-    return new TestSuite(FurthestCentroidND.class);
+    return new TestSuite(FurthestCentroidNDTest.class);
   }
 
   public static void main(String[] args){

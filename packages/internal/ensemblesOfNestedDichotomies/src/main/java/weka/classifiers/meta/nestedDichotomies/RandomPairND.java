@@ -100,7 +100,7 @@ import java.util.*;
  * <pre>
  * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.Logistic)
+ *  (default: weka.classifiers.trees.J48)
  * </pre>
  *
  * <!-- options-end -->
@@ -139,7 +139,7 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
    */
   public RandomPairND() {
 
-    m_Classifier = new weka.classifiers.functions.Logistic();
+    m_Classifier = new weka.classifiers.trees.J48();
   }
 
   /**
@@ -149,7 +149,7 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
    */
   @Override
   protected String defaultClassifierString() {
-    return "weka.classifiers.functions.Logistic";
+    return "weka.classifiers.trees.J48";
   }
 
   /**
@@ -253,6 +253,7 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
 
       // train a classifier with filtered data
       FilteredClassifier initialClassifier = new FilteredClassifier();
+      initialClassifier.setDoNotCheckForModifiedClassAttribute(true);
       initialClassifier.setFilter(multiFilter);
       initialClassifier.setClassifier(AbstractClassifier.makeCopy(classifier));
 
@@ -320,6 +321,7 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
     filter.setNumeric(false);
     filter.setInputFormat(data);
     m_FilteredClassifier = new FilteredClassifier();
+    m_FilteredClassifier.setDoNotCheckForModifiedClassAttribute(true);
     if (data.numInstances() > 0) {
       m_FilteredClassifier.setClassifier(AbstractClassifier.makeCopies(
         classifier, 1)[0]);
@@ -554,6 +556,15 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
     Collections.addAll(options, super.getOptions());
 
     return options.toArray(new String[0]);
+  }
+
+  /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String subsamplePercentTipText() {
+    return "The percentage of data to use at each node.";
   }
 
   public void setSubsamplePercent(double percent) {

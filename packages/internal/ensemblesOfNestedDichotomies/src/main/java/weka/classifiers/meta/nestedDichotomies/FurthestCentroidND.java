@@ -95,7 +95,7 @@ import java.util.*;
  * <pre>
  * -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.functions.Logistic)
+ *  (default: weka.classifiers.trees.J48)
  * </pre>
  *
  * <!-- options-end -->
@@ -136,7 +136,7 @@ public class FurthestCentroidND extends RandomizableSingleClassifierEnhancer
    */
   public FurthestCentroidND() {
 
-    m_Classifier = new weka.classifiers.functions.Logistic();
+    m_Classifier = new weka.classifiers.trees.J48();
   }
 
   public FurthestCentroidND(double[][] centroids) {
@@ -151,7 +151,7 @@ public class FurthestCentroidND extends RandomizableSingleClassifierEnhancer
    */
   @Override
   protected String defaultClassifierString() {
-    return "weka.classifiers.functions.Logistic";
+    return "weka.classifiers.trees.J48";
   }
 
   /**
@@ -407,6 +407,7 @@ public class FurthestCentroidND extends RandomizableSingleClassifierEnhancer
     filter.setNumeric(false);
     filter.setInputFormat(data);
     m_FilteredClassifier = new FilteredClassifier();
+    m_FilteredClassifier.setDoNotCheckForModifiedClassAttribute(true);
     if (data.numInstances() > 0) {
       m_FilteredClassifier.setClassifier(AbstractClassifier.makeCopies(
         classifier, 1)[0]);
