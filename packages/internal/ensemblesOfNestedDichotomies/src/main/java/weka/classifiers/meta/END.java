@@ -286,7 +286,6 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
     if (!(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ND)
       && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.ClassBalancedND)
       && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.DataNearBalancedND)
-            && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.FurthestCentroidND)
             && !(m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.RandomPairND)) {
       throw new IllegalArgumentException(
         "END only works with base classifiers in the nestedDichotomies package!");
@@ -314,9 +313,6 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
       } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.DataNearBalancedND) {
         ((weka.classifiers.meta.nestedDichotomies.DataNearBalancedND) m_Classifier2)
           .setHashtable(m_hashtable);
-      } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.FurthestCentroidND) {
-        ((weka.classifiers.meta.nestedDichotomies.FurthestCentroidND) m_Classifier2)
-                .setHashtable(m_hashtable);
       } else if (m_Classifier instanceof weka.classifiers.meta.nestedDichotomies.RandomPairND) {
         ((weka.classifiers.meta.nestedDichotomies.RandomPairND) m_Classifier2)
                 .setHashtable(m_hashtable);
