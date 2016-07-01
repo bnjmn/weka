@@ -282,10 +282,11 @@ public class PredictionAppender extends BaseStep {
           StepManager.CON_TRAININGSET) > 0) {
         for (int i = 0; i < newTrainInstances.numInstances(); i++) {
           if (clusterLabel) {
-            predictLabelClusterer(clusterer, newTrainInstances.instance(i));
+            predictLabelClusterer(clusterer, newTrainInstances.instance(i),
+              trainingData.instance(i));
           } else {
             predictProbabilitiesClusterer((DensityBasedClusterer) clusterer,
-              newTrainInstances.instance(i));
+              newTrainInstances.instance(i), trainingData.instance(i));
           }
         }
 
@@ -309,10 +310,11 @@ public class PredictionAppender extends BaseStep {
 
         for (int i = 0; i < newTestInstances.numInstances(); i++) {
           if (clusterLabel) {
-            predictLabelClusterer(clusterer, newTestInstances.instance(i));
+            predictLabelClusterer(clusterer, newTestInstances.instance(i),
+              testData.instance(i));
           } else {
             predictProbabilitiesClusterer((DensityBasedClusterer) clusterer,
-              newTestInstances.instance(i));
+              newTestInstances.instance(i), testData.instance(i));
           }
         }
 
@@ -387,10 +389,11 @@ public class PredictionAppender extends BaseStep {
           StepManager.CON_TRAININGSET) > 0) {
         for (int i = 0; i < newTrainInstances.numInstances(); i++) {
           if (labelOrNumeric) {
-            predictLabelClassifier(classifier, newTrainInstances.instance(i));
+            predictLabelClassifier(classifier, newTrainInstances.instance(i),
+              trainingData.instance(i));
           } else {
             predictProbabilitiesClassifier(classifier,
-              newTrainInstances.instance(i));
+              newTrainInstances.instance(i), trainingData.instance(i));
           }
         }
         if (isStopRequested()) {
@@ -411,10 +414,11 @@ public class PredictionAppender extends BaseStep {
           .numOutgoingConnectionsOfType(StepManager.CON_DATASET) > 0)) {
         for (int i = 0; i < newTestInstances.numInstances(); i++) {
           if (labelOrNumeric) {
-            predictLabelClassifier(classifier, newTestInstances.instance(i));
+            predictLabelClassifier(classifier, newTestInstances.instance(i),
+              testData.instance(i));
           } else {
             predictProbabilitiesClassifier(classifier,
-              newTestInstances.instance(i));
+              newTestInstances.instance(i), testData.instance(i));
           }
         }
         if (isStopRequested()) {
@@ -450,13 +454,14 @@ public class PredictionAppender extends BaseStep {
    * Add a cluster label to an instance using a clusterer
    *
    * @param clusterer the clusterer to use
-   * @param inst the instance to predict
+   * @param inst the instance to append a prediction to
+   * @param instOrig the original instance
    * @throws WekaException if a problem occurs
    */
   protected void predictLabelClusterer(weka.clusterers.Clusterer clusterer,
-    Instance inst) throws WekaException {
+    Instance inst, Instance instOrig) throws WekaException {
     try {
-      int cluster = clusterer.clusterInstance(inst);
+      int cluster = clusterer.clusterInstance(instOrig);
       inst.setValue(inst.numAttributes() - 1, (double) cluster);
     } catch (Exception ex) {
       throw new WekaException(ex);
@@ -468,13 +473,14 @@ public class PredictionAppender extends BaseStep {
    * DensityBasedClusterer
    *
    * @param clusterer the clusterer to use
-   * @param inst the instance to predict
+   * @param inst the instance to append a prediction to
+   * @param instOrig the original instance
    * @throws WekaException if a problem occurs
    */
   protected void predictProbabilitiesClusterer(DensityBasedClusterer clusterer,
-    Instance inst) throws WekaException {
+    Instance inst, Instance instOrig) throws WekaException {
     try {
-      double[] preds = clusterer.distributionForInstance(inst);
+      double[] preds = clusterer.distributionForInstance(instOrig);
       for (int i = 0; i < preds.length; i++) {
         inst.setValue(inst.numAttributes() - preds.length + i, preds[i]);
       }
@@ -487,14 +493,15 @@ public class PredictionAppender extends BaseStep {
    * Add a label to an instance using a classifier
    *
    * @param classifier the classifier to use
-   * @param inst the instance to predict
+   * @param inst the instance to append prediction to
+   * @param instOrig the original instance
    * @throws WekaException if a problem occurs
    */
   protected void predictLabelClassifier(weka.classifiers.Classifier classifier,
-    Instance inst) throws WekaException {
+    Instance inst, Instance instOrig) throws WekaException {
 
     try {
-      double pred = classifier.classifyInstance(inst);
+      double pred = classifier.classifyInstance(instOrig);
       inst.setValue(inst.numAttributes() - 1, pred);
     } catch (Exception ex) {
       throw new WekaException(ex);
@@ -505,13 +512,15 @@ public class PredictionAppender extends BaseStep {
    * Add a distribution over class labels to an instance using a classifier
    *
    * @param classifier the classifier to use
-   * @param inst the instance to predict
+   * @param inst the instance to append prediction to
+   * @param instOrig the original instance
    * @throws WekaException if a problem occurs
    */
   protected void predictProbabilitiesClassifier(
-    weka.classifiers.Classifier classifier, Instance inst) throws WekaException {
+    weka.classifiers.Classifier classifier, Instance inst, Instance instOrig)
+    throws WekaException {
     try {
-      double[] preds = classifier.distributionForInstance(inst);
+      double[] preds = classifier.distributionForInstance(instOrig);
       for (int i = 0; i < preds.length; i++) {
         inst.setValue(inst.numAttributes() - preds.length + i, preds[i]);
       }
@@ -620,7 +629,8 @@ public class PredictionAppender extends BaseStep {
   }
 
   /**
-   * Set whether to append probability distributions rather than predicted classes
+   * Set whether to append probability distributions rather than predicted
+   * classes
    *
    * @param append true to append probability distributions
    */
@@ -629,7 +639,8 @@ public class PredictionAppender extends BaseStep {
   }
 
   /**
-   * Get whether to append probability distributions rather than predicted classes
+   * Get whether to append probability distributions rather than predicted
+   * classes
    *
    * @return true if probability distributions are to be appended
    */
