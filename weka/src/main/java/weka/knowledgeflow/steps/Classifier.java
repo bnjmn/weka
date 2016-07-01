@@ -377,6 +377,9 @@ public class Classifier extends WekaAlgorithmWrapper implements
     PairedDataHelper<weka.classifiers.Classifier> helper) throws WekaException {
 
     Instances trainingData = data.getPrimaryPayload();
+    if (m_trainedClassifierHeader == null) {
+      m_trainedClassifierHeader = new Instances(trainingData, 0);
+    }
     try {
       weka.classifiers.Classifier classifier =
         AbstractClassifier.makeCopy(m_classifierTemplate);
