@@ -196,8 +196,7 @@ public class ArffPanel extends JPanel implements ActionListener,
     menuItemOptimalColWidth.addActionListener(this);
     menuItemOptimalColWidths = new JMenuItem("Optimal column width (all)");
     menuItemOptimalColWidths.addActionListener(this);
-    menuItemInsertInstance =
-      new JMenuItem("Insert new instance");
+    menuItemInsertInstance = new JMenuItem("Insert new instance");
 
     // row popup
     menuItemUndo = new JMenuItem("Undo");
@@ -707,6 +706,7 @@ public class ArffPanel extends JPanel implements ActionListener,
         && model.isMissingAt(i, m_CurrentCol)) {
         model.setValueAt(value, i, m_CurrentCol);
       } else if ((o == menuItemReplaceValues)
+        && model.getValueAt(i, m_CurrentCol) != null
         && model.getValueAt(i, m_CurrentCol).toString().equals(value)) {
         if (valueNewCopy.equals("NaN") || valueNewCopy.equals("?")) {
           valueNew = null;
@@ -867,8 +867,8 @@ public class ArffPanel extends JPanel implements ActionListener,
   }
 
   /**
-   * Add an instance at the currently selected index. If no instance is
-   * selected then adds a new instance at the end of the dataset.
+   * Add an instance at the currently selected index. If no instance is selected
+   * then adds a new instance at the end of the dataset.
    */
   public void addInstance() {
     int index = m_TableArff.getSelectedRow();
