@@ -335,6 +335,14 @@ public class Classifier extends WekaAlgorithmWrapper implements
                 : "Predicting incrementally");
         } else if (data.getConnectionName().equals(StepManager.CON_TRAININGSET)) {
           m_trainedClassifierHeader = incomingStructure;
+        } else if (data.getConnectionName().equals(StepManager.CON_TESTSET)
+          && getStepManager().numIncomingConnectionsOfType(
+            StepManager.CON_TRAININGSET) == 0
+          && m_classifierTemplate instanceof InputMappedClassifier) {
+          m_trainedClassifier =
+            weka.classifiers.AbstractClassifier.makeCopy(m_classifierTemplate);
+          // force the InputMappedClassifier to load a model (if one has been configured)
+          ((InputMappedClassifier) m_trainedClassifier).getModelHeader(null);
         }
 
         if (m_trainedClassifierHeader != null
@@ -433,10 +441,10 @@ public class Classifier extends WekaAlgorithmWrapper implements
             StepManager.CON_AUX_DATA_TRAININGSET, trainingData);
           batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM,
             setNum);
-          batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
-            maxSetNum);
-          batchClassifier
-            .setPayloadElement(StepManager.CON_AUX_DATA_LABEL, getName());
+          batchClassifier.setPayloadElement(
+            StepManager.CON_AUX_DATA_MAX_SET_NUM, maxSetNum);
+          batchClassifier.setPayloadElement(StepManager.CON_AUX_DATA_LABEL,
+            getName());
           getStepManager().outputData(batchClassifier);
         }
       }
