@@ -256,6 +256,9 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           .getPayloadElement(StepManager.CON_BATCH_CLASSIFIER);
       String evalLabel =
         data.getPayloadElement(StepManager.CON_AUX_DATA_LABEL).toString();
+      if (classifier == null) {
+        throw new WekaException("Classifier is null!!");
+      }
 
       if (m_isReset) {
         m_isReset = false;
