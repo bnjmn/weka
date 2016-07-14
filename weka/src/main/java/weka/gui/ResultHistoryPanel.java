@@ -98,6 +98,9 @@ public class ResultHistoryPanel extends JPanel {
   /** for printing the output to files */
   protected PrintableComponent m_Printer = null;
 
+  /** Something listening for list deletions */
+  protected transient RDeleteListener m_deleteListener;
+
   /**
    * Extension of MouseAdapter that implements Serializable.
    */
@@ -115,6 +118,20 @@ public class ResultHistoryPanel extends JPanel {
 
     /** for serialization */
     static final long serialVersionUID = -8675332541861828079L;
+  }
+
+  /**
+   * Interface for something to be notified when an entry in the list
+   * is deleted
+   */
+  public static interface RDeleteListener {
+
+    /**
+     * Called when an entry in the list is deleted
+     *
+     * @param name the name of the entry deleted
+     */
+    void entryDeleted(String name);
   }
 
   /**
@@ -163,7 +180,11 @@ public class ResultHistoryPanel extends JPanel {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
           int selected = m_List.getSelectedIndex();
           if (selected != -1) {
-            removeResult((String) m_Model.elementAt(selected));
+            String element = m_Model.elementAt(selected).toString();
+            removeResult(element);
+            if (m_deleteListener != null) {
+              m_deleteListener.entryDeleted(element);
+            }
           }
         }
       }
@@ -205,6 +226,15 @@ public class ResultHistoryPanel extends JPanel {
       }
     });
     add(js, BorderLayout.CENTER);
+  }
+
+  /**
+   * Set a listener for deletions from the list
+   *
+   * @param listener the listener to set
+   */
+  public void setDeleteListener(RDeleteListener listener) {
+    m_deleteListener = listener;
   }
 
   /**

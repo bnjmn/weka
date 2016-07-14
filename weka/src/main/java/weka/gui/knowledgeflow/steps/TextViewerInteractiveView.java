@@ -34,6 +34,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Map;
@@ -74,6 +75,11 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
     m_history = new ResultHistoryPanel(m_outText);
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
+    m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
+      @Override public void entryDeleted(String name) {
+        ((TextViewer)getStep()).getResults().remove(name);
+      }
+    });
     m_history.getList().addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
