@@ -88,6 +88,11 @@ public class AttributeSummarizerInteractiveView extends BaseInteractiveViewer {
     m_history = new ResultHistoryPanel(null);
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
+    m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
+      @Override public void entryDeleted(String name, int index) {
+        ((AttributeSummarizer)getStep()).getDatasets().remove(index);
+      }
+    });
 
     m_history.getList().addMouseListener(
       new ResultHistoryPanel.RMouseAdapter() {

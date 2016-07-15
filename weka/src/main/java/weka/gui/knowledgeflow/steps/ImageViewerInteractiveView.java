@@ -94,6 +94,11 @@ public class ImageViewerInteractiveView extends BaseInteractiveViewer {
     m_history = new ResultHistoryPanel(null);
     m_history.setBorder(BorderFactory.createTitledBorder("Image list"));
     m_history.setHandleRightClicks( false );
+    m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
+      @Override public void entryDeleted(String name, int index) {
+        ((ImageViewer)getStep()).getImages().remove(name);
+      }
+    });
     m_history.getList().addMouseListener( new ResultHistoryPanel.RMouseAdapter() {
         /** for serialization */
         private static final long serialVersionUID = -4984130887963944249L;

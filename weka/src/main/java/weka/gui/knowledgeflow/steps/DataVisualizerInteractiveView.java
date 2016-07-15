@@ -90,6 +90,11 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
     m_history = new ResultHistoryPanel(null);
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
+    m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
+      @Override public void entryDeleted(String name, int index) {
+        ((DataVisualizer)getStep()).getPlots().remove(index);
+      }
+    });
     m_history.getList().addMouseListener(
       new ResultHistoryPanel.RMouseAdapter() {
         private static final long serialVersionUID = -5174882230278923704L;

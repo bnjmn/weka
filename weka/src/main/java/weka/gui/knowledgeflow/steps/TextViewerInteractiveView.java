@@ -76,7 +76,7 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
-      @Override public void entryDeleted(String name) {
+      @Override public void entryDeleted(String name, int index) {
         ((TextViewer)getStep()).getResults().remove(name);
       }
     });
