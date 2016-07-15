@@ -121,8 +121,7 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
-   * Interface for something to be notified when an entry in the list
-   * is deleted
+   * Interface for something to be notified when an entry in the list is deleted
    */
   public static interface RDeleteListener {
 
@@ -130,8 +129,9 @@ public class ResultHistoryPanel extends JPanel {
      * Called when an entry in the list is deleted
      *
      * @param name the name of the entry deleted
+     * @param index the index of the entry deleted
      */
-    void entryDeleted(String name);
+    void entryDeleted(String name, int index);
   }
 
   /**
@@ -183,7 +183,7 @@ public class ResultHistoryPanel extends JPanel {
             String element = m_Model.elementAt(selected).toString();
             removeResult(element);
             if (m_deleteListener != null) {
-              m_deleteListener.entryDeleted(element);
+              m_deleteListener.entryDeleted(element, selected);
             }
           }
         }
@@ -383,9 +383,9 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
-   * Set the selected list entry. Note, does not update the single
-   * click display to the corresponding named result - use setSingle()
-   * to set the selected list entry and view the corresponding result
+   * Set the selected list entry. Note, does not update the single click display
+   * to the corresponding named result - use setSingle() to set the selected
+   * list entry and view the corresponding result
    *
    * @param name the name of the list entry to be selected
    */
