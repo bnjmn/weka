@@ -40,6 +40,7 @@ import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 
@@ -234,7 +235,7 @@ public class KnowledgeFlowApp extends AbstractGUIApplication {
       Set<String> execs =
         PluginManager.getPluginNamesOfType(ExecutionEnvironment.class
           .getCanonicalName());
-      List<String> execList = new ArrayList<String>();
+      List<String> execList = new LinkedList<String>();
       // make sure the default is listed first
       execList.add(BaseExecutionEnvironment.DESCRIPTION);
       if (execs != null) {
