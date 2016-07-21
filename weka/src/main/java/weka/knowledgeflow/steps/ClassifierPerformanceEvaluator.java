@@ -219,7 +219,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   public void stop() {
     super.stop();
 
-    if (m_taskCount.get() == 0 && isStopRequested()) {
+    if ((m_taskCount == null || m_taskCount.get() == 0) && isStopRequested()) {
       getStepManager().interrupted();
     }
   }
@@ -489,8 +489,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   }
 
   /**
-   * Adjust evaluation configuration if an {@code InputMappedClassifier}
-   * is being used
+   * Adjust evaluation configuration if an {@code InputMappedClassifier} is
+   * being used
    *
    * @param eval the evaluation object ot adjust
    * @param classifier the classifier being used
@@ -674,12 +674,13 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       }
 
       plotInstances.setUp();
-      if (m_classifier instanceof BatchPredictor) {
+      if (m_classifier instanceof BatchPredictor
+        && ((BatchPredictor) m_classifier)
+          .implementsMoreEfficientBatchPrediction()) {
         double[][] predictions =
           ((BatchPredictor) m_classifier).distributionsForInstances(m_testData);
         plotInstances.process(m_testData, predictions, eval);
       } else {
-
         for (int i = 0; i < m_testData.numInstances(); i++) {
           Instance temp = m_testData.instance(i);
           plotInstances.process(temp, m_classifier, eval);
