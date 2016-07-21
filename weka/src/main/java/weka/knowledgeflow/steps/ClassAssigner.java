@@ -59,6 +59,9 @@ public class ClassAssigner extends BaseStep {
   /** True if processing an instance stream */
   protected boolean m_isInstanceStream;
 
+  /** Counter used for streams */
+  protected int m_streamCount;
+
   /**
    * Set the class column to use
    *
@@ -91,6 +94,7 @@ public class ClassAssigner extends BaseStep {
     m_classCol = getStepManager().environmentSubstitute(m_classColumnS).trim();
     m_classAssigned = false;
     m_isInstanceStream = false;
+    m_streamCount = 0;
   }
 
   /**
@@ -116,7 +120,8 @@ public class ClassAssigner extends BaseStep {
         }
         assignClass((Instances) payload);
       }
-      m_classAssigned = true;
+      m_streamCount++;
+      m_classAssigned = m_streamCount == 2;
     }
 
     if (isStopRequested()) {
