@@ -271,7 +271,12 @@ public class FileEnvironmentField extends EnvironmentField {
       return new File(path);
     }
 
-    return new File(".");
+    JFileChooser embeddedEditor = (JFileChooser) m_fileEditor.getCustomEditor();
+    if (embeddedEditor.getFileSelectionMode() == JFileChooser.DIRECTORIES_ONLY) {
+      return new File(".");
+    } else {
+      return new File("");
+    }
   }
 
   @Override
