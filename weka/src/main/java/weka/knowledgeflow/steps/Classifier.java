@@ -288,6 +288,7 @@ public class Classifier extends WekaAlgorithmWrapper implements
   @Override
   public void processIncoming(Data data) throws WekaException {
     try {
+      getStepManager().processing();
       if (m_isReset) {
         m_isReset = false;
         Instances incomingStructure = null;

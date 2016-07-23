@@ -160,6 +160,8 @@ public class ClustererPerformanceEvaluator extends BaseStep {
       getStepManager().statusMessage("Evaluating (test set " + setNum + " of "
         + maxSetNum + ") " + clusterSpec);
 
+      eval = new ClusterEvaluation();
+      eval.setClusterer(clusterer);
       try {
         eval.evaluateClusterer(testData);
       } catch (Exception ex) {
