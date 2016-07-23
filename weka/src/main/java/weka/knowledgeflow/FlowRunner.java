@@ -546,7 +546,7 @@ public class FlowRunner implements FlowExecutor {
    */
   public void waitUntilFinished() {
     try {
-      Thread.sleep(500);
+      Thread.sleep(800);
       while (true) {
         boolean busy = flowBusy();
         if (busy) {

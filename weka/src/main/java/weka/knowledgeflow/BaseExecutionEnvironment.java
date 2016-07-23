@@ -31,6 +31,7 @@ import weka.core.PluginManager;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Base class for execution environments
@@ -240,11 +241,11 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   }
 
   /**
-   * Gets a new instance of the default flow executor suitable for
-   * use with this execution environment
+   * Gets a new instance of the default flow executor suitable for use with this
+   * execution environment
    *
-   * @return a new instance of the default flow executor suitable
-   * for use with this execution environment
+   * @return a new instance of the default flow executor suitable for use with
+   *         this execution environment
    */
   public FlowExecutor getDefaultFlowExecutor() {
     return new FlowRunner();
@@ -313,6 +314,23 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   protected void stopClientExecutionService() {
     if (m_executorService != null) {
       m_executorService.shutdown();
+      try {
+        // try to avoid a situation where a step might not have received
+        // data yet (and will be launching tasks on the client executor service
+        // when it does), all preceding steps have finished, and the shutdown
+        // monitor has polled and found all steps not busy. In this case,
+        // both executor services will be shutdown. The main one will have
+        // the job of executing the step in question (and will already have
+        // a runnable for this in its queue, so this will get executed). However,
+        // the client executor service will (potentially) have an empty queue
+        // as the step has not launched a task on it yet. This can lead to
+        // a situation where the step tries to launch a task when the
+        // client executor service has been shutdown. Blocking here at the
+        // main executor service should avoid this situation.
+        m_executorService.awaitTermination(5L, TimeUnit.SECONDS);
+      } catch (InterruptedException e) {
+        e.printStackTrace();
+      }
     }
 
     if (m_clientExecutorService != null) {
