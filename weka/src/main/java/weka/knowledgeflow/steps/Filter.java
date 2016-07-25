@@ -97,6 +97,8 @@ public class Filter extends WekaAlgorithmWrapper {
   public void setWrappedAlgorithm(Object algo) {
     super.setWrappedAlgorithm(algo);
     m_defaultIconPath = StepVisual.BASE_ICON_PATH + "DefaultFilter.gif";
+    String iconp = algo.getClass().getCanonicalName().replace("weka.","") + ".gif";
+    m_iconPath = StepVisual.BASE_ICON_PATH + iconp;
   }
 
   /**
