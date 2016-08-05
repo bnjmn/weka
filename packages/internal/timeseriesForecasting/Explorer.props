@@ -1,0 +1,4 @@
+# Explorer.props file. Adds the ExplorerTSPanel to the Tabs key.
+
+Tabs=weka.classifiers.timeseries.gui.explorer.ExplorerTSPanel
+TabsPolicy=append

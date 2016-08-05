@@ -1,0 +1,64 @@
+# Template Description file for a Weka package
+# 
+
+# Package name (required)
+PackageName=timeseriesForecasting
+
+# Version (required)
+Version=1.0.20
+
+#Date (year-month-day)
+Date=2016-07-20
+
+# Title (required)
+Title=Time series forecasting environment.
+
+# Category (recommended)
+Category=Time series
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=LGPL 2.1
+
+# Description (required)
+Description=Provides a time series forecasting environment for Weka. Includes a wrapper for Weka regression schemes that automates the process of creating lagged variables and date-derived periodic variables and provides the ability to do closed-loop forecasting. New evaluation routines are provided by a special evaluation module and graphing of predictions/forecasts are provided via the JFreeChart library. Includes both command-line and GUI user interfaces. Sample time series data can be found in ${WEKA_HOME}/packages/timeseriesForecasting/sample-data.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/timeseriesForecasting1.0.20.zip?download
+
+# URL for further information
+URL=http://wiki.pentaho.com/display/DATAMINING/Time+Series+Analysis+and+Forecasting+with+Weka
+
+# Changes in this release
+Changes=Made TSLagMaker into a filter and moved it to weka.filters.supervised.attribute. Filter has a 'deployment' mode that ensures that for non-training batches a given input instance gets pushed far enough into the lag history buffers to reach the minum lag depth. This allows current values (e.g. comming from sensors or whatever) to be treated as lagged values and ensures that any classifier built using the filter then produces a prediction for the future (rather than the current time). Deployment mode is activated (in a super hacky way) when the incoming instances relation name is prepended with the string 'deployment'. The editing GUI for custom periodics still needs to be made into a PropertyEditor, so these are not editible in the filter at present via the GenericObjectEditor. Also fixed a bug in the UI where the start button was not being disabled when a new set of instances was set. Various lists in the advanced configuration panel now resize correctly when the split pane divider is moved.
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.8.0)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+DoNotLoadIfFileNotPresent=lib/jfreechart-1.0.13.jar,lib/jcommon-1.0.14.jar
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+DoNotLoadIfFileNotPresentMessage=timeseriesForecasting can't be loaded because some some libraries are missing from the lib directory. Needed are jfreechart-1.0.13.jar and jcommon-1.0.14.jar.
