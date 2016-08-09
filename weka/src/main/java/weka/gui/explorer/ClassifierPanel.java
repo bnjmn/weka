@@ -1823,7 +1823,7 @@ public class ClassifierPanel extends AbstractPerspective implements
             if (testMode != 1) {
               String mode = "";
               if (testMode == 2) {
-                mode = "training split";
+                mode = "test split";
               } else if (testMode == 3) {
                 mode = "training data";
               } else if (testMode == 4) {
