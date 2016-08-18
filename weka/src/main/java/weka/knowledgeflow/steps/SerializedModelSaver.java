@@ -21,13 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.util.ArrayList;
-import java.util.List;
-
 import weka.classifiers.UpdateableBatchProcessor;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -37,6 +30,13 @@ import weka.gui.FilePropertyMetadata;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
+
+import java.io.BufferedOutputStream;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.ObjectOutputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Step that can save models encapsulated in incoming {@code Data} objects to
@@ -241,6 +241,7 @@ public class SerializedModelSaver extends BaseStep {
         modelToSave =
           (weka.classifiers.Classifier) data
             .getPayloadElement(StepManager.CON_INCREMENTAL_CLASSIFIER);
+        modelHeader = m_incrementalHeader;
       }
     } else {
       modelToSave = data.getPayloadElement(data.getConnectionName());
