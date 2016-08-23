@@ -41,17 +41,16 @@ import java.util.List;
 import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Class for constructing a forest of random trees.<br>
+ * <!-- globalinfo-start --> Class for constructing a forest of random trees.<br>
  * <br>
  * For more information see: <br>
  * <br>
- * Leo Breiman (2001). Random Forests. Machine Learning. 45(1):5-32.
- * <br><br>
- <!-- globalinfo-end -->
+ * Leo Breiman (2001). Random Forests. Machine Learning. 45(1):5-32. <br>
+ * <br>
+ * <!-- globalinfo-end -->
  * 
- <!-- technical-bibtex-start -->
- * BibTeX:
+ * <!-- technical-bibtex-start --> BibTeX:
+ * 
  * <pre>
  * &#64;article{Breiman2001,
  *    author = {Leo Breiman},
@@ -63,84 +62,126 @@ import java.util.Vector;
  *    year = {2001}
  * }
  * </pre>
- * <br><br>
- <!-- technical-bibtex-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p>
+ * <br>
+ * <br>
+ * <!-- technical-bibtex-end -->
  * 
- * <pre> -P
+ * <!-- options-start --> Valid options are:
+ * <p>
+ * 
+ * <pre>
+ * -P
  *  Size of each bag, as a percentage of the
- *  training set size. (default 100)</pre>
+ *  training set size. (default 100)
+ * </pre>
  * 
- * <pre> -O
- *  Calculate the out of bag error.</pre>
+ * <pre>
+ * -O
+ *  Calculate the out of bag error.
+ * </pre>
  * 
- * <pre> -store-out-of-bag-predictions
- *  Whether to store out of bag predictions in internal evaluation object.</pre>
+ * <pre>
+ * -store-out-of-bag-predictions
+ *  Whether to store out of bag predictions in internal evaluation object.
+ * </pre>
  * 
- * <pre> -output-out-of-bag-complexity-statistics
- *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.</pre>
+ * <pre>
+ * -output-out-of-bag-complexity-statistics
+ *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.
+ * </pre>
  * 
- * <pre> -print
- *  Print the individual classifiers in the output</pre>
+ * <pre>
+ * -print
+ *  Print the individual classifiers in the output
+ * </pre>
  * 
- * <pre> -attribute-importance
- *  Compute and output attribute importance (mean impurity decrease method)</pre>
+ * <pre>
+ * -attribute-importance
+ *  Compute and output attribute importance (mean impurity decrease method)
+ * </pre>
  * 
- * <pre> -I &lt;num&gt;
+ * <pre>
+ * -I &lt;num&gt;
  *  Number of iterations.
- *  (current value 100)</pre>
+ *  (current value 100)
+ * </pre>
  * 
- * <pre> -num-slots &lt;num&gt;
+ * <pre>
+ * -num-slots &lt;num&gt;
  *  Number of execution slots.
  *  (default 1 - i.e. no parallelism)
- *  (use 0 to auto-detect number of cores)</pre>
+ *  (use 0 to auto-detect number of cores)
+ * </pre>
  * 
- * <pre> -K &lt;number of attributes&gt;
+ * <pre>
+ * -K &lt;number of attributes&gt;
  *  Number of attributes to randomly investigate. (default 0)
- *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
+ *  (&lt;1 = int(log_2(#predictors)+1)).
+ * </pre>
  * 
- * <pre> -M &lt;minimum number of instances&gt;
+ * <pre>
+ * -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -V &lt;minimum variance for split&gt;
+ * <pre>
+ * -V &lt;minimum variance for split&gt;
  *  Set minimum numeric class variance proportion
- *  of train variance for split (default 1e-3).</pre>
+ *  of train variance for split (default 1e-3).
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Seed for random number generator.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -depth &lt;num&gt;
+ * <pre>
+ * -depth &lt;num&gt;
  *  The maximum depth of the tree, 0 for unlimited.
- *  (default 0)</pre>
+ *  (default 0)
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;
- *  Number of folds for backfitting (default 0, no backfitting).</pre>
+ * <pre>
+ * -N &lt;num&gt;
+ *  Number of folds for backfitting (default 0, no backfitting).
+ * </pre>
  * 
- * <pre> -U
- *  Allow unclassified instances.</pre>
+ * <pre>
+ * -U
+ *  Allow unclassified instances.
+ * </pre>
  * 
- * <pre> -B
- *  Break ties randomly when several attributes look equally good.</pre>
+ * <pre>
+ * -B
+ *  Break ties randomly when several attributes look equally good.
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -do-not-check-capabilities
+ * <pre>
+ * -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  (use with caution).
+ * </pre>
  * 
- * <pre> -num-decimal-places
- *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * <pre>
+ * -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).
+ * </pre>
  * 
- * <pre> -batch-size
- *  The desired batch size for batch prediction  (default 100).</pre>
+ * <pre>
+ * -batch-size
+ *  The desired batch size for batch prediction  (default 100).
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
  * @version $Revision$
@@ -447,12 +488,15 @@ public class RandomForest extends Bagging {
           computeAverageImpurityDecreasePerAttribute(nodeCounts);
         int[] sortedIndices = Utils.sort(impurityScores);
         buffer
-          .append("\n\nAttribute importance (average impurity decrease)\n\n");
+          .append("\n\nAttribute importance based on average impurity decrease "
+            + "(and number of nodes using that attribute)\n\n");
         for (int i = sortedIndices.length - 1; i >= 0; i--) {
           int index = sortedIndices[i];
           if (index != m_data.classIndex()) {
-            buffer.append(Utils.doubleToString(impurityScores[index], 10, 4))
-              .append(" (")
+            buffer
+              .append(
+                Utils.doubleToString(impurityScores[index], 10,
+                  getNumDecimalPlaces())).append(" (")
               .append(Utils.doubleToString(nodeCounts[index], 6, 0))
               .append(")  ").append(m_data.attribute(index).name())
               .append("\n");
@@ -610,81 +654,121 @@ public class RandomForest extends Bagging {
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p>
+   * <!-- options-start --> Valid options are:
+   * <p>
    * 
-   * <pre> -P
+   * <pre>
+   * -P
    *  Size of each bag, as a percentage of the
-   *  training set size. (default 100)</pre>
+   *  training set size. (default 100)
+   * </pre>
    * 
-   * <pre> -O
-   *  Calculate the out of bag error.</pre>
+   * <pre>
+   * -O
+   *  Calculate the out of bag error.
+   * </pre>
    * 
-   * <pre> -store-out-of-bag-predictions
-   *  Whether to store out of bag predictions in internal evaluation object.</pre>
+   * <pre>
+   * -store-out-of-bag-predictions
+   *  Whether to store out of bag predictions in internal evaluation object.
+   * </pre>
    * 
-   * <pre> -output-out-of-bag-complexity-statistics
-   *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.</pre>
+   * <pre>
+   * -output-out-of-bag-complexity-statistics
+   *  Whether to output complexity-based statistics when out-of-bag evaluation is performed.
+   * </pre>
    * 
-   * <pre> -print
-   *  Print the individual classifiers in the output</pre>
+   * <pre>
+   * -print
+   *  Print the individual classifiers in the output
+   * </pre>
    * 
-   * <pre> -attribute-importance
-   *  Compute and output attribute importance (mean impurity decrease method)</pre>
+   * <pre>
+   * -attribute-importance
+   *  Compute and output attribute importance (mean impurity decrease method)
+   * </pre>
    * 
-   * <pre> -I &lt;num&gt;
+   * <pre>
+   * -I &lt;num&gt;
    *  Number of iterations.
-   *  (current value 100)</pre>
+   *  (current value 100)
+   * </pre>
    * 
-   * <pre> -num-slots &lt;num&gt;
+   * <pre>
+   * -num-slots &lt;num&gt;
    *  Number of execution slots.
    *  (default 1 - i.e. no parallelism)
-   *  (use 0 to auto-detect number of cores)</pre>
+   *  (use 0 to auto-detect number of cores)
+   * </pre>
    * 
-   * <pre> -K &lt;number of attributes&gt;
+   * <pre>
+   * -K &lt;number of attributes&gt;
    *  Number of attributes to randomly investigate. (default 0)
-   *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
+   *  (&lt;1 = int(log_2(#predictors)+1)).
+   * </pre>
    * 
-   * <pre> -M &lt;minimum number of instances&gt;
+   * <pre>
+   * -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -V &lt;minimum variance for split&gt;
+   * <pre>
+   * -V &lt;minimum variance for split&gt;
    *  Set minimum numeric class variance proportion
-   *  of train variance for split (default 1e-3).</pre>
+   *  of train variance for split (default 1e-3).
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Seed for random number generator.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -depth &lt;num&gt;
+   * <pre>
+   * -depth &lt;num&gt;
    *  The maximum depth of the tree, 0 for unlimited.
-   *  (default 0)</pre>
+   *  (default 0)
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;
-   *  Number of folds for backfitting (default 0, no backfitting).</pre>
+   * <pre>
+   * -N &lt;num&gt;
+   *  Number of folds for backfitting (default 0, no backfitting).
+   * </pre>
    * 
-   * <pre> -U
-   *  Allow unclassified instances.</pre>
+   * <pre>
+   * -U
+   *  Allow unclassified instances.
+   * </pre>
    * 
-   * <pre> -B
-   *  Break ties randomly when several attributes look equally good.</pre>
+   * <pre>
+   * -B
+   *  Break ties randomly when several attributes look equally good.
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -do-not-check-capabilities
+   * <pre>
+   * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  (use with caution).
+   * </pre>
    * 
-   * <pre> -num-decimal-places
-   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+   * <pre>
+   * -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).
+   * </pre>
    * 
-   * <pre> -batch-size
-   *  The desired batch size for batch prediction  (default 100).</pre>
+   * <pre>
+   * -batch-size
+   *  The desired batch size for batch prediction  (default 100).
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -762,4 +846,3 @@ public class RandomForest extends Bagging {
     runClassifier(new RandomForest(), argv);
   }
 }
-
