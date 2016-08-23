@@ -21,14 +21,7 @@
 
 package weka.classifiers.trees;
 
-import java.io.Serializable;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.LinkedList;
-import java.util.Queue;
-import java.util.Random;
-import java.util.Vector;
-
+import com.github.fommil.netlib.BLAS;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -45,57 +38,90 @@ import weka.core.Randomizable;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WeightedInstancesHandler;
+import weka.gui.ProgrammaticProperty;
+
+import java.io.Serializable;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Random;
+import java.util.Vector;
 
 /**
- <!-- globalinfo-start -->
- * Class for constructing a tree that considers K randomly  chosen attributes at each node. Performs no pruning. Also has an option to allow estimation of class probabilities (or target mean in the regression case) based on a hold-out set (backfitting).
- * <br><br>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-start --> Class for constructing a tree that considers K
+ * randomly chosen attributes at each node. Performs no pruning. Also has an
+ * option to allow estimation of class probabilities (or target mean in the
+ * regression case) based on a hold-out set (backfitting). <br>
+ * <br>
+ * <!-- globalinfo-end -->
  * 
- <!-- options-start -->
- * Valid options are: <p>
+ * <!-- options-start --> Valid options are:
+ * <p>
  * 
- * <pre> -K &lt;number of attributes&gt;
+ * <pre>
+ * -K &lt;number of attributes&gt;
  *  Number of attributes to randomly investigate. (default 0)
- *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
+ *  (&lt;1 = int(log_2(#predictors)+1)).
+ * </pre>
  * 
- * <pre> -M &lt;minimum number of instances&gt;
+ * <pre>
+ * -M &lt;minimum number of instances&gt;
  *  Set minimum number of instances per leaf.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -V &lt;minimum variance for split&gt;
+ * <pre>
+ * -V &lt;minimum variance for split&gt;
  *  Set minimum numeric class variance proportion
- *  of train variance for split (default 1e-3).</pre>
+ *  of train variance for split (default 1e-3).
+ * </pre>
  * 
- * <pre> -S &lt;num&gt;
+ * <pre>
+ * -S &lt;num&gt;
  *  Seed for random number generator.
- *  (default 1)</pre>
+ *  (default 1)
+ * </pre>
  * 
- * <pre> -depth &lt;num&gt;
+ * <pre>
+ * -depth &lt;num&gt;
  *  The maximum depth of the tree, 0 for unlimited.
- *  (default 0)</pre>
+ *  (default 0)
+ * </pre>
  * 
- * <pre> -N &lt;num&gt;
- *  Number of folds for backfitting (default 0, no backfitting).</pre>
+ * <pre>
+ * -N &lt;num&gt;
+ *  Number of folds for backfitting (default 0, no backfitting).
+ * </pre>
  * 
- * <pre> -U
- *  Allow unclassified instances.</pre>
+ * <pre>
+ * -U
+ *  Allow unclassified instances.
+ * </pre>
  * 
- * <pre> -B
- *  Break ties randomly when several attributes look equally good.</pre>
+ * <pre>
+ * -B
+ *  Break ties randomly when several attributes look equally good.
+ * </pre>
  * 
- * <pre> -output-debug-info
+ * <pre>
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
- *  may output additional info to the console</pre>
+ *  may output additional info to the console
+ * </pre>
  * 
- * <pre> -do-not-check-capabilities
+ * <pre>
+ * -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
- *  (use with caution).</pre>
+ *  (use with caution).
+ * </pre>
  * 
- * <pre> -num-decimal-places
- *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * <pre>
+ * -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @author Richard Kirkby (rkirkby@cs.waikato.ac.nz)
@@ -143,6 +169,15 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    */
   protected double m_MinVarianceProp = 1e-3;
 
+  /** Whether to store the impurity decrease/gain sum */
+  protected boolean m_computeImpurityDecreases;
+
+  /**
+   * Indexed by attribute, each two element array contains impurity
+   * decrease/gain sum in first element and count in the second
+   */
+  protected double[][] m_impurityDecreasees;
+
   /**
    * Returns a string describing classifier
    * 
@@ -155,6 +190,38 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       + " chosen attributes at each node. Performs no pruning. Also has"
       + " an option to allow estimation of class probabilities (or target mean "
       + "in the regression case) based on a hold-out set (backfitting).";
+  }
+
+  /**
+   * Get the array of impurity decrease/gain sums
+   *
+   * @return the array of impurity decrease/gain sums
+   */
+  public double[][] getImpurityDecreases() {
+    return m_impurityDecreasees;
+  }
+
+  /**
+   * Set whether to compute/store impurity decreases for variable importance
+   * in RandomForest
+   *
+   * @param computeImpurityDecreases true to compute and store impurity decrease
+   *                                 values for splitting attributes
+   */
+  @ProgrammaticProperty
+  public void setComputeImpurityDecreases(boolean computeImpurityDecreases) {
+    m_computeImpurityDecreases = computeImpurityDecreases;
+  }
+
+  /**
+   * Get whether to compute/store impurity decreases for variable importance
+   * in RandomForest
+   *
+   * @return true to compute and store impurity decrease
+   *                                 values for splitting attributes
+   */
+  public boolean getComputeImpurityDecreases() {
+    return m_computeImpurityDecreases;
   }
 
   /**
@@ -363,9 +430,11 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   /**
    * Set the value of AllowUnclassifiedInstances.
    * 
-   * @param newAllowUnclassifiedInstances true if tree is allowed to abstain from making a prediction
+   * @param newAllowUnclassifiedInstances true if tree is allowed to abstain
+   *          from making a prediction
    */
-  public void setAllowUnclassifiedInstances(boolean newAllowUnclassifiedInstances) {
+  public void setAllowUnclassifiedInstances(
+    boolean newAllowUnclassifiedInstances) {
 
     m_AllowUnclassifiedInstances = newAllowUnclassifiedInstances;
   }
@@ -436,7 +505,7 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     newVector.addElement(new Option("\tAllow unclassified instances.", "U", 0,
       "-U"));
     newVector.addElement(new Option("\t" + breakTiesRandomlyTipText(), "B", 0,
-            "-B"));
+      "-B"));
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -490,50 +559,72 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
    * Parses a given list of options.
    * <p/>
    * 
-   <!-- options-start -->
-   * Valid options are: <p>
+   * <!-- options-start --> Valid options are:
+   * <p>
    * 
-   * <pre> -K &lt;number of attributes&gt;
+   * <pre>
+   * -K &lt;number of attributes&gt;
    *  Number of attributes to randomly investigate. (default 0)
-   *  (&lt;1 = int(log_2(#predictors)+1)).</pre>
+   *  (&lt;1 = int(log_2(#predictors)+1)).
+   * </pre>
    * 
-   * <pre> -M &lt;minimum number of instances&gt;
+   * <pre>
+   * -M &lt;minimum number of instances&gt;
    *  Set minimum number of instances per leaf.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -V &lt;minimum variance for split&gt;
+   * <pre>
+   * -V &lt;minimum variance for split&gt;
    *  Set minimum numeric class variance proportion
-   *  of train variance for split (default 1e-3).</pre>
+   *  of train variance for split (default 1e-3).
+   * </pre>
    * 
-   * <pre> -S &lt;num&gt;
+   * <pre>
+   * -S &lt;num&gt;
    *  Seed for random number generator.
-   *  (default 1)</pre>
+   *  (default 1)
+   * </pre>
    * 
-   * <pre> -depth &lt;num&gt;
+   * <pre>
+   * -depth &lt;num&gt;
    *  The maximum depth of the tree, 0 for unlimited.
-   *  (default 0)</pre>
+   *  (default 0)
+   * </pre>
    * 
-   * <pre> -N &lt;num&gt;
-   *  Number of folds for backfitting (default 0, no backfitting).</pre>
+   * <pre>
+   * -N &lt;num&gt;
+   *  Number of folds for backfitting (default 0, no backfitting).
+   * </pre>
    * 
-   * <pre> -U
-   *  Allow unclassified instances.</pre>
+   * <pre>
+   * -U
+   *  Allow unclassified instances.
+   * </pre>
    * 
-   * <pre> -B
-   *  Break ties randomly when several attributes look equally good.</pre>
+   * <pre>
+   * -B
+   *  Break ties randomly when several attributes look equally good.
+   * </pre>
    * 
-   * <pre> -output-debug-info
+   * <pre>
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
-   *  may output additional info to the console</pre>
+   *  may output additional info to the console
+   * </pre>
    * 
-   * <pre> -do-not-check-capabilities
+   * <pre>
+   * -do-not-check-capabilities
    *  If set, classifier capabilities are not checked before classifier is built
-   *  (use with caution).</pre>
+   *  (use with caution).
+   * </pre>
    * 
-   * <pre> -num-decimal-places
-   *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+   * <pre>
+   * -num-decimal-places
+   *  The number of decimal places for the output of numbers in the model (default 2).
+   * </pre>
    * 
-   <!-- options-end -->
+   * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
    * @throws Exception if an option is not supported
@@ -625,6 +716,10 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
   @Override
   public void buildClassifier(Instances data) throws Exception {
 
+    if (m_computeImpurityDecreases) {
+      m_impurityDecreasees = new double[data.numAttributes()][2];
+    }
+
     // Make sure K value is in range
     if (m_KValue > data.numAttributes() - 1) {
       m_KValue = data.numAttributes() - 1;
@@ -687,16 +782,17 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         totalWeight += inst.weight();
       } else {
         classProbs[0] += inst.classValue() * inst.weight();
-        totalSumSquared += inst.classValue() * inst.classValue()
-          * inst.weight();
+        totalSumSquared +=
+          inst.classValue() * inst.classValue() * inst.weight();
         totalWeight += inst.weight();
       }
     }
 
     double trainVariance = 0;
     if (data.classAttribute().isNumeric()) {
-      trainVariance = RandomTree.singleVariance(classProbs[0], totalSumSquared,
-        totalWeight) / totalWeight;
+      trainVariance =
+        RandomTree.singleVariance(classProbs[0], totalSumSquared, totalWeight)
+          / totalWeight;
       classProbs[0] /= totalWeight;
     }
 
@@ -776,8 +872,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     }
     StringBuffer resultBuff = new StringBuffer();
     m_Tree.toGraph(resultBuff, 0, null);
-    String result = "digraph RandomTree {\n" + "edge [style=bold]\n"
-      + resultBuff.toString() + "\n}\n";
+    String result =
+      "digraph RandomTree {\n" + "edge [style=bold]\n" + resultBuff.toString()
+        + "\n}\n";
     return result;
   }
 
@@ -916,16 +1013,18 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
           totalWeight += inst.weight();
         } else {
           classProbs[0] += inst.classValue() * inst.weight();
-          totalSumSquared += inst.classValue() * inst.classValue()
-            * inst.weight();
+          totalSumSquared +=
+            inst.classValue() * inst.classValue() * inst.weight();
           totalWeight += inst.weight();
         }
       }
 
       double trainVariance = 0;
       if (data.classAttribute().isNumeric()) {
-        trainVariance = RandomTree.singleVariance(classProbs[0],
-          totalSumSquared, totalWeight) / totalWeight;
+        trainVariance =
+          RandomTree
+            .singleVariance(classProbs[0], totalSumSquared, totalWeight)
+            / totalWeight;
         classProbs[0] /= totalWeight;
       }
 
@@ -964,8 +1063,9 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         } else if (m_Info.attribute(m_Attribute).isNominal()) {
 
           // For nominal attributes
-          returnedDist = m_Successors[(int) instance.value(m_Attribute)]
-            .distributionForInstance(instance);
+          returnedDist =
+            m_Successors[(int) instance.value(m_Attribute)]
+              .distributionForInstance(instance);
         } else {
 
           // For numeric attributes
@@ -1015,9 +1115,10 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     public int toGraph(StringBuffer text, int num) throws Exception {
 
       int maxIndex = Utils.maxIndex(m_ClassDistribution);
-      String classValue = m_Info.classAttribute().isNominal() ? m_Info
-        .classAttribute().value(maxIndex) : Utils.doubleToString(
-        m_ClassDistribution[0], getNumDecimalPlaces());
+      String classValue =
+        m_Info.classAttribute().isNominal() ? m_Info.classAttribute().value(
+          maxIndex) : Utils.doubleToString(m_ClassDistribution[0],
+          getNumDecimalPlaces());
 
       num++;
       if (m_Attribute == -1) {
@@ -1032,9 +1133,11 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             + m_Info.attribute(m_Attribute).name());
           if (m_Info.attribute(m_Attribute).isNumeric()) {
             if (i == 0) {
-              text.append(" < " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
+              text.append(" < "
+                + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             } else {
-              text.append(" >= " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
+              text.append(" >= "
+                + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             }
           } else {
             text.append(" = " + m_Info.attribute(m_Attribute).value(i));
@@ -1073,9 +1176,10 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       }
 
       if (m_Info.classAttribute().isNumeric()) {
-        return " : " + Utils.doubleToString(classMean, getNumDecimalPlaces()) + " ("
-          + Utils.doubleToString(m_Distribution[1], getNumDecimalPlaces()) + "/"
-          + Utils.doubleToString(avgError, getNumDecimalPlaces()) + ")";
+        return " : " + Utils.doubleToString(classMean, getNumDecimalPlaces())
+          + " ("
+          + Utils.doubleToString(m_Distribution[1], getNumDecimalPlaces())
+          + "/" + Utils.doubleToString(avgError, getNumDecimalPlaces()) + ")";
       }
 
       return " : " + m_Info.classAttribute().value(maxIndex) + " ("
@@ -1165,12 +1269,13 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         for (int i = 0; i < data.numInstances(); i++) {
           Instance inst = data.instance(i);
           totalSum += inst.classValue() * inst.weight();
-          totalSumSquared += inst.classValue() * inst.classValue()
-            * inst.weight();
+          totalSumSquared +=
+            inst.classValue() * inst.classValue() * inst.weight();
           totalSumOfWeights += inst.weight();
         }
-        priorVar = RandomTree.singleVariance(totalSum, totalSumSquared,
-          totalSumOfWeights);
+        priorVar =
+          RandomTree.singleVariance(totalSum, totalSumSquared,
+            totalSumOfWeights);
       }
 
       // Check if node doesn't contain enough instances or is pure
@@ -1196,8 +1301,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             if (data.attribute(m_Attribute).isNominal()) {
               m_Prop[(int) inst.value(m_Attribute)] += inst.weight();
             } else {
-              m_Prop[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1] += inst
-                .weight();
+              m_Prop[(inst.value(m_Attribute) < m_SplitPoint) ? 0 : 1] +=
+                inst.weight();
             }
           }
         }
@@ -1230,11 +1335,12 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
           double sumOfWeights = 0;
           for (int j = 0; j < subsets[i].numInstances(); j++) {
             if (data.classAttribute().isNominal()) {
-              dist[(int) subsets[i].instance(j).classValue()] += subsets[i]
-                .instance(j).weight();
+              dist[(int) subsets[i].instance(j).classValue()] +=
+                subsets[i].instance(j).weight();
             } else {
-              dist[0] += subsets[i].instance(j).classValue()
-                * subsets[i].instance(j).weight();
+              dist[0] +=
+                subsets[i].instance(j).classValue()
+                  * subsets[i].instance(j).weight();
               sumOfWeights += subsets[i].instance(j).weight();
             }
           }
@@ -1307,12 +1413,13 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         for (int i = 0; i < data.numInstances(); i++) {
           Instance inst = data.instance(i);
           totalSum += inst.classValue() * inst.weight();
-          totalSumSquared += inst.classValue() * inst.classValue()
-            * inst.weight();
+          totalSumSquared +=
+            inst.classValue() * inst.classValue() * inst.weight();
           totalSumOfWeights += inst.weight();
         }
-        priorVar = RandomTree.singleVariance(totalSum, totalSumSquared,
-          totalSumOfWeights);
+        priorVar =
+          RandomTree.singleVariance(totalSum, totalSumSquared,
+            totalSumOfWeights);
       }
 
       // Check if node doesn't contain enough instances or is pure
@@ -1380,18 +1487,21 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
         attIndicesWindow[windowSize - 1] = attIndex;
         windowSize--;
 
-        double currSplit = data.classAttribute().isNominal() ? distribution(
-          props, dists, attIndex, data) : numericDistribution(props, dists,
-          attIndex, totalSubsetWeights, data, tempNumericVals);
+        double currSplit =
+          data.classAttribute().isNominal() ? distribution(props, dists,
+            attIndex, data) : numericDistribution(props, dists, attIndex,
+            totalSubsetWeights, data, tempNumericVals);
 
-        double currVal = data.classAttribute().isNominal() ? gain(dists[0],
-          priorVal(dists[0])) : tempNumericVals[attIndex];
+        double currVal =
+          data.classAttribute().isNominal() ? gain(dists[0], priorVal(dists[0]))
+            : tempNumericVals[attIndex];
 
         if (Utils.gr(currVal, 0)) {
           gainFound = true;
         }
 
-        if ((currVal > val) || ((!getBreakTiesRandomly()) && (currVal == val) && (attIndex < bestIndex))) {
+        if ((currVal > val)
+          || ((!getBreakTiesRandomly()) && (currVal == val) && (attIndex < bestIndex))) {
           val = currVal;
           bestIndex = attIndex;
           split = currSplit;
@@ -1405,6 +1515,10 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
       // Any useful split found?
       if (Utils.gr(val, 0)) {
+        if (m_computeImpurityDecreases) {
+          m_impurityDecreasees[m_Attribute][0] += val;
+          m_impurityDecreasees[m_Attribute][1]++;
+        }
 
         // Build subtrees
         m_SplitPoint = split;
@@ -1573,8 +1687,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
           attVal = (int) inst.value(att);
           sums[attVal] += inst.classValue() * inst.weight();
-          sumSquared[attVal] += inst.classValue() * inst.classValue()
-            * inst.weight();
+          sumSquared[attVal] +=
+            inst.classValue() * inst.classValue() * inst.weight();
           sumOfWeights[attVal] += inst.weight();
         }
 
@@ -1604,8 +1718,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
           }
 
           currSums[1] += inst.classValue() * inst.weight();
-          currSumSquared[1] += inst.classValue() * inst.classValue()
-            * inst.weight();
+          currSumSquared[1] +=
+            inst.classValue() * inst.classValue() * inst.weight();
           currSumOfWeights[1] += inst.weight();
         }
 
@@ -1625,8 +1739,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
           Instance inst = data.instance(i);
 
           if (inst.value(att) > currSplit) {
-            currVal = RandomTree.variance(currSums, currSumSquared,
-              currSumOfWeights);
+            currVal =
+              RandomTree.variance(currSums, currSumSquared, currSumOfWeights);
             if (currVal < bestVal) {
               bestVal = currVal;
               splitPoint = (inst.value(att) + currSplit) / 2.0;
@@ -1678,13 +1792,13 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
 
         for (int j = 0; j < sums.length; j++) {
           sums[j] += props[0][j] * inst.classValue() * inst.weight();
-          sumSquared[j] += props[0][j] * inst.classValue() * inst.classValue()
-            * inst.weight();
+          sumSquared[j] +=
+            props[0][j] * inst.classValue() * inst.classValue() * inst.weight();
           sumOfWeights[j] += props[0][j] * inst.weight();
         }
         totalSum += inst.classValue() * inst.weight();
-        totalSumSquared += inst.classValue() * inst.classValue()
-          * inst.weight();
+        totalSumSquared +=
+          inst.classValue() * inst.classValue() * inst.weight();
         totalSumOfWeights += inst.weight();
       }
 
@@ -1699,8 +1813,8 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
       }
 
       // Compute variance gain
-      double priorVar = singleVariance(totalSum, totalSumSquared,
-        totalSumOfWeights);
+      double priorVar =
+        singleVariance(totalSum, totalSumSquared, totalSumOfWeights);
       double var = variance(sums, sumSquared, sumOfWeights);
       double gain = priorVar - var;
 
@@ -1917,9 +2031,11 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
             + " [label=\"");
           if (m_Info.attribute(m_Attribute).isNumeric()) {
             if (i == 0) {
-              text.append(" < " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
+              text.append(" < "
+                + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             } else {
-              text.append(" >= " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
+              text.append(" >= "
+                + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             }
           } else {
             text.append(" = "
@@ -1978,4 +2094,3 @@ public class RandomTree extends AbstractClassifier implements OptionHandler,
     runClassifier(new RandomTree(), argv);
   }
 }
-

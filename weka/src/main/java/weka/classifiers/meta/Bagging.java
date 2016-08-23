@@ -791,7 +791,7 @@ public class Bagging
 
     // save memory
     m_inBag = null;
-    m_data = null;
+    m_data = new Instances(m_data, 0);
   }
 
   /**
