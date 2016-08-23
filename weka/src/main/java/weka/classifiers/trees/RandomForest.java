@@ -518,8 +518,13 @@ public class RandomForest extends Bagging {
    *          splitting
    * @return the average impurity decrease per attribute over the trees
    */
-  protected double[] computeAverageImpurityDecreasePerAttribute(
+  public double[] computeAverageImpurityDecreasePerAttribute(
     double[] nodeCounts) throws WekaException {
+
+    if (m_Classifiers == null) {
+      throw new WekaException("Classifier has not been built yet!");
+    }
+
     if (!getComputeAttributeImportance()) {
       throw new WekaException("Stats for attribute importance have not "
         + "been collected!");
