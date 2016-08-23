@@ -169,7 +169,6 @@ public class RandomForest extends Bagging {
 
     RandomTree rTree = new RandomTree();
     rTree.setDoNotCheckCapabilities(true);
-    rTree.setComputeImpurityDecreases(true);
     super.setClassifier(rTree);
     super.setRepresentCopiesUsingWeights(true);
     setNumIterations(defaultNumberOfIterations());
