@@ -366,6 +366,7 @@ public class RandomForest extends Bagging {
    */
   public void setComputeAttributeImportance(boolean computeAttributeImportance) {
     m_computeAttributeImportance = computeAttributeImportance;
+    ((RandomTree)m_Classifier).setComputeImpurityDecreases(computeAttributeImportance);
   }
 
   /**
