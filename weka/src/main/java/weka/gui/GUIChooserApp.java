@@ -996,27 +996,11 @@ public class GUIChooserApp extends JFrame {
               Class.forName("tigerjython.core.TigerJython");
             Object[] args = new Object[1];
             args[0] = new String[0];
-
-            if (System.getProperty("os.name").toLowerCase().startsWith("mac")) {
-
-              // Awful hack to prevent TigerJython from taking over the Mac menu
-              // bar.
-              // Could potentially cause problems due to multi-threading, but
-              // hopefully
-              // not problematic in practice.
-              String realOS = System.getProperty("os.name");
-              System.setProperty("os.name", "pretending_not_to_be_an_apple");
-              tigerJythonClass.getMethod("main", String[].class).invoke(null,
-                args);
-              System.setProperty("os.name", realOS);
-            } else {
-              tigerJythonClass.getMethod("main", String[].class).invoke(null,
-                args);
-            }
+            tigerJythonClass.getMethod("main", String[].class).invoke(null, args);
 
           } catch (Exception ex) {
 
-            // Default to built-in console
+           // Default to built-in console
             if (m_JythonConsoleFrame == null) {
               jMenuItemJythonConsole.setEnabled(false);
               final JythonPanel jythonPanel = new JythonPanel();
