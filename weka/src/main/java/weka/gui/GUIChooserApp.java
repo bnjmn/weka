@@ -52,23 +52,7 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTable;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -992,26 +976,10 @@ public class GUIChooserApp extends JFrame {
 
           // Do we have TigerJython?
           try {
-            Class tigerJythonClass =
-              Class.forName("tigerjython.core.TigerJython");
+            Class tigerJythonClass = Class.forName("tigerjython.core.TigerJython");
             Object[] args = new Object[1];
             args[0] = new String[0];
-            if (System.getProperty("os.name").toLowerCase().startsWith("mac")) {
-
-              // Awful hack to prevent TigerJython from taking over the Mac menu
-              // bar.
-              // Could potentially cause problems due to multi-threading, but
-              // hopefully
-              // not problematic in practice.
-              String realOS = System.getProperty("os.name");
-              System.setProperty("os.name", "Darwin");
-              tigerJythonClass.getMethod("main", String[].class).invoke(null,
-                      args);
-              System.setProperty("os.name", realOS);
-            } else {
-              tigerJythonClass.getMethod("main", String[].class).invoke(null,
-                      args);
-            }
+            tigerJythonClass.getMethod("main", String[].class).invoke(null, args);
           } catch (Exception ex) {
 
            // Default to built-in console
