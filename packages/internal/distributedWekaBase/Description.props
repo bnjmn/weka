@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.0.13
+Version=1.0.14
 
 #Date (year-month-day)
-Date=2016-05-27
+Date=2016-08-25
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-Changes=Updated for changes to RandomForest in 3.8/3.9
+Changes=Added a class for formatting summary statistics
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.0.13.zip
+PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.0.14.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
