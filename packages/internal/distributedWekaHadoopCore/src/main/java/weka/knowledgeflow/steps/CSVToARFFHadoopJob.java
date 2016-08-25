@@ -53,6 +53,7 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
     List<String> result = super.getOutgoingConnectionTypes();
     result.add(StepManager.CON_DATASET);
     result.add(StepManager.CON_IMAGE);
+    result.add(StepManager.CON_TEXT);
 
     return result;
   }
@@ -61,11 +62,18 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
   protected void notifyJobOutputConnections() throws WekaException {
     Instances finalHeader =
       ((ArffHeaderHadoopJob) m_runningJob).getFinalHeader();
+    String summaryStats = ((ArffHeaderHadoopJob)m_runningJob).getText();
 
     if (finalHeader != null) {
       Data outputData = new Data(StepManager.CON_DATASET, finalHeader);
       outputData.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, 1);
       outputData.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM, 1);
+      getStepManager().outputData(outputData);
+    }
+
+    if (summaryStats != null) {
+      Data outputData = new Data(StepManager.CON_TEXT, summaryStats);
+      outputData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE, "summary stats");
       getStepManager().outputData(outputData);
     }
 

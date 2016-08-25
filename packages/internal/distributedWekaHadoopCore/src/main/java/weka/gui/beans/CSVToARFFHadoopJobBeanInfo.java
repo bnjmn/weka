@@ -53,6 +53,9 @@ public class CSVToARFFHadoopJobBeanInfo extends AbstractHadoopJobBeanInfo {
       descriptors.add(new EventSetDescriptor(CSVToARFFHadoopJob.class, "image",
         ImageListener.class, "acceptImage"));
 
+      descriptors.add(new EventSetDescriptor(CSVToARFFHadoopJob.class, "text",
+        TextListener.class, "acceptText"));
+
       return descriptors.toArray(new EventSetDescriptor[descriptors.size()]);
     } catch (Exception ex) {
       ex.printStackTrace();

@@ -47,6 +47,7 @@ import weka.core.ChartUtils;
 import weka.core.Instances;
 import weka.core.Utils;
 import weka.core.stats.NumericAttributeBinData;
+import weka.core.stats.StatsFormatter;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.distributed.CSVToARFFHeaderReduceTask;
@@ -84,6 +85,8 @@ public class CSVToArffHeaderHadoopReducer extends
   /** Whether quantiles are being estimated */
   protected boolean m_estimateQuantiles;
 
+  protected int m_decimalPlaces = 2;
+
   @Override
   public void setup(Context context) throws IOException {
     m_task = new CSVToARFFHeaderReduceTask();
@@ -96,6 +99,15 @@ public class CSVToArffHeaderHadoopReducer extends
         String[] options = Utils.splitOptions(taskOpts);
 
         m_estimateQuantiles = Utils.getFlag("compute-quartiles", options);
+
+        String decimalPlaces = Utils.getOption("decimal-places", options);
+        if (!DistributedJobConfig.isEmpty(decimalPlaces)) {
+          try {
+            m_decimalPlaces = Integer.parseInt(decimalPlaces);
+          } catch (NumberFormatException e) {
+            // quietly ignore
+          }
+        }
 
       } catch (Exception ex) {
         throw new IOException(ex);
@@ -139,6 +151,8 @@ public class CSVToArffHeaderHadoopReducer extends
         m_estimateQuantiles ? m_task.aggregateHeadersAndQuartiles(holdersToAgg)
           : m_task.aggregate(headersToAgg);
       writeHeaderToDestination(aggregated, outputDestination, conf);
+      writeSummaryStatsStringToDestination(aggregated, outputDestination,
+        m_estimateQuantiles, m_decimalPlaces, conf);
 
       Text outkey = new Text();
       outkey.set("AKey");
@@ -148,6 +162,42 @@ public class CSVToArffHeaderHadoopReducer extends
 
     } catch (Exception e) {
       throw new IOException(e);
+    }
+  }
+
+  public static void writeSummaryStatsStringToDestination(
+    Instances headerWithSummary, String outputFile, boolean quantiles,
+    int decimalPlaces, Configuration conf) throws IOException,
+    DistributedWekaException {
+    String summaryStats =
+      StatsFormatter.formatStats(headerWithSummary, quantiles, decimalPlaces);
+
+    if (outputFile.toLowerCase().endsWith(".arff")) {
+      outputFile = outputFile.replace(".arff", "").replace(".ARFF", "");
+    }
+    outputFile += ".summary";
+
+    PrintWriter pr = null;
+    try {
+      Path pt = new Path(outputFile);
+      FileSystem fs = FileSystem.get(conf);
+      if (fs.exists(pt)) {
+        // remove the file
+        fs.delete(pt, true);
+      }
+
+      FSDataOutputStream fout = fs.create(pt);
+      OutputStreamWriter osr = new OutputStreamWriter(fout);
+      BufferedWriter br = new BufferedWriter(osr);
+      pr = new PrintWriter(br);
+
+      pr.print(summaryStats);
+      pr.println();
+      pr.flush();
+    } finally {
+      if (pr != null) {
+        pr.close();
+      }
     }
   }
 
