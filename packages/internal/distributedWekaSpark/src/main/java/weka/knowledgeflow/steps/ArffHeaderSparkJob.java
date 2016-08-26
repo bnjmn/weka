@@ -54,6 +54,7 @@ public class ArffHeaderSparkJob extends AbstractSparkJob {
     List<String> result = super.getOutgoingConnectionTypes();
     result.add(StepManager.CON_DATASET);
     result.add(StepManager.CON_IMAGE);
+    result.add(StepManager.CON_TEXT);
 
     return result;
   }
@@ -62,10 +63,19 @@ public class ArffHeaderSparkJob extends AbstractSparkJob {
   public void notifyJobOutputConnections() throws WekaException {
     Instances finalHeader =
       ((weka.distributed.spark.ArffHeaderSparkJob) m_runningJob).getHeader();
+    String summaryStats =
+      ((weka.distributed.spark.ArffHeaderSparkJob) m_runningJob).getText();
     if (finalHeader != null) {
       Data outputData = new Data(StepManager.CON_DATASET, finalHeader);
       outputData.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, 1);
       outputData.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM, 1);
+      getStepManager().outputData(outputData);
+    }
+
+    if (summaryStats != null) {
+      Data outputData = new Data(StepManager.CON_TEXT, summaryStats);
+      outputData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+        "summary stats");
       getStepManager().outputData(outputData);
     }
 
@@ -74,14 +84,14 @@ public class ArffHeaderSparkJob extends AbstractSparkJob {
         .getSummaryCharts();
     List<String> attNames =
       ((weka.distributed.spark.ArffHeaderSparkJob) m_runningJob)
-      .getSummaryChartAttNames();
+        .getSummaryChartAttNames();
 
     if (charts != null && charts.size() > 0) {
       for (int i = 0; i < charts.size(); i++) {
-	BufferedImage image = charts.get(i);
+        BufferedImage image = charts.get(i);
         Data imageData = new Data(StepManager.CON_IMAGE, image);
-	imageData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-				    attNames.get(i));
+        imageData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
+          attNames.get(i));
         getStepManager().outputData(imageData);
         try {
           Thread.sleep(10);

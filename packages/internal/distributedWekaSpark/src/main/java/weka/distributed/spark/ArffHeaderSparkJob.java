@@ -35,11 +35,13 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.Utils;
 import weka.core.stats.NumericAttributeBinData;
+import weka.core.stats.StatsFormatter;
 import weka.distributed.CSVToARFFHeaderMapTask;
 import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.distributed.CSVToARFFHeaderReduceTask;
 import weka.distributed.DistributedWekaException;
 import weka.gui.beans.InstancesProducer;
+import weka.gui.beans.TextProducer;
 
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
@@ -69,7 +71,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class ArffHeaderSparkJob extends SparkJob implements
-  CommandlineRunnable, InstancesProducer {
+  CommandlineRunnable, InstancesProducer, TextProducer {
 
   /** key for specifying a chart width to use */
   public static final String CHART_WIDTH_KEY = "weka.chart.width";
@@ -91,6 +93,9 @@ public class ArffHeaderSparkJob extends SparkJob implements
 
   /** The final aggregated header */
   protected Instances m_finalHeader;
+
+  /** The summary stats */
+  protected String m_summaryStats = "";
 
   /** Comma-separated list of attribute names */
   protected String m_attributeNames = "";
@@ -118,9 +123,9 @@ public class ArffHeaderSparkJob extends SparkJob implements
   protected String m_pathToAggregatedHeader = "";
 
   /**
-   * If there are {@code >=} this number of partitions then we will run a parallel
-   * partial reduce (combine) before running the final local reduce to 1 ARFF
-   * header
+   * If there are {@code >=} this number of partitions then we will run a
+   * parallel partial reduce (combine) before running the final local reduce to
+   * 1 ARFF header
    */
   protected int m_parallelReduceThreshold = 400;
 
@@ -147,7 +152,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
    * @return the header as an Instances object
    * @throws IOException if a problem occurs
    */
-  protected static Instances loadArffHeaderFromPath(String pathToHeader)
+  protected Instances loadArffHeaderFromPath(String pathToHeader)
     throws IOException {
     InputStream is = openFileForRead(pathToHeader);
     InputStreamReader ir = new InputStreamReader(is);
@@ -156,6 +161,25 @@ public class ArffHeaderSparkJob extends SparkJob implements
       header = new Instances(ir);
     } finally {
       ir.close();
+    }
+
+    // check for stats summary
+    if (pathToHeader.toLowerCase().endsWith(".arff")) {
+      pathToHeader.replace(".arff", "").replace(".ARFF", "");
+    }
+    if (checkFileExists(pathToHeader)) {
+      is = openFileForRead(pathToHeader);
+      BufferedReader br = new BufferedReader(new InputStreamReader(is));
+      try {
+        StringBuilder builder = new StringBuilder();
+        String line = "";
+        while ((line = br.readLine()) != null) {
+          builder.append(line).append("\n");
+        }
+        m_summaryStats = builder.toString();
+      } finally {
+        br.close();
+      }
     }
 
     return header;
@@ -628,7 +652,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
             .attribute(i).name(), os, chartWidth, chartHeight);
         if (chart != null) {
           m_summaryCharts.add(chart);
-	  m_summaryChartAttNames.add(name);
+          m_summaryChartAttNames.add(name);
         }
       } else {
         NumericAttributeBinData binStats =
@@ -644,7 +668,7 @@ public class ArffHeaderSparkJob extends SparkJob implements
             chartWidth, chartHeight);
         if (chart != null) {
           m_summaryCharts.add(chart);
-	  m_summaryChartAttNames.add(name);
+          m_summaryChartAttNames.add(name);
         }
       }
     }
@@ -837,6 +861,9 @@ public class ArffHeaderSparkJob extends SparkJob implements
         : CSVToARFFHeaderReduceTask.aggregate(headerPortionsInstances);
     System.out.println(m_finalHeader);
 
+    m_summaryStats =
+      StatsFormatter.formatStats(m_finalHeader, computeQuartiles, 2);
+
     // save the input for other jobs to use...
     JavaRDD<Instance> dataSet =
       stringRDDToInstanceRDD(input,
@@ -946,5 +973,10 @@ public class ArffHeaderSparkJob extends SparkJob implements
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+  @Override
+  public String getText() {
+    return m_summaryStats;
   }
 }
