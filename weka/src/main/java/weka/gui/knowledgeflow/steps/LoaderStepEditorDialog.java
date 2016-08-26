@@ -22,13 +22,15 @@
 package weka.gui.knowledgeflow.steps;
 
 import weka.core.converters.FileSourcedConverter;
+import weka.gui.ExtensionFileFilter;
 import weka.gui.FileEnvironmentField;
 import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.Loader;
 import weka.knowledgeflow.steps.Step;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 import java.io.File;
 import java.io.IOException;
 
@@ -81,6 +83,24 @@ public class LoaderStepEditorDialog extends GOEStepEditorDialog {
     m_fileLoader =
       new FileEnvironmentField("Filename", JFileChooser.OPEN_DIALOG, false);
     m_fileLoader.setEnvironment(m_env);
+    m_fileLoader.resetFileFilters();
+    FileSourcedConverter loader =
+      ((FileSourcedConverter) ((Loader) getStepToEdit()).getLoader());
+    String[] ext = loader.getFileExtensions();
+    ExtensionFileFilter firstFilter = null;
+    for (int i = 0; i < ext.length; i++) {
+      ExtensionFileFilter ff = new ExtensionFileFilter(ext[i],
+              loader.getFileDescription() + " (*" + ext[i] + ")");
+      if (i == 0) {
+        firstFilter = ff;
+      }
+      m_fileLoader.addFileFilter(ff);
+    }
+
+    if (firstFilter != null) {
+      m_fileLoader.setFileFilter(firstFilter);
+    }
+
     JPanel p = new JPanel();
     p.setLayout(new BorderLayout());
     p.add(m_fileLoader, BorderLayout.NORTH);

@@ -21,19 +21,18 @@
 
 package weka.gui;
 
+import weka.core.Environment;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JPanel;
-import javax.swing.filechooser.FileFilter;
-
-import weka.core.Environment;
 
 /**
  * Widget that displays a label, editable combo box for selecting environment
@@ -189,6 +188,16 @@ public class FileEnvironmentField extends EnvironmentField {
   public void addFileFilter(FileFilter toSet) {
     JFileChooser embeddedEditor = (JFileChooser) m_fileEditor.getCustomEditor();
     embeddedEditor.addChoosableFileFilter(toSet);
+  }
+
+  /**
+   * Set the file filter to be the selected one in the drop down box
+   *
+   * @param toSet the file filter to set
+   */
+  public void setFileFilter(FileFilter toSet) {
+    JFileChooser embeddedEditor = (JFileChooser) m_fileEditor.getCustomEditor();
+    embeddedEditor.setFileFilter(toSet);
   }
 
   public void setCurrentDirectory(String directory) {
