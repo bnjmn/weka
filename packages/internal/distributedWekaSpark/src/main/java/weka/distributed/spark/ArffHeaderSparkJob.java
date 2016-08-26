@@ -861,8 +861,20 @@ public class ArffHeaderSparkJob extends SparkJob implements
         : CSVToARFFHeaderReduceTask.aggregate(headerPortionsInstances);
     System.out.println(m_finalHeader);
 
+    int decimalPlaces = 2;
+    try {
+      String dp =
+        Utils.getOption("decimal-places",
+          Utils.splitOptions(getCsvToArffTaskOptions()));
+      if (!DistributedJobConfig.isEmpty(dp)) {
+        decimalPlaces = Integer.parseInt(dp);
+      }
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
     m_summaryStats =
-      StatsFormatter.formatStats(m_finalHeader, computeQuartiles, 2);
+      StatsFormatter
+        .formatStats(m_finalHeader, computeQuartiles, decimalPlaces);
 
     // save the input for other jobs to use...
     JavaRDD<Instance> dataSet =
