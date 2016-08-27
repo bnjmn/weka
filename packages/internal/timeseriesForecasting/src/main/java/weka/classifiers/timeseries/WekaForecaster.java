@@ -25,13 +25,8 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.functions.LinearRegression;
-import weka.classifiers.timeseries.core.ConfidenceIntervalForecaster;
-import weka.classifiers.timeseries.core.CustomPeriodicTest;
-import weka.classifiers.timeseries.core.ErrorBasedConfidenceIntervalEstimator;
-import weka.classifiers.timeseries.core.IncrementallyPrimeable;
-import weka.classifiers.timeseries.core.OverlayForecaster;
+import weka.classifiers.timeseries.core.*;
 import weka.filters.supervised.attribute.TSLagMaker;
-import weka.classifiers.timeseries.core.TSLagUser;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -160,6 +155,111 @@ public class WekaForecaster extends AbstractForecaster implements TSLagUser,
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+    /**
+     * Check whether the base learner requires special serialization
+     *
+     * @return true if base learner requires special serialization, false otherwise
+     */
+    public boolean baseModelHasSerializer() {
+        return m_forecaster instanceof BaseModelSerializer;
+    }
+
+  /**
+   * Save underlying classifier
+   *
+   * @param filepath the path of the file to save the base model to
+   * @throws Exception
+   */
+  public void saveBaseModel(String filepath) throws Exception {
+    if (baseModelHasSerializer()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((BaseModelSerializer) m_singleTargetForecasters.get(i).getWrappedClassifier()).serializeModel(filepath + ".base" + i);
+    }
+  }
+
+  /**
+   * Load serialized classifier
+   *
+   * @param filepath the path of the file to load the base model from
+   * @throws Exception
+   */
+  public void loadBaseModel(String filepath) throws Exception {
+    if (baseModelHasSerializer()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((BaseModelSerializer) m_singleTargetForecasters.get(i).getWrappedClassifier()).loadSerializedModel(filepath + ".base" + i);
+    }
+  }
+
+  /**
+   * Serialize model state
+   *
+   * @param filepath the path of the file to save the model state to
+   * @throws Exception
+   */
+  public void serializeState(String filepath) throws Exception {
+    if (usesState()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((StateDependentPredictor) m_singleTargetForecasters.get(i).getWrappedClassifier()).serializeState(filepath + ".state" + i);
+    }
+  }
+
+  /**
+   * Load serialized model state
+   *
+   * @param filepath the path of the file to save the model state from
+   * @throws Exception
+   */
+  public void loadSerializedState(String filepath) throws Exception {
+    if (usesState()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((StateDependentPredictor) m_singleTargetForecasters.get(i).getWrappedClassifier()).loadSerializedState(filepath + ".state" + i);
+    }
+  }
+
+  /**
+   * Check whether the base learner requires operations regarding state
+   *
+   * @return true if base learner uses state-based predictions, false otherwise
+   */
+  public boolean usesState() {
+    return m_forecaster instanceof StateDependentPredictor;
+  }
+
+  /**
+   * Reset model state.
+   */
+  public void clearPreviousState() {
+    if (usesState()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((StateDependentPredictor) m_singleTargetForecasters.get(i).getWrappedClassifier()).clearPreviousState();
+    }
+  }
+
+  /**
+   * Load state into model.
+   */
+  public void setPreviousState(List<Object> previousState) {
+    if (usesState()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        ((StateDependentPredictor) m_singleTargetForecasters.get(i).getWrappedClassifier()).setPreviousState(previousState.get(i));
+    }
+  }
+
+  /**
+   * Get the last set state of the model.
+   *
+   * @return the state of the model to be used in next prediction
+   */
+  public List<Object> getPreviousState() {
+    List<Object> state = new ArrayList<>();
+
+    if (usesState()) {
+      for (int i = 0; i < m_singleTargetForecasters.size(); i++)
+        state.add(i, ((StateDependentPredictor) m_singleTargetForecasters.get(i).getWrappedClassifier()).getPreviousState());
+    }
+    return state;
   }
 
   /**
@@ -991,7 +1091,6 @@ public class WekaForecaster extends AbstractForecaster implements TSLagUser,
     Instances trainingData = insts;
     trainingData = m_lagMaker.getTransformedData(trainingData);
     // System.err.println(trainingData);
-
 
     m_dateRemover = new RemoveType();
     m_dateRemover.setOptions(new String[] { "-T", "date" });

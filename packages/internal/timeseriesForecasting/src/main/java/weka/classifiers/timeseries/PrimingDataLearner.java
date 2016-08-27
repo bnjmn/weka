@@ -46,7 +46,7 @@ public interface PrimingDataLearner {
    * Update the forecaster on a priming instance or predicted value (for
    * closed-loop projection)
    * 
-   * @param inst the instance to update from
+   * @param primingOrPredictedTargetValue the instance to update from
    */
   void updateForecaster(double primingOrPredictedTargetValue);
 }

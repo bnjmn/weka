@@ -24,6 +24,7 @@ package weka.classifiers.timeseries.eval;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.timeseries.AbstractForecaster;
 import weka.classifiers.timeseries.TSForecaster;
+import weka.classifiers.timeseries.WekaForecaster;
 import weka.classifiers.timeseries.core.OverlayForecaster;
 import weka.filters.supervised.attribute.TSLagMaker;
 import weka.classifiers.timeseries.core.TSLagUser;
@@ -38,13 +39,7 @@ import javax.swing.JPanel;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
-import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.FileReader;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
+import java.io.*;
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -644,7 +639,12 @@ public class TSEvaluation {
     m_trainingFuture = null;
     m_testFuture = null;
 
-    // train the forecaster first (if necessary)
+    // Initialization for state dependent predictors
+    int numStepsToForecast = m_horizon;
+    forecaster.clearPreviousState();
+    List<Object> postTrainingDataState = forecaster.getPreviousState();
+
+     // train the forecaster first (if necessary)
     if (m_trainingData != null && buildModel) {
       for (PrintStream p : progress) {
         p.println("Building forecaster...");
@@ -693,6 +693,10 @@ public class TSEvaluation {
       for (PrintStream p : progress) {
         p.println("Evaluating on training set...");
       }
+      // State dependent predictors update state on each time step prediction,
+      // so when performing evaluation only one time-step ahead must be predicted
+      if (forecaster.usesState())
+        m_horizon = 1;
 
       // set up training set prediction and eval modules
       m_predictionsForTrainingData = new ArrayList<ErrorModule>();
@@ -714,6 +718,7 @@ public class TSEvaluation {
         Instance current = m_trainingData.instance(i);
 
         if (i < m_primeWindowSize) {
+          // reset state
           primeData.add(current);
         } else {
           if (i % 10 == 0) {
@@ -722,7 +727,7 @@ public class TSEvaluation {
                 + " instances...");
             }
           }
-
+          // Clear state every time a forecast is made on new priming data
           forecaster.primeForecaster(primeData);
           /*
            * System.err.println(primeData); System.exit(1);
@@ -755,12 +760,63 @@ public class TSEvaluation {
             primeData.compactify();
           }
         }
+        // If on the instance before the last one, save the state of the state dependent predictor
+        if (i == m_trainingData.numInstances() - 1)
+          postTrainingDataState = forecaster.getPreviousState();
       }
+      m_horizon = numStepsToForecast;
     }
 
-    if (m_trainingData != null && m_forecastFuture
-    /* && !m_evaluateTrainingData */) {
+    if (m_trainingData != null && m_forecastFuture) {
+      // To generate future forecast for training data, a state-dependent
+      // model must start predictions from the beginning of the training data
+      if (!m_evaluateTrainingData && forecaster.usesState()) {
+        m_horizon = 1;
 
+        Instances primeData = new Instances(m_trainingData, 0);
+        if (forecaster instanceof TSLagUser) {
+          // if an artificial time stamp is being used, make sure it is reset for
+          // evaluating the training data
+          if (((TSLagUser) forecaster).getTSLagMaker().isUsingAnArtificialTimeIndex()) {
+            ((TSLagUser) forecaster).getTSLagMaker().setArtificialTimeStartValue(
+                    m_primeWindowSize);
+          }
+        }
+        for (int i = 0; i < m_trainingData.numInstances(); i++) {
+          Instance current = m_trainingData.instance(i);
+
+          if (i < m_primeWindowSize) {
+            primeData.add(current);
+          } else {
+            forecaster.primeForecaster(primeData);
+
+            List<List<NumericPrediction>> forecast = null;
+            if (forecaster instanceof OverlayForecaster
+                    && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
+
+              // can only generate forecasts for remaining training data that
+              // we can use as overlay data
+              if (current != null) {
+                Instances overlay = createOverlayForecastData(forecaster, m_trainingData, i, m_horizon);
+                ((OverlayForecaster) forecaster).forecast(m_horizon, overlay, progress);
+              }
+            } else {
+              forecaster.forecast(m_horizon, progress);
+            }
+
+            // remove the oldest prime instance and add this one
+            if (m_primeWindowSize > 0 && current != null) {
+              primeData.remove(0);
+              primeData.add(current);
+              primeData.compactify();
+            }
+          }
+          // If on the instance before the last one, save the state of the state dependent predictor
+          if (i == m_trainingData.numInstances() - 1)
+            postTrainingDataState = forecaster.getPreviousState();
+        }
+        m_horizon = numStepsToForecast;
+      }
       // generate a forecast beyond the end of the training data
       for (PrintStream p : progress) {
         p.println("Generating future forecast for training data...");
@@ -870,6 +926,7 @@ public class TSEvaluation {
       for (int i = predictionOffsetForTestData; i < m_testData.numInstances(); i++) {
         Instance current = m_testData.instance(i);
         if (m_primeWindowSize > 0) {
+          // reset state
           forecaster.primeForecaster(primeData);
         }
 
@@ -962,6 +1019,10 @@ public class TSEvaluation {
         m_testFuture = forecaster.forecast(m_horizon, progress);
       }
     }
+
+    // Set the state dependent forecaster ready to make predictions beyond the training data
+    // TODO: add checkbox on Forecasting Panel to reset or load state instead
+    forecaster.setPreviousState(postTrainingDataState);
   }
 
   /**

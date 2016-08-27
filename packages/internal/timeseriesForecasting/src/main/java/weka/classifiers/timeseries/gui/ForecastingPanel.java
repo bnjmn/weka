@@ -1010,6 +1010,15 @@ public class ForecastingPanel extends JPanel {
         StringBuffer outBuff = new StringBuffer();
         WekaForecaster wf = (WekaForecaster) f;
 
+        if (wf.baseModelHasSerializer()) {
+          try {
+            wf.loadBaseModel(sFile.toString());
+          } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, ex, "Base model load failed",
+                    JOptionPane.ERROR_MESSAGE);
+          }
+        }
+
         String lagOptions = "";
         if (wf instanceof TSLagUser) {
           TSLagMaker lagMaker = ((TSLagUser) wf).getTSLagMaker();
@@ -1071,6 +1080,8 @@ public class ForecastingPanel extends JPanel {
       }
 
       try {
+        forecaster.saveBaseModel(sFile.toString());
+        forecaster.serializeState(sFile.toString());
         ObjectOutputStream oos =
           new ObjectOutputStream(new FileOutputStream(sFile));
         oos.writeObject(forecaster);
