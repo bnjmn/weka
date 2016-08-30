@@ -43,6 +43,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
@@ -101,6 +102,29 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
     + "distributedWekaBase"
     + File.separator
     + "lib" + File.separator + "la4j-0.4.5.jar";
+
+  /** The path to the t-digest.jar */
+  public static final String TDIGEST_JAR = WekaPackageManager.PACKAGES_DIR
+    .toString()
+    + File.separator
+    + "distributedWekaBase"
+    + File.separator
+    + "lib" + File.separator + "t-digest-3.1.jar";
+
+  protected static List<String> s_runtimeLibraries = new ArrayList<>();
+
+  static {
+    try {
+      // main distrubuted Weka spark jar + jars from distributed Weka base
+      s_runtimeLibraries.addAll(Arrays.asList(DISTRIBUTED_WEKA_HADOOP_JAR,
+        DISTRIBUTED_WEKA_BASE_JAR, OPEN_CSV_JAR, JFREECHART_JAR, JCOMMON_JAR,
+        COLT_JAR, LA4J_JAR, TDIGEST_JAR));
+
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
   /** For serialization */
   private static final long serialVersionUID = -9026086203818342364L;
   /**
@@ -455,24 +479,34 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
           + "weka.jar in HDFS so that it is available to running Jobs");
     }
 
-    statusMessage("Installing libraries in HDFS...");
     List<String> installLibraries = new ArrayList<String>();
+    statusMessage("Installing libraries in HDFS...");
     logMessage("Copying " + environmentSubstitute(m_pathToWekaJar) + " to HDFS");
     installLibraries.add(environmentSubstitute(m_pathToWekaJar));
-    logMessage("Copying " + DISTRIBUTED_WEKA_BASE_JAR + " to HSFS");
-    installLibraries.add(DISTRIBUTED_WEKA_BASE_JAR);
-    logMessage("Copying " + DISTRIBUTED_WEKA_HADOOP_JAR + " to HSFS");
-    installLibraries.add(DISTRIBUTED_WEKA_HADOOP_JAR);
-    logMessage("Copying " + OPEN_CSV_JAR + " to HDFS");
-    installLibraries.add(OPEN_CSV_JAR);
-    logMessage("Copying " + JFREECHART_JAR + " to HDFS");
-    installLibraries.add(JFREECHART_JAR);
-    logMessage("Copying " + JCOMMON_JAR + " to HDFS");
-    installLibraries.add(JCOMMON_JAR);
-    logMessage("Copying " + COLT_JAR + " to HDFS");
-    installLibraries.add(COLT_JAR);
-    logMessage("Copying " + LA4J_JAR + " to HDFS");
-    installLibraries.add(LA4J_JAR);
+    for (String jar : s_runtimeLibraries) {
+      if (new File(jar).exists()) {
+        installLibraries.add(jar);
+        logMessage("Copying " + jar + " to HDFS");
+      } else {
+        logMessage("WARNING: runtime lib '" + jar + "' does not seem "
+          + "to exist on disk - skipping");
+      }
+    }
+
+    // logMessage("Copying " + DISTRIBUTED_WEKA_BASE_JAR + " to HSFS");
+    // installLibraries.add(DISTRIBUTED_WEKA_BASE_JAR);
+    // logMessage("Copying " + DISTRIBUTED_WEKA_HADOOP_JAR + " to HSFS");
+    // installLibraries.add(DISTRIBUTED_WEKA_HADOOP_JAR);
+    // logMessage("Copying " + OPEN_CSV_JAR + " to HDFS");
+    // installLibraries.add(OPEN_CSV_JAR);
+    // logMessage("Copying " + JFREECHART_JAR + " to HDFS");
+    // installLibraries.add(JFREECHART_JAR);
+    // logMessage("Copying " + JCOMMON_JAR + " to HDFS");
+    // installLibraries.add(JCOMMON_JAR);
+    // logMessage("Copying " + COLT_JAR + " to HDFS");
+    // installLibraries.add(COLT_JAR);
+    // logMessage("Copying " + LA4J_JAR + " to HDFS");
+    // installLibraries.add(LA4J_JAR);
 
     HDFSUtils.copyFilesToWekaHDFSInstallationDirectory(installLibraries,
       m_mrConfig.getHDFSConfig(), m_env, true);
@@ -577,13 +611,25 @@ public abstract class HadoopJob extends DistributedJob implements OptionHandler 
       + "for the job");
     List<String> cacheFiles = new ArrayList<String>();
     cacheFiles.add(new File(m_pathToWekaJar).getName());
+
     cacheFiles.add(new File(DISTRIBUTED_WEKA_BASE_JAR).getName());
-    cacheFiles.add(new File(DISTRIBUTED_WEKA_HADOOP_JAR).getName());
-    cacheFiles.add(new File(OPEN_CSV_JAR).getName());
-    cacheFiles.add(new File(JFREECHART_JAR).getName());
-    cacheFiles.add(new File(JCOMMON_JAR).getName());
-    cacheFiles.add(new File(COLT_JAR).getName());
-    cacheFiles.add(new File(LA4J_JAR).getName());
+
+    for (String jar : s_runtimeLibraries) {
+      if (new File(jar).exists()) {
+        cacheFiles.add(new File(jar).getName());
+      } else {
+        logMessage("WARNING: runtime lib '" + jar + "' does not seem "
+          + "to exist on disk - skipping");
+      }
+    }
+
+
+//    cacheFiles.add(new File(DISTRIBUTED_WEKA_HADOOP_JAR).getName());
+//    cacheFiles.add(new File(OPEN_CSV_JAR).getName());
+//    cacheFiles.add(new File(JFREECHART_JAR).getName());
+//    cacheFiles.add(new File(JCOMMON_JAR).getName());
+//    cacheFiles.add(new File(COLT_JAR).getName());
+//    cacheFiles.add(new File(LA4J_JAR).getName());
 
     HDFSUtils.addWekaInstalledFilesToClasspath(m_mrConfig.getHDFSConfig(),
       conf, cacheFiles, m_env);
