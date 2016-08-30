@@ -9,7 +9,7 @@ PackageName=prefuseGraphViewer
 Version=1.0.4
 
 #Date
-Date=2016-04-14
+Date=2016-08-31
 
 # Title (required)
 Title=A Knowledge Flow visualization component for displaying trees and graphs that uses the prefuse visualization toolkit.
