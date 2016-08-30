@@ -79,7 +79,7 @@ public class ChartUtils {
    * 
    * @param options a list of options
    * @param toGet the option to get the value of
-   * @return
+   * @return the value of the option, or null if the option is not present.
    */
   protected static String getOption(List<String> options, String toGet) {
     String value = null;
