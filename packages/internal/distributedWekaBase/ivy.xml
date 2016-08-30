@@ -22,6 +22,7 @@
 
     <dependency org="jfree" name="jfreechart" rev="1.0.13" transitive="true" conf="default->default" changing="true" />
 <!--    <dependency org="com.clearspring.analytics" name="stream" rev="2.7.0" /> -->
+    <dependency org="com.tdunning" name="t-digest" rev="3.1" />
 
     <dependency org="junit" name="junit" rev="4.5" conf="test->default" />
 
