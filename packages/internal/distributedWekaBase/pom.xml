@@ -129,6 +129,12 @@ This package provides generic configuration class and distributed map/reduce sty
     </dependency>
 
     <dependency>
+      <groupId>com.tdunning</groupId>
+      <artifactId>t-digest</artifactId>
+      <version>3.1</version>
+    </dependency>
+
+    <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
       <version>[3.8.0,)</version>
