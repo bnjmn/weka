@@ -22,7 +22,7 @@
 package weka.distributed;
 
 import au.com.bytecode.opencsv.CSVParser;
-import com.clearspring.analytics.stream.quantile.TDigest;
+import weka.core.stats.TDigest;
 import distributed.core.DistributedJobConfig;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -146,6 +146,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   protected boolean m_computeSummaryStats = true;
   /** A map of attribute names to summary statistics */
   protected Map<String, Stats> m_summaryStats = new HashMap<String, Stats>();
+  /** Decimal places for summary stats */
+  protected int m_decimalPlaces = 2;
+
   /**
    * Whether to treat zeros as missing values when computing summary stats for
    * numeric attributes
@@ -154,6 +157,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
   /** Whether to suppress command line options relating to quantile estimation */
   protected boolean m_suppressQuantileOptions;
+
+  /* Whether to suppress command line options relating to CSV parsing */
+  protected boolean m_suppressCSVParsingOptions;
 
   /** Whether to perform quantile estimation too */
   protected boolean m_estimateQuantiles = false;
@@ -176,6 +182,21 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    */
   public CSVToARFFHeaderMapTask(boolean suppressQuantileOptions) {
     m_suppressQuantileOptions = suppressQuantileOptions;
+  }
+
+  /**
+   * Constructor
+   * 
+   * @param suppressQuantileOptions true if command line options relating to
+   *          quantile estimation are to be suppressed
+   * @param suppressCSVParsingOptions true if command line options relating to
+   *          CSV parsing are to be suppressed
+   * @param suppressCSVParsingOptions
+   */
+  public CSVToARFFHeaderMapTask(boolean suppressQuantileOptions,
+    boolean suppressCSVParsingOptions) {
+    m_suppressQuantileOptions = suppressQuantileOptions;
+    m_suppressCSVParsingOptions = suppressCSVParsingOptions;
   }
 
   /**
@@ -297,7 +318,8 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       task = new CSVToARFFHeaderMapTask();
       task.setOptions(args);
-      // task.setComputeSummaryStats(true);
+      task.setComputeQuartilesAsPartOfSummaryStats(true);
+      //      task.setComputeSummaryStats(true);
 
       BufferedReader br = new BufferedReader(new FileReader(args[0]));
       String line = br.readLine();
@@ -444,16 +466,19 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")", "format", 1,
       "-format <date format>"));
 
-    result.add(new Option("\tThe string representing a missing value.\n"
-      + "\t(default: ?)", "M", 1, "-M <str>"));
+    if (!m_suppressCSVParsingOptions) {
+      result.add(new Option("\tThe string representing a missing value.\n"
+        + "\t(default: ?)", "M", 1, "-M <str>"));
 
-    result.add(new Option("\tThe field separator to be used.\n"
-      + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
-      "-F <separator>"));
+      result.add(new Option("\tThe field separator to be used.\n"
+        + "\t'\\t' can be used as well.\n" + "\t(default: ',')", "F", 1,
+        "-F <separator>"));
 
-    result.add(new Option("\tThe enclosure character(s) to use for strings.\n"
-      + "\tSpecify as a comma separated list (e.g. \",'" + " (default: \",')",
-      "E", 1, "-E <enclosures>"));
+      result.add(new Option(
+        "\tThe enclosure character(s) to use for strings.\n"
+          + "\tSpecify as a comma separated list (e.g. \",'"
+          + " (default: \",')", "E", 1, "-E <enclosures>"));
+    }
 
     if (!m_suppressQuantileOptions) {
       result.add(new Option(
@@ -468,6 +493,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
             + "at the expense of time and space (default="
             + NumericStats.Q_COMPRESSION + ").", "compression", 1,
           "-compression <number>"));
+
+      result.add(new Option("\tNumber of decimal places for summary stats.\n\t"
+        + "(default = 2)", "decimal-places", 1, "-decimal-places <num>"));
     }
 
     return result.elements();
@@ -494,18 +522,20 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       result.add(getDateFormat());
     }
 
-    result.add("-M");
-    result.add(getMissingValue());
+    if (!m_suppressCSVParsingOptions) {
+      result.add("-M");
+      result.add(getMissingValue());
 
-    result.add("-E");
-    String encl = getEnclosureCharacters();
-    if (encl.charAt(0) == '"') {
-      encl = "\\\"";
+      result.add("-E");
+      String encl = getEnclosureCharacters();
+      if (encl.charAt(0) == '"') {
+        encl = "\\\"";
+      }
+      result.add(encl);
+
+      result.add("-F");
+      result.add(getFieldSeparator());
     }
-    result.add(encl);
-
-    result.add("-F");
-    result.add(getFieldSeparator());
 
     if (!m_suppressQuantileOptions) {
       if (getComputeQuartilesAsPartOfSummaryStats()) {
@@ -514,6 +544,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       result.add("-compression");
       result.add("" + getCompressionLevelForQuartileEstimation());
+
+      result.add("-decimal-places");
+      result.add("" + getNumDecimalPlaces());
     }
 
     if (getTreatZerosAsMissing()) {
@@ -567,19 +600,21 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       setMissingValue("?");
     }
 
-    tmpStr = Utils.getOption('F', options);
-    if (tmpStr.length() != 0) {
-      setFieldSeparator(tmpStr);
-    } else {
-      setFieldSeparator(",");
-    }
-
-    tmpStr = Utils.getOption("E", options);
-    if (tmpStr.length() > 0) {
-      if (tmpStr.charAt(0) == '\\' && tmpStr.length() > 1) {
-        tmpStr = "" + tmpStr.charAt(1);
+    if (!m_suppressCSVParsingOptions) {
+      tmpStr = Utils.getOption('F', options);
+      if (tmpStr.length() != 0) {
+        setFieldSeparator(tmpStr);
+      } else {
+        setFieldSeparator(",");
       }
-      setEnclosureCharacters(tmpStr);
+
+      tmpStr = Utils.getOption("E", options);
+      if (tmpStr.length() > 0) {
+        if (tmpStr.charAt(0) == '\\' && tmpStr.length() > 1) {
+          tmpStr = "" + tmpStr.charAt(1);
+        }
+        setEnclosureCharacters(tmpStr);
+      }
     }
 
     setTreatZerosAsMissing(Utils.getFlag("treat-zeros-as-missing", options));
@@ -591,6 +626,11 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       tmpStr = Utils.getOption("compression", options);
       if (tmpStr.length() > 0) {
         setCompressionLevelForQuartileEstimation(Double.parseDouble(tmpStr));
+      }
+
+      tmpStr = Utils.getOption("decimal-places", options);
+      if (tmpStr.length() > 0) {
+        setNumDecimalPlaces(Integer.parseInt(tmpStr));
       }
     }
 
@@ -611,6 +651,24 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       m_nominalDefaultLabelSpecs.add(tmpStr);
     }
+  }
+
+  /**
+   * Set the number of decimal places for outputting summary stats
+   *
+   * @param numDecimalPlaces number of decimal places to use
+   */
+  public void setNumDecimalPlaces(int numDecimalPlaces) {
+    m_decimalPlaces = numDecimalPlaces;
+  }
+
+  /**
+   * Get the number of decimal places for outputting summary stats
+   *
+   * @return number of decimal places to use
+   */
+  public int getNumDecimalPlaces() {
+    return m_decimalPlaces;
   }
 
   /**

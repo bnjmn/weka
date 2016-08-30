@@ -21,17 +21,14 @@
 
 package weka.core.stats;
 
-import java.io.Serializable;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-
 import weka.core.Attribute;
 import weka.core.Utils;
 import weka.distributed.CSVToARFFHeaderMapTask;
 
-import com.clearspring.analytics.stream.quantile.TDigest;
+import java.io.Serializable;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class for computing numeric stats
@@ -133,8 +130,7 @@ public class NumericStats extends Stats implements Serializable {
           deSerializeCurrentQuantileEstimator();
         }
         if (m_quantileEstimator == null) {
-          m_quantileEstimator =
-            new TDigest(m_quantileCompression, new Random(1));
+          m_quantileEstimator = TDigest.createTDigest(m_quantileCompression);
         }
         m_quantileEstimator.add(value, (int) (weight < 1 ? 1 : weight));
       }
@@ -176,6 +172,15 @@ public class NumericStats extends Stats implements Serializable {
    */
   public void setQuantileEstimator(TDigest estimator) {
     m_quantileEstimator = estimator;
+  }
+
+  /**
+   * Set the compression level
+   *
+   * @param compression compression level
+   */
+  public void setCompression(double compression) {
+    m_quantileCompression = compression;
   }
 
   /**
@@ -240,9 +245,8 @@ public class NumericStats extends Stats implements Serializable {
       if (m == ArffSummaryNumericMetric.FIRSTQUARTILE
         || m == ArffSummaryNumericMetric.MEDIAN
         || m == ArffSummaryNumericMetric.THIRDQUARTILE) {
-        if (Utils
-          .isMissingValue(m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE
-            .ordinal()])
+        if (Utils.isMissingValue(m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE
+          .ordinal()])
           && Utils.isMissingValue(m_stats[ArffSummaryNumericMetric.MEDIAN
             .ordinal()])
           && Utils
@@ -379,7 +383,13 @@ public class NumericStats extends Stats implements Serializable {
     if (m_quantileEstimator == null) {
       return;
     }
+    computeQuartilesAndHistogramNew();
+  }
 
+  /**
+   * Original equal-width histogram generation method
+   */
+  protected void computeQuartilesAndHistogramsOriginal() {
     m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
       m_quantileEstimator.quantile(0.25);
     m_stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] =
@@ -434,6 +444,127 @@ public class NumericStats extends Stats implements Serializable {
         prev = cdf;
       }
     }
+
+    m_binLabels = binData.getBinLabels();
+    m_binFreqs = binData.getBinFreqs();
+  }
+
+  /**
+   * New method that performs equal width between the 10th and 90th percentiles.
+   * These bounds are adjusted if they coincide with the min/max. Two bins are
+   * reserved for outliers on either side
+   */
+  protected void computeQuartilesAndHistogramNew() {
+    m_stats[ArffSummaryNumericMetric.FIRSTQUARTILE.ordinal()] =
+      m_quantileEstimator.quantile(0.25);
+    m_stats[ArffSummaryNumericMetric.MEDIAN.ordinal()] =
+      m_quantileEstimator.quantile(0.5);
+    m_stats[ArffSummaryNumericMetric.THIRDQUARTILE.ordinal()] =
+      m_quantileEstimator.quantile(0.75);
+
+    double min = m_stats[ArffSummaryNumericMetric.MIN.ordinal()];
+    double max = m_stats[ArffSummaryNumericMetric.MAX.ordinal()];
+    double count = m_stats[ArffSummaryNumericMetric.COUNT.ordinal()];
+    double l = 0.1;
+    double h = 0.9;
+    double incr = 0.05;
+    double lowPercentile = m_quantileEstimator.quantile(l);
+    double highPercentile = m_quantileEstimator.quantile(h);
+    while (lowPercentile <= min || Math.abs(lowPercentile - min) < 1e-6) {
+      l += incr;
+      if (lowPercentile < highPercentile) {
+        lowPercentile = m_quantileEstimator.quantile(l);
+      } else {
+        break;
+      }
+      // System.err.println("Increased lp to: " + lowPercentile + " (" + l +
+      // ")");
+    }
+
+    while (highPercentile >= max || Math.abs(max - highPercentile) < 1e-6) {
+      h -= incr;
+      if (highPercentile > lowPercentile) {
+        highPercentile = m_quantileEstimator.quantile(h);
+        // System.err.println("Reduced hp to: " + highPercentile + " (" + h +
+        // ")");
+      } else {
+        break;
+      }
+    }
+    // System.err.println("Attribute: " + m_attributeName);
+    // System.err.println("Max: " + max + " hp: " + highPercentile);
+    // System.err.println("Min: " + min + " lp: " + lowPercentile);
+
+    // can't find an interesting area? Revert to the old equal width version
+    if (lowPercentile >= highPercentile) {
+      computeQuartilesAndHistogramsOriginal();
+      return;
+    }
+
+    NumericAttributeBinData binData =
+      new NumericAttributeBinData(m_attributeName, count, min,
+        m_stats[ArffSummaryNumericMetric.MAX.ordinal()],
+        m_stats[ArffSummaryNumericMetric.STDDEV.ordinal()],
+        m_stats[ArffSummaryNumericMetric.MISSING.ordinal()], lowPercentile,
+        highPercentile, NumericAttributeBinData.MAX_BINS);
+
+    double binWidthPercentileRange = binData.getBinWidth();
+
+    // number of bins (including the two reserved for outliers
+    int numBins = binData.getNumBins();
+
+    double lower = 0;
+    double upper = 0;
+    double midVal = (lowPercentile - min) / 2.0;
+    midVal = min + midVal;
+    double cdf = m_quantileEstimator.cdf(lowPercentile);
+    boolean ok = !Double.isInfinite(cdf) && !Double.isNaN(cdf);
+    double freq = ok ? cdf : 0;
+
+    freq *= count;
+    if (freq < 0) {
+      freq = 0;
+    }
+    binData.addValue(midVal, freq);
+    // System.err.println("upper: " + lowPercentile + ": " + freq);
+    double prev = cdf;
+
+    for (int i = 1; i < numBins - 1; i++) {
+      lower = lowPercentile + ((i - 1) * binWidthPercentileRange);
+      upper = lowPercentile + (i * binWidthPercentileRange);
+      midVal = lower + ((upper - lower) / 2.0);
+      cdf = m_quantileEstimator.cdf(upper);
+
+      ok = !Double.isInfinite(cdf) && !Double.isNaN(cdf);
+      freq = ok ? cdf : 0;
+      if (ok) {
+        freq = cdf - prev;
+      }
+      if (freq < 0) {
+        freq = 0;
+      }
+
+      freq *= count;
+      binData.addValue(midVal, freq);
+      // System.err.println("upper: " + upper + ": " + freq);
+      if (ok) {
+        prev = cdf;
+      }
+    }
+
+    // last bin
+    cdf = m_quantileEstimator.cdf(max);
+    prev = m_quantileEstimator.cdf(highPercentile);
+    midVal = (max - highPercentile) / 2.0;
+    midVal = highPercentile + midVal;
+
+    // must be total - previous frequency
+    freq = cdf - prev;
+    if (freq < 0) {
+      freq = 0;
+    }
+    freq *= count;
+    binData.addValue(midVal, freq);
 
     m_binLabels = binData.getBinLabels();
     m_binFreqs = binData.getBinFreqs();

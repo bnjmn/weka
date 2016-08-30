@@ -21,16 +21,6 @@
 
 package weka.distributed;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 import weka.core.Attribute;
 import weka.core.Instances;
 import weka.core.Utils;
@@ -41,11 +31,20 @@ import weka.core.stats.NumericStats;
 import weka.core.stats.QuantileCalculator;
 import weka.core.stats.Stats;
 import weka.core.stats.StringStats;
+import weka.core.stats.TDigest;
 import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 
-import com.clearspring.analytics.stream.quantile.TDigest;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Reduce task for ARFF header and summary attribute creation.
@@ -128,6 +127,7 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
 
           NumericStats newStats = NumericStats.attributeToStats(summary);
           newStats.setQuantileEstimator(mergedForAtt);
+          newStats.setCompression(mergedForAtt.compression());
           newStats.computeQuartilesAndHistogram();
 
           // add the updated attribute with quantiles and histogram
