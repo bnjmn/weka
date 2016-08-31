@@ -640,9 +640,9 @@ public class TSEvaluation {
     m_testFuture = null;
 
     // Initialization for state dependent predictors
-    int numStepsToForecast = m_horizon;
     forecaster.clearPreviousState();
-    List<Object> postTrainingDataState = forecaster.getPreviousState();
+    List<Object> postTrainingDataState = null;
+    List<Object> postTestDataState = null;
 
      // train the forecaster first (if necessary)
     if (m_trainingData != null && buildModel) {
@@ -686,17 +686,12 @@ public class TSEvaluation {
           m_testData = testMod;
         }
       }
-
     }
 
     if (m_evaluateTrainingData) {
       for (PrintStream p : progress) {
         p.println("Evaluating on training set...");
       }
-      // State dependent predictors update state on each time step prediction,
-      // so when performing evaluation only one time-step ahead must be predicted
-      if (forecaster.usesState())
-        m_horizon = 1;
 
       // set up training set prediction and eval modules
       m_predictionsForTrainingData = new ArrayList<ErrorModule>();
@@ -718,7 +713,6 @@ public class TSEvaluation {
         Instance current = m_trainingData.instance(i);
 
         if (i < m_primeWindowSize) {
-          // reset state
           primeData.add(current);
         } else {
           if (i % 10 == 0) {
@@ -727,11 +721,11 @@ public class TSEvaluation {
                 + " instances...");
             }
           }
-          // Clear state every time a forecast is made on new priming data
+
+          if (forecaster.usesState())
+            predictionsForBatch(forecaster, getInstancesUpTo(m_trainingData, primeData.lastInstance()), 1);
+
           forecaster.primeForecaster(primeData);
-          /*
-           * System.err.println(primeData); System.exit(1);
-           */
 
           List<List<NumericPrediction>> forecast = null;
           if (forecaster instanceof OverlayForecaster
@@ -760,63 +754,16 @@ public class TSEvaluation {
             primeData.compactify();
           }
         }
-        // If on the instance before the last one, save the state of the state dependent predictor
-        if (i == m_trainingData.numInstances() - 1)
-          postTrainingDataState = forecaster.getPreviousState();
       }
-      m_horizon = numStepsToForecast;
+
+    }
+
+    if (forecaster.usesState()) {
+      predictionsForTrainingData(forecaster, 1);
+      postTrainingDataState = forecaster.getPreviousState();
     }
 
     if (m_trainingData != null && m_forecastFuture) {
-      // To generate future forecast for training data, a state-dependent
-      // model must start predictions from the beginning of the training data
-      if (!m_evaluateTrainingData && forecaster.usesState()) {
-        m_horizon = 1;
-
-        Instances primeData = new Instances(m_trainingData, 0);
-        if (forecaster instanceof TSLagUser) {
-          // if an artificial time stamp is being used, make sure it is reset for
-          // evaluating the training data
-          if (((TSLagUser) forecaster).getTSLagMaker().isUsingAnArtificialTimeIndex()) {
-            ((TSLagUser) forecaster).getTSLagMaker().setArtificialTimeStartValue(
-                    m_primeWindowSize);
-          }
-        }
-        for (int i = 0; i < m_trainingData.numInstances(); i++) {
-          Instance current = m_trainingData.instance(i);
-
-          if (i < m_primeWindowSize) {
-            primeData.add(current);
-          } else {
-            forecaster.primeForecaster(primeData);
-
-            List<List<NumericPrediction>> forecast = null;
-            if (forecaster instanceof OverlayForecaster
-                    && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
-
-              // can only generate forecasts for remaining training data that
-              // we can use as overlay data
-              if (current != null) {
-                Instances overlay = createOverlayForecastData(forecaster, m_trainingData, i, m_horizon);
-                ((OverlayForecaster) forecaster).forecast(m_horizon, overlay, progress);
-              }
-            } else {
-              forecaster.forecast(m_horizon, progress);
-            }
-
-            // remove the oldest prime instance and add this one
-            if (m_primeWindowSize > 0 && current != null) {
-              primeData.remove(0);
-              primeData.add(current);
-              primeData.compactify();
-            }
-          }
-          // If on the instance before the last one, save the state of the state dependent predictor
-          if (i == m_trainingData.numInstances() - 1)
-            postTrainingDataState = forecaster.getPreviousState();
-        }
-        m_horizon = numStepsToForecast;
-      }
       // generate a forecast beyond the end of the training data
       for (PrintStream p : progress) {
         p.println("Generating future forecast for training data...");
@@ -828,8 +775,7 @@ public class TSEvaluation {
 
       // if overlay data is being used then the only way we can make a forecast
       // beyond the end of the training data is if we have a held-out test set
-      // to
-      // use for the "future" overlay fields values
+      // to use for the "future" overlay fields values
       if (forecaster instanceof OverlayForecaster
         && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
         if (m_testData != null) {
@@ -854,6 +800,9 @@ public class TSEvaluation {
       for (PrintStream p : progress) {
         p.println("Evaluating on test set...");
       }
+
+      if (forecaster.usesState())
+        forecaster.setPreviousState(postTrainingDataState);
 
       // set up training set prediction and eval modules
       m_predictionsForTestData = new ArrayList<ErrorModule>();
@@ -924,9 +873,11 @@ public class TSEvaluation {
       }
 
       for (int i = predictionOffsetForTestData; i < m_testData.numInstances(); i++) {
+        if (forecaster.usesState())
+          predictionsForBatch(forecaster, getInstancesUpTo(m_testData, primeData.lastInstance()), 1);
+
         Instance current = m_testData.instance(i);
         if (m_primeWindowSize > 0) {
-          // reset state
           forecaster.primeForecaster(primeData);
         }
 
@@ -936,6 +887,7 @@ public class TSEvaluation {
               + " instances...");
           }
         }
+
         List<List<NumericPrediction>> forecast = null;
         if (forecaster instanceof OverlayForecaster
           && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
@@ -972,6 +924,11 @@ public class TSEvaluation {
       }
     }
 
+    if (forecaster.usesState() && m_testData != null) {
+      predictionsForTestData(forecaster, 1);
+      postTestDataState = forecaster.getPreviousState();
+    }
+
     if (m_testData != null && m_forecastFuture
     /* && !m_evaluateTestData */) {
       // generate a forecast beyond the end of the training data
@@ -1003,6 +960,7 @@ public class TSEvaluation {
         primeData = new Instances(m_testData, m_testData.numInstances()
           - m_primeWindowSize, m_primeWindowSize);
       }
+
       forecaster.primeForecaster(primeData);
 
       if (forecaster instanceof OverlayForecaster
@@ -1022,7 +980,112 @@ public class TSEvaluation {
 
     // Set the state dependent forecaster ready to make predictions beyond the training data
     // TODO: add checkbox on Forecasting Panel to reset or load state instead
-    forecaster.setPreviousState(postTrainingDataState);
+    if (forecaster.usesState()) {
+      if (postTestDataState == null)
+        forecaster.setPreviousState(postTrainingDataState);
+      else
+        forecaster.setPreviousState(postTestDataState);
+    }
+  }
+
+  /**
+   * Make predictions for each step in a batch. Designed for forecasters which use
+   * StateDependentPredictors, for which each prediction alters their state
+   *
+   * @param forecaster the forecaster to use to make predictions
+   * @param batch the batch to make predictions on
+   * @param stepsToForecast number of steps to forecast ahead, for each instance
+   * @throws Exception if something goes wrong
+   */
+  private void predictionsForBatch(TSForecaster forecaster, Instances batch, int stepsToForecast)
+          throws Exception{
+    forecaster.clearPreviousState();
+    List<List<NumericPrediction>> forecast = null;
+
+    if (forecaster instanceof TSLagUser) {
+      // if an artificial time stamp is being used, make sure it is reset for
+      // evaluating the training data
+      if (((TSLagUser) forecaster).getTSLagMaker().isUsingAnArtificialTimeIndex()) {
+        ((TSLagUser) forecaster).getTSLagMaker().setArtificialTimeStartValue(
+                m_primeWindowSize);
+      }
+    }
+    for (int i = 0; i < batch.numInstances(); i++) {
+      // Make sure we have enough priming data
+      if (!(i < m_primeWindowSize)) {
+        Instance current = batch.instance(i);
+        Instances primeData = getInstancesUpTo(batch, current);
+        primeData.add(current);
+        forecaster.primeForecaster(primeData);
+
+        if (forecaster instanceof OverlayForecaster && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
+          // can only generate forecasts for remaining training data that
+          // we can use as overlay data
+          if (batch.instance(i) != batch.lastInstance()) {
+            Instances overlay = createOverlayForecastData(forecaster, batch, i + 1, stepsToForecast);
+            forecast = ((OverlayForecaster) forecaster).forecast(stepsToForecast, overlay);
+          }
+        } else {
+          forecast = forecaster.forecast(stepsToForecast);
+        }
+      }
+    }
+  }
+
+  /**
+   * Make predictions for each instance of the training data
+   *
+   * @param forecaster the forecaster to use to make predictions
+   * @param stepsToForecast number of steps to forecast ahead, for each instance
+   * @throws Exception if something goes wrong
+   */
+  private void predictionsForTrainingData(TSForecaster forecaster, int stepsToForecast) throws Exception {
+    predictionsForBatch(forecaster, getInstancesUpTo(m_trainingData, m_trainingData.lastInstance()), stepsToForecast);
+  }
+
+  /**
+   * Make predictions for each instance of the training data + the test data
+   *
+   * @param forecaster the forecaster to use to make predictions
+   * @param stepsToForecast number of steps to forecast ahead, for each instance
+   * @throws Exception if something goes wrong
+   */
+
+  private void predictionsForTestData(TSForecaster forecaster, int stepsToForecast) throws Exception {
+    Instances fullData = new Instances(m_trainingData);
+    for (int i = 0; i < m_testData.numInstances(); i++) {
+      fullData.add(m_testData.instance(i));
+    }
+    predictionsForBatch(forecaster, getInstancesUpTo(fullData, fullData.lastInstance()), stepsToForecast);
+  }
+
+  /**
+   * Get all the instances in an Instances set up to (and excluding) a specified Instance. If
+   * the fullBatch is the test data, add the training data to it first so we get the full batch data
+   *
+   * @param fullBatch the full batch to get a set of instances from
+   * @param lastInst the instance up to which all instances must be copied, excluding this one
+   * @return the set of instances desired
+   */
+  private Instances getInstancesUpTo(Instances fullBatch, Instance lastInst) {
+    int toCopy = 0;
+    // if we want the full batch up to the test data, include the training data
+    if (fullBatch.equals(m_testData)) {
+      Instances fullData = new Instances(m_trainingData);
+      for (int i = 0; i < m_testData.numInstances(); i++) {
+        fullData.add(m_testData.instance(i));
+      }
+      fullBatch = new Instances(fullData);
+    }
+
+    for (int i = 0; i < fullBatch.numInstances(); i++) {
+      if (fullBatch.instance(i).toString().equalsIgnoreCase(lastInst.toString())) {
+        toCopy = i;
+        break;
+      }
+    }
+
+    return new Instances(fullBatch, 0, toCopy);
   }
 
   /**

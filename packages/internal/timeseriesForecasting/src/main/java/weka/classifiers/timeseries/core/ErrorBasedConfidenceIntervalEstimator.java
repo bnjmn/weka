@@ -200,30 +200,36 @@ public class ErrorBasedConfidenceIntervalEstimator implements Serializable {
    * @param primeWindowSize number of priming instances to use
    * @throws Exception if something goes wrong
    */
-  private void forecastForBatchOneStepAhead(TSForecaster forecaster, Instances batch, int primeWindowSize) throws Exception {
+  private void predictionsForBatch(TSForecaster forecaster, Instances batch, int stepsToForecast, int primeWindowSize)
+          throws Exception{
+    forecaster.clearPreviousState();
+    List<List<NumericPrediction>> forecast = null;
+
     if (forecaster instanceof TSLagUser) {
-      // if an artificial time stamp is being used, make sure it is reset
+      // if an artificial time stamp is being used, make sure it is reset for
+      // evaluating the training data
       if (((TSLagUser) forecaster).getTSLagMaker().isUsingAnArtificialTimeIndex()) {
         ((TSLagUser) forecaster).getTSLagMaker().setArtificialTimeStartValue(primeWindowSize);
       }
     }
     for (int i = 0; i < batch.numInstances(); i++) {
-      Instance current = batch.instance(i);
+      // Make sure we have enough priming data
+      if (!(i < primeWindowSize)) {
+        Instance current = batch.instance(i);
+        Instances primeData = getInstancesUpTo(batch, current);
+        primeData.add(current);
+        forecaster.primeForecaster(primeData);
 
-      forecaster.primeForecaster(batch);
-
-      if (forecaster instanceof OverlayForecaster
-              && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
-
-        // can only generate forecasts for remaining training data that
-        // we can use as overlay data
-        if (current != null) {
-          Instances overlay = createOverlayForecastData(forecaster, batch, i, 1);
-
-          ((OverlayForecaster) forecaster).forecast(1, overlay);
+        if (forecaster instanceof OverlayForecaster && ((OverlayForecaster) forecaster).isUsingOverlayData()) {
+          // can only generate forecasts for remaining training data that
+          // we can use as overlay data
+          if (batch.instance(i) != batch.lastInstance()) {
+            Instances overlay = createOverlayForecastData(forecaster, batch, i + 1, stepsToForecast);
+            forecast = ((OverlayForecaster) forecaster).forecast(stepsToForecast, overlay);
+          }
+        } else {
+          forecast = forecaster.forecast(stepsToForecast);
         }
-      } else {
-        forecaster.forecast(1);
       }
     }
   }
@@ -252,7 +258,7 @@ public class ErrorBasedConfidenceIntervalEstimator implements Serializable {
   // the first instance in the supplied set of instances
   
   /**
-   * Computes confidence intervals using the supplied forecster and
+   * Computes confidence intervals using the supplied forecaster and
    * training data.
    * 
    * @param forecaster the forecaster to use
@@ -302,9 +308,8 @@ public class ErrorBasedConfidenceIntervalEstimator implements Serializable {
 
     for (int i = numPrime; i < insts.numInstances(); i++) {
       if (forecaster.usesState()) {
-        Instances batch = getInstancesUpTo(insts, primeInsts.lastInstance());
         forecaster.clearPreviousState();
-        forecastForBatchOneStepAhead(forecaster, batch, primeInsts.size());
+        predictionsForBatch(forecaster, getInstancesUpTo(insts, primeInsts.lastInstance()), 1, numPrime);
       }
 
       forecaster.primeForecaster(primeInsts);
@@ -352,7 +357,7 @@ public class ErrorBasedConfidenceIntervalEstimator implements Serializable {
       // to the end
       primeInsts.delete(0);
       primeInsts.add(insts.instance(i));
-      primeInsts.compactify();      
+      primeInsts.compactify();
     }
 
     m_confidenceLimitsForTargets = new ArrayList<List<double[]>>();

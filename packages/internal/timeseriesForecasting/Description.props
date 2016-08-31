@@ -5,10 +5,10 @@
 PackageName=timeseriesForecasting
 
 # Version (required)
-Version=1.0.21
+Version=1.0.22
 
 #Date (year-month-day)
-Date=2016-08-28
+Date=2016-08-31
 
 # Title (required)
 Title=Time series forecasting environment.
@@ -29,13 +29,13 @@ License=GPL 3
 Description=Provides a time series forecasting environment for Weka. Includes a wrapper for Weka regression schemes that automates the process of creating lagged variables and date-derived periodic variables and provides the ability to do closed-loop forecasting. New evaluation routines are provided by a special evaluation module and graphing of predictions/forecasts are provided via the JFreeChart library. Includes both command-line and GUI user interfaces. Sample time series data can be found in ${WEKA_HOME}/packages/timeseriesForecasting/sample-data.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/timeseriesForecasting1.0.21.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/timeseriesForecasting1.0.22.zip?download
 
 # URL for further information
 URL=http://wiki.pentaho.com/display/DATAMINING/Time+Series+Analysis+and+Forecasting+with+Weka
 
 # Changes in this release
-Changes=Incorporated addtions and changes from Pedro Ferreira to support base learners that make predictions based on their current state
+Changes=Bug fixes from Pedro Ferreira.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
