@@ -1,0 +1,2 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.StreamingUnivariateStats
+*resources*=[weka.knowledgeflow.plugin.templates|Compute summary stats on 1 million instances|weka/gui/knowledgeflow/templates/summary.kf]
