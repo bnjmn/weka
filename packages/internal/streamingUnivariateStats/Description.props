@@ -26,8 +26,7 @@ Maintainer=Mark Hall <mhall@pentaho.com>
 License=GPL 3.0
 
 # Description (required)
-Description=Provides a Knowledge Flow step that can compute various summary statistics incrementally on an incoming instance stream. Apart from simple statistics such as count, min, max, mean, standard deviation and frequency counts, the user can optionally turn on computation of the median and quartiles. This then uses a T-digest streaming quantile estimator. The T-digest estimator is slower to execute than the other statistics, so is not turned on
-by default. The step can also output a summary chart (histogram, box plot, pie chart) for each attribute in the data. Stats can be output once at the end of the stream or periodically as the stream is processed.
+Description=Provides a Knowledge Flow step that can compute various summary statistics incrementally on an incoming instance stream. Apart from simple statistics such as count, min, max, mean, standard deviation and frequency counts, the user can optionally turn on computation of the median and quartiles. This then uses a T-digest streaming quantile estimator. The T-digest estimator is slower to execute than the other statistics, so is not turned on by default. The step can also output a summary chart (histogram, box plot, pie chart) for each attribute in the data. Stats can be output once at the end of the stream or periodically as the stream is processed.
 
 # Changes in this release
 #Changes=
