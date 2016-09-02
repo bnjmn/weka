@@ -1412,7 +1412,7 @@ public class SGDText extends RandomizableClassifier implements
       double freq = (m_wordFrequencies) ? feature.getValue().m_count : 1.0;
       // double freq = (feature.getValue().m_count / iNorm * m_norm);
       if (m_normalize) {
-        freq /= iNorm * m_norm;
+        freq *= (m_norm / iNorm);
       }
 
       Count weight = m_dictionary.get(word);
