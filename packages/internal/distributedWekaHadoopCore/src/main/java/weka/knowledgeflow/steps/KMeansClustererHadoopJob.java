@@ -77,7 +77,7 @@ public class KMeansClustererHadoopJob extends AbstractHadoopJob {
       if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_TEXT) > 0) {
         String textual = finalClusterer.toString();
 
-        String title = "Spark: ";
+        String title = "Hadoop: ";
         String clustererSpec = finalClusterer.getClass().getName();
         clustererSpec +=
           " "
