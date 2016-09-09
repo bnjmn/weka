@@ -6,7 +6,7 @@
 PackageName=LibSVM
 
 # Version (required)
-Version=1.0.8
+Version=1.0.9
 
 #Date
 Date=2016-03-25
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description= A wrapper class for the libsvm library, including support for one-class SVMs.
 
-Changes=Fixed bug introduced in the last release of this package that prevented one-class mode from being used.
+Changes=Changed back from introspection-based use of libsvm to improve speed and memory consumption. Fixed some minor bugs with command-line option handling. No longer outputs debug info to terminal by default.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.8.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.9.zip?download
 
 # URL for further information
 URL=https://www.csie.ntu.edu.tw/~cjlin/libsvm/
