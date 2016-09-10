@@ -469,6 +469,17 @@ public class RandomForest extends Bagging {
   }
 
   /**
+   * Sets the seed for the random number generator.
+   *
+   * @param s the seed to be used
+   */
+  public void setSeed(int s) {
+
+    super.setSeed(s);
+    ((RandomTree) getClassifier()).setSeed(s);
+  }
+
+  /**
    * Returns description of the bagged classifier.
    *
    * @return description of the bagged classifier as a string
