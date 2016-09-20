@@ -469,9 +469,11 @@ public class Filter extends WekaAlgorithmWrapper {
         Instance filteredI = m_streamingFilter.output();
         if (m_stringAttsPresent) {
           for (int i = 0; i < filteredI.numAttributes(); i++) {
-            String val = filteredI.stringValue(i);
-            structureCopy.attribute(i).setStringValue(val);
-            filteredI.setValue(i, 0);
+            if (filteredI.attribute(i).isString() && ! filteredI.isMissing(i)) {
+              String val = filteredI.stringValue(i);
+              structureCopy.attribute(i).setStringValue(val);
+              filteredI.setValue(i, 0);
+            }
           }
           filteredI.setDataset(structureCopy);
         }
