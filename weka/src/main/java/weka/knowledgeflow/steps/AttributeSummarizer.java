@@ -24,9 +24,9 @@ package weka.knowledgeflow.steps;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionMetadata;
+import weka.core.PluginManager;
 import weka.gui.ProgrammaticProperty;
 import weka.gui.beans.OffscreenChartRenderer;
-import weka.core.PluginManager;
 import weka.gui.beans.WekaOffscreenChartRenderer;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
@@ -200,8 +200,30 @@ public class AttributeSummarizer extends BaseSimpleDataVisualizer {
   protected void createOffscreenPlot(Data data) {
     List<Instances> offscreenPlotData = new ArrayList<Instances>();
     Instances predictedI = data.getPrimaryPayload();
+    boolean colorSpecified = false;
 
-    if (predictedI.classIndex() >= 0 && predictedI.classAttribute().isNominal()) {
+    String additional = m_additionalOptions;
+    if (m_additionalOptions.length() > 0) {
+      additional = environmentSubstitute(additional);
+    }
+
+    if (!additional.contains("-color")
+      && m_offscreenRendererName.contains("Weka Chart Renderer")) {
+      // for WekaOffscreenChartRenderer only
+      if (additional.length() > 0) {
+        additional += ",";
+      }
+      if (predictedI.classIndex() >= 0) {
+        additional += "-color=" + predictedI.classAttribute().name();
+      } else {
+        additional += "-color=/last";
+      }
+    } else {
+      colorSpecified = true;
+    }
+
+    if (predictedI.classIndex() >= 0 && predictedI.classAttribute().isNominal()
+      && !colorSpecified) {
       // set up multiple series - one for each class
       Instances[] classes = new Instances[predictedI.numClasses()];
       for (int i = 0; i < predictedI.numClasses(); i++) {
@@ -220,22 +242,6 @@ public class AttributeSummarizer extends BaseSimpleDataVisualizer {
     }
 
     List<String> options = new ArrayList<String>();
-    String additional = m_additionalOptions;
-    if (m_additionalOptions.length() > 0) {
-      additional = environmentSubstitute(additional);
-    }
-
-    if (additional.contains("-color")) {
-      // for WekaOffscreenChartRenderer only
-      if (additional.length() > 0) {
-        additional += ",";
-      }
-      if (predictedI.classIndex() >= 0) {
-        additional += "-color=" + predictedI.classAttribute().name();
-      } else {
-        additional += "-color=/last";
-      }
-    }
 
     String[] optionsParts = additional.split(",");
     for (String p : optionsParts) {
@@ -317,22 +323,18 @@ public class AttributeSummarizer extends BaseSimpleDataVisualizer {
             m_offscreenRenderer = (OffscreenChartRenderer) r;
           } else {
             // use built-in default
-            getStepManager()
-              .logWarning(
-                "Offscreen renderer '"
-                  + getOffscreenRendererName()
-                  + "' is not available, using default weka chart renderer "
-                  + "instead");
+            getStepManager().logWarning(
+              "Offscreen renderer '" + getOffscreenRendererName()
+                + "' is not available, using default weka chart renderer "
+                + "instead");
             m_offscreenRenderer = new WekaOffscreenChartRenderer();
           }
         } catch (Exception ex) {
           // use built-in default
-          getStepManager()
-            .logWarning(
-              "Offscreen renderer '"
-                + getOffscreenRendererName()
-                + "' is not available, using default weka chart renderer "
-                + "instead");
+          getStepManager().logWarning(
+            "Offscreen renderer '" + getOffscreenRendererName()
+              + "' is not available, using default weka chart renderer "
+              + "instead");
           m_offscreenRenderer = new WekaOffscreenChartRenderer();
         }
       }
