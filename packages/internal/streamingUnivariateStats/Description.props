@@ -5,10 +5,10 @@
 PackageName=streamingUnivariateStats
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2016-08-31
+Date=2016-09-26
 
 # Title (required)
 Title=A Knowledge Flow step to compute summary statistics incrementally
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides a Knowledge Flow step that can compute various summary statistics incrementally on an incoming instance stream. Apart from simple statistics such as count, min, max, mean, standard deviation and frequency counts, the user can optionally turn on computation of the median and quartiles. This then uses a T-digest streaming quantile estimator. The T-digest estimator is slower to execute than the other statistics, so is not turned on by default. The step can also output a summary chart (histogram, box plot, pie chart) for each attribute in the data. Stats can be output once at the end of the stream or periodically as the stream is processed.
 
 # Changes in this release
-#Changes=
+Changes=Now processes incoming batch data as well as streaming data
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/streamingUnivariateStats1.0.0.zip
+PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/streamingUnivariateStats1.0.1.zip
 
 # URL for further information
 URL=URL=http://weka.sourceforge.net/doc.packages/streamingUnivariateStats
