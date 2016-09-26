@@ -324,7 +324,7 @@ public class TimeSeriesForecasting extends BaseStep {
   @Override
   public void stepInit() throws WekaException {
     if ((m_encodedForecaster == null || m_encodedForecaster.equals("-NONE-")) &&
-      m_fileName == null || isEmpty(m_fileName.toString())) {
+      (m_fileName == null || isEmpty(m_fileName.toString()))) {
       throw new WekaException("No forecaster specified!");
     }
 
