@@ -87,9 +87,17 @@ public class StreamingUnivariateStats extends BaseStep {
   /** Number of decimal places to output */
   protected int m_decimalPlaces = 2;
 
+  /** Default width for chart images */
   protected String m_chartWidth = "500";
+
+  /** Default height for chart images */
   protected String m_chartHeight = "400";
 
+  /**
+   * Set whether to compute quartiles or not
+   *
+   * @param computeQuartiles true to compute quartiles
+   */
   @OptionMetadata(
     displayName = "Compute quartiles",
     description = "Compute median and quartiles (note quartile estimator is substantially slower "
@@ -99,10 +107,21 @@ public class StreamingUnivariateStats extends BaseStep {
     m_computeQuantiles = computeQuartiles;
   }
 
+  /**
+   * Get whether to compute quartiles or not
+   *
+   * @return true if quartiles are to be computed
+   */
   public boolean getComputeQuartiles() {
     return m_computeQuantiles;
   }
 
+  /**
+   * Set the level of compression used by the quartile estimator (higher is less
+   * compression)
+   *
+   * @param compression the compression level to use
+   */
   @OptionMetadata(displayName = "Quartile estimator compression",
     description = "The degree of compression for quartile estimation ("
       + "bigger = less compression/more accurate/slower", displayOrder = 2)
@@ -110,10 +129,21 @@ public class StreamingUnivariateStats extends BaseStep {
     m_compressionLevel = compression;
   }
 
+  /**
+   * Get the level of compression used by the quartile estimator (higher is less
+   * compression)
+   *
+   * @return the compression level to use
+   */
   public double getQuartileCompression() {
     return m_compressionLevel;
   }
 
+  /**
+   * Set how often (in rows processed) to output the summary stats
+   *
+   * @param outputFrequency how frequently (in rows processed) to output stats
+   */
   @OptionMetadata(displayName = "Output stats every x rows",
     description = "How often (after every x input rows) to output the current "
       + "value of the stats (0 = only at the end of the stream)",
@@ -122,29 +152,88 @@ public class StreamingUnivariateStats extends BaseStep {
     m_outputEveryXRows = outputFrequency;
   }
 
+  /**
+   * Get how often (in rows processed) to output the summary stats
+   *
+   * @return how frequently (in rows processed) to output stats
+   */
   public int getOutputFrequency() {
     return m_outputEveryXRows;
   }
 
+  /**
+   * Set the number of decimal places to output
+   *
+   * @param decimalPlaces the number of decimal places to output
+   */
   @OptionMetadata(displayName = "Number of decimal places",
     description = "Number of decimal places", displayOrder = 4)
   public void setDecimalPlaces(int decimalPlaces) {
     m_decimalPlaces = decimalPlaces;
   }
 
+  /**
+   * Get the number of decimal places to output
+   *
+   * @return the number of decimal places to output
+   */
   public int getDecimalPlaces() {
     return m_decimalPlaces;
   }
 
+  /**
+   * Initialize the step
+   *
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
     m_rowCount = 0;
   }
 
+  /**
+   * Process an incoming data object
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
   @Override
   public void processIncoming(Data data) throws WekaException {
+    if (data.getConnectionName().equals(StepManager.CON_INSTANCE)) {
+      processStreaming(data);
+    } else {
+      processBatch(data);
+    }
+  }
 
+  /**
+   * Process a batch data object
+   *
+   * @param data the batch data object to process
+   * @throws WekaException if a problem occurs
+   */
+  protected void processBatch(Data data) throws WekaException {
+    Data streamData = new Data(StepManager.CON_INSTANCE);
+    Instances batch = data.getPrimaryPayload();
+    for (int i = 0; i < batch.numInstances(); i++) {
+      Instance current = batch.instance(i);
+      streamData.setPayloadElement(StepManager.CON_INSTANCE, current);
+      processStreaming(streamData);
+    }
+    streamData.setPayloadElement(
+      StepManager.CON_AUX_DATA_INCREMENTAL_STREAM_END, true);
+    processStreaming(streamData);
+    stepInit(); // just in case there are subsequent batches to process
+  }
+
+  /**
+   * Process a streaming data object
+   *
+   * @param data the data to process
+   * @throws WekaException if a problem occurs
+   */
+  protected void processStreaming(Data data) throws WekaException {
     Instance inst = (Instance) data.getPrimaryPayload();
     if (m_isReset) {
       m_isReset = false;
@@ -171,6 +260,11 @@ public class StreamingUnivariateStats extends BaseStep {
     }
   }
 
+  /**
+   * Output statistics
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void outputStats() throws WekaException {
     String result =
       StatsFormatter.formatStats(m_header, m_attributeStats,
@@ -181,6 +275,11 @@ public class StreamingUnivariateStats extends BaseStep {
     getStepManager().outputData(textD);
   }
 
+  /**
+   * Output graphs
+   *
+   * @throws WekaException if a problem occurs
+   */
   protected void outputGraphs() throws WekaException {
     if (!m_computeQuantiles
       && m_header.checkForAttributeType(Attribute.NUMERIC)) {
@@ -225,6 +324,11 @@ public class StreamingUnivariateStats extends BaseStep {
     }
   }
 
+  /**
+   * Update the incremental stats with the current instance's values
+   *
+   * @param inst the instance to use for updating the stats
+   */
   protected void updateStats(Instance inst) {
     double weight = inst.weight();
     for (int i = 0; i < m_header.numAttributes(); i++) {
@@ -241,6 +345,9 @@ public class StreamingUnivariateStats extends BaseStep {
     }
   }
 
+  /**
+   * Initialize statistics
+   */
   protected void initStats() {
     m_attributeStats = new Stats[m_header.numAttributes()];
     for (int i = 0; i < m_header.numAttributes(); i++) {
@@ -256,15 +363,26 @@ public class StreamingUnivariateStats extends BaseStep {
     }
   }
 
+  /**
+   * Get a list of allowed incoming connection types
+   *
+   * @return a list of allowed incoming connection types
+   */
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() == 0) {
-      return Arrays.asList(StepManager.CON_INSTANCE);
+      return Arrays.asList(StepManager.CON_INSTANCE, StepManager.CON_DATASET,
+        StepManager.CON_TRAININGSET, StepManager.CON_TESTSET);
     }
 
     return null;
   }
 
+  /**
+   * Get a list of allowed outgoing connection types
+   *
+   * @return a list of allowed outgoing connection types
+   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     return Arrays.asList(StepManager.CON_TEXT, StepManager.CON_IMAGE);
