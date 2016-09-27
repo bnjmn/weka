@@ -118,7 +118,9 @@ public class ClassAssigner extends BaseStep {
         if (payload == null) {
           throw new WekaException("Incoming data is null!");
         }
+        payload = new Instances((Instances)payload);
         assignClass((Instances) payload);
+        data = new Data(data.getConnectionName(), payload);
       }
       m_streamCount++;
       m_classAssigned = m_streamCount == 2;
