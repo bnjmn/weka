@@ -84,8 +84,10 @@ public class PredictionAppender extends BaseStep {
   @Override
   public List<String> getIncomingConnectionTypes() {
     if (getStepManager().numIncomingConnections() == 0) {
-      return Arrays.asList(StepManager.CON_BATCH_CLASSIFIER,
-        StepManager.CON_INCREMENTAL_CLASSIFIER);
+      return Arrays
+        .asList(StepManager.CON_BATCH_CLASSIFIER,
+          StepManager.CON_INCREMENTAL_CLASSIFIER,
+          StepManager.CON_BATCH_CLUSTERER);
     }
 
     return new ArrayList<String>();
