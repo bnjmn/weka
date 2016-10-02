@@ -515,7 +515,7 @@ public class CVParameterSelection
     } while (cvParam.length() != 0);
 
     super.setOptions(options);
-    
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -527,16 +527,7 @@ public class CVParameterSelection
   public String [] getOptions() {
 
     Vector<String> options = new Vector<String>();
-    
-    if (m_InitOptions != null) {
-      try {
-	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
-	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
-      } catch (Exception e) {
-	throw new RuntimeException("CVParameterSelection: could not set options " +
-				   "in getOptions().");
-      } 
-    }
+
     for (int i = 0; i < m_CVParams.size(); i++) {
       options.add("-P"); options.add("" + getCVParameter(i));
     }
