@@ -187,7 +187,7 @@ public class DTNB extends DecisionTable {
    * @throws Exception if something goes wrong
    */
   @Override
-  double evaluateFoldCV(Instances fold, int[] fs) throws Exception {
+  protected double evaluateFoldCV(Instances fold, int[] fs) throws Exception {
 
     int i;
     // int ruleCount = 0; NOT USED
@@ -321,7 +321,7 @@ public class DTNB extends DecisionTable {
    * @throws Exception if something goes wrong
    */
   @Override
-  double evaluateInstanceLeaveOneOut(Instance instance, double[] instA)
+  protected double evaluateInstanceLeaveOneOut(Instance instance, double[] instA)
     throws Exception {
 
     DecisionTableHashKey thekey;
@@ -393,7 +393,7 @@ public class DTNB extends DecisionTable {
   @Override
   protected void setUpEvaluator() throws Exception {
     m_evaluator = new EvalWithDelete();
-    m_evaluator.buildEvaluator(m_theInstances);
+    m_evaluator.buildEvaluator(getCurrentTrainingData());
   }
 
   protected class EvalWithDelete extends ASEvaluation implements
@@ -415,7 +415,7 @@ public class DTNB extends DecisionTable {
     private int setUpForEval(BitSet subset) throws Exception {
 
       int fc = 0;
-      for (int jj = 0; jj < m_numAttributes; jj++) {
+      for (int jj = 0; jj < getNumAttributes(); jj++) {
         if (subset.get(jj)) {
           fc++;
         }
@@ -424,27 +424,27 @@ public class DTNB extends DecisionTable {
       // int [] nbFs = new int [fc];
       // int count = 0;
 
-      for (int j = 0; j < m_numAttributes; j++) {
-        m_theInstances.attribute(j).setWeight(1.0); // reset weight
-        if (j != m_theInstances.classIndex()) {
+      for (int j = 0; j < getNumAttributes(); j++) {
+        getCurrentTrainingData().attribute(j).setWeight(1.0); // reset weight
+        if (j != getCurrentTrainingData().classIndex()) {
           if (subset.get(j)) {
             // nbFs[count++] = j;
-            m_theInstances.attribute(j).setWeight(0.0); // no influence for NB
+            getCurrentTrainingData().attribute(j).setWeight(0.0); // no influence for NB
           }
         }
       }
 
       // process delete set
-      for (int i = 0; i < m_numAttributes; i++) {
+      for (int i = 0; i < getNumAttributes(); i++) {
         if (m_deletedFromDTNB.get(i)) {
-          m_theInstances.attribute(i).setWeight(0.0); // no influence for NB
+          getCurrentTrainingData().attribute(i).setWeight(0.0); // no influence for NB
         }
       }
 
       if (m_NB == null) {
         // construct naive bayes for the first time
         m_NB = new NaiveBayes();
-        m_NB.buildClassifier(m_theInstances);
+        m_NB.buildClassifier(getCurrentTrainingData());
       }
       return fc;
     }
@@ -462,7 +462,7 @@ public class DTNB extends DecisionTable {
       int fc = setUpForEval(subset);
 
       // clear potentail delete for naive Bayes
-      m_theInstances.attribute(potentialDelete).setWeight(0.0);
+      getCurrentTrainingData().attribute(potentialDelete).setWeight(0.0);
       // copy.clear(potentialDelete);
       // fc--;
       return estimatePerformance(subset, fc);
@@ -621,7 +621,7 @@ public class DTNB extends DecisionTable {
        */
 
       // count how many were selected
-      for (int i = 0; i < m_numAttributes; i++) {
+      for (int i = 0; i < getNumAttributes(); i++) {
         if (copy.get(i)) {
           count++;
         }
@@ -630,7 +630,7 @@ public class DTNB extends DecisionTable {
       int[] list = new int[count];
       count = 0;
 
-      for (int i = 0; i < m_numAttributes; i++) {
+      for (int i = 0; i < getNumAttributes(); i++) {
         if (copy.get(i)) {
           list[count++] = i;
         }
@@ -652,6 +652,25 @@ public class DTNB extends DecisionTable {
 
   private void setUpSearch() {
     m_backwardWithDelete = new BackwardsWithDelete();
+  }
+
+  @Override
+  protected double estimatePerformance(BitSet feature_set, int num_atts)
+    throws Exception {
+    return super.estimatePerformance(feature_set, num_atts);
+  }
+
+  /**
+   * Get the number of attributes in the training data
+   *
+   * @return the number of attributes in the training data
+   */
+  protected int getNumAttributes() {
+    return m_numAttributes;
+  }
+
+  protected Instances getCurrentTrainingData() {
+    return m_theInstances;
   }
 
   /**
