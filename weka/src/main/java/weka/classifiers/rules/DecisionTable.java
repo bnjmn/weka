@@ -335,9 +335,10 @@ public class DecisionTable extends AbstractClassifier implements OptionHandler,
    * @return the classification of the instance
    * @throws Exception if something goes wrong
    */
-  double evaluateInstanceLeaveOneOut(Instance instance, double[] instA)
+  protected double evaluateInstanceLeaveOneOut(Instance instance, double[] instA)
     throws Exception {
 
+    // System.err.println("---------------- superclass leave-one-out ------------");
     DecisionTableHashKey thekey;
     double[] tempDist;
     double[] normDist;
@@ -427,7 +428,7 @@ public class DecisionTable extends AbstractClassifier implements OptionHandler,
    * @return the accuracy for the fold
    * @throws Exception if something goes wrong
    */
-  double evaluateFoldCV(Instances fold, int[] fs) throws Exception {
+  protected double evaluateFoldCV(Instances fold, int[] fs) throws Exception {
 
     int i;
     int numFold = fold.numInstances();
