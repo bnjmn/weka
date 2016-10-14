@@ -21,13 +21,7 @@
 
 package weka.classifiers.functions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -354,7 +348,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<Double>> results = new HashSet<Future<Double>>();
+    ArrayList<Future<Double>> results = new ArrayList<Future<Double>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
@@ -427,7 +421,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<double[]>> results = new HashSet<Future<double[]>>();
+    ArrayList<Future<double[]>> results = new ArrayList<Future<double[]>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
