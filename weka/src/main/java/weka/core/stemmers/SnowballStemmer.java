@@ -265,9 +265,9 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
     // try dynamic discovery if not in props file
     if (classnames.size() == 0) {
       classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);
-      for (i = 0; i < classnames.size(); i++) {
-        m_Stemmers.add(getStemmerName(classnames.get(i).toString()));
-      }
+    }
+    for (i = 0; i < classnames.size(); i++) {
+      m_Stemmers.add(getStemmerName(classnames.get(i).toString()));
     }
   }
 
