@@ -151,7 +151,11 @@ public class TimeSeriesTranslate extends AbstractTimeSeriesFilter {
     } else {
       inst = new DenseInstance(dest.weight(), vals);
     }
-    inst.setDataset(dest.dataset());
+    // inst.setDataset(dest.dataset());
+    // push() sets the dataset to the output format, however, if
+    // a preview transformation is being done then push() does not
+    // get called, so set the output format correctly here.
+    inst.setDataset(outputFormat);
     return inst;
   }
   
