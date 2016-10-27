@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>DTNB</artifactId>
-  <version>1.1.4-SNAPSHOT</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>DTNB</name>
@@ -101,13 +101,13 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.9.1,)</version>
+      <version>[3.7.11,)</version>
     </dependency>
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.9.1,)</version>
+      <version>[3.7.11,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
