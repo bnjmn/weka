@@ -38,8 +38,8 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * Location of properties - mainly to specify whether we are using Hadoop 1 or
    * 2.
    */
-  protected static final String HADOOP_PROPS =
-    "distributed/hadoop/Hadoop.props";
+  // protected static final String HADOOP_PROPS =
+    // "distributed/hadoop/Hadoop.props";
 
   /** Key for checking hadoop version in properties */
   protected static final String VERSION_KEY = "weka.distributed.hadoop.hadoop2";
@@ -70,8 +70,8 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
 
   /**
    * Load the properties file
-   */
-  protected static void loadProps() {
+   *
+   protected static void loadProps() {
     if (WEKA_HADOOP_PROPS == null) {
       try {
         WEKA_HADOOP_PROPS = Utils.readProperties(HADOOP_PROPS);
@@ -79,7 +79,7 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
         ex.printStackTrace();
       }
     }
-  }
+  } */
 
   /**
    * Returns true if we are running against Hadoop2/Yarn
@@ -87,8 +87,9 @@ public abstract class AbstractHadoopJobConfig extends DistributedJobConfig {
    * @return true if we are running against Hadoop2/Yarn
    */
   public static boolean isHadoop2() {
-    loadProps();
-    return WEKA_HADOOP_PROPS.getProperty(VERSION_KEY, "false").equals("true");
+    // loadProps();
+    return System.getProperty(VERSION_KEY, "false").toLowerCase().equals("true");
+//    return WEKA_HADOOP_PROPS.getProperty(VERSION_KEY, "false").equals("true");
   }
 
   /**
