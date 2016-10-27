@@ -21,15 +21,14 @@
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-
-import javax.swing.JComponent;
-import javax.swing.JPanel;
-
 import weka.core.Instances;
 import weka.core.WekaException;
 import weka.gui.Logger;
 import weka.gui.PythonPanel;
+
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import java.awt.BorderLayout;
 
 /**
  * Explorer plugin for CPython scripting

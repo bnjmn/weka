@@ -105,7 +105,14 @@ public class PythonScriptExecutorCustomizer extends JPanel implements
 
   @SuppressWarnings({ "rawtypes", "unchecked" })
   private void setup() {
-    DefaultSyntaxKit.initKit();
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
+
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      DefaultSyntaxKit.initKit();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
+    }
     m_scriptEditor = new JEditorPane();
 
     // check python availability
