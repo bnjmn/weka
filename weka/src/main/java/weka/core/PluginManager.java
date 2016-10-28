@@ -73,6 +73,14 @@ public class PluginManager {
     new HashMap<String, Map<String, String>>();
 
   /**
+   * Global lookup map to locate a package owner for resources. Keyed by group
+   * ID:resource description. Used to see if a package owns a resource, in which
+   * case the package classloader should be used to load the resource rather
+   * than the application classloader
+   */
+  protected static Map<String, String> RESOURCE_OWNER_PACKAGE = new HashMap<>();
+
+  /**
    * Add the supplied list of fully qualified class names to the disabled list
    * 
    * @param classnames a list of class names to add
@@ -134,7 +142,20 @@ public class PluginManager {
    */
   public static synchronized void addFromProperties(File propsFile)
     throws Exception {
-    addFromProperties(propsFile, false);
+    addFromProperties(null, propsFile);
+  }
+
+  /**
+   * Add all key value pairs from the supplied property file
+   *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param propsFile the properties file to add
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    File propsFile) throws Exception {
+    addFromProperties(packageName, propsFile, false);
   }
 
   /**
@@ -147,9 +168,24 @@ public class PluginManager {
    */
   public static synchronized void addFromProperties(File propsFile,
     boolean maintainInsertionOrder) throws Exception {
+    addFromProperties(null, propsFile, maintainInsertionOrder);
+  }
+
+  /**
+   * Add all key value pairs from the supplied property file
+   *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param propsFile the properties file to add
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    File propsFile, boolean maintainInsertionOrder) throws Exception {
     BufferedInputStream bi =
       new BufferedInputStream(new FileInputStream(propsFile));
-    addFromProperties(bi);
+    addFromProperties(packageName, bi, maintainInsertionOrder);
   }
 
   /**
@@ -160,7 +196,20 @@ public class PluginManager {
    */
   public static synchronized void addFromProperties(InputStream propsStream)
     throws Exception {
-    addFromProperties(propsStream, false);
+    addFromProperties(null, propsStream);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties stream
+   *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param propsStream an input stream to a properties file
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    InputStream propsStream) throws Exception {
+    addFromProperties(packageName, propsStream, false);
   }
 
   /**
@@ -173,13 +222,29 @@ public class PluginManager {
    */
   public static synchronized void addFromProperties(InputStream propsStream,
     boolean maintainInsertionOrder) throws Exception {
+    addFromProperties(null, propsStream, maintainInsertionOrder);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties stream
+   *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param propsStream an input stream to a properties file
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    InputStream propsStream, boolean maintainInsertionOrder) throws Exception {
+
     Properties expProps = new Properties();
 
     expProps.load(propsStream);
     propsStream.close();
     propsStream = null;
 
-    addFromProperties(expProps, maintainInsertionOrder);
+    addFromProperties(packageName, expProps, maintainInsertionOrder);
   }
 
   /**
@@ -196,20 +261,48 @@ public class PluginManager {
   /**
    * Add all key value pairs from the supplied properties object
    *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param props a Properties object
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    Properties props) throws Exception {
+    addFromProperties(packageName, props, false);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties object
+   *
    * @param props a Properties object
    * @param maintainInsertionOrder true if the order of insertion of
    *          implementations is to be preserved (rather than sorted order)
    * @throws Exception if a problem occurs
    */
-  public static synchronized void addFromProperties(Properties props,
+  public synchronized static void addFromProperties(Properties props,
     boolean maintainInsertionOrder) throws Exception {
+    addFromProperties(null, props, maintainInsertionOrder);
+  }
+
+  /**
+   * Add all key value pairs from the supplied properties object
+   *
+   * @param packageName the name of the Weka package that owns this properties
+   *          object. Can be null if not owned by a Weka package
+   * @param props a Properties object
+   * @param maintainInsertionOrder true if the order of insertion of
+   *          implementations is to be preserved (rather than sorted order)
+   * @throws Exception if a problem occurs
+   */
+  public static synchronized void addFromProperties(String packageName,
+    Properties props, boolean maintainInsertionOrder) throws Exception {
     java.util.Enumeration<?> keys = props.propertyNames();
 
     while (keys.hasMoreElements()) {
       String baseType = (String) keys.nextElement();
       String implementations = props.getProperty(baseType);
       if (baseType.equalsIgnoreCase("*resources*")) {
-        addPluginResourcesFromProperty(implementations);
+        addPluginResourcesFromProperty(packageName, implementations);
       } else {
         if (implementations != null && implementations.length() > 0) {
           String[] parts = implementations.split(",");
@@ -232,15 +325,32 @@ public class PluginManager {
    * Add resources from a list. String format for a list of resources (as might
    * be supplied from a *resources* entry in an property file:<br>
    * <br>
-   * 
+   *
    * <pre>
    * [groupID|description|path],[groupID|description|path],...
    * </pre>
-   * 
+   *
+   * @param resourceList a list of resources to add
+   */
+  public static void addPluginResourcesFromProperty(String resourceList) {
+    addPluginResourcesFromProperty(null, resourceList);
+  }
+
+  /**
+   * Add resources from a list. String format for a list of resources (as might
+   * be supplied from a *resources* entry in an property file:<br>
+   * <br>
+   *
+   * <pre>
+   * [groupID|description|path],[groupID|description|path],...
+   * </pre>
+   *
+   * @param packageName the Weka package that owns these resources. Can be null
+   *          if not owned by a Weka package
    * @param resourceList a list of resources to add
    */
   protected static synchronized void addPluginResourcesFromProperty(
-    String resourceList) {
+    String packageName, String resourceList) {
 
     // Format: [groupID|description|path],[...],...
     String[] resources = resourceList.split(",");
@@ -269,20 +379,36 @@ public class PluginManager {
         System.err.println("[PluginManager] Empty part in resource spec: " + r);
         continue;
       }
-      addPluginResource(groupID, resourceDesc, resourcePath);
+      addPluginResource(packageName, groupID, resourceDesc, resourcePath);
     }
   }
 
   /**
    * Add a resource.
-   * 
+   *
    * @param resourceGroupID the ID of the group under which the resource should
    *          be stored
    * @param resourceDescription the description/ID of the resource
    * @param resourcePath the path to the resource
    */
-  public static synchronized void addPluginResource(String resourceGroupID,
+  public static void addPluginResource(String resourceGroupID,
     String resourceDescription, String resourcePath) {
+    addPluginResource(null, resourceGroupID, resourceDescription, resourcePath);
+  }
+
+  /**
+   * Add a resource.
+   * 
+   * @param packageName the name of the package that owns this resource. Can be
+   *          null if not owned by a package, in which case the current
+   *          classloader will be used to load the resource.
+   * @param resourceGroupID the ID of the group under which the resource should
+   *          be stored
+   * @param resourceDescription the description/ID of the resource
+   * @param resourcePath the path to the resource
+   */
+  public static synchronized void addPluginResource(String packageName,
+    String resourceGroupID, String resourceDescription, String resourcePath) {
     Map<String, String> groupMap = RESOURCES.get(resourceGroupID);
     if (groupMap == null) {
       groupMap = new LinkedHashMap<String, String>();
@@ -290,6 +416,10 @@ public class PluginManager {
     }
 
     groupMap.put(resourceDescription, resourcePath);
+    if (packageName != null && packageName.length() > 0) {
+      RESOURCE_OWNER_PACKAGE.put(resourceGroupID + ":" + resourceDescription,
+        packageName);
+    }
   }
 
   /**
@@ -314,8 +444,17 @@ public class PluginManager {
       throw new IOException("Unknown resource: " + resourceDescription);
     }
 
-    return PluginManager.class.getClassLoader().getResourceAsStream(
-      resourcePath);
+    // owned by a package?
+    String ownerPackage =
+      RESOURCE_OWNER_PACKAGE.get(resourceGroupID + ":" + resourceDescription);
+
+    if (ownerPackage == null) {
+      return PluginManager.class.getClassLoader().getResourceAsStream(
+        resourcePath);
+    }
+
+    return WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
+      .getPackageClassLoader(ownerPackage).getResourceAsStream(resourcePath);
   }
 
   /**
@@ -472,7 +611,8 @@ public class PluginManager {
     String concreteImpl = pluginsOfInterfaceType.get(name);
     Object plugin = null;
     if (!DISABLED.contains(concreteImpl)) {
-      plugin = Class.forName(concreteImpl).newInstance();
+      plugin =
+        WekaPackageClassLoaderManager.forName(concreteImpl).newInstance();
     }
 
     return plugin;

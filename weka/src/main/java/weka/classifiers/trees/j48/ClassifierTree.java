@@ -76,6 +76,22 @@ public class ClassifierTree implements Drawable, Serializable,
    */
   private static long PRINTED_NODES = 0;
 
+  public ClassifierSplitModel getLocalModel() {
+    return m_localModel;
+  }
+
+  public ClassifierTree[] getSons() {
+    return m_sons;
+  }
+
+  public boolean isLeaf() {
+    return m_isLeaf;
+  }
+
+  public Instances getTrainingData() {
+    return m_train;
+  }
+
   /**
    * Gets the next unique node ID.
    * 

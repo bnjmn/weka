@@ -51,6 +51,7 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
 
 /**
  * With this class objects can be serialized to XML instead into a binary
@@ -580,7 +581,9 @@ public class XMLSerialization implements RevisionHandler {
     result = null;
 
     try {
-      result = new PropertyDescriptor(displayName, Class.forName(className));
+      // result = new PropertyDescriptor(displayName, Class.forName(className));
+      result = new PropertyDescriptor(displayName,
+        WekaPackageClassLoaderManager.forName(className));
     } catch (Exception e) {
       result = null;
     }
@@ -1170,7 +1173,8 @@ public class XMLSerialization implements RevisionHandler {
     } else if (name.equals(Short.TYPE.getName())) {
       result = Short.TYPE;
     } else {
-      result = Class.forName(name);
+      // result = Class.forName(name);
+      result = WekaPackageClassLoaderManager.forName(name);
     }
 
     return result;

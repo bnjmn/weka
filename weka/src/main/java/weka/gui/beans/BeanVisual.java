@@ -21,6 +21,8 @@
 
 package weka.gui.beans;
 
+import weka.core.WekaPackageClassLoaderManager;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -190,8 +192,9 @@ public class BeanVisual extends JPanel {
   public boolean loadIcons(String iconPath, String animatedIconPath) {
     boolean success = true;
     // java.net.URL imageURL = ClassLoader.getSystemResource(iconPath);
-    java.net.URL imageURL = this.getClass().getClassLoader()
-      .getResource(iconPath);
+    java.net.URL imageURL = WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager().findResource(iconPath);
+    //java.net.URL imageURL = this.getClass().getClassLoader()
+    //  .getResource(iconPath);
     if (imageURL == null) {
       // System.err.println("Warning: unable to load "+iconPath);
     } else {
@@ -204,7 +207,8 @@ public class BeanVisual extends JPanel {
     }
 
     // imageURL = ClassLoader.getSystemResource(animatedIconPath);
-    imageURL = this.getClass().getClassLoader().getResource(animatedIconPath);
+    imageURL = WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager().findResource(animatedIconPath);
+    // imageURL = this.getClass().getClassLoader().getResource(animatedIconPath);
     if (imageURL == null) {
       // System.err.println("Warning: unable to load "+animatedIconPath);
       success = false;

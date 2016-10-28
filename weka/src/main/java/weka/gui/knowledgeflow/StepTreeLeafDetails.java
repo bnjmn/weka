@@ -22,13 +22,13 @@
 package weka.gui.knowledgeflow;
 
 import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.knowledgeflow.StepManagerImpl;
 import weka.knowledgeflow.steps.KFStep;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
-import javax.swing.*;
-import java.beans.Beans;
+import javax.swing.Icon;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 
@@ -175,14 +175,18 @@ public class StepTreeLeafDetails implements Serializable {
     Step step = null;
 
     step =
-      (Step) Beans.instantiate(this.getClass().getClassLoader(),
-        m_stepClazz.getCanonicalName());
+    /*
+     * (Step) Beans.instantiate(this.getClass().getClassLoader(),
+     * m_stepClazz.getCanonicalName());
+     */
+    (Step) m_stepClazz.newInstance();
     StepManagerImpl manager = new StepManagerImpl(step);
 
     if (step instanceof WekaAlgorithmWrapper) {
       Object algo =
-        Beans.instantiate(this.getClass().getClassLoader(),
-          m_wrappedWekaAlgoName);
+      // Beans.instantiate(this.getClass().getClassLoader(),
+      // m_wrappedWekaAlgoName);
+        WekaPackageClassLoaderManager.objectForName(m_wrappedWekaAlgoName);
       ((WekaAlgorithmWrapper) step).setWrappedAlgorithm(algo);
     }
 

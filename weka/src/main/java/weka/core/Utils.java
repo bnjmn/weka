@@ -1100,7 +1100,8 @@ public final class Utils implements RevisionHandler {
 
     Class<?> c = null;
     try {
-      c = Class.forName(className);
+      //c = Class.forName(className);
+      c = WekaPackageClassLoaderManager.forName(className);
     } catch (Exception ex) {
       throw new Exception("Can't find class called: " + className);
     }
@@ -1146,7 +1147,8 @@ public final class Utils implements RevisionHandler {
 
     Class c = null;
     try {
-      c = Class.forName(className);
+      // c = Class.forName(className);
+      c = WekaPackageClassLoaderManager.forName(className);
     } catch (Exception ex) {
       throw new Exception("Can't find class called: " + className);
     }

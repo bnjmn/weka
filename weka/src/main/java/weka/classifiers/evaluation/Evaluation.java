@@ -41,6 +41,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.Summarizable;
 import weka.core.Utils;
 import weka.core.Version;
@@ -1240,7 +1241,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
             }
             // load from KOML?
             if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent())) {
-              objectInputStream = new ObjectInputStream(is);
+              // objectInputStream = new ObjectInputStream(is);
+              objectInputStream = SerializationHelper.getObjectInputStream(is);
               xmlInputStream = null;
             } else {
               objectInputStream = null;
@@ -2256,6 +2258,24 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
 
     return 100 * m_TotalSizeOfRegions / m_WithClass;
+  }
+
+  /**
+   * Gets the weight of the instances that had a non-missing class value
+   *
+   * @return the weight of the instances that had a non-missing class value
+   */
+  public final double withClass() {
+    return m_WithClass;
+  }
+
+  /**
+   * Gets the weight of the instances that had missing class values
+   *
+   * @return the weight of the instances that had missing class values
+   */
+  public final double missingClass() {
+    return m_MissingClass;
   }
 
   /**

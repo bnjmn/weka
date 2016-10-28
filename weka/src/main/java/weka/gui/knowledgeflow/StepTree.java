@@ -24,6 +24,7 @@ package weka.gui.knowledgeflow;
 import weka.core.PluginManager;
 import weka.core.Utils;
 import weka.core.WekaException;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.HierarchyPropertyParser;
@@ -44,7 +45,6 @@ import java.awt.Cursor;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.beans.Beans;
 import java.io.InputStream;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -216,7 +216,8 @@ public class StepTree extends JTree {
     for (String stepClass : stepClasses) {
       try {
         Step toAdd =
-          (Step) Beans.instantiate(getClass().getClassLoader(), stepClass);
+        // (Step) Beans.instantiate(getClass().getClassLoader(), stepClass);
+          (Step) WekaPackageClassLoaderManager.objectForName(stepClass);
         // check for ignore
         if (toAdd.getClass().getAnnotation(StepTreeIgnore.class) != null
           || toAdd.getClass().getAnnotation(weka.gui.beans.KFIgnore.class) != null) {
@@ -286,8 +287,8 @@ public class StepTree extends JTree {
    *
    * @param hpp the property parser to use
    * @param parentFolder the folder to populate
-   * @param wrapper the {@code WekaAlgorithmWrapper} implementation to use
-   *                for the class of algorithm being processed
+   * @param wrapper the {@code WekaAlgorithmWrapper} implementation to use for
+   *          the class of algorithm being processed
    * @throws Exception if a problem occurs
    */
   protected void processPackage(HierarchyPropertyParser hpp,
@@ -300,13 +301,17 @@ public class StepTree extends JTree {
       if (hpp.isLeafReached()) {
         String algName = hpp.fullValue();
         Object wrappedA =
-          Beans.instantiate(this.getClass().getClassLoader(), algName);
+        // Beans.instantiate(this.getClass().getClassLoader(), algName);
+          WekaPackageClassLoaderManager.objectForName(algName);
 
         if (wrappedA.getClass().getAnnotation(StepTreeIgnore.class) == null
           && wrappedA.getClass().getAnnotation(weka.gui.beans.KFIgnore.class) == null) {
           WekaAlgorithmWrapper wrapperCopy =
-            (WekaAlgorithmWrapper) Beans.instantiate(this.getClass()
-              .getClassLoader(), wrapper.getClass().getCanonicalName());
+          /*
+           * (WekaAlgorithmWrapper) Beans.instantiate(this.getClass()
+           * .getClassLoader(), wrapper.getClass().getCanonicalName());
+           */
+          (WekaAlgorithmWrapper) wrapper.getClass().newInstance();
           wrapperCopy.setWrappedAlgorithm(wrappedA);
           StepTreeLeafDetails leafData = new StepTreeLeafDetails(wrapperCopy);
           DefaultMutableTreeNode wrapperLeafNode = new InvisibleNode(leafData);
@@ -330,8 +335,8 @@ public class StepTree extends JTree {
   }
 
   /**
-   * Get a folder for a particular category from the tree. Creates the
-   * category folder if it doesn't already exist
+   * Get a folder for a particular category from the tree. Creates the category
+   * folder if it doesn't already exist
    *
    * @param jtreeRoot the root of the tree
    * @param category the name of the category to get the folder for
@@ -363,9 +368,8 @@ public class StepTree extends JTree {
   }
 
   /**
-   * Gets the category that the supplied step belongs to. Uses the info
-   * in the {@code KFStep} annotation; otherwise the default "Plugin"
-   * category is used.
+   * Gets the category that the supplied step belongs to. Uses the info in the
+   * {@code KFStep} annotation; otherwise the default "Plugin" category is used.
    *
    * @param toAdd the step to get the category for
    * @return the category name
@@ -403,8 +407,8 @@ public class StepTree extends JTree {
   }
 
   /**
-   * Get tool tip text for the step closest to the mouse location in
-   * the {@code StepTree}.
+   * Get tool tip text for the step closest to the mouse location in the
+   * {@code StepTree}.
    *
    * @param e the {@code MouseEvent} containing the pointer location
    * @return the tool tip for the closest step in the tree

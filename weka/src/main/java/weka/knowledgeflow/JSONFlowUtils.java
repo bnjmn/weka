@@ -28,6 +28,7 @@ import weka.core.OptionHandler;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.WekaException;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.json.JSONNode;
 import weka.gui.FilePropertyMetadata;
 import weka.knowledgeflow.steps.ClassAssigner;
@@ -37,7 +38,6 @@ import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.TrainingSetMaker;
 
 import java.beans.BeanInfo;
-import java.beans.Beans;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.BufferedReader;
@@ -339,8 +339,9 @@ public class JSONFlowUtils {
     String clazz = loaderNode.getChild(CLASS).getValue().toString();
     try {
       weka.core.converters.Loader loader =
-        (weka.core.converters.Loader) Beans.instantiate(
-          JSONFlowUtils.class.getClassLoader(), clazz);
+        (weka.core.converters.Loader) WekaPackageClassLoaderManager.objectForName(clazz);
+          /* Beans.instantiate(
+          JSONFlowUtils.class.getClassLoader(), clazz); */
 
       if (loader instanceof OptionHandler) {
         String optionString =
@@ -385,8 +386,9 @@ public class JSONFlowUtils {
     String clazz = saverNode.getChild(CLASS).getValue().toString();
     try {
       weka.core.converters.Saver saver =
-        (weka.core.converters.Saver) Beans.instantiate(
-          JSONFlowUtils.class.getClassLoader(), clazz);
+        (weka.core.converters.Saver) WekaPackageClassLoaderManager.objectForName(clazz);
+          /* Beans.instantiate(
+          JSONFlowUtils.class.getClassLoader(), clazz); */
 
       if (saver instanceof OptionHandler) {
         String optionString = saverNode.getChild(OPTIONS).getValue().toString();
@@ -430,8 +432,9 @@ public class JSONFlowUtils {
     String clazz = optionHNode.getChild(CLASS).getValue().toString();
     try {
       OptionHandler oh =
-        (OptionHandler) Beans.instantiate(JSONFlowUtils.class.getClassLoader(),
-          clazz);
+        (OptionHandler) WekaPackageClassLoaderManager.objectForName(clazz);
+          /* Beans.instantiate(JSONFlowUtils.class.getClassLoader(),
+          clazz); */
       String optionString = optionHNode.getChild(OPTIONS).getValue().toString();
       if (optionString != null && optionString.length() > 0) {
         String[] options = Utils.splitOptions(optionString);
@@ -531,7 +534,8 @@ public class JSONFlowUtils {
     Object step = null;
     Step theStep = null;
     try {
-      step = Beans.instantiate(JSONFlowUtils.class.getClassLoader(), clazz);
+      step = WekaPackageClassLoaderManager.objectForName(clazz);
+      //Beans.instantiate(JSONFlowUtils.class.getClassLoader(), clazz);
 
       if (!(step instanceof Step)) {
         throw new WekaException(

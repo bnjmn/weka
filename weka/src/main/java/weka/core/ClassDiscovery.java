@@ -74,7 +74,9 @@ public class ClassDiscovery implements RevisionHandler {
    */
   public static boolean isSubclass(String superclass, String otherclass) {
     try {
-      return isSubclass(Class.forName(superclass), Class.forName(otherclass));
+      // return isSubclass(Class.forName(superclass), Class.forName(otherclass));
+      return isSubclass(WekaPackageClassLoaderManager.forName(superclass), WekaPackageClassLoaderManager
+        .forName(otherclass));
     } catch (Exception e) {
       return false;
     }
@@ -119,7 +121,9 @@ public class ClassDiscovery implements RevisionHandler {
    */
   public static boolean hasInterface(String intf, String cls) {
     try {
-      return hasInterface(Class.forName(intf), Class.forName(cls));
+      // return hasInterface(Class.forName(intf), Class.forName(cls));
+      return hasInterface(WekaPackageClassLoaderManager.forName(intf), WekaPackageClassLoaderManager
+        .forName(cls));
     } catch (Exception e) {
       return false;
     }
@@ -240,7 +244,8 @@ public class ClassDiscovery implements RevisionHandler {
     result = new Vector<String>();
 
     try {
-      cls = Class.forName(classname);
+      // cls = Class.forName(classname);
+      cls = WekaPackageClassLoaderManager.forName(classname);
       result = find(cls, pkgnames);
     } catch (Exception e) {
       e.printStackTrace();
@@ -264,7 +269,8 @@ public class ClassDiscovery implements RevisionHandler {
     result = new Vector<String>();
 
     try {
-      cls = Class.forName(classname);
+      // cls = Class.forName(classname);
+      cls = WekaPackageClassLoaderManager.forName(classname);
       result = find(cls, pkgname);
     } catch (Exception e) {
       e.printStackTrace();
@@ -341,7 +347,8 @@ public class ClassDiscovery implements RevisionHandler {
       i = 0;
       while (i < result.size()) {
         try {
-          clsNew = Class.forName(result.get(i));
+          // clsNew = Class.forName(result.get(i));
+          clsNew = WekaPackageClassLoaderManager.forName(result.get(i));
 
           // no abstract classes
           if (Modifier.isAbstract(clsNew.getModifiers())) {

@@ -31,6 +31,7 @@ import weka.core.PluginManager;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.WekaEnumeration;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.WekaPackageManager;
 import weka.core.converters.FileSourcedConverter;
 import weka.core.xml.KOML;
@@ -113,7 +114,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
 import java.awt.image.BufferedImage;
 import java.beans.BeanInfo;
-import java.beans.Beans;
 import java.beans.Customizer;
 import java.beans.EventSetDescriptor;
 import java.beans.IntrospectionException;
@@ -314,7 +314,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           /*
            * weka.gui.HierarchyPropertyParser hpp = new
            * weka.gui.HierarchyPropertyParser(); hpp.build(wekaAlgs, ", ");
-           * 
+           *
            * System.err.println(hpp.showTree());
            */
           // ----- end test the HierarchyPropertyParser
@@ -405,7 +405,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   protected class InvisibleNode extends DefaultMutableTreeNode {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -9064396835384819887L;
     protected boolean m_isVisible;
@@ -485,7 +485,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   protected class InvisibleTreeModel extends DefaultTreeModel {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 6940101211275068260L;
     protected boolean m_filterIsActive;
@@ -571,7 +571,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Constructor.
-     * 
+     *
      * @param fullName flully qualified name of the bean
      * @param icon icon for the bean
      */
@@ -581,11 +581,11 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Constructor
-     * 
+     *
      * @param name fully qualified name of the bean
      * @param serializedMeta empty string or XML serialized MetaBean if this
      *          leaf represents a "user" component
-     * 
+     *
      * @param icon icon for the bean
      */
     protected JTreeLeafDetails(String name, Vector<Object> serializedMeta,
@@ -600,12 +600,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Constructor
-     * 
+     *
      * @param fullName fully qualified name of the bean
      * @param wekaAlgoName fully qualified name of the encapsulated (wrapped)
      *          weka algorithm, or null if this bean does not wrap a Weka
      *          algorithm
-     * 
+     *
      * @param icon icon for the bean
      */
     protected JTreeLeafDetails(String fullName, String wekaAlgoName, Icon icon) {
@@ -622,7 +622,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Get the tool tip for this leaf
-     * 
+     *
      * @return the tool tip
      */
     protected String getToolTipText() {
@@ -635,7 +635,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Returns the leaf label
-     * 
+     *
      * @return the leaf label
      */
     @Override
@@ -645,7 +645,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Gets the icon for this bean
-     * 
+     *
      * @return the icon for this bean
      */
     protected Icon getIcon() {
@@ -654,7 +654,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Set the icon to use for this bean
-     * 
+     *
      * @param icon the icon to use
      */
     protected void setIcon(Icon icon) {
@@ -664,7 +664,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Returns true if this leaf represents a wrapped Weka algorithm (i.e.
      * filter, classifier, clusterer etc.).
-     * 
+     *
      * @return true if this leaf represents a wrapped algorithm
      */
     protected boolean isWrappedAlgorithm() {
@@ -673,7 +673,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Returns true if this leaf represents a MetaBean (i.e. "user" component)
-     * 
+     *
      * @return true if this leaf represents a MetaBean
      */
     protected boolean isMetaBean() {
@@ -685,7 +685,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Gets the XML serialized MetaBean and associated information (icon,
      * displayname)
-     * 
+     *
      * @return the XML serialized MetaBean as a 3-element Vector containing
      *         display name serialized bean and icon
      */
@@ -703,11 +703,13 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           // copy.addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this);
           m_toolBarBean = m_metaBean.get(1);
         } else {
-          m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass()
-            .getClassLoader(), m_fullyQualifiedCompName);
+          m_toolBarBean = WekaPackageClassLoaderManager.objectForName(m_fullyQualifiedCompName);
+          //m_toolBarBean = Beans.instantiate(KnowledgeFlowApp.this.getClass()
+           // .getClassLoader(), m_fullyQualifiedCompName);
           if (isWrappedAlgorithm()) {
-            Object algo = Beans.instantiate(KnowledgeFlowApp.this.getClass()
-              .getClassLoader(), m_wekaAlgoName);
+            Object algo = WekaPackageClassLoaderManager.objectForName(m_wekaAlgoName);
+            //Object algo = Beans.instantiate(KnowledgeFlowApp.this.getClass()
+            //  .getClassLoader(), m_wekaAlgoName);
             ((WekaWrapper) m_toolBarBean).setWrappedAlgorithm(algo);
           }
         }
@@ -728,7 +730,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Used for displaying the bean components and their visible connections
-   * 
+   *
    * @author <a href="mailto:mhall@cs.waikato.ac.nz">Mark Hall</a>
    * @version $Revision$
    * @since 1.0
@@ -789,35 +791,35 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /**
      * Set instances (if the perspective accepts them)
-     * 
+     *
      * @param insts the instances
      */
     void setInstances(Instances insts) throws Exception;
 
     /**
      * Returns true if this perspective accepts instances
-     * 
+     *
      * @return true if this perspective can accept instances
      */
     boolean acceptsInstances();
 
     /**
      * Get the title of this perspective
-     * 
+     *
      * @return the title of this perspective
      */
     String getPerspectiveTitle();
 
     /**
      * Get the tool tip text for this perspective.
-     * 
+     *
      * @return the tool tip text for this perspective
      */
     String getPerspectiveTipText();
 
     /**
      * Get the icon for this perspective.
-     * 
+     *
      * @return the Icon for this perspective (or null if the perspective does
      *         not have an icon)
      */
@@ -826,7 +828,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Set active status of this perspective. True indicates that this
      * perspective is the visible active perspective in the KnowledgeFlow
-     * 
+     *
      * @param active true if this perspective is the active one
      */
     void setActive(boolean active);
@@ -836,7 +838,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      * has opted to have it available in the perspective toolbar. The
      * perspective can make the decision as to allocating or freeing resources
      * on the basis of this.
-     * 
+     *
      * @param loaded true if the perspective is available in the perspective
      *          toolbar of the KnowledgeFlow
      */
@@ -845,7 +847,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Set a reference to the main KnowledgeFlow perspective - i.e. the
      * perspective that manages flow layouts.
-     * 
+     *
      * @param main the main KnowledgeFlow perspective.
      */
     void setMainKFPerspective(KnowledgeFlowApp.MainKFPerspective main);
@@ -853,12 +855,12 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Main Knowledge Flow perspective
-   * 
+   *
    */
   public class MainKFPerspective extends JPanel implements KFPerspective {
 
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = 7666381888012259527L;
 
@@ -1189,7 +1191,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Get the edited status of the currently selected tab. Returns false if
      * there are no tabs
-     * 
+     *
      * @return the edited status of the currently selected tab or false if there
      *         are no tabs
      */
@@ -1204,7 +1206,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /**
      * Get the edited status of the tab at the supplied index. Returns false if
      * the index is out of bounds or there are no tabs
-     * 
+     *
      * @param index the index of the tab to check
      * @return the edited status of the tab
      */
@@ -1382,7 +1384,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         // set up an action for closing the curren tab
         final Action closeAction = new AbstractAction("Close") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 4762166880144590384L;
 
@@ -1518,7 +1520,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action saveAction = new AbstractAction("Save") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 5182044142154404706L;
 
@@ -1550,7 +1552,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action openAction = new AbstractAction("Open") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = -5106547209818805444L;
 
@@ -1574,7 +1576,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action newAction = new AbstractAction("New") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 8002244400334262966L;
 
@@ -1597,7 +1599,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action selectAllAction = new AbstractAction("SelectAll") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = -8086754050844707658L;
 
@@ -1642,7 +1644,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action zoomInAction = new AbstractAction("ZoomIn") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 1348383794897269484L;
 
@@ -1674,7 +1676,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action zoomOutAction = new AbstractAction("ZoomOut") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = -1120096894263455918L;
 
@@ -1706,7 +1708,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action groupAction = new AbstractAction("Group") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = -5752742619180091435L;
 
@@ -1735,7 +1737,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action cutAction = new AbstractAction("Cut") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = -4955878102742013040L;
 
@@ -1761,7 +1763,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action deleteAction = new AbstractAction("Delete") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 4621688037874199553L;
 
@@ -1783,7 +1785,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action copyAction = new AbstractAction("Copy") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 117010390180468707L;
 
@@ -1807,7 +1809,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action pasteAction = new AbstractAction("Paste") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 5935121051028929455L;
 
@@ -1832,7 +1834,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
         final Action snapAction = new AbstractAction("Snap") {
           /**
-           * 
+           *
            */
           private static final long serialVersionUID = 7820689847829357449L;
 
@@ -1865,7 +1867,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       final Action noteAction = new AbstractAction("Note") {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 2991743619130024875L;
 
@@ -1893,7 +1895,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       final Action undoAction = new AbstractAction("Undo") {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 7248362305594881263L;
 
@@ -2057,7 +2059,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       final Action helpAction = new AbstractAction("Help") {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 3301809940717051925L;
 
@@ -2090,7 +2092,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       final Action togglePerspectivesAction = new AbstractAction(
         "Toggle perspectives") {
         /**
-           * 
+           *
            */
         private static final long serialVersionUID = 5394622655137498495L;
 
@@ -2193,8 +2195,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           try {
             // modifications by Zerbetto
             // Beans.instantiate(null, tempBeanCompName);
-            Beans.instantiate(this.getClass().getClassLoader(),
-              tempBeanCompName);
+            WekaPackageClassLoaderManager.objectForName(tempBeanCompName);
+            //Beans.instantiate(this.getClass().getClassLoader(),
+             // tempBeanCompName);
 
             // end modifications by Zerbetto
           } catch (Exception ex) {
@@ -2273,7 +2276,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                   // try and get a tool tip
                   String toolTip = "";
                   try {
-                    Object wrappedA = Class.forName(algName).newInstance();
+                    Object wrappedA = WekaPackageClassLoaderManager.objectForName(algName);
+                    // Object wrappedA = Class.forName(algName).newInstance();
                     toolTip = getGlobalInfo(wrappedA);
                   } catch (Exception ex) {
                   }
@@ -2556,7 +2560,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                 if (PluginManager.isInDisabledList(className)) {
                   continue;
                 }
-                Object p = Class.forName(className).newInstance();
+                Object p = WekaPackageClassLoaderManager.objectForName(className);
+                // Object p = Class.forName(className).newInstance();
                 if (p instanceof KFPerspective && p instanceof JPanel) {
                   String title = ((KFPerspective) p).getPerspectiveTitle();
                   weka.core.logging.Logger.log(
@@ -2616,7 +2621,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       // necessary)
       m_componentTree = new JTree(model) {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 6628795889296634120L;
 
@@ -2908,7 +2913,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   private class CloseableTabTitle extends JPanel {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -6844232025394346426L;
 
@@ -2927,7 +2932,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       // read the title from the JTabbedPane
       m_tabLabel = new JLabel() {
         /**
-         * 
+         *
          */
         private static final long serialVersionUID = 8515052190461050324L;
 
@@ -2959,7 +2964,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     private class TabButton extends JButton implements ActionListener {
       /**
-       * 
+       *
        */
       private static final long serialVersionUID = -4915800749132175968L;
 
@@ -3142,7 +3147,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   protected class KFLogPanel extends LogPanel {
     /**
-     * 
+     *
      */
     private static final long serialVersionUID = -2224509243343105276L;
 
@@ -3268,7 +3273,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   /**
    * Set the environment variables to use. NOTE: loading a new layout resets
    * back to the default set of variables
-   * 
+   *
    * @param env
    */
   public void setEnvironment(Environment env) {
@@ -3500,7 +3505,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Gets the main knowledge flow perspective
-   * 
+   *
    * @return the main knowledge flow perspective
    */
   public MainKFPerspective getMainPerspective() {
@@ -3583,7 +3588,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
             // need to instantiate and add to the cache
 
             try {
-              Object p = Class.forName(selectedClassName).newInstance();
+              Object p = WekaPackageClassLoaderManager.objectForName(selectedClassName);
+              // Object p = Class.forName(selectedClassName).newInstance();
               if (p instanceof KFPerspective && p instanceof JPanel) {
                 String title = ((KFPerspective) p).getPerspectiveTitle();
                 weka.core.logging.Logger.log(
@@ -3618,8 +3624,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
     /*
      * d.addWindowListener(new java.awt.event.WindowAdapter() { public void
      * windowClosing(java.awt.event.WindowEvent e) {
-     * 
-     * 
+     *
+     *
      * d.dispose(); } });
      */
 
@@ -4213,10 +4219,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    * points with "<num> :" in order to specify the order. In both parallel and
    * sequential mode, a start point can be ommitted from exectution by prefixing
    * its name with "! :".
-   * 
+   *
    * @param sequential true if the flow layout is to have its start points run
    *          sequentially rather than in parallel
-   * 
+   *
    */
   private void runFlow(final boolean sequential) {
     if (m_mainKFPerspective.getNumTabs() > 0) {
@@ -4239,10 +4245,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
        * Vector components =
        * BeanInstance.getBeanInstances(m_mainKFPerspective.getCurrentTabIndex
        * ());
-       * 
+       *
        * if (components != null) { for (int i = 0; i < components.size(); i++) {
        * Object temp = ((BeanInstance) components.elementAt(i)).getBean();
-       * 
+       *
        * if (temp instanceof BeanCommon) { ((BeanCommon) temp).stop(); } } }
        */
     }
@@ -4288,7 +4294,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
           // try and get a tool tip
           String toolTip = "";
           try {
-            Object wrappedA = Class.forName(algName).newInstance();
+            Object wrappedA = WekaPackageClassLoaderManager.objectForName(algName);
+            // Object wrappedA = Class.forName(algName).newInstance();
             toolTip = getGlobalInfo(wrappedA);
           } catch (Exception ex) {
           }
@@ -4322,8 +4329,9 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       try {
         // modifications by Zerbetto
         // tempBean = Beans.instantiate(null, tempBeanCompName);
-        tempBean = Beans.instantiate(this.getClass().getClassLoader(),
-          tempBeanCompName);
+        tempBean = WekaPackageClassLoaderManager.objectForName(tempBeanCompName);
+        //tempBean = Beans.instantiate(this.getClass().getClassLoader(),
+        //  tempBeanCompName);
 
         // end modifications by Zerbetto
       } catch (Exception ex) {
@@ -4336,7 +4344,8 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         // algName = (String)tempBarSpecs.elementAt(j);
         Class<?> c = null;
         try {
-          c = Class.forName(algName);
+          c = WekaPackageClassLoaderManager.forName(algName);
+          // c = Class.forName(algName);
 
           // check for ignore
           for (Annotation a : c.getAnnotations()) {
@@ -4364,8 +4373,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       try {
         // modifications by Zerbetto
         // tempBean = Beans.instantiate(null, tempBeanCompName);
-        tempBean = Beans.instantiate(this.getClass().getClassLoader(),
-          tempBeanCompName);
+
+        tempBean = WekaPackageClassLoaderManager.objectForName(tempBeanCompName);
+        //tempBean = Beans.instantiate(this.getClass().getClassLoader(),
+        //  tempBeanCompName);
 
         // end modifications
       } catch (Exception ex) {
@@ -4471,8 +4482,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
         @Override
         public void actionPerformed(ActionEvent ee) {
           try {
-            InputStream inR = this.getClass().getClassLoader()
-              .getResourceAsStream(path);
+            ClassLoader resourceClassLoader = WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager().findClassloaderForResource(path);
+            InputStream inR = resourceClassLoader.getResourceAsStream(path);
+            //InputStream inR = this.getClass().getClassLoader()
+            //  .getResourceAsStream(path);
             m_mainKFPerspective.addTab("Untitled" + m_untitledCount++);
             XMLBeans xml = new XMLBeans(m_beanLayout, m_bcSupport,
               m_mainKFPerspective.getCurrentTabIndex());
@@ -4506,15 +4519,15 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Popup a context sensitive menu for the bean component
-   * 
+   *
    * @param pt holds the panel coordinates for the component
    * @param bi the bean component over which the user right clicked the mouse
    * @param x the x coordinate at which to popup the menu
    * @param y the y coordinate at which to popup the menu
-   * 
+   *
    *          Modified by Zerbetto: javax.swing.JPopupMenu transformed into
    *          java.awt.PopupMenu
-   * 
+   *
    */
   private void doPopup(Point pt, final BeanInstance bi, int x, int y) {
     final JComponent bc = (JComponent) bi.getBean();
@@ -5127,7 +5140,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Popup the customizer for this bean
-   * 
+   *
    * @param custClass the class of the customizer
    * @param bc the bean to be customized
    */
@@ -5243,47 +5256,47 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      * BeanConnection.getConnections(m_mainKFPerspective.getCurrentTabIndex());
      * Vector inputs = bean.getInputs(); Vector outputs = bean.getOutputs();
      * Vector allComps = bean.getSubFlow();
-     * 
+     *
      * for (int i = 0; i < inputs.size(); i++) { BeanInstance temp =
      * (BeanInstance)inputs.elementAt(i); // is this input a target for some
      * event? for (int j = 0; j < allConnections.size(); j++) { BeanConnection
      * tempC = (BeanConnection)allConnections.elementAt(j); if
      * (tempC.getTarget() == temp) { tempRemovedConnections.add(tempC); }
-     * 
+     *
      * // also check to see if this input is a source for // some target that is
      * *not* in the subFlow if (tempC.getSource() == temp &&
      * !bean.subFlowContains(tempC.getTarget())) {
      * tempRemovedConnections.add(tempC); } } }
-     * 
+     *
      * for (int i = 0; i < outputs.size(); i++) { BeanInstance temp =
      * (BeanInstance)outputs.elementAt(i); // is this output a source for some
      * target? for (int j = 0; j < allConnections.size(); j++) { BeanConnection
      * tempC = (BeanConnection)allConnections.elementAt(j); if
      * (tempC.getSource() == temp) { tempRemovedConnections.add(tempC); } } }
-     * 
-     * 
+     *
+     *
      * for (int i = 0; i < tempRemovedConnections.size(); i++) { BeanConnection
      * temp = (BeanConnection)tempRemovedConnections.elementAt(i);
      * temp.remove(m_mainKFPerspective.getCurrentTabIndex()); }
-     * 
+     *
      * MetaBean copy = copyMetaBean(bean, true);
-     * 
+     *
      * String displayName =""; ImageIcon scaledIcon = null; // if (copy
      * instanceof Visible) { //((Visible)copy).getVisual().scale(3); scaledIcon
      * = new ImageIcon(((Visible)copy).getVisual().scale(0.33)); displayName =
      * ((Visible)copy).getVisual().getText(); }
-     * 
+     *
      * JTreeLeafDetails metaLeaf = new JTreeLeafDetails(displayName, copy,
      * scaledIcon); DefaultMutableTreeNode newUserComp = new
      * DefaultMutableTreeNode(metaLeaf); model.insertNodeInto(newUserComp,
      * m_userCompNode, 0);
-     * 
+     *
      * // add to the list of user components m_userComponents.add(copy);
-     * 
+     *
      * if (installListener && m_firstUserComponentOpp) { try {
      * installWindowListenerForSavingUserBeans(); m_firstUserComponentOpp =
      * false; } catch (Exception ex) { ex.printStackTrace(); } }
-     * 
+     *
      * // Now reinstate any deleted connections to the original MetaBean for
      * (int i = 0; i < tempRemovedConnections.size(); i++) { BeanConnection temp
      * = (BeanConnection)tempRemovedConnections.elementAt(i); BeanConnection
@@ -5297,7 +5310,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      * (BeanInstance)beans.elementAt(i); if (tempB.getBean() instanceof Visible)
      * { ((Visible)(tempB.getBean())).getVisual().
      * addPropertyChangeListener(KnowledgeFlowApp.this);
-     * 
+     *
      * if (tempB.getBean() instanceof MetaBean) { ((MetaBean)tempB.getBean()).
      * addPropertyChangeListenersSubFlow(KnowledgeFlowApp.this); } // Restore
      * the default background colour ((Visible)(tempB.getBean())).getVisual().
@@ -5309,7 +5322,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   /**
    * Set the contents of the "paste" buffer and enable the paste from cliboard
    * toolbar button
-   * 
+   *
    * @param b the buffer to use
    */
   public void setPasteBuffer(StringBuffer b) {
@@ -5322,7 +5335,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Get the contents of the paste buffer
-   * 
+   *
    * @return the contents of the paste buffer
    */
   public StringBuffer getPasteBuffer() {
@@ -5331,7 +5344,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Utility routine that serializes the supplied Vector of BeanInstances to XML
-   * 
+   *
    * @param selectedBeans the vector of BeanInstances to serialize
    * @return a StringBuffer containing the serialized vector
    * @throws Exception if a problem occurs
@@ -5747,7 +5760,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Initiates the connection process for two beans
-   * 
+   *
    * @param esd the EventSetDescriptor for the source bean
    * @param bi the source bean
    * @param x the x coordinate to start connecting from
@@ -6087,7 +6100,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Accept property change events
-   * 
+   *
    * @param e a <code>PropertyChangeEvent</code> value
    */
   @Override
@@ -6152,7 +6165,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   /**
    * Load a layout from a file. Supports loading binary and XML serialized flow
    * files
-   * 
+   *
    * @param oFile the file to load from
    * @param newTab true if the loaded layout should be displayed in a new tab
    */
@@ -6162,7 +6175,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Load a layout from a file
-   * 
+   *
    * @param oFile the file to load from
    * @param newTab true if the loaded layout should be displayed in a new tab
    * @param isUndo is this file an "undo" file?
@@ -6258,7 +6271,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Load a flow file from an input stream. Only supports XML serialized flows.
-   * 
+   *
    * @param is the input stream to laod from
    * @param newTab whether to open a new tab in the UI for the flow
    * @param flowName the name of the flow
@@ -6272,7 +6285,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Load a flow file from a reader. Only supports XML serialized flows.
-   * 
+   *
    * @param reader the reader to load from
    * @param newTab whether to open a new tab in the UI for the flow
    * @param flowName the name of the flow
@@ -6371,7 +6384,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    * a Vector of beans and a Vector of connections. the supplied beans and
    * connections are deep-copied via serialization before being set in the
    * layout. The beans get added to the flow at position 0.
-   * 
+   *
    * @param v a Vector containing a Vector of beans and a Vector of connections
    * @exception Exception if something goes wrong
    */
@@ -6386,7 +6399,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
     /*
      * int tabI = 0;
-     * 
+     *
      * BeanInstance.
      * removeAllBeansFromContainer((JComponent)m_mainKFPerspective.
      * getBeanLayout(tabI), tabI); BeanInstance.setBeanInstances(new Vector(),
@@ -6417,7 +6430,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
    * Gets the current flow being edited. The flow is returned as a single Vector
    * containing two other Vectors: the beans and the connections. These two
    * vectors are deep-copied via serialization before being returned.
-   * 
+   *
    * @return the current flow being edited
    * @throws Exception if a problem occurs
    */
@@ -6443,7 +6456,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Returns the current flow being edited in XML format.
-   * 
+   *
    * @return the current flow as an XML string
    * @throws Exception if a problem occurs
    */
@@ -6458,7 +6471,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Utility method to create an image of a region of the given component
-   * 
+   *
    * @param component the component to create an image of
    * @param region the region of the component to put into the image
    * @return the image
@@ -6655,7 +6668,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   /**
    * Save the knowledge flow into the OutputStream passed at input. Only
    * supports saving the layout data (no trained models) to XML.
-   * 
+   *
    * @param out the output stream to save the layout in
    */
   public void saveLayout(OutputStream out, int tabIndex) {
@@ -6851,7 +6864,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
   /**
    * Utility method for grabbing the global info help (if it exists) from an
    * arbitrary object
-   * 
+   *
    * @param tempBean the object to grab global info from
    * @return the global help info or null if global info does not exist
    */
@@ -6881,7 +6894,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Create the singleton instance of the KnowledgeFlow
-   * 
+   *
    * @param args can contain a file argument for loading a flow layout (format:
    *          "file=[path to layout file]") Modified by Zerbetto: you can
    *          specify the path of a knowledge flow layout file at input
@@ -6927,7 +6940,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Return the singleton instance of the KnowledgeFlow
-   * 
+   *
    * @return the singleton instance
    */
   public static KnowledgeFlowApp getSingleton() {
@@ -6936,7 +6949,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Add a listener to be notified when startup is complete
-   * 
+   *
    * @param s a listener to add
    */
   public static void addStartupListener(StartUpListener s) {
@@ -6945,7 +6958,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Loads the specified file at input
-   * 
+   *
    * Added by Zerbetto
    */
   // modifications by Zerbetto 05-12-2007
@@ -6994,7 +7007,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Notifies to the parent swt that the layout is dirty
-   * 
+   *
    * Added by Zerbetto
    */
   private void notifyIsDirty() {
@@ -7005,7 +7018,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
   /**
    * Main method.
-   * 
+   *
    * @param args a <code>String[]</code> value
    */
   public static void main(String[] args) {

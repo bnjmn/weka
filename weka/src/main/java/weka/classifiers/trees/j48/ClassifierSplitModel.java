@@ -235,6 +235,15 @@ public abstract class ClassifierSplitModel
   }
 
   /**
+   * Sets the distribution associated with model.
+   *
+   * @param dist
+   */
+  public void setDistribution(Distribution dist) {
+    m_distribution = dist;
+  }
+
+  /**
    * Splits the given set of instances into subsets.
    *
    * @exception Exception if something goes wrong

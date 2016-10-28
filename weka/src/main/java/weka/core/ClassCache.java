@@ -31,6 +31,7 @@ import java.util.Enumeration;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -108,7 +109,7 @@ public class ClassCache implements RevisionHandler {
    */
   public ClassCache() {
     super();
-    initialize();
+    initializeNew();
   }
 
   /**
@@ -117,7 +118,7 @@ public class ClassCache implements RevisionHandler {
    * @param classname the classname to process
    * @return the processed classname
    */
-  protected String cleanUp(String classname) {
+  public static String cleanUp(String classname) {
     String result;
 
     result = classname;
@@ -141,7 +142,7 @@ public class ClassCache implements RevisionHandler {
    * @param classname the classname to extract the package from
    * @return the package name
    */
-  protected String extractPackage(String classname) {
+  public static String extractPackage(String classname) {
     if (classname.indexOf(".") > -1) {
       return classname.substring(0, classname.lastIndexOf("."));
     } else {
@@ -374,6 +375,27 @@ public class ClassCache implements RevisionHandler {
         System.out.println("Classpath-part: " + part);
       }
       initFromClasspathPart(part);
+    }
+  }
+
+  protected void initializeNew() {
+    m_Cache = new Hashtable<String, HashSet<String>>();
+    WekaPackageClassLoaderManager wcl = WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager();
+
+    // parent classloader entries...
+    URL[] sysOrWekaCP = wcl.getWekaClassloaderClasspathEntries();
+    for (URL url : sysOrWekaCP) {
+      String part = url.toString();
+      if (VERBOSE) {
+        System.out.println("Classpath-part: " + part);
+      }
+      initFromClasspathPart(part);
+    }
+
+    // top-level package jar file class entries
+    Set<String> classes = wcl.getPackageJarFileClasses();
+    for (String cl : classes) {
+      add(cl);
     }
   }
 

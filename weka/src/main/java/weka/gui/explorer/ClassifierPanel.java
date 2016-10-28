@@ -45,10 +45,12 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Range;
+import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.converters.ArffLoader;
 import weka.core.converters.ConverterUtils.DataSource;
 import weka.core.converters.IncrementalConverter;
@@ -825,8 +827,9 @@ public class ClassifierPanel extends AbstractPerspective implements
         // Display as a single button
         String className = pluginsVector.elementAt(0);
         final ClassifierPanelLaunchHandlerPlugin plugin =
-          (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
-            .newInstance();
+          (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
+          //(ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+          //  .newInstance();
         if (plugin != null) {
           plugin.setClassifierPanel(this);
           pluginBut = new JButton(plugin.getLaunchCommand());
@@ -849,8 +852,9 @@ public class ClassifierPanel extends AbstractPerspective implements
         String className = (pluginsVector.elementAt(i));
         try {
           final ClassifierPanelLaunchHandlerPlugin plugin =
-            (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
-              .newInstance();
+            (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
+          //  (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+            //  .newInstance();
 
           if (plugin == null) {
             continue;
@@ -1024,6 +1028,15 @@ public class ClassifierPanel extends AbstractPerspective implements
   }
 
   /**
+   * Get the current set of instances
+   *
+   * @return the current set of instances
+   */
+  public Instances getInstances() {
+    return m_Instances;
+  }
+
+  /**
    * Sets the user test set. Information about the current test set is displayed
    * in an InstanceSummaryPanel and the user is given the ability to load
    * another set from a file or url.
@@ -1077,7 +1090,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * outputs the header for the predictions on the data.
-   * 
+   *
    * @param outBuff the buffer to add the output to
    * @param classificationOutput for generating the classification output
    * @param title the title to print
@@ -1090,7 +1103,21 @@ public class ClassifierPanel extends AbstractPerspective implements
     classificationOutput.printHeader();
   }
 
-  protected static Evaluation setupEval(Evaluation eval, Classifier classifier,
+  /**
+   * Configures an evaluation object with respect to a classifier, cost matrix, output
+   * and plotting.
+   *
+   * @param eval the Evaluation object to configure
+   * @param classifier the Classifier being used
+   * @param inst the Instances involved
+   * @param costMatrix a cost matrix (if any)
+   * @param plotInstances a ClassifierErrorsPlotInstances for visualization of errors (can be null)
+   * @param classificationOutput an output object for printing predictions (can be null)
+   * @param onlySetPriors true to only set priors
+   * @return the configured Evaluation object
+   * @throws Exception if a problem occurs
+   */
+  public static Evaluation setupEval(Evaluation eval, Classifier classifier,
     Instances inst, CostMatrix costMatrix,
     ClassifierErrorsPlotInstances plotInstances,
     AbstractOutput classificationOutput, boolean onlySetPriors)
@@ -2343,7 +2370,8 @@ public class ClassifierPanel extends AbstractPerspective implements
       String className = (pluginsVector.elementAt(i));
       try {
         VisualizePlugin plugin =
-          (VisualizePlugin) Class.forName(className).newInstance();
+          (VisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+          // (VisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null) {
           continue;
         }
@@ -2372,7 +2400,8 @@ public class ClassifierPanel extends AbstractPerspective implements
       String className = (pluginsVector.elementAt(i));
       try {
         ErrorVisualizePlugin plugin =
-          (ErrorVisualizePlugin) Class.forName(className).newInstance();
+          (ErrorVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+          // (ErrorVisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null) {
           continue;
         }
@@ -2406,7 +2435,8 @@ public class ClassifierPanel extends AbstractPerspective implements
           String className = (pluginsVector.elementAt(i));
           try {
             TreeVisualizePlugin plugin =
-              (TreeVisualizePlugin) Class.forName(className).newInstance();
+              (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+              // (TreeVisualizePlugin) Class.forName(className).newInstance();
             if (plugin == null) {
               continue;
             }
@@ -2439,7 +2469,8 @@ public class ClassifierPanel extends AbstractPerspective implements
           String className = (pluginsVector.elementAt(i));
           try {
             GraphVisualizePlugin plugin =
-              (GraphVisualizePlugin) Class.forName(className).newInstance();
+              (GraphVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+              //(GraphVisualizePlugin) Class.forName(className).newInstance();
             if (plugin == null) {
               continue;
             }
@@ -2696,7 +2727,9 @@ public class ClassifierPanel extends AbstractPerspective implements
           if (selected.getName().endsWith(".gz")) {
             is = new GZIPInputStream(is);
           }
-          ObjectInputStream objectInputStream = new ObjectInputStream(is);
+          // ObjectInputStream objectInputStream = new ObjectInputStream(is);
+          ObjectInputStream objectInputStream =
+            SerializationHelper.getObjectInputStream(is);
           classifier = (Classifier) objectInputStream.readObject();
           try { // see if we can load the header
             trainHeader = (Instances) objectInputStream.readObject();
@@ -3406,6 +3439,241 @@ public class ClassifierPanel extends AbstractPerspective implements
       m_OutText.setBackground(outputBackgroundColor);
       m_History.setBackground(outputBackgroundColor);
     }
+  }
+
+  /**
+   * Gets whether cross-validation has been selected by the user
+   *
+   * @return true if cross-validation has been selected
+   */
+  public boolean isSelectedCV() {
+    return m_CVBut.isSelected();
+  }
+
+  /**
+   * Gets whether test on train has been selected by the user
+   *
+   * @return true if testing is to be done on the training set
+   */
+  public boolean isSelectedTestOnTrain() {
+    return m_TrainBut.isSelected();
+  }
+
+  /**
+   * Gets whether a percentage split has been selected by the user
+   *
+   * @return true if a percentage split has been selected
+   */
+  public boolean isSelectedPercentageSplit() {
+    return m_PercentBut.isSelected();
+  }
+
+  /**
+   * Gets whether a separate test set has been selected by the user
+   *
+   * @return true if a separate test set has been selected by the user
+   */
+  public boolean isSelectedSeparateTestSet() {
+    return m_TestSplitBut.isSelected();
+  }
+
+  /**
+   * Gets whether evaluation with respect to costs has been selected by the user
+   *
+   * @return true if eval with respect to costs
+   */
+  public boolean isSelectedEvalWithRespectToCosts() {
+    return m_EvalWRTCostsBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output the model
+   *
+   * @return true if the model is to be output
+   */
+  public boolean isSelectedOutputModel() {
+    return m_OutputModelBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output the confusion matrix
+   *
+   * @return true if the confusion matrix is to be output
+   */
+  public boolean isSelectedOutputConfusion() {
+    return m_OutputConfusionBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output per-class stats
+   *
+   * @return true if per-class stats are to be output
+   */
+  public boolean isSelectedOutputPerClassStats() {
+    return m_OutputPerClassBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output entropy metrics
+   *
+   * @return true if entropy metrics are to be output
+   */
+  public boolean isSelectedOutputEntropy() {
+    return m_OutputEntropyBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to store the predictions in the history
+   *
+   * @return true if predictions are to be stored
+   */
+  public boolean isSelectedStorePredictions() {
+    return m_StorePredictionsBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output source code
+   *
+   * @return true if source code is to be output
+   */
+  public boolean isSelectedOutputSourceCode() {
+    return m_OutputSourceCode.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to preserve order of instances
+   * in a percentage split
+   *
+   * @return whether the user has opted to preserve the instance order
+   */
+  public boolean isSelectedPreserveOrder() {
+    return m_PreserveOrderBut.isSelected();
+  }
+
+  /**
+   * Gets the name of the source code class to be generated
+   *
+   * @return the name of the source code class to be generated
+   */
+  public String getSourceCodeClassName() {
+    return m_SourceCodeClass.getText();
+  }
+
+  /**
+   * Get the current visualization
+   *
+   * @return the current visualization
+   */
+  public VisualizePanel getCurrentVisualization() {
+    return m_CurrentVis;
+  }
+
+  /**
+   * Set the current visualization
+   *
+   * @param current the visualization to use
+   */
+  public void setCurrentVisualization(VisualizePanel current) {
+    m_CurrentVis = current;
+  }
+
+  /**
+   * Get the selected (0-based) class index
+   *
+   * @return the selected class index
+   */
+  public int getSelectedClassIndex() {
+    return m_ClassCombo.getSelectedIndex();
+  }
+
+  /**
+   * Get the number of cross-validation folds to use
+   *
+   * @return the number of cross-validation folds to use
+   */
+  public int getNumCVFolds() {
+    return Integer.parseInt(m_CVText.getText());
+  }
+
+  /**
+   * Get the percentage to use for percentage split evaluation
+   *
+   * @return the percentage to use in a percent split evaluation
+   */
+  public double getPercentageSplit() {
+    return Double.parseDouble(m_PercentText.getText());
+  }
+
+  /**
+   * Get the currently configured classifier from the GenericObjectEditor
+   *
+   * @return the currently configured classifier
+   */
+  public Classifier getClassifier() {
+    return (Classifier) m_ClassifierEditor.getValue();
+  }
+
+  /**
+   * Get the cost matrix (if any)
+   *
+   * @return the cost matrix
+   */
+  public CostMatrix getCostMatrix() {
+    return (CostMatrix) m_CostMatrixEditor.getValue();
+  }
+
+  /**
+   * Get the formatter for classifcation output
+   *
+   * @return the formatter for classification output
+   */
+  public Object getClassificationOutputFormatter() {
+    return m_ClassificationOutputEditor.getValue();
+  }
+
+  /**
+   * Get the result history panel
+   *
+   * @return the result history panel
+   */
+  public ResultHistoryPanel getResultHistory() {
+    return m_History;
+  }
+
+  /**
+   * Get the loader object used for loading a separate test set
+   *
+   * @return the loader used for loading a separate test set
+   */
+  public Loader getSeparateTestSetLoader() {
+    return m_TestLoader;
+  }
+
+  /**
+   * Get the class index specified for the separate test set
+   *
+   * @return the class index specified for the separate test set
+   */
+  public int getSeparateTestSetClassIndex() {
+    return m_TestClassIndex;
+  }
+
+  /**
+   * Get the random seed
+   *
+   * @return the random seed
+   */
+  public int getRandomSeed() {
+    return Integer.parseInt(m_RandomSeedText.getText());
+  }
+
+  /**
+   * Get the log
+   *
+   * @return the log object
+   */
+  public Logger getLog() {
+    return m_Log;
   }
 
   public static enum TestMode {

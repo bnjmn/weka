@@ -90,10 +90,12 @@ import weka.core.Drawable;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Remove;
 import weka.gui.AbstractPerspective;
@@ -509,8 +511,8 @@ public class ClustererPanel extends AbstractPerspective implements
         // display a single button
         String className = pluginsVector.elementAt(0);
         final ClustererPanelLaunchHandlerPlugin plugin =
-          (ClustererPanelLaunchHandlerPlugin) Class.forName(className)
-            .newInstance();
+          (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
+            // Class.forName(className).newInstance();
         if (plugin != null) {
           plugin.setClustererPanel(this);
           pluginBut = new JButton(plugin.getLaunchCommand());
@@ -533,8 +535,8 @@ public class ClustererPanel extends AbstractPerspective implements
         String className = (pluginsVector.elementAt(i));
         try {
           final ClustererPanelLaunchHandlerPlugin plugin =
-            (ClustererPanelLaunchHandlerPlugin) Class.forName(className)
-              .newInstance();
+            (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
+              // Class.forName(className).newInstance();
 
           if (plugin == null) {
             continue;
@@ -1418,7 +1420,8 @@ public class ClustererPanel extends AbstractPerspective implements
         String className = (pluginsVector.elementAt(i));
         try {
           TreeVisualizePlugin plugin =
-            (TreeVisualizePlugin) Class.forName(className).newInstance();
+            (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+              // Class.forName(className).newInstance();
           if (plugin == null) {
             continue;
           }
@@ -1543,7 +1546,9 @@ public class ClustererPanel extends AbstractPerspective implements
         if (selected.getName().endsWith(".gz")) {
           is = new GZIPInputStream(is);
         }
-        ObjectInputStream objectInputStream = new ObjectInputStream(is);
+        // ObjectInputStream objectInputStream = new ObjectInputStream(is);
+        ObjectInputStream objectInputStream =
+          SerializationHelper.getObjectInputStream(is);
         clusterer = (Clusterer) objectInputStream.readObject();
         try { // see if we can load the header & ignored attribute info
           trainHeader = (Instances) objectInputStream.readObject();

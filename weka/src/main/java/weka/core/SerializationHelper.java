@@ -48,7 +48,8 @@ public class SerializationHelper implements RevisionHandler {
     boolean result;
 
     try {
-      result = isSerializable(Class.forName(classname));
+      // result = isSerializable(Class.forName(classname));
+      result = isSerializable(WekaPackageClassLoaderManager.forName(classname));
     } catch (Exception e) {
       result = false;
     }
@@ -79,7 +80,8 @@ public class SerializationHelper implements RevisionHandler {
     boolean result;
 
     try {
-      result = hasUID(Class.forName(classname));
+      // result = hasUID(Class.forName(classname));
+      result = hasUID(WekaPackageClassLoaderManager.forName(classname));
     } catch (Exception e) {
       result = false;
     }
@@ -124,7 +126,8 @@ public class SerializationHelper implements RevisionHandler {
     boolean result;
 
     try {
-      result = needsUID(Class.forName(classname));
+      // result = needsUID(Class.forName(classname));
+      result = needsUID(WekaPackageClassLoaderManager.forName(classname));
     } catch (Exception e) {
       result = false;
     }
@@ -163,7 +166,8 @@ public class SerializationHelper implements RevisionHandler {
     long result;
 
     try {
-      result = getUID(Class.forName(classname));
+      // result = getUID(Class.forName(classname));
+      result = getUID(WekaPackageClassLoaderManager.forName(classname));
     } catch (Exception e) {
       result = 0L;
     }
@@ -268,15 +272,56 @@ public class SerializationHelper implements RevisionHandler {
     ObjectInputStream ois;
     Object result;
 
-    if (!(stream instanceof BufferedInputStream)) {
-      stream = new BufferedInputStream(stream);
-    }
-
-    ois = new ObjectInputStream(stream);
+    ois = getObjectInputStream(stream);
     result = ois.readObject();
     ois.close();
 
     return result;
+  }
+
+  /**
+   * Get a (Weka package classloader aware) {@code ObjectInputStream} instance
+   * for reading objects from the supplied input stream
+   *
+   * @param stream the stream to wrap
+   * @return an {@code ObjectInputStream} instance that is aware of of Weka
+   *         package classloaders
+   * @throws IOException if a problem occurs
+   */
+  public static ObjectInputStream getObjectInputStream(InputStream stream)
+    throws IOException {
+    if (!(stream instanceof BufferedInputStream)) {
+      stream = new BufferedInputStream(stream);
+    }
+
+    return new ObjectInputStream(stream) {
+      protected WekaPackageLibIsolatingClassLoader m_firstLoader;
+
+      @Override
+      protected Class<?> resolveClass(ObjectStreamClass desc)
+        throws IOException, ClassNotFoundException {
+
+        // make sure that the type descriptor for arrays gets removed from
+        // what we're going to look up!
+        String arrayStripped =
+          desc.getName().replace("[L", "").replace("[", "").replace(";", "");
+        ClassLoader cl =
+          WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
+            .getLoaderForClass(arrayStripped);
+        if (!(cl instanceof WekaPackageLibIsolatingClassLoader)) {
+          // could be a third-party
+          if (m_firstLoader != null) {
+            if (m_firstLoader.hasThirdPartyClass(arrayStripped)) {
+              cl = m_firstLoader;
+            }
+          }
+        } else if (m_firstLoader == null) {
+          m_firstLoader = (WekaPackageLibIsolatingClassLoader) cl;
+        }
+
+        return Class.forName(desc.getName(), true, cl);
+      }
+    };
   }
 
   /**
@@ -301,11 +346,8 @@ public class SerializationHelper implements RevisionHandler {
     ObjectInputStream ois;
     Vector<Object> result;
 
-    if (!(stream instanceof BufferedInputStream)) {
-      stream = new BufferedInputStream(stream);
-    }
+    ois = getObjectInputStream(stream);
 
-    ois = new ObjectInputStream(stream);
     result = new Vector<Object>();
     try {
       while (true) {

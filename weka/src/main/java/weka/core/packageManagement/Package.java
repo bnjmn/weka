@@ -162,8 +162,8 @@ public abstract class Package implements Cloneable, Serializable {
    * @throws Exception if the list of missing depenencies can't be determined
    *           for some reason.
    */
-  public abstract List<Dependency> getMissingDependencies(List<Package> packages)
-    throws Exception;
+  public abstract List<Dependency>
+    getMissingDependencies(List<Package> packages) throws Exception;
 
   /**
    * Gets a list of installed packages that this package depends on that are
@@ -173,6 +173,19 @@ public abstract class Package implements Cloneable, Serializable {
    *         on.
    */
   public abstract List<Dependency> getIncompatibleDependencies()
+    throws Exception;
+
+  /**
+   * Compares this package's precluded list (if any) against the list of
+   * supplied packages. Any packages in the supplied list that match (by name
+   * and version constraints) any in the precluded list are returned
+   *
+   * @param packages a list of packages to compare against those in this
+   *          package's precluded list
+   * @return a list of packages that are covered by those in the precluded list
+   * @throws Exception if a problem occurs
+   */
+  public abstract List<Package> getPrecludedPackages(List<Package> packages)
     throws Exception;
 
   /**

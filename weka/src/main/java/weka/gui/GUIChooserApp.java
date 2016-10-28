@@ -27,15 +27,16 @@ import weka.core.Copyright;
 import weka.core.Defaults;
 import weka.core.Instances;
 import weka.core.Memory;
+import weka.core.PluginManager;
 import weka.core.Settings;
 import weka.core.SystemInfo;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.WekaPackageManager;
 import weka.core.scripting.Groovy;
 import weka.core.scripting.Jython;
 import weka.gui.arffviewer.ArffViewer;
-import weka.core.PluginManager;
 import weka.gui.boundaryvisualizer.BoundaryVisualizer;
 import weka.gui.experiment.Experimenter;
 import weka.gui.explorer.Explorer;
@@ -52,7 +53,23 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -210,24 +227,25 @@ public class GUIChooserApp extends JFrame {
   protected static LogWindow m_LogWindow = new LogWindow();
 
   /** The weka image */
-  Image m_weka = Toolkit.getDefaultToolkit().getImage(GUIChooserApp.class
-    .getClassLoader().getResource("weka/gui/images/weka_background.gif"));
+  Image m_weka = Toolkit.getDefaultToolkit().getImage(
+    GUIChooserApp.class.getClassLoader().getResource(
+      "weka/gui/images/weka_background.gif"));
 
   /** filechooser for the TreeVisualizer */
-  protected JFileChooser m_FileChooserTreeVisualizer =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(
+    new File(System.getProperty("user.dir")));
 
   /** filechooser for the GraphVisualizer */
-  protected JFileChooser m_FileChooserGraphVisualizer =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(
+    new File(System.getProperty("user.dir")));
 
   /** filechooser for Plots */
-  protected JFileChooser m_FileChooserPlot =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(
+    System.getProperty("user.dir")));
 
   /** filechooser for ROC curves */
-  protected JFileChooser m_FileChooserROC =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_FileChooserROC = new JFileChooser(new File(
+    System.getProperty("user.dir")));
 
   /** the icon for the frames */
   protected Image m_Icon;
@@ -271,31 +289,35 @@ public class GUIChooserApp extends JFrame {
     WekaPackageManager.getUnderlyingPackageManager().applySettings(m_settings);
 
     // filechoosers
-    m_FileChooserGraphVisualizer.addChoosableFileFilter(
-      new ExtensionFileFilter(".bif", "BIF Files (*.bif)"));
-    m_FileChooserGraphVisualizer.addChoosableFileFilter(
-      new ExtensionFileFilter(".xml", "XML Files (*.xml)"));
+    m_FileChooserGraphVisualizer
+      .addChoosableFileFilter(new ExtensionFileFilter(".bif",
+        "BIF Files (*.bif)"));
+    m_FileChooserGraphVisualizer
+      .addChoosableFileFilter(new ExtensionFileFilter(".xml",
+        "XML Files (*.xml)"));
 
-    m_FileChooserPlot
-      .addChoosableFileFilter(new ExtensionFileFilter(Instances.FILE_EXTENSION,
-        "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
+    m_FileChooserPlot.addChoosableFileFilter(new ExtensionFileFilter(
+      Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
+        + ")"));
     m_FileChooserPlot.setMultiSelectionEnabled(true);
 
-    m_FileChooserROC
-      .addChoosableFileFilter(new ExtensionFileFilter(Instances.FILE_EXTENSION,
-        "ARFF Files (*" + Instances.FILE_EXTENSION + ")"));
+    m_FileChooserROC.addChoosableFileFilter(new ExtensionFileFilter(
+      Instances.FILE_EXTENSION, "ARFF Files (*" + Instances.FILE_EXTENSION
+        + ")"));
 
     // general layout
-    m_Icon = Toolkit.getDefaultToolkit().getImage(GUIChooserApp.class
-      .getClassLoader().getResource("weka/gui/weka_icon_new_48.png"));
+    m_Icon =
+      Toolkit.getDefaultToolkit().getImage(
+        GUIChooserApp.class.getClassLoader().getResource(
+          "weka/gui/weka_icon_new_48.png"));
     setIconImage(m_Icon);
     this.getContentPane().setLayout(new BorderLayout());
 
     this.getContentPane().add(m_PanelApplications, BorderLayout.EAST);
 
     // applications
-    m_PanelApplications
-      .setBorder(BorderFactory.createTitledBorder("Applications"));
+    m_PanelApplications.setBorder(BorderFactory
+      .createTitledBorder("Applications"));
     m_PanelApplications.setLayout(new GridLayout(0, 1));
     m_PanelApplications.add(m_ExplorerBut);
     m_PanelApplications.add(m_ExperimenterBut);
@@ -311,11 +333,12 @@ public class GUIChooserApp extends JFrame {
     ImageIcon wii = new ImageIcon(m_weka);
     JLabel wekaLab = new JLabel(wii);
     wekaPan.add(wekaLab, BorderLayout.CENTER);
-    String infoString = "<html>" + "<font size=-2>"
-      + "Waikato Environment for Knowledge Analysis<br>" + "Version "
-      + Version.VERSION + "<br>" + "(c) " + Copyright.getFromYear() + " - "
-      + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
-      + Copyright.getAddress() + "</font>" + "</html>";
+    String infoString =
+      "<html>" + "<font size=-2>"
+        + "Waikato Environment for Knowledge Analysis<br>" + "Version "
+        + Version.VERSION + "<br>" + "(c) " + Copyright.getFromYear() + " - "
+        + Copyright.getToYear() + "<br>" + Copyright.getOwner() + "<br>"
+        + Copyright.getAddress() + "</font>" + "</html>";
     JLabel infoLab = new JLabel(infoString);
     infoLab.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
     wekaPan.add(infoLab, BorderLayout.SOUTH);
@@ -336,8 +359,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuProgram.add(jMenuItemProgramLogWindow);
     jMenuItemProgramLogWindow.setText("LogWindow");
     // jMenuItemProgramLogWindow.setMnemonic('L');
-    jMenuItemProgramLogWindow.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_L, KeyEvent.CTRL_MASK));
+    jMenuItemProgramLogWindow.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_L, KeyEvent.CTRL_MASK));
     m_LogWindow.setIconImage(m_Icon);
     jMenuItemProgramLogWindow.addActionListener(new ActionListener() {
       @Override
@@ -350,8 +373,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuProgram.add(jMenuItemProgramMemUsage);
     jMenuItemProgramMemUsage.setText("Memory usage");
     // jMenuItemProgramMemUsage.setMnemonic('M');
-    jMenuItemProgramMemUsage.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_M, KeyEvent.CTRL_MASK));
+    jMenuItemProgramMemUsage.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_M, KeyEvent.CTRL_MASK));
 
     jMenuItemProgramMemUsage.addActionListener(new ActionListener() {
       @Override
@@ -381,8 +404,8 @@ public class GUIChooserApp extends JFrame {
           }
           m_MemoryUsageFrame.setVisible(true);
           Dimension size = m_MemoryUsageFrame.getPreferredSize();
-          m_MemoryUsageFrame.setSize(
-            new Dimension((int) size.getWidth(), (int) size.getHeight()));
+          m_MemoryUsageFrame.setSize(new Dimension((int) size.getWidth(),
+            (int) size.getHeight()));
         }
       }
     });
@@ -394,13 +417,14 @@ public class GUIChooserApp extends JFrame {
       @Override
       public void actionPerformed(ActionEvent e) {
         try {
-          int result = SettingsEditor.showSingleSettingsEditor(m_settings,
-            GUIChooserDefaults.APP_ID, "GUIChooser",
-            (JComponent) GUIChooserApp.this.getContentPane().getComponent(0),
-            550, 100);
+          int result =
+            SettingsEditor.showSingleSettingsEditor(m_settings,
+              GUIChooserDefaults.APP_ID, "GUIChooser",
+              (JComponent) GUIChooserApp.this.getContentPane().getComponent(0),
+              550, 100);
           if (result == JOptionPane.OK_OPTION) {
-            WekaPackageManager.getUnderlyingPackageManager()
-              .applySettings(m_settings);
+            WekaPackageManager.getUnderlyingPackageManager().applySettings(
+              m_settings);
           }
         } catch (Exception ex) {
           ex.printStackTrace();
@@ -415,8 +439,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuProgram.add(jMenuItemProgramExit);
     jMenuItemProgramExit.setText("Exit");
     // jMenuItemProgramExit.setMnemonic('E');
-    jMenuItemProgramExit.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_E, KeyEvent.CTRL_MASK));
+    jMenuItemProgramExit.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_E,
+      KeyEvent.CTRL_MASK));
     jMenuItemProgramExit.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -436,8 +460,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuVisualization.add(jMenuItemVisualizationPlot);
     jMenuItemVisualizationPlot.setText("Plot");
     // jMenuItemVisualizationPlot.setMnemonic('P');
-    jMenuItemVisualizationPlot.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_P, KeyEvent.CTRL_MASK));
+    jMenuItemVisualizationPlot.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_P, KeyEvent.CTRL_MASK));
 
     jMenuItemVisualizationPlot.addActionListener(new ActionListener() {
       @Override
@@ -476,8 +500,8 @@ public class GUIChooserApp extends JFrame {
             }
           } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(m_Self,
-              "Error loading file '" + files[j] + "':\n" + ex.getMessage());
+            JOptionPane.showMessageDialog(m_Self, "Error loading file '"
+              + files[j] + "':\n" + ex.getMessage());
             return;
           }
         }
@@ -507,8 +531,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuVisualization.add(jMenuItemVisualizationROC);
     jMenuItemVisualizationROC.setText("ROC");
     // jMenuItemVisualizationROC.setMnemonic('R');
-    jMenuItemVisualizationROC.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_R, KeyEvent.CTRL_MASK));
+    jMenuItemVisualizationROC.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_R, KeyEvent.CTRL_MASK));
 
     jMenuItemVisualizationROC.addActionListener(new ActionListener() {
       @Override
@@ -526,8 +550,8 @@ public class GUIChooserApp extends JFrame {
           result = new Instances(new BufferedReader(new FileReader(filename)));
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self,
-            "Error loading file '" + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
+            + filename + "':\n" + ex.getMessage());
           return;
         }
         result.setClassIndex(result.numAttributes() - 1);
@@ -571,8 +595,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuVisualization.add(jMenuItemVisualizationTree);
     jMenuItemVisualizationTree.setText("TreeVisualizer");
     // jMenuItemVisualizationTree.setMnemonic('T');
-    jMenuItemVisualizationTree.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_T, KeyEvent.CTRL_MASK));
+    jMenuItemVisualizationTree.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_T, KeyEvent.CTRL_MASK));
 
     jMenuItemVisualizationTree.addActionListener(new ActionListener() {
       @Override
@@ -593,8 +617,8 @@ public class GUIChooserApp extends JFrame {
           top = builder.create(new FileReader(filename));
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self,
-            "Error loading file '" + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
+            + filename + "':\n" + ex.getMessage());
           return;
         }
 
@@ -624,8 +648,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuVisualization.add(jMenuItemVisualizationGraph);
     jMenuItemVisualizationGraph.setText("GraphVisualizer");
     // jMenuItemVisualizationGraph.setMnemonic('G');
-    jMenuItemVisualizationGraph.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_MASK));
+    jMenuItemVisualizationGraph.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_G, KeyEvent.CTRL_MASK));
 
     jMenuItemVisualizationGraph.addActionListener(new ActionListener() {
       @Override
@@ -649,8 +673,8 @@ public class GUIChooserApp extends JFrame {
           }
         } catch (Exception ex) {
           ex.printStackTrace();
-          JOptionPane.showMessageDialog(m_Self,
-            "Error loading file '" + filename + "':\n" + ex.getMessage());
+          JOptionPane.showMessageDialog(m_Self, "Error loading file '"
+            + filename + "':\n" + ex.getMessage());
           return;
         }
 
@@ -679,8 +703,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuVisualization.add(jMenuItemVisualizationBoundary);
     jMenuItemVisualizationBoundary.setText("BoundaryVisualizer");
     // jMenuItemVisualizationBoundary.setMnemonic('B');
-    jMenuItemVisualizationBoundary.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_B, KeyEvent.CTRL_MASK));
+    jMenuItemVisualizationBoundary.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_B, KeyEvent.CTRL_MASK));
 
     jMenuItemVisualizationBoundary.addActionListener(new ActionListener() {
       @Override
@@ -689,8 +713,8 @@ public class GUIChooserApp extends JFrame {
           jMenuItemVisualizationBoundary.setEnabled(false);
           m_BoundaryVisualizerFrame = new JFrame("BoundaryVisualizer");
           m_BoundaryVisualizerFrame.setIconImage(m_Icon);
-          m_BoundaryVisualizerFrame.getContentPane()
-            .setLayout(new BorderLayout());
+          m_BoundaryVisualizerFrame.getContentPane().setLayout(
+            new BorderLayout());
           final BoundaryVisualizer bv = new BoundaryVisualizer();
           m_BoundaryVisualizerFrame.getContentPane().add(bv,
             BorderLayout.CENTER);
@@ -721,13 +745,15 @@ public class GUIChooserApp extends JFrame {
     m_jMenuBar.add(jMenuExtensions);
     jMenuExtensions.setVisible(false);
 
-    String extensions = GenericObjectEditor.EDITOR_PROPERTIES
-      .getProperty(MainMenuExtension.class.getName(), "");
+    String extensions =
+      GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+        MainMenuExtension.class.getName(), "");
 
     if (extensions.length() > 0) {
       jMenuExtensions.setVisible(true);
-      String[] classnames = GenericObjectEditor.EDITOR_PROPERTIES
-        .getProperty(MainMenuExtension.class.getName(), "").split(",");
+      String[] classnames =
+        GenericObjectEditor.EDITOR_PROPERTIES.getProperty(
+          MainMenuExtension.class.getName(), "").split(",");
       Hashtable<String, JMenu> submenus = new Hashtable<String, JMenu>();
 
       // add all extensions
@@ -761,8 +787,9 @@ public class GUIChooserApp extends JFrame {
             menuitem.addActionListener(new ActionListener() {
               @Override
               public void actionPerformed(ActionEvent e) {
-                Component frame = createFrame(m_Self, finalMenuitem.getText(),
-                  null, null, null, -1, -1, null, false, false);
+                Component frame =
+                  createFrame(m_Self, finalMenuitem.getText(), null, null,
+                    null, -1, -1, null, false, false);
                 finalExt.fillFrame(frame);
                 frame.setVisible(true);
               }
@@ -792,8 +819,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuTools.add(jMenuItemToolsPackageManager);
     final String offline = (WekaPackageManager.m_offline ? " (offline)" : "");
     jMenuItemToolsPackageManager.setText("Package manager" + offline);
-    jMenuItemToolsPackageManager.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_U, KeyEvent.CTRL_MASK));
+    jMenuItemToolsPackageManager.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_U, KeyEvent.CTRL_MASK));
     jMenuItemToolsPackageManager.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -807,8 +834,8 @@ public class GUIChooserApp extends JFrame {
               if (!WekaPackageManager.m_noPackageMetaDataAvailable) {
                 m_PackageManagerFrame = new JFrame("Package Manager" + offline);
                 m_PackageManagerFrame.setIconImage(m_Icon);
-                m_PackageManagerFrame.getContentPane()
-                  .setLayout(new BorderLayout());
+                m_PackageManagerFrame.getContentPane().setLayout(
+                  new BorderLayout());
                 m_PackageManagerFrame.getContentPane().add(pm,
                   BorderLayout.CENTER);
                 m_PackageManagerFrame.addWindowListener(new WindowAdapter() {
@@ -841,8 +868,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuTools.add(jMenuItemToolsArffViewer);
     jMenuItemToolsArffViewer.setText("ArffViewer");
     // jMenuItemToolsArffViewer.setMnemonic('A');
-    jMenuItemToolsArffViewer.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_A, KeyEvent.CTRL_MASK));
+    jMenuItemToolsArffViewer.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_A, KeyEvent.CTRL_MASK));
 
     jMenuItemToolsArffViewer.addActionListener(new ActionListener() {
       @Override
@@ -865,8 +892,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuTools.add(jMenuItemToolsSql);
     jMenuItemToolsSql.setText("SqlViewer");
     // jMenuItemToolsSql.setMnemonic('S');
-    jMenuItemToolsSql.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_S, KeyEvent.CTRL_MASK));
+    jMenuItemToolsSql.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_S,
+      KeyEvent.CTRL_MASK));
 
     jMenuItemToolsSql.addActionListener(new ActionListener() {
       @Override
@@ -898,8 +925,8 @@ public class GUIChooserApp extends JFrame {
     final JMenuItem jMenuItemBayesNet = new JMenuItem();
     m_jMenuTools.add(jMenuItemBayesNet);
     jMenuItemBayesNet.setText("Bayes net editor");
-    jMenuItemBayesNet.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_N, KeyEvent.CTRL_MASK));
+    jMenuItemBayesNet.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_N,
+      KeyEvent.CTRL_MASK));
     jMenuItemBayesNet.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -932,8 +959,8 @@ public class GUIChooserApp extends JFrame {
       final JMenuItem jMenuItemGroovyConsole = new JMenuItem();
       m_jMenuTools.add(jMenuItemGroovyConsole);
       jMenuItemGroovyConsole.setText("Groovy console");
-      jMenuItemGroovyConsole.setAccelerator(
-        KeyStroke.getKeyStroke(KeyEvent.VK_G, KeyEvent.CTRL_MASK));
+      jMenuItemGroovyConsole.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_G, KeyEvent.CTRL_MASK));
       jMenuItemGroovyConsole.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -949,12 +976,12 @@ public class GUIChooserApp extends JFrame {
               // not problematic in practice.
               String realOS = System.getProperty("os.name");
               System.setProperty("os.name", "pretending_not_to_be_an_apple");
-              groovyConsoleClass.getMethod("run")
-                .invoke(groovyConsoleClass.newInstance());
+              groovyConsoleClass.getMethod("run").invoke(
+                groovyConsoleClass.newInstance());
               System.setProperty("os.name", realOS);
             } else {
-              groovyConsoleClass.getMethod("run")
-                .invoke(groovyConsoleClass.newInstance());
+              groovyConsoleClass.getMethod("run").invoke(
+                groovyConsoleClass.newInstance());
             }
           } catch (Exception ex) {
             System.err.println("Failed to start Groovy console.");
@@ -964,25 +991,31 @@ public class GUIChooserApp extends JFrame {
     }
 
     // Tools/Jython console
-    if (Jython.isPresent()) {
+    if (Jython.isPresent() || WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager().getPackageClassLoader("tigerjython") != null) {
       final JMenuItem jMenuItemJythonConsole = new JMenuItem();
       m_jMenuTools.add(jMenuItemJythonConsole);
       jMenuItemJythonConsole.setText("Jython console");
-      jMenuItemJythonConsole.setAccelerator(
-        KeyStroke.getKeyStroke(KeyEvent.VK_J, KeyEvent.CTRL_MASK));
+      jMenuItemJythonConsole.setAccelerator(KeyStroke.getKeyStroke(
+        KeyEvent.VK_J, KeyEvent.CTRL_MASK));
       jMenuItemJythonConsole.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
 
           // Do we have TigerJython?
           try {
-            Class tigerJythonClass = Class.forName("tigerjython.core.TigerJython");
+            ClassLoader tigerLoader = WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager().getPackageClassLoader("tigerjython");
+            if (tigerLoader == null) {
+              throw new Exception("no tigerjython");
+            }
+            Class tigerJythonClass =
+              Class.forName("tigerjython.core.TigerJython", true, tigerLoader);
             Object[] args = new Object[1];
             args[0] = new String[0];
-            tigerJythonClass.getMethod("main", String[].class).invoke(null, args);
+            tigerJythonClass.getMethod("main", String[].class).invoke(null,
+              args);
           } catch (Exception ex) {
 
-           // Default to built-in console
+            // Default to built-in console
             if (m_JythonConsoleFrame == null) {
               jMenuItemJythonConsole.setEnabled(false);
               final JythonPanel jythonPanel = new JythonPanel();
@@ -1009,8 +1042,9 @@ public class GUIChooserApp extends JFrame {
     }
 
     // plugins for Visualization and Tools
-    Set<String> pluginNames = PluginManager
-      .getPluginNamesOfType("weka.gui.GUIChooser.GUIChooserMenuPlugin");
+    Set<String> pluginNames =
+      PluginManager
+        .getPluginNamesOfType("weka.gui.GUIChooser.GUIChooserMenuPlugin");
     if (pluginNames != null) {
       boolean firstVis = true;
       boolean firstTools = true;
@@ -1047,8 +1081,7 @@ public class GUIChooserApp extends JFrame {
               }
             });
 
-            if (p
-              .getMenuToDisplayIn() == GUIChooser.GUIChooserMenuPlugin.Menu.VISUALIZATION) {
+            if (p.getMenuToDisplayIn() == GUIChooser.GUIChooserMenuPlugin.Menu.VISUALIZATION) {
               if (firstVis) {
                 m_jMenuVisualization.add(new JSeparator());
                 firstVis = false;
@@ -1081,8 +1114,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuHelp.add(jMenuItemHelpHomepage);
     jMenuItemHelpHomepage.setText("Weka homepage");
     // jMenuItemHelpHomepage.setMnemonic('H');
-    jMenuItemHelpHomepage.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_H, KeyEvent.CTRL_MASK));
+    jMenuItemHelpHomepage.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_H,
+      KeyEvent.CTRL_MASK));
     jMenuItemHelpHomepage.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
@@ -1097,8 +1130,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuHelp.add(jMenuItemHelpWekaWiki);
     jMenuItemHelpWekaWiki.setText("HOWTOs, code snippets, etc.");
     // jMenuItemHelpWekaWiki.setMnemonic('W');
-    jMenuItemHelpWekaWiki.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_W, KeyEvent.CTRL_MASK));
+    jMenuItemHelpWekaWiki.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_W,
+      KeyEvent.CTRL_MASK));
 
     jMenuItemHelpWekaWiki.addActionListener(new ActionListener() {
       @Override
@@ -1112,8 +1145,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuHelp.add(jMenuItemHelpSourceforge);
     jMenuItemHelpSourceforge.setText("Weka on Sourceforge");
     // jMenuItemHelpSourceforge.setMnemonic('F');
-    jMenuItemHelpSourceforge.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_F, KeyEvent.CTRL_MASK));
+    jMenuItemHelpSourceforge.setAccelerator(KeyStroke.getKeyStroke(
+      KeyEvent.VK_F, KeyEvent.CTRL_MASK));
 
     jMenuItemHelpSourceforge.addActionListener(new ActionListener() {
       @Override
@@ -1127,8 +1160,8 @@ public class GUIChooserApp extends JFrame {
     m_jMenuHelp.add(jMenuItemHelpSysInfo);
     jMenuItemHelpSysInfo.setText("SystemInfo");
     // jMenuItemHelpSysInfo.setMnemonic('S');
-    jMenuItemHelpSysInfo.setAccelerator(
-      KeyStroke.getKeyStroke(KeyEvent.VK_I, KeyEvent.CTRL_MASK));
+    jMenuItemHelpSysInfo.setAccelerator(KeyStroke.getKeyStroke(KeyEvent.VK_I,
+      KeyEvent.CTRL_MASK));
 
     jMenuItemHelpSysInfo.addActionListener(new ActionListener() {
       @Override
@@ -1301,16 +1334,16 @@ public class GUIChooserApp extends JFrame {
     });
     pack();
 
-    if (!Utils
-      .getDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager")) {
+    if (!Utils.getDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager")) {
       Thread tipThread = new Thread() {
         @Override
         public void run() {
           JCheckBox dontShow = new JCheckBox("Do not show this message again");
           Object[] stuff = new Object[2];
-          stuff[0] = "Weka has a package manager that you\n"
-            + "can use to install many learning schemes and tools.\nThe package manager can be "
-            + "found under the \"Tools\" menu.\n";
+          stuff[0] =
+            "Weka has a package manager that you\n"
+              + "can use to install many learning schemes and tools.\nThe package manager can be "
+              + "found under the \"Tools\" menu.\n";
           stuff[1] = dontShow;
           // Display the tip on finding/using the package manager
           JOptionPane.showMessageDialog(GUIChooserApp.this, stuff,
@@ -1318,8 +1351,8 @@ public class GUIChooserApp extends JFrame {
 
           if (dontShow.isSelected()) {
             try {
-              Utils.setDontShowDialog(
-                "weka.gui.GUIChooser.HowToFindPackageManager");
+              Utils
+                .setDontShowDialog("weka.gui.GUIChooser.HowToFindPackageManager");
             } catch (Exception ex) {
               // quietly ignore
             }
@@ -1343,8 +1376,8 @@ public class GUIChooserApp extends JFrame {
          * KnowledgeFlowApp.getSingleton().loadLayout( new
          * File(m_pendingKnowledgeFlowLoad), true);
          */
-        ((MainKFPerspective) m_knowledgeFlow.getMainPerspective())
-          .loadLayout(new File(m_pendingKnowledgeFlowLoad), true);
+        ((MainKFPerspective) m_knowledgeFlow.getMainPerspective()).loadLayout(
+          new File(m_pendingKnowledgeFlowLoad), true);
         m_pendingKnowledgeFlowLoad = null;
       }
       m_KnowledgeFlowFrame = new JFrame("Weka KnowledgeFlow Environment");
@@ -1437,8 +1470,7 @@ public class GUIChooserApp extends JFrame {
    * @param menuitem the menu item to add
    * @param startIndex the index in the menu to start with (0-based)
    */
-  protected void insertMenuItem(JMenu menu, JMenuItem menuitem,
-    int startIndex) {
+  protected void insertMenuItem(JMenu menu, JMenuItem menuitem, int startIndex) {
     boolean inserted;
     int i;
     JMenuItem current;
@@ -1642,11 +1674,14 @@ public class GUIChooserApp extends JFrame {
 
     if (!isVisible()
       // applications
-      && (m_ExplorerFrame == null) && (m_ExperimenterFrame == null)
-      && (m_KnowledgeFlowFrame == null) && (m_SimpleCLI == null)
+      && (m_ExplorerFrame == null)
+      && (m_ExperimenterFrame == null)
+      && (m_KnowledgeFlowFrame == null)
+      && (m_SimpleCLI == null)
       // tools
       && (m_ArffViewers.size() == 0) && (m_SqlViewerFrame == null)
-      && (m_GroovyConsoleFrame == null) && (m_JythonConsoleFrame == null)
+      && (m_GroovyConsoleFrame == null)
+      && (m_JythonConsoleFrame == null)
       && (m_EnsembleLibraryFrame == null)
       // visualization
       && (m_Plots.size() == 0) && (m_ROCs.size() == 0)
@@ -1654,6 +1689,7 @@ public class GUIChooserApp extends JFrame {
       && (m_BoundaryVisualizerFrame == null)
       // help
       && (m_SystemInfoFrame == null)) {
+      System.setSecurityManager(null);
       System.exit(0);
     }
   }
@@ -1675,7 +1711,8 @@ public class GUIChooserApp extends JFrame {
         "Note: a restart is required for this setting to come into effect");
 
     /** Default value for LAF */
-    protected static final String LAF = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+    protected static final String LAF =
+      "javax.swing.plaf.nimbus.NimbusLookAndFeel";
 
     private static final long serialVersionUID = -8524894440289936685L;
 
@@ -1742,12 +1779,20 @@ public class GUIChooserApp extends JFrame {
             System.setErr(savedStdErr);
 
             // Make entry in log and
-            weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
-              "Intercepted System.exit() from TigerJython. Please ignore");
-            throw new SecurityException(
-              "Intercepted System.exit() from TigerJython. Please ignore!");
+            /*
+             * weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+             * "Intercepted System.exit() from TigerJython. Please ignore");
+             * throw new SecurityException(
+             * "Intercepted System.exit() from TigerJython. Please ignore!");
+             */
           }
         }
+
+        weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+          "Intercepted System.exit() from a class other than the GUIChooser. "
+            + "Please ignore.");
+        throw new SecurityException("Intercepted System.exit() from "
+          + "a class other than the GUIChooser. Please ignore.");
       }
 
       public void checkPermission(Permission perm) {
@@ -1819,6 +1864,7 @@ public class GUIChooserApp extends JFrame {
               System.err.println("\ndisplayed message:");
               m_Memory.showOutOfMemory();
               System.err.println("\nexiting...");
+              System.setSecurityManager(null);
               System.exit(-1);
             }
             // } catch (InterruptedException ex) {

@@ -69,8 +69,8 @@ public class DefaultPackage extends Package implements Serializable {
     DefaultPackage newP = null;
 
     if (m_packageHome != null) {
-      newP = new DefaultPackage(new File(m_packageHome.toString()),
-        m_packageManager);
+      newP =
+        new DefaultPackage(new File(m_packageHome.toString()), m_packageManager);
     } else {
       newP = new DefaultPackage(null, m_packageManager);
     }
@@ -165,8 +165,8 @@ public class DefaultPackage extends Package implements Serializable {
       String secondInequality = null;
       int delimiterIndex = nameAndVersion.indexOf('|');
       if (delimiterIndex >= 0) {
-        secondInequality = nameAndVersion.substring(delimiterIndex + 1,
-          nameAndVersion.length());
+        secondInequality =
+          nameAndVersion.substring(delimiterIndex + 1, nameAndVersion.length());
         secondInequality = secondInequality.trim();
         String[] result2 = new String[5];
         result2[0] = result[0];
@@ -175,8 +175,9 @@ public class DefaultPackage extends Package implements Serializable {
         delimiterIndex = nameAndVersion.length();
       }
 
-      nameAndVersion = nameAndVersion.substring(
-        nameAndVersion.indexOf('(') + 1, delimiterIndex);
+      nameAndVersion =
+        nameAndVersion.substring(nameAndVersion.indexOf('(') + 1,
+          delimiterIndex);
       nameAndVersion = nameAndVersion.trim();
       int pos = 1;
       if (nameAndVersion.charAt(0) == '=') {
@@ -228,8 +229,8 @@ public class DefaultPackage extends Package implements Serializable {
         }
 
         if (ok) {
-          secondInequality = secondInequality.substring(pos,
-            secondInequality.indexOf(')'));
+          secondInequality =
+            secondInequality.substring(pos, secondInequality.indexOf(')'));
           result[4] = secondInequality.trim();
         }
       }
@@ -264,8 +265,8 @@ public class DefaultPackage extends Package implements Serializable {
           toAdd = m_packageManager.getRepositoryPackageInfo(split[0], split[2]);
 
           if (split.length == 3) {
-            VersionPackageConstraint versionConstraint = new VersionPackageConstraint(
-              toAdd);
+            VersionPackageConstraint versionConstraint =
+              new VersionPackageConstraint(toAdd);
             if (split[2] == null) {
               // assume anything up to and including the current version is
               // acceptable
@@ -279,12 +280,12 @@ public class DefaultPackage extends Package implements Serializable {
             dependencies.add(dep);
           } else {
             // ranged constraint
-            VersionRangePackageConstraint versionConstraint = new VersionRangePackageConstraint(
-              toAdd);
-            VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-              .getVersionComparison(split[1]);
-            VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-              .getVersionComparison(split[3]);
+            VersionRangePackageConstraint versionConstraint =
+              new VersionRangePackageConstraint(toAdd);
+            VersionPackageConstraint.VersionComparison comp1 =
+              VersionPackageConstraint.getVersionComparison(split[1]);
+            VersionPackageConstraint.VersionComparison comp2 =
+              VersionPackageConstraint.getVersionComparison(split[3]);
             versionConstraint.setRangeConstraint(split[2], comp1, split[4],
               comp2);
 
@@ -328,16 +329,17 @@ public class DefaultPackage extends Package implements Serializable {
           // for some reason
           split[2] = (split[2] == null ? "1000.1000.1000" : split[2]);
           baseMap.put("Version", split[2]);
-          Package basePackage = new DefaultPackage(null, m_packageManager,
-            baseMap);
+          Package basePackage =
+            new DefaultPackage(null, m_packageManager, baseMap);
 
           if (split.length == 3) {
-            VersionPackageConstraint baseConstraint = new VersionPackageConstraint(
-              basePackage);
-            VersionPackageConstraint.VersionComparison baseComp = VersionPackageConstraint.VersionComparison.LESSTHANOREQUAL;
+            VersionPackageConstraint baseConstraint =
+              new VersionPackageConstraint(basePackage);
+            VersionPackageConstraint.VersionComparison baseComp =
+              VersionPackageConstraint.VersionComparison.LESSTHANOREQUAL;
             if (split[1] != null) {
-              baseComp = VersionPackageConstraint
-                .getVersionComparison(split[1]);
+              baseComp =
+                VersionPackageConstraint.getVersionComparison(split[1]);
             }
             baseConstraint.setVersionConstraint(baseComp);
 
@@ -345,13 +347,13 @@ public class DefaultPackage extends Package implements Serializable {
             baseDeps.add(baseDep);
           } else {
             // ranged constraint
-            VersionRangePackageConstraint baseConstraint = new VersionRangePackageConstraint(
-              basePackage);
+            VersionRangePackageConstraint baseConstraint =
+              new VersionRangePackageConstraint(basePackage);
 
-            VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-              .getVersionComparison(split[1]);
-            VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-              .getVersionComparison(split[3]);
+            VersionPackageConstraint.VersionComparison comp1 =
+              VersionPackageConstraint.getVersionComparison(split[1]);
+            VersionPackageConstraint.VersionComparison comp2 =
+              VersionPackageConstraint.getVersionComparison(split[3]);
             baseConstraint.setRangeConstraint(split[2], comp1, split[4], comp2);
 
             baseDep = new Dependency(this, baseConstraint);
@@ -414,11 +416,11 @@ public class DefaultPackage extends Package implements Serializable {
         if (!(split[0].equalsIgnoreCase(m_packageManager.getBaseSystemName()))) {
 
           // gets the latest version of this package if split[2] is null
-          Package tempDep = m_packageManager.getRepositoryPackageInfo(split[0],
-            split[2]);
+          Package tempDep =
+            m_packageManager.getRepositoryPackageInfo(split[0], split[2]);
           if (!findPackage(split[0], packages)) {
-            VersionPackageConstraint versionConstraint = new VersionPackageConstraint(
-              tempDep);
+            VersionPackageConstraint versionConstraint =
+              new VersionPackageConstraint(tempDep);
             if (split[2] == null) {
               // assume anything up to and including the current version is
               // acceptable
@@ -430,12 +432,12 @@ public class DefaultPackage extends Package implements Serializable {
                 versionConstraint.setVersionConstraint(split[1]);
                 missing.add(new Dependency(this, versionConstraint));
               } else {
-                VersionRangePackageConstraint versionRConstraint = new VersionRangePackageConstraint(
-                  tempDep);
-                VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-                  .getVersionComparison(split[1]);
-                VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-                  .getVersionComparison(split[3]);
+                VersionRangePackageConstraint versionRConstraint =
+                  new VersionRangePackageConstraint(tempDep);
+                VersionPackageConstraint.VersionComparison comp1 =
+                  VersionPackageConstraint.getVersionComparison(split[1]);
+                VersionPackageConstraint.VersionComparison comp2 =
+                  VersionPackageConstraint.getVersionComparison(split[3]);
 
                 versionRConstraint.setRangeConstraint(split[2], comp1,
                   split[4], comp2);
@@ -488,6 +490,67 @@ public class DefaultPackage extends Package implements Serializable {
   }
 
   /**
+   * Compares this package's precluded list (if any) against the list of
+   * supplied packages. Any packages in the supplied list that match (by name
+   * and version constraints) any in the precluded list are returned
+   *
+   * @param packages a list of packages to compare against those in this
+   *          package's precluded list
+   * @return a list of packages that are covered by those in the precluded list
+   * @throws Exception if a problem occurs
+   */
+  @Override
+  public List<Package> getPrecludedPackages(List<Package> packages)
+    throws Exception {
+    List<Package> result = new ArrayList<>();
+    Object precluded = getPackageMetaDataElement("Precludes");
+    if (precluded != null) {
+      StringTokenizer tok = new StringTokenizer(precluded.toString(), ",");
+      while (tok.hasMoreTokens()) {
+        String nextT = tok.nextToken().trim();
+        String[] splitD = splitNameVersion(nextT);
+        // look for a match
+        for (Package p : packages) {
+          if (p.getName().equalsIgnoreCase(splitD[0].trim())) {
+            // if a version number is supplied then check, otherwise assume
+            // that version does not matter
+            if (splitD[1] != null && splitD[2] != null) {
+              String versionI =
+                p.getPackageMetaDataElement("Version").toString().trim();
+
+              if (splitD.length == 3) {
+                VersionPackageConstraint.VersionComparison constraint =
+                  VersionPackageConstraint.getVersionComparison(splitD[1]);
+                if (VersionPackageConstraint.checkConstraint(versionI,
+                  constraint, splitD[2])) {
+                  result.add(p);
+                }
+              } else {
+                VersionRangePackageConstraint versionRConstraint =
+                  new VersionRangePackageConstraint(p);
+                VersionPackageConstraint.VersionComparison comp1 =
+                  VersionPackageConstraint.getVersionComparison(splitD[1]);
+                VersionPackageConstraint.VersionComparison comp2 =
+                  VersionPackageConstraint.getVersionComparison(splitD[3]);
+                versionRConstraint.setRangeConstraint(splitD[2], comp1,
+                  splitD[4], comp2);
+                if (versionRConstraint.checkConstraint(p)) {
+                  result.add(p);
+                }
+              }
+            } else {
+              result.add(p);
+            }
+          }
+        }
+
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Gets those packages from the supplied list that this package depends on and
    * are currently incompatible with this package.
    * 
@@ -513,30 +576,31 @@ public class DefaultPackage extends Package implements Serializable {
         // check only if a version number was supplied in the dependency list.
         if (splitD[1] != null && splitD[2] != null) {
           for (Package p : packages) {
-            String packageNameI = p.getPackageMetaDataElement("PackageName")
-              .toString();
+            String packageNameI =
+              p.getPackageMetaDataElement("PackageName").toString();
             if (packageNameI.trim().equalsIgnoreCase(splitD[0].trim())) {
               // now check version against this one
-              String versionI = p.getPackageMetaDataElement("Version")
-                .toString().trim();
+              String versionI =
+                p.getPackageMetaDataElement("Version").toString().trim();
               // String[] splitI = splitNameVersion(versionI);
 
               if (splitD.length == 3) {
-                VersionPackageConstraint.VersionComparison constraint = VersionPackageConstraint
-                  .getVersionComparison(splitD[1]);
+                VersionPackageConstraint.VersionComparison constraint =
+                  VersionPackageConstraint.getVersionComparison(splitD[1]);
                 if (!VersionPackageConstraint.checkConstraint(versionI,
                   constraint, splitD[2])) {
-                  VersionPackageConstraint vpc = new VersionPackageConstraint(p);
+                  VersionPackageConstraint vpc =
+                    new VersionPackageConstraint(p);
                   vpc.setVersionConstraint(constraint);
                   incompatible.add(new Dependency(this, vpc));
                 }
               } else {
-                VersionRangePackageConstraint versionRConstraint = new VersionRangePackageConstraint(
-                  p);
-                VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-                  .getVersionComparison(splitD[1]);
-                VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-                  .getVersionComparison(splitD[3]);
+                VersionRangePackageConstraint versionRConstraint =
+                  new VersionRangePackageConstraint(p);
+                VersionPackageConstraint.VersionComparison comp1 =
+                  VersionPackageConstraint.getVersionComparison(splitD[1]);
+                VersionPackageConstraint.VersionComparison comp2 =
+                  VersionPackageConstraint.getVersionComparison(splitD[3]);
 
                 versionRConstraint.setRangeConstraint(splitD[2], comp1,
                   splitD[4], comp2);
@@ -640,8 +704,8 @@ public class DefaultPackage extends Package implements Serializable {
         // check the system version
         if (split[1] != null) {
           if (split.length == 3) {
-            VersionPackageConstraint.VersionComparison constraint = VersionPackageConstraint
-              .getVersionComparison(split[1]);
+            VersionPackageConstraint.VersionComparison constraint =
+              VersionPackageConstraint.getVersionComparison(split[1]);
             if (!VersionPackageConstraint.checkConstraint(systemVersion,
               constraint, split[2])) {
               ok = false;
@@ -653,15 +717,15 @@ public class DefaultPackage extends Package implements Serializable {
             baseMap.put("PackageName", "weka");
 
             baseMap.put("Version", systemVersion);
-            Package basePackage = new DefaultPackage(null, m_packageManager,
-              baseMap);
+            Package basePackage =
+              new DefaultPackage(null, m_packageManager, baseMap);
 
-            VersionRangePackageConstraint versionRConstraint = new VersionRangePackageConstraint(
-              basePackage);
-            VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-              .getVersionComparison(split[1]);
-            VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-              .getVersionComparison(split[3]);
+            VersionRangePackageConstraint versionRConstraint =
+              new VersionRangePackageConstraint(basePackage);
+            VersionPackageConstraint.VersionComparison comp1 =
+              VersionPackageConstraint.getVersionComparison(split[1]);
+            VersionPackageConstraint.VersionComparison comp2 =
+              VersionPackageConstraint.getVersionComparison(split[3]);
 
             versionRConstraint.setRangeConstraint(split[2], comp1, split[4],
               comp2);
@@ -741,9 +805,10 @@ public class DefaultPackage extends Package implements Serializable {
    */
   @Override
   public boolean isInstalled() {
-    File packageDir = new File(m_packageHome.getAbsoluteFile() + File.separator
-      + m_packageMetaData.get("PackageName") + File.separator
-      + "Description.props");
+    File packageDir =
+      new File(m_packageHome.getAbsoluteFile() + File.separator
+        + m_packageMetaData.get("PackageName") + File.separator
+        + "Description.props");
     return (packageDir.exists());
   }
 
@@ -759,8 +824,8 @@ public class DefaultPackage extends Package implements Serializable {
 
         System.out
           .println("Checking first version number against second constraint");
-        VersionPackageConstraint.VersionComparison constraint = VersionPackageConstraint
-          .getVersionComparison(splitA[1]);
+        VersionPackageConstraint.VersionComparison constraint =
+          VersionPackageConstraint.getVersionComparison(splitA[1]);
 
         if (VersionPackageConstraint.checkConstraint(splitI[2], constraint,
           splitA[2])) {
@@ -774,20 +839,20 @@ public class DefaultPackage extends Package implements Serializable {
         baseMap.put("Version", splitA[2]);
         Package packageA = new DefaultPackage(null, null, baseMap);
         packageA.setPackageMetaData(baseMap);
-        VersionPackageConstraint constrA = new VersionPackageConstraint(
-          packageA);
+        VersionPackageConstraint constrA =
+          new VersionPackageConstraint(packageA);
         constrA.setVersionConstraint(constraint);
 
         if (splitI.length == 3) {
 
-          VersionPackageConstraint.VersionComparison constraintI = VersionPackageConstraint
-            .getVersionComparison(splitI[1]);
+          VersionPackageConstraint.VersionComparison constraintI =
+            VersionPackageConstraint.getVersionComparison(splitI[1]);
 
           Package packageI = (Package) packageA.clone();
           packageI.setPackageMetaDataElement(
             VersionPackageConstraint.VERSION_KEY, splitI[2]);
-          VersionPackageConstraint constrI = new VersionPackageConstraint(
-            packageI);
+          VersionPackageConstraint constrI =
+            new VersionPackageConstraint(packageI);
           constrI.setVersionConstraint(constraintI);
 
           PackageConstraint pc = null;
@@ -813,10 +878,10 @@ public class DefaultPackage extends Package implements Serializable {
 
         VersionRangePackageConstraint c = new VersionRangePackageConstraint(p);
 
-        VersionPackageConstraint.VersionComparison comp1 = VersionPackageConstraint
-          .getVersionComparison(splitA[1]);
-        VersionPackageConstraint.VersionComparison comp2 = VersionPackageConstraint
-          .getVersionComparison(splitA[3]);
+        VersionPackageConstraint.VersionComparison comp1 =
+          VersionPackageConstraint.getVersionComparison(splitA[1]);
+        VersionPackageConstraint.VersionComparison comp2 =
+          VersionPackageConstraint.getVersionComparison(splitA[3]);
         c.setRangeConstraint(splitA[2], comp1, splitA[4], comp2);
 
         if (c.checkConstraint(p)) {

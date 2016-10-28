@@ -38,8 +38,7 @@ import java.util.List;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public abstract class AbstractPerspective extends JPanel
-  implements Perspective {
+public abstract class AbstractPerspective extends JPanel implements Perspective {
 
   /** For serialization */
   private static final long serialVersionUID = 1919714661641262879L;
@@ -232,7 +231,9 @@ public abstract class AbstractPerspective extends JPanel
       this.getClass().getAnnotation(PerspectiveInfo.class);
     if (perspectiveA != null && perspectiveA.iconPath() != null
       && perspectiveA.iconPath().length() > 0) {
-      m_perspectiveIcon = StepVisual.loadIcon(perspectiveA.iconPath());
+      m_perspectiveIcon =
+        StepVisual.loadIcon(this.getClass().getClassLoader(),
+          perspectiveA.iconPath());
     }
 
     return m_perspectiveIcon;
