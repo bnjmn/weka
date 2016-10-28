@@ -6,10 +6,10 @@
 PackageName=netlibNativeOSX
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2016-03-22
+Date=2016-10-27
 
 # Title (required)
 Title=netlib-java wrappers and native libraries for BLAS, LAPACK and ARPACK under OS X
@@ -31,7 +31,7 @@ Description=This package is a library-only package specific for Mac OS X. It pro
 #Changes=
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/netlibNativeOSX1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/netlibNativeOSX1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/netlibNativeOSX
@@ -42,5 +42,14 @@ URL=http://weka.sourceforge.net/doc.packages/netlibNativeOSX
 # Related to other packages?
 #Related=
 
+Precludes=netlibNativeWindows,netlibNativeLinux
+
+# Jar files containing native libraries (; separated list of jar/zip:lib-path,lib-path,...)
+NativeLibs=lib/netlib-native_ref-osx-x86_64-1.1-natives.jar:netlib-native_ref-osx-x86_64.jnilib;lib/netlib-native_system-osx-x86_64-1.1-natives.jar:netlib-native_system-osx-x86_64.jnilib
+
+# Classes needed for loading/finding native libraries (get injected into the root or weka.jar-level classloader). k separated list of
+# [root|]jar/zip:fully qualified class,fully qualified class,...
+InjectLoader=root|lib/jniloader-1.1.jar;root|lib/native_ref-java-1.1.jar;root|lib/native_system-java-1.1.jar
+
 # Dependencies
-Depends=weka (>=3.7.14-SNAPSHOT)
+Depends=weka (>=3.8.0)
