@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoop
 
 # Version (required)
-Version=1.0.16
+Version=1.1.17
 
 #Date (year-month-day)
-Date=2015-05-27
+Date=2016-10-27
 
 # Title (required)
 Title=Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. Either this package or distributedWekaHadoop2 should be installed, but not both. Which one you choose depends on whether you are running Hadoop 1.x or 2.x. This package will cause distributedWekaBase, distributedWekaHadoopCore and distributedWekaHadoopLibs to be installed. The later contains client libraries for Apache Hadoop 1.x. If you are running against a different distribution then these libraries will need to be replaced with the client hadoop libraries from your distribution.
 
 # Changes in this release
-#Changes=
+Changes=Modifications to allow working when loaded by a child classloader
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.0.16.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoop1.1.17.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,7 +44,15 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.7.12), distributedWekaBase (>=1.0.12), distributedWekaHadoopCore (>=1.0.16), distributedWekaHadoopLibs (>=1.0.0)
+Depends=weka (>=3.9.1-SNAPSHOT), distributedWekaHadoopCore (>=1.1.22), distributedWekaHadoopLibs (>=1.0.1)
+
+# Package(s) that can't be installed alongside this one
+Precludes=distributedWekaHadoop2
+
+# Inject these dependencies at load time
+InjectDependencies=distributedWekaHadoopCore:distributedWekaHadoopLibs
+
+SetSystemProperties=weka.distributed.hadoop.hadoop2=false
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
