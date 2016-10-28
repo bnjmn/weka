@@ -46,6 +46,7 @@ import org.apache.commons.codec.binary.Base64;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.timeseries.AbstractForecaster;
 import weka.classifiers.timeseries.WekaForecaster;
+import weka.core.SerializationHelper;
 import weka.filters.supervised.attribute.TSLagMaker;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -230,7 +231,7 @@ public class TimeSeriesForecasting extends JPanel implements BeanCommon,
 
       byte[] decoded = decodeFromBase64(base64encoded);
       ByteArrayInputStream bis = new ByteArrayInputStream(decoded);
-      ObjectInputStream ois = new ObjectInputStream(bis);
+      ObjectInputStream ois = SerializationHelper.getObjectInputStream(bis);
 
       List<Object> model = (List<Object>) ois.readObject();
       ois.close();
@@ -337,7 +338,7 @@ public class TimeSeriesForecasting extends JPanel implements BeanCommon,
    * @param eventName the event
    * @return true if the object will accept a connection
    */
-  public boolean connectionAllowed(String arg0) {
+  public boolean connectionAllowed(String eventName) {
     if (m_listenee != null) {
       return false;
     }
@@ -551,8 +552,7 @@ public class TimeSeriesForecasting extends JPanel implements BeanCommon,
         if (filenameN.toLowerCase().endsWith(".gz")) {
           is = new GZIPInputStream(is);
         }
-        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-            is));
+        ObjectInputStream ois = SerializationHelper.getObjectInputStream(is);
         WekaForecaster forecaster = (WekaForecaster) ois.readObject();
 
         Instances header = (Instances) ois.readObject();

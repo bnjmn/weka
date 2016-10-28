@@ -13,7 +13,6 @@
  *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-
 /*
  *    ForecastingPanel.java
  *    Copyright (C) 2010-2016 University of Waikato, Hamilton, New Zealand
@@ -25,6 +24,7 @@ import weka.classifiers.timeseries.AbstractForecaster;
 import weka.classifiers.timeseries.TSForecaster;
 import weka.classifiers.timeseries.WekaForecaster;
 import weka.classifiers.timeseries.core.OverlayForecaster;
+import weka.core.SerializationHelper;
 import weka.filters.supervised.attribute.TSLagMaker;
 import weka.classifiers.timeseries.core.TSLagUser;
 import weka.classifiers.timeseries.eval.TSEvaluation;
@@ -130,8 +130,8 @@ public class ForecastingPanel extends JPanel {
   protected TimeSeriesPerspective.TimeSeriesModelListener m_forecasterListener;
 
   /** The file chooser for selecting model files. */
-  protected JFileChooser m_fileChooser =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected JFileChooser m_fileChooser = new JFileChooser(new File(
+    System.getProperty("user.dir")));
 
   /**
    * For each dataset, perform a check (if a timestamp is specified) just once
@@ -195,8 +195,8 @@ public class ForecastingPanel extends JPanel {
         if (m_configAndBuild) {
           // configure the WekaForecaster with the base
           // learner
-          m_threadForecaster
-            .setBaseForecaster(m_advancedConfigPanel.getBaseClassifier());
+          m_threadForecaster.setBaseForecaster(m_advancedConfigPanel
+            .getBaseClassifier());
 
           m_simpleConfigPanel.applyToForecaster(m_threadForecaster);
           m_advancedConfigPanel.applyToForecaster(m_threadForecaster);
@@ -205,15 +205,15 @@ public class ForecastingPanel extends JPanel {
         m_simpleConfigPanel.applyToEvaluation(eval, m_threadForecaster);
         m_advancedConfigPanel.applyToEvaluation(eval, m_threadForecaster);
 
-        eval
-          .setForecastFuture(m_advancedConfigPanel.getOutputFuturePredictions()
-            || m_advancedConfigPanel.getGraphFuturePredictions());
+        eval.setForecastFuture(m_advancedConfigPanel
+          .getOutputFuturePredictions()
+          || m_advancedConfigPanel.getGraphFuturePredictions());
 
         if (m_threadForecaster instanceof OverlayForecaster
           && ((OverlayForecaster) m_threadForecaster).isUsingOverlayData()) {
           if (!eval.getEvaluateOnTestData()
-            && (m_advancedConfigPanel.m_outputFutureCheckBox.isSelected()
-              || m_advancedConfigPanel.m_graphFutureCheckBox.isSelected())) {
+            && (m_advancedConfigPanel.m_outputFutureCheckBox.isSelected() || m_advancedConfigPanel.m_graphFutureCheckBox
+              .isSelected())) {
 
             // warn the user that future forecast can't be produced for the
             // training data
@@ -222,13 +222,12 @@ public class ForecastingPanel extends JPanel {
               "Unable to generate a future forecast beyond the end of the training\n"
                 + "data because there is no future overlay data available. Use a holdout\n"
                 + "set for evaluation in order to simulate having \"future\" overlay\n"
-                + "data available.\n\n",
-              "ForecastingPanel");
+                + "data available.\n\n", "ForecastingPanel");
           }
 
           if (eval.getEvaluateOnTestData()
-            && (m_advancedConfigPanel.m_outputFutureCheckBox.isSelected()
-              || m_advancedConfigPanel.m_graphFutureCheckBox.isSelected())) {
+            && (m_advancedConfigPanel.m_outputFutureCheckBox.isSelected() || m_advancedConfigPanel.m_graphFutureCheckBox
+              .isSelected())) {
 
             // warn the user that future forecast can't be produced for the test
             // data
@@ -272,8 +271,8 @@ public class ForecastingPanel extends JPanel {
         outBuff.append("Scheme:\n\t" + fname).append("\n\n");
 
         if (lagOptions.length() > 0) {
-          outBuff.append("Lagged and derived variable options:\n\t")
-            .append(lagOptions + "\n\n");
+          outBuff.append("Lagged and derived variable options:\n\t").append(
+            lagOptions + "\n\n");
         }
 
         outBuff.append("Relation:     " + inst.relationName() + '\n');
@@ -328,22 +327,25 @@ public class ForecastingPanel extends JPanel {
           }
           if (eval.getTrainingData() != null
             && eval.getEvaluateOnTrainingData()) {
-            String predString = eval.printPredictionsForTrainingData(
-              "=== Predictions " + "for training data: " + targetName + " ("
-                + step + (step > 1 ? "-steps ahead)" : "-step ahead)") + " ===",
-              targetName, step, eval.getPrimeWindowSize());
+            String predString =
+              eval.printPredictionsForTrainingData("=== Predictions "
+                + "for training data: " + targetName + " (" + step
+                + (step > 1 ? "-steps ahead)" : "-step ahead)") + " ===",
+                targetName, step, eval.getPrimeWindowSize());
             outBuff.append("\n").append(predString);
           }
 
           if (eval.getTestData() != null) {
-            int instanceNumOffset = (eval.getTrainingData() != null
-              && m_advancedConfigPanel.getHoldoutSetSize() > 0)
-                ? eval.getTrainingData().numInstances() : 0;
+            int instanceNumOffset =
+              (eval.getTrainingData() != null && m_advancedConfigPanel
+                .getHoldoutSetSize() > 0) ? eval.getTrainingData()
+                .numInstances() : 0;
 
-            String predString = eval.printPredictionsForTestData(
-              "=== Predictions " + "for test data: " + targetName + " (" + step
+            String predString =
+              eval.printPredictionsForTestData("=== Predictions "
+                + "for test data: " + targetName + " (" + step
                 + (step > 1 ? "-steps ahead)" : "-step ahead)") + " ===",
-              targetName, step, instanceNumOffset);
+                targetName, step, instanceNumOffset);
             outBuff.append("\n").append(predString);
           }
           m_history.updateResult(name);
@@ -351,12 +353,12 @@ public class ForecastingPanel extends JPanel {
 
         // output any future predictions
         if (m_advancedConfigPanel.getOutputFuturePredictions()) {
-          if (eval
-            .getTrainingData() != null /*
-                                        * && eval.getEvaluateOnTrainingData()
-                                        */) {
-            outBuff.append(
-              "\n=== Future predictions from end of training data ===\n");
+          if (eval.getTrainingData() != null /*
+                                              * &&
+                                              * eval.getEvaluateOnTrainingData()
+                                              */) {
+            outBuff
+              .append("\n=== Future predictions from end of training data ===\n");
             outBuff
               .append(eval.printFutureTrainingForecast(m_threadForecaster));
           }
@@ -376,8 +378,9 @@ public class ForecastingPanel extends JPanel {
         }
 
         // result object list
-        List<Object> resultList = (m_configAndBuild) ? new ArrayList<Object>()
-          : (List<Object>) m_history.getNamedObject(name);
+        List<Object> resultList =
+          (m_configAndBuild) ? new ArrayList<Object>()
+            : (List<Object>) m_history.getNamedObject(name);
 
         if (!m_configAndBuild) {
           // go through and remove any JPanels
@@ -396,8 +399,9 @@ public class ForecastingPanel extends JPanel {
         // graph predictions for targets at specific step
         if (m_advancedConfigPanel.getGraphPredictionsAtStep() > 0) {
           int stepNum = m_advancedConfigPanel.getGraphPredictionsAtStep();
-          List<String> targets = AbstractForecaster
-            .stringToList(m_threadForecaster.getFieldsToForecast());
+          List<String> targets =
+            AbstractForecaster.stringToList(m_threadForecaster
+              .getFieldsToForecast());
           if (eval.getTrainingData() != null
             && eval.getEvaluateOnTrainingData()) {
             JPanel trainTargetsAtStep =
@@ -410,11 +414,13 @@ public class ForecastingPanel extends JPanel {
           }
 
           if (eval.getTestData() != null && eval.getEvaluateOnTestData()) {
-            int instanceOffset = (eval.getPrimeForTestDataWithTestData())
-              ? eval.getPrimeWindowSize() : 0;
-            JPanel testTargetsAtStep = eval.graphPredictionsForTargetsOnTesting(
-              GraphDriver.getDefaultDriver(), m_threadForecaster, targets,
-              stepNum, instanceOffset);
+            int instanceOffset =
+              (eval.getPrimeForTestDataWithTestData()) ? eval
+                .getPrimeWindowSize() : 0;
+            JPanel testTargetsAtStep =
+              eval.graphPredictionsForTargetsOnTesting(
+                GraphDriver.getDefaultDriver(), m_threadForecaster, targets,
+                stepNum, instanceOffset);
             testTargetsAtStep.setToolTipText("Test pred. for targets");
 
             graphList.add(testTargetsAtStep);
@@ -428,9 +434,9 @@ public class ForecastingPanel extends JPanel {
             m_advancedConfigPanel.getGraphTargetForStepsTarget();
 
           if (!fieldsToForecast.contains(selectedTarget)) {
-            throw new Exception(
-              "Cannot graph predictions for \"" + selectedTarget
-                + "\" because that field is not being predicted.");
+            throw new Exception("Cannot graph predictions for \""
+              + selectedTarget
+              + "\" because that field is not being predicted.");
           }
           List<Integer> stepList =
             m_advancedConfigPanel.getGraphTargetForStepsStepList();
@@ -447,11 +453,13 @@ public class ForecastingPanel extends JPanel {
           }
 
           if (eval.getTestData() != null && eval.getEvaluateOnTestData()) {
-            int instanceOffset = (eval.getPrimeForTestDataWithTestData())
-              ? eval.getPrimeWindowSize() : 0;
-            JPanel testStepsForTarget = eval.graphPredictionsForStepsOnTesting(
-              GraphDriver.getDefaultDriver(), m_threadForecaster,
-              selectedTarget, stepList, instanceOffset);
+            int instanceOffset =
+              (eval.getPrimeForTestDataWithTestData()) ? eval
+                .getPrimeWindowSize() : 0;
+            JPanel testStepsForTarget =
+              eval.graphPredictionsForStepsOnTesting(
+                GraphDriver.getDefaultDriver(), m_threadForecaster,
+                selectedTarget, stepList, instanceOffset);
             testStepsForTarget.setToolTipText("Test pred. at steps");
 
             graphList.add(testStepsForTarget);
@@ -460,14 +468,14 @@ public class ForecastingPanel extends JPanel {
 
         // graph future predictions
         if (m_advancedConfigPanel.getGraphFuturePredictions()) {
-          if (eval
-            .getTrainingData() != null /*
-                                        * && eval.getEvaluateOnTrainingData()
-                                        */) {
+          if (eval.getTrainingData() != null /*
+                                              * &&
+                                              * eval.getEvaluateOnTrainingData()
+                                              */) {
             try {
-              JPanel trainFuture = eval.graphFutureForecastOnTraining(
-                GraphDriver.getDefaultDriver(), m_threadForecaster,
-                AbstractForecaster
+              JPanel trainFuture =
+                eval.graphFutureForecastOnTraining(GraphDriver
+                  .getDefaultDriver(), m_threadForecaster, AbstractForecaster
                   .stringToList(m_threadForecaster.getFieldsToForecast()));
               trainFuture.setToolTipText("Train future pred.");
 
@@ -492,9 +500,9 @@ public class ForecastingPanel extends JPanel {
 
           if (eval.getTestData() != null && eval.getEvaluateOnTestData()) {
             try {
-              JPanel testFuture = eval.graphFutureForecastOnTesting(
-                GraphDriver.getDefaultDriver(), m_threadForecaster,
-                AbstractForecaster
+              JPanel testFuture =
+                eval.graphFutureForecastOnTesting(GraphDriver
+                  .getDefaultDriver(), m_threadForecaster, AbstractForecaster
                   .stringToList(m_threadForecaster.getFieldsToForecast()));
               testFuture.setToolTipText("Test future pred.");
 
@@ -652,8 +660,8 @@ public class ForecastingPanel extends JPanel {
       }
     });
 
-    m_outputPane
-      .setBorder(BorderFactory.createTitledBorder("Output/Visualization"));
+    m_outputPane.setBorder(BorderFactory
+      .createTitledBorder("Output/Visualization"));
 
     m_outputPane.addTab("Output", null, js, "Forecaster output");
 
@@ -680,8 +688,7 @@ public class ForecastingPanel extends JPanel {
     m_history.getList().addMouseListener(new MouseAdapter() {
       @Override
       public void mouseClicked(MouseEvent e) {
-        if (((e.getModifiers()
-          & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
+        if (((e.getModifiers() & InputEvent.BUTTON1_MASK) != InputEvent.BUTTON1_MASK)
           || e.isAltDown()) {
           int index = m_history.getList().locationToIndex(e.getPoint());
           if (index != -1) {
@@ -924,8 +931,9 @@ public class ForecastingPanel extends JPanel {
           if (m_isRunningAsPerspective) {
             try {
               KnowledgeFlowApp singleton = KnowledgeFlowApp.getSingleton();
-              String encoded = TimeSeriesForecasting
-                .encodeForecasterToBase64(toSave, structureToSave);
+              String encoded =
+                TimeSeriesForecasting.encodeForecasterToBase64(toSave,
+                  structureToSave);
 
               TimeSeriesForecasting component = new TimeSeriesForecasting();
               component.setEncodedForecaster(encoded);
@@ -951,10 +959,9 @@ public class ForecastingPanel extends JPanel {
         }
       });
 
-      reevaluateModelItem
-        .setEnabled((m_advancedConfigPanel.m_trainingCheckBox.isSelected()
-          || m_advancedConfigPanel.m_holdoutCheckBox.isSelected())
-          && m_instances != null);
+      reevaluateModelItem.setEnabled((m_advancedConfigPanel.m_trainingCheckBox
+        .isSelected() || m_advancedConfigPanel.m_holdoutCheckBox.isSelected())
+        && m_instances != null);
     } else {
       reevaluateModelItem.setEnabled(false);
     }
@@ -982,7 +989,8 @@ public class ForecastingPanel extends JPanel {
       boolean loadOK = true;
       try {
         ObjectInputStream is =
-          new ObjectInputStream(new FileInputStream(sFile));
+          SerializationHelper.getObjectInputStream(new FileInputStream(sFile));
+        // new ObjectInputStream(new FileInputStream(sFile));
         f = is.readObject();
         header = (Instances) is.readObject();
         is.close();
@@ -1015,7 +1023,7 @@ public class ForecastingPanel extends JPanel {
             wf.loadBaseModel(sFile.toString());
           } catch (Exception ex) {
             JOptionPane.showMessageDialog(null, ex, "Base model load failed",
-                    JOptionPane.ERROR_MESSAGE);
+              JOptionPane.ERROR_MESSAGE);
           }
         }
 
@@ -1038,8 +1046,8 @@ public class ForecastingPanel extends JPanel {
         outBuff.append("loaded from '" + sFile.getName() + "'\n\n");
 
         if (lagOptions.length() > 0) {
-          outBuff.append("Lagged and derived variable options:\n\t")
-            .append(lagOptions + "\n\n");
+          outBuff.append("Lagged and derived variable options:\n\t").append(
+            lagOptions + "\n\n");
         }
 
         outBuff.append(wf.toString());
@@ -1097,8 +1105,8 @@ public class ForecastingPanel extends JPanel {
 
       if (saveOK) {
         if (m_log != null) {
-          m_log.logMessage(
-            "Saved model (" + name + " ) to file '" + sFile.getName() + "'");
+          m_log.logMessage("Saved model (" + name + " ) to file '"
+            + sFile.getName() + "'");
           m_log.statusMessage("OK");
         }
       }
@@ -1250,10 +1258,11 @@ public class ForecastingPanel extends JPanel {
 
         if (!ok && !hasMissing) {
           // ask if we should sort
-          int result = JOptionPane.showConfirmDialog(ForecastingPanel.this,
-            "The data does not appear to be in sorted order of \"" + timeStampF
-              + "\". Do you want to sort the data?",
-            "Forecasting", JOptionPane.YES_NO_OPTION);
+          int result =
+            JOptionPane.showConfirmDialog(ForecastingPanel.this,
+              "The data does not appear to be in sorted order of \""
+                + timeStampF + "\". Do you want to sort the data?",
+              "Forecasting", JOptionPane.YES_NO_OPTION);
 
           if (result == JOptionPane.YES_OPTION) {
             if (m_log != null) {
@@ -1275,22 +1284,23 @@ public class ForecastingPanel extends JPanel {
           // impact
           // on results.
 
-          int result = JOptionPane.showConfirmDialog(ForecastingPanel.this,
-            "The data does not appear to be in sorted order of \"" + timeStampF
-              + "\". \nFurthermore, there are rows with\n"
-              + "missing timestamp values. We can remove these\n"
-              + "rows and then sort the data but this is likely to\n"
-              + "result in degraded performance. It is strongly\n"
-              + "recommended that you fix these issues in the data\n"
-              + "before continuing. Do you want the system to proceed\n"
-              + "anyway by removing rows with missing timestamps and\n"
-              + "then sorting the data?",
-            "Forecasting", JOptionPane.YES_NO_OPTION);
+          int result =
+            JOptionPane.showConfirmDialog(ForecastingPanel.this,
+              "The data does not appear to be in sorted order of \""
+                + timeStampF + "\". \nFurthermore, there are rows with\n"
+                + "missing timestamp values. We can remove these\n"
+                + "rows and then sort the data but this is likely to\n"
+                + "result in degraded performance. It is strongly\n"
+                + "recommended that you fix these issues in the data\n"
+                + "before continuing. Do you want the system to proceed\n"
+                + "anyway by removing rows with missing timestamps and\n"
+                + "then sorting the data?", "Forecasting",
+              JOptionPane.YES_NO_OPTION);
 
           if (result == JOptionPane.YES_OPTION) {
             if (m_log != null) {
-              m_log.statusMessage(
-                "Removing rows with missing time stamps and sorting data...");
+              m_log
+                .statusMessage("Removing rows with missing time stamps and sorting data...");
             }
             m_instances.deleteWithMissing(timeStampAtt);
             m_instances.sort(timeStampAtt);
@@ -1467,10 +1477,12 @@ public class ForecastingPanel extends JPanel {
       if (args.length == 0) {
         throw new Exception("supply the name of an arff file");
       }
-      Instances i = new Instances(
-        new java.io.BufferedReader(new java.io.FileReader(args[0])));
-      ForecastingPanel scp = new ForecastingPanel(
-        new LogPanel(new WekaTaskMonitor()), true, false, false);
+      Instances i =
+        new Instances(new java.io.BufferedReader(
+          new java.io.FileReader(args[0])));
+      ForecastingPanel scp =
+        new ForecastingPanel(new LogPanel(new WekaTaskMonitor()), true, false,
+          false);
       scp.setInstances(i);
       final javax.swing.JFrame jf = new javax.swing.JFrame("Weka Forecasting");
       jf.getContentPane().setLayout(new BorderLayout());

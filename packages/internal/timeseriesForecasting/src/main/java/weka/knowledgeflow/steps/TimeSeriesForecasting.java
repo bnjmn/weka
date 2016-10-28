@@ -25,6 +25,7 @@ import org.apache.commons.codec.binary.Base64;
 import weka.classifiers.evaluation.NumericPrediction;
 import weka.classifiers.timeseries.AbstractForecaster;
 import weka.classifiers.timeseries.WekaForecaster;
+import weka.core.SerializationHelper;
 import weka.filters.supervised.attribute.TSLagMaker;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
@@ -801,8 +802,7 @@ public class TimeSeriesForecasting extends BaseStep {
         if (filenameN.toLowerCase().endsWith(".gz")) {
           is = new GZIPInputStream(is);
         }
-        ObjectInputStream ois =
-          new ObjectInputStream(new BufferedInputStream(is));
+        ObjectInputStream ois = SerializationHelper.getObjectInputStream(is);
         WekaForecaster forecaster = (WekaForecaster) ois.readObject();
 
         Instances header = (Instances) ois.readObject();
@@ -885,7 +885,8 @@ public class TimeSeriesForecasting extends BaseStep {
 
       byte[] decoded = decodeFromBase64(base64encoded);
       ByteArrayInputStream bis = new ByteArrayInputStream(decoded);
-      ObjectInputStream ois = new ObjectInputStream(bis);
+      // ObjectInputStream ois = new ObjectInputStream(bis);
+      ObjectInputStream ois = SerializationHelper.getObjectInputStream(bis);
 
       List<Object> model = (List<Object>) ois.readObject();
       ois.close();
