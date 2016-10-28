@@ -6,7 +6,7 @@
 PackageName=kfGroovy
 
 # Version (required)
-Version=1.0.12
+Version=1.0.13
 
 #Date
 Date=2016-06-07
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=A Knowledge Flow plugin that provides a Knowledge Flow step that wraps around a Groovy script. The plugin generates a fully compilable template Groovy script that implements various Knowledge Flow interfaces. The user can fill in the methods that are necessary to accomplish the desired logic. The script is compiled at runtime and the Groovy component passes incoming events to the script and collects and passes on generated events.
 
-Changes=Updated to Groovy 2.4.6.
+Changes=Small change in order to work with child classloaders
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/kfGroovy1.0.12.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/kfGroovy1.0.13.zip?download
 
 # URL for further information
 URL=http://wiki.pentaho.com/display/DATAMINING/Groovy+Scripting+in+the+KnowledgeFlow
