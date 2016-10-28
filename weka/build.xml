@@ -34,6 +34,7 @@
   <property name="wekaexejar" value="../../../weka/dist/weka.jar"/>
   <property name="junitjar" value="../../../weka/lib/junit.jar"/>
   <property name="wekaclasses" value="../../../weka/build/classes"/>
+  <property name="wekalib" value="../../../weka/lib/*"/>
   <property name="wekatestclasses" value="../../../weka/build/testcases"/>
   <!-- valid values for the following: make, compile, compile_tests, clean -->
   <property name="packageCommand" value="make"/>
@@ -59,8 +60,8 @@
   <path id="package.class.path">
     <pathelement path="${proj.cp}"/>
     <dirset dir="${packages_internal}">
-        <include name="**/${build}/classes"/>
-        <include name="**/${build}/testcases"/>
+      <include name="**/${build}/classes"/>
+      <include name="**/${build}/testcases"/>
    </dirset>
    <dirset dir="${packages_external}">
      <include name="**/${build}/classes"/>
@@ -94,10 +95,10 @@
       
   <target name="compile_internal" depends="compile" description="Compile a named internal package (run with -DpackageName=package name)">
     <echo message="Compiling ${packageName}"/>
-    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${cp}:${wekalib}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="compile" inheritall="false">
       <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+      <property name="java.class.path" value="${wekaclasses}:${wekalib}:${cp}"/>
     </ant>
   </target>
 
@@ -112,10 +113,10 @@
 
   <target name="make_internal" description="Make a named internal package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
     <echo message="Making ${packageName}"/>
-    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${wekalib}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="make_package" inheritall="false">
       <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+      <property name="java.class.path" value="${wekaclasses}:${cp}:${wekalib}"/>
     </ant>
   </target>
 
@@ -365,10 +366,10 @@
 
   <target name="compile_external" depends="compile" description="Compile a named external package (run with -DpackageName=package name)">
     <echo message="Compiling ${packageName}"/>
-    <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
+    <echo message="CLASSPATH ${wekaclasses}:${wekalib}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile" inheritall="false">
       <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+      <property name="java.class.path" value="${wekaclasses}:${cp}:${wekalib}"/>
     </ant>
   </target>
 
@@ -385,7 +386,7 @@
     <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="make_package" inheritall="false">
       <property name="package" value="${packageName}" />
-      <property name="java.class.path" value="${wekaclasses}:${cp}"/>
+      <property name="java.class.path" value="${wekaclasses}:${cp}:${wekalib}"/>
     </ant>
   </target>
 
@@ -618,6 +619,9 @@
          <include name="**/*.default"/>
        </fileset>
     </copy>
+    <copy file="${lib}/core.jar" todir="${build}/classes" />
+    <copy file="${lib}/mtj.jar" todir="${build}/classes" />
+    <copy file="${lib}/arpack_combined_all.jar" todir="${build}/classes" />      
     <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine"/>
     <unzip src="${lib}/java-cup.jar" dest="${build}/classes">
@@ -635,7 +639,7 @@
         <include name="org/**/*"/>
       </patternset>
     </unzip>
-    <unzip src="${lib}/mtj.jar" dest="${build}/classes">
+<!--    <unzip src="${lib}/mtj.jar" dest="${build}/classes">
       <patternset>
         <include name="no/uib/**/*"/>
       </patternset>
@@ -649,7 +653,7 @@
       <patternset>
         <include name="org/**/*"/>
       </patternset>
-    </unzip>
+    </unzip> -->
   </target>
 
   <!-- Make the javadocs -->
