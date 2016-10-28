@@ -131,16 +131,10 @@
     <copy file="Description.props"
           todir="${dist}/${package}"/>
     <copy file="GUIEditors.props"
-          todir="${dist}/${package}"/>
+          todir="${dist}/${package}"/>    
     <mkdir dir="${dist}/${package}/lib"/>
-    <copy todir="${dist}/${package}/lib" >
-       <fileset dir="${lib}">
-         <include name="*.jar"/>
-         <include name="*.zip"/>
-         <exclude name="weka.jar"/>
-         <exclude name="pdm*.jar"/>
-       </fileset>
-    </copy>
+    <copy file="${lib}/sizeofag-1.0.0.jar" todir="${dist}/${package}/lib"/>
+    <copy file="${lib}/moa-2014.04.jar" todir="${dist}/${package}"/>
     <mkdir dir="${dist}/${package}/doc"/>
     <copy todir="${dist}/${package}/doc" >
        <fileset dir="${doc}">
