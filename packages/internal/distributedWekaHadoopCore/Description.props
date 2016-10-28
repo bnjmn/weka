@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoopCore
 
 # Version (required)
-Version=1.0.21
+Version=1.1.22
 
 #Date (year-month-day)
-Date=2016-08-30
+Date=2016-10-27
 
 # Title (required)
 Title=Core Hadoop wrappers for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides loaders and savers for HDFS, plus Hadoop jobs and tasks that wrap the tasks provided in distributedWekaBase. This is the core of the distributedWekaHadoop package. To install all necessary componets for distributedWekaHadoop install either the distributedWekaHadoop or distributedWekaHadoop2 package, for Hadoop 1.x or 2.x respectively. This will ensure that the core package gets installed along with the appropriate libs package for either Hadoop 1.x or 2.x.
 
 # Changes in this release
-Changes=Small change to allow for the new t-digest library in distributedWekaBase 1.0.15
+Changes=Changes to support working in a child classloader
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopCore1.0.21.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopCore1.1.22.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -44,21 +44,9 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.8.0), distributedWekaBase (>=1.0.14)
+Depends=weka (>=3.9.1-SNAPSHOT),distributedWekaBase (>=1.1.16)
 
-# Message to display in installation. Can be used to provide
-# special instructions (e.g. manual stuff needed to complete
-# the installation process). (optional).
-#MessageToDisplayOnInstall=Funky package requires some extra\n\
-# stuff to be installed after installing this package. You will\n\
-# need to blah, blah, blah in order to blah, blah, blah...
+DoNotLoadIfClassNotPresent=org.apache.hadoop.conf.Configuration
 
-# Prevent package from being loaded by Weka if the named
-# files/directories are not present (relative to the package's
-# root directory). Useful for packages that require the user
-# to manually install some third-party library(s). (optional)
-# DoNotLoadIfFileNotPresent=
+DoNotLoadIfClassNotPresentMessage=This package cannot be loaded because Hadoop classes do not seem to be available
 
-# Log message to be displayed if package can't be loaded due to
-# missing files/directories. (optional)
-# DoNotLoadIfFileNotPresentMessage=
