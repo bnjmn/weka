@@ -28,7 +28,7 @@ License=GPL 3.0
 # Description (required)
 Description=This package is a library-only package specific for Mac OS X. It provides native libraries for linear algebra, including both a reference and system-tuned version. After installing this package, several Weka schemes (such as linear regression and PCA) will use the native libraries for matrix operations.
 
-#Changes=
+Changes=Now includes entries entries in this description file for use in a child classloader
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/netlibNativeOSX1.0.1.zip?download
