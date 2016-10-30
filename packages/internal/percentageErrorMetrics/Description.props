@@ -31,7 +31,7 @@ Description=Provides root mean square percentage error and mean absolute percent
 Changes=Changes to support running when loaded by a child classloader
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/percentageErrorMetrics1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/percentageErrorMetrics1.1.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/percentageErrorMetrics
