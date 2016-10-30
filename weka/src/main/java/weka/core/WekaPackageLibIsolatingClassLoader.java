@@ -58,6 +58,8 @@ import java.util.zip.ZipFile;
 import static weka.core.WekaPackageManager.DO_NOT_LOAD_IF_CLASS_NOT_PRESENT_KEY;
 import static weka.core.WekaPackageManager.DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_KEY;
 import static weka.core.WekaPackageManager.DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_MESSAGE_KEY;
+import static weka.core.WekaPackageManager.DO_NOT_LOAD_IF_FILE_NOT_PRESENT_KEY;
+import static weka.core.WekaPackageManager.DO_NOT_LOAD_IF_FILE_NOT_PRESENT_MESSAGE_KEY;
 
 /**
  * <p>
@@ -827,6 +829,11 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
       return false;
     }
 
+    if (!checkForMissingFiles(p, new File(WekaPackageManager.getPackageHome()
+      .toString() + File.separator + p.getName()), System.err)) {
+      return false;
+    }
+
     setSystemProperties(p, System.out);
 
     return true;
@@ -838,8 +845,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * @param toLoad the package in question
    * @param progress for printing progress/debug info
    */
-  protected void setSystemProperties(Package toLoad,
-    PrintStream... progress) {
+  protected void setSystemProperties(Package toLoad, PrintStream... progress) {
     Object sysProps =
       toLoad
         .getPackageMetaDataElement(WekaPackageManager.SET_SYSTEM_PROPERTIES_KEY);
@@ -865,16 +871,20 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * before allowing this package to be loaded. This is useful for checking to
    * see if third-party classes are accessible. An example would be Java3D,
    * which has an installer that installs into the JRE/JDK.
+   * 
+   * @param toCheck the package in question
+   * @param progress for printing progress/error info
    *
    * @return true if good to go
+   * @throws Exception if there is a problem
    */
-  protected boolean checkForMissingClasses(Package toLoad,
+  protected boolean checkForMissingClasses(Package toCheck,
     PrintStream... progress) throws Exception {
 
     boolean result = true;
 
     Object doNotLoadIfClassNotInstantiable =
-      toLoad.getPackageMetaDataElement(DO_NOT_LOAD_IF_CLASS_NOT_PRESENT_KEY);
+      toCheck.getPackageMetaDataElement(DO_NOT_LOAD_IF_CLASS_NOT_PRESENT_KEY);
 
     if (doNotLoadIfClassNotInstantiable != null
       && doNotLoadIfClassNotInstantiable.toString().length() > 0) {
@@ -888,7 +898,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
         } catch (Exception ex) {
           for (PrintStream p : progress) {
             p.println("[WekaPackageLibIsolatingClassLoader] "
-              + toLoad.getName() + " can't be loaded because " + nextT
+              + toCheck.getName() + " can't be loaded because " + nextT
               + " can't be instantiated.");
           }
           result = false;
@@ -900,7 +910,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
     if (!result) {
       // grab the message to print to the log (if any)
       Object doNotLoadMessage =
-        toLoad
+        toCheck
           .getPackageMetaDataElement(DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_MESSAGE_KEY);
       if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
         for (PrintStream p : progress) {
@@ -910,6 +920,67 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
           } catch (Exception e) {
             // quietly ignore
           }
+          p.println("[Weka] " + dnlM);
+        }
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Checks to see if there are any missing files/directories for a given
+   * package. If there are missing files, then the package can't be loaded. An
+   * example would be a connector package that, for whatever reason, can't
+   * include a necessary third-party jar file in its lib folder, and requires
+   * the user to download and install this jar file manually.
+   *
+   * @param toLoad the package to check
+   * @param packageRoot the root directory of the package
+   * @param progress for printing progress/error info
+   * @return true if good to go
+   */
+  public static boolean checkForMissingFiles(Package toLoad, File packageRoot,
+    PrintStream... progress) {
+    boolean result = true;
+
+    Object doNotLoadIfFileMissing =
+      toLoad.getPackageMetaDataElement(DO_NOT_LOAD_IF_FILE_NOT_PRESENT_KEY);
+    String packageRootPath = packageRoot.getPath() + File.separator;
+
+    if (doNotLoadIfFileMissing != null
+      && doNotLoadIfFileMissing.toString().length() > 0) {
+
+      StringTokenizer tok =
+        new StringTokenizer(doNotLoadIfFileMissing.toString(), ",");
+      while (tok.hasMoreTokens()) {
+        String nextT = tok.nextToken().trim();
+        File toCheck = new File(packageRootPath + nextT);
+        if (!toCheck.exists()) {
+          for (PrintStream p : progress) {
+            p.println("[Weka] " + toLoad.getName()
+              + " can't be loaded because " + toCheck.getPath()
+              + " appears to be missing.");
+          }
+          result = false;
+          break;
+        }
+      }
+    }
+
+    if (!result) {
+      // grab the message to print to the log (if any)
+      Object doNotLoadMessage =
+        toLoad
+          .getPackageMetaDataElement(DO_NOT_LOAD_IF_FILE_NOT_PRESENT_MESSAGE_KEY);
+      if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
+        String dnlM = doNotLoadMessage.toString();
+        try {
+          dnlM = Environment.getSystemWide().substitute(dnlM);
+        } catch (Exception ex) {
+          // quietly ignore
+        }
+        for (PrintStream p : progress) {
           p.println("[Weka] " + dnlM);
         }
       }
