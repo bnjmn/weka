@@ -124,7 +124,7 @@ public class RootMeanSquarePercentageError extends AbstractEvaluationMetric impl
       throw new UnknownStatisticException("Statistic " + name + " is unknown.");
     }
 
-    return Math.sqrt(m_SumSquarePercentageError / (m_baseEvaluation.m_WithClass - m_baseEvaluation.m_Unclassified));
+    return Math.sqrt(m_SumSquarePercentageError / (m_baseEvaluation.withClass() - m_baseEvaluation.unclassified()));
   }
 
   /**

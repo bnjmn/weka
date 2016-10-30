@@ -124,7 +124,7 @@ public class MeanAbsolutePercentageError extends AbstractEvaluationMetric implem
       throw new UnknownStatisticException("Statistic " + name + " is unknown.");
     }
 
-    return m_SumAbsolutePercentageError / (m_baseEvaluation.m_WithClass - m_baseEvaluation.m_Unclassified);
+    return m_SumAbsolutePercentageError / (m_baseEvaluation.withClass() - m_baseEvaluation.unclassified());
   }
 
   /**

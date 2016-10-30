@@ -6,10 +6,10 @@
 PackageName=percentageErrorMetrics
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2015-12-10
+Date=2016-10-31
 
 # Title (required)
 Title=Root mean square percentage error and mean absolute percentage error
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Provides root mean square percentage error and mean absolute percentage error for evaluating regression schemes.
 
-#Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=Changes to support running when loaded by a child classloader
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/percentageErrorMetrics1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/percentageErrorMetrics1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/percentageErrorMetrics
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/percentageErrorMetrics
 #Related=WrapperSubsetEval
 
 # Dependencies
-Depends=weka (>=3.7.8)
+Depends=weka (>=3.9.1-SNAPSHOT)
