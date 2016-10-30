@@ -182,7 +182,7 @@ public class J48graft
    *
    * @return      the capabilities of this classifier
    */
-  public Capabilities getCapabilities() {
+  /* public Capabilities getCapabilities() {
     Capabilities      result;
 
     try {
@@ -196,7 +196,7 @@ public class J48graft
     result.setOwner(this);
 
     return result;
-  }
+  } */
 
   /**
    * Generates the classifier.
