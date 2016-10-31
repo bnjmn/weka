@@ -1062,16 +1062,18 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     Collections.addAll(options, super.getOptions());
 
     options.add("-L");
-    options.add("" + getLossFunction().getClass().getName());
+    String lossSpec = "" + getLossFunction().getClass().getName();
     if (getLossFunction() instanceof OptionHandler) {
-      options.add(" " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions()));
+	lossSpec += " " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions());
     }
+    options.add(lossSpec);
 
     options.add("-A");
-    options.add("" + getActivationFunction().getClass().getName());
+    String activSpec = "" + getActivationFunction().getClass().getName();
     if (getActivationFunction() instanceof OptionHandler) {
-      options.add(" " + Utils.joinOptions(((OptionHandler)getActivationFunction()).getOptions()));
+	activSpec += " " + Utils.joinOptions(((OptionHandler)getActivationFunction()).getOptions());
     }
+    options.add(activSpec);
 
     return options.toArray(new String[0]);
   }
