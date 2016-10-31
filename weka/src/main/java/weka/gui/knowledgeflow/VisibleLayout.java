@@ -759,6 +759,22 @@ public class VisibleLayout extends JPanel {
        * .getApplicationSettings());
        */
       m_flowExecutor.setLogger(m_logPanel);
+      m_flowExecutor
+        .addExecutionFinishedCallback(new ExecutionFinishedCallback() {
+          @Override
+          public void executionFinished() {
+            m_isExecuting = false;
+            m_logPanel.statusMessage("@!@[KnowledgeFlow]|OK.");
+            if (m_flowExecutor.wasStopped()) {
+              m_logPanel.setMessageOnAll(false, "Stopped.");
+            }
+            m_mainPerspective.getMainToolBar().enableWidgets(
+              MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
+              MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());
+            m_mainPerspective.getMainToolBar().disableWidgets(
+              MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
+          }
+        });
     }
     m_flowExecutor.setSettings(appSettings);
     m_mainPerspective.getMainToolBar().disableWidgets(
@@ -769,22 +785,7 @@ public class VisibleLayout extends JPanel {
 
     m_flowExecutor.getExecutionEnvironment().setEnvironmentVariables(m_env);
     m_isExecuting = true;
-    m_flowExecutor
-      .addExecutionFinishedCallback(new ExecutionFinishedCallback() {
-        @Override
-        public void executionFinished() {
-          m_isExecuting = false;
-          m_logPanel.statusMessage("@!@[KnowledgeFlow]|OK.");
-          if (m_flowExecutor.wasStopped()) {
-            m_logPanel.setMessageOnAll(false, "Stopped.");
-          }
-          m_mainPerspective.getMainToolBar().enableWidgets(
-            MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
-            MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());
-          m_mainPerspective.getMainToolBar().disableWidgets(
-            MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
-        }
-      });
+
     // Flow toRun = m_flow.copyFlow();
     m_flowExecutor.setFlow(m_flow);
     m_logPanel.clearStatus();
