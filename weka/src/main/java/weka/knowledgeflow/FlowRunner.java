@@ -21,6 +21,7 @@
 
 package weka.knowledgeflow;
 
+import weka.core.CommandlineRunnable;
 import weka.core.Environment;
 import weka.core.PluginManager;
 import weka.core.Settings;
@@ -46,7 +47,7 @@ import java.util.TreeMap;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class FlowRunner implements FlowExecutor {
+public class FlowRunner implements FlowExecutor, CommandlineRunnable {
 
   /** The flow to execute */
   protected Flow m_flow;
@@ -172,32 +173,51 @@ public class FlowRunner implements FlowExecutor {
   public static void main(String[] args) {
     weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
       "Logging started");
+    try {
+      WekaPackageManager.loadPackages(false, true, false);
+      FlowRunner fr = new FlowRunner();
+      fr.run(fr, args);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /**
+   * Run a FlowRunner object
+   *
+   * @param toRun the FlowRunner object to execute
+   * @param args the command line arguments
+   * @throws Exception if a problem occurs
+   */
+  @Override
+  public void run(Object toRun, String[] args) throws Exception {
+    if (!(toRun instanceof FlowRunner)) {
+      throw new IllegalArgumentException("Object to run is not an instance of "
+        + "FlowRunner!");
+    }
+
     if (args.length < 1) {
       System.err.println("Usage:\n\nFlowRunner <json flow file> [-s]\n\n"
         + "\tUse -s to launch start points sequentially (default launches "
         + "in parallel).");
     } else {
-      try {
-        WekaPackageManager.loadPackages(false, true, false);
-        Settings settings = new Settings("weka", KFDefaults.APP_ID);
-        settings.loadSettings();
-        settings.applyDefaults(new KFDefaults());
+      Settings settings = new Settings("weka", KFDefaults.APP_ID);
+      settings.loadSettings();
+      settings.applyDefaults(new KFDefaults());
+      FlowRunner fr = (FlowRunner) toRun;
+      fr.setSettings(settings);
 
-        FlowRunner fr = new FlowRunner(settings);
-        String fileName = args[0];
-        args[0] = "";
-        fr.setLaunchStartPointsSequentially(Utils.getFlag("s", args));
+      String fileName = args[0];
+      args[0] = "";
+      fr.setLaunchStartPointsSequentially(Utils.getFlag("s", args));
 
-        Flow toRun = Flow.loadFlow(new File(fileName), new SimpleLogger());
+      Flow flowToRun = Flow.loadFlow(new File(fileName), new SimpleLogger());
 
-        fr.setFlow(toRun);
-        fr.run();
-        fr.waitUntilFinished();
-        fr.m_logHandler.logLow("FlowRunner: Finished all flows.");
-        System.exit(0);
-      } catch (Exception ex) {
-        ex.printStackTrace();
-      }
+      fr.setFlow(flowToRun);
+      fr.run();
+      fr.waitUntilFinished();
+      fr.m_logHandler.logLow("FlowRunner: Finished all flows.");
+      System.exit(0);
     }
   }
 
@@ -600,6 +620,14 @@ public class FlowRunner implements FlowExecutor {
   @Override
   public boolean wasStopped() {
     return m_wasStopped;
+  }
+
+  @Override
+  public void preExecution() throws Exception {
+  }
+
+  @Override
+  public void postExecution() throws Exception {
   }
 
   /**
