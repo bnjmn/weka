@@ -26,6 +26,7 @@ import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
+import weka.gui.knowledgeflow.GraphicalEnvironmentCommandHandler;
 
 import java.util.concurrent.Future;
 
@@ -66,6 +67,24 @@ public interface ExecutionEnvironment {
    * @return true if this execution environment is headless
    */
   boolean isHeadless();
+
+  /**
+   * Set the environment for performing commands at the application-level in a
+   * graphical environment.
+   *
+   * @handler the handler to use
+   */
+  void setGraphicalEnvironmentCommandHandler(
+    GraphicalEnvironmentCommandHandler handler);
+
+  /**
+   * Get the environment for performing commands at the application-level in a
+   * graphical environment.
+   * 
+   * @return the graphical environment command handler, or null if running
+   *         headless
+   */
+  GraphicalEnvironmentCommandHandler getGraphicalEnvironmentCommandHandler();
 
   /**
    * Set environment variables for this execution environment

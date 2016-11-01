@@ -27,6 +27,7 @@ import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
 import weka.core.PluginManager;
+import weka.gui.knowledgeflow.GraphicalEnvironmentCommandHandler;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -57,6 +58,12 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
 
   /** Whether the execution environment is headless or not */
   protected boolean m_headless;
+
+  /**
+   * The handler (if any) for application-level commands in a graphical
+   * environment
+   */
+  protected GraphicalEnvironmentCommandHandler m_graphicalEnvCommandHandler;
 
   /** The environment variables to use */
   protected transient Environment m_envVars = Environment.getSystemWide();
@@ -120,6 +127,32 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   @Override
   public void setHeadless(boolean headless) {
     m_headless = headless;
+  }
+
+  /**
+   * Get the environment for performing commands at the application-level in a
+   * graphical environment.
+   *
+   * @return the graphical environment command handler, or null if running
+   *         headless
+   */
+  @Override
+  public GraphicalEnvironmentCommandHandler
+    getGraphicalEnvironmentCommandHandler() {
+
+    return m_graphicalEnvCommandHandler;
+  }
+
+  /**
+   * Set the environment for performing commands at the application-level in a
+   * graphical environment.
+   *
+   * @handler the handler to use
+   */
+  @Override
+  public void setGraphicalEnvironmentCommandHandler(
+    GraphicalEnvironmentCommandHandler handler) {
+    m_graphicalEnvCommandHandler = handler;
   }
 
   /**
@@ -321,7 +354,8 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
         // monitor has polled and found all steps not busy. In this case,
         // both executor services will be shutdown. The main one will have
         // the job of executing the step in question (and will already have
-        // a runnable for this in its queue, so this will get executed). However,
+        // a runnable for this in its queue, so this will get executed).
+        // However,
         // the client executor service will (potentially) have an empty queue
         // as the step has not launched a task on it yet. This can lead to
         // a situation where the step tries to launch a task when the

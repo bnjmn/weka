@@ -735,7 +735,8 @@ public class VisibleLayout extends JPanel {
     if (isExecuting()) {
       throw new WekaException("The flow is already executing!");
     }
-    Settings appSettings = m_mainPerspective.getMainApplication().getApplicationSettings();
+    Settings appSettings =
+      m_mainPerspective.getMainApplication().getApplicationSettings();
     if (m_flowExecutor == null) {
       String execName =
         appSettings.getSetting(KFDefaults.APP_ID,
@@ -770,7 +771,8 @@ public class VisibleLayout extends JPanel {
             }
             m_mainPerspective.getMainToolBar().enableWidgets(
               MainKFPerspectiveToolBar.Widgets.PLAY_PARALLEL_BUTTON.toString(),
-              MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON.toString());
+              MainKFPerspectiveToolBar.Widgets.PLAY_SEQUENTIAL_BUTTON
+                .toString());
             m_mainPerspective.getMainToolBar().disableWidgets(
               MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
           }
@@ -784,6 +786,10 @@ public class VisibleLayout extends JPanel {
       MainKFPerspectiveToolBar.Widgets.STOP_BUTTON.toString());
 
     m_flowExecutor.getExecutionEnvironment().setEnvironmentVariables(m_env);
+    m_flowExecutor.getExecutionEnvironment().setHeadless(false);
+    m_flowExecutor.getExecutionEnvironment()
+      .setGraphicalEnvironmentCommandHandler(
+        new KFGraphicalEnvironmentCommandHandler(m_mainPerspective));
     m_isExecuting = true;
 
     // Flow toRun = m_flow.copyFlow();
