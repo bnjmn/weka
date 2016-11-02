@@ -28,7 +28,7 @@ License=GPL 3.0
 # Description (required)
 Description=A Knowledge Flow plugin that acts as a dummy data source for data coming from the Kettle ETL Tool. Is designed to be used as an entry point into a Knowledge Flow process by the Knowledge Flow Kettle plugin step. This Kettle component converts data rows from an upstream ETL process into Weka instances and then pumps them into the Knowledge Flow via this data source.
 
-Changes=Now uses includes new Knowledge Flow implementation
+Changes=Now includes a pom.xml file
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/kfKettle1.0.5.zip?download
