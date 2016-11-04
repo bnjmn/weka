@@ -45,7 +45,7 @@ URL=http://weka.sourceforge.net/doc.packages/netlibNativeLinux
 Precludes=netlibNativeOSX,netlibNativeWindows
 
 # Jar files containing native libraries (; separated list of jar/zip:lib-path,lib-path,...)
-NativeLibs=tvf lib/netlib-native_ref-linux-armhf-1.1-natives.jar:netlib-native_ref-linux-armhf.so;lib/netlib-native_ref-linux-i686-1.1-natives.jar:netlib-native_ref-linux-i686.so;lib/netlib-native_ref-linux-x86_64-1.1-natives.jar:netlib-native_ref-linux-x86_64.so;lib/netlib-native_system-linux-armhf-1.1-natives.jar:netlib-native_system-linux-armhf.so;lib/netlib-native_system-linux-i686-1.1-natives.jar:netlib-native_system-linux-i686.so;lib/netlib-native_system-linux-x86_64-1.1-natives.jar:netlib-native_system-linux-x86_64.so.asc
+NativeLibs=lib/netlib-native_ref-linux-armhf-1.1-natives.jar:netlib-native_ref-linux-armhf.so;lib/netlib-native_ref-linux-i686-1.1-natives.jar:netlib-native_ref-linux-i686.so;lib/netlib-native_ref-linux-x86_64-1.1-natives.jar:netlib-native_ref-linux-x86_64.so;lib/netlib-native_system-linux-armhf-1.1-natives.jar:netlib-native_system-linux-armhf.so;lib/netlib-native_system-linux-i686-1.1-natives.jar:netlib-native_system-linux-i686.so;lib/netlib-native_system-linux-x86_64-1.1-natives.jar:netlib-native_system-linux-x86_64.so.asc
 
 # Classes needed for loading/finding native libraries (get injected into the root or weka.jar-level classloader). k separated list of
 # [root|]jar/zip:fully qualified class,fully qualified class,...
