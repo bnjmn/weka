@@ -1,0 +1,421 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    Dl4jMlpClassifier.java
+ *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
+ *
+ */
+package weka.classifiers.functions;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Random;
+
+import org.deeplearning4j.nn.conf.inputs.InputType;
+import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
+import org.deeplearning4j.nn.api.OptimizationAlgorithm;
+import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration.ListBuilder;
+import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
+import org.deeplearning4j.optimize.api.IterationListener;
+import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
+import org.nd4j.linalg.api.ndarray.INDArray;
+import org.nd4j.linalg.dataset.DataSet;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import weka.classifiers.RandomizableClassifier;
+import weka.classifiers.rules.ZeroR;
+import weka.core.BatchPredictor;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionMetadata;
+import weka.dl4j.FileIterationListener;
+import weka.dl4j.iterators.AbstractDataSetIterator;
+import weka.dl4j.iterators.DefaultInstancesIterator;
+import weka.dl4j.iterators.ImageDataSetIterator;
+import weka.dl4j.layers.DenseLayer;
+import org.deeplearning4j.nn.conf.layers.Layer;
+import weka.dl4j.layers.OutputLayer;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
+import weka.filters.unsupervised.attribute.Normalize;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
+
+/**
+ * A wrapper for DeepLearning4j that can be used to train a multi-layer perceptron using that library.
+ *
+ * @author Christopher Beckham
+ * @author Eibe Frank
+ *
+ * @author Christopher Beckham
+ *
+ * @version $Revision: 11711 $
+ */
+public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPredictor {
+
+	/** The ID used for serializing this class. */
+	protected static final long serialVersionUID = -6363254116597574265L;
+
+	/** The logger used in this class. */
+	protected final Logger log = LoggerFactory.getLogger(Dl4jMlpClassifier.class);
+
+	/** Filter used to replace missing values. */
+	protected ReplaceMissingValues m_replaceMissing = null;
+
+	/** Filter used to normalize or standardize the data. */
+	protected Filter m_normalize = null;
+
+	/** Filter used to convert nominal attributes to binary numeric attributes. */
+	protected NominalToBinary m_nominalToBinary = null;
+
+	/** ZeroR classifier, just in case we don't actually have any data to train a network. */
+	protected ZeroR m_zeroR = null;
+
+	/** The actual neural network model. **/
+	protected MultiLayerNetwork m_model = null;
+
+	/** The name of the file that debug information will be written to. */
+	protected String m_debugFile = "";
+
+	/** The layers of the network. */
+	protected Layer[] m_layers = new Layer[] {};
+
+	/** Making a serializable version of the builder for configuring the network. */
+	public static class Builder extends org.deeplearning4j.nn.conf.NeuralNetConfiguration.Builder implements Serializable {};
+
+	/** The configuration parameters of the network. */
+	protected Builder m_builder = new Builder();
+
+	/** The number of epochs to perform. */
+	protected int m_numEpochs = 10;
+
+	/** The dataset iterator to use. */
+	protected AbstractDataSetIterator m_iterator = new DefaultInstancesIterator();
+
+	/** Whether to standardize or normalize the data. */
+	protected boolean m_standardizeInsteadOfNormalize = true;
+
+	/** Coefficients used for normalizing the class */
+	protected double m_x1 = 1.0;
+	protected double m_x0 = 0.0;
+
+	public String globalInfo() {
+		return "Classification and regression with multilayer perceptrons using DeepLearning4J";
+	}
+
+	@OptionMetadata(
+					displayName = "The name of the file to write debug information to.",
+					description = "The name of the file to write debug information to.",
+					commandLineParamName = "debugFile", commandLineParamSynopsis = "-debugFile <string>",
+					displayOrder = 1)
+	public String getDebugFile() {
+		return m_debugFile;
+	}
+	public void setDebugFile(String debugFile) {
+		m_debugFile = debugFile;
+	}
+
+	@OptionMetadata(
+					displayName = "The specification of the layers.", description = "The specification of the layers.",
+					commandLineParamName = "layers", commandLineParamSynopsis = "-layers <string>",
+					displayOrder = 2)
+	public void setLayers(Layer[] layers) {
+		m_layers = layers;
+	}
+	public Layer[] getLayers() {
+		return m_layers;
+	}
+
+	@OptionMetadata(description = "The number of epochs to perform.",
+					displayName = "The number of epochs to perform",
+					commandLineParamName = "numEpochs", commandLineParamSynopsis = "-numEpochs <int>", displayOrder = 4)
+	public void setNumEpochs(int numEpochs) {
+		m_numEpochs = numEpochs;
+	}
+	public int getNumEpochs() {
+		return m_numEpochs;
+	}
+
+	@OptionMetadata(description = "Optimization algorithm (LINE_GRADIENT_DESCENT, CONJUGATE_GRADIENT, HESSIAN_FREE, " +
+					"LBFGS, STOCHASTIC_GRADIENT_DESCENT)", displayName = "Optimization algorithm",
+					commandLineParamName = "algorithm", commandLineParamSynopsis = "-algorithm <string>", displayOrder = 5)
+	public OptimizationAlgorithm getOptimizationAlgorithm() {
+		return m_builder.getOptimizationAlgo();
+	}
+	public void setOptimizationAlgorithm(OptimizationAlgorithm optimAlgorithm) {
+		m_builder.setOptimizationAlgo(optimAlgorithm);
+	}
+
+	@OptionMetadata(description = "The dataset iterator to use", displayName = "Dataset iterator",
+					commandLineParamName = "iterator", commandLineParamSynopsis = "-iterator <string>", displayOrder = 6)
+	public AbstractDataSetIterator getDataSetIterator() { return m_iterator; }
+	public void setDataSetIterator(AbstractDataSetIterator iterator) {
+		m_iterator = iterator;
+	}
+
+	/**
+	 * Get the current number of units for a particular layer. Returns -1 for anything that is not
+	 * a DenseLayer or an OutputLayer.
+	 *
+	 * @param  layer the layer
+	 * @return the number of units
+	 */
+	protected int getNumUnits(Layer layer) {
+
+		if (layer instanceof DenseLayer) {
+			return ((DenseLayer)layer).getNOut();
+		} else if (layer instanceof OutputLayer) {
+			return ((OutputLayer)layer).getNOut();
+		}
+		return -1;
+	}
+
+	/**
+	 * Sets the number of incoming connections for the nodes in the given layer.
+	 *
+	 * @param layer the layer
+	 * @param numInputs the number of inputs
+	 */
+	protected void setNumIncoming(Layer layer, int numInputs) {
+
+		if (layer instanceof DenseLayer) {
+			((DenseLayer) layer).setNIn(numInputs);
+		} else if (layer instanceof OutputLayer) {
+			((OutputLayer) layer).setNIn(numInputs);
+		}
+	}
+
+	/**
+	 * The method used to train the classifier.
+	 * @param data set of instances serving as training data
+	 * @throws Exception if something goes wrong in the training process
+	 */
+	@Override
+	public void buildClassifier(Instances data) throws Exception {
+
+		// Can classifier handle the data?
+		getCapabilities().testWithFail(data);
+
+		// Check basic network structure
+		if (m_layers.length == 0) {
+			throw new Exception("No layers have been added!");
+		}
+		if( ! (m_layers[ m_layers.length-1 ] instanceof OutputLayer) ) {
+			throw new Exception("Last layer in network must be an output layer!");
+		}
+
+		// Remove instances with missing class and check that instances and predictor attributes remain.
+		data = new Instances(data);
+		data.deleteWithMissingClass();
+		m_zeroR = null;
+		if (data.numInstances() == 0 || data.numAttributes() < 2) {
+			m_zeroR.buildClassifier(data);
+			return;
+		}
+
+		// Replace missing values
+		m_replaceMissing = new ReplaceMissingValues();
+		m_replaceMissing.setInputFormat(data);
+		data = Filter.useFilter(data, m_replaceMissing);
+
+		// Retrieve two different class values used to determine filter transformation
+		double y0 = data.instance(0).classValue();
+		int index = 1;
+		while (index < data.numInstances() && data.instance(index).classValue() == y0) {
+			index++;
+		}
+		if (index == data.numInstances()) {
+			// degenerate case, all class values are equal
+			// we don't want to deal with this, too much hassle
+			throw new Exception("All class values are the same. At least two class values should be different");
+		}
+		double y1 = data.instance(index).classValue();
+
+		// Replace nominal attributes by binary numeric attributes.
+		m_nominalToBinary = new NominalToBinary();
+		m_nominalToBinary.setInputFormat(data);
+		data = Filter.useFilter(data, m_nominalToBinary);
+
+		// Standardize or normalize (as requested), including the class
+		if (m_standardizeInsteadOfNormalize) {
+			m_normalize = new Standardize();
+			m_normalize.setOptions(new String[] { "-unset-class-temporarily" } );
+		} else {
+			m_normalize = new Normalize();
+		}
+		m_normalize.setInputFormat(data);
+		data = Filter.useFilter(data, m_normalize);
+
+		double z0 = data.instance(0).classValue();
+		double z1 = data.instance(index).classValue();
+		m_x1 = (y0-y1) / (z0 - z1); // no division by zero, since y0 != y1 guaranteed => z0 != z1 ???
+		m_x0 = (y0 - m_x1 * z0); // = y1 - m_x1 * z1
+
+		// Randomize the data, just in case
+		Random rand = new Random(getSeed());
+		data.randomize(rand);
+
+		// Initialize random number generator for construction of network
+		m_builder.setSeed(rand.nextInt());
+
+		// Construct the mlp configuration
+		ListBuilder ip = m_builder.list(getLayers());
+		int numInputAttributes = getDataSetIterator().getNumAttributes(data);
+
+		// Connect up the layers appropriately
+		for (int x = 0; x < m_layers.length; x++) {
+
+			// Is this the first hidden layer?
+			if( x == 0 ) {
+				setNumIncoming(m_layers[x], numInputAttributes);
+			} else {
+				setNumIncoming(m_layers[x], getNumUnits(m_layers[x-1]) );
+			}
+
+			// Is this the output layer?
+			if ( x == m_layers.length - 1 ) {
+				((OutputLayer)m_layers[x]).setNOut(data.numClasses());
+			}
+			ip = ip.layer(x, m_layers[x]);
+		}
+
+		// If we have a convolutional network
+		if( getDataSetIterator() instanceof ImageDataSetIterator ) {
+			ImageDataSetIterator idsi = (ImageDataSetIterator)getDataSetIterator();
+		  ip.setInputType(InputType.convolutionalFlat(idsi.getWidth(), idsi.getHeight(), idsi.getNumChannels()));
+		}
+
+		ip = ip.pretrain(false).backprop(true);
+
+		MultiLayerConfiguration conf = ip.build();
+
+		if( getDebug() ) {
+			System.err.println( conf.toJson() );
+		}
+
+		// build the network
+		m_model = new MultiLayerNetwork(conf);
+		m_model.init();
+
+		if ( getDebug() ) {
+			System.err.println(m_model.conf().toYaml());
+		}
+
+		ArrayList<IterationListener> listeners = new ArrayList<IterationListener>();
+		listeners.add( new ScoreIterationListener( data.numInstances() / getDataSetIterator().getTrainBatchSize() ) );
+
+		int numMiniBatches = (int) Math.ceil( ((double)data.numInstances()) / ((double)getDataSetIterator().getTrainBatchSize()) );
+		// if the debug file doesn't point to a directory, set up the listener
+		if( !getDebugFile().equals("") ) {
+			listeners.add( new FileIterationListener(getDebugFile(), numMiniBatches) );
+		}
+
+		m_model.setListeners(listeners);
+
+		// if debug mode is set, print the shape of the outputs
+		// of the network
+		if( getDebug() ) {
+			DataSetIterator tmpIter = getDataSetIterator().getIterator(data, getSeed());
+			while(tmpIter.hasNext()) {
+				DataSet d = tmpIter.next();
+				m_model.initialize(d);
+				List<INDArray> activations = m_model.feedForward();
+				for(int i = 0; i < activations.size(); i++) {
+					log.info("*** Output shape of layer {} is {} ***", (i+1), Arrays.toString(activations.get(i).shape()) );
+				}
+				System.out.format("number of params: %d\n", m_model.numParams() );
+				break;
+			}
+		}
+
+		// Abusing the MultipleEpochsIterator because it splits the data into batches
+		DataSetIterator iter = getDataSetIterator().getIterator(data, getSeed());
+		for(int i = 0; i < getNumEpochs(); i++) {
+			m_model.fit(iter); // Note that this calls the reset() method of the iterator
+			if (getDebug()) {
+				log.info("*** Completed epoch {} ***", i + 1);
+			}
+			iter.reset();
+		}
+	}
+
+	/**
+	 * The method to use when making predictions for a test instance.
+	 *
+	 * @param inst the instance to get a prediction for
+	 * @return the class probability estimates (if the class is nominal) or the numeric prediction (if it is numeric)
+	 * @throws Exception if something goes wrong at prediction time
+	 */
+	public double[] distributionForInstance(Instance inst) throws Exception {
+
+		// Do we only have a ZeroR model?
+		if (m_zeroR != null) {
+			return m_zeroR.distributionForInstance(inst);
+		}
+
+		// Filter the instance
+		m_replaceMissing.input(inst);
+		inst = m_replaceMissing.output();
+		m_nominalToBinary.input(inst);
+		inst = m_nominalToBinary.output();
+		m_normalize.input(inst);
+		inst = m_normalize.output();
+
+		Instances insts = new Instances( inst.dataset(), 0 );
+		insts.add(inst);
+		INDArray predicted = m_model.output(getDataSetIterator().getIterator( insts, getSeed(), 1 ).next().getFeatureMatrix());
+		predicted = predicted.getRow(0);
+		double[] preds = new double[inst.numClasses()];
+		for (int i = 0; i < preds.length; i++) {
+			preds[i] = predicted.getDouble(i);
+		}
+		// only normalise if we're dealing with classification
+		if( preds.length > 1) {
+			weka.core.Utils.normalize(preds);
+		} else {
+			preds[0] = preds[0] * m_x1 + m_x0;
+		}
+		return preds;
+	}
+
+	/**
+	 * Returns a string describing the model.
+	 *
+	 * @return the model string
+	 */
+	@Override
+	public String toString() {
+
+		if(m_model != null) {
+			return m_model.conf().toYaml();
+		}
+		return null;
+	}
+
+	/**
+	 * The main method for running this class.
+	 *
+	 * @param argv the command-line arguments
+	 */
+	public static void main(String[] argv) {
+		runClassifier(new Dl4jMlpClassifier(), argv);
+	}
+
+}
