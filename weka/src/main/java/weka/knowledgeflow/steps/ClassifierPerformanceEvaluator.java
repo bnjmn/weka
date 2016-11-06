@@ -22,6 +22,7 @@
 package weka.knowledgeflow.steps;
 
 import weka.classifiers.AggregateableEvaluation;
+import weka.classifiers.CostMatrix;
 import weka.classifiers.Evaluation;
 import weka.classifiers.evaluation.ThresholdCurve;
 import weka.core.BatchPredictor;
@@ -78,6 +79,15 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
    * prediction margin
    */
   protected boolean m_errorPlotPointSizeProportionalToMargin;
+
+  /** True to perform cost sensitive evaluation */
+  protected boolean m_costSensitiveEval;
+
+  /** The cost matrix (string form) */
+  protected String m_costString = "";
+
+  /** The cost matrix */
+  protected CostMatrix m_matrix;
 
   /** Evaluation metrics to output */
   protected String m_selectedEvalMetrics = "";
@@ -152,6 +162,44 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
   }
 
   /**
+   * Set whether to evaluate with respoect to costs
+   *
+   * @param useCosts true to use cost-sensitive evaluation
+   */
+  @ProgrammaticProperty
+  public void setEvaluateWithRespectToCosts(boolean useCosts) {
+    m_costSensitiveEval = useCosts;
+  }
+
+  /**
+   * Get whether to evaluate with respoect to costs
+   *
+   * @return true to use cost-sensitive evaluation
+   */
+  public boolean getEvaluateWithRespectToCosts() {
+    return m_costSensitiveEval;
+  }
+
+  /**
+   * Set the cost matrix to use as a string
+   *
+   * @param cms the cost matrix to use
+   */
+  @ProgrammaticProperty
+  public void setCostMatrixString(String cms) {
+    m_costString = cms;
+  }
+
+  /**
+   * Get the cost matrix to use as a string
+   *
+   * @return the cost matrix
+   */
+  public String getCostMatrixString() {
+    return m_costString;
+  }
+
+  /**
    * Get a list of incoming connection types that this step can accept. Ideally
    * (and if appropriate), this should take into account the state of the step
    * and any existing incoming connections. E.g. a step might be able to accept
@@ -213,6 +261,14 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     m_PlotInstances = null;
     m_aggregatedPlotInstances = null;
     m_taskCount = new AtomicInteger(0);
+    if (m_costSensitiveEval && m_costString != null
+      && m_costString.length() > 0) {
+      try {
+        m_matrix = CostMatrix.parseMatlab(getCostMatrixString());
+      } catch (Exception e) {
+        throw new WekaException(e);
+      }
+    }
   }
 
   @Override
@@ -270,7 +326,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         m_setsToGo = new AtomicInteger(0);
         if (trainingData == null) {
           // no training data to estimate majority class/mean target from
-          Evaluation eval = new Evaluation(testData);
+          Evaluation eval =
+            new Evaluation(testData, m_costSensitiveEval ? m_matrix : null);
           m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
           m_PlotInstances.setInstances(testData);
           m_PlotInstances.setClassifier(classifier);
@@ -279,12 +336,13 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
 
           eval =
             adjustForInputMappedClassifier(eval, classifier, testData,
-              m_PlotInstances);
+              m_PlotInstances, m_costSensitiveEval ? m_matrix : null);
           eval.useNoPriors();
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
         } else {
-          Evaluation eval = new Evaluation(trainingData);
+          Evaluation eval =
+            new Evaluation(trainingData, m_costSensitiveEval ? m_matrix : null);
           m_PlotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
           m_PlotInstances.setInstances(trainingData);
           m_PlotInstances.setClassifier(classifier);
@@ -293,7 +351,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
 
           eval =
             adjustForInputMappedClassifier(eval, classifier, trainingData,
-              m_PlotInstances);
+              m_PlotInstances, m_costSensitiveEval ? m_matrix : null);
           m_eval = new AggregateableEvaluation(eval);
           m_eval.setMetricsToDisplay(m_metricsList);
         }
@@ -309,7 +367,8 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
         EvaluationTask evalTask =
           new EvaluationTask(this, classifier, trainingData, testData, setNum,
             m_metricsList, getErrorPlotPointSizeProportionalToMargin(),
-            evalLabel, new EvaluationCallback());
+            evalLabel, new EvaluationCallback(), m_costSensitiveEval ? m_matrix
+              : null);
         getStepManager().getExecutionEnvironment().submitTask(evalTask);
         m_taskCount.incrementAndGet();
       } else {
@@ -393,6 +452,10 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           textTitle = evalLabel + " : " + textTitle;
         }
       }
+
+      CostMatrix cm =
+        m_costSensitiveEval ? CostMatrix.parseMatlab(getCostMatrixString())
+          : null;
       String resultT =
         "=== Evaluation result ===\n\n"
           + "Scheme: "
@@ -400,6 +463,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           + "\n"
           + ((textOptions.length() > 0) ? "Options: " + textOptions + "\n" : "")
           + "Relation: " + testData.relationName() + "\n\n"
+          + (cm != null ? "Cost matrix:\n" + cm.toString() + "\n" : "")
           + m_eval.toSummaryString();
 
       if (testData.classAttribute().isNominal()) {
@@ -496,12 +560,15 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
    * @param classifier the classifier being used
    * @param inst the instances being evaluated on
    * @param plotInstances plotting instances
+   * @param matrix the CostMatrix to use, or null for no cost-sensitive
+   *          evaluation
    * @return the adjusted {@code Evaluation} object
    * @throws Exception if a problem occurs
    */
   protected static Evaluation adjustForInputMappedClassifier(Evaluation eval,
     weka.classifiers.Classifier classifier, Instances inst,
-    ClassifierErrorsPlotInstances plotInstances) throws Exception {
+    ClassifierErrorsPlotInstances plotInstances, CostMatrix matrix)
+    throws Exception {
 
     if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
       Instances mappedClassifierHeader =
@@ -598,6 +665,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     private static final long serialVersionUID = -686972773536075889L;
 
     protected weka.classifiers.Classifier m_classifier;
+    protected CostMatrix m_cMatrix;
     protected Instances m_trainData;
     protected Instances m_testData;
     protected int m_setNum;
@@ -609,10 +677,11 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
     public EvaluationTask(Step source, weka.classifiers.Classifier classifier,
       Instances trainData, Instances testData, int setNum,
       List<String> metricsList, boolean errPlotPtSizePropToMarg,
-      String evalLabel, EvaluationCallback callback) {
+      String evalLabel, EvaluationCallback callback, CostMatrix matrix) {
 
       super(source, callback);
       m_classifier = classifier;
+      m_cMatrix = matrix;
       m_trainData = trainData;
       m_testData = testData;
       m_setNum = setNum;
@@ -646,7 +715,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
       Evaluation eval = null;
 
       if (m_trainData == null) {
-        eval = new Evaluation(m_testData);
+        eval = new Evaluation(m_testData, m_cMatrix);
         plotInstances.setInstances(m_testData);
         plotInstances.setClassifier(m_classifier);
         plotInstances.setClassIndex(m_testData.classIndex());
@@ -655,12 +724,12 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           .setPointSizeProportionalToMargin(m_errPlotPtSizePropToMarg);
         eval =
           adjustForInputMappedClassifier(eval, m_classifier, m_testData,
-            plotInstances);
+            plotInstances, m_cMatrix);
 
         eval.useNoPriors();
         eval.setMetricsToDisplay(m_metricsList);
       } else {
-        eval = new Evaluation(m_trainData);
+        eval = new Evaluation(m_trainData, m_cMatrix);
         plotInstances.setInstances(m_trainData);
         plotInstances.setClassifier(m_classifier);
         plotInstances.setClassIndex(m_trainData.classIndex());
@@ -669,7 +738,7 @@ public class ClassifierPerformanceEvaluator extends BaseStep {
           .setPointSizeProportionalToMargin(m_errPlotPtSizePropToMarg);
         eval =
           adjustForInputMappedClassifier(eval, m_classifier, m_trainData,
-            plotInstances);
+            plotInstances, m_cMatrix);
         eval.setMetricsToDisplay(m_metricsList);
       }
 
