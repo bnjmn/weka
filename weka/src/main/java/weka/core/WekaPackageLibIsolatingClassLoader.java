@@ -219,7 +219,6 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
           String jarPath = jarAndEntries[0].trim();
           String[] libPathsInJar = jarAndEntries[1].split(",");
           List<String> libsToInstall = new ArrayList<>();
-          List<String> libsToAddToPath = new ArrayList<>();
           // look at named libs and check if they are already in
           // $WEKA_HOME/native-libs - don't extract a second time, but DO
           // add entries to java.library.path
@@ -227,10 +226,9 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
             String libName = lib.trim().replace("\\", "/");
             if (!nativeLibInstalled(libName.substring(
               libName.lastIndexOf("/") + 1, libName.length()))) {
-              libsToInstall.add(libName);
+              libsToInstall.add(libName.substring(
+                libName.lastIndexOf("/") + 1, libName.length()));
             }
-            libsToAddToPath.add(libName.substring(libName.lastIndexOf("/") + 1,
-              libName.length()));
           }
 
           if (libsToInstall.size() > 0) {
