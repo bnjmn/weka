@@ -27,6 +27,7 @@ import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.CustomDisplayStringProvider;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.WekaPackageClassLoaderManager;
@@ -900,8 +901,10 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       if (returnVal == JFileChooser.APPROVE_OPTION) {
         File selected = m_FileChooser.getSelectedFile();
         try {
-          ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(
-            new FileInputStream(selected)));
+          ObjectInputStream oi =
+            SerializationHelper.getObjectInputStream(new BufferedInputStream(new FileInputStream(selected)));
+          /* ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(
+            new FileInputStream(selected))); */
           Object obj = oi.readObject();
           oi.close();
           if (!m_ClassType.isAssignableFrom(obj.getClass())) {
