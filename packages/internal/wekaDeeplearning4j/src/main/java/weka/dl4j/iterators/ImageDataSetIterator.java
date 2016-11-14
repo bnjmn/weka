@@ -62,6 +62,17 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
     /** The location of the folder containing the images */
     protected File m_imagesLocation = new File(System.getProperty("user.dir"));
 
+    @OptionMetadata(displayName = "size of mini batch",
+            description = "The mini batch size to use in the iterator (default = 1).",
+            commandLineParamName = "bs", commandLineParamSynopsis = "-bs <int>",
+            displayOrder = 0)
+    public void setTrainBatchSize(int trainBatchSize) {
+        m_batchSize = trainBatchSize;
+    }
+    public int getTrainBatchSize() {
+        return m_batchSize;
+    }
+
     @OptionMetadata(
             displayName = "directory of images",
             description = "The directory containing the images (default = user home).",

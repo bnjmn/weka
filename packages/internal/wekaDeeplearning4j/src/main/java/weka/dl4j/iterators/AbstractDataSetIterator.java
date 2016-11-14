@@ -79,14 +79,18 @@ public abstract class AbstractDataSetIterator implements OptionHandler, Serializ
 	 */
 	public abstract DataSetIterator getIterator(Instances data, int seed, int batchSize) throws Exception;
 
-	@OptionMetadata(
-					displayName = "size of mini batch",
-					description = "The mini batch size to use in the iterator (default = 1).",
-					commandLineParamName = "bs", commandLineParamSynopsis = "-bs <int>",
-					displayOrder = 1)
+	/**
+	 * Setting the training batch size
+	 * @param trainBatchSize the batch size
+	 */
 	public void setTrainBatchSize(int trainBatchSize) {
 		m_batchSize = trainBatchSize;
 	}
+
+	/**
+	 * Getting the training batch size
+	 * @return the batch size
+	 */
 	public int getTrainBatchSize() {
 		return m_batchSize;
 	}

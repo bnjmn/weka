@@ -25,6 +25,7 @@ import org.nd4j.linalg.dataset.DataSet;
 
 import weka.classifiers.functions.dl4j.Utils;
 import weka.core.Instances;
+import weka.core.OptionMetadata;
 import weka.dl4j.ShufflingDataSetIterator;
 
 
@@ -40,6 +41,17 @@ public class DefaultInstancesIterator extends AbstractDataSetIterator {
 
 	/** The ID used to serialize this class */
 	private static final long serialVersionUID = 1316260988724548474L;
+
+	@OptionMetadata(displayName = "size of mini batch",
+										description = "The mini batch size to use in the iterator (default = 1).",
+										commandLineParamName = "bs", commandLineParamSynopsis = "-bs <int>",
+										displayOrder = 1)
+	public void setTrainBatchSize(int trainBatchSize) {
+		m_batchSize = trainBatchSize;
+	}
+	public int getTrainBatchSize() {
+		return m_batchSize;
+	}
 
 	/**
 	 * Returns the number of predictor attributes for this dataset.

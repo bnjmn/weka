@@ -38,7 +38,7 @@ import org.nd4j.linalg.api.ndarray.INDArray;
  * ImageRecordReader in DeepLearning4j assumes that your images are separated into different folders,
  * where each folder is a class, e.g. for MNIST, all the 0 images are in a folder
  * called 0/, all the 1 images in 1/, etc. At test time, you will get instances
- * where the class is not known, e.g:<br> image.png,?</br>
+ * where the class is not known, e.g:<br> image.png,?<br>
  * This is why we have had to make a new image record reader and make it possible
  * that all the images are in one folder. We specify the classes for those images
  * explicitly. The reader also shuffles the data.

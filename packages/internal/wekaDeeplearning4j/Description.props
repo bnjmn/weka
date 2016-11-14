@@ -9,7 +9,7 @@ PackageName=wekaDeeplearning4j
 Version=1.0.0
 
 #Date
-Date=2016-11-04
+Date=2016-11-14
 
 # Title (required)
 Title=Weka wrappers for Deeplearning4j
@@ -17,7 +17,7 @@ Title=Weka wrappers for Deeplearning4j
 Category=Classification/Regression
 
 # Author (required)
-Author=Christopher Beckham
+Author=Christopher Beckham and Eibe Frank
 
 # Maintainer (required)
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>

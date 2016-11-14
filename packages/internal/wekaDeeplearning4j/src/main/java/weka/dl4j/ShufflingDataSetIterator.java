@@ -41,7 +41,7 @@ public class ShufflingDataSetIterator implements DataSetIterator, Serializable {
 	/** The ID used to serialize this class */
 	private static final long serialVersionUID = 5571114918884888578L;
 
-	/** The dataset to oeprate on */
+	/** The dataset to operate on */
 	protected DataSet m_data = null;
 
 	/** The mini batch size */
@@ -83,6 +83,10 @@ public class ShufflingDataSetIterator implements DataSetIterator, Serializable {
 	@Override
 	public DataSet next() {
 
+		// Special case: getRange() does not work as expected if there is just a single example
+		if ((m_cursor == 0) && (m_batchSize == 1) && (m_data.numExamples() == 1)) {
+			return m_data;
+		}
 		DataSet thisBatch = (DataSet) m_data.getRange(m_cursor, m_cursor + m_batchSize);
 		m_cursor += m_batchSize;
 		return thisBatch;
@@ -97,6 +101,10 @@ public class ShufflingDataSetIterator implements DataSetIterator, Serializable {
 	@Override
 	public DataSet next(int num) {
 
+		// Special case: getRange() does not work as expected if there is just a single example
+		if ((m_cursor == 0) && (num == 1) && (m_data.numExamples() == 1)) {
+			return m_data;
+		}
 		DataSet thisBatch = (DataSet) m_data.getRange(m_cursor, m_cursor + num);
 		m_cursor += num;
 		return thisBatch;

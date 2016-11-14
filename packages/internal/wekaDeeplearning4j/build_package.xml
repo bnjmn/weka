@@ -13,6 +13,7 @@
   <property name="src" value="src/main/java"/>
   <property name="src-test" value="src/test/java"/>
   <property name="lib" value="lib" />
+  <property name="data" value="data" />
   <property name="build" value="build"/>
   <property name="dist"  value="dist"/>
   <property name="doc"  value="doc"/>
@@ -164,6 +165,9 @@
   </target>
 
   <target name="make_package" depends="exejar" description="Make the package zip file. Run with -Dpackage=[package name]">
+    <copydir src="${data}"
+             dest="${dist}/${package}/${data}"
+    />
     <mkdir dir="${dist}/${package}"/>
     <copy todir="${dist}/${package}">
       <fileset dir="${dist}">
@@ -188,8 +192,17 @@
          <include name="*.zip"/>
          <exclude name="weka.jar"/>
          <exclude name="pdm*.jar"/>
+	 <exclude name="nd4j-api-0.6.0.jar"/>
+	 <exclude name="deeplearning4j-nn-0.6.0.jar"/>
        </fileset>
     </copy>
+    <copy todir="${dist}/${package}" >
+       <fileset dir="${lib}">
+	 <include name="nd4j-api-0.6.0.jar"/>
+	 <include name="deeplearning4j-nn-0.6.0.jar"/>
+       </fileset>
+    </copy>
+    
     <mkdir dir="${dist}/${package}/doc"/>
     <copy todir="${dist}/${package}/doc" >
        <fileset dir="${doc}">

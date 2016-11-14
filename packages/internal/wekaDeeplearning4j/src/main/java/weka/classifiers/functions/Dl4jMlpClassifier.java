@@ -20,6 +20,7 @@
  */
 package weka.classifiers.functions;
 
+import java.io.File;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,10 +42,7 @@ import org.slf4j.LoggerFactory;
 
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.rules.ZeroR;
-import weka.core.BatchPredictor;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
+import weka.core.*;
 import weka.dl4j.FileIterationListener;
 import weka.dl4j.iterators.AbstractDataSetIterator;
 import weka.dl4j.iterators.DefaultInstancesIterator;
@@ -68,7 +66,7 @@ import weka.filters.unsupervised.attribute.Standardize;
  *
  * @version $Revision: 11711 $
  */
-public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPredictor {
+public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPredictor, CapabilitiesHandler {
 
 	/** The ID used for serializing this class. */
 	protected static final long serialVersionUID = -6363254116597574265L;
@@ -91,8 +89,8 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 	/** The actual neural network model. **/
 	protected MultiLayerNetwork m_model = null;
 
-	/** The name of the file that debug information will be written to. */
-	protected String m_debugFile = "";
+	/** The file that log information will be written to. */
+	protected File m_logFile = new File(System.getProperty("user.dir"));
 
 	/** The layers of the network. */
 	protected Layer[] m_layers = new Layer[] {};
@@ -117,23 +115,44 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 	protected double m_x0 = 0.0;
 
 	public String globalInfo() {
-		return "Classification and regression with multilayer perceptrons using DeepLearning4J";
+		return "Classification and regression with multilayer perceptrons using DeepLearning4J.";
 	}
 
-	@OptionMetadata(
-					displayName = "The name of the file to write debug information to.",
-					description = "The name of the file to write debug information to.",
-					commandLineParamName = "debugFile", commandLineParamSynopsis = "-debugFile <string>",
+
+	/**
+	 * Returns default capabilities of the classifier.
+	 *
+	 * @return      the capabilities of this classifier
+	 */
+	public Capabilities getCapabilities() {
+		Capabilities result = super.getCapabilities();
+		result.disableAll();
+
+		// attributes
+		result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+		result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+		result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
+		result.enable(Capabilities.Capability.STRING_ATTRIBUTES);
+		result.enable(Capabilities.Capability.MISSING_VALUES);
+
+		// class
+		result.enable(Capabilities.Capability.NOMINAL_CLASS);
+		result.enable(Capabilities.Capability.NUMERIC_CLASS);
+		result.enable(Capabilities.Capability.DATE_CLASS);
+		result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+
+		return result;
+	}
+
+
+	@OptionMetadata(displayName = "log file",
+					description = "The name of the log file to write loss information to (default = no log file).",
+					commandLineParamName = "logFile", commandLineParamSynopsis = "-logFile <string>",
 					displayOrder = 1)
-	public String getDebugFile() {
-		return m_debugFile;
-	}
-	public void setDebugFile(String debugFile) {
-		m_debugFile = debugFile;
-	}
+	public File getLogFile() { return m_logFile; }
+	public void setLogFile(File logFile) { m_logFile = logFile; }
 
-	@OptionMetadata(
-					displayName = "The specification of the layers.", description = "The specification of the layers.",
+	@OptionMetadata(displayName = "layer specification", description = "The specification of the layers.",
 					commandLineParamName = "layers", commandLineParamSynopsis = "-layers <string>",
 					displayOrder = 2)
 	public void setLayers(Layer[] layers) {
@@ -143,8 +162,8 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 		return m_layers;
 	}
 
-	@OptionMetadata(description = "The number of epochs to perform.",
-					displayName = "The number of epochs to perform",
+	@OptionMetadata(description = "The number of epochs to perform",
+					displayName = "number of epochs",
 					commandLineParamName = "numEpochs", commandLineParamSynopsis = "-numEpochs <int>", displayOrder = 4)
 	public void setNumEpochs(int numEpochs) {
 		m_numEpochs = numEpochs;
@@ -154,7 +173,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 	}
 
 	@OptionMetadata(description = "Optimization algorithm (LINE_GRADIENT_DESCENT, CONJUGATE_GRADIENT, HESSIAN_FREE, " +
-					"LBFGS, STOCHASTIC_GRADIENT_DESCENT)", displayName = "Optimization algorithm",
+					"LBFGS, STOCHASTIC_GRADIENT_DESCENT)", displayName = "optimization algorithm",
 					commandLineParamName = "algorithm", commandLineParamSynopsis = "-algorithm <string>", displayOrder = 5)
 	public OptimizationAlgorithm getOptimizationAlgorithm() {
 		return m_builder.getOptimizationAlgo();
@@ -163,7 +182,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 		m_builder.setOptimizationAlgo(optimAlgorithm);
 	}
 
-	@OptionMetadata(description = "The dataset iterator to use", displayName = "Dataset iterator",
+	@OptionMetadata(description = "The dataset iterator to use", displayName = "dataset iterator",
 					commandLineParamName = "iterator", commandLineParamSynopsis = "-iterator <string>", displayOrder = 6)
 	public AbstractDataSetIterator getDataSetIterator() { return m_iterator; }
 	public void setDataSetIterator(AbstractDataSetIterator iterator) {
@@ -321,29 +340,13 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 		ArrayList<IterationListener> listeners = new ArrayList<IterationListener>();
 		listeners.add( new ScoreIterationListener( data.numInstances() / getDataSetIterator().getTrainBatchSize() ) );
 
-		int numMiniBatches = (int) Math.ceil( ((double)data.numInstances()) / ((double)getDataSetIterator().getTrainBatchSize()) );
-		// if the debug file doesn't point to a directory, set up the listener
-		if( !getDebugFile().equals("") ) {
-			listeners.add( new FileIterationListener(getDebugFile(), numMiniBatches) );
+		// if the log file doesn't point to a directory, set up the listener
+		if( !getLogFile().isDirectory() ) {
+			int numMiniBatches = (int) Math.ceil( ((double)data.numInstances()) / ((double)getDataSetIterator().getTrainBatchSize()) );
+			listeners.add( new FileIterationListener(getLogFile().getAbsolutePath(), numMiniBatches) );
 		}
 
 		m_model.setListeners(listeners);
-
-		// if debug mode is set, print the shape of the outputs
-		// of the network
-		if( getDebug() ) {
-			DataSetIterator tmpIter = getDataSetIterator().getIterator(data, getSeed());
-			while(tmpIter.hasNext()) {
-				DataSet d = tmpIter.next();
-				m_model.initialize(d);
-				List<INDArray> activations = m_model.feedForward();
-				for(int i = 0; i < activations.size(); i++) {
-					log.info("*** Output shape of layer {} is {} ***", (i+1), Arrays.toString(activations.get(i).shape()) );
-				}
-				System.out.format("number of params: %d\n", m_model.numParams() );
-				break;
-			}
-		}
 
 		// Abusing the MultipleEpochsIterator because it splits the data into batches
 		DataSetIterator iter = getDataSetIterator().getIterator(data, getSeed());
@@ -380,7 +383,8 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements BatchPr
 
 		Instances insts = new Instances( inst.dataset(), 0 );
 		insts.add(inst);
-		INDArray predicted = m_model.output(getDataSetIterator().getIterator( insts, getSeed(), 1 ).next().getFeatureMatrix());
+		DataSet ds = getDataSetIterator().getIterator( insts, getSeed(), 1 ).next();
+		INDArray predicted = m_model.output(ds.getFeatureMatrix(), false);
 		predicted = predicted.getRow(0);
 		double[] preds = new double[inst.numClasses()];
 		for (int i = 0; i < preds.length; i++) {
