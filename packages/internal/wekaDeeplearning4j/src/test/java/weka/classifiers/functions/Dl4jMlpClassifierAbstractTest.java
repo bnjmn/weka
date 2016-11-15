@@ -1,6 +1,7 @@
 package weka.classifiers.functions;
 
 import org.deeplearning4j.nn.conf.layers.Layer;
+import org.nd4j.linalg.lossfunctions.impl.LossSquaredHinge;
 import weka.classifiers.AbstractClassifierTest;
 import weka.classifiers.CheckClassifier;
 import weka.classifiers.Classifier;
@@ -21,7 +22,9 @@ public class Dl4jMlpClassifierAbstractTest extends AbstractClassifierTest {
     Dl4jMlpClassifier mlp = new Dl4jMlpClassifier();
     DenseLayer dl = new DenseLayer();
     dl.setNOut(2);
-    mlp.setLayers(new Layer[] { dl, new OutputLayer() });
+    OutputLayer ol = new OutputLayer();
+    ol.setLossFn(new LossSquaredHinge());
+    mlp.setLayers(new Layer[] { dl, ol });
     return mlp;
   }
 

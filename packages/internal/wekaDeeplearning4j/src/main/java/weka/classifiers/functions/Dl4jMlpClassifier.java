@@ -138,7 +138,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
     result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
     result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
-    result.enable(Capabilities.Capability.STRING_ATTRIBUTES);
+    result.enableDependency(Capabilities.Capability.STRING_ATTRIBUTES);
     result.enable(Capabilities.Capability.MISSING_VALUES);
 
     // class
