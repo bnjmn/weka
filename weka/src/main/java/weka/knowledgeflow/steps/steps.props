@@ -22,4 +22,5 @@ weka.knowledgeflow.steps.Block,weka.knowledgeflow.steps.AlterRelationName,\
 weka.knowledgeflow.steps.Sorter,weka.knowledgeflow.steps.SubstringReplacer,\
 weka.knowledgeflow.steps.SubstringLabeler,weka.knowledgeflow.steps.Appender,\
 weka.knowledgeflow.steps.FlowByExpression,weka.knowledgeflow.steps.InstanceStreamToBatchMaker,\
-weka.knowledgeflow.steps.Join,weka.knowledgeflow.steps.DataGrid,weka.knowledgeflow.steps.SendToPerspective
+weka.knowledgeflow.steps.Join,weka.knowledgeflow.steps.DataGrid,weka.knowledgeflow.steps.SendToPerspective,\
+weka.knowledgeflow.steps.WriteWekaLog

@@ -639,11 +639,11 @@ public class StepManagerImpl implements StepManager {
    *
    * @param connectionName the name of the type of connection to add
    * @param step the target step component that is receiving the given
-   *          connection type
-   *          it can't accept the connection at the present time
+   *          connection type it can't accept the connection at the present time
    * @return true if the connection was successful
    */
-  public boolean addOutgoingConnection(String connectionName, StepManagerImpl step) {
+  public boolean addOutgoingConnection(String connectionName,
+    StepManagerImpl step) {
     return addOutgoingConnection(connectionName, step, false);
   }
 
@@ -888,7 +888,7 @@ public class StepManagerImpl implements StepManager {
       notifyOutputListeners(data);
     }
   }
-  
+
   /**
    * Output one or more Data objects to all relevant steps. Populates the source
    * in each Data object for the client, HOWEVER, the client must have populated
@@ -1349,6 +1349,7 @@ public class StepManagerImpl implements StepManager {
    * @return the StepManager of the named step, or null if the step does not
    *         exist in the current flow.
    */
+  @Override
   public StepManager findStepInFlow(String stepNameToFind) {
     Flow flow = m_executionEnvironment.getFlowExecutor().getFlow();
 
