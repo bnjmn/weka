@@ -40,4 +40,4 @@ URL=https://www.csie.ntu.edu.tw/~cjlin/libsvm/
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.8.0)
