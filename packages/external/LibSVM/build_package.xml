@@ -1,7 +1,7 @@
 <project name="weka-package" default="compile" basedir=".">
 <!-- 
   ===========================================================================
-   Ant build file for weka a weka package. 
+   Ant build file for LibSVM
 
    Type ant -projecthelp for targets and descriptions.
 
