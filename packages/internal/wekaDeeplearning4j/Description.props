@@ -28,7 +28,7 @@ License=GPL 3.0
 # Description (required)
 Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library.
 
-Changes=
+Changes=Serialization working now. Capability handling for convolutional case corrected. Model output fixed.
 
 # Package URL for obtaining the package archive (required)
 PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4j1.0.1.zip?download
