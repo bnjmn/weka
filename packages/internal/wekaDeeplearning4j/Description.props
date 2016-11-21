@@ -6,10 +6,10 @@
 PackageName=wekaDeeplearning4j
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2016-11-15
+Date=2016-11-22
 
 # Title (required)
 Title=Weka wrappers for Deeplearning4j
@@ -31,7 +31,7 @@ Description=Provides a wrapper classifier for feedforward networks, including co
 Changes=
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4j1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4j1.0.1.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
