@@ -218,16 +218,16 @@ public class DefaultPackageManager extends PackageManager {
         int amountRead = bi.read(m_buffer);
         if (amountRead == -1) {
           for (PrintStream progres : progress) {
-            progres.println("[DefaultPackageManager] downloaded "
-              + (totalBytesRead / 1000) + " KB");
+            progres.print("[DefaultPackageManager] downloaded "
+              + (totalBytesRead / 1000) + " KB\r");
           }
           break;
         }
         bo.write(m_buffer, 0, amountRead);
         totalBytesRead += amountRead;
         for (PrintStream progres : progress) {
-          progres.println("%%[DefaultPackageManager] downloaded "
-            + (totalBytesRead / 1000) + " KB");
+          progres.print("%%[DefaultPackageManager] downloaded "
+            + (totalBytesRead / 1000) + " KB\r");
         }
       }
     }
@@ -988,15 +988,15 @@ public class DefaultPackageManager extends PackageManager {
           if (amountRead == -1) {
             for (PrintStream progres : progress) {
               progres.println("[DefaultPackageManager] downloaded "
-                + (totalBytesRead / 1000) + " KB");
+                + (totalBytesRead / 1000) + " KB\r");
             }
             break;
           }
           bos.write(m_buffer, 0, amountRead);
           totalBytesRead += amountRead;
           for (PrintStream progres : progress) {
-            progres.println("[DefaultPackageManager] downloaded "
-              + (totalBytesRead / 1000) + " KB");
+            progres.print("[DefaultPackageManager] downloaded "
+              + (totalBytesRead / 1000) + " KB\r");
           }
         }
       }

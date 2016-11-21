@@ -383,7 +383,7 @@ public class PackageManager extends JPanel {
         // of KB read from the message
         String kbs =
           progressMessage.replace("[DefaultPackageManager] downloaded ", "");
-        kbs = kbs.replace(" KB", "");
+        kbs = kbs.replace(" KB\r", "");
         m_progressCount = Integer.parseInt(kbs);
       } else {
         m_progressCount++;
