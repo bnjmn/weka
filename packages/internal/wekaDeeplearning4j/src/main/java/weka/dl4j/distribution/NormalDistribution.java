@@ -21,6 +21,7 @@
 
 package weka.dl4j.distribution;
 
+import com.fasterxml.jackson.annotation.JsonTypeName;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.OptionMetadata;
@@ -34,6 +35,7 @@ import java.util.Enumeration;
  *
  * @version $Revision: 11711 $
  */
+@JsonTypeName("normal")
 public class NormalDistribution extends org.deeplearning4j.nn.conf.distribution.NormalDistribution implements OptionHandler {
 
   /**

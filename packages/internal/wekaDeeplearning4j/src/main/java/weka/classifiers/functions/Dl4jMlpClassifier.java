@@ -21,13 +21,15 @@
 package weka.classifiers.functions;
 
 import java.io.File;
-import java.io.Serializable;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Random;
 
+import org.deeplearning4j.nn.conf.NeuralNetConfiguration;
 import org.deeplearning4j.nn.conf.inputs.InputType;
+import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import org.deeplearning4j.nn.api.OptimizationAlgorithm;
 import org.deeplearning4j.nn.conf.MultiLayerConfiguration;
@@ -93,21 +95,26 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   protected ZeroR m_zeroR;
 
   /** The actual neural network model. **/
-  protected MultiLayerNetwork m_model;
+  protected transient MultiLayerNetwork m_model;
 
   /** The file that log information will be written to. */
   protected File m_logFile = new File(System.getProperty("user.dir"));
 
   /** The layers of the network. */
   protected Layer[] m_layers = new Layer[] {new OutputLayer()};
+
   /** The configuration parameters of the network. */
-  protected Builder m_builder = new Builder();;
+  protected OptimizationAlgorithm m_algo = OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT;;
+
   /** The number of epochs to perform. */
   protected int m_numEpochs = 10;
+
   /** The dataset iterator to use. */
   protected AbstractDataSetIterator m_iterator = new DefaultInstancesIterator();
+
   /** Whether to standardize or normalize the data. */
   protected boolean m_standardizeInsteadOfNormalize = true;
+
   /** Coefficients used for normalizing the class */
   protected double m_x1 = 1.0;
   protected double m_x0 = 0.0;
@@ -135,11 +142,15 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     result.disableAll();
 
     // attributes
-    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
-    result.enableDependency(Capabilities.Capability.STRING_ATTRIBUTES);
-    result.enable(Capabilities.Capability.MISSING_VALUES);
+    if (getDataSetIterator() instanceof ImageDataSetIterator) {
+      result.enable(Capabilities.Capability.STRING_ATTRIBUTES);
+    } else {
+      result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+      result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+      result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
+      result.enable(Capabilities.Capability.MISSING_VALUES);
+      result.enableDependency(Capabilities.Capability.STRING_ATTRIBUTES); // User might switch to ImageDSI in GUI
+    }
 
     // class
     result.enable(Capabilities.Capability.NOMINAL_CLASS);
@@ -148,6 +159,41 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
 
     return result;
+  }
+
+  /**
+   * Custom serialization method.
+   *
+   * @param oos the object output stream
+   * @throws IOException
+   */
+  private void writeObject(ObjectOutputStream oos) throws IOException {
+
+    // default serialization
+    oos.defaultWriteObject();
+
+    // write the network
+    if (m_replaceMissing != null) {
+      ModelSerializer.writeModel(m_model, oos, false);
+    }
+  }
+
+  /**
+   * Custom deserialization method
+   *
+   * @param ois the object input stream
+   * @throws ClassNotFoundException
+   * @throws IOException
+   */
+  private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+
+    // default deserialization
+    ois.defaultReadObject();
+
+    // restore the model
+    if (m_replaceMissing != null) {
+      m_model = ModelSerializer.restoreMultiLayerNetwork(ois, false);
+    }
   }
 
   /**
@@ -202,11 +248,11 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     displayName = "optimization algorithm", commandLineParamName = "algorithm",
     commandLineParamSynopsis = "-algorithm <string>", displayOrder = 5)
   public OptimizationAlgorithm getOptimizationAlgorithm() {
-    return m_builder.getOptimizationAlgo();
+    return m_algo;
   }
 
   public void setOptimizationAlgorithm(OptimizationAlgorithm optimAlgorithm) {
-    m_builder.setOptimizationAlgo(optimAlgorithm);
+    m_algo = optimAlgorithm;
   }
 
   @OptionMetadata(description = "The dataset iterator to use",
@@ -330,10 +376,16 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     data.randomize(rand);
 
     // Initialize random number generator for construction of network
-    m_builder.setSeed(rand.nextInt());
+    NeuralNetConfiguration.Builder builder = new NeuralNetConfiguration.Builder();
+    if (getOptimizationAlgorithm() == null) {
+      builder.setOptimizationAlgo(OptimizationAlgorithm.STOCHASTIC_GRADIENT_DESCENT);
+    } else {
+      builder.setOptimizationAlgo(getOptimizationAlgorithm());
+    }
+    builder.setSeed(rand.nextInt());
 
     // Construct the mlp configuration
-    ListBuilder ip = m_builder.list(getLayers());
+    ListBuilder ip = builder.list(getLayers());
     int numInputAttributes = getDataSetIterator().getNumAttributes(data);
 
     // Connect up the layers appropriately
@@ -381,7 +433,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
       / getDataSetIterator().getTrainBatchSize()));
 
     // if the log file doesn't point to a directory, set up the listener
-    if (!getLogFile().isDirectory()) {
+    if (getLogFile() != null && !getLogFile().isDirectory()) {
       int numMiniBatches =
         (int) Math.ceil(((double) data.numInstances())
           / ((double) getDataSetIterator().getTrainBatchSize()));
@@ -454,16 +506,9 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   @Override
   public String toString() {
 
-    if (m_model != null) {
-      return m_model.conf().toYaml();
+    if (m_replaceMissing != null) {
+      return m_model.getLayerWiseConfigurations().toYaml();
     }
     return null;
   }
-
-  /** Making a serializable version of the builder for configuring the network. */
-  public static class Builder extends
-    org.deeplearning4j.nn.conf.NeuralNetConfiguration.Builder implements
-    Serializable {
-  }
-
 }
