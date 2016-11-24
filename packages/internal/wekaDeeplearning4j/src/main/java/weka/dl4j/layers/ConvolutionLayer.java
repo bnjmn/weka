@@ -24,6 +24,7 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Map;
 
+import org.deeplearning4j.nn.conf.ConvolutionMode;
 import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
@@ -75,7 +76,7 @@ public class ConvolutionLayer extends org.deeplearning4j.nn.conf.layers.Convolut
 		setAdamVarDecay(0.999);
 		setEpsilon(1e-6);
 		setRmsDecay(0.95);
-		setConvolutionType(Convolution.Type.VALID);
+		setConvolutionMode(ConvolutionMode.Truncate);
 		setKernelSize(new int[] {5, 5});
 		setStride(new int[] {1, 1});
 		setPadding(new int[] {0, 0});
@@ -374,15 +375,15 @@ public class ConvolutionLayer extends org.deeplearning4j.nn.conf.layers.Convolut
 	}
 
 	@OptionMetadata(
-					displayName = "convolution type",
-					description = "The type of convolution (default = valid).",
-					commandLineParamName = "type", commandLineParamSynopsis = "-type <string>",
+					displayName = "convolution mode",
+					description = "The convolution mode (default = Truncate).",
+					commandLineParamName = "mode", commandLineParamSynopsis = "-mode <string>",
 					displayOrder = 26)
-	public Convolution.Type getConvolutionType() {
-		return this.convolutionType;
+	public ConvolutionMode getConvolutionMode() {
+		return this.convolutionMode;
 	}
-	public void setConvolutionType(Convolution.Type convolutionType) {
-		this.convolutionType = convolutionType;
+	public void setConvolutionMode(ConvolutionMode convolutionMode) {
+		this.convolutionMode = convolutionMode;
 	}
 
 	@OptionMetadata(

@@ -21,7 +21,7 @@
 
 package weka.dl4j.distribution;
 
-import com.fasterxml.jackson.annotation.JsonTypeName;
+import org.nd4j.shade.jackson.annotation.JsonTypeName;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.OptionMetadata;

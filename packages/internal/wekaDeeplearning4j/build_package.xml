@@ -192,14 +192,14 @@
          <include name="*.zip"/>
          <exclude name="weka.jar"/>
          <exclude name="pdm*.jar"/>
-	 <exclude name="nd4j-api-0.6.0.jar"/>
-	 <exclude name="deeplearning4j-nn-0.6.0.jar"/>
+	 <exclude name="nd4j-api-0.7.0.jar"/>
+	 <exclude name="deeplearning4j-nn-0.7.0.jar"/>
        </fileset>
     </copy>
     <copy todir="${dist}/${package}" >
        <fileset dir="${lib}">
-	 <include name="nd4j-api-0.6.0.jar"/>
-	 <include name="deeplearning4j-nn-0.6.0.jar"/>
+	 <include name="nd4j-api-0.7.0.jar"/>
+	 <include name="deeplearning4j-nn-0.7.0.jar"/>
        </fileset>
     </copy>
     
