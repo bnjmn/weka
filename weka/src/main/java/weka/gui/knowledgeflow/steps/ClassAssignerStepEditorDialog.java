@@ -94,6 +94,7 @@ public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
       createAboutPanel(step);
       add(p, BorderLayout.CENTER);
     } else {
+      m_classCombo = null;
       super.setStepToEdit(step);
     }
   }
@@ -137,9 +138,11 @@ public class ClassAssignerStepEditorDialog extends GOEStepEditorDialog {
    */
   @Override
   public void okPressed() {
-    String selected = m_classCombo.getSelectedItem().toString();
-    selected =
-      selected.substring(selected.indexOf(')') + 1, selected.length()).trim();
-    ((ClassAssigner) getStepToEdit()).setClassColumn(selected);
+    if (m_classCombo != null) {
+      String selected = m_classCombo.getSelectedItem().toString();
+      selected =
+        selected.substring(selected.indexOf(')') + 1, selected.length()).trim();
+      ((ClassAssigner) getStepToEdit()).setClassColumn(selected);
+    }
   }
 }

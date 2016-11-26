@@ -527,7 +527,7 @@ public class Filter extends WekaAlgorithmWrapper {
     if (incomingStructure != null) {
       try {
         weka.filters.Filter tempFilter =
-          weka.filters.Filter.makeCopy(m_filterTemplate);
+          weka.filters.Filter.makeCopy(getFilter());
         if (tempFilter.setInputFormat(incomingStructure)) {
           return tempFilter.getOutputFormat();
         }
