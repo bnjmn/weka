@@ -226,8 +226,8 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
             String libName = lib.trim().replace("\\", "/");
             if (!nativeLibInstalled(libName.substring(
               libName.lastIndexOf("/") + 1, libName.length()))) {
-              libsToInstall.add(libName.substring(
-                libName.lastIndexOf("/") + 1, libName.length()));
+              libsToInstall.add(libName.substring(libName.lastIndexOf("/") + 1,
+                libName.length()));
             }
           }
 
@@ -484,11 +484,16 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
 
     if (result == null) {
       // try only top-level jars of all other known packages
-      result = m_classloaderRepo.findClass(name);
+      try {
+        result = m_classloaderRepo.findClass(name);
+      } catch (ClassNotFoundException ex) {
+        //
+      }
     }
 
     if (result == null) {
-      throw new ClassNotFoundException("Unable to find class: " + name);
+      throw new ClassNotFoundException("[" + toString()
+        + "] Unable to find class: " + name);
     }
     return result;
   }
@@ -548,15 +553,35 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
   @Override
   public Enumeration<URL> getResources(String name) throws IOException {
     Enumeration<URL> result = null;
-    try {
-      result = super.getResources(name);
-    } catch (IOException ex) {
+    java.util.ServiceLoader l;
+    result = super.getResources(name);
+
+    if (result == null || !result.hasMoreElements()) {
       for (String packageName : m_packageDependencies) {
         result = m_classloaderRepo.findResources(packageName, name);
-        if (result != null) {
+        if (result != null && result.hasMoreElements()) {
           break;
         }
       }
+    }
+
+    if (result == null || !result.hasMoreElements()) {
+      if (m_debug) {
+        System.out.println("Trying parent classloader ("
+          + m_classloaderRepo.getClass().getClassLoader() + ") for resources '"
+          + name + "'");
+      }
+
+      result = m_classloaderRepo.getClass().getClassLoader().getResources(name);
+      if ((result == null || !result.hasMoreElements()) && m_debug) {
+        System.out.println("Failed...");
+      }
+    }
+
+    if (m_debug) {
+      System.out.println(m_packageName
+        + " classloader searching for resources " + name
+        + (result != null ? " - found" : " - not found"));
     }
 
     return result;

@@ -592,7 +592,7 @@ public class WekaPackageClassLoaderManager {
       getPackageClassLoader(packageName);
 
     if (toTry != null) {
-      result = toTry.findResource(name);
+      result = toTry.getResource(name);
     }
 
     return result;
@@ -614,7 +614,7 @@ public class WekaPackageClassLoaderManager {
 
     if (toTry != null) {
       try {
-        result = toTry.findResources(name);
+        result = toTry.getResources(name);
       } catch (IOException ex) {
         // ignore here
       }
