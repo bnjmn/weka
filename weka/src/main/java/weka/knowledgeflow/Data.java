@@ -125,6 +125,9 @@ public class Data implements Serializable {
    */
   public void setConnectionName(String name) {
     m_connectionName = name;
+    if (StepManagerImpl.connectionIsIncremental(this)) {
+      setPayloadElement(StepManager.CON_AUX_DATA_IS_INCREMENTAL, true);
+    }
   }
 
   /**
