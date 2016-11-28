@@ -1,0 +1,52 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=wekaDeeplearning4jCPU
+
+# Version (required)
+Version=1.1.2
+
+#Date
+Date=2016-11-25
+
+# Title (required)
+Title=Weka wrappers for Deeplearning4j
+
+Category=Classification/Regression
+
+# Author (required)
+Author=Christopher Beckham, Eibe Frank and Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library.
+
+Changes=Splitting package into a core package, CPU-related libs package and GPU-related libs package
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jCPU1.1.2.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.9.1-SNAPSHOT), wekaDeeplearning4jCore (>=1.1.2), wekaDeeplearning4jCPULibs (>=1.0.0)
+
+# Package(s) that can't be installed alongside this one (old wekaDeepLearning4j)
+Precludes=wekaDeeplearning4j,wekaDeeplearning4jGPU
+
+#Inject these dependencies at load time
+InjectDependencies=wekaDeeplearning4jCore:wekaDeeplearning4jCPULibs

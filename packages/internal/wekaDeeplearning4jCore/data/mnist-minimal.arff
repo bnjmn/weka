@@ -1,0 +1,14 @@
+@relation mnist.meta.minimal
+@attribute filename string
+@attribute class {0,1,2,3,4,5,6,7,8,9}
+@data
+1020_c3.gif.png,3
+1002_c2.gif.png,2
+1003_c5.gif.png,5
+1005_c9.gif.png,9
+1007_c8.gif.png,8
+1008_c1.gif.png,1
+1009_c0.gif.png,0
+1012_c7.gif.png,7
+1014_c6.gif.png,6
+1015_c4.gif.png,4

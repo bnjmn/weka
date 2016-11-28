@@ -1,0 +1,8 @@
+org.deeplearning4j.nn.conf.layers.Layer=weka.gui.GenericObjectEditor
+org.deeplearning4j.nn.conf.layers.Layer[]=weka.gui.GenericArrayEditor
+
+org.deeplearning4j.nn.conf.distribution.Distribution=weka.gui.GenericObjectEditor
+
+org.nd4j.linalg.lossfunctions.ILossFunction=weka.gui.GenericObjectEditor
+
+weka.dl4j.iterators.AbstractDataSetIterator=weka.gui.GenericObjectEditor

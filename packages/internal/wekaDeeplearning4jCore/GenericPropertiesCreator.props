@@ -1,0 +1,11 @@
+org.deeplearning4j.nn.conf.layers.Layer =\
+ weka.dl4j.layers
+
+org.deeplearning4j.nn.conf.distribution.Distribution =\
+ weka.dl4j.distribution
+
+org.nd4j.linalg.lossfunctions.ILossFunction =\
+ org.nd4j.linalg.lossfunctions.impl
+
+weka.dl4j.iterators.AbstractDataSetIterator =\
+ weka.dl4j.iterators
