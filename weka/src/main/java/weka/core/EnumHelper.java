@@ -110,7 +110,7 @@ public class EnumHelper {
    */
   public static Object valueFromString(String enmumClass, String enumValue)
     throws Exception {
-    Class<?> eClazz = Class.forName(enmumClass);
+    Class<?> eClazz = WekaPackageClassLoaderManager.forName(enmumClass);
     Method valuesM = eClazz.getMethod("values");
 
     Enum[] values = (Enum[]) valuesM.invoke(null);

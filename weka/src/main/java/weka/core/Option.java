@@ -506,6 +506,11 @@ public class Option implements RevisionHandler {
                     + "does not match any of the legal IDs or strings "
                     + "for it.");
                 }
+              } else if (value instanceof Enum) {
+                EnumHelper helper = new EnumHelper((Enum) value);
+                valueToSet =
+                  EnumHelper
+                    .valueFromString(helper.getEnumClass(), optionValue);
               } else if (value instanceof OptionHandler) {
                 valueToSet = constructOptionHandlerValue(optionValue);
               } else if (value instanceof Number) {
