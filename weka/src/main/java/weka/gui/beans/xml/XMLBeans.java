@@ -45,6 +45,7 @@ import org.w3c.dom.NodeList;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.converters.ConverterUtils;
 import weka.core.xml.XMLBasicSerialization;
 import weka.core.xml.XMLDocument;
@@ -437,11 +438,11 @@ public class XMLBeans extends XMLBasicSerialization {
     classnames = ConverterUtils.getFileLoaders();
     for (i = 0; i < classnames.size(); i++) {
       m_CustomMethods
-        .register(this, Class.forName(classnames.get(i)), "Loader");
+        .register(this, WekaPackageClassLoaderManager.forName(classnames.get(i)), "Loader");
     }
     classnames = ConverterUtils.getFileSavers();
     for (i = 0; i < classnames.size(); i++) {
-      m_CustomMethods.register(this, Class.forName(classnames.get(i)), "Saver");
+      m_CustomMethods.register(this, WekaPackageClassLoaderManager.forName(classnames.get(i)), "Saver");
     }
 
     // other variables

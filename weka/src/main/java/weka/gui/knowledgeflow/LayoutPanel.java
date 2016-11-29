@@ -24,6 +24,7 @@ package weka.gui.knowledgeflow;
 import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.WekaException;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.converters.FileSourcedConverter;
 import weka.gui.Perspective;
 import weka.gui.knowledgeflow.VisibleLayout.LayoutOperation;
@@ -34,16 +35,32 @@ import weka.knowledgeflow.StepManagerImpl;
 import weka.knowledgeflow.steps.Loader;
 import weka.knowledgeflow.steps.Note;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import java.awt.BasicStroke;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Cursor;
 import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Menu;
+import java.awt.MenuItem;
+import java.awt.Point;
+import java.awt.PopupMenu;
+import java.awt.RenderingHints;
+import java.awt.Stroke;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionAdapter;
-import java.beans.Beans;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -270,7 +287,9 @@ public class LayoutPanel extends PrintablePanel {
             v.setDisplayConnectors(false);
           }
 
-          if (step != null) {
+          if (step != null
+            && step.getStepManager() != m_visLayout.getEditStep()
+              .getStepManager()) {
             // connection is valid because only valid connections will
             // have appeared in the contextual popup
 
@@ -1160,8 +1179,10 @@ public class LayoutPanel extends PrintablePanel {
     String viewerClassName, StepInteractiveViewer viewerImpl) {
     try {
       Object viewer =
-        viewerClassName != null ? Beans.instantiate(this.getClass()
-          .getClassLoader(), viewerClassName) : viewerImpl;
+        viewerClassName != null ? WekaPackageClassLoaderManager
+          .objectForName(viewerClassName) : viewerImpl;
+      // viewerClassName != null ? Beans.instantiate(this.getClass()
+      // .getClassLoader(), viewerClassName) : viewerImpl;
       if (!(viewer instanceof StepInteractiveViewer)) {
         throw new WekaException("Interactive step viewer component "
           + viewerClassName + " must implement StepInteractiveViewer");
@@ -1204,8 +1225,8 @@ public class LayoutPanel extends PrintablePanel {
     StepEditorDialog toPopup = null;
     if (custEditor != null && custEditor.length() > 0) {
       try {
-        Object custPanel =
-          Beans.instantiate(getClass().getClassLoader(), custEditor);
+        Object custPanel = WekaPackageClassLoaderManager.objectForName(custEditor);
+          // Beans.instantiate(getClass().getClassLoader(), custEditor);
 
         if (!(custPanel instanceof StepEditorDialog)) {
           throw new WekaException(

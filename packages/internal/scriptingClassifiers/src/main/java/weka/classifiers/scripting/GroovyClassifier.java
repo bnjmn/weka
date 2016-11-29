@@ -294,9 +294,9 @@ public class GroovyClassifier extends AbstractClassifier {
    */
   @Override
   public void buildClassifier(Instances instances) throws Exception {
-    if (!Groovy.isPresent()) {
-      throw new Exception("Groovy classes not in CLASSPATH!");
-    }
+      //    if (!Groovy.isPresent()) {
+      //      throw new Exception("Groovy classes not in CLASSPATH!");
+      //    }
 
     // try loading the module
     initGroovyObject();

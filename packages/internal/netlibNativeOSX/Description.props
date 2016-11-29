@@ -1,0 +1,55 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=netlibNativeOSX
+
+# Version (required)
+Version=1.0.1
+
+#Date
+Date=2016-10-27
+
+# Title (required)
+Title=netlib-java wrappers and native libraries for BLAS, LAPACK and ARPACK under OS X
+
+Category=Linear Algebra
+
+# Author (required)
+Author=The Weka team
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=This package is a library-only package specific for Mac OS X. It provides native libraries for linear algebra, including both a reference and system-tuned version. After installing this package, several Weka schemes (such as linear regression and PCA) will use the native libraries for matrix operations.
+
+Changes=Now includes entries entries in this description file for use in a child classloader
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/netlibNativeOSX1.0.1.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/netlibNativeOSX
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+Precludes=netlibNativeWindows,netlibNativeLinux
+
+# Jar files containing native libraries (; separated list of jar/zip:lib-path,lib-path,...)
+NativeLibs=lib/netlib-native_ref-osx-x86_64-1.1-natives.jar:netlib-native_ref-osx-x86_64.jnilib;lib/netlib-native_system-osx-x86_64-1.1-natives.jar:netlib-native_system-osx-x86_64.jnilib
+
+# Classes needed for loading/finding native libraries (get injected into the root or weka.jar-level classloader). k separated list of
+# [root|]jar/zip:fully qualified class,fully qualified class,...
+InjectLoader=root|lib/jniloader-1.1.jar;root|lib/native_ref-java-1.1.jar;root|lib/native_system-java-1.1.jar
+
+# Dependencies
+Depends=weka (>=3.8.0)

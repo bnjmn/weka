@@ -351,6 +351,7 @@ public class DataNearBalancedND extends RandomizableSingleClassifierEnhancer
     filter.setNumeric(false);
     filter.setInputFormat(data);
     m_FilteredClassifier = new FilteredClassifier();
+    m_FilteredClassifier.setDoNotCheckForModifiedClassAttribute(true);
     if (data.numInstances() > 0) {
       m_FilteredClassifier.setClassifier(AbstractClassifier.makeCopies(
         classifier, 1)[0]);

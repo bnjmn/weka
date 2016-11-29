@@ -384,9 +384,9 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
             + " [label=\"");
           if (m_Info.attribute(m_Attribute).isNumeric()) {
             if (i == 0) {
-              text.append(" < " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" < " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             } else {
-              text.append(" >= " + Utils.doubleToString(m_SplitPoint, 2));
+              text.append(" >= " + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
             }
           } else {
             text.append(" = "
@@ -417,19 +417,19 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
           classMean = m_ClassProbs[0];
         }
         StringBuffer buffer = new StringBuffer();
-        buffer.append(" : " + Utils.doubleToString(classMean, 2));
+        buffer.append(" : " + Utils.doubleToString(classMean, getNumDecimalPlaces()));
         double avgError = 0;
         if (m_Distribution[1] > 0) {
           avgError = m_Distribution[0] / m_Distribution[1];
         }
-        buffer.append(" (" + Utils.doubleToString(m_Distribution[1], 2) + "/"
-          + Utils.doubleToString(avgError, 2) + ")");
+        buffer.append(" (" + Utils.doubleToString(m_Distribution[1], getNumDecimalPlaces()) + "/"
+          + Utils.doubleToString(avgError, getNumDecimalPlaces()) + ")");
         avgError = 0;
         if (m_HoldOutDist[0] > 0) {
           avgError = m_HoldOutError / m_HoldOutDist[0];
         }
-        buffer.append(" [" + Utils.doubleToString(m_HoldOutDist[0], 2) + "/"
-          + Utils.doubleToString(avgError, 2) + "]");
+        buffer.append(" [" + Utils.doubleToString(m_HoldOutDist[0], getNumDecimalPlaces()) + "/"
+          + Utils.doubleToString(avgError, getNumDecimalPlaces()) + "]");
         return buffer.toString();
       } else {
         int maxIndex;
@@ -441,16 +441,16 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
         return " : "
           + m_Info.classAttribute().value(maxIndex)
           + " ("
-          + Utils.doubleToString(Utils.sum(m_Distribution), 2)
+          + Utils.doubleToString(Utils.sum(m_Distribution), getNumDecimalPlaces())
           + "/"
           + Utils.doubleToString(
-            (Utils.sum(m_Distribution) - m_Distribution[maxIndex]), 2)
+            (Utils.sum(m_Distribution) - m_Distribution[maxIndex]), getNumDecimalPlaces())
           + ")"
           + " ["
-          + Utils.doubleToString(Utils.sum(m_HoldOutDist), 2)
+          + Utils.doubleToString(Utils.sum(m_HoldOutDist), getNumDecimalPlaces())
           + "/"
           + Utils.doubleToString(
-            (Utils.sum(m_HoldOutDist) - m_HoldOutDist[maxIndex]), 2) + "]";
+            (Utils.sum(m_HoldOutDist) - m_HoldOutDist[maxIndex]), getNumDecimalPlaces()) + "]";
       }
     }
 
@@ -490,14 +490,14 @@ public class REPTree extends AbstractClassifier implements OptionHandler,
             text.append("|   ");
           }
           text.append(m_Info.attribute(m_Attribute).name() + " < "
-            + Utils.doubleToString(m_SplitPoint, 2));
+            + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
           text.append(m_Successors[0].toString(level + 1, this));
           text.append("\n");
           for (int j = 0; j < level; j++) {
             text.append("|   ");
           }
           text.append(m_Info.attribute(m_Attribute).name() + " >= "
-            + Utils.doubleToString(m_SplitPoint, 2));
+            + Utils.doubleToString(m_SplitPoint, getNumDecimalPlaces()));
           text.append(m_Successors[1].toString(level + 1, this));
         }
 

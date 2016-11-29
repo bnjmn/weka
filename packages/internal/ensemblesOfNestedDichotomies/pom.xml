@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>ensemblesOfNestedDichotomies</artifactId>
-  <version>1.0.4-SNAPSHOT</version>
+  <version>1.0.6-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>ensemblesOfNestedDichotomies</name>
@@ -102,13 +102,13 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.1,)</version>
+      <version>[3.8.0,)</version>
     </dependency>
 
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.1,)</version>
+      <version>[3.8.0,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

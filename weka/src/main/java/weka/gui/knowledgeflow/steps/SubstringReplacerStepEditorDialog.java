@@ -21,12 +21,11 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import weka.gui.EnvironmentField;
+import weka.gui.JListHelper;
+import weka.gui.beans.SubstringReplacerRules;
+import weka.gui.knowledgeflow.StepEditorDialog;
+import weka.knowledgeflow.steps.SubstringReplacer;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -39,12 +38,12 @@ import javax.swing.JScrollPane;
 import javax.swing.SwingConstants;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-
-import weka.gui.EnvironmentField;
-import weka.gui.JListHelper;
-import weka.gui.beans.SubstringReplacerRules;
-import weka.gui.knowledgeflow.StepEditorDialog;
-import weka.knowledgeflow.steps.SubstringReplacer;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 
 /**
  * Step editor dialog for the SubstringReplacer step
@@ -56,20 +55,43 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = 7804721324137987443L;
 
+  /** Field for specifying the attributes to match on */
   protected EnvironmentField m_attListField;
+
+  /** Field for specifying the string/regex to match */
   protected EnvironmentField m_matchField;
+
+  /** Field for specifying the value to replace a match with */
   protected EnvironmentField m_replaceField;
+
+  /** Checkbox to specify that the match is a regex */
   protected JCheckBox m_regexCheck = new JCheckBox();
+
+  /** Checkbox for specifying that case should be ignored when matching */
   protected JCheckBox m_ignoreCaseCheck = new JCheckBox();
+
+  /** Holds the list of match rules */
   protected JList<SubstringReplacerRules.SubstringReplacerMatchRule> m_list =
     new JList<SubstringReplacerRules.SubstringReplacerMatchRule>();
+
+  /** List model */
   protected DefaultListModel<SubstringReplacerRules.SubstringReplacerMatchRule> m_listModel;
 
+  /** Button for adding a new match rule */
   protected JButton m_newBut = new JButton("New");
+
+  /** Button for deleting a match rule */
   protected JButton m_deleteBut = new JButton("Delete");
+
+  /** Button for moving a match rule up in the list */
   protected JButton m_upBut = new JButton("Move up");
+
+  /** Button for moving a match rule down in the list */
   protected JButton m_downBut = new JButton("Move down");
 
+  /**
+   * Initialize the editor
+   */
   protected void initialize() {
     String mrString =
       ((SubstringReplacer) getStepToEdit()).getMatchReplaceDetails();
@@ -93,6 +115,9 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
     }
   }
 
+  /**
+   * Layout the editor dialog
+   */
   @Override
   protected void layoutEditor() {
     initialize();
@@ -124,7 +149,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
     fieldHolder.add(replaceP);
     controlHolder.add(fieldHolder, BorderLayout.NORTH);
 
-    JPanel checkHolder = new JPanel();
+    final JPanel checkHolder = new JPanel();
     checkHolder.setLayout(new GridLayout(0, 2));
     JLabel regexLab =
       new JLabel("Match using a regular expression", SwingConstants.RIGHT);
@@ -206,6 +231,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
           if (!m_deleteBut.isEnabled()) {
             m_deleteBut.setEnabled(true);
           }
+          checkUpDown();
 
           Object entry = m_list.getSelectedValue();
           if (entry != null) {
@@ -247,6 +273,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
         }
 
         m_list.setSelectedIndex(m_listModel.size() - 1);
+        checkUpDown();
       }
     });
 
@@ -256,6 +283,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
         int selected = m_list.getSelectedIndex();
         if (selected >= 0) {
           m_listModel.removeElementAt(selected);
+          checkUpDown();
 
           if (m_listModel.size() <= 1) {
             m_upBut.setEnabled(false);
@@ -269,6 +297,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveUp(m_list);
+        checkUpDown();
       }
     });
 
@@ -276,6 +305,7 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
       @Override
       public void actionPerformed(ActionEvent e) {
         JListHelper.moveDown(m_list);
+        checkUpDown();
       }
     });
 
@@ -304,6 +334,20 @@ public class SubstringReplacerStepEditorDialog extends StepEditorDialog {
     });
   }
 
+  /**
+   * Set the enabled state of the up and down buttons based on the currently
+   * selected row in the table
+   */
+  protected void checkUpDown() {
+    if (m_list.getSelectedValue() != null && m_listModel.size() > 1) {
+      m_upBut.setEnabled(m_list.getSelectedIndex() > 0);
+      m_downBut.setEnabled(m_list.getSelectedIndex() < m_listModel.size() - 1);
+    }
+  }
+
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   protected void okPressed() {
     StringBuilder buff = new StringBuilder();

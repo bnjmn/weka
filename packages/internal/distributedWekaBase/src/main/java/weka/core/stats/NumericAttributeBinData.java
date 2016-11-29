@@ -21,12 +21,12 @@
 
 package weka.core.stats;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import weka.core.Aggregateable;
 import weka.core.Attribute;
 import weka.core.Utils;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Class for managing bin data for a histogram based on an attribute
@@ -38,7 +38,7 @@ public class NumericAttributeBinData implements
   Aggregateable<NumericAttributeBinData> {
 
   /** Maximum bins to create */
-  public static final int MAX_BINS = 15;
+  public static final int MAX_BINS = 10;
 
   /** The name of the attribute */
   protected String m_attName;
@@ -104,14 +104,95 @@ public class NumericAttributeBinData implements
    *          cutpoints based on range and overall count) or -1 to use the
    *          default max.
    */
-  public NumericAttributeBinData(String attName, double numPoints,
-    double min, double max, double stdDev, double missingFreq, int maxBins) {
+  public NumericAttributeBinData(String attName, double numPoints, double min,
+    double max, double stdDev, double missingFreq, int maxBins) {
     setup(attName, numPoints, min, max, stdDev, missingFreq, null, null,
       maxBins);
   }
 
   /**
-   * Set up histogram
+   * Constructor
+   * 
+   * @param attName the name of the attribute
+   * @param numPoints the number of points that have been seen for this
+   *          attribute
+   * @param min the minimum value
+   * @param max the maximum value
+   * @param stdDev the standard deviation
+   * @param missingFreq the number of missing values
+   * @param lowerPercentile the lower percentile to use for the equal width
+   *          binning
+   * @param upperPercentile the upper percentile to use for hte equal width
+   *          binning
+   * @param maxBins the maximum number of bins to use
+   */
+  public NumericAttributeBinData(String attName, double numPoints, double min,
+    double max, double stdDev, double missingFreq, double lowerPercentile,
+    double upperPercentile, int maxBins) {
+
+    if (upperPercentile - lowerPercentile > 0) {
+      setupWithPercentiles(attName, numPoints, min, max, stdDev, missingFreq,
+        lowerPercentile, upperPercentile, maxBins);
+    } else {
+      setup(attName, numPoints, min, max, stdDev, missingFreq, null, null,
+        maxBins);
+    }
+  }
+
+  /**
+   * Set up histogram using upper and lower bound percentiles
+   *
+   * @param attName the name of the attribute
+   * @param numPoints the number of points seen
+   * @param min the minimum
+   * @param max the maximum
+   * @param stdDev the standard deviation
+   * @param missingFreq the number of missing values
+   * @param lowPercentile the lower bound percentile to use
+   * @param highPercentile the upper bound percentile to use
+   * @param maxBins the maximum number of bins to allow (if setting bin
+   *          cutpoints based on range and overall count) or -1 to use the
+   *          default max.
+   */
+  protected void setupWithPercentiles(String attName, double numPoints,
+    double min, double max, double stdDev, double missingFreq,
+    double lowPercentile, double highPercentile, int maxBins) {
+
+    m_missingFreq = missingFreq;
+
+    // number of bins for the region where 90% of the data resides
+    // reserve a bin each for low and high outliers
+    double adjustedNumPoints = (highPercentile - lowPercentile) * numPoints;
+    int numBins =
+      // numPoints > 0 ? (maxBins > 0 ? maxBins - 2 : MAX_BINS - 2)
+      // : 0;
+      numPoints > 0 ? numBinsHeuristic(stdDev, adjustedNumPoints,
+        lowPercentile, highPercentile, maxBins > 0 ? maxBins - 2 : MAX_BINS - 2)
+        : 0;
+
+    m_binCutpoints = new double[numBins + 2];
+    m_binFreqs = new double[numBins + 2];
+
+    m_binCutpoints[0] = lowPercentile;
+    m_binCutpoints[m_binCutpoints.length - 1] = max;
+    double step = 0;
+    if (numBins > 0) {
+      double range = highPercentile - lowPercentile;
+      step = range / numBins;
+
+      for (int i = 1; i <= numBins; i++) {
+        m_binCutpoints[i] = lowPercentile + (i * step);
+      }
+    }
+
+    m_numBins = numBins + 2;
+
+    // width of the bins that lie between 10th and 90th percentile
+    m_binWidth = step;
+  }
+
+  /**
+   * Set up histogram using equal width between min and max
    * 
    * @param attName the name of the attribute
    * @param numPoints the number of points seen
@@ -133,9 +214,8 @@ public class NumericAttributeBinData implements
 
     if (binLabels == null && binFreqs == null) {
       int numBins =
-        numPoints > 0 ?
-          numBinsHeuristic(stdDev, numPoints, min, max, maxBins > 0 ? maxBins
-            : MAX_BINS) : 0;
+        numPoints > 0 ? numBinsHeuristic(stdDev, numPoints, min, max,
+          maxBins > 0 ? maxBins : MAX_BINS) : 0;
 
       m_binCutpoints = new double[numBins];
       m_binFreqs = new double[numBins];

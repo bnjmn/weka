@@ -610,6 +610,24 @@ public class ItemSet implements Serializable, RevisionHandler {
   }
 
   /**
+   * Get the item array
+   *
+   * @return the item array
+   */
+  public int[] getItems() {
+    return m_items;
+  }
+
+  /**
+   * Get the total number of transactions
+   *
+   * @return the total number of transactions
+   */
+  public int getTotalTransactions() {
+    return m_totalTransactions;
+  }
+
+  /**
    * Returns the revision string.
    * 
    * @return the revision

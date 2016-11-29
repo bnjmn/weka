@@ -26,31 +26,25 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SpecialFunctions;
-import weka.core.Statistics;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
+import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
+import weka.filters.unsupervised.attribute.Discretize;
 
 /**
  * <!-- globalinfo-start -->
- * Reweights the instances in the data so that each class has the same total weight. The total sum of weights accross all instances will be maintained. Only the weights in the first batch of data received by this filter are changed, so it can be used with the FilteredClassifier.
+ * Reweights the instances in the data so that each class has the same total weight. The total sum of weights accross all instances will be maintained. Only the weights in the first batch of data received by this filter are changed, so it can be used with the FilteredClassifier. If the class is numeric, it is discretized using equal-width discretization to establish pseudo classes for weighting.
  * <p/>
  * <!-- globalinfo-end -->
  * 
  * <!-- options-start -->
  * Valid options are: <p/>
- * 
+ *
+ * <pre> -num-intervals &lt;positive integer&gt;
+ *  The number of discretization intervals to use when the class is numeric (default of weka.attribute.unsupervised.Discretize).</pre>
+ *
  * <pre> -output-debug-info
  *  If set, filter is run in debug mode and
  *  may output additional info to the console</pre>
@@ -69,6 +63,30 @@ public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter
   /** for serialization */
   static final long serialVersionUID = 6237337831221353842L;
 
+  /** number of discretization intervals to use if the class is numeric */
+  protected int m_NumIntervals = 10;
+
+  /**
+   * Gets the number of discretization intervals to use when the class is numeric.
+   *
+   * @return the number of discretization intervals
+   */
+  @OptionMetadata(
+          displayName = "Number of discretization intervals",
+          description = "The number of discretization intervals to use when the class is numeric.",
+          displayOrder = 1,
+          commandLineParamName = "num-intervals",
+          commandLineParamSynopsis = "-num-intervals <int>",
+          commandLineParamIsFlag = false)
+  public int getNumIntervals() { return m_NumIntervals; }
+
+  /**
+   * Sets the number of discretization intervals to use.
+   *
+   * @param num the number of discretization intervals to use.
+   */
+  public void setNumIntervals(int num) { m_NumIntervals = num; }
+
   /**
    * Returns a string describing this filter.
    * 
@@ -78,9 +96,10 @@ public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter
   @Override
   public String globalInfo() {
     return "Reweights the instances in the data so that each class has the same total "
-      + "weight. The total sum of weights accross all instances will be maintained. Only "
-      + "the weights in the first batch of data received by this filter are changed, so "
-      + "it can be used with the FilteredClassifier.";
+            + "weight. The total sum of weights across all instances will be maintained. Only "
+            + "the weights in the first batch of data received by this filter are changed, so "
+            + "it can be used with the FilteredClassifier. If the class is numeric, the class is "
+            + "discretized using equal-width discretization to establish pseudo classes for weighting.";
   }
 
   /**
@@ -133,23 +152,31 @@ public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter
       return new Instances(instances);
     }
 
-    // Generate the output and return it
-    Instances result = new Instances(instances, instances.numInstances());
-    double[] sumOfWeightsPerClass = new double[instances.numClasses()];
-    for (int i = 0; i < instances.numInstances(); i++) {
-      Instance inst = instances.instance(i);
+    Instances dataToUseForMakingWeights = instances;
+    if (instances.classAttribute().isNumeric()) {
+      Discretize discretizer = new Discretize();
+      discretizer.setBins(m_NumIntervals);
+      discretizer.setIgnoreClass(true);
+      int[] indices = new int[] {instances.classIndex()};
+      discretizer.setAttributeIndicesArray(indices);
+      discretizer.setInputFormat(instances);
+      dataToUseForMakingWeights = Filter.useFilter(instances, discretizer);
+    }
+
+    // Calculate the sum of weights per class and in total
+    double[] sumOfWeightsPerClass = new double[dataToUseForMakingWeights.numClasses()];
+    for (int i = 0; i < dataToUseForMakingWeights.numInstances(); i++) {
+      Instance inst = dataToUseForMakingWeights.instance(i);
       sumOfWeightsPerClass[(int)inst.classValue()] += inst.weight();
     }
     double sumOfWeights = Utils.sum(sumOfWeightsPerClass);
 
-    // Rescale weights
-    double factor = sumOfWeights / (double)instances.numClasses();
-    for (int i = 0; i < instances.numInstances(); i++) {
-      result.add(instances.instance(i)); // This will make a copy
-      Instance newInst = result.instance(i);
-      copyValues(newInst, false, instances, outputFormatPeek());
-      newInst.setWeight(factor * newInst.weight() / 
-                        sumOfWeightsPerClass[(int)newInst.classValue()]);
+    // Copy data and rescale weights
+    Instances result = new Instances(instances);
+    double factor = sumOfWeights / (double)dataToUseForMakingWeights.numClasses();
+    for (int i = 0; i < result.numInstances(); i++) {
+       result.instance(i).setWeight(factor * result.instance(i).weight() /
+                         sumOfWeightsPerClass[(int)dataToUseForMakingWeights.instance(i).classValue()]);
     }
     return result;
   }

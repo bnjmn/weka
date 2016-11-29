@@ -21,13 +21,7 @@
 
 package weka.classifiers.functions;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.Random;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -354,7 +348,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<Double>> results = new HashSet<Future<Double>>();
+    ArrayList<Future<Double>> results = new ArrayList<Future<Double>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
@@ -427,7 +421,7 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<double[]>> results = new HashSet<Future<double[]>>();
+    ArrayList<Future<double[]>> results = new ArrayList<Future<double[]>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
@@ -1068,16 +1062,18 @@ public abstract class MLPModel extends RandomizableClassifier implements Weighte
     Collections.addAll(options, super.getOptions());
 
     options.add("-L");
-    options.add("" + getLossFunction().getClass().getName());
+    String lossSpec = "" + getLossFunction().getClass().getName();
     if (getLossFunction() instanceof OptionHandler) {
-      options.add(" " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions()));
+	lossSpec += " " + Utils.joinOptions(((OptionHandler)getLossFunction()).getOptions());
     }
+    options.add(lossSpec);
 
     options.add("-A");
-    options.add("" + getActivationFunction().getClass().getName());
+    String activSpec = "" + getActivationFunction().getClass().getName();
     if (getActivationFunction() instanceof OptionHandler) {
-      options.add(" " + Utils.joinOptions(((OptionHandler)getActivationFunction()).getOptions()));
+	activSpec += " " + Utils.joinOptions(((OptionHandler)getActivationFunction()).getOptions());
     }
+    options.add(activSpec);
 
     return options.toArray(new String[0]);
   }

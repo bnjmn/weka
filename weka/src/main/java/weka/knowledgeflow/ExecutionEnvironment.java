@@ -26,12 +26,14 @@ import weka.core.Environment;
 import weka.core.Settings;
 import weka.core.WekaException;
 import weka.gui.Logger;
+import weka.gui.knowledgeflow.GraphicalEnvironmentCommandHandler;
 
 import java.util.concurrent.Future;
 
 /**
- * Client user interface for an execution environment. Implementations of
- * ExecutionEnvironment need to extend BaseExecutionEnvironment
+ * Client (i.e. from the Step perspective) interface for an execution
+ * environment. Implementations of ExecutionEnvironment need to extend
+ * BaseExecutionEnvironment
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  */
@@ -42,7 +44,7 @@ public interface ExecutionEnvironment {
    *
    * @return a description of this execution environment
    */
-    String getDescription();
+  String getDescription();
 
   /**
    * Get default settings for this ExecutionEnvironment.
@@ -50,77 +52,95 @@ public interface ExecutionEnvironment {
    * @return the default settings for this execution environment, or null if
    *         there are no default settings.
    */
-    Defaults getDefaultSettings();
+  Defaults getDefaultSettings();
 
   /**
    * Set whether this execution environment is headless
    * 
    * @param headless true if the execution environment is headless
    */
-    void setHeadless(boolean headless);
+  void setHeadless(boolean headless);
 
   /**
    * Get whether this execution environment is headless
    * 
    * @return true if this execution environment is headless
    */
-    boolean isHeadless();
+  boolean isHeadless();
+
+  /**
+   * Set the environment for performing commands at the application-level in a
+   * graphical environment.
+   *
+   * @handler the handler to use
+   */
+  void setGraphicalEnvironmentCommandHandler(
+    GraphicalEnvironmentCommandHandler handler);
+
+  /**
+   * Get the environment for performing commands at the application-level in a
+   * graphical environment.
+   * 
+   * @return the graphical environment command handler, or null if running
+   *         headless
+   */
+  GraphicalEnvironmentCommandHandler getGraphicalEnvironmentCommandHandler();
 
   /**
    * Set environment variables for this execution environment
    * 
    * @param env the environment variables to use
    */
-    void setEnvironmentVariables(Environment env);
+  void setEnvironmentVariables(Environment env);
 
   /**
    * Get environment variables for this execution environment
    * 
    * @return the environment variables for this execution environment
    */
-    Environment getEnvironmentVariables();
+  Environment getEnvironmentVariables();
 
   /**
    * Set knowledge flow settings for this execution environment
    *
    * @param settings the settings to use
    */
-    void setSettings(Settings settings);
+  void setSettings(Settings settings);
 
   /**
    * Get knowledge flow settings for this execution environment
    *
    * @return the settings to use
    */
-    Settings getSettings();
+  Settings getSettings();
 
   /**
    * Set the log to use
    * 
    * @param log the log to use
    */
-    void setLog(Logger log);
+  void setLog(Logger log);
 
   /**
    * Get the log in use
    * 
    * @return the log in use
    */
-    Logger getLog();
+  Logger getLog();
 
   /**
    * Set the logging level to use
    *
    * @param level the logging level to use
    */
-    void setLoggingLevel(LoggingLevel level);
+  void setLoggingLevel(LoggingLevel level);
 
   /**
    * Get the logging level in use
    *
    * @return the logging level in use
    */
-    LoggingLevel getLoggingLevel();
+  LoggingLevel getLoggingLevel();
 
   /**
    * Submit a task to be run by the execution environment. Client steps are free
@@ -137,5 +157,5 @@ public interface ExecutionEnvironment {
   /**
    * Step/StepManager can use this to request a stop to all processing
    */
-    void stopProcessing();
+  void stopProcessing();
 }

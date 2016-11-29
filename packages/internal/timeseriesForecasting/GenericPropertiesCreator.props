@@ -1,0 +1,8 @@
+# Customises the list of options given by the GenericObjectEditor
+# for various superclasses.
+#
+# Version: $Revision: 10426 $
+
+# Lists the Classifiers-Packages I want to choose from
+weka.classifiers.Classifier=\
+ weka.classifiers.timeseries

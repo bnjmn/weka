@@ -1182,8 +1182,14 @@ public class BoundaryPlotter extends BaseStep implements DataCollector {
         }
       }
 
-      // average
-      Utils.normalize(sumOfProbsForRegion, sumOfSums);
+      if (sumOfSums > 0) {
+        // average
+        Utils.normalize(sumOfProbsForRegion, sumOfSums);
+      } else {
+        throw new Exception(
+          "Arithmetic underflow. Please increase value of kernel bandwidth " +
+                  "parameter (k).");
+      }
 
       // cache
       double[] tempDist = new double[sumOfProbsForRegion.length];

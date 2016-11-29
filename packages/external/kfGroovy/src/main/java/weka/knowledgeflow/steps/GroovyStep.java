@@ -217,8 +217,15 @@ public class GroovyStep extends BaseStep {
    * @throws Exception if there is a problem during compilation
    */
   public static Step compileScript(String script) throws Exception {
-    GroovyClassLoader gcl = new GroovyClassLoader();
-    Class scriptClass = gcl.parseClass(script);
-    return (Step) scriptClass.newInstance();
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(
+        new GroovyStep().getClass().getClassLoader());
+      GroovyClassLoader gcl = new GroovyClassLoader();
+      Class scriptClass = gcl.parseClass(script);
+      return (Step) scriptClass.newInstance();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
+    }
   }
 }

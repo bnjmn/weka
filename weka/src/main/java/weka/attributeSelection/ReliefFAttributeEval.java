@@ -705,7 +705,9 @@ public class ReliefFAttributeEval extends ASEvaluation implements
       m_classProbs = new double[m_numClasses];
 
       for (int i = 0; i < m_numInstances; i++) {
-        m_classProbs[(int) m_trainInstances.instance(i).value(m_classIndex)]++;
+        if (!m_trainInstances.instance(i).classIsMissing()) {
+          m_classProbs[(int) m_trainInstances.instance(i).value(m_classIndex)]++;
+        }
       }
 
       for (int i = 0; i < m_numClasses; i++) {
@@ -1268,6 +1270,10 @@ public class ReliefFAttributeEval extends ASEvaluation implements
         if (m_numericClass) {
           cl = 0;
         } else {
+          if (m_trainInstances.instance(i).classIsMissing()) {
+            // skip instances with missing class values in the nominal class case
+            continue;
+          }
           cl = (int) m_trainInstances.instance(i).value(m_classIndex);
         }
 

@@ -45,6 +45,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
@@ -1161,7 +1162,8 @@ public class Experiment implements Serializable, OptionHandler, RevisionHandler 
     // binary
     else {
       FileInputStream fi = new FileInputStream(filename);
-      ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(fi));
+      ObjectInputStream oi = SerializationHelper.getObjectInputStream(fi);
+      // ObjectInputStream oi = new ObjectInputStream(new BufferedInputStream(fi));
       result = (Experiment) oi.readObject();
       oi.close();
     }

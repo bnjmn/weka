@@ -323,10 +323,11 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
     if (m_isLeaf)
       return getEstimatedErrorsForDistribution(new Distribution(data));
     else{
-      Distribution savedDist = localModel().m_distribution;
+      Distribution savedDist = localModel().distribution();
       localModel().resetDistribution(data);
       localInstances = (Instances[])localModel().split(data);
-      localModel().m_distribution = savedDist;
+      //localModel().m_distribution = savedDist;
+      localModel().setDistribution(savedDist);
       for (i=0;i<m_sons.length;i++)
 	errors = errors+
 	  son(i).getEstimatedErrorsForBranch(localInstances[i]);
@@ -1200,20 +1201,20 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
 
     int i,j;
 
-    for(i=0;i<m_sons.length;i++) {
+    for(i=0;i<getSons().length;i++) {
        text.append("\n");;
        for(j=0;j<depth;j++)
           text.append("|   ");
-       text.append(m_localModel.leftSide(m_train));
-       text.append(m_localModel.rightSide(i, m_train));
-       if(m_sons[i].m_isLeaf) {
+       text.append(getLocalModel().leftSide(getTrainingData()));
+       text.append(getLocalModel().rightSide(i, getTrainingData()));
+       if(m_sons[i].isLeaf()) {
           text.append(": ");
-          if(m_localModel instanceof GraftSplit)
-             text.append(((GraftSplit)m_localModel).dumpLabelG(i,m_train));
+          if(getLocalModel() instanceof GraftSplit)
+             text.append(((GraftSplit)getLocalModel()).dumpLabelG(i,getTrainingData()));
           else
-             text.append(m_localModel.dumpLabel(i,m_train));
+             text.append(getLocalModel().dumpLabel(i,getTrainingData()));
        } else
-          ((C45PruneableClassifierTreeG)m_sons[i]).dumpTree(depth+1,text);
+          ((C45PruneableClassifierTreeG)getSons()[i]).dumpTree(depth+1,text);
      }
   }
   

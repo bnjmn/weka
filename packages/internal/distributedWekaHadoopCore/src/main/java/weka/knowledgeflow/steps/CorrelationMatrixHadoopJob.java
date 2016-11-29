@@ -79,7 +79,7 @@ public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
       if (!DistributedJobConfig.isEmpty(pcaText)) {
         Data outText = new Data(StepManager.CON_TEXT, pcaText);
         outText.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-          "Spark - PCA analysis");
+          "Hadoop - PCA analysis");
         getStepManager().outputData(outText);
       }
     }
@@ -90,7 +90,7 @@ public class CorrelationMatrixHadoopJob extends AbstractHadoopJob {
     if (heatmap != null) {
       Data outImage = new Data(StepManager.CON_IMAGE, heatmap);
       outImage.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE,
-        "Spark - correlation heat map");
+        "Hadoop - correlation heat map");
       getStepManager().outputData(outImage);
     }
   }

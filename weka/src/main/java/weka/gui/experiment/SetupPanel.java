@@ -21,6 +21,7 @@
 
 package weka.gui.experiment;
 
+import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.experiment.Experiment;
@@ -671,8 +672,9 @@ public class SetupPanel extends AbstractSetupPanel {
       Experiment exp = null;
       if (readExp) {
         FileInputStream fi = new FileInputStream(expFile);
-        ObjectInputStream oi = new ObjectInputStream(
-          new BufferedInputStream(fi));
+        ObjectInputStream oi = SerializationHelper.getObjectInputStream(fi);
+          /* new ObjectInputStream(
+          new BufferedInputStream(fi)); */
         exp = (Experiment) oi.readObject();
         oi.close();
       } else {

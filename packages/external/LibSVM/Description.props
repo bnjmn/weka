@@ -6,10 +6,10 @@
 PackageName=LibSVM
 
 # Version (required)
-Version=1.0.7
+Version=1.0.10
 
 #Date
-Date=2016-01-28
+Date=2016-09-09
 
 # Title (required)
 Title=A wrapper class for the libsvm tools
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description= A wrapper class for the libsvm library, including support for one-class SVMs.
 
-Changes=To be consistent with other SVMs in WEKA, the target attribute is now normalized before SVM regression is performed!
+Changes=Updated Weka dependency to >=3.8.0.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.7.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/LibSVM1.0.10.zip?download
 
 # URL for further information
 URL=https://www.csie.ntu.edu.tw/~cjlin/libsvm/
@@ -40,4 +40,4 @@ URL=https://www.csie.ntu.edu.tw/~cjlin/libsvm/
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.8.0)

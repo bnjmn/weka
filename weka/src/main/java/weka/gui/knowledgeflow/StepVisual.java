@@ -28,6 +28,7 @@ import weka.knowledgeflow.steps.Note;
 import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
@@ -42,6 +43,8 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.beans.Beans;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Map;
 import java.util.Set;
 
@@ -157,11 +160,14 @@ public class StepVisual extends JPanel {
     KFStep stepAnnotation = step.getClass().getAnnotation(KFStep.class);
     if (stepAnnotation != null && stepAnnotation.iconPath() != null
       && stepAnnotation.iconPath().length() > 0) {
-      return loadIcon(stepAnnotation.iconPath());
+      return loadIcon(step.getClass().getClassLoader(),
+        stepAnnotation.iconPath());
     }
 
     if (step instanceof WekaAlgorithmWrapper) {
-      ImageIcon icon = loadIcon(((WekaAlgorithmWrapper) step).getIconPath());
+      ImageIcon icon =
+        loadIcon(((WekaAlgorithmWrapper) step).getWrappedAlgorithm().getClass().getClassLoader(),
+          ((WekaAlgorithmWrapper) step).getIconPath());
       if (icon == null) {
         // try package default for this class of wrapped algorithm
         icon =
@@ -188,12 +194,36 @@ public class StepVisual extends JPanel {
    * @return an icon
    */
   public static ImageIcon loadIcon(String iconPath) {
-    java.net.URL imageURL =
-      StepVisual.class.getClassLoader().getResource(iconPath);
+    return loadIcon(StepVisual.class.getClassLoader(), iconPath);
+  }
 
-    if (imageURL != null) {
-      Image pic = Toolkit.getDefaultToolkit().getImage(imageURL);
-      return new ImageIcon(pic);
+  /**
+   * Load an icon from the supplied path
+   *
+   * @param classLoader the classloader to use for finding the resource
+   * @param iconPath the path to load from
+   * @return an icon
+   */
+  public static ImageIcon loadIcon(ClassLoader classLoader, String iconPath) {
+    // java.net.URL imageURL = classLoader.getResource(iconPath);
+
+    InputStream imageStream = classLoader.getResourceAsStream(iconPath);
+
+    // if (imageURL != null) {
+    if (imageStream != null) {
+      // Image pic = Toolkit.getDefaultToolkit().getImage(imageURL);
+      try {
+        Image pic = ImageIO.read(imageStream);
+        return new ImageIcon(pic);
+      } catch (IOException ex) {
+        ex.printStackTrace();
+      } finally {
+        try {
+          imageStream.close();
+        } catch (IOException ex) {
+          // ignore
+        }
+      }
     }
 
     return null;

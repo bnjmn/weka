@@ -1,0 +1,2 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.TimeSeriesForecasting
+weka.gui.Perspective=weka.gui.knowledgeflow.TimeSeriesPerspective

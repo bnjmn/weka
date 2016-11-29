@@ -51,6 +51,7 @@ import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.Version;
+import weka.core.WekaPackageClassLoaderManager;
 
 /**
  * With this class objects can be serialized to XML instead into a binary
@@ -204,6 +205,9 @@ public class XMLSerialization implements RevisionHandler {
    */
   protected Hashtable<Class<?>, String> m_ClassnameOverride = null;
 
+  /** true to suppress warnings about loading newer/older versions etc. */
+  protected boolean m_suppressWarnings;
+
   /**
    * initializes the serialization
    * 
@@ -212,6 +216,15 @@ public class XMLSerialization implements RevisionHandler {
   public XMLSerialization() throws Exception {
     super();
     clear();
+  }
+
+  /**
+   * Set whether to suppress warning messages or not
+   *
+   * @param suppress true to suppress warnings
+   */
+  public void setSuppressWarnings(boolean suppress) {
+    m_suppressWarnings = suppress;
   }
 
   /**
@@ -287,6 +300,9 @@ public class XMLSerialization implements RevisionHandler {
    * release. If the version differ, a warning is printed.
    */
   private void checkVersion() {
+    if (m_suppressWarnings) {
+      return;
+    }
     String versionStr;
     Version version;
 
@@ -565,7 +581,9 @@ public class XMLSerialization implements RevisionHandler {
     result = null;
 
     try {
-      result = new PropertyDescriptor(displayName, Class.forName(className));
+      // result = new PropertyDescriptor(displayName, Class.forName(className));
+      result = new PropertyDescriptor(displayName,
+        WekaPackageClassLoaderManager.forName(className));
     } catch (Exception e) {
       result = null;
     }
@@ -1155,7 +1173,8 @@ public class XMLSerialization implements RevisionHandler {
     } else if (name.equals(Short.TYPE.getName())) {
       result = Short.TYPE;
     } else {
-      result = Class.forName(name);
+      // result = Class.forName(name);
+      result = WekaPackageClassLoaderManager.forName(name);
     }
 
     return result;

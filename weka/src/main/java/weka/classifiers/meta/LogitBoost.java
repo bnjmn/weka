@@ -1108,28 +1108,6 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Tool tip text
-   * 
-   * @return tool tip text for this property
-   */
-  public String batchSizeTipText() {
-    return "Batch size option is not used in LogitBoost";
-  }
-
-  /**
-   * Dummy method to satisfy BatchPredictor interface.
-   */
-  public void setBatchSize(String i) {
-  }
-
-  /**
-   * Dummy method to satisfy BatchPredictor interface.
-   */
-  public String getBatchSize() {
-    return "";
-  }
-
-  /**
    * Performs efficient batch predcition
    *
    * @return true, as LogitBoost can perform efficient batch prediction

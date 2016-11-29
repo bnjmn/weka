@@ -388,6 +388,8 @@ public class RuleNode extends AbstractClassifier {
     // build a linear regression for the training data using the
     // tested attributes
     LinearRegression temp = new LinearRegression();
+    temp.setDoNotCheckCapabilities(true);
+    temp.setMinimal(true);
     temp.buildClassifier(reducedInst);
 
     double[] lmCoeffs = temp.coefficients();

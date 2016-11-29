@@ -20,6 +20,12 @@
  */
 package weka.gui;
 
+import weka.core.ClassDiscovery;
+import weka.core.ClassDiscovery.StringCompare;
+import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
+import weka.core.WekaPackageManager;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -31,11 +37,6 @@ import java.util.Hashtable;
 import java.util.Properties;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.ClassDiscovery;
-import weka.core.ClassDiscovery.StringCompare;
-import weka.core.Utils;
-import weka.core.WekaPackageManager;
 
 /**
  * This class can generate the properties object that is normally loaded from
@@ -441,7 +442,7 @@ public class GenericPropertiesCreator {
 
     result = true;
     try {
-      clsCurrent = Class.forName(classname);
+      clsCurrent = WekaPackageClassLoaderManager.forName(classname);
       // check for GPCIgnore
       for (Annotation a : clsCurrent.getAnnotations()) {
         if (a instanceof GPCIgnore) {
@@ -459,7 +460,7 @@ public class GenericPropertiesCreator {
         list = m_Excludes.get(key).get(EXCLUDE_INTERFACE);
         for (i = 0; i < list.size(); i++) {
           try {
-            cls = Class.forName(list.get(i).toString());
+            cls = WekaPackageClassLoaderManager.forName(list.get(i).toString());
             if (ClassDiscovery.hasInterface(cls, clsCurrent)) {
               result = false;
               break;
@@ -475,7 +476,7 @@ public class GenericPropertiesCreator {
         list = m_Excludes.get(key).get(EXCLUDE_SUPERCLASS);
         for (i = 0; i < list.size(); i++) {
           try {
-            cls = Class.forName(list.get(i).toString());
+            cls = WekaPackageClassLoaderManager.forName(list.get(i).toString());
             if (ClassDiscovery.isSubclass(cls, clsCurrent)) {
               result = false;
               break;
@@ -491,7 +492,7 @@ public class GenericPropertiesCreator {
         list = m_Excludes.get(key).get(EXCLUDE_CLASS);
         for (i = 0; i < list.size(); i++) {
           try {
-            cls = Class.forName(list.get(i).toString());
+            cls = WekaPackageClassLoaderManager.forName(list.get(i).toString());
             if (cls.getName().equals(clsCurrent.getName())) {
               result = false;
             }
@@ -537,7 +538,7 @@ public class GenericPropertiesCreator {
         pkg = tok.nextToken().trim();
 
         try {
-          classes = ClassDiscovery.find(Class.forName(key), pkg);
+          classes = ClassDiscovery.find(WekaPackageClassLoaderManager.forName(key), pkg);
         } catch (Exception e) {
           System.out.println("Problem with '" + key + "': " + e);
           classes = new Vector<String>();

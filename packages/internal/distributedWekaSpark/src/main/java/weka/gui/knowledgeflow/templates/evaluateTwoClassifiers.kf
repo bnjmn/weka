@@ -65,7 +65,7 @@
 		{
 			"class" : "weka.knowledgeflow.steps.WekaClassifierEvaluationSparkJob",
 			"properties" : {
-				"jobOptions" : "-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -S 1 -num-slots 1 -- -K 0",
+				"jobOptions" : "-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -seed 1 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -M ? -E ' -F , -compression 50.0 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -I 100 -S 1 -num-slots 1 -K 0",
 				"name" : "WekaClassifierEvaluationSparkJob2"
 			},
 			"connections" : {

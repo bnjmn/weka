@@ -44,12 +44,4 @@ public interface MultivariateEstimator {
    */
   double logDensity(double[] value);
 
-  /**
-   * Returns the probability density estimate at the given point.
-   * 
-   * @param value the value at which to evaluate
-   * @return the the density estimate at the given value
-   */
-  double getProbability(double[] value);
-
 }

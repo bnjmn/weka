@@ -799,16 +799,16 @@ public class BayesNet extends AbstractClassifier implements OptionHandler,
     text.append("\n");
     text.append("<BIF VERSION=\"0.3\">\n");
     text.append("<NETWORK>\n");
-    text.append("<NAME>" + XMLNormalize(m_Instances.relationName())
+    text.append("<NAME>" + XMLNormalize(Utils.quote(m_Instances.relationName()))
       + "</NAME>\n");
     for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
       text.append("<VARIABLE TYPE=\"nature\">\n");
       text.append("<NAME>"
-        + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</NAME>\n");
+        + XMLNormalize(Utils.quote(m_Instances.attribute(iAttribute).name())) + "</NAME>\n");
       for (int iValue = 0; iValue < m_Instances.attribute(iAttribute)
         .numValues(); iValue++) {
         text.append("<OUTCOME>"
-          + XMLNormalize(m_Instances.attribute(iAttribute).value(iValue))
+          + XMLNormalize(Utils.quote(m_Instances.attribute(iAttribute).value(iValue)))
           + "</OUTCOME>\n");
       }
       text.append("</VARIABLE>\n");
@@ -817,12 +817,12 @@ public class BayesNet extends AbstractClassifier implements OptionHandler,
     for (int iAttribute = 0; iAttribute < m_Instances.numAttributes(); iAttribute++) {
       text.append("<DEFINITION>\n");
       text.append("<FOR>"
-        + XMLNormalize(m_Instances.attribute(iAttribute).name()) + "</FOR>\n");
+        + XMLNormalize(Utils.quote(m_Instances.attribute(iAttribute).name())) + "</FOR>\n");
       for (int iParent = 0; iParent < m_ParentSets[iAttribute].getNrOfParents(); iParent++) {
         text
           .append("<GIVEN>"
-            + XMLNormalize(m_Instances.attribute(
-              m_ParentSets[iAttribute].getParent(iParent)).name())
+            + XMLNormalize(Utils.quote(m_Instances.attribute(
+              m_ParentSets[iAttribute].getParent(iParent)).name()))
             + "</GIVEN>\n");
       }
       text.append("<TABLE>\n");

@@ -67,6 +67,7 @@ import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.net.InetAddress;
+import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -1135,7 +1136,7 @@ public class WekaServer implements CommandlineRunnable {
           String url = "http://" + getHostname() + ":" + getPort();
           url = url.replace(" ", "%20");
           url += PurgeTaskServlet.CONTEXT_PATH;
-          url += "/?name=" + t.toString();
+	  url += "/?name=" + URLEncoder.encode(t.toString(), "UTF-8");
           url += "&client=Y";
 
           post = new PostMethod(url);

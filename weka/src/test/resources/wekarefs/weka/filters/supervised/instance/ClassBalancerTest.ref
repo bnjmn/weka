@@ -1,4 +1,4 @@
-@relation FilterTest-weka.filters.supervised.instance.ClassBalancer
+@relation FilterTest-weka.filters.supervised.instance.ClassBalancer-num-intervals10
 
 @attribute StringAtt1 string
 @attribute NominalAtt1 {r,g,b}

@@ -40,6 +40,7 @@ import java.net.URL;
 import java.text.BreakIterator;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
+import java.text.ParseException;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Properties;
@@ -84,6 +85,18 @@ public final class Utils implements RevisionHandler {
       return df;
     }
   };
+
+  /**
+   * Turns a given date string into Java's internal representation (milliseconds from 1 January 1970).
+   *
+   * @param dateString the string representing the date
+   * @param dateFormat the date format as a string
+   *
+   * @return milliseconds since 1 January 1970 (as a double converted from long)
+   */
+  public static double dateToMillis(String dateString, String dateFormat) throws ParseException {
+    return new java.text.SimpleDateFormat(dateFormat).parse(dateString).getTime();
+  }
 
   /**
    * Tests if the given value codes "missing".
@@ -1019,7 +1032,8 @@ public final class Utils implements RevisionHandler {
       }
       boolean escape = false;
       for (int n = 0; n < element.length(); n++) {
-        if (Character.isWhitespace(element.charAt(n))) {
+        if (Character.isWhitespace(element.charAt(n))
+          || element.charAt(n) == '"' || element.charAt(n) == '\'') {
           escape = true;
           break;
         }
@@ -1086,7 +1100,8 @@ public final class Utils implements RevisionHandler {
 
     Class<?> c = null;
     try {
-      c = Class.forName(className);
+      //c = Class.forName(className);
+      c = WekaPackageClassLoaderManager.forName(className);
     } catch (Exception ex) {
       throw new Exception("Can't find class called: " + className);
     }
@@ -1132,7 +1147,8 @@ public final class Utils implements RevisionHandler {
 
     Class c = null;
     try {
-      c = Class.forName(className);
+      // c = Class.forName(className);
+      c = WekaPackageClassLoaderManager.forName(className);
     } catch (Exception ex) {
       throw new Exception("Can't find class called: " + className);
     }

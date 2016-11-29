@@ -163,7 +163,7 @@ public class MakePreconstructedFilter extends Filter implements
 
   @Override
   public Instances getInputFormat() {
-    return getBaseFilter().getInputFormat();
+    return getBaseFilter().getCopyOfInputFormat();
   }
 
   @Override
@@ -219,8 +219,8 @@ public class MakePreconstructedFilter extends Filter implements
 
   @Override
   public boolean isConstructed() {
-    return getBaseFilter() != null && getBaseFilter().getInputFormat() != null
-      && !m_isReset;
+    return getBaseFilter() != null
+      && getBaseFilter().getCopyOfInputFormat() != null && !m_isReset;
   }
 
   /**
@@ -228,7 +228,8 @@ public class MakePreconstructedFilter extends Filter implements
    * ready to use and has an input format set on the underlying filter.
    */
   public void setConstructed() {
-    if (getBaseFilter() != null && getBaseFilter().getInputFormat() != null) {
+    if (getBaseFilter() != null
+      && getBaseFilter().getCopyOfInputFormat() != null) {
       m_isReset = false;
     }
   }

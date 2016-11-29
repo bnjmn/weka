@@ -57,6 +57,12 @@ public class TrainTestSplitMaker extends BaseStep {
   /** Resolved percentage */
   protected double m_trainPercentage = 66.0;
 
+  /**
+   * Whether to preserve the order of the data before making the split, rather
+   * than randomly shuffling
+   */
+  protected boolean m_preserveOrder;
+
   /** Resolved seed */
   protected long m_seed = 1L;
 
@@ -86,7 +92,8 @@ public class TrainTestSplitMaker extends BaseStep {
    *
    * @param seed the random seed to use
    */
-  @OptionMetadata(displayName = "Random seed", description = "The random seed",
+  @OptionMetadata(displayName = "Random seed",
+    description = "The random seed to use when shuffling the data",
     displayOrder = 2)
   public void setSeed(String seed) {
     m_seedS = seed;
@@ -99,6 +106,30 @@ public class TrainTestSplitMaker extends BaseStep {
    */
   public String getSeed() {
     return m_seedS;
+  }
+
+  /**
+   * Set whether to preserve the order of the instances or not
+   *
+   * @param preserve true to preserve the order rather than randomly shuffling
+   *          first
+   */
+  @OptionMetadata(
+    displayName = "Preserve instance order",
+    description = "Preserve the order of the instances rather than randomly shuffling",
+    displayOrder = 3)
+  public
+    void setPreserveOrder(boolean preserve) {
+    m_preserveOrder = preserve;
+  }
+
+  /**
+   * Get whether to preserve the order of the instances or not
+   *
+   * @return true to preserve the order rather than randomly shuffling first
+   */
+  public boolean getPreserveOrder() {
+    return m_preserveOrder;
   }
 
   /**
@@ -141,7 +172,10 @@ public class TrainTestSplitMaker extends BaseStep {
 
     getStepManager().logBasic("Creating train/test split");
     getStepManager().statusMessage("Creating train/test split");
-    dataSet.randomize(new Random(m_seed));
+
+    if (!getPreserveOrder()) {
+      dataSet.randomize(new Random(m_seed));
+    }
     int trainSize =
       (int) Math.round(dataSet.numInstances() * m_trainPercentage / 100);
     int testSize = dataSet.numInstances() - trainSize;

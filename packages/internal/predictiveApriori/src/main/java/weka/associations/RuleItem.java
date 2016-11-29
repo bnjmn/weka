@@ -90,13 +90,14 @@ public class RuleItem implements Comparable<RuleItem>, Serializable,
 
     m_premise = premise;
     m_consequence = consequence;
-    m_accuracy = RuleGeneration.expectation(ruleSupport, m_premise.m_counter,
+    m_accuracy = RuleGeneration.expectation(ruleSupport, m_premise.support(),
       m_midPoints, m_priors);
     // overflow, underflow
     if (Double.isNaN(m_accuracy) || m_accuracy < 0) {
       m_accuracy = Double.MIN_VALUE;
     }
-    m_consequence.m_counter = ruleSupport;
+    //m_consequence.m_counter = ruleSupport;
+    m_consequence.setCounter(ruleSupport);
     m_genTime = genTime;
   }
 
@@ -117,13 +118,15 @@ public class RuleItem implements Comparable<RuleItem>, Serializable,
   public RuleItem generateRuleItem(ItemSet premise, ItemSet consequence,
     Instances instances, int genTime, int minRuleCount, double[] m_midPoints,
     Hashtable<Double, Double> m_priors) {
-    ItemSet rule = new ItemSet(instances.numInstances());
-    rule.m_items = new int[(consequence.m_items).length];
-    System.arraycopy(premise.m_items, 0, rule.m_items, 0,
-      (premise.m_items).length);
-    for (int k = 0; k < consequence.m_items.length; k++) {
-      if (consequence.m_items[k] != -1) {
-        rule.m_items[k] = consequence.m_items[k];
+    //ItemSet rule = new ItemSet(instances.numInstances());
+    ItemSet rule = new ItemSet(instances.numInstances(), new int[(consequence.getItems()).length]);
+    // rule.m_items = new int[(consequence.m_items).length];
+    rule.setCounter(0);
+    System.arraycopy(premise.getItems(), 0, rule.getItems(), 0,
+      (premise.getItems()).length);
+    for (int k = 0; k < consequence.getItems().length; k++) {
+      if (consequence.getItems()[k] != -1) {
+        rule.getItems()[k] = consequence.getItems()[k];
       }
     }
     for (int i = 0; i < instances.numInstances(); i++) {

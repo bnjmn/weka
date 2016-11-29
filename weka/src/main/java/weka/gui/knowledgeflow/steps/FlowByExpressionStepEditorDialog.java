@@ -21,9 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.GridLayout;
+import weka.core.Instances;
+import weka.core.WekaException;
+import weka.gui.EnvironmentField;
+import weka.gui.knowledgeflow.StepEditorDialog;
+import weka.knowledgeflow.StepManager;
+import weka.knowledgeflow.steps.FlowByExpression;
+
+import javax.swing.*;
+import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import javax.swing.tree.DefaultTreeSelectionModel;
+import javax.swing.tree.TreePath;
+import javax.swing.tree.TreeSelectionModel;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -31,29 +42,6 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextField;
-import javax.swing.JTree;
-import javax.swing.SwingConstants;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
-
-import weka.core.Instances;
-import weka.core.WekaException;
-import weka.gui.EnvironmentField;
-import weka.gui.knowledgeflow.StepEditorDialog;
-import weka.knowledgeflow.StepManager;
-import weka.knowledgeflow.steps.FlowByExpression;
 
 /**
  * Step editor dialog for the FlowByExpression step
@@ -65,24 +53,57 @@ public class FlowByExpressionStepEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = 1545740909421963983L;
 
+  /** Combo box for the LHS of the expression being entered */
   protected JComboBox m_lhsField = new EnvironmentField.WideComboBox();
+
+  /** Combo box for choosing the operator */
   protected JComboBox<String> m_operatorCombo = new JComboBox<String>();
+
+  /** Combo box for the RHS of the expression being entered */
   protected JComboBox m_rhsField = new EnvironmentField.WideComboBox();
+
+  /** Check box for indicating that the RHS is the name of an attribute */
   protected JCheckBox m_rhsIsAttribute = new JCheckBox("RHS is attribute");
+
+  /** Label for displaying the current expression */
   protected JLabel m_expressionLab = new JLabel();
 
+  /**
+   * Combo box for choosing the downstream step that
+   * instances matching the expression should go to
+   */
   protected JComboBox<String> m_trueData = new JComboBox<String>();
+
+  /**
+   * Combo box for choosing the downstream step that instances failing
+   * to match the expression should go to
+   */
   protected JComboBox<String> m_falseData = new JComboBox<String>();
 
+  /** Holds the tree view of the expression */
   protected JTree m_expressionTree;
+
+  /** Root of the tree */
   protected DefaultMutableTreeNode m_treeRoot;
 
+  /** Button for adding a new expression node to the expression tree */
   protected JButton m_addExpressionNode = new JButton("Add Expression node");
+
+  /** Button for adding a new brackets node to the expression tree */
   protected JButton m_addBracketNode = new JButton("Add bracket node");
+
+  /** Button for toggling negation */
   protected JButton m_toggleNegation = new JButton("Toggle negation");
+
+  /** Button for and/or */
   protected JButton m_andOr = new JButton("And/Or");
+
+  /** Button for deleting a node from the expression tree */
   protected JButton m_deleteNode = new JButton("Delete node");
 
+  /**
+   * Layout the editor
+   */
   @Override
   @SuppressWarnings("unchecked")
   protected void layoutEditor() {
@@ -695,6 +716,9 @@ public class FlowByExpressionStepEditorDialog extends StepEditorDialog {
     });
   }
 
+  /**
+   * Called when the OK button gets pressed
+   */
   @Override
   protected void okPressed() {
     if (m_treeRoot != null) {

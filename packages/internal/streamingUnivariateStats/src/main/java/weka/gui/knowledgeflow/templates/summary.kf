@@ -1,0 +1,89 @@
+{
+	"flow_name" : "summary",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.StreamingUnivariateStats",
+			"properties" : {
+				"computeQuartiles" : true,
+				"decimalPlaces" : 2,
+				"name" : "StreamingUnivariateStats",
+				"outputFrequency" : 0,
+				"quartileCompression" : 100.0
+			},
+			"connections" : {
+				"image" : [
+					"ImageViewer"
+				],
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "296,52"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ImageViewer",
+			"properties" : {
+				"name" : "ImageViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "534,182"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "537,53"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Generates 1000000 \ninstances"
+			},
+			"connections" : {
+			},
+			"coordinates" : "9,150"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Compute stats.\n(NOTE. Turn off\nquartile estimation\nfor faster runtime)"
+			},
+			"connections" : {
+			},
+			"coordinates" : "277,150"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> </html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "18,14"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.DataGenerator",
+			"properties" : {
+				"dataGenerator" : {
+					"type" : "optionHandler",
+					"class" : "weka.datagenerators.classifiers.classification.Agrawal",
+					"options" : "-r weka.datagenerators.classifiers.classification.Agrawal-S_50_-n_1000000_-F_5_-P_0.05 -S 1 -n 1000000 -F 5 -P 0.05"
+				},
+				"name" : "Agrawal"
+			},
+			"connections" : {
+				"instance" : [
+					"StreamingUnivariateStats"
+				]
+			},
+			"coordinates" : "31,52"
+		}
+	]
+}

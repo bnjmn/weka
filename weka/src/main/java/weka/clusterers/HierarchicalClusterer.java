@@ -1157,8 +1157,7 @@ public class HierarchicalClusterer extends AbstractClusterer implements
    */
   public String globalInfo() {
     return "Hierarchical clustering class.\n"
-      + "Implements a number of classic agglomorative (i.e. bottom up) hierarchical clustering methods"
-      + "based on .";
+      + "Implements a number of classic agglomerative (i.e., bottom up) hierarchical clustering methods.";
   }
 
   public static void main(String[] argv) {

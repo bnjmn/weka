@@ -219,7 +219,14 @@ public class PythonPanel extends JPanel {
   protected JSplitPane createEditorAndVarPanel() {
     m_fileChooser.setAcceptAllFileFilterUsed(true);
     m_fileChooser.setMultiSelectionEnabled(false);
-    DefaultSyntaxKit.initKit();
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
+
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      DefaultSyntaxKit.initKit();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
+    }
     m_scriptEditor = new JEditorPane();
     JPanel scriptHolder = new JPanel(new BorderLayout());
     JToolBar toolBar = new JToolBar();

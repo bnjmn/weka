@@ -177,6 +177,11 @@ public class ImageViewer extends BaseStep implements DataCollector {
         + "be a map");
     }
 
+    try {
+      m_images = byteArrayImageMapToBufferedImageMap((Map<String, byte[]>) data);
+    } catch (IOException e) {
+      throw new WekaException(e);
+    }
   }
 
   /**

@@ -118,9 +118,6 @@ public class StepManagerImpl implements StepManager {
    */
   protected BaseExecutionEnvironment m_executionEnvironment;
 
-  /** Holds Knowledge Flow settings */
-  protected Settings m_settings = new Settings("weka", KFDefaults.APP_ID);
-
   /** The log to use */
   protected LogManager m_log;
 
@@ -642,11 +639,11 @@ public class StepManagerImpl implements StepManager {
    *
    * @param connectionName the name of the type of connection to add
    * @param step the target step component that is receiving the given
-   *          connection type
-   *          it can't accept the connection at the present time
+   *          connection type it can't accept the connection at the present time
    * @return true if the connection was successful
    */
-  public boolean addOutgoingConnection(String connectionName, StepManagerImpl step) {
+  public boolean addOutgoingConnection(String connectionName,
+    StepManagerImpl step) {
     return addOutgoingConnection(connectionName, step, false);
   }
 
@@ -893,13 +890,19 @@ public class StepManagerImpl implements StepManager {
   }
 
   /**
-   * Output one or more Data objects to downstream connected Steps. Data
-   * object(s) must have a connection type set (so that they can be routed to
-   * the appropriate downstream Steps). Also notifies any registered
-   * StepOutputListeners.
+   * Output one or more Data objects to all relevant steps. Populates the source
+   * in each Data object for the client, HOWEVER, the client must have populated
+   * the connection type in each Data object to be output so that the
+   * StepManager knows which connected steps to send the data to. Also notifies
+   * any registered {@code StepOutputListeners}. Note that the downstream
+   * step(s)' processIncoming() method is called in a separate thread for batch
+   * connections. Furthermore, if multiple Data objects are supplied via the
+   * varargs argument, and a target step will receive more than one of the Data
+   * objects, then they will be passed on to the step in question sequentially
+   * within the same thread of execution.
    *
    * @param data one or more Data objects to be sent
-   * @throws WekaException
+   * @throws WekaException if a problem occurs
    */
   @Override
   public void outputData(Data... data) throws WekaException {
@@ -1346,6 +1349,7 @@ public class StepManagerImpl implements StepManager {
    * @return the StepManager of the named step, or null if the step does not
    *         exist in the current flow.
    */
+  @Override
   public StepManager findStepInFlow(String stepNameToFind) {
     Flow flow = m_executionEnvironment.getFlowExecutor().getFlow();
 

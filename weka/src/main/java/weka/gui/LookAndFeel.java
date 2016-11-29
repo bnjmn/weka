@@ -142,12 +142,12 @@ public class LookAndFeel {
    * @param lookAndFeelKey the key to look up the look and feel in the settings
    * @throws IOException if a problem occurs when loading settings
    */
-  public static void setLookAndFeel(String appID, String lookAndFeelKey)
+  public static void setLookAndFeel(String appID, String lookAndFeelKey, String defaultLookAndFeel)
     throws IOException {
     Settings forLookAndFeelOnly = new Settings("weka", appID);
 
     String laf =
-      forLookAndFeelOnly.getSetting(appID, lookAndFeelKey, "",
+      forLookAndFeelOnly.getSetting(appID, lookAndFeelKey, defaultLookAndFeel,
         Environment.getSystemWide());
 
     if (laf.length() > 0 && laf.contains(".")

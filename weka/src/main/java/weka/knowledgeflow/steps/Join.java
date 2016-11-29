@@ -53,7 +53,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 @KFStep(
   name = "Join",
   category = "Flow",
-  toolTipText = "Performs an inner join on two incoming datasets/instance streams<br>(IMPORTANT: assumes that "
+  toolTipText = "Performs an inner join on two incoming datasets/instance streams (IMPORTANT: assumes that "
     + "both datasets are sorted in ascending order of the key fields). If data is not sorted then use"
     + "a Sorter step to sort both into ascending order of the key fields. Does not handle the case where"
     + "keys are not unique in one or both inputs.",

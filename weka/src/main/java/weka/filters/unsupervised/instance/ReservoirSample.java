@@ -21,10 +21,6 @@
 
 package weka.filters.unsupervised.instance;
 
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
-
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.Instance;
@@ -36,6 +32,12 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.Enumeration;
+import java.util.Random;
+import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> Produces a random subsample of a dataset using the
@@ -88,7 +90,7 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
   protected int m_SampleSize = 100;
 
   /** Holds the sub-sample (reservoir) */
-  protected Instance[] m_subSample;
+  protected Object[] m_subSample;
 
   /** The current instance being processed */
   protected int m_currentInst;
@@ -98,6 +100,9 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
 
   /** The random number generator */
   protected Random m_random;
+
+  /** True if the incoming data contains string attributes */
+  protected boolean m_containsStringAtts;
 
   /**
    * Returns a string describing this filter
@@ -285,9 +290,11 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
+    m_containsStringAtts = instanceInfo.checkForStringAttributes();
+
     setOutputFormat(instanceInfo);
 
-    m_subSample = new Instance[m_SampleSize];
+    m_subSample = new Object[m_SampleSize];
     m_currentInst = 0;
     m_random = new Random(m_RandomSeed);
 
@@ -301,13 +308,13 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
    */
   protected void processInstance(Instance instance) {
     if (m_currentInst < m_SampleSize) {
-      m_subSample[m_currentInst] = (Instance) instance.copy();
+      m_subSample[m_currentInst] = m_containsStringAtts ? instance.toString() : instance.copy();
     } else {
       double r = m_random.nextDouble();
       if (r < ((double) m_SampleSize / (double) m_currentInst)) {
         r = m_random.nextDouble();
         int replace = (int) (m_SampleSize * r);
-        m_subSample[replace] = (Instance) instance.copy();
+        m_subSample[replace] = m_containsStringAtts ? instance.toString() : instance.copy();
       }
     }
     m_currentInst++;
@@ -336,7 +343,9 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
       return true;
     } else {
       // bufferInput(instance);
-      copyValues(instance, false);
+      if (!m_containsStringAtts) {
+        copyValues(instance, false);
+      }
       processInstance(instance);
       return false;
     }
@@ -374,10 +383,19 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
    */
   protected void createSubsample() {
 
+    StringBuilder sb = null;
+    if (m_containsStringAtts) {
+      sb = new StringBuilder();
+      sb.append(getInputFormat().stringFreeStructure()).append("\n");
+    }
     for (int i = 0; i < m_SampleSize; i++) {
       if (m_subSample[i] != null) {
-        Instance copy = (Instance) m_subSample[i].copy();
-        push(copy, false); // No need to copy instance
+        if (!m_containsStringAtts) {
+          Instance copy = (Instance) ((Instance) m_subSample[i]).copy();
+          push(copy, false); // No need to copy instance
+        } else {
+          sb.append(m_subSample[i].toString()).append("\n");
+        }
       } else {
         // less data in the original than was asked for
         // as a sample.
@@ -385,6 +403,17 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
       }
     }
     m_subSample = null;
+
+    if (m_containsStringAtts) {
+      try {
+        Instances stringSample = new Instances(new StringReader(sb.toString()));
+        for (int i = 0; i < stringSample.numInstances(); i++) {
+          push(stringSample.instance(i), false);
+        }
+      } catch (IOException ex) {
+        throw new RuntimeException(ex);
+      }
+    }
   }
 
   /**

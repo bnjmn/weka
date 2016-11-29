@@ -6,10 +6,10 @@
 PackageName=scriptingClassifiers
 
 # Version (required)
-Version=1.0.3
+Version=1.1.3
 
 #Date
-Date=2013-12-06
+Date=2016-10-31
 
 # Title (required)
 Title=Wrapper classifiers for Jython and Groovy scripting code.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Wrapper classifiers for Jython and Groovy code. Even though the classifier is serializable, the trained classifier cannot be stored persistently. I.e., one cannot store a model file and re-load it at a later point in time again to make predictions.
 
-Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=Changes to support running when loaded by a child classloader
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/scriptingClassifiers1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/scriptingClassifiers1.1.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/scriptingClassifiers
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/scriptingClassifiers
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.1)
+Depends=weka (>=3.9.1-SNAPSHOT),kfGroovy (>=1.0.12),tigerjython (>= 1.0.3)

@@ -359,9 +359,9 @@ public class JythonClassifier extends AbstractClassifier {
    */
   @Override
   public void buildClassifier(Instances instances) throws Exception {
-    if (!Jython.isPresent()) {
-      throw new Exception("Jython classes not in CLASSPATH!");
-    }
+      //    if (!Jython.isPresent()) {
+      //      throw new Exception("Jython classes not in CLASSPATH!");
+      //    }
 
     // try loading the module
     initJythonObject();

@@ -79,7 +79,16 @@ public class PythonScriptExecutorStepEditorDialog extends GOEStepEditorDialog {
     addPrimaryEditorPanel(BorderLayout.CENTER);
 
     String script = ((PythonScriptExecutor) getStepToEdit()).getPythonScript();
-    DefaultSyntaxKit.initKit();
+    ClassLoader orig = Thread.currentThread().getContextClassLoader();
+
+    // jsyntaxpane uses Class.forName() to instantiate syntax handlers defined
+    // properties files. Force Class.forName() to use our classloader
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      DefaultSyntaxKit.initKit();
+    } finally {
+      Thread.currentThread().setContextClassLoader(orig);
+    }
     m_scriptEditor = new JEditorPane();
 
     // check python availability

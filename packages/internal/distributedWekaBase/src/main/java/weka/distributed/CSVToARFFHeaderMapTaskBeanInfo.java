@@ -98,6 +98,10 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
+      p1 = new PropertyDescriptor("numDecimalPlaces",
+        CSVToARFFHeaderMapTask.class);
+      pds.add(p1);
+
       return pds.toArray(new PropertyDescriptor[1]);
     } catch (Exception ex) {
       ex.printStackTrace();

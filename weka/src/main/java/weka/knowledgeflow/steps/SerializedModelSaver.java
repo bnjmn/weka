@@ -31,7 +31,6 @@ import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 
-import javax.swing.*;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -86,7 +85,7 @@ public class SerializedModelSaver extends BaseStep {
    *
    * @param directory the directory to save to
    */
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.SAVE_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.SAVE_DIALOG,
     directoriesOnly = true)
   @OptionMetadata(displayName = "Output directory",
     description = "The directory to save models to", displayOrder = 0)
@@ -242,6 +241,7 @@ public class SerializedModelSaver extends BaseStep {
         modelToSave =
           (weka.classifiers.Classifier) data
             .getPayloadElement(StepManager.CON_INCREMENTAL_CLASSIFIER);
+        modelHeader = m_incrementalHeader;
       }
     } else {
       modelToSave = data.getPayloadElement(data.getConnectionName());

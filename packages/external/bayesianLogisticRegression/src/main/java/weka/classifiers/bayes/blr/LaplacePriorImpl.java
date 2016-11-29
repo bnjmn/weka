@@ -38,13 +38,6 @@ public class LaplacePriorImpl
   
   /** for serialization. */
   private static final long serialVersionUID = 2353576123257012607L;
-  
-  Instances m_Instances;
-  double Beta;
-  double Hyperparameter;
-  double DeltaUpdate;
-  double[] R;
-  double Delta;
 
   /**
    * Update function specific to Laplace Prior.

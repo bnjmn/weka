@@ -69,7 +69,8 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
   protected int m_numDecimalPlaces = NUM_DECIMAL_PLACES_DEFAULT;
 
   /** Default preferred batch size for batch predictions */
-  protected String m_BatchSize = "100";
+  public static String BATCH_SIZE_DEFAULT = "100";
+  protected String m_BatchSize = BATCH_SIZE_DEFAULT;
 
   /**
    * Creates a new instance of a classifier given it's class name and (optional)
@@ -250,11 +251,14 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
       "\tIf set, classifier capabilities are not checked before classifier is built\n"
         + "\t(use with caution).",
       "-do-not-check-capabilities", 0, "-do-not-check-capabilities"));
-
     newVector.addElement(new Option(
       "\tThe number of decimal places for the output of numbers in the model"
         + " (default " + m_numDecimalPlaces + ").",
       "num-decimal-places", 1, "-num-decimal-places"));
+    newVector.addElement(new Option(
+            "\tThe desired batch size for batch prediction " + " (default " + m_BatchSize + ").",
+            "batch-size", 1, "-batch-size"));
+
 
     return newVector.elements();
   }
@@ -283,7 +287,10 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
       options.add("-num-decimal-places");
       options.add("" + getNumDecimalPlaces());
     }
-
+    if (!(getBatchSize().equals(BATCH_SIZE_DEFAULT))) {
+      options.add("-batch-size");
+      options.add("" + getBatchSize());
+    }
     return options.toArray(new String[0]);
   }
 
@@ -301,6 +308,14 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * (use with caution).
    * <p>
    *
+   * -num-decimal-laces <br>
+   * The number of decimal places for the output of numbers in the model.
+   * <p>
+   *
+   * -batch-size <br>
+   * The desired batch size for batch prediction.
+   * <p>
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -315,6 +330,10 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
     String optionString = Utils.getOption("num-decimal-places", options);
     if (optionString.length() != 0) {
       setNumDecimalPlaces((new Integer(optionString)).intValue());
+    }
+    optionString = Utils.getOption("batch-size", options);
+    if (optionString.length() != 0) {
+      setBatchSize(optionString);
     }
   }
 

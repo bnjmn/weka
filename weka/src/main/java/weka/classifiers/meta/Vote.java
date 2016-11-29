@@ -373,7 +373,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       m_classifiersToLoad.add(loadString);
     }
 
-    setDoNotPrintModels(Utils.getFlag("-do-not-print", options));
+    setDoNotPrintModels(Utils.getFlag("do-not-print", options));
 
     super.setOptions(options);
   }

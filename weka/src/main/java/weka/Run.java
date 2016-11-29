@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
 
 /**
  * Helper class that executes Weka schemes from the command line. Performs
@@ -84,8 +85,9 @@ public class Run {
     for (int i = 0; i < matches.size(); i++) {
       if (matches.get(i).endsWith(schemeToFind) || matchAnywhere) {
         try {
-          Object scheme = java.beans.Beans.instantiate((new Run()).getClass()
-            .getClassLoader(), matches.get(i));
+          // Object scheme = java.beans.Beans.instantiate((new Run()).getClass()
+          // .getClassLoader(), matches.get(i));
+          Object scheme = WekaPackageClassLoaderManager.objectForName(matches.get(i));
           if (classType == null
             || classType.isAssignableFrom(scheme.getClass())) {
             if (notJustRunnables
@@ -141,6 +143,7 @@ public class Run {
       boolean noScan = false;
       boolean noLoad = false;
       boolean matchAnywhere = false;
+      boolean dontPromptIfMultipleMatches = false;
 
       if (Utils.getFlag("list-packages", args)) {
         weka.core.WekaPackageManager.loadPackages(true, true, false);
@@ -163,6 +166,11 @@ public class Run {
         schemeIndex++;
       }
 
+      if (Utils.getFlag("do-not-prompt-if-multiple-matches", args)) {
+        dontPromptIfMultipleMatches = true;
+        schemeIndex++;
+      }
+
       if (!noLoad) {
         weka.core.WekaPackageManager.loadPackages(false, true, false);
       }
@@ -181,7 +189,8 @@ public class Run {
       }
 
       if (!noScan) {
-        List<String> prunedMatches = findSchemeMatch(schemeToRun, matchAnywhere);
+        List<String> prunedMatches =
+          findSchemeMatch(schemeToRun, matchAnywhere);
 
         if (prunedMatches.size() == 0) {
           System.err.println("Can't find scheme " + schemeToRun
@@ -189,8 +198,17 @@ public class Run {
           // System.exit(1);
           return;
         } else if (prunedMatches.size() > 1) {
-          java.io.BufferedReader br = new java.io.BufferedReader(
-            new java.io.InputStreamReader(System.in));
+          if (dontPromptIfMultipleMatches) {
+            System.out.println("There are multiple matches:");
+            for (int i = 0; i < prunedMatches.size(); i++) {
+              System.out.println("\t" + (i + 1) + ") " + prunedMatches.get(i));
+            }
+            System.out.println("\nPlease make your scheme name more specific "
+              + "(i.e. qualify it with more of the package name).");
+            return;
+          }
+          java.io.BufferedReader br =
+            new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
           boolean done = false;
           while (!done) {
             System.out.println("Select a scheme to run, or <return> to exit:");
@@ -224,10 +242,12 @@ public class Run {
 
       Object scheme = null;
       try {
-        scheme = java.beans.Beans.instantiate((new Run()).getClass()
-          .getClassLoader(), schemeToRun);
+        // scheme = java.beans.Beans.instantiate((new Run()).getClass()
+        // .getClassLoader(), schemeToRun);
+        scheme = WekaPackageClassLoaderManager.objectForName(schemeToRun);
       } catch (Exception ex) {
-        System.err.println(schemeToRun + " is not runnable!");
+        System.err.println(schemeToRun + " is not runnable!\n"
+          + ex.getMessage());
         // System.exit(1);
         return;
       }
@@ -271,8 +291,8 @@ public class Run {
       if (types.size() == 1) {
         selectedType = types.get(0);
       } else {
-        java.io.BufferedReader br = new java.io.BufferedReader(
-          new java.io.InputStreamReader(System.in));
+        java.io.BufferedReader br =
+          new java.io.BufferedReader(new java.io.InputStreamReader(System.in));
         boolean done = false;
         while (!done) {
           System.out.println("" + schemeToRun

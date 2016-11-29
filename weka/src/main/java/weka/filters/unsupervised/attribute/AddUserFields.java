@@ -324,6 +324,7 @@ public class AddUserFields extends Filter implements OptionHandler,
         String format = m_typeS.substring(m_typeS.indexOf(":") + 1,
           m_typeS.length());
         m_dateFormat = new SimpleDateFormat(format);
+
         if (!m_valueS.toLowerCase().equals("now")) {
           try {
             m_parsedDate = m_dateFormat.parse(m_valueS);
@@ -437,7 +438,7 @@ public class AddUserFields extends Filter implements OptionHandler,
 
     newVector
       .addElement(new Option(
-        "\tNew field specification (name@type@value).\n"
+        "\tNew field specification (name@type:value).\n"
           + "\t Environment variables may be used for any/all parts of the\n"
           + "\tspecification. Type can be one of (numeric, nominal, string or date).\n"
           + "\tThe value for date be a specific date string or the special string\n"
@@ -445,7 +446,7 @@ public class AddUserFields extends Filter implements OptionHandler,
           + "\tstring for parsing specific date values can be specified by suffixing\n"
           + "\tthe type specification - e.g. \"myTime@date:MM-dd-yyyy@08-23-2009\"."
           + "This option may be specified multiple times", "A", 1,
-        "-A <name:type:value>"));
+        "-A <name@type@value>"));
 
     return newVector.elements();
   }
@@ -471,7 +472,7 @@ public class AddUserFields extends Filter implements OptionHandler,
    * 
    * * <!-- options-end -->
    * 
-   * @param otions the list of options as an array of string
+   * @param options the list of options as an array of string
    * @throws Exception if an option is not supported
    */
   @Override
@@ -549,7 +550,7 @@ public class AddUserFields extends Filter implements OptionHandler,
   /**
    * Set environment varialbes to use
    * 
-   * @param the environment variables to use
+   * @param env the environment variables to use
    */
   @Override
   public void setEnvironment(Environment env) {

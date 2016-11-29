@@ -52,6 +52,7 @@ import weka.gui.beans.InstancesProducer;
 import distributed.core.DistributedJob;
 import distributed.core.DistributedJobConfig;
 import distributed.hadoop.HDFSUtils;
+import weka.gui.beans.TextProducer;
 
 /**
  * A Hadoop job for creating a unified ARFF header (including summary "meta"
@@ -61,7 +62,7 @@ import distributed.hadoop.HDFSUtils;
  * @version $Revision$
  */
 public class ArffHeaderHadoopJob extends HadoopJob implements
-  InstancesProducer, CommandlineRunnable {
+  InstancesProducer, TextProducer, CommandlineRunnable {
 
   /**
    * For serialization
@@ -132,6 +133,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
 
   /** The instances header produced by the job */
   protected Instances m_finalHeader;
+
+  /** Formatted summary stats */
+  protected String m_summaryStats = "";
 
   /** Holds any images generated from the summary attributes */
   protected List<BufferedImage> m_summaryCharts;
@@ -812,6 +816,27 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
         m_finalHeader = new Instances(br);
         br.close();
         br = null;
+
+        // now try and grab the formatted summary stats
+        if (outputFileName.toLowerCase().endsWith(".arff")) {
+          outputFileName = outputFileName.replace(".arff", "").replace(".ARFF", "");
+        }
+        outputFileName += ".summary";
+        p = new Path(outputFileName);
+        if (fs.exists(p)) {
+          is = fs.open(p);
+          br = new BufferedReader(new InputStreamReader(is));
+          StringBuilder summaryBuilder = new StringBuilder();
+          String line = "";
+          while((line = br.readLine()) != null) {
+            summaryBuilder.append(line).append("\n");
+          }
+
+          br.close();
+          br = null;
+
+          m_summaryStats = summaryBuilder.toString();
+        }
       } finally {
         if (br != null) {
           br.close();
@@ -850,5 +875,9 @@ public class ArffHeaderHadoopJob extends HadoopJob implements
     } catch (Exception ex) {
       ex.printStackTrace();
     }
+  }
+
+  @Override public String getText() {
+    return m_summaryStats;
   }
 }

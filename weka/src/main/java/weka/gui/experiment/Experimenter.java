@@ -100,10 +100,12 @@ public class Experimenter extends AbstractPerspective {
       public void propertyChange(PropertyChangeEvent e) {
         // System.err.println("Updated experiment");
         Experiment exp = m_SetupPanel.getExperiment();
-        exp.classFirst(m_ClassFirst);
-        m_RunPanel.setExperiment(exp);
-        // m_ResultsPanel.setExperiment(exp);
-        m_TabbedPane.setEnabledAt(1, true);
+        if (exp != null) {
+          exp.classFirst(m_ClassFirst);
+          m_RunPanel.setExperiment(exp);
+          // m_ResultsPanel.setExperiment(exp);
+          m_TabbedPane.setEnabledAt(1, true);
+        }
       }
     });
     setLayout(new BorderLayout());

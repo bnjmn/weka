@@ -42,7 +42,7 @@ import weka.core.stats.QuantileCalculator;
 import weka.core.stats.StringStats;
 import weka.distributed.CSVToARFFHeaderMapTask.HeaderAndQuantileDataHolder;
 
-import com.clearspring.analytics.stream.quantile.TDigest;
+import weka.core.stats.TDigest;
 
 /**
  * Tests the CSVToARFFHeaderMapTask and the CSVToARFFHeaderReduceTask.

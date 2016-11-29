@@ -91,8 +91,8 @@ public class Option implements RevisionHandler {
    *          stop getting options from
    * @return a list of options
    */
-  public static Vector<Option> listOptionsForClassHierarchy(Class<?> childClazz,
-    Class<?> oldestAncestorClazz) {
+  public static Vector<Option> listOptionsForClassHierarchy(
+    Class<?> childClazz, Class<?> oldestAncestorClazz) {
     Vector<Option> results = listOptionsForClass(childClazz);
 
     Class<?> parent = childClazz;
@@ -113,8 +113,7 @@ public class Option implements RevisionHandler {
    * @param clazz the class to get methods from
    * @param methList the list to add them to
    */
-  protected static void addMethodsToList(Class<?> clazz,
-    List<Method> methList) {
+  protected static void addMethodsToList(Class<?> clazz, List<Method> methList) {
     Method[] methods = clazz.getDeclaredMethods();
     for (Method m : methods) {
       methList.add(m);
@@ -263,6 +262,11 @@ public class Option implements RevisionHandler {
                   "Getter method for a command "
                     + "line flag should return a boolean value");
               }
+              if (((Object[]) value).length == 0) {
+                // remove the initial option identifier (added above)
+                // as the array is empty
+                options.remove(options.size() - 1);
+              }
               int index = 0;
               for (Object element : (Object[]) value) {
                 if (index > 0) {
@@ -270,8 +274,8 @@ public class Option implements RevisionHandler {
                     .add("-" + parameterDescription.commandLineParamName());
                 }
                 if (element instanceof OptionHandler) {
-                  options.add(
-                    getOptionStringForOptionHandler((OptionHandler) element));
+                  options
+                    .add(getOptionStringForOptionHandler((OptionHandler) element));
                 } else {
                   options.add(element.toString());
                 }
@@ -286,8 +290,8 @@ public class Option implements RevisionHandler {
               options
                 .add(getOptionStringForOptionHandler((OptionHandler) value));
             } else if (value instanceof SelectedTag) {
-              options
-                .add("" + ((SelectedTag) value).getSelectedTag().getReadable());
+              options.add(""
+                + ((SelectedTag) value).getSelectedTag().getReadable());
             } else {
               // check for boolean/flag
               if (parameterDescription.commandLineParamIsFlag()) {
@@ -427,11 +431,13 @@ public class Option implements RevisionHandler {
             Object valueToSet = null;
             if (parameterDescription.commandLineParamIsFlag()) {
               processOpt = true;
-              valueToSet = (Utils
-                .getFlag(parameterDescription.commandLineParamName(), options));
+              valueToSet =
+                (Utils.getFlag(parameterDescription.commandLineParamName(),
+                  options));
             } else {
-              optionValue = Utils.getOption(
-                parameterDescription.commandLineParamName(), options);
+              optionValue =
+                Utils.getOption(parameterDescription.commandLineParamName(),
+                  options);
               processOpt = optionValue.length() > 0;
             }
 
@@ -439,8 +445,7 @@ public class Option implements RevisionHandler {
             // the type
             Object value = getter.invoke(target, getterArgs);
             if (value != null && processOpt) {
-              if (value.getClass().isArray()
-                && ((Object[]) value).length >= 0) {
+              if (value.getClass().isArray() && ((Object[]) value).length >= 0) {
                 // We're interested in the actual element type...
                 Class<?> elementType =
                   getter.getReturnType().getComponentType();
@@ -449,8 +454,9 @@ public class Option implements RevisionHandler {
                 List<String> optionValues = new ArrayList<String>();
                 optionValues.add(optionValue);
                 while (true) {
-                  optionValue = Utils.getOption(
-                    parameterDescription.commandLineParamName(), options);
+                  optionValue =
+                    Utils.getOption(
+                      parameterDescription.commandLineParamName(), options);
                   if (optionValue.length() == 0) {
                     break;
                   }
@@ -514,10 +520,10 @@ public class Option implements RevisionHandler {
                     valueToSet = new Float(optionValue);
                   }
                 } catch (NumberFormatException e) {
-                  throw new Exception(
-                    "Option: '" + parameterDescription.commandLineParamName()
-                      + "' requires a " + value.getClass().getCanonicalName()
-                      + " argument");
+                  throw new Exception("Option: '"
+                    + parameterDescription.commandLineParamName()
+                    + "' requires a " + value.getClass().getCanonicalName()
+                    + " argument");
                 }
               } else if (value instanceof String) {
                 valueToSet = optionValue;
@@ -554,8 +560,8 @@ public class Option implements RevisionHandler {
     throws Exception {
     String[] optHandlerSpec = Utils.splitOptions(optionValue);
     if (optHandlerSpec.length == 0) {
-      throw new Exception(
-        "Invalid option handler specification " + "string '" + optionValue);
+      throw new Exception("Invalid option handler specification " + "string '"
+        + optionValue);
     }
     String optionHandler = optHandlerSpec[0];
     optHandlerSpec[0] = "";
@@ -572,7 +578,7 @@ public class Option implements RevisionHandler {
    */
   public static void deleteOption(List<Option> list, String name) {
 
-    for (Iterator<Option> iter = list.listIterator(); iter.hasNext(); ) {
+    for (Iterator<Option> iter = list.listIterator(); iter.hasNext();) {
       Option a = iter.next();
       if (a.name().equals(name)) {
         iter.remove();
@@ -581,15 +587,15 @@ public class Option implements RevisionHandler {
   }
 
   /**
-   * Removes an option from a given list of strings that specifies options.
-   * This method is for an option that has a parameter value.
+   * Removes an option from a given list of strings that specifies options. This
+   * method is for an option that has a parameter value.
    *
    * @param list the list to reduce
    * @param name the name of the option (including hyphen)
    */
   public static void deleteOptionString(List<String> list, String name) {
 
-    for (Iterator<String> iter = list.listIterator(); iter.hasNext(); ) {
+    for (Iterator<String> iter = list.listIterator(); iter.hasNext();) {
       String a = iter.next();
       if (a.equals(name)) {
         iter.remove();
@@ -600,15 +606,15 @@ public class Option implements RevisionHandler {
   }
 
   /**
-   * Removes an option from a given list of strings that specifies options.
-   * This method is for an option without a parameter value (i.e., a flag).
+   * Removes an option from a given list of strings that specifies options. This
+   * method is for an option without a parameter value (i.e., a flag).
    *
    * @param list the list to reduce
    * @param name the name of the option (including hyphen)
    */
   public static void deleteFlagString(List<String> list, String name) {
 
-    for (Iterator<String> iter = list.listIterator(); iter.hasNext(); ) {
+    for (Iterator<String> iter = list.listIterator(); iter.hasNext();) {
       String a = iter.next();
       if (a.equals(name)) {
         iter.remove();
@@ -626,8 +632,7 @@ public class Option implements RevisionHandler {
    * @throws IllegalAccessException if a problem occurs
    */
   protected static void setOption(Method setter, Object target,
-    Object valueToSet)
-      throws InvocationTargetException, IllegalAccessException {
+    Object valueToSet) throws InvocationTargetException, IllegalAccessException {
     Object[] setterArgs = { valueToSet };
     setter.invoke(target, setterArgs);
   }

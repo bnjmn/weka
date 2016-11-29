@@ -27,6 +27,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
+import weka.classifiers.AbstractClassifier;
+import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.core.Capabilities;
@@ -329,60 +331,63 @@ public class CVParameterSelection
     throws Exception {
 
     if (depth < m_CVParams.size()) {
-      CVParameter cvParam = (CVParameter)m_CVParams.elementAt(depth);
+      CVParameter cvParam = (CVParameter) m_CVParams.elementAt(depth);
 
       double upper;
-      switch ((int)(cvParam.m_Lower - cvParam.m_Upper + 0.5)) {
-      case 1:
-	upper = m_NumAttributes;
-	break;
-      case 2:
-	upper = m_TrainFoldSize;
-	break;
-      default:
-	upper = cvParam.m_Upper;
-	break;
+      switch ((int) (cvParam.m_Lower - cvParam.m_Upper + 0.5)) {
+        case 1:
+          upper = m_NumAttributes;
+          break;
+        case 2:
+          upper = m_TrainFoldSize;
+          break;
+        default:
+          upper = cvParam.m_Upper;
+          break;
       }
       double increment = (upper - cvParam.m_Lower) / (cvParam.m_Steps - 1);
-      for(cvParam.m_ParamValue = cvParam.m_Lower; 
-	  cvParam.m_ParamValue <= upper; 
-	  cvParam.m_ParamValue += increment) {
-	findParamsByCrossValidation(depth + 1, trainData, random);
+      for (cvParam.m_ParamValue = cvParam.m_Lower;
+           cvParam.m_ParamValue <= upper;
+           cvParam.m_ParamValue += increment) {
+        findParamsByCrossValidation(depth + 1, trainData, random);
       }
     } else {
-      
+
       Evaluation evaluation = new Evaluation(trainData);
 
+      // Work with a copy of the base classifier in case the base classifier does not initialize itself properly
+      Classifier copiedClassifier = AbstractClassifier.makeCopy(m_Classifier);
+
       // Set the classifier options
-      String [] options = createOptions();
+      String[] options = createOptions();
       if (m_Debug) {
-	System.err.print("Setting options for " 
-			 + m_Classifier.getClass().getName() + ":");
-	for (int i = 0; i < options.length; i++) {
-	  System.err.print(" " + options[i]);
-	}
-	System.err.println("");
+        System.err.print("Setting options for "
+                + copiedClassifier.getClass().getName() + ":");
+        for (int i = 0; i < options.length; i++) {
+          System.err.print(" " + options[i]);
+        }
+        System.err.println("");
       }
-      ((OptionHandler)m_Classifier).setOptions(options);
+      ((OptionHandler) copiedClassifier).setOptions(options);
       for (int j = 0; j < m_NumFolds; j++) {
 
         // We want to randomize the data the same way for every 
         // learning scheme.
-	Instances train = trainData.trainCV(m_NumFolds, j, new Random(1));
-	Instances test = trainData.testCV(m_NumFolds, j);
-	m_Classifier.buildClassifier(train);
-	evaluation.setPriors(train);
-	evaluation.evaluateModel(m_Classifier, test);
+        Instances train = trainData.trainCV(m_NumFolds, j, new Random(1));
+        Instances test = trainData.testCV(m_NumFolds, j);
+        copiedClassifier.buildClassifier(train);
+        evaluation.setPriors(train);
+        evaluation.evaluateModel(copiedClassifier, test);
       }
       double error = evaluation.errorRate();
       if (m_Debug) {
-	System.err.println("Cross-validated error rate: " 
-			   + Utils.doubleToString(error, 6, 4));
+        System.err.println("Cross-validated error rate: "
+                + Utils.doubleToString(error, 6, 4));
       }
       if ((m_BestPerformance == -99) || (error < m_BestPerformance)) {
-	
-	m_BestPerformance = error;
-	m_BestClassifierOptions = createOptions();
+
+        m_BestPerformance = error;
+        m_BestClassifierOptions = createOptions();
       }
     }
   }
@@ -515,7 +520,7 @@ public class CVParameterSelection
     } while (cvParam.length() != 0);
 
     super.setOptions(options);
-    
+
     Utils.checkForRemainingOptions(options);
   }
 
@@ -527,16 +532,7 @@ public class CVParameterSelection
   public String [] getOptions() {
 
     Vector<String> options = new Vector<String>();
-    
-    if (m_InitOptions != null) {
-      try {
-	((OptionHandler)m_Classifier).setOptions((String[])m_InitOptions.clone());
-	((OptionHandler)m_Classifier).setOptions((String[])m_BestClassifierOptions.clone());
-      } catch (Exception e) {
-	throw new RuntimeException("CVParameterSelection: could not set options " +
-				   "in getOptions().");
-      } 
-    }
+
     for (int i = 0; i < m_CVParams.size(); i++) {
       options.add("-P"); options.add("" + getCVParameter(i));
     }
@@ -583,6 +579,7 @@ public class CVParameterSelection
     // remove instances with missing class
     Instances trainData = new Instances(instances);
     trainData.deleteWithMissingClass();
+    Instances trainDataCopy = new Instances(trainData); // Just in case base classifier is sensitive to order of data.
     
     if (!(m_Classifier instanceof OptionHandler)) {
       throw new IllegalArgumentException("Base classifier should be OptionHandler.");
@@ -596,7 +593,7 @@ public class CVParameterSelection
 
     // Check whether there are any parameters to optimize
     if (m_CVParams.size() == 0) {
-       m_Classifier.buildClassifier(trainData);
+       m_Classifier.buildClassifier(trainDataCopy);
        m_BestClassifierOptions = m_InitOptions;
        return;
     }
@@ -617,7 +614,7 @@ public class CVParameterSelection
 
     String [] options = (String [])m_BestClassifierOptions.clone();
     ((OptionHandler)m_Classifier).setOptions(options);
-    m_Classifier.buildClassifier(trainData);
+    m_Classifier.buildClassifier(trainDataCopy);
   }
 
 

@@ -5,10 +5,10 @@
 PackageName=distributedWekaHadoopLibs
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2015-05-27
+Date=2016-10-27
 
 # Title (required)
 Title=Hadoop 1.x libraries for distributedWekaHadoop
@@ -32,7 +32,7 @@ Description=Hadoop 1.x libraries for the distributedWekaHadoop package. This pac
 #Changes=
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopLibs1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/distributedWekaHadoopLibs1.0.1.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
@@ -45,6 +45,8 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 
 # Dependencies (format: packageName (equality/inequality version_number)
 Depends=weka (>=3.7.12)
+
+Precludes=distributedWekaHadoop2Libs
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete

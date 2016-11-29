@@ -49,6 +49,10 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
   protected List<ImageListener> m_imageListeners =
     new ArrayList<ImageListener>();
 
+  /** Downstream listeners for text events */
+  protected List<TextListener> m_textListeners =
+    new ArrayList<TextListener>();
+
   /**
    * Constructor
    */
@@ -81,12 +85,22 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
 
     Instances finalHeader =
       ((ArffHeaderHadoopJob) m_runningJob).getFinalHeader();
+    String summaryStats = ((ArffHeaderHadoopJob)m_runningJob).getText();
+
     if (finalHeader != null) {
       DataSetEvent de = new DataSetEvent(this, finalHeader);
       for (DataSourceListener d : m_dsListeners) {
         d.acceptDataSet(de);
       }
     }
+
+    if (summaryStats != null) {
+      TextEvent te = new TextEvent(this, summaryStats, "summary stats");
+      for (TextListener tl : m_textListeners) {
+        tl.acceptText(te);
+      }
+    }
+
     List<BufferedImage> charts =
       ((ArffHeaderHadoopJob) m_runningJob).getSummaryCharts();
     if (charts != null && charts.size() > 0) {
@@ -137,5 +151,13 @@ public class CSVToARFFHadoopJob extends AbstractHadoopJob {
    */
   public synchronized void removeImageListener(ImageListener l) {
     m_imageListeners.remove(l);
+  }
+
+  public synchronized void addTextListener(TextListener l) {
+    m_textListeners.add(l);
+  }
+
+  public synchronized void removeTextListener(TextListener l) {
+    m_textListeners.remove(l);
   }
 }

@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
+import no.uib.cipr.matrix.*;
+
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -35,8 +37,6 @@ import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.SparseInstance;
 import weka.core.Utils;
-import weka.core.matrix.EigenvalueDecomposition;
-import weka.core.matrix.Matrix;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -116,7 +116,7 @@ public class PrincipalComponents extends Filter implements OptionHandler,
   protected int m_NumInstances;
 
   /** Correlation matrix for the original data. */
-  protected double[][] m_Correlation;
+  protected UpperSymmDenseMatrix m_Correlation;
 
   /**
    * If true, center (rather than standardize) the data and compute PCA from
@@ -569,7 +569,7 @@ public class PrincipalComponents extends Filter implements OptionHandler,
     }
 
     // now compute the covariance matrix
-    m_Correlation = new double[m_NumAttribs][m_NumAttribs];
+    m_Correlation = new UpperSymmDenseMatrix(m_NumAttribs);
 
     for (int i = 0; i < m_NumAttribs; i++) {
       for (int j = i; j < m_NumAttribs; j++) {
@@ -580,8 +580,7 @@ public class PrincipalComponents extends Filter implements OptionHandler,
         }
 
         cov /= m_TrainInstances.numInstances() - 1;
-        m_Correlation[i][j] = cov;
-        m_Correlation[j][i] = cov;
+        m_Correlation.set(i, j, cov);
       }
     }
   }
@@ -680,9 +679,6 @@ public class PrincipalComponents extends Filter implements OptionHandler,
     Vector<Integer> deleteCols;
     int[] todelete;
     double[][] v;
-    Matrix corr;
-    EigenvalueDecomposition eig;
-    Matrix V;
 
     m_TrainInstances = new Instances(instances);
 
@@ -738,17 +734,11 @@ public class PrincipalComponents extends Filter implements OptionHandler,
     fillCovariance();
 
     // get eigen vectors/values
-    corr = new Matrix(m_Correlation);
-    eig = corr.eig();
-    V = eig.getV();
-    v = new double[m_NumAttribs][m_NumAttribs];
-    for (i = 0; i < v.length; i++) {
-      for (j = 0; j < v[0].length; j++) {
-        v[i][j] = V.get(i, j);
-      }
-    }
-    m_Eigenvectors = v.clone();
-    m_Eigenvalues = eig.getRealEigenvalues().clone();
+
+    SymmDenseEVD evd = SymmDenseEVD.factorize(m_Correlation);
+
+    m_Eigenvectors = Matrices.getArray(evd.getEigenvectors());
+    m_Eigenvalues = evd.getEigenvalues();
 
     // any eigenvalues less than 0 are not worth anything --- change to 0
     for (i = 0; i < m_Eigenvalues.length; i++) {

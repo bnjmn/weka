@@ -73,6 +73,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.LogHandler;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.core.WekaPackageManager;
@@ -173,8 +174,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       }
     });
 
-    String wekaServerPasswordPath = WekaPackageManager.WEKA_HOME.toString()
-      + File.separator + "server" + File.separator + "weka.pwd";
+    String wekaServerPasswordPath =
+      WekaPackageManager.WEKA_HOME.toString() + File.separator + "server"
+        + File.separator + "weka.pwd";
     File wekaServerPasswordFile = new File(wekaServerPasswordPath);
     boolean useAuth = wekaServerPasswordFile.exists();
 
@@ -253,7 +255,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
    * @param message the message to display
    */
   protected synchronized void statusMessage(String message) {
-    m_classifierPanel.m_Log.statusMessage("[RemoteExceutor] " + message);
+    m_classifierPanel.getLog().statusMessage("[RemoteExceutor] " + message);
   }
 
   /**
@@ -262,7 +264,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
    * @param message the message to display.
    */
   protected synchronized void logMessage(String message) {
-    m_classifierPanel.m_Log.logMessage("[RemoteExecutor] " + message);
+    m_classifierPanel.getLog().logMessage("[RemoteExecutor] " + message);
   }
 
   /**
@@ -287,8 +289,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       PostMethod post = null;
       TaskStatusInfo resultInfo = null;
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client, m_username,
         m_password);
       int interval = m_hostPanel.getMonitorInterval();
@@ -306,8 +308,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
               }
               // only check on those that haven't finished yet
               String taskID = taskIDs.get(i);
-              String service = GetTaskStatusServlet.CONTEXT_PATH + "/?name="
-                + taskID + "&client=Y";
+              String service =
+                GetTaskStatusServlet.CONTEXT_PATH + "/?name=" + taskID
+                  + "&client=Y";
               post = new PostMethod(constructURL(service));
               post.setDoAuthentication(true);
               post.addRequestHeader(new Header("Content-Type", "text/plain"));
@@ -319,8 +322,10 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                 break;
               } else {
                 is = post.getResponseBodyAsStream();
-                ObjectInputStream ois = new ObjectInputStream(
-                  new BufferedInputStream(new GZIPInputStream(is)));
+                ObjectInputStream ois =
+                  SerializationHelper
+                    .getObjectInputStream(new BufferedInputStream(
+                      new GZIPInputStream(is)));
                 Object response = ois.readObject();
                 if (response.toString().startsWith(WekaServlet.RESPONSE_ERROR)) {
 
@@ -334,8 +339,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                   if (resultInfo.getExecutionStatus() == TaskStatusInfo.FINISHED) {
                     numFinished++;
                     finished[i] = true;
-                    if (m_classifierPanel.m_Log instanceof TaskLogger) {
-                      ((TaskLogger) m_classifierPanel.m_Log).taskFinished();
+                    if (m_classifierPanel.getLog() instanceof TaskLogger) {
+                      ((TaskLogger) m_classifierPanel.getLog()).taskFinished();
                     }
                   }
                 }
@@ -365,8 +370,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
               // make sure we decrease the running task count by the number
               // of failed/unchecked tasks
               for (int i = 0; i < taskIDs.size() - numFinished; i++) {
-                if (m_classifierPanel.m_Log instanceof TaskLogger) {
-                  ((TaskLogger) m_classifierPanel.m_Log).taskFinished();
+                if (m_classifierPanel.getLog() instanceof TaskLogger) {
+                  ((TaskLogger) m_classifierPanel.getLog()).taskFinished();
                 }
               }
               break;
@@ -601,8 +606,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         m_training = (Instances) m_compressedTrain.getObject();
         m_compressedTrain = null;
 
-        ClassifierErrorsPlotInstances plotInstances = ExplorerDefaults
-          .getClassifierErrorsPlotInstances();
+        ClassifierErrorsPlotInstances plotInstances =
+          ExplorerDefaults.getClassifierErrorsPlotInstances();
 
         String classifierName = m_template.getClass().getSimpleName();
         m_log.logMessage("Training classifier '" + classifierName
@@ -623,8 +628,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         Evaluation eval = new Evaluation(m_training, m_costMatrix);
-        eval = ClassifierPanel.setupEval(eval, m_classifier, m_training,
-          m_costMatrix, plotInstances, m_outputCollector, false);
+        eval =
+          ClassifierPanel.setupEval(eval, m_classifier, m_training,
+            m_costMatrix, plotInstances, m_outputCollector, false);
 
         plotInstances.setUp();
 
@@ -658,8 +664,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
         try {
           m_persistedResult = WekaServer.getTempFile();
-          oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
+          oos =
+            new ObjectOutputStream(new BufferedOutputStream(
+              new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
           oos.writeObject(results);
           oos.flush();
           // successfully saved result - now save memory
@@ -727,8 +734,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         m_persistedTrain = WekaServer.getTempFile();
-        oos = new ObjectOutputStream(new BufferedOutputStream(
-          new FileOutputStream(m_persistedTrain)));
+        oos =
+          new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+            m_persistedTrain)));
         oos.writeObject(m_compressedTrain);
         oos.flush();
 
@@ -757,8 +765,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       if (m_persistedTrain != null && m_compressedTrain == null) {
         ObjectInputStream ois = null;
         try {
-          ois = new ObjectInputStream(new BufferedInputStream(
-            new FileInputStream(m_persistedTrain)));
+          ois =
+            SerializationHelper.getObjectInputStream(new FileInputStream(
+              m_persistedTrain));
           m_compressedTrain = (SerializedObject) ois.readObject();
         } catch (Exception ex) {
           // OK, we will fail to run now
@@ -788,8 +797,13 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       ObjectInputStream ois = null;
       try {
-        ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(m_persistedResult))));
+        ois =
+          SerializationHelper.getObjectInputStream(new GZIPInputStream(
+            new FileInputStream(m_persistedResult)));
+        /*
+         * ois = new ObjectInputStream(new BufferedInputStream(new
+         * GZIPInputStream( new FileInputStream(m_persistedResult))));
+         */
         List results = (List) ois.readObject();
         m_result.setTaskResult(results);
       } finally {
@@ -876,7 +890,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
      */
     public SeparateTestSetTask(Classifier classifier, Instances train,
       Loader testLoader, File testFile, String testURL, int testClassIndex,
-      boolean saveVis, AbstractOutput outputCollector, CostMatrix costMatrix) throws Exception {
+      boolean saveVis, AbstractOutput outputCollector, CostMatrix costMatrix)
+      throws Exception {
 
       super(classifier, saveVis, outputCollector, costMatrix);
 
@@ -923,8 +938,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         m_train = (Instances) m_compressedTrain.getObject();
         m_compressedTrain = null;
 
-        ClassifierErrorsPlotInstances plotInstances = ExplorerDefaults
-          .getClassifierErrorsPlotInstances();
+        ClassifierErrorsPlotInstances plotInstances =
+          ExplorerDefaults.getClassifierErrorsPlotInstances();
 
         String classifierName = m_template.getClass().getSimpleName();
         m_log.logMessage("Training classifier '" + classifierName
@@ -945,8 +960,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         Evaluation eval = new Evaluation(m_train, m_costMatrix);
-        eval = ClassifierPanel.setupEval(eval, m_classifier, m_train,
-          m_costMatrix, plotInstances, m_outputCollector, false);
+        eval =
+          ClassifierPanel.setupEval(eval, m_classifier, m_train, m_costMatrix,
+            plotInstances, m_outputCollector, false);
 
         plotInstances.setUp();
 
@@ -985,8 +1001,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
         try {
           m_persistedResult = WekaServer.getTempFile();
-          oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
+          oos =
+            new ObjectOutputStream(new BufferedOutputStream(
+              new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
           oos.writeObject(results);
           oos.flush();
           // successfully saved result - now save memory
@@ -1047,8 +1064,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         m_persistedData = WekaServer.getTempFile();
-        oos = new ObjectOutputStream(new BufferedOutputStream(
-          new FileOutputStream(m_persistedData)));
+        oos =
+          new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+            m_persistedData)));
         oos.writeObject(m_compressedTrain);
         oos.flush();
 
@@ -1077,8 +1095,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       if (m_persistedData != null && m_compressedTrain == null) {
         ObjectInputStream ois = null;
         try {
-          ois = new ObjectInputStream(new BufferedInputStream(
-            new FileInputStream(m_persistedData)));
+          ois =
+            SerializationHelper.getObjectInputStream(new FileInputStream(
+              m_persistedData));
           m_compressedTrain = (SerializedObject) ois.readObject();
         } catch (Exception ex) {
           // OK, we will fail to run now
@@ -1108,8 +1127,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       ObjectInputStream ois = null;
       try {
-        ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(m_persistedResult))));
+        ois =
+          SerializationHelper.getObjectInputStream(new GZIPInputStream(
+            new FileInputStream(m_persistedResult)));
         List results = (List) ois.readObject();
         m_result.setTaskResult(results);
       } finally {
@@ -1214,8 +1234,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         m_trainingFold = (Instances) m_compressedTrain.getObject();
         m_compressedTrain = null;
 
-        ClassifierErrorsPlotInstances plotInstances = ExplorerDefaults
-          .getClassifierErrorsPlotInstances();
+        ClassifierErrorsPlotInstances plotInstances =
+          ExplorerDefaults.getClassifierErrorsPlotInstances();
 
         String classifierName = m_template.getClass().getSimpleName();
 
@@ -1244,8 +1264,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         Evaluation eval = new Evaluation(m_trainingFold, m_costMatrix);
-        eval = ClassifierPanel.setupEval(eval, m_classifier, m_trainingFold,
-          m_costMatrix, plotInstances, m_outputCollector, false);
+        eval =
+          ClassifierPanel.setupEval(eval, m_classifier, m_trainingFold,
+            m_costMatrix, plotInstances, m_outputCollector, false);
 
         plotInstances.setUp();
 
@@ -1288,8 +1309,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
         try {
           m_persistedResult = WekaServer.getTempFile();
-          oos = new ObjectOutputStream(new BufferedOutputStream(
-            new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
+          oos =
+            new ObjectOutputStream(new BufferedOutputStream(
+              new GZIPOutputStream(new FileOutputStream(m_persistedResult))));
           oos.writeObject(results);
           oos.flush();
 
@@ -1360,8 +1382,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
 
         m_persistedData = WekaServer.getTempFile();
-        oos = new ObjectOutputStream(new BufferedOutputStream(
-          new FileOutputStream(m_persistedData)));
+        oos =
+          new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+            m_persistedData)));
         oos.writeObject(m_compressedTrain);
         oos.writeObject(m_compressedTest);
         oos.flush();
@@ -1393,8 +1416,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         && m_compressedTest == null) {
         ObjectInputStream ois = null;
         try {
-          ois = new ObjectInputStream(new BufferedInputStream(
-            new FileInputStream(m_persistedData)));
+          ois =
+            SerializationHelper.getObjectInputStream(new FileInputStream(
+              m_persistedData));
           m_compressedTrain = (SerializedObject) ois.readObject();
           m_compressedTest = (SerializedObject) ois.readObject();
         } catch (Exception ex) {
@@ -1425,8 +1449,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       ObjectInputStream ois = null;
       try {
-        ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(new FileInputStream(m_persistedResult))));
+        ois =
+          SerializationHelper.getObjectInputStream(new GZIPInputStream(
+            new FileInputStream(m_persistedResult)));
         List results = (List) ois.readObject();
         m_result.setTaskResult(results);
       } finally {
@@ -1477,28 +1502,26 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       statusMessage("Setting up...");
       CostMatrix costMatrix = null;
-      Instances inst = new Instances(m_classifierPanel.m_Instances);
+      Instances inst = new Instances(m_classifierPanel.getInstances());
       ClassifierErrorsPlotInstances plotInstances = null;
       Instances aggregatedPlotInstances = null;
       ArrayList<Object> aggregatedPlotSizes = null;
       ArrayList<Integer> aggregatedPlotShapes = null;
       PlotData2D plotData = null;
 
-      if (m_classifierPanel.m_EvalWRTCostsBut.isSelected()) {
-        costMatrix = new CostMatrix(
-          (CostMatrix) m_classifierPanel.m_CostMatrixEditor.getValue());
+      if (m_classifierPanel.isSelectedEvalWithRespectToCosts()) {
+        costMatrix = new CostMatrix(m_classifierPanel.getCostMatrix());
       }
 
-      boolean outputModel = m_classifierPanel.m_OutputModelBut.isSelected();
-      boolean outputConfusion = m_classifierPanel.m_OutputConfusionBut
-        .isSelected();
-      boolean outputPerClass = m_classifierPanel.m_OutputPerClassBut
-        .isSelected();
+      boolean outputModel = m_classifierPanel.isSelectedOutputModel();
+      boolean outputConfusion = m_classifierPanel.isSelectedOutputConfusion();
+      boolean outputPerClass =
+        m_classifierPanel.isSelectedOutputPerClassStats();
       boolean outputSummary = true;
-      boolean outputEntropy = m_classifierPanel.m_OutputEntropyBut.isSelected();
-      boolean saveVis = m_classifierPanel.m_StorePredictionsBut.isSelected();
-      boolean outputPredictionsText = (m_classifierPanel.m_ClassificationOutputEditor
-        .getValue().getClass() != Null.class);
+      boolean outputEntropy = m_classifierPanel.isSelectedOutputEntropy();
+      boolean saveVis = m_classifierPanel.isSelectedStorePredictions();
+      boolean outputPredictionsText =
+        m_classifierPanel.getClassificationOutputFormatter().getClass() != Null.class;
 
       String grph = null;
 
@@ -1506,10 +1529,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       int numFolds = 10;
       double percent = 66;
 
-      int classIndex = m_classifierPanel.m_ClassCombo.getSelectedIndex();
+      int classIndex = m_classifierPanel.getSelectedClassIndex();
       inst.setClassIndex(classIndex);
-      Classifier classifier = (Classifier) m_classifierPanel.m_ClassifierEditor
-        .getValue();
+      Classifier classifier = m_classifierPanel.getClassifier();
       Classifier template = null;
       try {
         template = AbstractClassifier.makeCopy(classifier);
@@ -1522,8 +1544,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       StringBuffer outBuff = new StringBuffer();
       AbstractOutput classificationOutput = null;
       if (outputPredictionsText) {
-        classificationOutput = (AbstractOutput) m_classifierPanel.m_ClassificationOutputEditor
-          .getValue();
+        classificationOutput =
+          (AbstractOutput) m_classifierPanel.getClassificationOutputFormatter();
         Instances header = new Instances(inst, 0);
         header.setClassIndex(classIndex);
         classificationOutput.setHeader(header);
@@ -1538,22 +1560,24 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       List<String> taskIDs = null;
 
       try {
-        if (m_classifierPanel.m_CVBut.isSelected()) {
-          numFolds = Integer.parseInt(m_classifierPanel.m_CVText.getText());
+        if (m_classifierPanel.isSelectedCV()) {
+          // numFolds = Integer.parseInt(m_classifierPanel.m_CVText.getText());
+          numFolds = m_classifierPanel.getNumCVFolds();
           if (numFolds <= 1) {
             throw new Exception("Number of folds must be greater than 1");
           }
           testMode = 1;
-        } else if (m_classifierPanel.m_TrainBut.isSelected()) {
+        } else if (m_classifierPanel.isSelectedTestOnTrain()) {
           testMode = 3;
-        } else if (m_classifierPanel.m_PercentBut.isSelected()) {
+        } else if (m_classifierPanel.isSelectedPercentageSplit()) {
           testMode = 2;
-          percent = Double.parseDouble(m_classifierPanel.m_PercentText
-            .getText());
+          percent = m_classifierPanel.getPercentageSplit();
+          // percent =
+          // Double.parseDouble(m_classifierPanel.m_PercentText.getText());
           if ((percent <= 0) || (percent >= 100)) {
             throw new Exception("Percentage must be between 0 and 100");
           }
-        } else if (m_classifierPanel.m_TestSplitBut.isSelected()) {
+        } else if (m_classifierPanel.isSelectedSeparateTestSet()) {
           testMode = 4;
         }
 
@@ -1566,8 +1590,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         name += " (Remote)";
         cmd = classifier.getClass().getName();
         if (classifier instanceof OptionHandler) {
-          cmd += " "
-            + Utils.joinOptions(((OptionHandler) classifier).getOptions());
+          cmd +=
+            " " + Utils.joinOptions(((OptionHandler) classifier).getOptions());
         }
 
         // set up the structure of the plottable instances for
@@ -1606,11 +1630,11 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
             .append(costMatrix.toString()).append("\n");
         }
         outBuff.append("\n");
-        m_classifierPanel.m_History.addResult(name, outBuff);
-        m_classifierPanel.m_History.setSingle(name);
+        m_classifierPanel.getResultHistory().addResult(name, outBuff);
+        m_classifierPanel.getResultHistory().setSingle(name);
 
         if (testMode == 4) {
-          Loader testLoader = m_classifierPanel.m_TestLoader;
+          Loader testLoader = m_classifierPanel.getSeparateTestSetLoader();
           File sourceFile = null;
           String url = null;
           if (testLoader instanceof FileSourcedConverter) {
@@ -1629,7 +1653,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
             throw new Exception("No test file/url has been configured!");
           }
           Instances testStructure = testLoader.getStructure();
-          int testClassIndex = m_classifierPanel.m_TestClassIndex;
+          int testClassIndex = m_classifierPanel.getSeparateTestSetClassIndex();
           testStructure.setClassIndex(testClassIndex);
 
           if (!(template instanceof InputMappedClassifier)) {
@@ -1656,20 +1680,21 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           statusMessage("Evaluating on test data...");
           eval = new Evaluation(inst, costMatrix);
           // make adjustments if the classifier is an InputMappedClassifier
-          eval = ClassifierPanel.setupEval(eval, template, inst, costMatrix,
-            plotInstances, classificationOutput, false);
+          eval =
+            ClassifierPanel.setupEval(eval, template, inst, costMatrix,
+              plotInstances, classificationOutput, false);
           // copy the setup
           evalA = new AggregateableEvaluation(eval);
 
           plotInstances.setUp();
 
           if (outputPredictionsText) {
-            m_classifierPanel.printPredictionsHeader(outBuff,
-              classificationOutput, "test split");
+            printPredictionsHeader(outBuff, classificationOutput, "test split");
           }
 
-          taskIDs = runSeparateTestSet(template, inst, testLoader, sourceFile,
-            url, testClassIndex, saveVis, outputPredictionsText, costMatrix);
+          taskIDs =
+            runSeparateTestSet(template, inst, testLoader, sourceFile, url,
+              testClassIndex, saveVis, outputPredictionsText, costMatrix);
 
           if (taskIDs == null) {
             outBuff
@@ -1688,8 +1713,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
             } else {
               statusMessage("Retrieving classification results for separate test set task"
                 + " from the server...");
-              TaskStatusInfo classifierResult = getResultFromServer(taskIDs
-                .get(0));
+              TaskStatusInfo classifierResult =
+                getResultFromServer(taskIDs.get(0));
               if (classifierResult == null
                 || classifierResult.getTaskResult() == null) {
                 outBuff
@@ -1702,12 +1727,12 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                 evalA.aggregate(taskEval);
 
                 if (results.size() > 1 && plotInstances != null && saveVis) {
-                  ClassifierErrorsPlotInstances taskPlot = (ClassifierErrorsPlotInstances) results
-                    .get(1);
-                  aggregatedPlotInstances = new Instances(
-                    taskPlot.getPlotInstances());
-                  aggregatedPlotShapes = taskPlot.m_PlotShapes;
-                  aggregatedPlotSizes = taskPlot.m_PlotSizes;
+                  ClassifierErrorsPlotInstances taskPlot =
+                    (ClassifierErrorsPlotInstances) results.get(1);
+                  aggregatedPlotInstances =
+                    new Instances(taskPlot.getPlotInstances());
+                  aggregatedPlotShapes = taskPlot.getPlotShapes();
+                  aggregatedPlotSizes = taskPlot.getPlotSizes();
                 }
 
                 if (results.size() > 2 && classificationOutput != null) {
@@ -1727,20 +1752,21 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
           eval = new Evaluation(inst, costMatrix);
           // make adjustments if the classifier is an InputMappedClassifier
-          eval = ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
-            plotInstances, classificationOutput, false);
+          eval =
+            ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
+              plotInstances, classificationOutput, false);
           // copy the setup
           evalA = new AggregateableEvaluation(eval);
 
           plotInstances.setUp();
 
           if (outputPredictionsText) {
-            m_classifierPanel.printPredictionsHeader(outBuff,
-              classificationOutput, "test split");
+            printPredictionsHeader(outBuff, classificationOutput, "test split");
           }
 
-          taskIDs = runPercentageSplit(template, inst, percent, saveVis,
-            outputPredictionsText, costMatrix);
+          taskIDs =
+            runPercentageSplit(template, inst, percent, saveVis,
+              outputPredictionsText, costMatrix);
 
           if (taskIDs == null) {
             outBuff
@@ -1759,8 +1785,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
             } else {
               statusMessage("Retrieving classification results for test on train"
                 + " from the server...");
-              TaskStatusInfo classifierResult = getResultFromServer(taskIDs
-                .get(0));
+              TaskStatusInfo classifierResult =
+                getResultFromServer(taskIDs.get(0));
               if (classifierResult == null
                 || classifierResult.getTaskResult() == null) {
                 outBuff
@@ -1773,12 +1799,12 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                 evalA.aggregate(taskEval);
 
                 if (results.size() > 1 && plotInstances != null && saveVis) {
-                  ClassifierErrorsPlotInstances taskPlot = (ClassifierErrorsPlotInstances) results
-                    .get(1);
-                  aggregatedPlotInstances = new Instances(
-                    taskPlot.getPlotInstances());
-                  aggregatedPlotShapes = taskPlot.m_PlotShapes;
-                  aggregatedPlotSizes = taskPlot.m_PlotSizes;
+                  ClassifierErrorsPlotInstances taskPlot =
+                    (ClassifierErrorsPlotInstances) results.get(1);
+                  aggregatedPlotInstances =
+                    new Instances(taskPlot.getPlotInstances());
+                  aggregatedPlotShapes = taskPlot.getPlotShapes();
+                  aggregatedPlotSizes = taskPlot.getPlotSizes();
                 }
 
                 if (results.size() > 2 && classificationOutput != null) {
@@ -1798,20 +1824,22 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           statusMessage("Evaluating on training data...");
           eval = new Evaluation(inst, costMatrix);
           // make adjustments if the classifier is an InputMappedClassifier
-          eval = ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
-            plotInstances, classificationOutput, false);
+          eval =
+            ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
+              plotInstances, classificationOutput, false);
           // copy the setup
           evalA = new AggregateableEvaluation(eval);
 
           plotInstances.setUp();
 
           if (outputPredictionsText) {
-            m_classifierPanel.printPredictionsHeader(outBuff,
-              classificationOutput, "training set");
+            printPredictionsHeader(outBuff, classificationOutput,
+              "training set");
           }
 
-          taskIDs = runTestOnTrain(template, inst, saveVis,
-            outputPredictionsText, costMatrix, outputModel);
+          taskIDs =
+            runTestOnTrain(template, inst, saveVis, outputPredictionsText,
+              costMatrix, outputModel);
           if (taskIDs == null) {
             outBuff
               .append("\n\nThere was a problem sending test on train task to the "
@@ -1829,8 +1857,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
             } else {
               statusMessage("Retrieving classification results for test on train"
                 + " from the server...");
-              TaskStatusInfo classifierResult = getResultFromServer(taskIDs
-                .get(0));
+              TaskStatusInfo classifierResult =
+                getResultFromServer(taskIDs.get(0));
               if (classifierResult == null
                 || classifierResult.getTaskResult() == null) {
                 outBuff
@@ -1843,12 +1871,12 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                 evalA.aggregate(taskEval);
 
                 if (results.size() > 1 && plotInstances != null && saveVis) {
-                  ClassifierErrorsPlotInstances taskPlot = (ClassifierErrorsPlotInstances) results
-                    .get(1);
-                  aggregatedPlotInstances = new Instances(
-                    taskPlot.getPlotInstances());
-                  aggregatedPlotShapes = taskPlot.m_PlotShapes;
-                  aggregatedPlotSizes = taskPlot.m_PlotSizes;
+                  ClassifierErrorsPlotInstances taskPlot =
+                    (ClassifierErrorsPlotInstances) results.get(1);
+                  aggregatedPlotInstances =
+                    new Instances(taskPlot.getPlotInstances());
+                  aggregatedPlotShapes = taskPlot.getPlotShapes();
+                  aggregatedPlotSizes = taskPlot.getPlotSizes();
                 }
 
                 if (results.size() > 2 && classificationOutput != null) {
@@ -1864,7 +1892,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                   outBuff
                     .append("=== Classifier model (full training set) ===\n\n");
                   outBuff.append(fullClassifier.toString() + "\n");
-                  m_classifierPanel.m_History.updateResult(name);
+                  m_classifierPanel.getResultHistory().updateResult(name);
                 }
               }
             }
@@ -1876,12 +1904,13 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           statusMessage("Randomizing instances...");
           int rnd = 1;
           try {
-            rnd = Integer.parseInt(m_classifierPanel.m_RandomSeedText.getText()
-              .trim());
+            rnd = m_classifierPanel.getRandomSeed();
+            // Integer.parseInt(m_classifierPanel.m_RandomSeedText.getText()
+            // .trim());
             // System.err.println("Using random seed "+rnd);
           } catch (Exception ex) {
-            m_classifierPanel.m_Log
-              .logMessage("Trouble parsing random seed value");
+            m_classifierPanel.getLog().logMessage(
+              "Trouble parsing random seed value");
             rnd = 1;
           }
           Random random = new Random(rnd);
@@ -1892,20 +1921,21 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           }
           eval = new Evaluation(inst, costMatrix);
           // make adjustments if the classifier is an InputMappedClassifier
-          eval = ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
-            plotInstances, classificationOutput, false);
+          eval =
+            ClassifierPanel.setupEval(eval, classifier, inst, costMatrix,
+              plotInstances, classificationOutput, false);
           // copy the setup
           evalA = new AggregateableEvaluation(eval);
 
           plotInstances.setUp();
 
           if (outputPredictionsText) {
-            m_classifierPanel.printPredictionsHeader(outBuff,
-              classificationOutput, "test data");
+            printPredictionsHeader(outBuff, classificationOutput, "test data");
           }
 
-          taskIDs = runCV(template, inst, numFolds, random, saveVis,
-            outputPredictionsText, costMatrix);
+          taskIDs =
+            runCV(template, inst, numFolds, random, saveVis,
+              outputPredictionsText, costMatrix);
           if (taskIDs == null) {
             outBuff.append("\n\nThere was a problem sending fold tasks to the "
               + "server - check the log.");
@@ -1925,8 +1955,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
               for (int i = 0; i < taskIDs.size(); i++) {
                 statusMessage("Retrieving classification results for fold "
                   + (i + 1) + " from the server...");
-                TaskStatusInfo classifierResult = getResultFromServer(taskIDs
-                  .get(i));
+                TaskStatusInfo classifierResult =
+                  getResultFromServer(taskIDs.get(i));
                 if (classifierResult == null
                   || classifierResult.getTaskResult() == null) {
                   outBuff
@@ -1940,20 +1970,20 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
                 evalA.aggregate(foldEval);
 
                 if (results.size() > 1 && plotInstances != null && saveVis) {
-                  ClassifierErrorsPlotInstances foldPlot = (ClassifierErrorsPlotInstances) results
-                    .get(1);
+                  ClassifierErrorsPlotInstances foldPlot =
+                    (ClassifierErrorsPlotInstances) results.get(1);
 
                   if (aggregatedPlotInstances == null) {
-                    aggregatedPlotInstances = new Instances(
-                      foldPlot.getPlotInstances());
+                    aggregatedPlotInstances =
+                      new Instances(foldPlot.getPlotInstances());
                     aggregatedPlotShapes = foldPlot.getPlotShapes();
                     aggregatedPlotSizes = foldPlot.getPlotSizes();
                   } else {
                     Instances temp = foldPlot.getPlotInstances();
                     for (int j = 0; j < temp.numInstances(); j++) {
                       aggregatedPlotInstances.add(temp.get(j));
-                      aggregatedPlotShapes.add(foldPlot.m_PlotShapes.get(j));
-                      aggregatedPlotSizes.add(foldPlot.m_PlotSizes.get(j));
+                      aggregatedPlotShapes.add(foldPlot.getPlotShapes().get(j));
+                      aggregatedPlotSizes.add(foldPlot.getPlotSizes().get(j));
                     }
                   }
                 }
@@ -2013,16 +2043,16 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           }
 
           if (fullClassifier != null && (fullClassifier instanceof Sourcable)
-            && m_classifierPanel.m_OutputSourceCode.isSelected()) {
+            && m_classifierPanel.isSelectedOutputSourceCode()) {
             outBuff.append("=== Source code ===\n\n");
             outBuff.append(Evaluation.wekaStaticWrapper(
               ((Sourcable) fullClassifier),
-              m_classifierPanel.m_SourceCodeClass.getText()));
+              m_classifierPanel.getSourceCodeClassName()));
           }
 
-          m_classifierPanel.m_History.updateResult(name);
+          m_classifierPanel.getResultHistory().updateResult(name);
           logMessage("Finished " + cname);
-          m_classifierPanel.m_Log.statusMessage("OK");
+          m_classifierPanel.getLog().statusMessage("OK");
         }
       } catch (Exception ex) {
         logMessage(ex.getMessage());
@@ -2042,44 +2072,46 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
               ArrayList<Object> vv = new ArrayList<Object>();
               vv.add(fullClassifier);
-              Instances trainHeader = new Instances(
-                m_classifierPanel.m_Instances, 0);
+              Instances trainHeader =
+                new Instances(m_classifierPanel.getInstances(), 0);
               trainHeader.setClassIndex(classIndex);
               vv.add(trainHeader);
               if (grph != null) {
                 vv.add(grph);
               }
-              m_classifierPanel.m_History.addObject(name, vv);
+              m_classifierPanel.getResultHistory().addObject(name, vv);
             } else if (saveVis && plotData != null
               && plotData.getPlotInstances().numInstances() > 0) {
-              m_classifierPanel.m_CurrentVis = new weka.gui.visualize.VisualizePanel();
-              m_classifierPanel.m_CurrentVis.setName(name + " ("
-                + inst.relationName() + ")");
-              m_classifierPanel.m_CurrentVis.setLog(m_classifierPanel.m_Log);
-              m_classifierPanel.m_CurrentVis.addPlot(plotData);
+              m_classifierPanel
+                .setCurrentVisualization(new weka.gui.visualize.VisualizePanel());
+              m_classifierPanel.getCurrentVisualization().setName(
+                name + " (" + inst.relationName() + ")");
+              m_classifierPanel.getCurrentVisualization().setLog(
+                m_classifierPanel.getLog());
+              m_classifierPanel.getCurrentVisualization().addPlot(plotData);
               // m_CurrentVis.setColourIndex(plotInstances.getPlotInstances().classIndex()+1);
-              m_classifierPanel.m_CurrentVis.setColourIndex(plotData
-                .getPlotInstances().classIndex());
+              m_classifierPanel.getCurrentVisualization().setColourIndex(
+                plotData.getPlotInstances().classIndex());
               plotInstances.cleanUp();
 
               ArrayList<Object> vv = new ArrayList<Object>();
               if (outputModel) {
                 vv.add(fullClassifier);
-                Instances trainHeader = new Instances(
-                  m_classifierPanel.m_Instances, 0);
+                Instances trainHeader =
+                  new Instances(m_classifierPanel.getInstances(), 0);
                 trainHeader.setClassIndex(classIndex);
                 vv.add(trainHeader);
                 if (grph != null) {
                   vv.add(grph);
                 }
               }
-              vv.add(m_classifierPanel.m_CurrentVis);
+              vv.add(m_classifierPanel.getCurrentVisualization());
 
               if ((evalA != null) && (evalA.predictions() != null)) {
                 vv.add(evalA.predictions());
                 vv.add(inst.classAttribute());
               }
-              m_classifierPanel.m_History.addObject(name, vv);
+              m_classifierPanel.getResultHistory().addObject(name, vv);
             }
 
             // purge all the tasks from the server.
@@ -2087,7 +2119,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
               statusMessage("Purging completed tasks from server");
               logMessage("Purging completed tasks from server");
               purgeTasksFromServer(taskIDs);
-              m_classifierPanel.m_Log.statusMessage("OK");
+              m_classifierPanel.getLog().statusMessage("OK");
             }
           } catch (Exception ex) {
             ex.printStackTrace();
@@ -2127,8 +2159,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       AbstractOutput outputCollector = null;
       if (outputPredictionsText) {
         try {
-          outputCollector = (AbstractOutput) m_classifierPanel.m_ClassificationOutputEditor
-            .getValue().getClass().newInstance();
+          outputCollector =
+            (AbstractOutput) m_classifierPanel
+              .getClassificationOutputFormatter().getClass().newInstance();
         } catch (InstantiationException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -2138,8 +2171,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       SeparateTestSetTask tTask = null;
       try {
-        tTask = new SeparateTestSetTask(current, inst, testLoader, sourceFile,
-          url, testClassIndex, saveVis, outputCollector, costMatrix);
+        tTask =
+          new SeparateTestSetTask(current, inst, testLoader, sourceFile, url,
+            testClassIndex, saveVis, outputCollector, costMatrix);
 
       } catch (Exception ex) {
         ex.printStackTrace();
@@ -2156,8 +2190,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         taskIDs = null;
       }
 
-      if (m_classifierPanel.m_Log instanceof TaskLogger) {
-        ((TaskLogger) m_classifierPanel.m_Log).taskStarted();
+      if (m_classifierPanel.getLog() instanceof TaskLogger) {
+        ((TaskLogger) m_classifierPanel.getLog()).taskStarted();
       }
 
       return taskIDs;
@@ -2190,8 +2224,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       AbstractOutput outputCollector = null;
       if (outputPredictionsText) {
         try {
-          outputCollector = (AbstractOutput) m_classifierPanel.m_ClassificationOutputEditor
-            .getValue().getClass().newInstance();
+          outputCollector =
+            (AbstractOutput) m_classifierPanel
+              .getClassificationOutputFormatter().getClass().newInstance();
         } catch (InstantiationException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -2199,12 +2234,11 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
       }
 
-      if (!m_classifierPanel.m_PreserveOrderBut.isSelected()) {
+      if (!m_classifierPanel.isSelectedPreserveOrder()) {
         statusMessage("Randomizing instances...");
         int rnd = 1;
         try {
-          rnd = Integer.parseInt(m_classifierPanel.m_RandomSeedText.getText()
-            .trim());
+          rnd = m_classifierPanel.getRandomSeed();
         } catch (Exception ex) {
           logMessage("Trouble parsing random seed value");
         }
@@ -2218,8 +2252,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       FoldTask fTask = null;
       try {
-        fTask = new FoldTask(current, train, test, -1, saveVis,
-          outputCollector, costMatrix);
+        fTask =
+          new FoldTask(current, train, test, -1, saveVis, outputCollector,
+            costMatrix);
       } catch (Exception ex) {
         ex.printStackTrace();
         taskIDs = null;
@@ -2235,8 +2270,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         taskIDs = null;
       }
 
-      if (m_classifierPanel.m_Log instanceof TaskLogger) {
-        ((TaskLogger) m_classifierPanel.m_Log).taskStarted();
+      if (m_classifierPanel.getLog() instanceof TaskLogger) {
+        ((TaskLogger) m_classifierPanel.getLog()).taskStarted();
       }
 
       return taskIDs;
@@ -2269,8 +2304,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
       AbstractOutput outputCollector = null;
       if (outputPredictionsText) {
         try {
-          outputCollector = (AbstractOutput) m_classifierPanel.m_ClassificationOutputEditor
-            .getValue().getClass().newInstance();
+          outputCollector =
+            (AbstractOutput) m_classifierPanel
+              .getClassificationOutputFormatter().getClass().newInstance();
         } catch (InstantiationException e) {
           e.printStackTrace();
         } catch (IllegalAccessException e) {
@@ -2280,8 +2316,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
 
       TestOnTrainTask ttask = null;
       try {
-        ttask = new TestOnTrainTask(current, inst, saveVis, outputCollector,
-          costMatrix, outputModel);
+        ttask =
+          new TestOnTrainTask(current, inst, saveVis, outputCollector,
+            costMatrix, outputModel);
       } catch (Exception ex) {
         ex.printStackTrace();
         taskIDs = null;
@@ -2294,8 +2331,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         // bail out here...
         taskIDs = null;
       }
-      if (m_classifierPanel.m_Log instanceof TaskLogger) {
-        ((TaskLogger) m_classifierPanel.m_Log).taskStarted();
+      if (m_classifierPanel.getLog() instanceof TaskLogger) {
+        ((TaskLogger) m_classifierPanel.getLog()).taskStarted();
       }
 
       return taskIDs;
@@ -2337,8 +2374,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         AbstractOutput outputCollector = null;
         if (outputPredictionsText) {
           try {
-            outputCollector = (AbstractOutput) m_classifierPanel.m_ClassificationOutputEditor
-              .getValue().getClass().newInstance();
+            outputCollector =
+              (AbstractOutput) m_classifierPanel
+                .getClassificationOutputFormatter().getClass().newInstance();
           } catch (InstantiationException e) {
             e.printStackTrace();
           } catch (IllegalAccessException e) {
@@ -2347,8 +2385,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         }
         FoldTask fTask = null;
         try {
-          fTask = new FoldTask(current, train, test, fold + 1, saveVis,
-            outputCollector, costMatrix);
+          fTask =
+            new FoldTask(current, train, test, fold + 1, saveVis,
+              outputCollector, costMatrix);
         } catch (Exception ex) {
           ex.printStackTrace();
           taskIDs = null;
@@ -2365,8 +2404,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           break;
         }
 
-        if (m_classifierPanel.m_Log instanceof TaskLogger) {
-          ((TaskLogger) m_classifierPanel.m_Log).taskStarted();
+        if (m_classifierPanel.getLog() instanceof TaskLogger) {
+          ((TaskLogger) m_classifierPanel.getLog()).taskStarted();
         }
       }
 
@@ -2382,8 +2421,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
     String realHostname = m_hostPanel.getHostName();
     String realPort = m_hostPanel.getPort();
     try {
-      realHostname = Environment.getSystemWide().substitute(
-        m_hostPanel.getHostName());
+      realHostname =
+        Environment.getSystemWide().substitute(m_hostPanel.getHostName());
       realPort = Environment.getSystemWide().substitute(m_hostPanel.getPort());
     } catch (Exception ex) {
     }
@@ -2427,8 +2466,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
         "application/octet-stream"));
 
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client, m_username,
         m_password);
 
@@ -2438,7 +2477,7 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           + "required");
       } else {
         is = post.getResponseBodyAsStream();
-        ObjectInputStream ois = new ObjectInputStream(is);
+        ObjectInputStream ois = SerializationHelper.getObjectInputStream(is);
         // System.out.println("Number of bytes in response " + ois.available());
         Object response = ois.readObject();
         if (response.toString().startsWith(WekaServlet.RESPONSE_ERROR)) {
@@ -2484,15 +2523,15 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
     String taskList = tasks.substring(0, tasks.lastIndexOf(","));
 
     try {
-      String service = PurgeTaskServlet.CONTEXT_PATH + "/?name=" + taskList
-        + "&client=Y";
+      String service =
+        PurgeTaskServlet.CONTEXT_PATH + "/?name=" + taskList + "&client=Y";
       post = new PostMethod(constructURL(service));
       post.setDoAuthentication(true);
       post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client, m_username,
         m_password);
 
@@ -2502,8 +2541,8 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           + "required");
       } else {
         is = post.getResponseBodyAsStream();
-        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          is));
+        ObjectInputStream ois =
+          SerializationHelper.getObjectInputStream(new BufferedInputStream(is));
         Object response = ois.readObject();
         if (response.toString().startsWith(WekaServlet.RESPONSE_ERROR)) {
 
@@ -2543,15 +2582,15 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
     TaskStatusInfo resultInfo = null;
 
     try {
-      String service = GetTaskResultServlet.CONTEXT_PATH + "/?name=" + taskID
-        + "&client=Y";
+      String service =
+        GetTaskResultServlet.CONTEXT_PATH + "/?name=" + taskID + "&client=Y";
       post = new PostMethod(constructURL(service));
       post.setDoAuthentication(true);
       post.addRequestHeader(new Header("Content-Type", "text/plain"));
 
       // Get HTTP client
-      HttpClient client = WekaServer.ConnectionManager.getSingleton()
-        .createHttpClient();
+      HttpClient client =
+        WekaServer.ConnectionManager.getSingleton().createHttpClient();
       WekaServer.ConnectionManager.addCredentials(client, m_username,
         m_password);
 
@@ -2561,8 +2600,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
           + "required");
       } else {
         is = post.getResponseBodyAsStream();
-        ObjectInputStream ois = new ObjectInputStream(new BufferedInputStream(
-          new GZIPInputStream(is)));
+        ObjectInputStream ois =
+          SerializationHelper.getObjectInputStream(new BufferedInputStream(
+            new GZIPInputStream(is)));
         Object response = ois.readObject();
         if (response.toString().startsWith(WekaServlet.RESPONSE_ERROR)) {
 
@@ -2594,16 +2634,31 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
     return resultInfo;
   }
 
+  /**
+   * outputs the header for the predictions on the data.
+   *
+   * @param outBuff the buffer to add the output to
+   * @param classificationOutput for generating the classification output
+   * @param title the title to print
+   */
+  protected static void printPredictionsHeader(StringBuffer outBuff,
+    AbstractOutput classificationOutput, String title) {
+    if (classificationOutput.generatesOutput()) {
+      outBuff.append("=== Predictions on " + title + " ===\n\n");
+    }
+    classificationOutput.printHeader();
+  }
+
   protected synchronized void launchRemote() {
-    if (m_classifierPanel.m_CVBut.isSelected()
-      || m_classifierPanel.m_TrainBut.isSelected()
-      || m_classifierPanel.m_PercentBut.isSelected()) {
+    if (m_classifierPanel.isSelectedCV()
+      || m_classifierPanel.isSelectedTestOnTrain()
+      || m_classifierPanel.isSelectedPercentageSplit()) {
       ExecuteThread eThread = new ExecuteThread();
       eThread.setPriority(Thread.MIN_PRIORITY);
       logMessage("Starting remote execution...");
       eThread.start();
     } else {
-      if (m_classifierPanel.m_TestLoader != null) {
+      if (m_classifierPanel.getSeparateTestSetLoader() != null) {
         ExecuteThread eThread = new ExecuteThread();
         eThread.setPriority(Thread.MIN_PRIORITY);
         logMessage("Starting remote execution...");
@@ -2615,8 +2670,9 @@ public class ClassifierPanelRemoteLauncher extends JPanel implements
   protected void popupUI() {
     // m_launchButton.setEnabled(false);
 
-    m_popupD = new JDialog(
-      (java.awt.Frame) m_classifierPanel.getTopLevelAncestor(), true);
+    m_popupD =
+      new JDialog((java.awt.Frame) m_classifierPanel.getTopLevelAncestor(),
+        true);
     m_popupD.setLayout(new BorderLayout());
     m_popupD.getContentPane().add(this, BorderLayout.CENTER);
 

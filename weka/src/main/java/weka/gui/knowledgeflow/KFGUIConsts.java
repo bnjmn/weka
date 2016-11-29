@@ -53,4 +53,10 @@ public class KFGUIConsts {
   /** Props for templates */
   protected static final String TEMPLATE_PROPERTY_FILE =
     "weka/gui/knowledgeflow/templates/templates.props";
+
+  /** Constant for an open dialog (same as JFileChooser.OPEN_DIALOG) */
+  public static final int OPEN_DIALOG = 0;
+
+  /** Constant for a save dialog (same as JFileChooser.SAVE_DIALOG) */
+  public static final int SAVE_DIALOG = 1;
 }

@@ -192,6 +192,43 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   }
 
   /**
+   * Constructor for a numeric or string attribute. Provides an alternative
+   * way for creating string attributes.
+   *
+   * @param attributeName the name for the attribute
+   * @param createStringAttribute if true, a string attribute will be created, otherwise a numeric one.
+   */
+  // @ requires attributeName != null;
+  // @ ensures m_Name == attributeName;
+  public Attribute(String attributeName, boolean createStringAttribute) {
+
+    this(attributeName, createStringAttribute, (ProtectedProperties)null);
+  }
+
+  /**
+   * Constructor for a numeric or string attribute, where metadata is supplied. Provides an alternative
+   * way for creating string attributes.
+   *
+   * @param attributeName the name for the attribute
+   * @param createStringAttribute if true, a string attribute will be created, otherwise a numeric one.
+   * @param metadata the attribute's properties
+   */
+  // @ requires attributeName != null;
+  // @ requires metadata != null;
+  // @ ensures m_Name == attributeName;
+  public Attribute(String attributeName, boolean createStringAttribute, ProtectedProperties metadata) {
+
+    m_Name = attributeName;
+    if (createStringAttribute) {
+      m_AttributeInfo = new NominalAttributeInfo((List<String>)null, attributeName);
+      m_Type = STRING;
+    }
+    if (metadata != null) {
+      m_AttributeMetaInfo = new AttributeMetaInfo(metadata, this);
+    }
+  }
+
+  /**
    * Constructor for a date attribute.
    * 
    * @param attributeName the name for the attribute
@@ -356,7 +393,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   }
 
   /**
-   * Tests if given attribute is equal to this attribute.
+   * Tests if given attribute is equal to this attribute. Attribute indices are ignored in the comparison.
    * 
    * @param other the Object to be compared to this attribute
    * @return true if the given attribute is equal to this attribute
@@ -379,6 +416,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
   /**
    * Tests if given attribute is equal to this attribute. If they're not the
    * same a message detailing why they differ will be returned, otherwise null.
+   * Attribute indices are ignored in the comparison.
    * 
    * @param other the Object to be compared to this attribute
    * @return null if the given attribute is equal to this attribute

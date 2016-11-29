@@ -181,6 +181,7 @@ public class FlowByExpression extends BaseStep {
   @Override
   public void stepInit() throws WekaException {
     m_isReset = true;
+    m_streamingData = null;
 
     // see if the specified downstream steps are connected
     m_validTrueStep =

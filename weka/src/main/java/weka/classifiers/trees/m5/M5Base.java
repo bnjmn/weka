@@ -258,28 +258,27 @@ public abstract class M5Base extends AbstractClassifier implements
    */
   @Override
   public String[] getOptions() {
-    String[] options = new String[5];
-    int current = 0;
+
+    Vector<String> result = new Vector<String>();
 
     if (getUnpruned()) {
-      options[current++] = "-N";
+      result.add("-N");
     }
 
     if (getUseUnsmoothed()) {
-      options[current++] = "-U";
+      result.add("-U");
     }
 
     if (getBuildRegressionTree()) {
-      options[current++] = "-R";
+      result.add("-R");
     }
 
-    options[current++] = "-M";
-    options[current++] = "" + getMinNumInstances();
+    result.add("-M");
+    result.add("" + getMinNumInstances());
 
-    while (current < options.length) {
-      options[current++] = "";
-    }
-    return options;
+    Collections.addAll(result, super.getOptions());
+
+    return result.toArray(new String[result.size()]);
   }
 
   /**

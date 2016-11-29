@@ -27,9 +27,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
-import java.util.HashSet;
 import java.util.Random;
-import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
@@ -141,7 +139,12 @@ import weka.filters.UnsupervisedFilter;
  * -S
  *  Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize)
  * </pre>
- * 
+ *
+ * <pre>
+ * -seed &lt;int&gt;
+ *  The seed for the random number generator (default is 1).
+ * </pre>
+ *
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -320,6 +323,9 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
   protected double[] m_offsets = null;
   protected double[] m_factors = null;
 
+  // The random number seed.
+  protected int m_Seed = 1;
+
   /**
    * Calculates min and max for all attributes in the given data.
    */
@@ -356,9 +362,9 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
     data = new Instances(data);
 
     // Make sure data is shuffled
-    Random random = new Random(1);
+    Random random = new Random(getSeed());
     if (data.numInstances() > 1) {
-      random = data.getRandomNumberGenerator(1);
+      random = data.getRandomNumberGenerator(getSeed());
     }
     data.randomize(random);
 
@@ -483,7 +489,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<Double>> results = new HashSet<Future<Double>>();
+    ArrayList<Future<Double>> results = new ArrayList<Future<Double>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
@@ -586,7 +592,7 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
 
     // Set up result set, and chunk size
     int chunksize = m_data.numInstances() / m_numThreads;
-    Set<Future<double[]>> results = new HashSet<Future<double[]>>();
+    ArrayList<Future<double[]>> results = new ArrayList<Future<double[]>>();
 
     // For each thread
     for (int j = 0; j < m_numThreads; j++) {
@@ -707,7 +713,6 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
         if (empirical != derived) {
           System.err.println("Empirical gradient: " + empirical
             + " Derived gradient: " + derived);
-          System.exit(1);
         }
       }
     }
@@ -1068,6 +1073,35 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
   }
 
   /**
+   * Returns the tip text for this property
+   * @return tip text for this property suitable for
+   * displaying in the explorer/experimenter gui
+   */
+  public String seedTipText() {
+    return "The random number seed to be used.";
+  }
+
+  /**
+   * Set the seed for random number generation.
+   *
+   * @param seed the seed
+   */
+  public void setSeed(int seed) {
+
+    m_Seed = seed;
+  }
+
+  /**
+   * Gets the seed for the random number generations
+   *
+   * @return the seed for the random number generation
+   */
+  public int getSeed() {
+
+    return m_Seed;
+  }
+
+  /**
    * @return a string to describe the option
    */
   public String toleranceTipText() {
@@ -1391,6 +1425,11 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
       "\tWhether to 0=normalize/1=standardize/2=neither. "
         + "(default 1=standardize)", "S", 1, "-S"));
 
+    newVector.addElement(new Option(
+            "\tRandom number seed.\n"
+                    + "\t(default 1)",
+            "seed", 1, "-seed <num>"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -1458,7 +1497,12 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
    * -S
    *  Whether to 0=normalize/1=standardize/2=neither. (default 1=standardize)
    * </pre>
-   * 
+   *
+   * <pre>
+   * -seed &lt;int&gt;
+   *  The seed for the random number generator (default is 1).
+   * </pre>
+   *
    * <!-- options-end -->
    * 
    * Options after -- are passed to the designated filter.
@@ -1517,6 +1561,12 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
       setFilterType(new SelectedTag(FILTER_STANDARDIZE, TAGS_FILTER));
     }
 
+    String seed = Utils.getOption("seed", options);
+    if (seed.length() != 0) {
+      setSeed(Integer.parseInt(seed));
+    } else {
+      setSeed(1);
+    }
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -1568,6 +1618,9 @@ public class MLPAutoencoder extends SimpleBatchFilter implements
 
     options.add("-S");
     options.add("" + m_filterType);
+
+    options.add("-seed");
+    options.add("" + getSeed());
 
     Collections.addAll(options, super.getOptions());
 

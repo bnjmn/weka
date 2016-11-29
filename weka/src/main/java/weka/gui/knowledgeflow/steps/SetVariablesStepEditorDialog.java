@@ -91,6 +91,11 @@ public class SetVariablesStepEditorDialog extends StepEditorDialog {
       }
     }
 
+    /**
+     * Get the variables in internal format
+     *
+     * @return the variables + settings in the internal format
+     */
     public String getVariablesInternal() {
       StringBuilder b = new StringBuilder();
       JTable table = m_table.getTable();

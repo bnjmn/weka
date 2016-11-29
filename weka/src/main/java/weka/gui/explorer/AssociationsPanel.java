@@ -65,6 +65,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Settings;
 import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.AbstractPerspective;
 import weka.gui.GenericObjectEditor;
 import weka.gui.Logger;
@@ -668,8 +669,8 @@ public class AssociationsPanel extends AbstractPerspective implements
             String className = (pluginsVector.elementAt(i));
             try {
               AssociationRuleVisualizePlugin plugin =
-                (AssociationRuleVisualizePlugin) Class.forName(className)
-                  .newInstance();
+                (AssociationRuleVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+                  //Class.forName(className).newInstance();
               if (plugin == null) {
                 continue;
               }
@@ -691,7 +692,8 @@ public class AssociationsPanel extends AbstractPerspective implements
             String className = (pluginsVector.elementAt(i));
             try {
               TreeVisualizePlugin plugin =
-                (TreeVisualizePlugin) Class.forName(className).newInstance();
+                (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
+                  // Class.forName(className).newInstance();
               if (plugin == null) {
                 continue;
               }

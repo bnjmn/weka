@@ -103,6 +103,8 @@ public class KFDefaults extends Defaults {
       "Show scheme tool tips in tree view", "");
   public static final boolean SHOW_JTREE_GLOBAL_INFO_TIPS = true;
 
+  public static final String LAF = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
+
   protected static final Settings.SettingKey[] DEFAULT_KEYS = {
     MAX_UNDO_POINTS_KEY, LAYOUT_COLOR_KEY, SHOW_GRID_KEY, GRID_COLOR_KEY,
     GRID_SPACING_KEY, LAYOUT_WIDTH_KEY, LAYOUT_HEIGHT_KEY,

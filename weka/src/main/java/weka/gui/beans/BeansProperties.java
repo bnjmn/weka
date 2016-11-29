@@ -22,6 +22,7 @@ package weka.gui.beans;
 
 import weka.core.PluginManager;
 import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.metastore.MetaStore;
 import weka.core.metastore.XMLFileBasedMetaStore;
 
@@ -232,7 +233,8 @@ public class BeansProperties implements Serializable {
             renderer = renderer.trim();
             // Check that we can instantiate it successfully
             try {
-              Object p = Class.forName(renderer).newInstance();
+              Object p = WekaPackageClassLoaderManager.objectForName(renderer);
+                // Class.forName(renderer).newInstance();
               if (p instanceof OffscreenChartRenderer) {
                 String name = ((OffscreenChartRenderer) p).rendererName();
                 PluginManager.addPlugin(

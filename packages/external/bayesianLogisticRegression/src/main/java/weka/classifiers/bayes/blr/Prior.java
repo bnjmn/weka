@@ -49,6 +49,14 @@ public abstract class Prior
   protected double penalty = 0.0;
 
   /**
+   * Sets the reference to the Instances object to null to conserve memory.
+   */
+  public void clean() {
+    m_Instances = null;
+    R = null;
+  }
+
+  /**
    * Interface for the update functions for different types of
    * priors.
    *

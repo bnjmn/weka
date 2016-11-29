@@ -21,19 +21,6 @@
 
 package weka.knowledgeflow.steps;
 
-import weka.core.Attribute;
-import weka.core.Environment;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
-import weka.core.WekaException;
-import weka.gui.FilePropertyMetadata;
-import weka.gui.ProgrammaticProperty;
-import weka.gui.knowledgeflow.KFGUIConsts;
-import weka.knowledgeflow.Data;
-import weka.knowledgeflow.StepManager;
-
-import javax.swing.*;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -50,6 +37,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.OptionMetadata;
+import weka.core.WekaException;
+import weka.gui.FilePropertyMetadata;
+import weka.gui.ProgrammaticProperty;
+import weka.gui.knowledgeflow.KFGUIConsts;
+import weka.knowledgeflow.Data;
+import weka.knowledgeflow.StepManager;
+
 /**
  * Step for sorting instances according to one or more attributes.
  *
@@ -57,7 +56,14 @@ import java.util.Map;
  * @version $Revision: $
  */
 @KFStep(name = "Sorter", category = "Tools",
-  toolTipText = "Sort instances in ascending or descending order",
+  toolTipText = "Sort instances in ascending or descending order according "
+    + "to the values of user-specified attributes. Instances can be sorted "
+    + "according to multiple attributes (defined in order). Handles datasets "
+    + "larger than can be fit into main memory via instance connections and "
+    + "specifying the in-memory buffer size. Implements a merge-sort by writing "
+    + "the sorted in-memory buffer to a file when full and then interleaving "
+    + "instances from the disk-based file(s) when the incoming stream has "
+    + "finished.",
   iconPath = KFGUIConsts.BASE_ICON_PATH + "Sorter.gif")
 public class Sorter extends BaseStep {
 
@@ -128,7 +134,7 @@ public class Sorter extends BaseStep {
    *
    * @param tempDir the temp dir to use
    */
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = true)
   @OptionMetadata(displayName = "Directory for temp files",
     description = "Where to store temporary files when spilling to disk",

@@ -55,6 +55,7 @@ import weka.core.Environment;
 import weka.core.EnvironmentHandler;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
 import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.core.xml.XStream;
@@ -537,9 +538,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
    * processing the first instance in the incoming stream. Note that this
    * happens automatically if the incoming instances structure does not match
    * that of any previous structure used to train the model.
-   * 
-   * @param reset true if the incremental classifier should be reset before
-   *          processing the first instance in the incoming data stream
+   *
    */
   public boolean getResetIncrementalClassifier() {
     return m_resetIncrementalClassifier;
@@ -2154,8 +2153,8 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     } /* binary */else {
 
       ObjectInputStream is =
-        new ObjectInputStream(new BufferedInputStream(new FileInputStream(
-          loadFrom)));
+        SerializationHelper.getObjectInputStream(new FileInputStream(loadFrom));
+
       // try and read the model
       temp = (weka.classifiers.Classifier) is.readObject();
       // try and read the header (if present)
@@ -2285,8 +2284,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
     }
 
     if ((m_executorPool == null || (m_executorPool.getQueue().size() == 0 && m_executorPool
-      .getActiveCount() == 0))
-      && m_Classifier != null) {
+      .getActiveCount() == 0)) && m_Classifier != null) {
       newVector.addElement("Save model");
     }
 
@@ -2471,8 +2469,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
       + "|"
       + ((m_ClassifierTemplate instanceof OptionHandler && Utils.joinOptions(
         ((OptionHandler) m_ClassifierTemplate).getOptions()).length() > 0) ? Utils
-        .joinOptions(((OptionHandler) m_ClassifierTemplate).getOptions())
-        + "|"
+        .joinOptions(((OptionHandler) m_ClassifierTemplate).getOptions()) + "|"
         : "");
   }
 

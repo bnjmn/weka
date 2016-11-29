@@ -40,6 +40,7 @@ import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 
@@ -869,7 +870,7 @@ public class ConverterUtils implements Serializable, RevisionHandler {
 
       // get data from converter
       try {
-        cls = Class.forName(classname);
+        cls = WekaPackageClassLoaderManager.forName(classname);
         converter = (FileSourcedConverter) cls.newInstance();
         ext = converter.getFileExtensions();
       } catch (Exception e) {
@@ -1001,7 +1002,7 @@ public class ConverterUtils implements Serializable, RevisionHandler {
     classname = ht.get(extension);
     if (classname != null) {
       try {
-        result = Class.forName(classname).newInstance();
+        result = WekaPackageClassLoaderManager.forName(classname).newInstance();
       } catch (Exception e) {
         result = null;
         e.printStackTrace();

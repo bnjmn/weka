@@ -21,6 +21,14 @@
 
 package weka.knowledgeflow.steps;
 
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+
+import javax.imageio.ImageIO;
+
 import weka.core.Defaults;
 import weka.core.OptionMetadata;
 import weka.core.Settings;
@@ -29,14 +37,6 @@ import weka.gui.FilePropertyMetadata;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
-
-import javax.imageio.ImageIO;
-import javax.swing.JFileChooser;
-import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * Step for saving static images as either png or gif.
@@ -91,7 +91,7 @@ public class ImageSaver extends BaseStep {
     description = "<html>The file to save an image to<br>The variable 'image_count' may be "
       + "used as<br>part of the filename/path in order to differentiate<br>"
       + "multiple images.</html>", displayOrder = 1)
-  @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
+  @FilePropertyMetadata(fileChooserDialogType = KFGUIConsts.OPEN_DIALOG,
     directoriesOnly = false)
   public void setFile(File f) {
     m_file = f;

@@ -45,7 +45,7 @@ public class VisualizeUtils {
   protected static Properties VISUALIZE_PROPERTIES;
 
   /** Default maximum precision for the display of numeric values */
-  protected static int MAX_PRECISION = 10;
+  public static int MAX_PRECISION = 10;
 
   static {
 

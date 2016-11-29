@@ -59,7 +59,7 @@
       optimize="${optimization}"
       debug="${debug}"
       deprecation="${deprecation}"
-      source="1.6" target="1.6">
+      source="1.7" target="1.7">
 
       <classpath refid="project.class.path" /> 
     </javac>
@@ -120,7 +120,7 @@
             optimize="${optimization}"
             debug="${debug}"
             deprecation="${deprecation}"
-            source="1.6" target="1.6">
+            source="1.7" target="1.7">
        <classpath refid="project.class.path" /> 
      </javac>
      <copy todir="${build}/testcases" >
@@ -173,6 +173,8 @@
       </fileset>
     </delete>
     <copy file="Description.props"
+          todir="${dist}/${package}"/>
+    <copy file="PluginManager.props"
           todir="${dist}/${package}"/>
     <mkdir dir="${dist}/${package}/doc"/>
     <copy todir="${dist}/${package}/doc" >

@@ -6,10 +6,10 @@
 PackageName=ensemblesOfNestedDichotomies
 
 # Version (required)
-Version=1.0.3
+Version=1.0.5
 
 #Date
-Date=2013-12-03
+Date=2016-06-30
 
 # Title (required)
 Title= A meta classifier for handling multi-class datasets with 2-class classifiers by building an ensemble of nested dichotomies.
@@ -17,7 +17,7 @@ Title= A meta classifier for handling multi-class datasets with 2-class classifi
 Category=Ensemble learning
 
 # Author (required)
-Author=Eibe Frank and Lin Dong
+Author=Eibe Frank and Lin Dong and Tim Leathart.
 
 # Maintainer (required)
 Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description= A meta classifier for handling multi-class datasets with 2-class classifiers by building an ensemble of nested dichotomies.<br/><br/>For more info, check<br/><br/>Lin Dong, Eibe Frank, Stefan Kramer: Ensembles of Balanced Nested Dichotomies for Multi-class Problems. In: PKDD, 84-95, 2005.<br/><br/>Eibe Frank, Stefan Kramer: Ensembles of nested dichotomies for multi-class problems. In: Twenty-first International Conference on Machine Learning, 2004.
 
-Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=New classes for ECML 2016 paper.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/ensemblesOfNestedDichotomies1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/ensemblesOfNestedDichotomies1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ensemblesOfNestedDichotomies
@@ -43,4 +43,4 @@ URL=http://weka.sourceforge.net/doc.packages/ensemblesOfNestedDichotomies
 #Related=WrapperSubsetEval
 
 # Dependencies
-Depends=weka (>=3.7.11)
+Depends=weka (>=3.8.0)

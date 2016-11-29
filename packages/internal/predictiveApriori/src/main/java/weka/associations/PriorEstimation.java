@@ -158,17 +158,17 @@ public class PriorEstimation implements Serializable, RevisionHandler {
         }
         int[] ruleItem = new int[maxLength];
         for (int k = 0; k < itemArray.length; k++) {
-          if (current.m_premise.m_items[k] != -1) {
-            ruleItem[k] = current.m_premise.m_items[k];
-          } else if (current.m_consequence.m_items[k] != -1) {
-            ruleItem[k] = current.m_consequence.m_items[k];
+          if (current.m_premise.getItems()[k] != -1) {
+            ruleItem[k] = current.m_premise.getItems()[k];
+          } else if (current.m_consequence.getItems()[k] != -1) {
+            ruleItem[k] = current.m_consequence.getItems()[k];
           } else {
             ruleItem[k] = -1;
           }
         }
         ItemSet rule = new ItemSet(ruleItem);
         updateCounters(rule);
-        ruleCounter = rule.m_counter;
+        ruleCounter = rule.support();
         if (ruleCounter > 0) {
           jump = true;
         }
@@ -176,7 +176,7 @@ public class PriorEstimation implements Serializable, RevisionHandler {
         j++;
         if (jump) {
           buildDistribution((double) ruleCounter
-            / (double) current.m_premise.m_counter, i);
+            / (double) current.m_premise.support(), i);
         }
       }
 

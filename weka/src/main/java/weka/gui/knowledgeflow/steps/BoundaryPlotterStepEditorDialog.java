@@ -1,11 +1,25 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    BoundaryPlotterStepEditorDialog.java
+ *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
 package weka.gui.knowledgeflow.steps;
-
-import java.awt.BorderLayout;
-import java.awt.GridLayout;
-
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.border.TitledBorder;
 
 import weka.core.Attribute;
 import weka.core.Instances;
@@ -14,21 +28,49 @@ import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.steps.BoundaryPlotter;
 
+import javax.swing.*;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+
 /**
+ * Editor dialog for the boundary plotter step
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 public class BoundaryPlotterStepEditorDialog extends GOEStepEditorDialog {
 
   private static final long serialVersionUID = 4351742205211273840L;
+
+  /**
+   * Combo box for selecting the x attribute to plot when there is an incoming
+   * instances structure at design time
+   */
   protected JComboBox<String> m_xCombo = new JComboBox<String>();
+
+  /**
+   * Combo box for selecting the y attribute to plot when there is an incoming
+   * instances structure at design time
+   */
   protected JComboBox<String> m_yCombo = new JComboBox<String>();
 
+  /**
+   * Environment field for specifying the x attribute when there isn't incoming
+   * instances structure at design time
+   */
   protected weka.gui.EnvironmentField m_xEnviro =
     new weka.gui.EnvironmentField();
+
+  /**
+   * Environment field for specifying the y attribute when there isn't incoming
+   * instances structure at design time
+   */
   protected weka.gui.EnvironmentField m_yEnviro =
     new weka.gui.EnvironmentField();
 
+  /**
+   * Layout the editor
+   */
   @Override
   public void layoutEditor() {
     // just need to add widgets for choosing the x and y visualization
@@ -115,6 +157,9 @@ public class BoundaryPlotterStepEditorDialog extends GOEStepEditorDialog {
     m_editorHolder.add(attPan, BorderLayout.SOUTH);
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     String xName =

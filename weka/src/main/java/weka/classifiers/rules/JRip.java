@@ -1227,6 +1227,40 @@ public class JRip extends AbstractClassifier implements
     }
 
     /**
+     * Removes redundant tests in the rule.
+     *
+     * @param data an instance object that contains the appropriate header information for the attributes.
+     */
+    public void cleanUp(Instances data) {
+
+      double[] mins = new double[data.numAttributes()];
+      double[] maxs = new double[data.numAttributes()];
+      for (int i = 0; i < data.numAttributes(); i++) {
+        mins[i] = Double.MAX_VALUE;
+        maxs[i] = -Double.MAX_VALUE;
+      }
+      for (int i = m_Antds.size() - 1; i >= 0; i--) {
+        Attribute att = m_Antds.get(i).getAttr();
+        if (att.isNumeric()) {
+          double splitPoint = ((NumericAntd)m_Antds.get(i)).getSplitPoint();
+          if (m_Antds.get(i).getAttrValue() == 0) {
+            if (splitPoint < mins[att.index()]) {
+              mins[att.index()] = splitPoint;
+            } else {
+              m_Antds.remove(i);
+            }
+          } else {
+            if (splitPoint > maxs[att.index()]) {
+              maxs[att.index()] = splitPoint;
+            } else {
+              m_Antds.remove(i);
+            }
+          }
+        }
+      }
+    }
+
+    /**
      * Sets the internal representation of the class label to be predicted
      * 
      * @param cl the internal representation of the class label to be predicted
@@ -1455,7 +1489,6 @@ public class JRip extends AbstractClassifier implements
      * @param instances the data based on which the infoGain is computed
      * @param defAcRt the default accuracy rate of data
      * @param antd the specific antecedent
-     * @param numConds the number of antecedents in the rule so far
      * @return the data covered by the antecedent
      */
     private Instances computeInfoGain(Instances instances, double defAcRt,
@@ -1717,6 +1750,11 @@ public class JRip extends AbstractClassifier implements
       }
 
       data = rulesetForOneClass(expFPRate, data, classIndex, defDL);
+    }
+
+    // Remove redundant numeric tests from the rules
+    for (Rule rule : m_Ruleset) {
+      ((RipperRule)rule).cleanUp(data);
     }
 
     // Set the default rule

@@ -21,16 +21,12 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-
-import javax.swing.BorderFactory;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-
 import weka.gui.knowledgeflow.StepEditorDialog;
 import weka.knowledgeflow.steps.Note;
 import weka.knowledgeflow.steps.Step;
+
+import javax.swing.*;
+import java.awt.*;
 
 /**
  * Editor dialog for Notes
@@ -42,8 +38,14 @@ public class NoteEditorDialog extends StepEditorDialog {
 
   private static final long serialVersionUID = 2358735294813135692L;
 
+  /** Text area of the note */
   protected JTextArea m_textArea = new JTextArea(5, 40);
 
+  /**
+   * Set the step (note) being edited
+   *
+   * @param step the step to edit
+   */
   @Override
   protected void setStepToEdit(Step step) {
     // override to prevent an "about" panel getting added
@@ -51,6 +53,9 @@ public class NoteEditorDialog extends StepEditorDialog {
     layoutEditor();
   }
 
+  /**
+   * Layout the note editor
+   */
   @Override
   public void layoutEditor() {
     m_textArea.setLineWrap(true);
@@ -64,6 +69,9 @@ public class NoteEditorDialog extends StepEditorDialog {
     add(holder, BorderLayout.CENTER);
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     ((Note) getStepToEdit()).setNoteText(m_textArea.getText());

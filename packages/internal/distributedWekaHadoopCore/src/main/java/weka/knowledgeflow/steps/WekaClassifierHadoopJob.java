@@ -94,7 +94,7 @@ public class WekaClassifierHadoopJob extends AbstractHadoopJob {
       if (getStepManager().numOutgoingConnectionsOfType(StepManager.CON_TEXT) > 0) {
         String textual = finalClassifier.toString();
 
-        String title = "Spark: ";
+        String title = "Hadoop: ";
         String classifierSpec = finalClassifier.getClass().getName();
         if (finalClassifier instanceof OptionHandler) {
           classifierSpec +=

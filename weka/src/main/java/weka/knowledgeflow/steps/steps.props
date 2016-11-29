@@ -1,5 +1,5 @@
 weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.Loader,weka.knowledgeflow.steps.Saver,\
-weka.knowledgeflow.steps.Filter,\
+weka.knowledgeflow.steps.DataGenerator,weka.knowledgeflow.steps.Filter,\
 weka.knowledgeflow.steps.Classifier,weka.knowledgeflow.steps.Clusterer,\
 weka.knowledgeflow.steps.Associator,weka.knowledgeflow.steps.ASEvaluator,\
 weka.knowledgeflow.steps.ASSearchStrategy,\
@@ -18,9 +18,9 @@ weka.knowledgeflow.steps.BoundaryPlotter,\
 weka.knowledgeflow.steps.ScatterPlotMatrix,weka.knowledgeflow.steps.GraphViewer,\
 weka.knowledgeflow.steps.CostBenefitAnalysis,weka.knowledgeflow.steps.SerializedModelSaver,\
 weka.knowledgeflow.steps.SetVariables,weka.knowledgeflow.steps.MakeResourceIntensive,\
-weka.knowledgeflow.steps.Block,\
-weka.knowledgeflow.steps.ExampleClassifier,\
+weka.knowledgeflow.steps.Block,weka.knowledgeflow.steps.AlterRelationName,\
 weka.knowledgeflow.steps.Sorter,weka.knowledgeflow.steps.SubstringReplacer,\
 weka.knowledgeflow.steps.SubstringLabeler,weka.knowledgeflow.steps.Appender,\
 weka.knowledgeflow.steps.FlowByExpression,weka.knowledgeflow.steps.InstanceStreamToBatchMaker,\
-weka.knowledgeflow.steps.Join
+weka.knowledgeflow.steps.Join,weka.knowledgeflow.steps.DataGrid,weka.knowledgeflow.steps.SendToPerspective,\
+weka.knowledgeflow.steps.WriteWekaLog

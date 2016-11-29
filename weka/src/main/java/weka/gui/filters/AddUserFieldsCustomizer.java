@@ -148,7 +148,7 @@ public class AddUserFieldsCustomizer extends JPanel implements
     listPanel.add(butHolder, BorderLayout.NORTH);
     JScrollPane js = new JScrollPane(m_list);
     js.setBorder(BorderFactory
-        .createTitledBorder("Match-list list (rows applied in order)"));
+        .createTitledBorder("Attributes to add"));
     listPanel.add(js, BorderLayout.CENTER);
     add(listPanel, BorderLayout.CENTER);
 

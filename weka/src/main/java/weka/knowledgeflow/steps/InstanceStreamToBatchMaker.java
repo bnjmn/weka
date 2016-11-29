@@ -52,9 +52,9 @@ public class InstanceStreamToBatchMaker extends BaseStep {
   /** The structure of the incoming instances */
   protected Instances m_structure;
 
-  /** Holds incoming instances */
-  protected List<Instance> m_batch;
-
+  /** True if the incoming data contains string attributes */
+  protected boolean m_hasStringAtts;
+  
   /**
    * Initialize the step.
    *
@@ -62,7 +62,6 @@ public class InstanceStreamToBatchMaker extends BaseStep {
    */
   @Override
   public void stepInit() throws WekaException {
-    m_batch = new ArrayList<Instance>();
     m_isReset = true;
   }
 
@@ -117,7 +116,8 @@ public class InstanceStreamToBatchMaker extends BaseStep {
       }
       getStepManager().logDetailed("Collecting instances...");
       Instance temp = data.getPrimaryPayload();
-      m_structure = new Instances(temp.dataset(), 0);
+      m_structure = new Instances(temp.dataset(), 0).stringFreeStructure();
+      m_hasStringAtts = temp.dataset().checkForStringAttributes();
     }
 
     if (isStopRequested()) {
@@ -128,24 +128,26 @@ public class InstanceStreamToBatchMaker extends BaseStep {
     if (!getStepManager().isStreamFinished(data)) {
       getStepManager().throughputUpdateStart();
       Instance inst = data.getPrimaryPayload();
-      m_batch.add(inst);
+      if (m_hasStringAtts) {
+        for (int i = 0; i < m_structure.numAttributes(); i++) {
+          if (m_structure.attribute(i).isString() && !inst.isMissing(i)) {
+            int index =
+              m_structure.attribute(i).addStringValue(inst.stringValue(i));
+            inst.setValue(i, index);
+          }
+        }
+      }
+      m_structure.add(inst);
       getStepManager().throughputUpdateEnd();
     } else {
       // output batch
-      Instances toOutput = new Instances(m_structure, m_batch.size());
-      for (Instance i : m_batch) {
-        toOutput.add(i);
-      }
-      toOutput.compactify();
-
-      // save memory
-      m_batch.clear();
+      m_structure.compactify();
       getStepManager().logBasic(
-        "Emitting a batch of " + toOutput.numInstances() + " instances.");
+        "Emitting a batch of " + m_structure.numInstances() + " instances.");
       List<String> outCons =
         new ArrayList<String>(getStepManager().getOutgoingConnections()
           .keySet());
-      Data out = new Data(outCons.get(0), toOutput);
+      Data out = new Data(outCons.get(0), m_structure);
       out.setPayloadElement(StepManager.CON_AUX_DATA_SET_NUM, 1);
       out.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM, 1);
       if (!isStopRequested()) {

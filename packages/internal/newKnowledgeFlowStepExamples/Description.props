@@ -1,0 +1,46 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=newKnowledgeFlowStepExamples
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2016-04-14
+
+# Title (required)
+Title=Example Step implementations for the new Knowledge Flow, as described in the Weka manual
+
+Category=Examples
+
+# Author (required)
+Author=Mark Hall
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Example Step implementations for the new Knowledge Flow, as described in the Weka manual.
+
+#Changes=
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/newKnowledgeFlowStepExamples1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/newKnowledgeFlowStepExamples
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.8.0)

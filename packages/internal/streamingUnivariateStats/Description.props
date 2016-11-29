@@ -1,0 +1,54 @@
+# Description file for streamingUnivariateStats
+# 
+
+# Package name (required)
+PackageName=streamingUnivariateStats
+
+# Version (required)
+Version=1.0.1
+
+#Date (year-month-day)
+Date=2016-09-26
+
+# Title (required)
+Title=A Knowledge Flow step to compute summary statistics incrementally
+
+# Category (recommended)
+Category=KnowledgeFlow
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides a Knowledge Flow step that can compute various summary statistics incrementally on an incoming instance stream. Apart from simple statistics such as count, min, max, mean, standard deviation and frequency counts, the user can optionally turn on computation of the median and quartiles. This then uses a T-digest streaming quantile estimator. The T-digest estimator is slower to execute than the other statistics, so is not turned on by default. The step can also output a summary chart (histogram, box plot, pie chart) for each attribute in the data. Stats can be output once at the end of the stream or periodically as the stream is processed.
+
+# Changes in this release
+Changes=Now processes incoming batch data as well as streaming data
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/streamingUnivariateStats1.0.1.zip
+
+# URL for further information
+URL=URL=http://weka.sourceforge.net/doc.packages/streamingUnivariateStats
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.8.0), distributedWekaBase (>=1.0.15)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+#MessageToDisplayOnInstall=Funky package requires some extra\n\
+# stuff to be installed after installing this package. You will\n\
+# need to blah, blah, blah in order to blah, blah, blah...

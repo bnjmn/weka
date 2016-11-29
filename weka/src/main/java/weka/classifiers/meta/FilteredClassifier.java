@@ -23,19 +23,8 @@ package weka.classifiers.meta;
 
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.BatchPredictor;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.CommandlineRunnable;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.PartitionGenerator;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WekaException;
 import weka.filters.Filter;
 
 import java.util.Collections;
@@ -148,6 +137,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   /** The instance structure of the filtered instances */
   protected Instances m_FilteredInstances;
 
+  /** Flag that can be set to true if class attribute is not to be checked for modifications by the filer. */
+  protected boolean m_DoNotCheckForModifiedClassAttribute = false;
+
   /**
    * Returns a string describing this classifier
    * 
@@ -177,6 +169,14 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   protected String defaultFilterString() {
 
     return "weka.filters.supervised.attribute.Discretize";
+  }
+
+  /**
+   * Use this method to determine whether classifier checks whether class attribute has been modified by filter.
+   */
+  public void setDoNotCheckForModifiedClassAttribute(boolean flag) {
+
+    m_DoNotCheckForModifiedClassAttribute = flag;
   }
 
   /**
@@ -552,8 +552,12 @@ public class FilteredClassifier extends SingleClassifierEnhancer
      * fname.substring(fname.lastIndexOf('.') + 1); util.Timer t =
      * util.Timer.getTimer("FilteredClassifier::" + fname); t.start();
      */
+    Attribute classAttribute = (Attribute)data.classAttribute().copy();
     m_Filter.setInputFormat(data); // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
+    if ((!classAttribute.equals(data.classAttribute())) && (!m_DoNotCheckForModifiedClassAttribute)) {
+      throw new IllegalArgumentException("Cannot proceed: " + getFilterSpec() + " has modified the class attribute!");
+    }
     // t.stop();
 
     // can classifier handle the data?

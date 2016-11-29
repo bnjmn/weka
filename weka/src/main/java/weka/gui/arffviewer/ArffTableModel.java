@@ -21,6 +21,22 @@
 
 package weka.gui.arffviewer;
 
+import weka.core.Attribute;
+import weka.core.DenseInstance;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.Undoable;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.ConverterUtils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Reorder;
+import weka.gui.ComponentHelper;
+
+import javax.swing.JOptionPane;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.DefaultTableModel;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
@@ -33,22 +49,6 @@ import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Vector;
-
-import javax.swing.JOptionPane;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.DefaultTableModel;
-
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Undoable;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.ConverterUtils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Reorder;
-import weka.gui.ComponentHelper;
 
 /**
  * The model for the Arff-Viewer.
@@ -261,7 +261,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @return the attribute type
    */
   public int getType(int columnIndex) {
-    return getType(0, columnIndex);
+    return getType(-1, columnIndex);
   }
 
   /**
@@ -276,8 +276,10 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     result = Attribute.STRING;
 
-    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex > 0)
-      && (columnIndex < getColumnCount())) {
+    if ((rowIndex < 0) && columnIndex > 0 && columnIndex < getColumnCount()) {
+      result = m_Data.attribute(columnIndex - 1).type();
+    } else if ((rowIndex >= 0) && (rowIndex < getRowCount())
+      && (columnIndex > 0) && (columnIndex < getColumnCount())) {
       result = m_Data.instance(rowIndex).attribute(columnIndex - 1).type();
     }
 
@@ -424,6 +426,38 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     }
   }
 
+  public void insertInstance(int index) {
+    insertInstance(index, true);
+  }
+
+  public void insertInstance(int index, boolean notify) {
+    if (!m_IgnoreChanges) {
+      addUndoPoint();
+    }
+    double[] vals = new double[m_Data.numAttributes()];
+
+    // set any string or relational attribute values to missing
+    // in the new instance, just in case this is the very first
+    // instance in the dataset.
+    for (int i = 0; i < m_Data.numAttributes(); i++) {
+      if (m_Data.attribute(i).isString()
+        || m_Data.attribute(i).isRelationValued()) {
+        vals[i] = Utils.missingValue();
+      }
+    }
+    Instance toAdd = new DenseInstance(1.0, vals);
+    if (index < 0) {
+      m_Data.add(toAdd);
+    } else {
+      m_Data.add(index, toAdd);
+    }
+    if (notify) {
+      notifyListener(new TableModelEvent(this, m_Data.numInstances() - 1,
+        m_Data.numInstances() - 1, TableModelEvent.ALL_COLUMNS,
+        TableModelEvent.INSERT));
+    }
+  }
+
   /**
    * deletes the instances at the given positions
    * 
@@ -476,8 +510,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
         while (i > 0) {
           i--;
           int equalCount = 1;
-          while ((i > 0) && (m_Data.instance(i).value(columnIndex - 1) ==
-            m_Data.instance(i - 1).value(columnIndex - 1))) {
+          while ((i > 0)
+            && (m_Data.instance(i).value(columnIndex - 1) == m_Data.instance(
+              i - 1).value(columnIndex - 1))) {
             equalCount++;
             i--;
           }
@@ -569,8 +604,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     int index;
 
     index = m_Data.classIndex();
-    result = ((index == -1) && (m_Data.numAttributes() == columnIndex))
-      || (index == columnIndex - 1);
+    result =
+      ((index == -1) && (m_Data.numAttributes() == columnIndex))
+        || (index == columnIndex - 1);
 
     return result;
   }
@@ -589,7 +625,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     if ((columnIndex >= 0) && (columnIndex < getColumnCount())) {
       if (columnIndex == 0) {
-        result = "<html><center>No.<br><font size=\"-2\">&nbsp;</font></center></html>";
+        result =
+          "<html><center>No.<br><font size=\"-2\">&nbsp;</font></center></html>";
       } else {
         if (m_Data != null) {
           if ((columnIndex - 1 < m_Data.numAttributes())) {
@@ -602,8 +639,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
             // name
             if (isClassIndex(columnIndex)) {
-              result += "<b>" + m_Data.attribute(columnIndex - 1).name()
-                + "</b>";
+              result +=
+                "<b>" + m_Data.attribute(columnIndex - 1).name() + "</b>";
             } else {
               result += m_Data.attribute(columnIndex - 1).name();
             }
@@ -729,8 +766,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
               result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
               break;
             case Attribute.NUMERIC:
-              result = new Double(m_Data.instance(rowIndex).value(
-                columnIndex - 1));
+              result =
+                new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
               break;
             default:
               result = "-can't display-";
@@ -748,12 +785,15 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
                 }
                 // does it contain "\n" or "\r"? -> replace with red html tag
                 if ((tmp.indexOf("\n") > -1) || (tmp.indexOf("\r") > -1)) {
-                  tmp = tmp.replaceAll("\\r\\n",
-                    "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
-                  tmp = tmp.replaceAll("\\r",
-                    "<font color=\"red\"><b>\\\\r</b></font>");
-                  tmp = tmp.replaceAll("\\n",
-                    "<font color=\"red\"><b>\\\\n</b></font>");
+                  tmp =
+                    tmp.replaceAll("\\r\\n",
+                      "<font color=\"red\"><b>\\\\r\\\\n</b></font>");
+                  tmp =
+                    tmp.replaceAll("\\r",
+                      "<font color=\"red\"><b>\\\\r</b></font>");
+                  tmp =
+                    tmp.replaceAll("\\n",
+                      "<font color=\"red\"><b>\\\\n</b></font>");
                   tmp = "<html>" + tmp + "</html>";
                   modified = true;
                 }
@@ -956,8 +996,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
       tempFile = m_UndoList.get(m_UndoList.size() - 1);
       try {
         // read serialized data
-        ooi = new ObjectInputStream(new BufferedInputStream(
-          new FileInputStream(tempFile)));
+        ooi =
+          new ObjectInputStream(new BufferedInputStream(new FileInputStream(
+            tempFile)));
         inst = (Instances) ooi.readObject();
         ooi.close();
 
@@ -998,8 +1039,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
         tempFile.deleteOnExit();
 
         // serialize instances
-        oos = new ObjectOutputStream(new BufferedOutputStream(
-          new FileOutputStream(tempFile)));
+        oos =
+          new ObjectOutputStream(new BufferedOutputStream(new FileOutputStream(
+            tempFile)));
         oos.writeObject(getInstances());
         oos.flush();
         oos.close();

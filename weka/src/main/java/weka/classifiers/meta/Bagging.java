@@ -185,6 +185,15 @@ public class Bagging
   /** Whether to print individual ensemble members in output.*/
   private boolean m_printClassifiers;
 
+  /** Random number generator */
+  protected Random m_random;
+
+  /** Used to indicate whether an instance is in a bag or not */
+  protected boolean[][] m_inBag;
+
+  /** Reference to the training data */
+  protected Instances m_data;
+
   /**
    * Constructor.
    */
@@ -641,11 +650,7 @@ public class Bagging
 					     + " not supported (Bagging)");
     }
   }
-  
-  protected Random m_random;
-  protected boolean[][] m_inBag;
-  protected Instances m_data;
-  
+
   /**
    * Returns a training set for a particular iteration.
    * 
@@ -664,11 +669,13 @@ public class Bagging
       m_inBag[iteration] = new boolean[m_data.numInstances()];
       bagData = m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights());
     } else {
-      bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
       if (bagSize < m_data.numInstances()) {
+        bagData = m_data.resampleWithWeights(r, false); // Need to turn off representation using weights in this case.
         bagData.randomize(r);
         Instances newBagData = new Instances(bagData, 0, bagSize);
         bagData = newBagData;
+      } else {
+        bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
       }
     }
     
@@ -736,7 +743,6 @@ public class Bagging
       m_OutOfBagEvaluationObject = new Evaluation(m_data);
 
       for (int i = 0; i < m_data.numInstances(); i++) {
-        double vote;
         double[] votes;
         if (m_Numeric)
           votes = new double[1];
@@ -784,7 +790,8 @@ public class Bagging
     }
 
     // save memory
-    m_data = null;
+    m_inBag = null;
+    m_data = new Instances(m_data, 0);
   }
 
   /**
@@ -848,7 +855,7 @@ public class Bagging
         text.append(m_Classifiers[i].toString() + "\n\n");
     }
     if (m_CalcOutOfBag) {
-      text.append(m_OutOfBagEvaluationObject.toSummaryString("*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
+      text.append(m_OutOfBagEvaluationObject.toSummaryString("\n\n*** Out-of-bag estimates ***\n", getOutputOutOfBagComplexityStatistics()));
     }
 
     return text.toString();

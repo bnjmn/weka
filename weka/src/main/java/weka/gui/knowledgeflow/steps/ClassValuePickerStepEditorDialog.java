@@ -48,6 +48,11 @@ public class ClassValuePickerStepEditorDialog extends GOEStepEditorDialog {
   /** For displaying class values */
   protected JComboBox m_classValueCombo = new EnvironmentField.WideComboBox();
 
+  /**
+   * Set the step to edit
+   *
+   * @param step the step to edit
+   */
   @Override
   @SuppressWarnings("unchecked")
   public void setStepToEdit(Step step) {
@@ -114,6 +119,9 @@ public class ClassValuePickerStepEditorDialog extends GOEStepEditorDialog {
     }
   }
 
+  /**
+   * Called when the OK button is pressed
+   */
   @Override
   public void okPressed() {
     Object selected = m_classValueCombo.getSelectedItem();

@@ -103,7 +103,7 @@ public class UnscheduledNamedKnowledgeFlowTask implements NamedTask,
 
   /**
    * Set the log to use
-   * 
+   *
    * @param log the log to use
    */
   @Override
@@ -113,7 +113,7 @@ public class UnscheduledNamedKnowledgeFlowTask implements NamedTask,
 
   /**
    * Get the log
-   * 
+   *
    * @return the log in use
    */
   @Override
@@ -235,7 +235,6 @@ public class UnscheduledNamedKnowledgeFlowTask implements NamedTask,
    */
   @Override
   public void execute() {
-    ObjectOutputStream oos = null;
     try {
       Flow toExecute = Flow.JSONToFlow(m_flowJSON);
 

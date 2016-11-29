@@ -21,28 +21,20 @@
 
 package weka.gui.knowledgeflow.steps;
 
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Insets;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Set;
-
-import javax.swing.BorderFactory;
-import javax.swing.JComboBox;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
-
+import weka.core.PluginManager;
 import weka.gui.EnvironmentField;
 import weka.gui.PropertySheetPanel;
 import weka.gui.beans.OffscreenChartRenderer;
-import weka.core.PluginManager;
 import weka.gui.beans.WekaOffscreenChartRenderer;
 import weka.gui.knowledgeflow.GOEStepEditorDialog;
 import weka.knowledgeflow.steps.ModelPerformanceChart;
 import weka.knowledgeflow.steps.Step;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Set;
 
 /**
  * Step editor dialog for the ModelPerformanceChart step
@@ -67,8 +59,8 @@ public class ModelPerformanceChartStepEditorDialog extends GOEStepEditorDialog {
   protected String m_currentRendererOptions;
 
   /**
-   * Set the step to edit. Also constructs the layout of the editor based on
-   * the step's settings
+   * Set the step to edit. Also constructs the layout of the editor based on the
+   * step's settings
    *
    * @param step the step to edit in this editor
    */
@@ -138,7 +130,8 @@ public class ModelPerformanceChartStepEditorDialog extends GOEStepEditorDialog {
     add(m_editorHolder, BorderLayout.CENTER);
 
     m_offscreenSelector.addItem("Weka Chart Renderer");
-    Set<String> pluginRenderers = PluginManager
+    Set<String> pluginRenderers =
+      PluginManager
         .getPluginNamesOfType("weka.gui.beans.OffscreenChartRenderer");
     if (pluginRenderers != null) {
       for (String plugin : pluginRenderers) {
@@ -155,10 +148,14 @@ public class ModelPerformanceChartStepEditorDialog extends GOEStepEditorDialog {
 
     getCurrentSettings();
     m_offscreenSelector.setSelectedItem(m_currentRendererName);
-    m_rendererOptions.setText( m_currentRendererOptions );
+    m_rendererOptions.setText(m_currentRendererOptions);
     setupRendererOptsTipText(rendererOptsLabel);
   }
 
+  /**
+   * Get the name of the offscreen renderer and any options for it from the step
+   * being edited.
+   */
   protected void getCurrentSettings() {
     m_currentRendererName =
       ((ModelPerformanceChart) getStepToEdit()).getOffscreenRendererName();

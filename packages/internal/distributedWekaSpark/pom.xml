@@ -95,7 +95,7 @@ This package provides Spark wrappers for the classes in distributedWekaBase. Inc
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.12,)</version>
+      <version>[3.8.0,)</version>
     </dependency>
 
     <dependency>
@@ -125,7 +125,7 @@ This package provides Spark wrappers for the classes in distributedWekaBase. Inc
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.7.12,)</version>
+      <version>[3.8.0,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>

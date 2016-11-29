@@ -111,9 +111,9 @@ public class RuleGeneration implements Serializable, RevisionHandler {
    */
   public RuleGeneration(ItemSet itemSet) {
 
-    m_totalTransactions = itemSet.m_totalTransactions;
-    m_counter = itemSet.m_counter;
-    m_items = itemSet.m_items;
+    m_totalTransactions = itemSet.getTotalTransactions();
+    m_counter = itemSet.support();
+    m_items = itemSet.getItems();
   }
 
   /**
@@ -215,17 +215,17 @@ public class RuleGeneration implements Serializable, RevisionHandler {
 
     // create rule body
     premise = null;
-    premise = new ItemSet(m_totalTransactions);
-    premise.m_items = new int[m_items.length];
-    System.arraycopy(m_items, 0, premise.m_items, 0, m_items.length);
-    premise.m_counter = m_counter;
+    premise = new ItemSet(m_totalTransactions, new int[m_items.length]);
+    // premise.m_items = new int[m_items.length];
+    System.arraycopy(m_items, 0, premise.getItems(), 0, m_items.length);
+    premise.setCounter(m_counter);
 
     do {
       m_minRuleCount = 1;
-      while (expectation(m_minRuleCount, premise.m_counter, m_midPoints,
+      while (expectation(m_minRuleCount, premise.support(), m_midPoints,
         m_priors) <= m_expectation) {
         m_minRuleCount++;
-        if (m_minRuleCount > premise.m_counter) {
+        if (m_minRuleCount > premise.support()) {
           return m_best;
         }
       }
@@ -281,10 +281,10 @@ public class RuleGeneration implements Serializable, RevisionHandler {
               m_change = true;
               redundant = removeRedundant(current);
               m_expectation = (m_best.first()).accuracy();
-              while (expectation(m_minRuleCount, (current.premise()).m_counter,
+              while (expectation(m_minRuleCount, (current.premise()).support(),
                 m_midPoints, m_priors) < m_expectation) {
                 m_minRuleCount++;
-                if (m_minRuleCount > (current.premise()).m_counter) {
+                if (m_minRuleCount > (current.premise()).support()) {
                   break;
                 }
               }
@@ -311,16 +311,16 @@ public class RuleGeneration implements Serializable, RevisionHandler {
     if (a.m_accuracy < b.m_accuracy) {
       return false;
     }
-    for (int k = 0; k < a.premise().m_items.length; k++) {
-      if (a.premise().m_items[k] != b.premise().m_items[k]) {
-        if ((a.premise().m_items[k] != -1 && b.premise().m_items[k] != -1)
-          || b.premise().m_items[k] == -1) {
+    for (int k = 0; k < a.premise().getItems().length; k++) {
+      if (a.premise().getItems()[k] != b.premise().getItems()[k]) {
+        if ((a.premise().getItems()[k] != -1 && b.premise().getItems()[k] != -1)
+          || b.premise().getItems()[k] == -1) {
           return false;
         }
       }
-      if (a.consequence().m_items[k] != b.consequence().m_items[k]) {
-        if ((a.consequence().m_items[k] != -1 && b.consequence().m_items[k] != -1)
-          || a.consequence().m_items[k] == -1) {
+      if (a.consequence().getItems()[k] != b.consequence().getItems()[k]) {
+        if ((a.consequence().getItems()[k] != -1 && b.consequence().getItems()[k] != -1)
+          || a.consequence().getItems()[k] == -1) {
           return false;
         }
       }
@@ -346,12 +346,14 @@ public class RuleGeneration implements Serializable, RevisionHandler {
     for (int i = 0; i < instances.numAttributes(); i++) {
       if (i == attNum) {
         for (int j = 0; j < instances.attribute(i).numValues(); j++) {
-          consequence = new ItemSet(instances.numInstances());
-          consequence.m_items = new int[instances.numAttributes()];
+          // consequence = new ItemSet(instances.numInstances());
+          consequence = new ItemSet(instances.numInstances(), new int[instances.numAttributes()]);
+          // consequence.m_items = new int[instances.numAttributes()];
+          consequence.setCounter(0);
           for (int k = 0; k < instances.numAttributes(); k++) {
-            consequence.m_items[k] = -1;
+            consequence.getItems()[k] = -1;
           }
-          consequence.m_items[i] = j;
+          consequence.getItems()[i] = j;
           consequences.add(consequence);
         }
       }

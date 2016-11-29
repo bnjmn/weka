@@ -24,7 +24,6 @@ import weka.classifiers.AbstractClassifier;
 
 import weka.core.Instances;
 import weka.core.Instance;
-import weka.core.matrix.Matrix;
 import weka.core.RevisionUtils;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -34,8 +33,10 @@ import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.RemoveUseless;
 
+import no.uib.cipr.matrix.*;
+import no.uib.cipr.matrix.Matrix;
+
 import java.util.Enumeration;
-import java.util.Vector;
 import java.util.Collections;
 
 /**
@@ -60,7 +61,8 @@ import java.util.Collections;
  *  (use with caution).</pre>
  * 
  * <!-- options-end -->
- * 
+ *
+ * @author Eibe Frank, University of Waikato
  * @version $Revision: 10382 $
  */
 public class FLDA extends AbstractClassifier {
@@ -71,8 +73,8 @@ public class FLDA extends AbstractClassifier {
   /** Holds header of training date */
   protected Instances m_Data;
   
-  /** The weight vector as a 1-dimensional matrix */
-  protected Matrix m_Weights;
+  /** The weight vector */
+  protected Vector m_Weights;
 
   /** The threshold */
   protected double m_Threshold;
@@ -119,7 +121,7 @@ public class FLDA extends AbstractClassifier {
   /**
    * Computes the mean vector for each class.
    */
-  protected Matrix[] getClassMeans(Instances data, int[] counts) {
+  protected Vector[] getClassMeans(Instances data, int[] counts) {
     
     double[][] centroids = new double[2][data.numAttributes() - 1];
     for (int i = 0; i < data.numInstances(); i++) {
@@ -132,29 +134,29 @@ public class FLDA extends AbstractClassifier {
       }
       counts[(int)inst.classValue()] ++;
     }
-    Matrix[] centroidMatrices = new Matrix[2];
+    Vector[] centroidVectors = new DenseVector[2];
     for (int i = 0; i < 2; i++) {
-      centroidMatrices[i] = new Matrix(centroids[i], 1);
-      centroidMatrices[i].timesEquals(1.0 / (double)counts[i]);
+      centroidVectors[i] = new DenseVector(centroids[i]);
+      centroidVectors[i].scale(1.0 / (double)counts[i]);
     }
     if (m_Debug) {
       System.out.println("Count for class 0: " + counts[0]);
-      System.out.println("Centroid 0:" + centroidMatrices[0]); 
+      System.out.println("Centroid 0:" + centroidVectors[0]);
       System.out.println("Count for class 11: " + counts[1]);
-      System.out.println("Centroid 1:" + centroidMatrices[1]); 
+      System.out.println("Centroid 1:" + centroidVectors[1]);
     }
 
-    return centroidMatrices;
+    return centroidVectors;
   } 
   
   /**
-   * Computes centered subsets as matrix.
+   * Computes centered subsets as matrix with instances as columns.
    */
-  protected Matrix[] getCenteredData(Instances data, int[] counts, Matrix[] centroids) {
+  protected Matrix[] getCenteredData(Instances data, int[] counts, Vector[] centroids) {
 
     Matrix[] centeredData = new Matrix[2];
     for (int i = 0; i < 2; i++) {
-      centeredData[i] = new Matrix(counts[i], data.numAttributes() - 1);
+      centeredData[i] = new DenseMatrix(data.numAttributes() - 1, counts[i]);
     }
     int[] indexC = new int[2];
     for (int i = 0; i < data.numInstances(); i++) {
@@ -163,8 +165,8 @@ public class FLDA extends AbstractClassifier {
       int index = 0;
       for (int j = 0; j < data.numAttributes(); j++) {
         if (j != data.classIndex()) {
-          centeredData[classIndex].set(indexC[classIndex], index, 
-                                       inst.value(j) - centroids[classIndex].get(0, index)); 
+          centeredData[classIndex].set(index, indexC[classIndex],
+                                       inst.value(j) - centroids[classIndex].get(index));
           index++;
         }
       }
@@ -193,27 +195,30 @@ public class FLDA extends AbstractClassifier {
 
     // Establish class frequencies and centroids
     int[] classCounts = new int[2];
-    Matrix[] centroids = getClassMeans(insts, classCounts);
+    Vector[] centroids = getClassMeans(insts, classCounts);
 
     // Compute difference of centroids
-    Matrix diff = centroids[0].minus(centroids[1]);
+    Vector diff = centroids[0].copy().add(-1.0, centroids[1]);
 
     // Center data for each class
     Matrix[] data = getCenteredData(insts, classCounts, centroids);
 
-    // Computer scatter matrix and add ridge
-    Matrix scatter = data[0].transpose().times(data[0]).plus(data[1].transpose().times(data[1]));
-    scatter.plusEquals(Matrix.identity(insts.numAttributes() - 1, insts.numAttributes() - 1).timesEquals(m_Ridge));
+    // Compute scatter matrix and add ridge
+    Matrix scatter = new UpperSymmDenseMatrix(data[0].numRows()).rank1(data[0]).
+            add(new UpperSymmDenseMatrix(data[1].numRows()).rank1(data[1]));
+    for (int i = 0; i < scatter.numColumns(); i++) {
+      scatter.add(i, i, m_Ridge);
+    }
     if (m_Debug) {
       System.out.println("Scatter:\n" + scatter);
     }
 
     // Establish and normalize weight vector
-    m_Weights = scatter.inverse().times(diff.transpose());
-    m_Weights.timesEquals(1.0/Math.sqrt(m_Weights.transpose().times(m_Weights).get(0, 0)));
+    m_Weights = scatter.solve(diff, new DenseVector(scatter.numColumns()));
+    m_Weights.scale(1.0 / m_Weights.norm(Vector.Norm.Two));
 
-    // Computer threshold
-    m_Threshold = 0.5 * m_Weights.transpose().times(centroids[0].transpose().plus(centroids[1].transpose())).get(0,0);
+    // Compute threshold
+    m_Threshold = 0.5 * m_Weights.dot(centroids[0].copy().add(centroids[1]));
 
     // Store header only
     m_Data = new Instances(insts, 0);
@@ -229,21 +234,25 @@ public class FLDA extends AbstractClassifier {
     inst = m_RemoveUseless.output();
     
     // Convert instance to matrix
-    Matrix instM = new Matrix(1, inst.numAttributes() - 1);
+    Vector instM = new DenseVector(inst.numAttributes() - 1);
     int index = 0;
     for (int i = 0; i < inst.numAttributes(); i++) {
       if (i != m_Data.classIndex()) {
-        instM.set(0, index++, inst.value(i));
+        instM.set(index++, inst.value(i));
       }
     }
 
     // Pipe output through sigmoid
     double[] dist = new double[2];
-    dist[1] = 1/(1 + Math.exp(instM.times(m_Weights).get(0, 0) - m_Threshold));
+    dist[1] = 1/(1 + Math.exp(instM.dot(m_Weights) - m_Threshold));
     dist[0] = 1 - dist[1];
     return dist;
   }
-    
+
+  /**
+   * Outputs description of classifier as a string.
+   * @return the description
+   */
   public String toString() {
 
     if (m_Weights == null) {
@@ -257,7 +266,7 @@ public class FLDA extends AbstractClassifier {
     for (int i = 0; i < m_Data.numAttributes(); i++) {
       if (i != m_Data.classIndex()) {
         result.append(m_Data.attribute(i).name() + ": \t");
-        double weight = m_Weights.get(index++, 0);
+        double weight = m_Weights.get(index++);
         if (weight >= 0) {
           result.append(" ");
         }
@@ -304,7 +313,7 @@ public class FLDA extends AbstractClassifier {
    */
   public Enumeration<Option> listOptions() {
 
-    Vector<Option> newVector = new Vector<Option>(7);
+    java.util.Vector<Option> newVector = new java.util.Vector<Option>(7);
 
     newVector.addElement(new Option(
 	      "\tThe ridge parameter.\n"+
@@ -360,7 +369,7 @@ public class FLDA extends AbstractClassifier {
    */
   public String [] getOptions() {
 
-    Vector<String> options = new Vector<String>();
+    java.util.Vector<String> options = new java.util.Vector<String>();
     options.add("-R"); options.add("" + getRidge());
     
     Collections.addAll(options, super.getOptions());

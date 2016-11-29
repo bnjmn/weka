@@ -265,6 +265,16 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
   }
 
   /**
+   * Gets a copy of just the structure of the input format instances.
+   *
+   * @return a copy of the structure (attribute information) of the input
+   * format instances
+   */
+  public Instances getCopyOfInputFormat() {
+    return getInputFormat() == null ? null : new Instances(getInputFormat(), 0);
+  }
+
+  /**
    * Returns a reference to the current input format without copying it.
    *
    * @return a reference to the current input format

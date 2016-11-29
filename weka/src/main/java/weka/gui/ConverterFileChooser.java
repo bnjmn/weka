@@ -22,6 +22,7 @@ package weka.gui;
 
 import weka.core.Capabilities;
 import weka.core.Instances;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.AbstractFileSaver;
 import weka.core.converters.AbstractLoader;
@@ -333,7 +334,7 @@ public class ConverterFileChooser extends JFileChooser {
 
       // get data from converter
       try {
-        cls = Class.forName(classname);
+        cls = WekaPackageClassLoaderManager.forName(classname);
         converter = (FileSourcedConverter) cls.newInstance();
         ext = converter.getFileExtensions();
         desc = converter.getFileDescription();

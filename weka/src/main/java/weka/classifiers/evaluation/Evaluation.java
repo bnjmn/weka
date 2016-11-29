@@ -41,6 +41,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.Summarizable;
 import weka.core.Utils;
 import weka.core.Version;
@@ -483,7 +484,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     m_MarginCounts = new double[k_MarginResolution + 1];
 
     for (String s : BUILT_IN_EVAL_METRICS) {
-      m_metricsToDisplay.add(s.toLowerCase());
+      if (!s.equalsIgnoreCase("Coverage") && !s.equalsIgnoreCase("Region size")) {
+        m_metricsToDisplay.add(s.toLowerCase());
+      }
     }
 
     m_pluginMetrics = AbstractEvaluationMetric.getPluginMetrics();
@@ -572,13 +575,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Remove the supplied list of metrics from the list of those to display.
-   * 
-   * @param metricsNotToDisplay a list of metrics to ommit from the display
+   * Toggle the output of the metrics specified in the supplied list.
+   *
+   * @param metricsToToggle a list of metrics to toggle
    */
-  public void dontDisplayMetrics(List<String> metricsNotToDisplay) {
-    for (String s : metricsNotToDisplay) {
-      m_metricsToDisplay.remove(s.toLowerCase());
+  public void toggleEvalMetrics(List<String> metricsToToggle) {
+    for (String s : metricsToToggle) {
+      if (m_metricsToDisplay.contains(s.toLowerCase())) {
+        m_metricsToDisplay.remove(s.toLowerCase());
+      } else {
+        m_metricsToDisplay.add(s.toLowerCase());
+      }
     }
   }
 
@@ -1122,12 +1129,12 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         + makeOptionString(classifier, globalInfo));
     }
 
-    String metricsToDisable = Utils.getOption("disable", options);
-    List<String> disableList = new ArrayList<String>();
-    if (metricsToDisable.length() > 0) {
-      String[] parts = metricsToDisable.split(",");
+    String metricsToToggle = Utils.getOption("toggle", options);
+    List<String> toggleList = new ArrayList<String>();
+    if (metricsToToggle.length() > 0) {
+      String[] parts = metricsToToggle.split(",");
       for (String p : parts) {
-        disableList.add(p.trim().toLowerCase());
+        toggleList.add(p.trim().toLowerCase());
       }
     }
 
@@ -1234,7 +1241,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
             }
             // load from KOML?
             if (!(objectInputFileName.endsWith(".koml") && KOML.isPresent())) {
-              objectInputStream = new ObjectInputStream(is);
+              // objectInputStream = new ObjectInputStream(is);
+              objectInputStream = SerializationHelper.getObjectInputStream(is);
               xmlInputStream = null;
             } else {
               objectInputStream = null;
@@ -1457,9 +1465,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         new Evaluation(new Instances(mappedClassifierHeader, 0), costMatrix);
     }
     trainingEvaluation.setDiscardPredictions(discardPredictions);
-    trainingEvaluation.dontDisplayMetrics(disableList);
+    trainingEvaluation.toggleEvalMetrics(toggleList);
     testingEvaluation.setDiscardPredictions(discardPredictions);
-    testingEvaluation.dontDisplayMetrics(disableList);
+    testingEvaluation.toggleEvalMetrics(toggleList);
 
     // disable use of priors if no training file given
     if (!trainSetPresent) {
@@ -2250,6 +2258,24 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
 
     return 100 * m_TotalSizeOfRegions / m_WithClass;
+  }
+
+  /**
+   * Gets the weight of the instances that had a non-missing class value
+   *
+   * @return the weight of the instances that had a non-missing class value
+   */
+  public final double withClass() {
+    return m_WithClass;
+  }
+
+  /**
+   * Gets the weight of the instances that had missing class values
+   *
+   * @return the weight of the instances that had missing class values
+   */
+  public final double missingClass() {
+    return m_MissingClass;
   }
 
   /**
@@ -4040,9 +4066,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("-m <name of file with cost matrix>\n");
     optionsText.append("\tSets file with cost matrix.\n");
     optionsText
-      .append("-disable <comma-separated list of evaluation metric names>\n");
+      .append("-toggle <comma-separated list of evaluation metric names>\n");
     optionsText
-      .append("\tComma separated list of metric names not to print to the output.\n\t");
+      .append("\tComma separated list of metric names to toggle in the output.\n\t"
+        + "All metrics are output by default with the exception of 'Coverage' and "
+        + "'Region size'.\n\t");
     optionsText.append("Available metrics:\n\t");
     List<String> metricsToDisplay =
       new ArrayList<String>(Arrays.asList(BUILT_IN_EVAL_METRICS));
