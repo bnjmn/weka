@@ -38,6 +38,9 @@ public class MeanAbsolutePercentageError extends AbstractEvaluationMetric implem
   /** Sum of absolute percentages */
   protected double m_SumAbsolutePercentageError = 0;
 
+  /** Sum of weights */
+  protected double m_SumOfWeights = 0;
+
   /**
    * Whether metric applies to nominal class.
    * @return false
@@ -88,6 +91,7 @@ public class MeanAbsolutePercentageError extends AbstractEvaluationMetric implem
       if (!Utils.isMissingValue(predictedValue)) {
         double relativeError = (instance.classValue() - predictedValue) / instance.classValue();
         m_SumAbsolutePercentageError += instance.weight() * Math.abs(relativeError);
+        m_SumOfWeights += instance.weight();
       }
     }
   }
@@ -124,7 +128,7 @@ public class MeanAbsolutePercentageError extends AbstractEvaluationMetric implem
       throw new UnknownStatisticException("Statistic " + name + " is unknown.");
     }
 
-    return m_SumAbsolutePercentageError / (m_baseEvaluation.withClass() - m_baseEvaluation.unclassified());
+    return m_SumAbsolutePercentageError / m_SumOfWeights;
   }
 
   /**

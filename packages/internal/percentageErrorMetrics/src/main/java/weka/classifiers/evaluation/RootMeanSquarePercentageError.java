@@ -38,6 +38,9 @@ public class RootMeanSquarePercentageError extends AbstractEvaluationMetric impl
   /** Sum of squared percentages */
   protected double m_SumSquarePercentageError = 0;
 
+  /** Sum of weights */
+  protected double m_SumOfWeights = 0;
+
   /**
    * Whether metric applies to nominal class.
    * @return false
@@ -88,6 +91,7 @@ public class RootMeanSquarePercentageError extends AbstractEvaluationMetric impl
       if (!Utils.isMissingValue(predictedValue)) {
         double relativeError = (instance.classValue() - predictedValue) / instance.classValue();
         m_SumSquarePercentageError += instance.weight() * relativeError * relativeError;
+        m_SumOfWeights += instance.weight();
       }
     }
   }
@@ -124,7 +128,7 @@ public class RootMeanSquarePercentageError extends AbstractEvaluationMetric impl
       throw new UnknownStatisticException("Statistic " + name + " is unknown.");
     }
 
-    return Math.sqrt(m_SumSquarePercentageError / (m_baseEvaluation.withClass() - m_baseEvaluation.unclassified()));
+    return Math.sqrt(m_SumSquarePercentageError / m_SumOfWeights);
   }
 
   /**
