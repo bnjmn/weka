@@ -150,6 +150,7 @@ public class Classifier extends WekaAlgorithmWrapper implements
   public void stepInit() throws WekaException {
     try {
       m_trainedClassifier = null;
+      m_trainedClassifierHeader = null;
       m_trainTestHelper = null;
       m_incrementalData = new Data(StepManager.CON_INCREMENTAL_CLASSIFIER);
       m_classifierTemplate =
