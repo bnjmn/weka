@@ -95,7 +95,7 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.9.1,)</version>
+      <version>[3.7.8,)</version>
     </dependency>
 
     <dependency>
@@ -109,7 +109,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.7.8</version>
+      <version>3.8.2</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
