@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>percentageErrorMetrics</artifactId>
-  <version>1.0.1</version>
+  <version>1.0.1-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>percentageErrorMetrics</name>
@@ -101,7 +101,7 @@
     <dependency>
       <groupId>nz.ac.waikato.cms.weka</groupId>
       <artifactId>weka-dev</artifactId>
-      <version>[3.9.1,)</version>
+      <version>[3.7.8,)</version>
       <type>test-jar</type>
       <scope>test</scope>
     </dependency>
@@ -109,7 +109,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>3.8.2</version>
+      <version>3.7.8</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
