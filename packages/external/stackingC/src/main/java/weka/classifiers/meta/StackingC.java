@@ -24,13 +24,7 @@ package weka.classifiers.meta;
 import weka.classifiers.Classifier;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.functions.LinearRegression;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
+import weka.core.*;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
 import weka.filters.Filter;
@@ -119,8 +113,25 @@ public class StackingC
     ((LinearRegression)(getMetaClassifier())).
       setAttributeSelectionMethod(new 
 	weka.core.SelectedTag(1, LinearRegression.TAGS_SELECTION));
-  }  
-      
+  }
+
+  /**
+   * Returns combined capabilities of the base classifiers, i.e., the
+   * capabilities all of them have in common.
+   *
+   * @return      the capabilities of the base classifiers
+   */
+  public Capabilities getCapabilities() {
+    Capabilities      result;
+
+    result = super.getCapabilities();
+    result.disable(Capabilities.Capability.NUMERIC_CLASS);
+    result.disableDependency(Capabilities.Capability.NUMERIC_CLASS);
+    result.enable(Capabilities.Capability.NOMINAL_CLASS);
+
+    return result;
+  }
+
   /**
    * Returns a string describing classifier
    * @return a description suitable for
