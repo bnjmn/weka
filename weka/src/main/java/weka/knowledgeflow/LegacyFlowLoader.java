@@ -22,6 +22,7 @@
 package weka.knowledgeflow;
 
 import weka.core.WekaException;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.Logger;
 import weka.gui.beans.BeanCommon;
 import weka.gui.beans.BeanConnection;
@@ -656,6 +657,16 @@ public class LegacyFlowLoader implements FlowLoader {
             throw new WekaException(ex);
           }
         }
+      }
+    }
+
+    if (result == null) {
+      // one more last-ditch attempt
+      String lastDitch = "weka.knowledgeflow.steps." + clazzNameOnly;
+      try {
+        result = (Step) WekaPackageClassLoaderManager.objectForName(lastDitch);
+      } catch (Exception e) {
+        //
       }
     }
 
