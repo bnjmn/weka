@@ -40,12 +40,14 @@ import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.knowledgeflow.Data;
 import weka.knowledgeflow.LoggingLevel;
+import weka.knowledgeflow.SingleThreadedExecution;
 import weka.knowledgeflow.StepManager;
 
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -161,6 +163,17 @@ public class Classifier extends WekaAlgorithmWrapper implements
         ((EnvironmentHandler) m_classifierTemplate)
           .setEnvironment(getStepManager().getExecutionEnvironment()
             .getEnvironmentVariables());
+      }
+
+      // Check to see if the classifier is one that must run single-threaded
+      Annotation a =
+        m_classifierTemplate.getClass().getAnnotation(
+          SingleThreadedExecution.class);
+      if (a != null) {
+        getStepManager().logBasic(
+          getClassifier().getClass().getCanonicalName() + " "
+            + "will be executed in the single threaded executor");
+        getStepManager().setStepMustRunSingleThreaded(true);
       }
     } catch (Exception ex) {
       throw new WekaException(ex);

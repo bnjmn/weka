@@ -141,6 +141,12 @@ public class StepManagerImpl implements StepManager {
   protected boolean m_stepIsResourceIntensive;
 
   /**
+   * True if the managed step must run single threaded - i.e. in an executor
+   * service with one worker thread
+   */
+  protected boolean m_stepMustRunSingleThreaded;
+
+  /**
    * Constructor
    *
    * @param step the Step to manage
@@ -181,6 +187,9 @@ public class StepManagerImpl implements StepManager {
 
     Annotation a = step.getClass().getAnnotation(KFStep.class);
     m_stepIsResourceIntensive = a != null && ((KFStep) a).resourceIntensive();
+
+    a = step.getClass().getAnnotation(SingleThreadedExecution.class);
+    m_stepMustRunSingleThreaded = a != null;
   }
 
   /**
@@ -201,6 +210,31 @@ public class StepManagerImpl implements StepManager {
   @Override
   public boolean stepIsResourceIntensive() {
     return m_stepIsResourceIntensive;
+  }
+
+  /**
+   * Set whether the managed step must run single-threaded. I.e. in an executor
+   * service with one worker thread, thus effectively preventing more than one
+   * copy of the step from executing at any one point in time
+   *
+   * @param mustRunSingleThreaded true if the managed step must run
+   *          single-threaded
+   */
+  @Override
+  public void setStepMustRunSingleThreaded(boolean mustRunSingleThreaded) {
+    m_stepMustRunSingleThreaded = mustRunSingleThreaded;
+  }
+
+  /**
+   * Get whether the managed step must run single-threaded. I.e. in an executor
+   * service with one worker thread, thus effectively preventing more than one
+   * copy of the step from executing at any one point in time
+   *
+   * @return true if the managed step must run single-threaded
+   */
+  @Override
+  public boolean getStepMustRunSingleThreaded() {
+    return m_stepMustRunSingleThreaded;
   }
 
   /**

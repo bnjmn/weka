@@ -90,6 +90,14 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
    */
   protected transient ExecutorService m_clientExecutorService;
 
+  /**
+   * An executor service with a single worker thread. This is used to execute
+   * steps that are marked with the {@code SingleThreadedExecution annotation},
+   * which effectively limits one object of the type in question to be executing
+   * in the KnowledgeFlow/JVM at any one time.
+   */
+  protected transient ExecutorService m_singleThreadService;
+
   /** The log */
   protected transient Logger m_log;
 
@@ -251,11 +259,20 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   @Override
   public <T> Future<ExecutionResult<T>> submitTask(StepTask<T> stepTask)
     throws WekaException {
-
-    m_logHandler.logDebug("Submitting " + stepTask.toString()
-      + (stepTask.isResourceIntensive() ? " (resource intensive)" : ""));
-    return stepTask.isResourceIntensive() ? m_clientExecutorService
-      .submit(stepTask) : m_executorService.submit(stepTask);
+    String taskType = "";
+    if (stepTask.getMustRunSingleThreaded()) {
+      taskType = " (single threaded)";
+    } else if (stepTask.isResourceIntensive()) {
+      taskType = " (resource intensive)";
+    }
+    m_logHandler.logDebug("Submitting " + stepTask.toString() + taskType);
+    if (stepTask.getMustRunSingleThreaded()) {
+      return m_singleThreadService.submit(stepTask);
+    }
+    if (stepTask.isResourceIntensive()) {
+      return m_clientExecutorService.submit(stepTask);
+    }
+    return m_executorService.submit(stepTask);
   }
 
   /**
@@ -339,6 +356,8 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
       numThreadsHighLoad > 0 ? Executors.newFixedThreadPool(numThreadsHighLoad)
         : Executors.newFixedThreadPool(Runtime.getRuntime()
           .availableProcessors());
+
+    m_singleThreadService = Executors.newSingleThreadExecutor();
   }
 
   /**
@@ -370,6 +389,10 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
     if (m_clientExecutorService != null) {
       m_clientExecutorService.shutdown();
     }
+
+    if (m_singleThreadService != null) {
+      m_singleThreadService.shutdown();
+    }
   }
 
   /**
@@ -383,9 +406,23 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
   protected void launchStartPoint(final StepManagerImpl startPoint)
     throws WekaException {
 
-    m_logHandler.logDebug("Submitting " + startPoint.getName()
-      + (startPoint.stepIsResourceIntensive() ? " (resource intensive)" : ""));
-    if (startPoint.stepIsResourceIntensive()) {
+    String taskType =
+      startPoint.getStepMustRunSingleThreaded() ? " (single-threaded)"
+        : (startPoint.stepIsResourceIntensive() ? " (resource intensive)" : "");
+    m_logHandler.logDebug("Submitting " + startPoint.getName() + taskType);
+
+    if (startPoint.getStepMustRunSingleThreaded()) {
+      StepTask<Void> singleThreaded = new StepTask<Void>(null) {
+        private static final long serialVersionUID = -4008646793585608806L;
+
+        @Override
+        public void process() throws Exception {
+          startPoint.startStep();
+        }
+      };
+      singleThreaded.setMustRunSingleThreaded(true);
+      submitTask(singleThreaded);
+    } else if (startPoint.stepIsResourceIntensive()) {
       submitTask(new StepTask<Void>(null) {
 
         /** For serialization */
@@ -426,9 +463,20 @@ public class BaseExecutionEnvironment implements ExecutionEnvironment {
         // instance (streaming) connections.
         step.processIncoming(data[0]);
       } else {
-        m_logHandler.logDebug("Submitting " + step.getName()
-          + (step.stepIsResourceIntensive() ? " (resource intensive)" : ""));
-        if (step.stepIsResourceIntensive()) {
+        String taskType =
+          step.getStepMustRunSingleThreaded() ? " (single-threaded)" : (step
+            .stepIsResourceIntensive() ? " (resource intensive)" : "");
+        m_logHandler.logDebug("Submitting " + step.getName() + taskType);
+        if (step.getStepMustRunSingleThreaded()) {
+          m_singleThreadService.submit(new Runnable() {
+            @Override
+            public void run() {
+              for (Data d : data) {
+                step.processIncoming(d);
+              }
+            }
+          });
+        } else if (step.stepIsResourceIntensive()) {
           m_clientExecutorService.submit(new Runnable() {
             @Override
             public void run() {

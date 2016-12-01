@@ -473,4 +473,26 @@ public interface StepManager {
    *          resource intensive
    */
   void setStepIsResourceIntensive(boolean isResourceIntensive);
+
+  /**
+   * Marked the step managed by this step manager as one that must run
+   * single-threaded. I.e. in an executor service with one worker thread, thus
+   * effectively preventing more than one copy of the step from executing at any
+   * one point in time
+   *
+   * @param mustRunSingleThreaded true if the managed step must run
+   *          single-threaded
+   */
+  void setStepMustRunSingleThreaded(boolean mustRunSingleThreaded);
+
+  /**
+   * Returns true if the step managed by this step manager has been marked as
+   * one that must run single-threaded. I.e. in an executor service with one
+   * worker thread, thus effectively preventing more than one copy of the step
+   * from executing at any one point in time
+   *
+   * @param mustRunSingleThreaded true if the managed step must run
+   *          single-threaded
+   */
+  boolean getStepMustRunSingleThreaded();
 }

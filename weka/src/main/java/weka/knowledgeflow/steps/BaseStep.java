@@ -136,6 +136,29 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
   }
 
   /**
+   * Set whether this step must run single threaded. I.e. on an executor
+   * service which has only one worker thread, thus effectively preventing
+   * more than one copy of the step executing at any one time.
+   *
+   * @param mustRunSingleThreaded true if the step must run single threaded
+   */
+  @ProgrammaticProperty
+  public void setStepMustRunSingleThreaded(boolean mustRunSingleThreaded) {
+    getStepManager().setStepMustRunSingleThreaded(mustRunSingleThreaded);
+  }
+
+  /**
+   * Get whether this step must run single threaded. I.e. on an executor
+   * service which has only one worker thread, thus effectively preventing
+   * more than one copy of the step executing at any one time.
+   *
+   * @return true if the step must run single threaded
+   */
+  public boolean getStepMustRunSingleThreaded() {
+    return getStepManager().getStepMustRunSingleThreaded();
+  }
+
+  /**
    * Get the name of this step
    *
    * @return the name of this step

@@ -46,6 +46,13 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
   protected boolean m_resourceIntensive = true;
 
   /**
+   * True if only one of these tasks can be executing at any one time in the
+   * Knowledge Flow/JVM. This has priority over isResourceIntensive() and causes
+   * the task to run on an executor service with one worker thread.
+   */
+  protected boolean m_mustRunSingleThreaded;
+
+  /**
    * The callback notifier delegate. Performs the actual notification back to
    * the step
    */
@@ -114,11 +121,34 @@ public abstract class StepTask<T> implements Callable<ExecutionResult<T>>,
    * Get whether this {@code StepTask} is resource intensive (cpu/memory) or
    * not. By default, a {@code StepTask} is resource intensive
    *
-   * @return false if this {@code StepTask} is not resource
-   *          intensive
+   * @return false if this {@code StepTask} is not resource intensive
    */
   public boolean isResourceIntensive() {
     return m_resourceIntensive;
+  }
+
+  /**
+   * Set whether this {@code StepTask} must run single threaded - i.e. only
+   * one of these tasks is executing at any one time in the JVM. The Knowledge
+   * Flow uses a special executor service with a single worker thread to execute
+   * these tasks. This property, if true, overrides isResourceIntensive().
+   *
+   * @param singleThreaded true if this task must run single threaded
+   */
+  public void setMustRunSingleThreaded(boolean singleThreaded) {
+    m_mustRunSingleThreaded = singleThreaded;
+  }
+
+  /**
+   * Get whether this {@code StepTask} must run single threaded - i.e. only
+   * one of these tasks is executing at any one time in the JVM. The Knowledge
+   * Flow uses a special executor service with a single worker thread to execute
+   * these tasks. This property, if true, overrides isResourceIntensive().
+   *
+   * @return true if this task must run single threaded
+   */
+  public boolean getMustRunSingleThreaded() {
+    return m_mustRunSingleThreaded;
   }
 
   /**
