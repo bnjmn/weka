@@ -38,6 +38,7 @@ import weka.knowledgeflow.steps.Step;
 import weka.knowledgeflow.steps.TrainingSetMaker;
 
 import java.beans.BeanInfo;
+import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 import java.io.BufferedReader;
@@ -339,9 +340,11 @@ public class JSONFlowUtils {
     String clazz = loaderNode.getChild(CLASS).getValue().toString();
     try {
       weka.core.converters.Loader loader =
-        (weka.core.converters.Loader) WekaPackageClassLoaderManager.objectForName(clazz);
-          /* Beans.instantiate(
-          JSONFlowUtils.class.getClassLoader(), clazz); */
+        (weka.core.converters.Loader) WekaPackageClassLoaderManager
+          .objectForName(clazz);
+      /*
+       * Beans.instantiate( JSONFlowUtils.class.getClassLoader(), clazz);
+       */
 
       if (loader instanceof OptionHandler) {
         String optionString =
@@ -386,9 +389,11 @@ public class JSONFlowUtils {
     String clazz = saverNode.getChild(CLASS).getValue().toString();
     try {
       weka.core.converters.Saver saver =
-        (weka.core.converters.Saver) WekaPackageClassLoaderManager.objectForName(clazz);
-          /* Beans.instantiate(
-          JSONFlowUtils.class.getClassLoader(), clazz); */
+        (weka.core.converters.Saver) WekaPackageClassLoaderManager
+          .objectForName(clazz);
+      /*
+       * Beans.instantiate( JSONFlowUtils.class.getClassLoader(), clazz);
+       */
 
       if (saver instanceof OptionHandler) {
         String optionString = saverNode.getChild(OPTIONS).getValue().toString();
@@ -433,8 +438,9 @@ public class JSONFlowUtils {
     try {
       OptionHandler oh =
         (OptionHandler) WekaPackageClassLoaderManager.objectForName(clazz);
-          /* Beans.instantiate(JSONFlowUtils.class.getClassLoader(),
-          clazz); */
+      /*
+       * Beans.instantiate(JSONFlowUtils.class.getClassLoader(), clazz);
+       */
       String optionString = optionHNode.getChild(OPTIONS).getValue().toString();
       if (optionString != null && optionString.length() > 0) {
         String[] options = Utils.splitOptions(optionString);
@@ -535,7 +541,7 @@ public class JSONFlowUtils {
     Step theStep = null;
     try {
       step = WekaPackageClassLoaderManager.objectForName(clazz);
-      //Beans.instantiate(JSONFlowUtils.class.getClassLoader(), clazz);
+      // Beans.instantiate(JSONFlowUtils.class.getClassLoader(), clazz);
 
       if (!(step instanceof Step)) {
         throw new WekaException(
@@ -556,24 +562,28 @@ public class JSONFlowUtils {
           valueToSet = aProp.getValue();
         }
 
-        if (valueToSet != null) {
-          PropertyDescriptor propD =
-            new PropertyDescriptor(aProp.getName(), theStep.getClass());
-          File checkForFileProp = checkForFileProp(valueToSet, propD);
-          if (checkForFileProp != null) {
-            valueToSet = checkForFileProp;
+        try {
+          if (valueToSet != null) {
+            PropertyDescriptor propD =
+              new PropertyDescriptor(aProp.getName(), theStep.getClass());
+            File checkForFileProp = checkForFileProp(valueToSet, propD);
+            if (checkForFileProp != null) {
+              valueToSet = checkForFileProp;
+            }
+            Method writeMethod = propD.getWriteMethod();
+            if (writeMethod == null) {
+              System.err
+                .println("Unable to obtain a setter method for property '"
+                  + aProp.getName() + "' in step class '" + clazz);
+              continue;
+            }
+            Object[] arguments = { valueToSet };
+            writeMethod.invoke(theStep, arguments);
           }
-          Method writeMethod = propD.getWriteMethod();
-          if (writeMethod == null) {
-            System.err
-              .println("Unable to obtain a setter method for property '"
-                + aProp.getName() + "' in step class '" + clazz);
-            continue;
-          }
-          Object[] arguments = { valueToSet };
-          writeMethod.invoke(theStep, arguments);
+        } catch (IntrospectionException ex) {
+          System.err.println("WARNING: Unable to set property '" + aProp.getName()
+            + "' in step class '" + clazz + " - skipping");
         }
-
       }
 
     } catch (Exception ex) {
