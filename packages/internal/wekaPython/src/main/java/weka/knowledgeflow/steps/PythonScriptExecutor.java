@@ -47,8 +47,8 @@ import java.util.List;
  * @version $Revision: $
  */
 @KFStep(name = "PythonScriptExecutor", category = "Scripting",
-  toolTipText = "CPython scripting step",
-  iconPath = KFGUIConsts.BASE_ICON_PATH + "PythonScriptExecutor.gif")
+  toolTipText = "CPython scripting step", iconPath = KFGUIConsts.BASE_ICON_PATH
+    + "PythonScriptExecutor.gif")
 public class PythonScriptExecutor extends BaseStep {
 
   private static final long serialVersionUID = -491300310357178468L;
@@ -67,6 +67,33 @@ public class PythonScriptExecutor extends BaseStep {
 
   /** Attempt to keep going after detecting output on sys error from python */
   protected boolean m_continueOnSysErr;
+
+  /**
+   * Set whether to try and continue after seeing output on the sys error
+   * stream. Some schemes write warnings (rather than errors) to sys error.
+   *
+   * @param c true if we should try to continue after seeing output on the sys
+   *          error stream
+   */
+  public void setContinueOnSysErr(boolean c) {
+    m_continueOnSysErr = c;
+  }
+
+  /**
+   * Get whether to try and continue after seeing output on the sys error
+   * stream. Some schemes write warnings (rather than errors) to sys error.
+   *
+   * @return true if we should try to continue after seeing output on the sys
+   *         error stream
+   */
+  @OptionMetadata(
+    displayName = "Try to continue after sys err output from script",
+    description = "Try to continue after sys err output from script.\nSome schemes"
+      + " report warnings to the system error stream.", displayOrder = 5)
+  public
+    boolean getContinueOnSysErr() {
+    return m_continueOnSysErr;
+  }
 
   /**
    * Set whether to output debugging info (both client and server side)
@@ -115,10 +142,10 @@ public class PythonScriptExecutor extends BaseStep {
    *
    * @param scriptFile the name of the script file to load at runtime
    */
-  @OptionMetadata(displayName = "File to load script from",
+  @OptionMetadata(
+    displayName = "File to load script from",
     description = "A file to load the python script from (if set takes precendence"
-      + "over any script from the editor",
-    displayOrder = 1)
+      + "over any script from the editor", displayOrder = 1)
   @FilePropertyMetadata(fileChooserDialogType = JFileChooser.OPEN_DIALOG,
     directoriesOnly = false)
   public void setScriptFile(File scriptFile) {
@@ -139,10 +166,12 @@ public class PythonScriptExecutor extends BaseStep {
    *
    * @param varsToGet a comma-separated list of variables to get from python
    */
-  @OptionMetadata(displayName = "Variables to get from Python",
+  @OptionMetadata(
+    displayName = "Variables to get from Python",
     description = "A comma-separated list of variables to retrieve from Python",
     displayOrder = 2)
-  public void setVariablesToGetFromPython(String varsToGet) {
+  public
+    void setVariablesToGetFromPython(String varsToGet) {
     m_varsToGet = varsToGet;
   }
 
@@ -217,25 +246,18 @@ public class PythonScriptExecutor extends BaseStep {
           // now execute the user's script
           String script = m_pyScript;
           if (m_scriptFile != null && m_scriptFile.toString().length() > 0) {
-            script = loadScript();
+            try {
+              script = loadScript();
+            } catch (IOException ex) {
+              throw new WekaException(ex);
+            }
           }
 
           executeScript(session, script);
-          getStepManager().finished();
-        }
-      } catch (Exception ex) {
-        if (getDebug()) {
-          if (session != null) {
-            getStepManager().logBasic("Getting debug info...");
-            List<String> outAndErr = session.getPythonDebugBuffer(getDebug());
-            getStepManager()
-              .logBasic("Output from python:\n" + outAndErr.get(0));
-            getStepManager()
-              .logBasic("Error from python:\n" + outAndErr.get(1));
-          }
         }
       } finally {
         PythonSession.releaseSession(this);
+        getStepManager().finished();
       }
     }
   }
@@ -307,8 +329,8 @@ public class PythonScriptExecutor extends BaseStep {
       // try initializing
       if (!PythonSession.initSession("python", getDebug())) {
         String envEvalResults = PythonSession.getPythonEnvCheckResults();
-        throw new WekaException(
-          "Was unable to start python environment: " + envEvalResults);
+        throw new WekaException("Was unable to start python environment: "
+          + envEvalResults);
       }
     }
 
@@ -350,8 +372,9 @@ public class PythonScriptExecutor extends BaseStep {
         for (String v : vars) {
           if (!session.checkIfPythonVariableIsSet(v.trim(), getDebug())) {
             if (m_continueOnSysErr) {
-              getStepManager().logWarning("Requested output variable '" + v
-                + "' does not seem " + "to be set in python");
+              getStepManager().logWarning(
+                "Requested output variable '" + v + "' does not seem "
+                  + "to be set in python");
             } else {
               throw new WekaException("Requested output variable '" + v
                 + "' does not seem to be set in python");
@@ -365,15 +388,15 @@ public class PythonScriptExecutor extends BaseStep {
         for (i = 0; i < vars.length; i++) {
           if (ok[i]) {
             if (getDebug()) {
-              getStepManager()
-                .logDetailed("Retrieving variable '" + vars[i].trim()
+              getStepManager().logDetailed(
+                "Retrieving variable '" + vars[i].trim()
                   + "' from python. Type: " + types[i].toString());
             }
             if (types[i] == PythonSession.PythonVariableType.DataFrame) {
               // converting to instances takes precedence over textual form
               // if we have data set listeners
-              if (getStepManager()
-                .numOutgoingConnectionsOfType(StepManager.CON_DATASET) > 0) {
+              if (getStepManager().numOutgoingConnectionsOfType(
+                StepManager.CON_DATASET) > 0) {
                 Instances pyFrame =
                   session.getDataFrameAsInstances(vars[i].trim(), getDebug());
                 Data output = new Data(StepManager.CON_DATASET, pyFrame);
@@ -381,8 +404,8 @@ public class PythonScriptExecutor extends BaseStep {
                 output.setPayloadElement(StepManager.CON_AUX_DATA_MAX_SET_NUM,
                   1);
                 getStepManager().outputData(output);
-              } else if (getStepManager()
-                .numOutgoingConnectionsOfType(StepManager.CON_TEXT) > 0) {
+              } else if (getStepManager().numOutgoingConnectionsOfType(
+                StepManager.CON_TEXT) > 0) {
                 String textPyFrame =
                   session.getVariableValueFromPythonAsPlainString(
                     vars[i].trim(), getDebug());
@@ -392,8 +415,8 @@ public class PythonScriptExecutor extends BaseStep {
                 getStepManager().outputData(output);
               }
             } else if (types[i] == PythonSession.PythonVariableType.Image) {
-              if (getStepManager()
-                .numOutgoingConnectionsOfType(StepManager.CON_IMAGE) > 0) {
+              if (getStepManager().numOutgoingConnectionsOfType(
+                StepManager.CON_IMAGE) > 0) {
                 BufferedImage image =
                   session.getImageFromPython(vars[i].trim(), getDebug());
                 Data output = new Data(StepManager.CON_IMAGE, image);
@@ -403,8 +426,8 @@ public class PythonScriptExecutor extends BaseStep {
               }
             } else if (types[i] == PythonSession.PythonVariableType.String
               || types[i] == PythonSession.PythonVariableType.Unknown) {
-              if (getStepManager()
-                .numOutgoingConnectionsOfType(StepManager.CON_TEXT) > 0) {
+              if (getStepManager().numOutgoingConnectionsOfType(
+                StepManager.CON_TEXT) > 0) {
                 String varAsText =
                   session.getVariableValueFromPythonAsPlainString(
                     vars[i].trim(), getDebug());
@@ -422,8 +445,10 @@ public class PythonScriptExecutor extends BaseStep {
         if (session != null) {
           getStepManager().logBasic("Getting debug info....");
           List<String> outAndErr = session.getPythonDebugBuffer(getDebug());
-          getStepManager().logBasic("Output from python:\n" + outAndErr.get(0));
-          getStepManager().logBasic("Error from python:\n" + outAndErr.get(1));
+          getStepManager().logBasic(
+            "System output from python:\n" + outAndErr.get(0));
+          getStepManager().logBasic(
+            "System err from python:\n" + outAndErr.get(1));
         }
 
       }
