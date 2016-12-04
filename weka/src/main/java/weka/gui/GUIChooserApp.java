@@ -965,7 +965,7 @@ public class GUIChooserApp extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
           try {
-            Class groovyConsoleClass = Class.forName("groovy.ui.Console");
+            Class groovyConsoleClass = WekaPackageClassLoaderManager.forName("groovy.ui.Console");
 
             if (System.getProperty("os.name").toLowerCase().startsWith("mac")) {
 

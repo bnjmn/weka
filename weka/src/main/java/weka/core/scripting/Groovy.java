@@ -27,6 +27,7 @@ import java.lang.reflect.Method;
 
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.WekaPackageClassLoaderManager;
 
 /**
  * A helper class for <a href="http://groovy.codehaus.org/"
@@ -53,7 +54,8 @@ public class Groovy implements Serializable, RevisionHandler {
   protected static boolean m_Present = false;
   static {
     try {
-      Class.forName(CLASS_GROOVYCLASSLOADER);
+      // Class.forName(CLASS_GROOVYCLASSLOADER);
+      WekaPackageClassLoaderManager.forName(CLASS_GROOVYCLASSLOADER);
       m_Present = true;
     } catch (Exception e) {
       m_Present = false;
@@ -124,9 +126,11 @@ public class Groovy implements Serializable, RevisionHandler {
 
     if (isPresent()) {
       try {
-        cls = Class.forName(CLASS_GROOVYCLASSLOADER);
+        // cls = Class.forName(CLASS_GROOVYCLASSLOADER);
+        cls = WekaPackageClassLoaderManager.forName(CLASS_GROOVYCLASSLOADER);
         constr = cls.getConstructor(new Class[] { ClassLoader.class });
-        result = constr.newInstance(Groovy.class.getClassLoader());
+        //result = constr.newInstance(Groovy.class.getClassLoader());
+        result = constr.newInstance(cls.getClassLoader());
       } catch (Exception e) {
         e.printStackTrace();
         result = null;
