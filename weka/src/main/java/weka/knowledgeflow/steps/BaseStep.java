@@ -154,7 +154,7 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
    *
    * @return true if the step must run single threaded
    */
-  public boolean getStepMustRunSingleThreaded() {
+  public boolean stepMustRunSingleThreaded() {
     return getStepManager().getStepMustRunSingleThreaded();
   }
 
