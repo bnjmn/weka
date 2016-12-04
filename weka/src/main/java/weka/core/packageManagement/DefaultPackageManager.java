@@ -38,6 +38,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.PrintStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -849,7 +850,7 @@ public class DefaultPackageManager extends PackageManager {
     return getConnection(connURL);
   }
 
-  private URLConnection getConnection(URL connURL) throws IOException {
+  private URLConnection openConnection(URL connURL) throws IOException {
     URLConnection conn = null;
 
     // setup the proxy (if we are using one) and open the connect
@@ -861,6 +862,32 @@ public class DefaultPackageManager extends PackageManager {
 
     // Set a timeout for establishing the connection
     conn.setConnectTimeout(m_timeout);
+
+    return conn;
+  }
+
+  private URLConnection getConnection(URL connURL) throws IOException {
+    URL origURL = connURL;
+    URLConnection conn = openConnection(connURL);
+
+    if (conn instanceof HttpURLConnection) {
+      int status = ((HttpURLConnection) conn).getResponseCode();
+      int redirectCount = 0;
+      while (status == HttpURLConnection.HTTP_MOVED_TEMP
+        || status == HttpURLConnection.HTTP_MOVED_PERM
+        || status == HttpURLConnection.HTTP_SEE_OTHER) {
+        redirectCount++;
+        if (redirectCount > 2) {
+          throw new IOException(
+            "Three redirects were generated when trying to " + "download "
+              + origURL);
+        }
+
+        String newURL = conn.getHeaderField("Location");
+        conn = openConnection(new URL(newURL));
+        status = ((HttpURLConnection) conn).getResponseCode();
+      }
+    }
 
     return conn;
   }
