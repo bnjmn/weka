@@ -200,7 +200,6 @@ public class DefaultPackageManager extends PackageManager {
       File.createTempFile(packageArchiveName, "." + fileExtension);
 
     for (PrintStream progres : progress) {
-      progres.println(packageURL.toString());
       progres.println("[DefaultPackageManager] Tmp file: "
         + tmpDownload.toString());
     }
