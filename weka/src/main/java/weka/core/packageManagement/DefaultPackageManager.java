@@ -870,7 +870,18 @@ public class DefaultPackageManager extends PackageManager {
     URLConnection conn = openConnection(connURL);
 
     if (conn instanceof HttpURLConnection) {
-      int status = ((HttpURLConnection) conn).getResponseCode();
+      int status = 0;
+      try {
+        status = ((HttpURLConnection) conn).getResponseCode();
+      } catch (Exception ex) {
+        if (connURL.toString().startsWith("https://")) {
+          String newURL = connURL.toString().replace("https://", "http://");
+          conn = openConnection(new URL(newURL));
+          status = ((HttpURLConnection) conn).getResponseCode();
+        } else {
+          throw ex;
+        }
+      }
       int redirectCount = 0;
       while (status == HttpURLConnection.HTTP_MOVED_TEMP
         || status == HttpURLConnection.HTTP_MOVED_PERM
@@ -894,6 +905,8 @@ public class DefaultPackageManager extends PackageManager {
             newURL = newURL.replace("https://", "http://");
             conn = openConnection(new URL(newURL));
             status = ((HttpURLConnection) conn).getResponseCode();
+          } else {
+            throw ex;
           }
         }
       }
