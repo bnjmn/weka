@@ -46,6 +46,8 @@ import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interactive viewer for the ScatterPlotMatrix step
@@ -92,8 +94,20 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
-      @Override public void entryDeleted(String name, int index) {
-        ((ScatterPlotMatrix)getStep()).getDatasets().remove(index);
+      @Override
+      public void entryDeleted(String name, int index) {
+        ((ScatterPlotMatrix) getStep()).getDatasets().remove(index);
+      }
+
+      @Override
+      public void entriesDeleted(List<String> names, List<Integer> indexes) {
+        List<Data> ds = ((ScatterPlotMatrix) getStep()).getDatasets();
+        List<Data> toRemove = new ArrayList<Data>();
+        for (int i : indexes) {
+          toRemove.add(ds.get(i));
+        }
+
+        ds.removeAll(toRemove);
       }
     });
 
@@ -191,13 +205,11 @@ public class ScatterPlotMatrixInteractiveView extends BaseInteractiveViewer {
     int pointSize =
       settings.getSetting(VisualizePanel.ScatterDefaults.ID,
         VisualizePanel.ScatterDefaults.POINT_SIZE_KEY,
-        VisualizePanel.ScatterDefaults.POINT_SIZE,
-        Environment.getSystemWide());
+        VisualizePanel.ScatterDefaults.POINT_SIZE, Environment.getSystemWide());
     int plotSize =
       settings.getSetting(VisualizePanel.ScatterDefaults.ID,
         VisualizePanel.ScatterDefaults.PLOT_SIZE_KEY,
-        VisualizePanel.ScatterDefaults.PLOT_SIZE,
-        Environment.getSystemWide());
+        VisualizePanel.ScatterDefaults.PLOT_SIZE, Environment.getSystemWide());
     m_matrixPanel.setPointSize(pointSize);
     m_matrixPanel.setPlotSize(plotSize);
     m_matrixPanel.updatePanel();

@@ -31,13 +31,19 @@ import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.VisualizeUtils;
 import weka.knowledgeflow.steps.DataVisualizer;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JSplitPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interactive viewer for the DataVisualizer step
@@ -49,7 +55,7 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
 
   private static final long serialVersionUID = 5345799787154266282L;
 
-  /** Holds results  */
+  /** Holds results */
   protected ResultHistoryPanel m_history;
 
   /** The actual visualization */
@@ -91,8 +97,21 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
-      @Override public void entryDeleted(String name, int index) {
-        ((DataVisualizer)getStep()).getPlots().remove(index);
+      @Override
+      public void entryDeleted(String name, int index) {
+        ((DataVisualizer) getStep()).getPlots().remove(index);
+      }
+
+      @Override
+      public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
+        List<PlotData2D> ds = ((DataVisualizer) getStep()).getPlots();
+        List<PlotData2D> toRemove = new ArrayList<PlotData2D>();
+        for (int i : indexes) {
+          toRemove.add(ds.get(i));
+        }
+
+        ds.removeAll(toRemove);
       }
     });
     m_history.getList().addMouseListener(

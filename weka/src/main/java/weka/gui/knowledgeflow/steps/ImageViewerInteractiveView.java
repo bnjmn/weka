@@ -47,6 +47,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -97,6 +98,13 @@ public class ImageViewerInteractiveView extends BaseInteractiveViewer {
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
       @Override public void entryDeleted(String name, int index) {
         ((ImageViewer)getStep()).getImages().remove(name);
+      }
+
+      @Override
+      public void entriesDeleted(List<String> names, List<Integer> indexes) {
+        for (String name : names) {
+          ((ImageViewer) getStep()).getImages().remove(name);
+        }
       }
     });
     m_history.getList().addMouseListener( new ResultHistoryPanel.RMouseAdapter() {

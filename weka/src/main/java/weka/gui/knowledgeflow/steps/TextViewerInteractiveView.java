@@ -29,8 +29,17 @@ import weka.gui.SaveBuffer;
 import weka.gui.knowledgeflow.BaseInteractiveViewer;
 import weka.knowledgeflow.steps.TextViewer;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -76,8 +85,17 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
     m_history.setBorder(BorderFactory.createTitledBorder("Result list"));
     m_history.setHandleRightClicks(false);
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
-      @Override public void entryDeleted(String name, int index) {
-        ((TextViewer)getStep()).getResults().remove(name);
+      @Override
+      public void entryDeleted(String name, int index) {
+        ((TextViewer) getStep()).getResults().remove(name);
+      }
+
+      @Override
+      public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
+        for (String name : names) {
+          ((TextViewer) getStep()).getResults().remove(name);
+        }
       }
     });
     m_history.getList().addMouseListener(new MouseAdapter() {

@@ -31,13 +31,19 @@ import weka.knowledgeflow.Data;
 import weka.knowledgeflow.StepManager;
 import weka.knowledgeflow.steps.CostBenefitAnalysis;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JSplitPane;
+import javax.swing.ListSelectionModel;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Interactive view for the CostBenefitAnalysis step
@@ -86,6 +92,17 @@ public class CostBenefitAnalysisInteractiveView extends BaseInteractiveViewer {
     m_history.setDeleteListener(new ResultHistoryPanel.RDeleteListener() {
       @Override public void entryDeleted(String name, int index) {
         ((CostBenefitAnalysis)getStep()).getDatasets().remove(index);
+      }
+
+      @Override public void entriesDeleted(java.util.List<String> names,
+        java.util.List<Integer> indexes) {
+        List<Data> ds = ((CostBenefitAnalysis) getStep()).getDatasets();
+        List<Data> toRemove = new ArrayList<Data>();
+        for (int i : indexes) {
+          toRemove.add(ds.get(i));
+        }
+
+        ds.removeAll(toRemove);
       }
     });
 
