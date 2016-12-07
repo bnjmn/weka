@@ -311,7 +311,7 @@ public class ResultHistoryPanel extends JPanel {
   public void addObject(String name, Object o) {
     String nameCopy = name;
     int i = 0;
-    while (m_Results.containsKey(nameCopy)) {
+    while (m_Objs.containsKey(nameCopy)) {
       nameCopy = name + "_" + i++;
     }
 
