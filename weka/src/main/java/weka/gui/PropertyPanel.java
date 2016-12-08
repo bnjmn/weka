@@ -37,6 +37,7 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyEditor;
+import java.lang.reflect.Array;
 
 import javax.swing.BorderFactory;
 import javax.swing.JMenuItem;
@@ -141,14 +142,26 @@ public class PropertyPanel extends JPanel {
               item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  String str = m_Editor.getValue().getClass().getName();
-                  if (m_Editor.getValue() instanceof OptionHandler)
-                    str += " "
-                        + Utils.joinOptions(((OptionHandler) m_Editor
-                            .getValue()).getOptions());
+                  Object value = m_Editor.getValue();
+                  String str = "";
+                  if (value.getClass().isArray()) {
+                    str += value.getClass().getName();
+                    Object[] arr = (Object[])value;
+                    for (Object v : arr) {
+                      String s = v.getClass().getName();
+                      if (v instanceof OptionHandler) {
+                        s += " " + Utils.joinOptions(((OptionHandler) v).getOptions());
+                      }
+                      str += " \"" + Utils.backQuoteChars(s.trim()) + "\"";
+                    }
+                  } else {
+                    str += value.getClass().getName();
+                    if (value instanceof OptionHandler) {
+                      str += " " + Utils.joinOptions(((OptionHandler) value).getOptions());
+                    }
+                  }
                   StringSelection selection = new StringSelection(str.trim());
-                  Clipboard clipboard = Toolkit.getDefaultToolkit()
-                      .getSystemClipboard();
+                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                   clipboard.setContents(selection, selection);
                 }
               });
@@ -166,8 +179,18 @@ public class PropertyPanel extends JPanel {
                     String[] options = Utils.splitOptions(str);
                     String classname = options[0];
                     options[0] = "";
-                    m_Editor.setValue(Utils.forName(Object.class, classname,
-                        options));
+                    if (Class.forName(classname).isArray()) {
+                      Object[] arr = (Object[])Array.newInstance(Class.forName(classname).getComponentType(), options.length - 1);
+                      for (int i = 1; i < options.length; i++) {
+                        String[] ops = Utils.splitOptions(Utils.unbackQuoteChars(options[i]));
+                        String cname = ops[0];
+                        ops[0] = "";
+                        arr[i - 1] = Utils.forName(Object.class, cname, ops);
+                      }
+                      m_Editor.setValue(arr);
+                    } else {
+                      m_Editor.setValue(Utils.forName(Object.class, classname, options));
+                    }
                   } catch (Exception ex) {
                     JOptionPane.showMessageDialog(comp,
                         "Error parsing commandline:\n" + ex, "Error...",
