@@ -174,15 +174,16 @@ public class PropertyPanel extends JPanel {
               public void actionPerformed(ActionEvent e) {
                 String str = JOptionPane.showInputDialog(comp,
                     "Configuration (<classname> [<options>])");
-                if (str != null) {
+                if (str != null && str.length() > 0) {
                   try {
                     String[] options = Utils.splitOptions(str);
                     String classname = options[0];
                     options[0] = "";
-                    if (Class.forName(classname).isArray()) {
-                      Object[] arr = (Object[])Array.newInstance(Class.forName(classname).getComponentType(), options.length - 1);
+                    Class c = Utils.forName(Object.class, classname, null).getClass();
+                    if (c.isArray()) {
+                      Object[] arr = (Object[])Array.newInstance(c.getComponentType(), options.length - 1);
                       for (int i = 1; i < options.length; i++) {
-                        String[] ops = Utils.splitOptions(Utils.unbackQuoteChars(options[i]));
+                        String[] ops = Utils.splitOptions(options[i]);
                         String cname = ops[0];
                         ops[0] = "";
                         arr[i - 1] = Utils.forName(Object.class, cname, ops);
@@ -211,7 +212,7 @@ public class PropertyPanel extends JPanel {
                       + Utils.joinOptions(((OptionHandler) m_Editor.getValue())
                           .getOptions());
                   str = JOptionPane.showInputDialog(comp, "Configuration", str);
-                  if (str != null) {
+                  if (str != null && str.length() > 0) {
                     try {
                       String[] options = Utils.splitOptions(str);
                       String classname = options[0];

@@ -1069,7 +1069,7 @@ public final class Utils implements RevisionHandler {
    * @param options an array of options suitable for passing to setOptions. May
    *          be null. Any options accepted by the object will be removed from
    *          the array.
-   * @return the newly created object, ready for use.
+   * @return the newly created object, ready for use (if it is an array, it will have size zero).
    * @exception Exception if the class name is invalid, or if the class is not
    *              assignable to the desired class type, or the options supplied
    *              are not acceptable to the object
@@ -1084,7 +1084,17 @@ public final class Utils implements RevisionHandler {
     List<String> matches = Run.findSchemeMatch(classType, className, false,
       true);
     if (matches.size() == 0) {
-      throw new Exception("Can't find class called: " + className);
+
+      // Could be an array class type, which is not covered by findSchemeMatch()
+      try {
+        Class c = Class.forName(className);
+        if (c.isArray() && (classType.isAssignableFrom(c))) {
+          return Array.newInstance(c.getComponentType(), 0);
+        }
+        throw new Exception();
+      } catch (Exception ex) {
+        throw new Exception("Can't find class called: " + className);
+      }
     }
 
     if (matches.size() > 1) {

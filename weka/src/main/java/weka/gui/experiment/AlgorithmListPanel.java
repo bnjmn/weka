@@ -39,6 +39,8 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
+import java.lang.reflect.Array;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListCellRenderer;
@@ -213,20 +215,28 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
             JPopupMenu menu = new JPopupMenu();
             JMenuItem item;
 
-            item = new JMenuItem("Add configuration...");
+            item = new JMenuItem("Add configuration(s)...");
             item.addActionListener(new ActionListener() {
               @Override
               public void actionPerformed(ActionEvent e) {
                 String str = JOptionPane.showInputDialog(self,
                   "Configuration (<classname> [<options>])");
-                if (str != null) {
+                if (str != null && str.length() > 0) {
                   try {
                     String[] options = Utils.splitOptions(str);
                     String classname = options[0];
                     options[0] = "";
-                    Object obj = Utils
-                      .forName(Object.class, classname, options);
-                    m_AlgorithmListModel.addElement(obj);
+                    Class c = Utils.forName(Object.class, classname, null).getClass();
+                    if (c.isArray()) {
+                      for (int i = 1; i < options.length; i++) {
+                        String[] ops = Utils.splitOptions(options[i]);
+                        String cname = ops[0];
+                        ops[0] = "";
+                        m_AlgorithmListModel.addElement(Utils.forName(Object.class, cname, ops));
+                      }
+                    } else {
+                      m_AlgorithmListModel.addElement(Utils.forName(Object.class, classname, options));
+                    }
                     updateExperiment();
                   } catch (Exception ex) {
                     ex.printStackTrace();
@@ -246,24 +256,46 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
               item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                  if (m_List.getSelectedValuesList().size() > 1) {
+                    JOptionPane.showMessageDialog(self, "You have selected more than one element in the list.", "Error...",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                  }
                   self.actionPerformed(new ActionEvent(m_EditBut, 0, ""));
                 }
               });
               menu.add(item);
 
-              item = new JMenuItem("Copy configuration to clipboard");
+              item = new JMenuItem("Copy configuration(s) to clipboard");
               item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  String str = m_List.getSelectedValue().getClass().getName();
-                  if (m_List.getSelectedValue() instanceof OptionHandler) {
-                    str += " "
-                      + Utils.joinOptions(((OptionHandler) m_List
-                        .getSelectedValue()).getOptions());
+                  List<Object> list = m_List.getSelectedValuesList();
+                  Object value = null;
+                  if (list.size() > 1) {
+                    value = list.toArray();
+                  } else {
+                    value = list.get(0);
+                  }
+                  String str = "";
+                  if (value.getClass().isArray()) {
+                    str += value.getClass().getName();
+                    Object[] arr = (Object[])value;
+                    for (Object v : arr) {
+                      String s = v.getClass().getName();
+                      if (v instanceof OptionHandler) {
+                        s += " " + Utils.joinOptions(((OptionHandler) v).getOptions());
+                      }
+                      str += " \"" + Utils.backQuoteChars(s.trim()) + "\"";
+                    }
+                  } else {
+                    str += value.getClass().getName();
+                    if (value instanceof OptionHandler) {
+                      str += " " + Utils.joinOptions(((OptionHandler) value).getOptions());
+                    }
                   }
                   StringSelection selection = new StringSelection(str.trim());
-                  Clipboard clipboard = Toolkit.getDefaultToolkit()
-                    .getSystemClipboard();
+                  Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
                   clipboard.setContents(selection, selection);
                 }
               });
@@ -273,9 +305,14 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
               item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                  if (m_List.getSelectedValuesList().size() > 1) {
+                    JOptionPane.showMessageDialog(self, "You have selected more than one element in the list.", "Error...",
+                            JOptionPane.ERROR_MESSAGE);
+                    return;
+                  }
                   String str = JOptionPane.showInputDialog(self,
                     "Configuration (<classname> [<options>])");
-                  if (str != null) {
+                  if (str != null && str.length() > 0) {
                     try {
                       String[] options = Utils.splitOptions(str);
                       String classname = options[0];
