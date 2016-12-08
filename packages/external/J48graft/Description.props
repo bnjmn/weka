@@ -9,7 +9,7 @@ PackageName=J48graft
 Version=1.1.4
 
 #Date
-Date=2016-10-31
+Date=2016-12-09
 
 # Title (required)
 Title=Class for generating a grafted (pruned or unpruned) C4.5 decision tree
