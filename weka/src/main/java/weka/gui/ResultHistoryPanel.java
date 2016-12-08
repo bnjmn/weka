@@ -187,16 +187,7 @@ public class ResultHistoryPanel extends JPanel {
       @Override
       public void keyReleased(KeyEvent e) {
         if (e.getKeyCode() == KeyEvent.VK_DELETE) {
-          int[] selectedI = m_List.getSelectedIndices();
-          if (selectedI != null && selectedI.length > 0) {
-            List<String> elsToDelete = new ArrayList<String>();
-            for (int i : selectedI) {
-              elsToDelete.add(m_Model.elementAt(i).toString());
-            }
-            for (String el : elsToDelete) {
-              removeResult(el);
-            }
-          }
+          removeResults(m_List.getSelectedIndices());
 
 //          int selected = m_List.getSelectedIndex();
 //          if (selected != -1) {
@@ -214,14 +205,16 @@ public class ResultHistoryPanel extends JPanel {
         @Override
         public void valueChanged(ListSelectionEvent e) {
           if (!e.getValueIsAdjusting()) {
-            ListSelectionModel lm = (ListSelectionModel) e.getSource();
-            for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
-              if (lm.isSelectedIndex(i)) {
-                // m_AttSummaryPanel.setAttribute(i);
-                if ((i != -1) && (m_SingleText != null)) {
-                  setSingle((String) m_Model.elementAt(i));
+            if (m_List.getSelectedIndices().length <= 1) {
+              ListSelectionModel lm = (ListSelectionModel) e.getSource();
+              for (int i = e.getFirstIndex(); i <= e.getLastIndex(); i++) {
+                if (lm.isSelectedIndex(i)) {
+                  // m_AttSummaryPanel.setAttribute(i);
+                  if ((i != -1) && (m_SingleText != null)) {
+                    setSingle((String) m_Model.elementAt(i));
+                  }
+                  break;
                 }
-                break;
               }
             }
           }
@@ -272,6 +265,32 @@ public class ResultHistoryPanel extends JPanel {
 
     m_Model.addElement(nameCopy);
     m_Results.put(nameCopy, result);
+  }
+
+  /**
+   * Remove the entries at the specified indices in the list
+   *
+   * @param selectedI the entries to remove
+   */
+  public void removeResults(int[] selectedI) {
+    if (selectedI != null && selectedI.length > 0) {
+      List<String> elsToDelete = new ArrayList<String>();
+      for (int i : selectedI) {
+        elsToDelete.add(m_Model.elementAt(i).toString());
+      }
+      removeResults(elsToDelete);
+    }
+  }
+
+  /**
+   * Remove the specified entries from the list
+   *
+   * @param entries the entries to remove
+   */
+  public void removeResults(List<String> entries) {
+    for (String el : entries) {
+      removeResult(el);
+    }
   }
 
   /**

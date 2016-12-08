@@ -604,8 +604,10 @@ public class ClassifierPanel extends AbstractPerspective implements
           || e.isAltDown()) {
           int index = m_History.getList().locationToIndex(e.getPoint());
           if (index != -1) {
-            String name = m_History.getNameAtIndex(index);
-            visualize(name, e.getX(), e.getY());
+            List<String> selectedEls =
+              (List<String>) m_History.getList().getSelectedValuesList();
+            // String name = m_History.getNameAtIndex(index);
+            visualize(selectedEls, e.getX(), e.getY());
           } else {
             visualize(null, e.getX(), e.getY());
           }
@@ -827,9 +829,10 @@ public class ClassifierPanel extends AbstractPerspective implements
         // Display as a single button
         String className = pluginsVector.elementAt(0);
         final ClassifierPanelLaunchHandlerPlugin plugin =
-          (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
-          //(ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
-          //  .newInstance();
+          (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
+            .objectForName(className);
+        // (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+        // .newInstance();
         if (plugin != null) {
           plugin.setClassifierPanel(this);
           pluginBut = new JButton(plugin.getLaunchCommand());
@@ -852,9 +855,10 @@ public class ClassifierPanel extends AbstractPerspective implements
         String className = (pluginsVector.elementAt(i));
         try {
           final ClassifierPanelLaunchHandlerPlugin plugin =
-            (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager.objectForName(className);
-          //  (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
-            //  .newInstance();
+            (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
+              .objectForName(className);
+          // (ClassifierPanelLaunchHandlerPlugin) Class.forName(className)
+          // .newInstance();
 
           if (plugin == null) {
             continue;
@@ -1104,15 +1108,17 @@ public class ClassifierPanel extends AbstractPerspective implements
   }
 
   /**
-   * Configures an evaluation object with respect to a classifier, cost matrix, output
-   * and plotting.
+   * Configures an evaluation object with respect to a classifier, cost matrix,
+   * output and plotting.
    *
    * @param eval the Evaluation object to configure
    * @param classifier the Classifier being used
    * @param inst the Instances involved
    * @param costMatrix a cost matrix (if any)
-   * @param plotInstances a ClassifierErrorsPlotInstances for visualization of errors (can be null)
-   * @param classificationOutput an output object for printing predictions (can be null)
+   * @param plotInstances a ClassifierErrorsPlotInstances for visualization of
+   *          errors (can be null)
+   * @param classificationOutput an output object for printing predictions (can
+   *          be null)
    * @param onlySetPriors true to only set priors
    * @return the configured Evaluation object
    * @throws Exception if a problem occurs
@@ -1909,7 +1915,8 @@ public class ClassifierPanel extends AbstractPerspective implements
                 && plotInstances.canPlot(false)) {
                 m_CurrentVis = new VisualizePanel();
                 if (getMainApplication() != null) {
-                  Settings settings = getMainApplication().getApplicationSettings();
+                  Settings settings =
+                    getMainApplication().getApplicationSettings();
                   m_CurrentVis.applySettings(settings,
                     weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
                 }
@@ -1967,22 +1974,22 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Handles constructing a popup menu with visualization options.
    * 
-   * @param name the name of the result history list entry clicked on by the
+   * @param names the name of the result history list entry clicked on by the
    *          user
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
   @SuppressWarnings("unchecked")
-  protected void visualize(String name, int x, int y) {
-    final String selectedName = name;
+  protected void visualize(List<String> names, int x, int y) {
+    final List<String> selectedNames = names;
     JPopupMenu resultListMenu = new JPopupMenu();
 
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       visMainBuffer.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.setSingle(selectedName);
+          m_History.setSingle(selectedNames.get(0));
         }
       });
     } else {
@@ -1991,11 +1998,11 @@ public class ClassifierPanel extends AbstractPerspective implements
     resultListMenu.add(visMainBuffer);
 
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       visSepBuffer.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.openFrame(selectedName);
+          m_History.openFrame(selectedNames.get(0));
         }
       });
     } else {
@@ -2004,11 +2011,11 @@ public class ClassifierPanel extends AbstractPerspective implements
     resultListMenu.add(visSepBuffer);
 
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       saveOutput.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          saveBuffer(selectedName);
+          saveBuffer(selectedNames.get(0));
         }
       });
     } else {
@@ -2016,12 +2023,12 @@ public class ClassifierPanel extends AbstractPerspective implements
     }
     resultListMenu.add(saveOutput);
 
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
+    JMenuItem deleteOutput = new JMenuItem("Delete result buffer(s)");
+    if (selectedNames != null) {
       deleteOutput.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.removeResult(selectedName);
+          m_History.removeResults(selectedNames);
         }
       });
     } else {
@@ -2041,8 +2048,8 @@ public class ClassifierPanel extends AbstractPerspective implements
     resultListMenu.add(loadModel);
 
     ArrayList<Object> o = null;
-    if (selectedName != null) {
-      o = (ArrayList<Object>) m_History.getNamedObject(selectedName);
+    if (selectedNames != null && selectedNames.size() == 1) {
+      o = (ArrayList<Object>) m_History.getNamedObject(selectedNames.get(0));
     }
 
     VisualizePanel temp_vp = null;
@@ -2079,11 +2086,12 @@ public class ClassifierPanel extends AbstractPerspective implements
     final Instances trainHeader = temp_trainHeader;
 
     JMenuItem saveModel = new JMenuItem("Save model");
-    if (classifier != null) {
+    if (classifier != null && selectedNames != null
+      && selectedNames.size() == 1) {
       saveModel.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          saveClassifier(selectedName, classifier, trainHeader);
+          saveClassifier(selectedNames.get(0), classifier, trainHeader);
         }
       });
     } else {
@@ -2093,11 +2101,12 @@ public class ClassifierPanel extends AbstractPerspective implements
 
     JMenuItem reEvaluate =
       new JMenuItem("Re-evaluate model on current test set");
-    if (classifier != null && m_TestLoader != null) {
+    if (classifier != null && m_TestLoader != null && selectedNames != null
+      && selectedNames.size() == 1) {
       reEvaluate.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          reevaluateModel(selectedName, classifier, trainHeader);
+          reevaluateModel(selectedNames.get(0), classifier, trainHeader);
         }
       });
     } else {
@@ -2107,7 +2116,8 @@ public class ClassifierPanel extends AbstractPerspective implements
 
     JMenuItem reApplyConfig =
       new JMenuItem("Re-apply this model's configuration");
-    if (classifier != null) {
+    if (classifier != null && selectedNames != null
+      && selectedNames.size() == 1) {
       reApplyConfig.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -2152,7 +2162,7 @@ public class ClassifierPanel extends AbstractPerspective implements
             if (vp != null) {
               title = vp.getName();
             } else {
-              title = selectedName;
+              title = selectedNames.get(0);
             }
             visualizeTree(grph, title);
           }
@@ -2165,7 +2175,7 @@ public class ClassifierPanel extends AbstractPerspective implements
             Thread th = new Thread() {
               @Override
               public void run() {
-                visualizeBayesNet(grph, selectedName);
+                visualizeBayesNet(grph, selectedNames.get(0));
               }
             };
             th.start();
@@ -2329,7 +2339,8 @@ public class ClassifierPanel extends AbstractPerspective implements
               Instances result = cc.getCurve(preds, classValue);
               VisualizePanel vmc = new VisualizePanel();
               if (getMainApplication() != null) {
-                Settings settings = getMainApplication().getApplicationSettings();
+                Settings settings =
+                  getMainApplication().getApplicationSettings();
                 m_CurrentVis.applySettings(settings,
                   weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
               }
@@ -2370,8 +2381,9 @@ public class ClassifierPanel extends AbstractPerspective implements
       String className = (pluginsVector.elementAt(i));
       try {
         VisualizePlugin plugin =
-          (VisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
-          // (VisualizePlugin) Class.forName(className).newInstance();
+          (VisualizePlugin) WekaPackageClassLoaderManager
+            .objectForName(className);
+        // (VisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null) {
           continue;
         }
@@ -2400,8 +2412,9 @@ public class ClassifierPanel extends AbstractPerspective implements
       String className = (pluginsVector.elementAt(i));
       try {
         ErrorVisualizePlugin plugin =
-          (ErrorVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
-          // (ErrorVisualizePlugin) Class.forName(className).newInstance();
+          (ErrorVisualizePlugin) WekaPackageClassLoaderManager
+            .objectForName(className);
+        // (ErrorVisualizePlugin) Class.forName(className).newInstance();
         if (plugin == null) {
           continue;
         }
@@ -2435,14 +2448,15 @@ public class ClassifierPanel extends AbstractPerspective implements
           String className = (pluginsVector.elementAt(i));
           try {
             TreeVisualizePlugin plugin =
-              (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
-              // (TreeVisualizePlugin) Class.forName(className).newInstance();
+              (TreeVisualizePlugin) WekaPackageClassLoaderManager
+                .objectForName(className);
+            // (TreeVisualizePlugin) Class.forName(className).newInstance();
             if (plugin == null) {
               continue;
             }
             availablePlugins = true;
             JMenuItem pluginMenuItem =
-              plugin.getVisualizeMenuItem(grph, selectedName);
+              plugin.getVisualizeMenuItem(grph, selectedNames.get(0));
             new Version();
             if (pluginMenuItem != null) {
               /*
@@ -2469,14 +2483,15 @@ public class ClassifierPanel extends AbstractPerspective implements
           String className = (pluginsVector.elementAt(i));
           try {
             GraphVisualizePlugin plugin =
-              (GraphVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
-              //(GraphVisualizePlugin) Class.forName(className).newInstance();
+              (GraphVisualizePlugin) WekaPackageClassLoaderManager
+                .objectForName(className);
+            // (GraphVisualizePlugin) Class.forName(className).newInstance();
             if (plugin == null) {
               continue;
             }
             availablePlugins = true;
             JMenuItem pluginMenuItem =
-              plugin.getVisualizeMenuItem(grph, selectedName);
+              plugin.getVisualizeMenuItem(grph, selectedNames.get(0));
             new Version();
             if (pluginMenuItem != null) {
               /*
@@ -2958,9 +2973,11 @@ public class ClassifierPanel extends AbstractPerspective implements
             // visualization if selected
             // if (saveVis) {
             plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-            plotInstances.setInstances(trainHeader != null ? trainHeader : userTestStructure);
+            plotInstances.setInstances(trainHeader != null ? trainHeader
+              : userTestStructure);
             plotInstances.setClassifier(classifierToUse);
-            plotInstances.setClassIndex(trainHeader != null ? trainHeader.classIndex() : userTestStructure.classIndex());
+            plotInstances.setClassIndex(trainHeader != null ? trainHeader
+              .classIndex() : userTestStructure.classIndex());
             plotInstances.setSaveForVisualization(saveVis);
             plotInstances.setEvaluation(eval);
 
@@ -2994,8 +3011,9 @@ public class ClassifierPanel extends AbstractPerspective implements
 
             // make adjustments if the classifier is an InputMappedClassifier
             eval =
-              setupEval(eval, classifierToUse, trainHeader != null ? trainHeader : userTestStructure, costMatrix,
-                plotInstances, classificationOutput, false);
+              setupEval(eval, classifierToUse,
+                trainHeader != null ? trainHeader : userTestStructure,
+                costMatrix, plotInstances, classificationOutput, false);
             eval.useNoPriors();
             plotInstances.setUp();
 
@@ -3143,7 +3161,8 @@ public class ClassifierPanel extends AbstractPerspective implements
                 && plotInstances.getPlotInstances().numInstances() > 0) {
                 m_CurrentVis = new VisualizePanel();
                 if (getMainApplication() != null) {
-                  Settings settings = getMainApplication().getApplicationSettings();
+                  Settings settings =
+                    getMainApplication().getApplicationSettings();
                   m_CurrentVis.applySettings(settings,
                     weka.gui.explorer.VisualizePanel.ScatterDefaults.ID);
                 }
@@ -3541,8 +3560,8 @@ public class ClassifierPanel extends AbstractPerspective implements
   }
 
   /**
-   * Gets whether the user has opted to preserve order of instances
-   * in a percentage split
+   * Gets whether the user has opted to preserve order of instances in a
+   * percentage split
    *
    * @return whether the user has opted to preserve the instance order
    */

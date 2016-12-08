@@ -42,6 +42,7 @@ import java.io.FileWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
@@ -431,8 +432,9 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
           || e.isAltDown()) {
           int index = m_History.getList().locationToIndex(e.getPoint());
           if (index != -1) {
-            String name = m_History.getNameAtIndex(index);
-            visualize(name, e.getX(), e.getY());
+            List<String> selectedEls =
+              (List<String>) m_History.getList().getSelectedValuesList();
+            visualize(selectedEls, e.getX(), e.getY());
           } else {
             visualize(null, e.getX(), e.getY());
           }
@@ -1009,22 +1011,22 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
   /**
    * Handles constructing a popup menu with visualization options
    * 
-   * @param name the name of the result history list entry clicked on by the
+   * @param names the name of the result history list entry clicked on by the
    *          user.
    * @param x the x coordinate for popping up the menu
    * @param y the y coordinate for popping up the menu
    */
   @SuppressWarnings("unchecked")
-  protected void visualize(String name, int x, int y) {
-    final String selectedName = name;
+  protected void visualize(List<String> names, int x, int y) {
+    final List<String> selectedNames = names;
     JPopupMenu resultListMenu = new JPopupMenu();
 
     JMenuItem visMainBuffer = new JMenuItem("View in main window");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       visMainBuffer.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.setSingle(selectedName);
+          m_History.setSingle(selectedNames.get(0));
         }
       });
     } else {
@@ -1033,11 +1035,11 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     resultListMenu.add(visMainBuffer);
 
     JMenuItem visSepBuffer = new JMenuItem("View in separate window");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       visSepBuffer.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.openFrame(selectedName);
+          m_History.openFrame(selectedNames.get(0));
         }
       });
     } else {
@@ -1046,11 +1048,11 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     resultListMenu.add(visSepBuffer);
 
     JMenuItem saveOutput = new JMenuItem("Save result buffer");
-    if (selectedName != null) {
+    if (selectedNames != null && selectedNames.size() == 1) {
       saveOutput.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          saveBuffer(selectedName);
+          saveBuffer(selectedNames.get(0));
         }
       });
     } else {
@@ -1058,12 +1060,12 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     }
     resultListMenu.add(saveOutput);
 
-    JMenuItem deleteOutput = new JMenuItem("Delete result buffer");
-    if (selectedName != null) {
+    JMenuItem deleteOutput = new JMenuItem("Delete result buffer(s)");
+    if (selectedNames != null) {
       deleteOutput.addActionListener(new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          m_History.removeResult(selectedName);
+          m_History.removeResults(selectedNames);
         }
       });
     } else {
@@ -1072,8 +1074,8 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
     resultListMenu.add(deleteOutput);
 
     ArrayList<Object> o = null;
-    if (selectedName != null) {
-      o = (ArrayList<Object>) m_History.getNamedObject(selectedName);
+    if (selectedNames != null && selectedNames.size() == 1) {
+      o = (ArrayList<Object>) m_History.getNamedObject(selectedNames.get(0));
     }
 
     // VisualizePanel temp_vp = null;
