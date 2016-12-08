@@ -1148,8 +1148,9 @@ public class WekaPackageManager {
                   System.out.println("[Weka] loading package "
                     + content.getName());
                 }
-                WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
-                  .addPackageToClassLoader(content);
+                WekaPackageClassLoaderManager
+                  .getWekaPackageClassLoaderManager().addPackageToClassLoader(
+                    content);
               }
             }
           } catch (Exception ex) {
@@ -2342,6 +2343,33 @@ public class WekaPackageManager {
 
   private static void installPackageFromRepository(String packageName,
     String version, boolean force) throws Exception {
+
+    if (version.equals("Latest")) {
+      // if no version/latest has been specified by the user then
+      // look for the latest version of the package that is compatible
+      // with the installed version of Weka.
+      version = "none";
+      List<Object> availableVersions =
+        PACKAGE_MANAGER.getRepositoryPackageVersions(packageName);
+      // version numbers will be in descending sorted order from the
+      // repository. We want the most recent version that is compatible
+      // with the base weka install
+      for (Object v : availableVersions) {
+        Package versionedPackage =
+          getRepositoryPackageInfo(packageName, v.toString());
+        if (versionedPackage.isCompatibleBaseSystem()) {
+          version =
+            versionedPackage.getPackageMetaDataElement(
+              VersionPackageConstraint.VERSION_KEY).toString();
+          break;
+        }
+      }
+
+      if (version.equals("none")) {
+        throw new Exception("Was unable to find a version of '" + packageName
+        + "' that is compatible with Weka " + Version.VERSION);
+      }
+    }
 
     Package toInstall = null;
     try {
