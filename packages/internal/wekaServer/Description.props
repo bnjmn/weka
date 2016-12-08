@@ -8,7 +8,7 @@ PackageName=wekaServer
 Version=1.1.6
 
 #Date (year-month-day)
-Date=2016-10-31
+Date=2016-12-09
 
 # Title (required)
 Title=Simple server for executing Weka tasks.
