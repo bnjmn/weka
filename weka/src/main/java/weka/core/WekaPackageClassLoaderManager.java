@@ -377,8 +377,8 @@ public class WekaPackageClassLoaderManager {
   }
 
   /**
-   * Attempts to locate a classloader for the named class. Tries packages first,
-   * and then returns the Weka classloader if this fails. Note that this also
+   * Attempts to locate a classloader for the named class. Tries the Weka
+   * classloader and globally visible package classes first. Note that this also
    * finds classes that are contained in a package's lib directory. General code
    * should not be looking directly for such third-party classes. Instead, if
    * they require third-party classes they should reference them directly (and
@@ -395,9 +395,17 @@ public class WekaPackageClassLoaderManager {
    * @return a classloader
    */
   public ClassLoader getLoaderForClass(String className) {
-
     className = className.replace("[L", "").replace("[", "").replace(";", "");
-    ClassLoader result = m_classBasedClassLoaderLookup.get(className);
+
+    // try the Weka classloader and globally visible package classes first
+    ClassLoader result = getClass().getClassLoader();
+    try {
+      Class<?> cl = findClass(className);
+      return cl.getClassLoader();
+    } catch (Exception ex) {
+    }
+
+    result = m_classBasedClassLoaderLookup.get(className);
     if (result == null) {
       result = getClass().getClassLoader();
     }
