@@ -6,10 +6,10 @@
 PackageName=scatterPlot3D
 
 # Version (required)
-Version=1.0.6
+Version=1.0.7
 
 #Date
-Date=2016-01-11
+Date=2016-12-09
 
 # Title (required)
 Title=A visualization component for displaying a 3D scatter plot of the data using Java 3D.
@@ -31,7 +31,7 @@ Description=A visualization component for displaying a 3D scatter plot of the da
 Changes=This version includes the latest Java3D classes and native libraries (32 and 64 bit) for Windows, Linux and Mac OSX. No special installation is required as the Java3D system loads the correct native library automatically. Users of Oracle Java 1.7 under Mac OSX should read the "MessageToDisplayOnInstallation" entry. More information about the updated version of Java3D used in this package can be found at http://gouessej.wordpress.com/2012/08/01/java-3d-est-de-retour-java-3d-is-back and http://jogamp.org/wiki/index.php/Downloading_and_installing_JOGL.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/scatterPlot3D1.0.7.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D
@@ -40,7 +40,7 @@ URL=http://weka.sourceforge.net/doc.packages/scatterPlot3D
 #Related=
 
 # Dependencies
-Depends=weka (>=3.7.4)
+Depends=weka (>=3.8.0)
 
 # Special instructions to be displayed on installation of this package
 MessageToDisplayOnInstallation=This package includes Java3D classes and native\n\
