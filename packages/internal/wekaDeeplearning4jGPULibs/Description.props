@@ -9,7 +9,7 @@ PackageName=wekaDeeplearning4jGPULibs
 Version=1.0.0
 
 #Date
-Date=2016-11-25
+Date=2016-12-09
 
 # Title (required)
 Title=CPU native libraries for wekaDeeplearning4j
