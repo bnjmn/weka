@@ -44,13 +44,13 @@ URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
 # Related=packageName1,packageName2,...
 
 # Dependencies (format: packageName (equality/inequality version_number)
-Depends=weka (>=3.9.1-SNAPSHOT), distributedWekaHadoopCore (>=1.1.22), distributedWekaHadoopLibs2 (>=1.0.1)
+Depends=weka (>=3.9.1-SNAPSHOT), distributedWekaHadoopCore (>=1.1.22), distributedWekaHadoop2Libs (>=1.0.1)
 
 # Package(s) that can't be installed along side this one
 Precludes=distributedWekaHadoop
 
 # Inject these dependencies at load time
-InjectDependencies=distributedWekaHadoopCore:distributedWekaHadoopLibs2
+InjectDependencies=distributedWekaHadoopCore:distributedWekaHadoop2Libs
 
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
