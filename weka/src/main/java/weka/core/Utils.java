@@ -1086,7 +1086,7 @@ public final class Utils implements RevisionHandler {
     if (matches.size() == 0) {
 
       // Could be an array class type, which is not covered by findSchemeMatch()
-      Class c = Class.forName(className);
+      Class c = WekaPackageClassLoaderManager.forName(className);
       if (c.isArray() && (classType == null || classType.isAssignableFrom(c))) {
         return Array.newInstance(c.getComponentType(), 0);
       }
