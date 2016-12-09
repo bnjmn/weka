@@ -395,6 +395,8 @@ public class WekaPackageClassLoaderManager {
    * @return a classloader
    */
   public ClassLoader getLoaderForClass(String className) {
+
+    className = className.replace("[L", "").replace("[", "").replace(";", "");
     ClassLoader result = m_classBasedClassLoaderLookup.get(className);
     if (result == null) {
       result = getClass().getClassLoader();
