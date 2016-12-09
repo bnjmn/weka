@@ -1088,7 +1088,7 @@ public final class Utils implements RevisionHandler {
       // Could be an array class type, which is not covered by findSchemeMatch()
       try {
         Class c = Class.forName(className);
-        if (c.isArray() && (classType.isAssignableFrom(c))) {
+        if (c.isArray() && (classType == null || classType.isAssignableFrom(c))) {
           return Array.newInstance(c.getComponentType(), 0);
         }
         throw new Exception();
