@@ -31,7 +31,7 @@ Description=Provides the Cuda GPU native libraries for the wekaDeeplearning4jGPU
 Changes=Splitting package into a core package, CPU-related libs package and GPU-related libs package
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPU1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPULibs1.0.0.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
