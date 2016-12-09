@@ -1405,13 +1405,19 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   public void setValue(Object o) {
 
     if (m_ClassType == null) {
+      JOptionPane.showMessageDialog(null,
+              "No ClassType set up for GenericObjectEditor.", "Error...",
+              JOptionPane.ERROR_MESSAGE);
       Logger.log(weka.core.logging.Logger.Level.WARNING,
-        "No ClassType set up for GenericObjectEditor!!");
+        "No ClassType set up for GenericObjectEditor!");
       return;
     }
     if (!m_ClassType.isAssignableFrom(o.getClass())) {
+      JOptionPane.showMessageDialog(null,
+              "Object not of correct type and cannot be assigned.", "Error...",
+              JOptionPane.ERROR_MESSAGE);
       Logger.log(weka.core.logging.Logger.Level.WARNING,
-        "setValue object not of correct type!");
+        "Object not of correct type and cannot be assigned!");
       return;
     }
 

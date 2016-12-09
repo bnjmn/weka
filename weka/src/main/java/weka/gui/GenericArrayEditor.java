@@ -348,9 +348,6 @@ public class GenericArrayEditor implements PropertyEditor {
     private void updateEditorType(Object o) {
 
       // Determine if the current object is an array
-      m_ElementEditor = null;
-      m_ListModel = null;
-      removeAll();
       if ((o != null) && (o.getClass().isArray())) {
         Class<?> elementClass = o.getClass().getComponentType();
         PropertyEditor editor = PropertyEditorManager.findEditor(elementClass);
@@ -379,6 +376,8 @@ public class GenericArrayEditor implements PropertyEditor {
                 }
               } catch (Exception ex) {
                 m_ElementEditor = null;
+                m_ListModel = null;
+                removeAll();
                 System.err.println(ex.getMessage());
                 add(m_Label, BorderLayout.CENTER);
                 m_Support.firePropertyChange("", null, null);
@@ -398,9 +397,12 @@ public class GenericArrayEditor implements PropertyEditor {
           }
         }
         if (view == null) {
-          System.err.println("No property editor for class: "
-            + elementClass.getName());
+          JOptionPane.showMessageDialog(this,
+                  "No property editor for class: "  + elementClass.getName(), "Error...",
+                  JOptionPane.ERROR_MESSAGE);
+          return;
         } else {
+          removeAll();
           m_ElementEditor = editor;
           try {
             m_Editor = editor.getClass().newInstance();

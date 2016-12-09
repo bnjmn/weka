@@ -1086,15 +1086,11 @@ public final class Utils implements RevisionHandler {
     if (matches.size() == 0) {
 
       // Could be an array class type, which is not covered by findSchemeMatch()
-      try {
-        Class c = Class.forName(className);
-        if (c.isArray() && (classType == null || classType.isAssignableFrom(c))) {
-          return Array.newInstance(c.getComponentType(), 0);
-        }
-        throw new Exception();
-      } catch (Exception ex) {
-        throw new Exception("Can't find class called: " + className);
+      Class c = Class.forName(className);
+      if (c.isArray() && (classType == null || classType.isAssignableFrom(c))) {
+        return Array.newInstance(c.getComponentType(), 0);
       }
+      throw new Exception("Can't find a permissible class called: " + className);
     }
 
     if (matches.size() > 1) {
@@ -1113,7 +1109,7 @@ public final class Utils implements RevisionHandler {
       //c = Class.forName(className);
       c = WekaPackageClassLoaderManager.forName(className);
     } catch (Exception ex) {
-      throw new Exception("Can't find class called: " + className);
+      throw new Exception("Can't find a permissible class called: " + className);
     }
 
     Object o = c.newInstance();

@@ -126,7 +126,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   protected Experiment m_Exp;
 
   /** The component displaying the algorithm list */
-  protected JList m_List;
+  protected JList<Classifier> m_List;
 
   /** Click to add an algorithm */
   protected JButton m_AddBut = new JButton("Add new...");
@@ -270,10 +270,10 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
               item.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                  List<Object> list = m_List.getSelectedValuesList();
+                  List<Classifier> list = m_List.getSelectedValuesList();
                   Object value = null;
                   if (list.size() > 1) {
-                    value = list.toArray();
+                    value = list.toArray(new Classifier[0]);
                   } else {
                     value = list.get(0);
                   }
