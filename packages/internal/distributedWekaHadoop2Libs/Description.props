@@ -8,7 +8,7 @@ PackageName=distributedWekaHadoop2Libs
 Version=1.0.1
 
 #Date (year-month-day)
-Date=2016-10-27
+Date=2016-12-09
 
 # Title (required)
 Title=Hadoop 2.x libraries for distributedWekaHadoop
