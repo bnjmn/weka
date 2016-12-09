@@ -52,6 +52,8 @@ Precludes=distributedWekaHadoop
 # Inject these dependencies at load time
 InjectDependencies=distributedWekaHadoopCore:distributedWekaHadoop2Libs
 
+SetSystemProperties=weka.distributed.hadoop.hadoop2=true
+
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
 # the installation process). (optional).
