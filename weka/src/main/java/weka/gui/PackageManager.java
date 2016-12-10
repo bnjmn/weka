@@ -2292,6 +2292,11 @@ public class PackageManager extends JPanel {
         List<Object> catAndVers = m_packageLookupInfo.get(p.getName());
         String loadStatus = catAndVers.get(2).toString();
         if (p.isInstalled()) {
+          try {
+            p = WekaPackageManager.getInstalledPackageInfo(p.getName());
+          } catch (Exception ex) {
+            ex.printStackTrace();
+          }
           File packageRoot =
             new File(WekaPackageManager.getPackageHome().toString()
               + File.separator + p.getName());
@@ -2425,6 +2430,7 @@ public class PackageManager extends JPanel {
       // check the load status of this package (if installed)
       String loadStatus = "";
       if (p.isInstalled()) {
+        p = WekaPackageManager.getInstalledPackageInfo(p.getName());
         File packageRoot =
           new File(WekaPackageManager.getPackageHome().toString());
         boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
