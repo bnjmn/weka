@@ -159,7 +159,7 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
 
     String startMessage =
       (theLoader instanceof FileSourcedConverter) ? "Loading "
-        + ((FileSourcedConverter) theLoader).retrieveFile().getName()
+        + environmentSubstitute(((FileSourcedConverter) theLoader).retrieveFile().toString())
         : "Loading...";
 
     getStepManager().logBasic(startMessage);
