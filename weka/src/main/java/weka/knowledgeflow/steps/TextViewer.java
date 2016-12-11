@@ -131,8 +131,10 @@ public class TextViewer extends BaseStep implements DataCollector {
       }
     }
 
+    Data textData = new Data(StepManager.CON_TEXT, body);
+    textData.setPayloadElement(StepManager.CON_AUX_DATA_TEXT_TITLE, title);
     // pass on downstream
-    getStepManager().outputData(data);
+    getStepManager().outputData(textData);
     getStepManager().finished();
   }
 
