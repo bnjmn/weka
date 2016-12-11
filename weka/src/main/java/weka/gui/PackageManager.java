@@ -62,6 +62,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+import static weka.core.WekaPackageManager.DISABLED_KEY;
+import static weka.core.WekaPackageManager.DISABLE_KEY;
+
 /**
  * A GUI interface the the package management system.
  * 
@@ -945,6 +948,21 @@ public class PackageManager extends JPanel {
         }
 
         if (!m_forceBut.isSelected()) {
+          // Check to see if it's disabled at the repository
+          Object disabled =
+            packageToInstall.getPackageMetaDataElement(DISABLE_KEY);
+          if (disabled == null) {
+            disabled = packageToInstall.getPackageMetaDataElement(DISABLED_KEY);
+          }
+          if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
+            JOptionPane.showMessageDialog(PackageManager.this, "Unable to "
+              + "install package\n" + packageName + " because it has been "
+              + "disabled at the repository", "Weka Package Manager",
+              JOptionPane.ERROR_MESSAGE);
+            m_unsuccessfulInstalls.add(packageToInstall);
+            continue;
+          }
+
           try {
             if (!packageToInstall.isCompatibleBaseSystem()) {
               List<Dependency> baseSysDep =
@@ -1047,9 +1065,8 @@ public class PackageManager extends JPanel {
                 conflicts);
           } catch (Exception e) {
             e.printStackTrace();
-            displayErrorDialog(
-              "Problem determinining dependencies for package: "
-                + packageToInstall.getName(), e);
+            displayErrorDialog("Problem determining dependencies for package: "
+              + packageToInstall.getName(), e);
             // return null; // can't proceed
             m_unsuccessfulInstalls.add(packageToInstall);
             continue;
@@ -1152,9 +1169,11 @@ public class PackageManager extends JPanel {
           }
 
           // now check for precludes
-          if (packageToInstall.getPackageMetaDataElement(WekaPackageManager.PRECLUDES_KEY) != null) {
+          if (packageToInstall
+            .getPackageMetaDataElement(WekaPackageManager.PRECLUDES_KEY) != null) {
             try {
-              List<Package> installed = WekaPackageManager.getInstalledPackages();
+              List<Package> installed =
+                WekaPackageManager.getInstalledPackages();
               Map<String, Package> packageMap = new HashMap<>();
               for (Package p : installed) {
                 packageMap.put(p.getName(), p);
@@ -1163,7 +1182,8 @@ public class PackageManager extends JPanel {
                 packageMap.put(p.getName(), p);
               }
               List<Package> precluded =
-                packageToInstall.getPrecludedPackages(new ArrayList<Package>(packageMap.values()));
+                packageToInstall.getPrecludedPackages(new ArrayList<Package>(
+                  packageMap.values()));
               if (precluded.size() > 0) {
                 List<Package> finalPrecluded = new ArrayList<>();
                 for (Package p : precluded) {
@@ -1176,12 +1196,11 @@ public class PackageManager extends JPanel {
                   for (Package fp : finalPrecluded) {
                     temp.append("\n\t").append(fp.toString());
                   }
-                  JOptionPane.showConfirmDialog(PackageManager.this,
-                    "Package " + packageToInstall.getName() + " cannot be "
-                      + "installed because it precludes the following packages"
-                      + ":\n\n"
-                      + temp.toString(), "Weka Package Manager",
-                    JOptionPane.OK_OPTION);
+                  JOptionPane.showMessageDialog(PackageManager.this, "Package "
+                    + packageToInstall.getName() + " cannot be "
+                    + "installed because it precludes the following packages"
+                    + ":\n\n" + temp.toString(), "Weka Package Manager",
+                    JOptionPane.ERROR_MESSAGE);
                   m_unsuccessfulInstalls.add(packageToInstall);
                   continue;
                 }
@@ -2259,8 +2278,9 @@ public class PackageManager extends JPanel {
         // handle non-repository packages
         @SuppressWarnings("unchecked")
         List<Object> repVersions = (List<Object>) catAndVers.get(1);
-        //repositoryV = repVersions.get(0);
-        repositoryV = p.getPackageMetaDataElement(WekaPackageManager.VERSION_KEY);
+        // repositoryV = repVersions.get(0);
+        repositoryV =
+          p.getPackageMetaDataElement(WekaPackageManager.VERSION_KEY);
       }
       // String repString = getRepVersions(p.getName(), repositoryV);
       // repositoryV = repositoryV + " " + repString;
