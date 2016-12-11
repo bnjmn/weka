@@ -9,7 +9,7 @@ PackageName=netlibNativeWindows
 Version=1.0.1
 
 #Date
-Date=2016-04-14
+Date=2016-12-12
 
 # Title (required)
 Title=netlib-java wrappers and native libraries for BLAS, LAPACK and ARPACK under Windows
