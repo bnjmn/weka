@@ -937,14 +937,31 @@ public class PackageManager extends JPanel {
             .getPackageMetaDataElement("MessageToDisplayOnInstallation");
         if (specialInstallMessage != null
           && specialInstallMessage.toString().length() > 0) {
-          String siM = specialInstallMessage.toString();
-          try {
-            siM = Environment.getSystemWide().substitute(siM);
-          } catch (Exception ex) {
-            // quietly ignore
+          if (!Utils
+            .getDontShowDialog("weka.gui.PackageManager.ShowSpecialInstallInstructions")) {
+            String siM = specialInstallMessage.toString();
+            try {
+              siM = Environment.getSystemWide().substitute(siM);
+            } catch (Exception ex) {
+              // quietly ignore
+            }
+            JCheckBox dontShow =
+              new JCheckBox("Do not show this message again");
+            Object[] stuff = new Object[2];
+            stuff[0] = packageToInstall + "\n\n" + siM;
+            stuff[1] = dontShow;
+            JOptionPane.showMessageDialog(PackageManager.this, stuff,
+              "Weka Package Manager", JOptionPane.OK_OPTION);
+
+            if (dontShow.isSelected()) {
+              try {
+                Utils
+                  .setDontShowDialog("weka.gui.PackageManager.ShowSpecialInstallInstructions");
+              } catch (Exception ex) {
+                // quietly ignore
+              }
+            }
           }
-          JOptionPane.showMessageDialog(PackageManager.this, packageToInstall
-            + "\n\n" + siM, "Weka Package Manager", JOptionPane.OK_OPTION);
         }
 
         if (!m_forceBut.isSelected()) {
@@ -1024,7 +1041,7 @@ public class PackageManager extends JPanel {
                   new JCheckBox("Do not show this message again");
                 Object[] stuff = new Object[2];
                 stuff[0] =
-                  "Weka will need to be restared after installation for\n"
+                  "Weka will need to be restarted after installation for\n"
                     + "the changes to come into effect.\n";
                 stuff[1] = dontShow;
 
