@@ -2367,7 +2367,7 @@ public class WekaPackageManager {
 
       if (version.equals("none")) {
         throw new Exception("Was unable to find a version of '" + packageName
-        + "' that is compatible with Weka " + Version.VERSION);
+          + "' that is compatible with Weka " + Version.VERSION);
       }
     }
 
@@ -2383,6 +2383,17 @@ public class WekaPackageManager {
     // First check to see if this package is compatible with the base system
 
     if (!force) {
+      // check to see if it's disabled
+      Object disabled = toInstall.getPackageMetaDataElement(DISABLE_KEY);
+      if (disabled == null) {
+        disabled = toInstall.getPackageMetaDataElement(DISABLED_KEY);
+      }
+      if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
+        System.err.println("Can't install package " + packageName
+          + " because it " + "has been disabled at the repository.");
+        return;
+      }
+
       boolean ok = toInstall.isCompatibleBaseSystem();
 
       if (!ok) {
