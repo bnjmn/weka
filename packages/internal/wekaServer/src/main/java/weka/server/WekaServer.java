@@ -256,6 +256,12 @@ public class WekaServer implements CommandlineRunnable {
    * Constructor
    */
   public WekaServer() {
+      // Force loading of plugin evaluation metrics. For some reason (probably
+      // to do with classloading from static blocks) deserialized Explorer tasks
+      // seem to result in linkage errors when plugin metric classes get loaded
+      // by the same classloader twice. This doesn't seem to affect plugin classifiers
+      // and other schemes.
+      weka.classifiers.evaluation.Evaluation.getAllEvaluationMetricNames();
   }
 
   /**
