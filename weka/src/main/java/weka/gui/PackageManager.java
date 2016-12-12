@@ -808,7 +808,8 @@ public class PackageManager extends JPanel {
             new File(WekaPackageManager.getPackageHome() + File.separator
               + installedPackage.getName());
           boolean loadCheck =
-            WekaPackageManager.loadCheck(installedPackage, packageRoot, pps);
+          // WekaPackageManager.loadCheck(installedPackage, packageRoot, pps);
+            WekaPackageManager.hasBeenLoaded(installedPackage);
 
           if (!loadCheck) {
             displayErrorDialog("Package was installed correctly but could not "
@@ -2313,7 +2314,8 @@ public class PackageManager extends JPanel {
         File packageRoot =
           new File(WekaPackageManager.getPackageHome().toString()
             + File.separator + p.getName());
-        boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+        // boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+        boolean loaded = WekaPackageManager.hasBeenLoaded(p);
         String loadStatus = loaded ? "Yes" : "No - check log";
         m_model.setValueAt(loadStatus, row, getColumnIndex(LOADED_COLUMN));
       }
@@ -2337,7 +2339,8 @@ public class PackageManager extends JPanel {
           File packageRoot =
             new File(WekaPackageManager.getPackageHome().toString()
               + File.separator + p.getName());
-          boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+          //boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+          boolean loaded = WekaPackageManager.hasBeenLoaded(p);
           boolean userNoLoad =
             WekaPackageManager.m_doNotLoadList.contains(p.getName());
           if (!loadStatus.contains("pending")) {
@@ -2470,7 +2473,8 @@ public class PackageManager extends JPanel {
         p = WekaPackageManager.getInstalledPackageInfo(p.getName());
         File packageRoot =
           new File(WekaPackageManager.getPackageHome().toString());
-        boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+        // boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+        boolean loaded = WekaPackageManager.hasBeenLoaded(p);
         loadStatus = (loaded) ? "Yes" : "No - check log";
       }
 

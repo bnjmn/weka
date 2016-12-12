@@ -785,6 +785,20 @@ public class WekaPackageManager {
   }
 
   /**
+   * Check to see if the named package has been loaded successfully
+   *
+   * @param toCheck the name of the package to check for
+   * @return true if the named package has been loaded successfully
+   */
+  public static boolean hasBeenLoaded(Package toCheck) {
+
+    // if it loaded successfully, passed all integrity checks etc., then there
+    // will be package classloader for it
+    return WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
+      .getPackageClassLoader(toCheck.getName()) != null;
+  }
+
+  /**
    * Check whether a package should be loaded or not. Checks for missing
    * classes, unset environment variables, missing dependencies etc.
    * 
