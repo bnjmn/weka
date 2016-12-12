@@ -21,7 +21,6 @@
 
 package weka.classifiers.trees;
 
-import com.github.fommil.netlib.BLAS;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
