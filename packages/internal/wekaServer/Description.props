@@ -5,10 +5,10 @@
 PackageName=wekaServer
 
 # Version (required)
-Version=1.1.6
+Version=1.1.7
 
 #Date (year-month-day)
-Date=2016-12-09
+Date=2016-12-12
 
 # Title (required)
 Title=Simple server for executing Weka tasks.
@@ -29,13 +29,13 @@ License=GPL 2
 Description=Provides a simple servlet-based server for execution of data mining tasks.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaServer1.1.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaServer1.1.7.zip?download
 
 # URL for further information
 URL=http://wiki.pentaho.com/display/DATAMINING/Weka+Server
 
 # Changes in this release
-Changes=Changes to support running when loaded by a child classloader
+Changes=Fixed a weird issue that affected Explorer-based tasks and plugin evaluation metrics.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
