@@ -21,6 +21,8 @@
 package weka.core;
 
 import java.io.*;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.Vector;
 
 /**
@@ -295,7 +297,8 @@ public class SerializationHelper implements RevisionHandler {
     }
 
     return new ObjectInputStream(stream) {
-      protected WekaPackageLibIsolatingClassLoader m_firstLoader;
+      protected Set<WekaPackageLibIsolatingClassLoader> m_thirdPartyLoaders =
+        new LinkedHashSet<>();
 
       @Override
       protected Class<?> resolveClass(ObjectStreamClass desc)
@@ -308,18 +311,30 @@ public class SerializationHelper implements RevisionHandler {
         ClassLoader cl =
           WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
             .getLoaderForClass(arrayStripped);
-        if (!(cl instanceof WekaPackageLibIsolatingClassLoader)) {
-          // could be a third-party
-          if (m_firstLoader != null) {
-            if (m_firstLoader.hasThirdPartyClass(arrayStripped)) {
-              cl = m_firstLoader;
-            }
-          }
-        } else if (m_firstLoader == null) {
-          m_firstLoader = (WekaPackageLibIsolatingClassLoader) cl;
+
+        if (cl instanceof WekaPackageLibIsolatingClassLoader) {
+          // might be third-party classes involved, store the classloader
+          m_thirdPartyLoaders
+            .add((WekaPackageLibIsolatingClassLoader) cl);
         }
 
-        return Class.forName(desc.getName(), true, cl);
+        Class<?> result = null;
+        try {
+          result = Class.forName(desc.getName(), true, cl);
+        } catch (ClassNotFoundException ex) {
+          for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
+            if (l.hasThirdPartyClass(arrayStripped)) {
+              result = Class.forName(desc.getName(), true, l);
+            }
+          }
+        }
+
+        if (result == null) {
+          throw new ClassNotFoundException("Unable to find class "
+            + arrayStripped);
+        }
+
+        return result;
       }
     };
   }

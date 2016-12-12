@@ -34,6 +34,10 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -154,8 +158,8 @@ public class SerializedObject implements Serializable, RevisionHandler {
       } else {
         if (!m_isCompressed)
           p = new ObjectInputStream(new BufferedInputStream(istream)) {
-
-            protected WekaPackageLibIsolatingClassLoader m_firstLoader;
+            protected Set<WekaPackageLibIsolatingClassLoader> m_thirdPartyLoaders =
+              new LinkedHashSet<>();
 
             @Override
             protected Class<?> resolveClass(ObjectStreamClass desc)
@@ -167,20 +171,32 @@ public class SerializedObject implements Serializable, RevisionHandler {
                 desc.getName().replace("[L", "").replace("[", "")
                   .replace(";", "");
               ClassLoader cl =
-                WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
-                  .getLoaderForClass(arrayStripped);
-              if (!(cl instanceof WekaPackageLibIsolatingClassLoader)) {
-                // could be a third-party
-                if (m_firstLoader != null) {
-                  if (m_firstLoader.hasThirdPartyClass(arrayStripped)) {
-                    cl = m_firstLoader;
-                  }
-                }
-              } else if (m_firstLoader == null) {
-                m_firstLoader = (WekaPackageLibIsolatingClassLoader) cl;
+                WekaPackageClassLoaderManager
+                  .getWekaPackageClassLoaderManager().getLoaderForClass(
+                    arrayStripped);
+              if (cl instanceof WekaPackageLibIsolatingClassLoader) {
+                // might be third-party classes involved, store the classloader
+                m_thirdPartyLoaders
+                  .add((WekaPackageLibIsolatingClassLoader) cl);
               }
 
-              return Class.forName(desc.getName(), true, cl);
+              Class<?> result = null;
+              try {
+                result = Class.forName(desc.getName(), true, cl);
+              } catch (ClassNotFoundException ex) {
+                for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
+                  if (l.hasThirdPartyClass(arrayStripped)) {
+                    result = Class.forName(desc.getName(), true, l);
+                  }
+                }
+              }
+
+              if (result == null) {
+                throw new ClassNotFoundException("Unable to find class "
+                  + arrayStripped);
+              }
+
+              return result;
             }
           };
         else
@@ -188,6 +204,8 @@ public class SerializedObject implements Serializable, RevisionHandler {
             new ObjectInputStream(new BufferedInputStream(new GZIPInputStream(
               istream))) {
 
+              protected Set<WekaPackageLibIsolatingClassLoader> m_thirdPartyLoaders =
+                new LinkedHashSet<>();
               protected WekaPackageLibIsolatingClassLoader m_firstLoader = null;
 
               @Override
@@ -200,20 +218,33 @@ public class SerializedObject implements Serializable, RevisionHandler {
                   desc.getName().replace("[L", "").replace("[", "")
                     .replace(";", "");
                 ClassLoader cl =
-                  WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
-                    .getLoaderForClass(arrayStripped);
-                if (!(cl instanceof WekaPackageLibIsolatingClassLoader)) {
-                  // could be a third-party
-                  if (m_firstLoader != null) {
-                    if (m_firstLoader.hasThirdPartyClass(arrayStripped)) {
-                      cl = m_firstLoader;
-                    }
-                  }
-                } else if (m_firstLoader == null) {
-                  m_firstLoader = (WekaPackageLibIsolatingClassLoader) cl;
+                  WekaPackageClassLoaderManager
+                    .getWekaPackageClassLoaderManager().getLoaderForClass(
+                      arrayStripped);
+
+                if (cl instanceof WekaPackageLibIsolatingClassLoader) {
+                  // might be third-party classes involved, store the classloader
+                  m_thirdPartyLoaders
+                    .add((WekaPackageLibIsolatingClassLoader) cl);
                 }
 
-                return Class.forName(desc.getName(), true, cl);
+                Class<?> result = null;
+                try {
+                  result = Class.forName(desc.getName(), true, cl);
+                } catch (ClassNotFoundException ex) {
+                  for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
+                    if (l.hasThirdPartyClass(arrayStripped)) {
+                      result = Class.forName(desc.getName(), true, l);
+                    }
+                  }
+                }
+
+                if (result == null) {
+                  throw new ClassNotFoundException("Unable to find class "
+                    + arrayStripped);
+                }
+
+                return result;
               }
             };
         toReturn = p.readObject();
