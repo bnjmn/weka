@@ -1947,6 +1947,31 @@ public class WekaPackageManager {
   }
 
   /**
+   * Get the latest version of the named package that is compatible with the
+   * base version of Weka being used.
+   *
+   * @param packageName the name of the package to get the latest compatible version of
+   * @return the latest compatible version or null if there is no compatible package
+   * @throws Exception if a problem occurs
+   */
+  public static Package getLatestCompatibleVersion(String packageName)
+    throws Exception {
+    Package latest = null;
+    List<Object> availableVersions =
+      PACKAGE_MANAGER.getRepositoryPackageVersions(packageName);
+    for (Object version : availableVersions) {
+      Package versionedPackage =
+        getRepositoryPackageInfo(packageName, version.toString());
+      if (versionedPackage.isCompatibleBaseSystem()) {
+        latest = versionedPackage;
+        break;
+      }
+    }
+
+    return latest;
+  }
+
+  /**
    * Get a list of installed packages
    * 
    * @return a list of installed packages

@@ -2297,8 +2297,20 @@ public class PackageManager extends JPanel {
         @SuppressWarnings("unchecked")
         List<Object> repVersions = (List<Object>) catAndVers.get(1);
         // repositoryV = repVersions.get(0);
-        repositoryV =
-          p.getPackageMetaDataElement(WekaPackageManager.VERSION_KEY);
+        try {
+          Package latestRepoV =
+            WekaPackageManager.getLatestCompatibleVersion(p.getName());
+          if (latestRepoV != null) {
+            repositoryV =
+              latestRepoV
+                .getPackageMetaDataElement(WekaPackageManager.VERSION_KEY);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+          displayErrorDialog("An error has occurred while trying to obtain"
+            + " installed package info", e);
+        }
+        // p.getPackageMetaDataElement(WekaPackageManager.VERSION_KEY);
       }
       // String repString = getRepVersions(p.getName(), repositoryV);
       // repositoryV = repositoryV + " " + repString;
@@ -2339,7 +2351,7 @@ public class PackageManager extends JPanel {
           File packageRoot =
             new File(WekaPackageManager.getPackageHome().toString()
               + File.separator + p.getName());
-          //boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
+          // boolean loaded = WekaPackageManager.loadCheck(p, packageRoot);
           boolean loaded = WekaPackageManager.hasBeenLoaded(p);
           boolean userNoLoad =
             WekaPackageManager.m_doNotLoadList.contains(p.getName());
