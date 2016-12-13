@@ -737,7 +737,7 @@ public class WekaPackageManager {
       /*
        * for (File content : contents) { if (content.isFile() &&
        * content.getPath().endsWith(".jar")) { if (verbose) {
-       * System.out.println("[Weka] loading " + content.getPath()); }
+       * System.out.println("[WekaPackageManager] loading " + content.getPath()); }
        * ClassloaderUtil.addFile(content.getPath());
        * 
        * } else if (content.isDirectory() &&
@@ -821,7 +821,7 @@ public class WekaPackageManager {
 
     if (!load) {
       for (PrintStream p : progress) {
-        p.println("[Weka] Skipping package " + toLoad.getName()
+        p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
           + " because it is not compatible with Weka "
           + PACKAGE_MANAGER.getBaseSystemVersion().toString());
       }
@@ -840,7 +840,7 @@ public class WekaPackageManager {
         }
         if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
           for (PrintStream p : progress) {
-            p.println("[Weka] Skipping package " + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
               + " because it has been marked as disabled at the repository");
           }
           return false;
@@ -860,7 +860,7 @@ public class WekaPackageManager {
         List<Package> preclusions = toLoad.getPrecludedPackages(installed);
         if (preclusions.size() > 0) {
           for (PrintStream p : progress) {
-            p.println("[Weka] Skipping package " + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
               + " because it precludes one or more packages that are "
               + "already installed: ");
             for (Package prec : preclusions) {
@@ -877,7 +877,7 @@ public class WekaPackageManager {
     load = !m_doNotLoadList.contains(toLoad.getName());
     if (!load) {
       for (PrintStream p : progress) {
-        p.println("[Weka] Skipping package " + toLoad.getName()
+        p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
           + " because it is has been marked as do not load");
       }
       return false;
@@ -892,7 +892,7 @@ public class WekaPackageManager {
       List<Dependency> missing = toLoad.getMissingDependencies();
       if (missing.size() > 0) {
         for (PrintStream p : progress) {
-          p.println("[Weka] " + toLoad.getName()
+          p.println("[WekaPackageManager] " + toLoad.getName()
             + " can't be loaded because the following"
             + " packages are missing:");
           for (Dependency d : missing) {
@@ -913,7 +913,7 @@ public class WekaPackageManager {
         if (d.getTarget().getPackage().isInstalled()) {
           if (!loadCheck(d.getTarget().getPackage(), packageRoot, progress)) {
             for (PrintStream p : progress) {
-              p.println("[Weka] Can't load " + toLoad.getName() + " because "
+              p.println("[WekaPackageManager] Can't load " + toLoad.getName() + " because "
                 + d.getTarget() + " can't be loaded.");
             }
             return false;
@@ -924,7 +924,7 @@ public class WekaPackageManager {
             getInstalledPackageInfo(d.getTarget().getPackage().getName());
           if (!d.getTarget().checkConstraint(installedD)) {
             for (PrintStream p : progress) {
-              p.println("[Weka] Can't load " + toLoad.getName()
+              p.println("[WekaPackageManager] Can't load " + toLoad.getName()
                 + " because the installed "
                 + d.getTarget().getPackage().getName()
                 + " is not compatible (requires: " + d.getTarget() + ")");
@@ -970,7 +970,7 @@ public class WekaPackageManager {
         File toCheck = new File(packageRootPath + nextT);
         if (!toCheck.exists()) {
           for (PrintStream p : progress) {
-            p.println("[Weka] " + toLoad.getName()
+            p.println("[WekaPackageManager] " + toLoad.getName()
               + " can't be loaded because " + toCheck.getPath()
               + " appears to be missing.");
           }
@@ -993,7 +993,7 @@ public class WekaPackageManager {
           // quietly ignore
         }
         for (PrintStream p : progress) {
-          p.println("[Weka] " + dnlM);
+          p.println("[WekaPackageManager] " + dnlM);
         }
       }
     }
@@ -1159,7 +1159,7 @@ public class WekaPackageManager {
 
               if (load) {
                 if (verbose) {
-                  System.out.println("[Weka] loading package "
+                  System.out.println("[WekaPackageManager] loading package "
                     + content.getName());
                 }
                 WekaPackageClassLoaderManager
@@ -1169,7 +1169,7 @@ public class WekaPackageManager {
             }
           } catch (Exception ex) {
             ex.printStackTrace();
-            System.err.println("[Weka] Problem loading package "
+            System.err.println("[WekaPackageManager] Problem loading package "
               + content.getName() + " skipping...");
           }
         }
@@ -1192,7 +1192,7 @@ public class WekaPackageManager {
           }
         } catch (Exception ex) {
           ex.printStackTrace();
-          System.err.println("[Weka] Problem loading package "
+          System.err.println("[WekaPackageManager] Problem loading package "
             + content.getName() + " skipping...");
         }
       }
