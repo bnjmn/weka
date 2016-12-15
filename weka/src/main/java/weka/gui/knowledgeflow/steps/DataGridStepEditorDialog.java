@@ -529,6 +529,7 @@ public class DataGridStepEditorDialog extends StepEditorDialog {
      */
     public void setInstances(Instances inst) {
       m_ArffPanel.setInstances(new Instances(inst));
+      m_ArffPanel.setOptimalColWidths();
     }
 
     /**
