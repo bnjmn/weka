@@ -14,12 +14,19 @@
  */
 
 /*
- *    SetVariables.java
- *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *    StorePropertiesInEnvironment.java
+ *    Copyright (C) 2016 University of Waikato, Hamilton, New Zealand
  *
  */
 
 package weka.knowledgeflow.steps;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 import weka.core.Attribute;
 import weka.core.Environment;
@@ -32,67 +39,57 @@ import weka.knowledgeflow.Data;
 import weka.knowledgeflow.JobEnvironment;
 import weka.knowledgeflow.StepManager;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-
 /**
- * Step that can be used to set the values of environment variables for the flow
- * being executed. Can be useful when testing flows that use environment
- * variables (that would typically have values set appropriately at runtime in a
- * production setting). This step is special in the sense the the Knowledge Flow
- * checks for it and invokes its stepInit() method (thus setting variables)
- * before initializing all other steps in the flow. It can also be used to set
- * 'dynamic' variables based on the values of attributes in incoming instances.
- * Dynamic variables are not guaranteed to be available to other steps in the
- * same flow at runtime. Instead, they are meant to be used by a directly
- * connected (via 'variables' connection) 'Job' step, which will execute a
- * specified sub-flow for each 'variables' data object received.
+ * Stores property values specified in incoming instances in the flow
+ * environment.
  * 
- *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
 @KFStep(
-  name = "SetVariables",
+  name = "StorePropertiesInEnvironment",
   category = "Flow",
-  toolTipText = "Assign default values for static variables, if not already set, and "
-    + "for dynamic variables. Static variables are guaranteed to be available to "
-    + "all other steps at initialization as the Knowledge Flow makes sure that "
-    + "SetVariables is invoked first first. Dynamic variables can have their "
-    + "values set using the values of attributes from incoming instances. Dynamic "
-    + "variables are *not* guaranteed to be available to other steps in the flow - "
-    + "instead, they are intended for use by a directly connected 'Job' step, which "
-    + "will execute a specified sub-flow for each 'variables' data object received.",
-  iconPath = KFGUIConsts.BASE_ICON_PATH + "SetVariables.gif")
-public class SetVariables extends BaseStep {
+  toolTipText = "Store property settings for a particular algorithm-based step "
+    + "(eg Classifier, Clusterer etc) in the flow environment. When connected "
+    + "to a downstream Job step, the sub-flow executed by the Job can use a "
+    + "SetPropertiesFromEnvironment step to access the stored properties and "
+    + "set them on the underlying scheme in an algorithm-based step. Each property "
+    + "is configured by specifying the attribute in the incoming instance to obtain "
+    + "its value from, the target scheme-based step (in the sub-flow) that will "
+    + "receive it, the property name/path to set on the target step and a default "
+    + "property value (optional) to use if the value is missing in the incoming "
+    + "instance. If the property/path field is left blank, then it is assumed that "
+    + "the value is actually a scheme + options spec in command-line form; otherwise, "
+    + "the value is set by processing the property path - e.g. if our target step "
+    + "to receive property settings was Bagging (itself with default settings), and "
+    + "the property path to set was 'classifier.maxDepth', then the classifier property "
+    + "of Bagging would yield a REPTree base classifier and the maxDepth property of "
+    + "REPTree would be set. Note that the SetPropertiesFromEnvironment step will "
+    + "process property settings in the order that they are defined by this step. This "
+    + "means that it is possible to set the entire base learner for a Classifier step"
+    + "with one property setting and then drill down to a particular option in the "
+    + "base learner using a second property setting.",
+  iconPath = KFGUIConsts.BASE_ICON_PATH + "StorePropertiesInEnvironment.gif")
+public class StorePropertiesInEnvironment extends BaseStep {
+  private static final long serialVersionUID = -1526289154505863542L;
 
   /** Separators for internal variable specification */
   public static final String SEP1 = "@@vv@@";
-  public static final String SEP2 = "@v@v";
-  public static final String SEP3 = "@a@a";
-
-  private static final long serialVersionUID = 8042350408846800738L;
-
-  /** Holds static variables in internal representation */
-  protected String m_internalRep = "";
-
-  /** Holds dynamic variables in internal representation */
-  protected String m_dynamicInternalRep = "";
-
-  /** Map of variables to set with fixed values */
-  protected Map<String, String> m_varsToSet =
-    new LinkedHashMap<String, String>();
+  public static final String SEP2 = "@a@a";
 
   /**
-   * Map of variables to set based on the values of attributes in incoming
-   * instances
+   * Map of properties to set based on the values of attributes in incoming
+   * instances. Keyed by attribute name/index. List contains target step name,
+   * property path (can be empty string to indicate a command line spec for a
+   * complete base-scheme config), default property value. If an incoming
+   * attribute value is missing, and no default property value is available, an
+   * exception will be generated.
    */
-  protected Map<String, List<String>> m_varsToSetFromIncomingInstances =
+  protected Map<String, List<String>> m_propsToSetFromIncomingInstances =
     new LinkedHashMap<>();
+
+  /** True if the structure has been checked */
+  protected boolean m_structureCheckComplete;
 
   /**
    * OK if there is at least one specified attribute in the incoming instance
@@ -100,55 +97,25 @@ public class SetVariables extends BaseStep {
    */
   protected boolean m_structureOK;
 
-  /** True if the structure has been checked */
-  protected boolean m_structureCheckComplete;
+  /** Internal string-based representation of property configs */
+  protected String m_internalRep = "";
 
-  /**
-   * True if an exception should be raised when an attribute value being used to
-   * set a variable is missing, instead of using a default value
-   */
   protected boolean m_raiseErrorWhenValueMissing;
 
-  /**
-   * Set the static variables to set (in internal representation)
-   *
-   * @param rep the variables to set
-   */
   @ProgrammaticProperty
-  public void setVarsInternalRep(String rep) {
+  public void setPropsInternalRep(String rep) {
     m_internalRep = rep;
   }
 
-  /**
-   * Get the variables to set (in internal representation)
-   *
-   * @return the variables to set
-   */
-  public String getVarsInternalRep() {
+  public String getPropsInternalRep() {
     return m_internalRep;
   }
 
-  @ProgrammaticProperty
-  public void setDynamicVarsInternalRep(String rep) {
-    m_dynamicInternalRep = rep;
-  }
-
-  public String getDynamicVarsInternalRep() {
-    return m_dynamicInternalRep;
-  }
-
-  /**
-   * Initialize the step.
-   *
-   * @throws WekaException if a problem occurs during initialization
-   */
   @Override
   public void stepInit() throws WekaException {
     m_structureCheckComplete = false;
     m_structureOK = false;
-    m_varsToSet = internalToMap(m_internalRep);
-    m_varsToSetFromIncomingInstances =
-      internalDynamicToMap(m_dynamicInternalRep);
+    m_propsToSetFromIncomingInstances = internalDynamicToMap(m_internalRep);
 
     Environment currentEnv =
       getStepManager().getExecutionEnvironment().getEnvironmentVariables();
@@ -163,23 +130,11 @@ public class SetVariables extends BaseStep {
         currentEnv);
     }
 
-    for (Map.Entry<String, String> e : m_varsToSet.entrySet()) {
-      String key = e.getKey();
-      String value = e.getValue();
-
-      if (key != null && key.length() > 0 && value != null
-        && currentEnv.getVariableValue(key) == null) {
-        getStepManager()
-          .logDetailed("Setting variable: " + key + " = " + value);
-        currentEnv.addVariable(key, value);
-      }
-    }
-
     if (getStepManager().numIncomingConnections() > 0
-      && m_varsToSetFromIncomingInstances.size() == 0) {
+      && m_propsToSetFromIncomingInstances.size() == 0) {
       getStepManager().logWarning(
-        "Incoming data detected, but no variables to set from incoming "
-          + "instances have been defined");
+        "Incoming data detected, but no properties to "
+          + "set from incoming instances have been defined.");
     }
   }
 
@@ -187,7 +142,6 @@ public class SetVariables extends BaseStep {
   public void processIncoming(Data data) throws WekaException {
     if (!m_structureCheckComplete) {
       m_structureCheckComplete = true;
-
       Instances structure = null;
       if (data.getConnectionName().equals(StepManager.CON_INSTANCE)) {
         structure = ((Instance) data.getPrimaryPayload()).dataset();
@@ -254,8 +208,9 @@ public class SetVariables extends BaseStep {
 
   protected void processInstance(Instance inst, Data existingEnv)
     throws WekaException {
-    Map<String, String> vars = new HashMap<>();
-    for (Map.Entry<String, List<String>> e : m_varsToSetFromIncomingInstances
+    Map<String, Map<String, String>> props = new HashMap<>();
+
+    for (Map.Entry<String, List<String>> e : m_propsToSetFromIncomingInstances
       .entrySet()) {
       String attName = environmentSubstitute(e.getKey());
       Attribute current = inst.dataset().attribute(attName);
@@ -271,49 +226,55 @@ public class SetVariables extends BaseStep {
           // ignore
         }
       }
+
       if (index != -1) {
-        String varToSet = environmentSubstitute(e.getValue().get(0));
-        String val = environmentSubstitute(e.getValue().get(1));
+        String stepName = environmentSubstitute(e.getValue().get(0));
+        String propToSet = environmentSubstitute(e.getValue().get(1));
+        String val = environmentSubstitute(e.getValue().get(2));
 
         if (inst.isMissing(index)) {
-          if (m_raiseErrorWhenValueMissing) {
+          if (val.length() == 0 && m_raiseErrorWhenValueMissing) {
             throw new WekaException("Value of attribute '"
               + inst.attribute(index).name()
-              + "' was missing in current instance");
+              + "' was missing in current instance and no default value has "
+              + "been specified");
           }
         } else {
           val = inst.stringValue(index);
         }
-        vars.put(varToSet, val);
+        Map<String, String> propsForStep = props.get(stepName);
+        if (propsForStep == null) {
+          propsForStep = new LinkedHashMap<>();
+          props.put(stepName, propsForStep);
+        }
+        propsForStep.put(propToSet, val);
+        getStepManager().logDebug(
+          "Storing property '" + propToSet + "' for step " + "'" + stepName
+            + "' with value '" + val + "'");
       }
     }
 
-    Environment env =
-      getStepManager().getExecutionEnvironment().getEnvironmentVariables();
-    for (Map.Entry<String, String> e : vars.entrySet()) {
-      env.addVariable(e.getKey(), e.getValue());
-    }
+    JobEnvironment env =
+      (JobEnvironment) getStepManager().getExecutionEnvironment()
+        .getEnvironmentVariables();
+    env.addToStepProperties(props);
 
     if (existingEnv != null) {
-      Map<String, String> existingVars =
+      Map<String, Map<String, String>> existingProps =
         existingEnv
-          .getPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_VARIABLES);
-      if (existingVars != null) {
-        vars.putAll(existingVars);
+          .getPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_PROPERTIES);
+      if (existingProps != null) {
+        props.putAll(existingProps);
       }
     }
-
     Data output = new Data(StepManager.CON_ENVIRONMENT);
-    output.setPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_VARIABLES,
-      vars);
-
+    output.setPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_PROPERTIES,
+      props);
     if (existingEnv != null) {
-      output.setPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_PROPERTIES,
+      output.setPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_VARIABLES,
         existingEnv
-          .getPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_PROPERTIES));
+          .getPayloadElement(StepManager.CON_AUX_DATA_ENVIRONMENT_VARIABLES));
     }
-
-    // make sure that each data output is in the same thread
     output.setPayloadElement(StepManager.CON_AUX_DATA_INSTANCE, inst);
     output.setPayloadElement(StepManager.CON_AUX_DATA_IS_INCREMENTAL, true);
     getStepManager().outputData(output);
@@ -321,7 +282,7 @@ public class SetVariables extends BaseStep {
 
   protected void checkStructure(Instances structure) {
     List<String> notFoundInIncoming = new ArrayList<>();
-    for (String attName : m_varsToSetFromIncomingInstances.keySet()) {
+    for (String attName : m_propsToSetFromIncomingInstances.keySet()) {
       if (structure.attribute(attName) == null) {
         notFoundInIncoming.add(attName);
       } else {
@@ -329,7 +290,7 @@ public class SetVariables extends BaseStep {
       }
     }
 
-    if (notFoundInIncoming.size() == m_varsToSetFromIncomingInstances.size()) {
+    if (notFoundInIncoming.size() == m_propsToSetFromIncomingInstances.size()) {
       getStepManager().logWarning(
         "None of the specified attributes appear to be "
           + "in the incoming instance structure");
@@ -343,42 +304,25 @@ public class SetVariables extends BaseStep {
     }
   }
 
-  /**
-   * Get a list of incoming connection types that this step can accept. Ideally
-   * (and if appropriate), this should take into account the state of the step
-   * and any existing incoming connections. E.g. a step might be able to accept
-   * one (and only one) incoming batch data connection.
-   *
-   * @return a list of incoming connections that this step can accept given its
-   *         current state
-   */
   @Override
   public List<String> getIncomingConnectionTypes() {
+
     if (getStepManager().numIncomingConnections() == 0) {
       return Arrays.asList(StepManager.CON_DATASET,
         StepManager.CON_TRAININGSET, StepManager.CON_TESTSET,
         StepManager.CON_INSTANCE, StepManager.CON_ENVIRONMENT);
     }
 
-    return new ArrayList<String>();
+    return new ArrayList<>();
   }
 
-  /**
-   * Get a list of outgoing connection types that this step can produce. Ideally
-   * (and if appropriate), this should take into account the state of the step
-   * and the incoming connections. E.g. depending on what incoming connection is
-   * present, a step might be able to produce a trainingSet output, a testSet
-   * output or neither, but not both.
-   *
-   * @return a list of outgoing connections that this step can produce
-   */
   @Override
   public List<String> getOutgoingConnectionTypes() {
     if (getStepManager().numIncomingConnections() != 0) {
       return Arrays.asList(StepManager.CON_ENVIRONMENT);
     }
 
-    return new ArrayList<String>();
+    return new ArrayList<>();
   }
 
   /**
@@ -391,54 +335,33 @@ public class SetVariables extends BaseStep {
    */
   @Override
   public String getCustomEditorForStep() {
-    return "weka.gui.knowledgeflow.steps.SetVariablesStepEditorDialog";
+    return "weka.gui.knowledgeflow.steps.StorePropertiesInEnvironmentStepEditorDialog";
   }
 
   public static Map<String, List<String>> internalDynamicToMap(
     String internalRep) {
-    Map<String, List<String>> varsToSet = new LinkedHashMap<>();
+    Map<String, List<String>> propsToSet = new LinkedHashMap<>();
     if (internalRep != null && internalRep.length() > 0) {
       String[] parts = internalRep.split(SEP1);
       for (String p : parts) {
-        String[] attVal = p.split(SEP3);
-        if (attVal.length == 2) {
+        String[] attVal = p.split(SEP2);
+        if (attVal.length == 4) {
           String attName = attVal[0].trim();
-          String[] varDefault = attVal[1].trim().split(SEP2);
-          String varName = varDefault[0].trim();
-          String defaultV = "";
-          if (varDefault.length == 2) {
-            defaultV = varDefault[1].trim();
+          String stepName = attVal[1].trim();
+          String propName = attVal[2].trim();
+          String defVal = attVal[3].trim();
+
+          if (attName.length() > 0 && stepName.length() > 0) {
+            List<String> stepAndDefL = new ArrayList<>();
+            stepAndDefL.add(stepName);
+            stepAndDefL.add(propName);
+            stepAndDefL.add(defVal);
+            propsToSet.put(attName, stepAndDefL);
           }
-          List<String> varAndDefL = new ArrayList<>();
-          varAndDefL.add(varName);
-          varAndDefL.add(defaultV);
-          varsToSet.put(attName, varAndDefL);
         }
       }
     }
 
-    return varsToSet;
-  }
-
-  /**
-   * Convert a string in the internal static variable representation to a map of
-   * variables + values
-   *
-   * @param internalRep the variables in internal represenation
-   * @return a map of variables + values
-   */
-  public static Map<String, String> internalToMap(String internalRep) {
-    Map<String, String> varsToSet = new LinkedHashMap<String, String>();
-    if (internalRep != null && internalRep.length() > 0) {
-      String[] parts = internalRep.split(SEP1);
-      for (String p : parts) {
-        String[] keyVal = p.trim().split(SEP2);
-        if (keyVal.length == 2) {
-          varsToSet.put(keyVal[0].trim(), keyVal[1]);
-        }
-      }
-    }
-
-    return varsToSet;
+    return propsToSet;
   }
 }

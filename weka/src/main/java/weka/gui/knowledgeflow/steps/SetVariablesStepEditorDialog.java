@@ -28,8 +28,10 @@ import weka.knowledgeflow.steps.SetVariables;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import java.awt.BorderLayout;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -44,21 +46,95 @@ public class SetVariablesStepEditorDialog extends StepEditorDialog {
 
   /** panel for editing variables */
   protected VariablesPanel m_vp;
+  protected DynamicVariablesPanel m_dvp;
 
   @Override
   protected void layoutEditor() {
     String internalRep = ((SetVariables) getStepToEdit()).getVarsInternalRep();
+    String dynamicInternalRep =
+      ((SetVariables) getStepToEdit()).getDynamicVarsInternalRep();
     Map<String, String> vars = SetVariables.internalToMap(internalRep);
+    Map<String, List<String>> dynamicVars =
+      SetVariables.internalDynamicToMap(dynamicInternalRep);
 
     m_vp = new VariablesPanel(vars);
-    add(m_vp, BorderLayout.CENTER);
+    m_dvp = new DynamicVariablesPanel(dynamicVars);
+    JTabbedPane tabbedPane = new JTabbedPane();
+    tabbedPane.add("Static", m_vp);
+    tabbedPane.add("Dynamic", m_dvp);
+
+    add(tabbedPane, BorderLayout.CENTER);
   }
 
   @Override
   protected void okPressed() {
     String vi = m_vp.getVariablesInternal();
-    ((SetVariables) getStepToEdit())
-      .setVarsInternalRep(m_vp.getVariablesInternal());
+    String dvi = m_dvp.getVariablesInternal();
+    ((SetVariables) getStepToEdit()).setVarsInternalRep(m_vp
+      .getVariablesInternal());
+    ((SetVariables) getStepToEdit()).setDynamicVarsInternalRep(m_dvp
+      .getVariablesInternal());
+  }
+
+  protected static class DynamicVariablesPanel extends JPanel {
+
+    private static final long serialVersionUID = -280047347103350039L;
+
+    protected InteractiveTablePanel m_table = new InteractiveTablePanel(
+      new String[] { "Attribute name/index", "Variable name", "Default value", "" });
+
+    public DynamicVariablesPanel(Map<String, List<String>> vars) {
+      setLayout(new BorderLayout());
+      setBorder(BorderFactory.createTitledBorder("Variables to set from "
+        + "incoming instances"));
+      add(m_table, BorderLayout.CENTER);
+
+      // populate table with variables
+      int row = 0;
+      JTable table = m_table.getTable();
+      for (Map.Entry<String, List<String>> e : vars.entrySet()) {
+        String attName = e.getKey();
+        String varName = e.getValue().get(0);
+        String defaultVal = e.getValue().get(1);
+        if (attName != null && attName.length() > 0 && varName != null
+          && varName.length() > 0) {
+          table.getModel().setValueAt(attName, row, 0);
+          table.getModel().setValueAt(varName, row, 1);
+          table.getModel().setValueAt(defaultVal, row, 2);
+          ((InteractiveTableModel) table.getModel()).addEmptyRow();
+          row++;
+        }
+      }
+    }
+
+    /**
+     * Get the variables in internal format
+     *
+     * @return the variables + settings in the internal format
+     */
+    public String getVariablesInternal() {
+      StringBuilder b = new StringBuilder();
+      JTable table = m_table.getTable();
+      int numRows = table.getModel().getRowCount();
+
+      for (int i = 0; i < numRows; i++) {
+        String attName = table.getValueAt(i, 0).toString();
+        String varName = table.getValueAt(i, 1).toString();
+        String defVal = table.getValueAt(i, 2).toString();
+        if (attName.trim().length() > 0 && varName.trim().length() > 0) {
+          if (defVal.length() == 0) {
+            defVal = " ";
+          }
+          b.append(attName).append(SetVariables.SEP3).append(varName)
+            .append(SetVariables.SEP2).append(defVal);
+        }
+        if (i < numRows - 1) {
+          b.append(SetVariables.SEP1);
+        }
+      }
+
+      return b.toString();
+    }
   }
 
   /**
@@ -67,12 +143,12 @@ public class SetVariablesStepEditorDialog extends StepEditorDialog {
   protected static class VariablesPanel extends JPanel {
     private static final long serialVersionUID = 5188290550108775006L;
 
-    protected InteractiveTablePanel m_table =
-      new InteractiveTablePanel(new String[] { "Variable", "Value", "" });
+    protected InteractiveTablePanel m_table = new InteractiveTablePanel(
+      new String[] { "Variable name", "Value", "" });
 
     public VariablesPanel(Map<String, String> vars) {
       setLayout(new BorderLayout());
-      setBorder(BorderFactory.createTitledBorder("Variables to set"));
+      setBorder(BorderFactory.createTitledBorder("Static variables to set"));
       add(m_table, BorderLayout.CENTER);
 
       // populate table with variables

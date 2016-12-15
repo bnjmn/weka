@@ -56,6 +56,9 @@ public interface StepManager {
   public static final String CON_GRAPH = "graph";
   public static final String CON_CHART = "chart";
   public static final String CON_INFO = "info";
+  public static final String CON_ENVIRONMENT = "environment";
+  public static final String CON_JOB_SUCCESS = "jobSuccess";
+  public static final String CON_JOB_FAILURE = "jobFailure";
 
   // auxiliary information for various connections
   public static final String CON_AUX_DATA_SET_NUM = "aux_set_num";
@@ -63,6 +66,7 @@ public interface StepManager {
   public static final String CON_AUX_DATA_TEST_INSTANCE = "aux_testInstance";
   public static final String CON_AUX_DATA_TESTSET = "aux_testsSet";
   public static final String CON_AUX_DATA_TRAININGSET = "aux_trainingSet";
+  public static final String CON_AUX_DATA_INSTANCE = "aux_instance";
   public static final String CON_AUX_DATA_TEXT_TITLE = "aux_textTitle";
   public static final String CON_AUX_DATA_LABEL = "aux_label";
   public static final String CON_AUX_DATA_CLASS_ATTRIBUTE = "class_attribute";
@@ -72,6 +76,9 @@ public interface StepManager {
   public static final String CON_AUX_DATA_CHART_MIN = "chart_min";
   public static final String CON_AUX_DATA_CHART_DATA_POINT = "chart_data_point";
   public static final String CON_AUX_DATA_CHART_LEGEND = "chart_legend";
+  public static final String CON_AUX_DATA_ENVIRONMENT_VARIABLES = "env_variables";
+  public static final String CON_AUX_DATA_ENVIRONMENT_PROPERTIES = "env_properties";
+  public static final String CON_AUX_DATA_ENVIRONMENT_RESULTS = "env_results";
   public static final String CON_AUX_DATA_BATCH_ASSOCIATION_RULES =
     "batch_association_rules";
   public static final String CON_AUX_DATA_INCREMENTAL_STREAM_END =
@@ -333,8 +340,8 @@ public interface StepManager {
 
   /**
    * Signal that throughput measurement has finished. Should only be used by
-   * steps that are processing instance streams. Call as the completion of an
-   * instance stream.
+   * steps that are emitting incremental data. Call as the completion of an
+   * data stream.
    *
    * @param data one or more Data events (with appropriate connection type set)
    *          to pass on to downstream connected steps. These are used to carry

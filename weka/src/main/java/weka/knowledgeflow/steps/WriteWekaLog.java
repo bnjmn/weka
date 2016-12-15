@@ -41,7 +41,7 @@ import weka.knowledgeflow.StepManager;
  */
 @KFStep(name = "WriteToWekaLog", category = "Flow",
   toolTipText = "Write data to the log", iconPath = KFGUIConsts.BASE_ICON_PATH
-    + "DiamondPlain.gif")
+    + "WriteWekaLog.gif")
 public class WriteWekaLog extends BaseStep {
 
   private static final long serialVersionUID = -2306717547200779711L;

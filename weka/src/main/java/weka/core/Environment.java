@@ -45,6 +45,10 @@ public class Environment implements RevisionHandler {
   // Map to hold all the system environment variables + java properties
   private final Map<String, String> m_envVars = new TreeMap<String, String>();
 
+  /**
+   * Constructs a new Environment object with all environment variables
+   * and java properties set.
+   */
   public Environment() {
     // get the env variables first
     Map<String, String> env = System.getenv();
@@ -65,6 +69,16 @@ public class Environment implements RevisionHandler {
       m_envVars.put(kv, value);
     }
     m_envVars.put("weka.version", Version.VERSION);
+  }
+
+  /**
+   * Constructor that makes a new Environment object containing all
+   * the entries in the supplied one
+   *
+   * @param other the Environment object to copy to this one
+   */
+  public Environment(Environment other) {
+    m_envVars.putAll(other.m_envVars);
   }
 
   /**

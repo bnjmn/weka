@@ -1,0 +1,148 @@
+{
+	"flow_name" : "jobSubFlow",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.Loader",
+			"properties" : {
+				"loader" : {
+					"type" : "loader",
+					"class" : "weka.core.converters.ArffLoader",
+					"filePath" : "${filetoload}",
+					"useRelativePath" : false
+				},
+				"name" : "ArffLoader"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TextViewer",
+					"ClassAssigner"
+				]
+			},
+			"coordinates" : "37,89"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+				"text" : [
+					"WriteToWekaLog"
+				]
+			},
+			"coordinates" : "237,89"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WriteWekaLog",
+			"properties" : {
+				"incrementalLoggingFrequency" : "1000",
+				"loggingLevel" : {
+					"type" : "enumHelper",
+					"class" : "weka.knowledgeflow.LoggingLevel",
+					"value" : "Basic"
+				},
+				"name" : "WriteToWekaLog"
+			},
+			"connections" : {
+			},
+			"coordinates" : "437,89"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ClassAssigner",
+			"properties" : {
+				"classColumn" : "/last",
+				"name" : "ClassAssigner"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TrainingSetMaker"
+				]
+			},
+			"coordinates" : "37,209"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TrainingSetMaker",
+			"properties" : {
+				"name" : "TrainingSetMaker"
+			},
+			"connections" : {
+				"trainingSet" : [
+					"ZeroR"
+				]
+			},
+			"coordinates" : "237,209"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Classifier",
+			"properties" : {
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.rules.ZeroR",
+					"options" : ""
+				},
+				"loadClassifierFileName" : "",
+				"name" : "ZeroR",
+				"resetIncrementalClassifier" : false,
+				"updateIncrementalClassifier" : true
+			},
+			"connections" : {
+				"text" : [
+					"WriteToWekaLog",
+					"WriteDataToResult"
+				]
+			},
+			"coordinates" : "437,209"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.SetPropertiesFromEnvironment",
+			"properties" : {
+				"name" : "SetPropertiesFromEnvironment"
+			},
+			"connections" : {
+				"info" : [
+					"ZeroR"
+				]
+			},
+			"coordinates" : "317,329"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WriteDataToResult",
+			"properties" : {
+				"name" : "WriteDataToResult"
+			},
+			"connections" : {
+			},
+			"coordinates" : "437,329"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "ArffLoader uses an environment\nvariable to define the file to load."
+			},
+			"connections" : {
+			},
+			"coordinates" : "40,40"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "We use a ZeroR classifier here,\nbut it actually becomes NaiveBayes\nand Bagging at runtime due to properties\nset by the StetPropertiesFromEnvironment\nstep."
+			},
+			"connections" : {
+			},
+			"coordinates" : "514,215"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "SetPropertiesFromEnvironment\nchecks the environment to see\nif there are any properties associated\nwith the name of the step it is connected\nto. It then sets these properties (if any)\non the connected step."
+			},
+			"connections" : {
+			},
+			"coordinates" : "50,324"
+		}
+	]
+}

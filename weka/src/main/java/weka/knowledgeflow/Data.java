@@ -201,4 +201,13 @@ public class Data implements Serializable {
   public void clearPayload() {
     m_payloadMap.clear();
   }
+
+  /**
+   * Return true if the connection specified for this data object is incremental
+   *
+   * @return true if the connection for this data object is incremental
+   */
+  public boolean isIncremental() {
+    return StepManagerImpl.connectionIsIncremental(this);
+  }
 }

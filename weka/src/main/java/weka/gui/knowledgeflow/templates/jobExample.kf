@@ -1,0 +1,139 @@
+{
+	"flow_name" : "jobExample",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.SetVariables",
+			"properties" : {
+				"dynamicVarsInternalRep" : "fname@a@afiletoload@v@v@@vv@@",
+				"name" : "SetVariables",
+				"varsInternalRep" : ""
+			},
+			"connections" : {
+				"environment" : [
+					"StorePropertiesInEnvironment"
+				]
+			},
+			"coordinates" : "266,220"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.DataGrid",
+			"properties" : {
+				"data" : "@relation DataGrid\n\n@attribute fname string\n@attribute config string\n@attribute repTree string\n\n@data\nweka/gui/knowledgeflow/templates/iris.arff,'weka.classifiers.bayes.NaiveBayes -D',?\nweka/gui/knowledgeflow/templates/credit-g.arff,'.Bagging -print',2",
+				"name" : "DataGrid"
+			},
+			"connections" : {
+				"instance" : [
+					"SetVariables"
+				]
+			},
+			"coordinates" : "34,221"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Job",
+			"properties" : {
+				"flowFile" : "weka/gui/knowledgeflow/templates/jobSubFlow.kf",
+				"name" : "Job"
+			},
+			"connections" : {
+				"jobSuccess" : [
+					"GetDataFromResult"
+				]
+			},
+			"coordinates" : "386,351"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.StorePropertiesInEnvironment",
+			"properties" : {
+				"name" : "StorePropertiesInEnvironment",
+				"propsInternalRep" : "config@a@aZeroR@a@a @a@a @@vv@@repTree@a@aZeroR@a@aclassifier.maxDepth@a@a @@vv@@"
+			},
+			"connections" : {
+				"environment" : [
+					"Job"
+				]
+			},
+			"coordinates" : "465,218"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.GetDataFromResult",
+			"properties" : {
+				"name" : "GetDataFromResult"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "197,352"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "21,353"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note6",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It processes ARFF files as resources loaded<br>from the classpath. It demonstrates how to dynamically parameterize a flow at runtime.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "222,4"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Define some data to \nparameterize the Job's\nsub-flow with. You could \nalso use a Loader step \nto load a file containing \nparamteter/variable values.\nEach instance output by this\nstep contains variable and\nparameter values that are\nset/stored by the SetVariables\nand StorePropertiesInEnvironment\nsteps respectively."
+			},
+			"connections" : {
+			},
+			"coordinates" : "12,25"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note7",
+				"noteText" : "Set environment variables based\non the values stored in attributes\nof the incoming instance objects."
+			},
+			"connections" : {
+			},
+			"coordinates" : "232,159"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note8",
+				"noteText" : "Store property values in the environment\nbased on the values stored in attributes\nof the incoming instance objects. These\nproperty values can be used to set option\nvalues for scheme-based steps in the\nsub-flow run by the Job step. This is \nparticularly useful as the schemes used\nin scheme-based steps typically do not\naccept environment variables.  Click the\n\"About\" button in the step's editor dialog\nfor more information."
+			},
+			"connections" : {
+			},
+			"coordinates" : "535,96"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note9",
+				"noteText" : "Job executes another flow as\nan atomic unit. It passes in \nenvironment variables and property\nsettings for the sub-flow to use. Open\nthe editor dialog for Job and click\n\"Edit sub-flow\" to see the flow\nthat wil be executed."
+			},
+			"connections" : {
+			},
+			"coordinates" : "464,346"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note10",
+				"noteText" : "Get results stored by the\nWriteDataToResult step\nin the Job's sub-flow."
+			},
+			"connections" : {
+			},
+			"coordinates" : "166,446"
+		}
+	]
+}

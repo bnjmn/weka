@@ -709,6 +709,10 @@ public class Classifier extends WekaAlgorithmWrapper implements
       result.add(StepManager.CON_TESTSET);
     }
 
+    if (getStepManager().numIncomingConnectionsOfType(StepManager.CON_INFO) == 0) {
+      result.add(StepManager.CON_INFO);
+    }
+
     return result;
   }
 

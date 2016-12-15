@@ -123,8 +123,18 @@ public class TextViewer extends BaseStep implements DataCollector {
     if (title != null && body != null) {
       String name =
         (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
-      m_results.put(name + title + (setNum != null ? " (" + setNum + ")" : ""),
-        body);
+      name = name + title + (setNum != null ? " (" + setNum + ")" : "");
+      if (m_results.containsKey(name)) {
+        try {
+          Thread.sleep(5);
+          name =
+            (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
+          name = name + title + (setNum != null ? " (" + setNum + ")" : "");
+        } catch (InterruptedException e) {
+          // ignore
+        }
+      }
+      m_results.put(name, body);
       if (m_viewerListener != null) {
         m_viewerListener.acceptTextResult(name + title
           + (setNum != null ? " (" + setNum + ")" : ""), body);

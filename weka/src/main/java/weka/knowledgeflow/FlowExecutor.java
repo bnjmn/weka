@@ -122,6 +122,11 @@ public interface FlowExecutor {
   void runParallel() throws WekaException;
 
   /**
+   * Block until all steps are no longer busy
+   */
+  void waitUntilFinished();
+
+  /**
    * Stop all processing
    */
   void stopProcessing();
