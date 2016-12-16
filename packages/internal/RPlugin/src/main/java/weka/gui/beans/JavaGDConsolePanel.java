@@ -351,7 +351,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
     Properties props = null;
 
     try {
-      props = Utils.readProperties(PROPERTIES_FILE);
+      props = Utils.readProperties(PROPERTIES_FILE, this.getClass().getClassLoader());
     } catch (Exception ex) {
       ex.printStackTrace();
       props = new Properties();
@@ -363,6 +363,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
     try {
       Class.forName("weka.gui.scripting.SyntaxDocument");
     } catch (Exception ex) {
+      System.err.println("SyntaxDocument is not available....");
       syntaxDocAvailable = false;
     }
 
