@@ -25,6 +25,7 @@ import java.io.File;
 
 import weka.core.RevisionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SerializedObject;
 
 /**
  * Class to encapsulate an experiment as a task that can be executed on a remote
@@ -44,6 +45,8 @@ public class RemoteExperimentSubTask implements Task, RevisionHandler {
   /* The (sub) experiment to execute */
   private Experiment m_experiment;
 
+  private SerializedObject m_serializedExp;
+
   public RemoteExperimentSubTask() {
     m_result.setStatusMessage("Not running.");
     m_result.setExecutionStatus(TaskStatusInfo.TO_BE_RUN);
@@ -55,7 +58,12 @@ public class RemoteExperimentSubTask implements Task, RevisionHandler {
    * @param task the experiment
    */
   public void setExperiment(Experiment task) {
-    m_experiment = task;
+    // m_experiment = task;
+    try {
+      m_serializedExp = new SerializedObject(task);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
   }
 
   /**
@@ -64,7 +72,12 @@ public class RemoteExperimentSubTask implements Task, RevisionHandler {
    * @return this sub task's experiment
    */
   public Experiment getExperiment() {
-    return m_experiment;
+    if (m_experiment != null) {
+      return m_experiment;
+    } else {
+      m_experiment = (Experiment) m_serializedExp.getObject();
+      return m_experiment;
+    }
   }
 
   /**
@@ -72,6 +85,7 @@ public class RemoteExperimentSubTask implements Task, RevisionHandler {
    */
   @Override
   public void execute() {
+    m_experiment = (Experiment) m_serializedExp.getObject();
     // FastVector result = new FastVector();
     m_result = new TaskStatusInfo();
     m_result.setStatusMessage("Running...");
