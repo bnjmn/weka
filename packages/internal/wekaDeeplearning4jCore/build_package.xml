@@ -202,7 +202,7 @@
 	 <exclude name="nd4j-jackson-0.7.0.jar"/>
 	 <exclude name="nd4j-native-api-0.7.0.jar"/>
 	 <exclude name="slf4j-api-1.7.21.jar"/>
-	 <exclude name="common-lang-3.2.1.jar"/>
+	 <exclude name="commons-lang3-3.5.jar"/>
 	 <exclude name="guava-19.0.jar"/>
        </fileset>
     </copy>
@@ -218,7 +218,7 @@
 	 <include name="nd4j-jackson-0.7.0.jar"/>
 	 <include name="nd4j-native-api-0.7.0.jar"/>
 	 <include name="slf4j-api-1.7.21.jar"/>
-	 <include name="common-lang-3.2.1.jar"/>
+	 <include name="commons-lang3-3.5.jar"/>
 	 <include name="guava-19.0.jar"/>
        </fileset>
     </copy>
