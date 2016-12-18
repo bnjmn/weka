@@ -22,6 +22,7 @@
 package weka.server;
 
 import weka.core.LogHandler;
+import weka.core.SerializationHelper;
 import weka.experiment.Task;
 import weka.server.WekaTaskMap.WekaTaskEntry;
 import weka.server.logging.ServerLogger;
@@ -129,9 +130,8 @@ public class ExecuteTaskServlet extends WekaServlet {
     try {
       if (clientLegacy) {
         // Deserialize the task
-        ois =
-          new ObjectInputStream(
-            new BufferedInputStream(new GZIPInputStream(in)));
+	GZIPInputStream gzi = new GZIPInputStream(in);
+	ois = SerializationHelper.getObjectInputStream(gzi);        
 
         task = ois.readObject();
       } else if (clientNew) {
