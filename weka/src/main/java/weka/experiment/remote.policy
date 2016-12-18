@@ -37,6 +37,19 @@ grant {
   permission java.lang.RuntimePermission
     "getClassLoader";
 
+  // the following three permissions allow the MLRClassifier
+  // (from the RPlugin package) to work properly. They can be
+  // omitted if you don't plan on using RPlugin with the remote
+  // servers
+  permission java.lang.RuntimePermission
+    "createClassLoader";
+
+  permission java.lang.RuntimePermission
+    "accessDeclaredMembers";
+
+  permission java.lang.reflect.ReflectPermission
+    "suppressAccessChecks”;
+
   // file permission for data sets
   permission java.io.FilePermission
     "/path_to_data_sets/-", "read";
