@@ -1,0 +1,2129 @@
+------------------------------------------------------------------------
+r12844 | mhall | 2016-04-15 12:05:41 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+
+Updated for the 1.1.16 release
+------------------------------------------------------------------------
+r12849 | mhall | 2016-04-15 12:18:07 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/Description.props
+
+Updated date and dependency
+------------------------------------------------------------------------
+r12852 | mhall | 2016-04-15 12:26:13 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaHadoopCore/PluginManager.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/build_package.xml
+
+PluginManager.props and updated build_package.xml
+------------------------------------------------------------------------
+r12853 | mhall | 2016-04-15 12:28:51 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+
+Updated version number and dependencies
+------------------------------------------------------------------------
+r12854 | mhall | 2016-04-15 12:30:05 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/build.properties
+
+Updated build properties
+------------------------------------------------------------------------
+r12856 | mhall | 2016-04-15 13:40:57 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+   M /trunk/packages/internal/distributedWekaSpark/build.properties
+
+Updated version number and dependencies
+------------------------------------------------------------------------
+r12858 | mhall | 2016-04-15 13:49:51 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/Description.props
+
+Updated weka dependency
+------------------------------------------------------------------------
+r12860 | mhall | 2016-04-15 13:52:58 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeLinux/Description.props
+
+Updated weka dependency
+------------------------------------------------------------------------
+r12863 | mhall | 2016-04-15 13:56:50 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeWindows/Description.props
+
+Updated weka dependency
+------------------------------------------------------------------------
+r12865 | mhall | 2016-04-15 13:58:45 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/newKnowledgeFlowStepExamples/Description.props
+
+Updated weka dependency
+------------------------------------------------------------------------
+r12867 | mhall | 2016-04-15 14:02:38 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Updated version number and weka dependency
+------------------------------------------------------------------------
+r12869 | mhall | 2016-04-15 14:06:58 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Updated weka dependencies
+------------------------------------------------------------------------
+r12871 | mhall | 2016-04-15 14:11:35 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+
+Updated version number and weka dependency
+------------------------------------------------------------------------
+r12873 | mhall | 2016-04-15 14:14:57 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r12875 | mhall | 2016-04-15 14:16:57 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/Description.props
+
+Updated version number and weka dependency
+------------------------------------------------------------------------
+r12877 | mhall | 2016-04-15 14:20:31 +1200 (Fri, 15 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/latentSemanticAnalysis/Description.props
+   M /trunk/packages/external/latentSemanticAnalysis/pom.xml
+
+Updated weka dependency
+------------------------------------------------------------------------
+r12913 | mhall | 2016-04-27 15:09:32 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated for new release
+------------------------------------------------------------------------
+r12914 | mhall | 2016-04-27 15:10:16 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated for new release
+------------------------------------------------------------------------
+r12916 | mhall | 2016-04-27 15:26:11 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+
+Fixed download URL
+------------------------------------------------------------------------
+r12918 | mhall | 2016-04-27 15:30:08 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+   M /trunk/packages/internal/distributedWekaSpark/build.properties
+   M /trunk/packages/internal/distributedWekaSpark/pom.xml
+
+Updated for new release
+------------------------------------------------------------------------
+r12920 | mhall | 2016-04-27 16:11:03 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+
+Fixed download URL
+------------------------------------------------------------------------
+r12922 | mhall | 2016-04-27 16:19:49 +1200 (Wed, 27 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+
+Removed some stray text
+------------------------------------------------------------------------
+r12929 | eibe | 2016-04-29 10:31:30 +1200 (Fri, 29 Apr 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/core/RSessionImpl.java
+
+Default repository for R changed to https://cloud.r-project.org.
+------------------------------------------------------------------------
+r12935 | mhall | 2016-05-06 12:11:23 +1200 (Fri, 06 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+Updated weka dependency in pom
+------------------------------------------------------------------------
+r12937 | mhall | 2016-05-06 12:29:49 +1200 (Fri, 06 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.1
+------------------------------------------------------------------------
+r12939 | mhall | 2016-05-06 12:29:53 +1200 (Fri, 06 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r12941 | eibe | 2016-05-06 16:51:35 +1200 (Fri, 06 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/core/RSessionImpl.java
+
+Default repository for R changed from https://cloud.r-project.org to http://cloud.r-project.org.
+------------------------------------------------------------------------
+r12960 | mhall | 2016-05-18 12:15:22 +1200 (Wed, 18 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/knowledgeflow/steps/AbstractSparkJob.java
+
+Fixed a bug that prevented spark step options from being altered after a job had been run and suffered a failure
+------------------------------------------------------------------------
+r12962 | mhall | 2016-05-18 12:18:54 +1200 (Wed, 18 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+   M /trunk/packages/internal/distributedWekaSpark/build.properties
+
+Updated for 1.0.5
+------------------------------------------------------------------------
+r12987 | eibe | 2016-05-24 21:26:23 +1200 (Tue, 24 May 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute
+   A /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+First stab at implementing multiclass FLDA. Not working yet.
+------------------------------------------------------------------------
+r12988 | mhall | 2016-05-25 14:57:53 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/distributed/spark/BaseSparkJobConfig.java
+
+The routine that searches the classpath for the weka.jar did not contain a break statement - fixed.
+------------------------------------------------------------------------
+r12990 | mhall | 2016-05-25 15:00:45 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+   M /trunk/packages/internal/distributedWekaSpark/build.properties
+
+Updated for 1.0.6
+------------------------------------------------------------------------
+r12992 | mhall | 2016-05-25 15:17:36 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/distributed/hadoop/HadoopJob.java
+
+The routine that searches the classpath for the weka.jar did not contain a break statement - fixed.
+------------------------------------------------------------------------
+r12994 | mhall | 2016-05-25 15:21:56 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/build.properties
+
+Updated to 1.0.19
+------------------------------------------------------------------------
+r12996 | mhall | 2016-05-25 15:29:39 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated version in pom
+------------------------------------------------------------------------
+r12998 | mhall | 2016-05-25 15:32:15 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated dependencies in pom
+------------------------------------------------------------------------
+r12999 | mhall | 2016-05-25 15:34:12 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaBase-1.0.13
+------------------------------------------------------------------------
+r13001 | mhall | 2016-05-25 15:34:15 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13002 | mhall | 2016-05-25 15:39:53 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaHadoopCore-1.0.19
+------------------------------------------------------------------------
+r13004 | mhall | 2016-05-25 15:39:56 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13005 | eibe | 2016-05-25 22:08:36 +1200 (Wed, 25 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+Further progress but probably not correct yet.
+------------------------------------------------------------------------
+r13006 | eibe | 2016-05-26 17:00:28 +1200 (Thu, 26 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+No obvious problems left, but results are different from R's lda in MASS package.
+------------------------------------------------------------------------
+r13007 | eibe | 2016-05-26 21:39:45 +1200 (Thu, 26 May 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+Cosmetic changes only.
+------------------------------------------------------------------------
+r13037 | eibe | 2016-06-03 12:15:00 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+Most important discriminants are now listed first.
+------------------------------------------------------------------------
+r13038 | eibe | 2016-06-03 15:43:23 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/Description.props
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+Now also includes a filter to perform dimensionality reduction using Fisher's FLDA.
+------------------------------------------------------------------------
+r13039 | eibe | 2016-06-03 15:50:24 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/src/main/java/weka/filters/supervised/attribute/MultiClassFLDA.java
+
+Forgot to include "implements WeightedInstancesHandler".
+------------------------------------------------------------------------
+r13040 | mhall | 2016-06-03 16:16:14 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+Updated wekalist urls
+------------------------------------------------------------------------
+r13041 | mhall | 2016-06-03 16:19:49 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare release discriminantAnalysis-1.0.2
+------------------------------------------------------------------------
+r13043 | mhall | 2016-06-03 16:19:53 +1200 (Fri, 03 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/discriminantAnalysis/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13049 | eibe | 2016-06-07 11:02:43 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/tigerjython/Description.props
+   M /trunk/packages/external/tigerjython/lib/tigerjython2.jar
+
+Updated to latest version of TigerJython.
+------------------------------------------------------------------------
+r13050 | eibe | 2016-06-07 11:13:46 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   D /trunk/packages/external/kfGroovy/lib/groovy-all-2.4.5.jar
+   A /trunk/packages/external/kfGroovy/lib/groovy-all-2.4.6.jar
+
+Updated Groovy to 2.4.6.
+------------------------------------------------------------------------
+r13051 | eibe | 2016-06-07 11:14:40 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+
+Updated Groovy to 2.4.6.
+------------------------------------------------------------------------
+r13054 | mhall | 2016-06-07 11:38:17 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updated pom.xml
+------------------------------------------------------------------------
+r13056 | mhall | 2016-06-07 11:52:31 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+Updated version in pom
+------------------------------------------------------------------------
+r13058 | mhall | 2016-06-07 11:53:19 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare release kfGroovy-1.0.12
+------------------------------------------------------------------------
+r13060 | mhall | 2016-06-07 11:53:22 +1200 (Tue, 07 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13077 | eibe | 2016-06-30 16:31:51 +1200 (Thu, 30 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/Description.props
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/END.java
+   A /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/nestedDichotomies/FurthestCentroidND.java
+   A /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/nestedDichotomies/RandomPairND.java
+   A /trunk/packages/internal/ensemblesOfNestedDichotomies/src/test/java/weka/classifiers/meta/nestedDichotomies/FurthestCentroidNDTest.java
+   A /trunk/packages/internal/ensemblesOfNestedDichotomies/src/test/java/weka/classifiers/meta/nestedDichotomies/RandomPairNDTest.java
+
+New classes for ECML 2016 paper.
+------------------------------------------------------------------------
+r13078 | eibe | 2016-06-30 17:01:05 +1200 (Thu, 30 Jun 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/Description.props
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/nestedDichotomies/FurthestCentroidND.java
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/nestedDichotomies/RandomPairND.java
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/src/test/java/weka/classifiers/meta/nestedDichotomies/FurthestCentroidNDTest.java
+
+A couple of small changes to make things work with the latest versions of WEKA.
+------------------------------------------------------------------------
+r13079 | eibe | 2016-07-01 10:49:02 +1200 (Fri, 01 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/src/main/java/weka/classifiers/meta/END.java
+
+Removed furthest centroid option from END, because this method is deterministic, so ensembles need to be build using bagging, boosting, etc., instead.
+------------------------------------------------------------------------
+r13080 | mhall | 2016-07-01 10:56:23 +1200 (Fri, 01 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r13082 | mhall | 2016-07-01 11:02:29 +1200 (Fri, 01 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+Updated dependencies in pom
+------------------------------------------------------------------------
+r13084 | mhall | 2016-07-01 11:08:40 +1200 (Fri, 01 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+[maven-release-plugin] prepare release ensemblesOfNestedDichotomies-1.0.5
+------------------------------------------------------------------------
+r13086 | mhall | 2016-07-01 11:08:44 +1200 (Fri, 01 Jul 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/ensemblesOfNestedDichotomies/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13160 | mhall | 2016-08-05 12:00:19 +1200 (Fri, 05 Aug 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/timeseriesForecasting
+   A /trunk/packages/internal/timeseriesForecasting/Beans.props
+   A /trunk/packages/internal/timeseriesForecasting/Description.props
+   A /trunk/packages/internal/timeseriesForecasting/Explorer.props
+   A /trunk/packages/internal/timeseriesForecasting/GenericPropertiesCreator.props
+   A /trunk/packages/internal/timeseriesForecasting/PluginManager.props
+   A /trunk/packages/internal/timeseriesForecasting/build-res
+   A /trunk/packages/internal/timeseriesForecasting/build-res/subfloor.xml
+   A /trunk/packages/internal/timeseriesForecasting/build.properties
+   A /trunk/packages/internal/timeseriesForecasting/build_package.xml
+   A /trunk/packages/internal/timeseriesForecasting/ivy.xml
+   A /trunk/packages/internal/timeseriesForecasting/ivysettings.xml
+   A /trunk/packages/internal/timeseriesForecasting/lib
+   A /trunk/packages/internal/timeseriesForecasting/pom.xml
+   A /trunk/packages/internal/timeseriesForecasting/sample-data
+   A /trunk/packages/internal/timeseriesForecasting/sample-data/airline.arff
+   A /trunk/packages/internal/timeseriesForecasting/sample-data/appleStocks2011.arff
+   A /trunk/packages/internal/timeseriesForecasting/sample-data/wine.arff
+   A /trunk/packages/internal/timeseriesForecasting/src
+   A /trunk/packages/internal/timeseriesForecasting/src/main
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/AbstractForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/HoltWinters.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/PrimingDataLearner.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/TSForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/WekaForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/AbstractTimeSeriesFilter.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/ConfidenceIntervalForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/CustomPeriodicTest.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/ErrorBasedConfidenceIntervalEstimator.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/IncrementallyPrimeable.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/OverlayForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/TSLagUser.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/TimeSeriesTranslate.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/Utils.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/DACModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/ErrorModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/MAEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/MAPEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/MSEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/RAEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/RMSEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/RRSEModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/TSEvalModule.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/TSEvaluation.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/graph
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/graph/GraphDriver.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/graph/JFreeChartDriver.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/AdvancedConfigPanel.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/CustomPeriodicEditor.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/CustomPeriodicTestEditor.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/ForecastingPanel.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/SimpleConfigPanel.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/explorer
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/explorer/ExplorerTSPanel.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/filters
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/filters/supervised
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/filters/supervised/attribute
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/filters/supervised/attribute/TSLagMaker.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/TimeSeriesForecasting.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/TimeSeriesForecastingBeanInfo.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/TimeSeriesForecastingCustomizer.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/TimeSeriesForecastingKFPerspective.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/icons
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/icons/chart_line.png
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow/TimeSeriesPerspective.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow/icons
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow/icons/chart_line.png
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow/steps
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/knowledgeflow/steps/TimeSeriesForecastingStepEditorDialog.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/knowledgeflow
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/knowledgeflow/steps
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/knowledgeflow/steps/TimeSeriesForecasting.java
+   A /trunk/packages/internal/timeseriesForecasting/src/test
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka/classifiers
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka/classifiers/timeseries
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka/classifiers/timeseries/WekaForecasterTest.java
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka/classifiers/timeseries/data
+   A /trunk/packages/internal/timeseriesForecasting/src/test/java/weka/classifiers/timeseries/data/wine_date.arff
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs/weka
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs/weka/classifiers
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs/weka/classifiers/timeseries
+   A /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs/weka/classifiers/timeseries/WekaForecasterTest.ref
+   A /trunk/packages/internal/timeseriesForecasting/timeseriesForecasting.iml
+
+Import of the timeseriesForecasting package
+------------------------------------------------------------------------
+r13163 | mhall | 2016-08-05 12:07:44 +1200 (Fri, 05 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.20
+------------------------------------------------------------------------
+r13165 | mhall | 2016-08-05 12:07:47 +1200 (Fri, 05 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13194 | mhall | 2016-08-25 09:59:31 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StatsFormatter.java
+
+Initial import of StatsFormatter class
+------------------------------------------------------------------------
+r13197 | eibe | 2016-08-25 11:31:04 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/tigerjython/Description.props
+   M /trunk/packages/external/tigerjython/lib/tigerjython2.cfg
+   M /trunk/packages/external/tigerjython/lib/tigerjython2.jar
+
+New version of tigerJython package.
+------------------------------------------------------------------------
+r13199 | mhall | 2016-08-25 14:45:06 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/distributed/hadoop/ArffHeaderHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/distributed/hadoop/CSVToArffHeaderHadoopReducer.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/gui/beans/CSVToARFFHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/gui/beans/CSVToARFFHadoopJobBeanInfo.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/knowledgeflow/steps/CSVToARFFHadoopJob.java
+
+Updated for summary stats formatted output
+------------------------------------------------------------------------
+r13201 | mhall | 2016-08-25 14:50:37 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTaskBeanInfo.java
+
+Updated for the numDecimalPlaces property
+------------------------------------------------------------------------
+r13202 | eibe | 2016-08-25 14:51:00 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/tigerjython/lib/tigerjython2.cfg
+
+Setting L&F to empty string in the configuration file for TigerJython causes it to simply use WEKA's L&F.
+------------------------------------------------------------------------
+r13205 | mhall | 2016-08-25 15:58:50 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   D /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StatsFormatter.java
+
+Now outputs 0 for derived numeric stats when all values are missing
+------------------------------------------------------------------------
+r13206 | mhall | 2016-08-25 16:00:57 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13207 | mhall | 2016-08-25 16:02:20 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated build.properties
+------------------------------------------------------------------------
+r13208 | mhall | 2016-08-25 16:07:34 +1200 (Thu, 25 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/build.properties
+
+Updated description and build.properties
+------------------------------------------------------------------------
+r13216 | mhall | 2016-08-26 12:45:32 +1200 (Fri, 26 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/Description.props
+   M /trunk/packages/internal/distributedWekaSpark/build.properties
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/distributed/spark/ArffHeaderSparkJob.java
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/knowledgeflow/steps/ArffHeaderSparkJob.java
+
+Updated to support formatting of summary statistics from ARFF job
+------------------------------------------------------------------------
+r13221 | mhall | 2016-08-26 13:19:16 +1200 (Fri, 26 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/distributed/spark/ArffHeaderSparkJob.java
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/gui/knowledgeflow/templates/createARFFHeaderAndGenerateGraphs.kf
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/weka/gui/knowledgeflow/templates/createARFFHeaderWithSummary.kf
+
+ArffHeaderSparkJob now sets the numDecimalPlaces property for summary stats formatting. Templates updated
+------------------------------------------------------------------------
+r13227 | mhall | 2016-08-28 10:27:43 +1200 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/Description.props
+   M /trunk/packages/internal/timeseriesForecasting/build.properties
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/PrimingDataLearner.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/TSForecaster.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/WekaForecaster.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/BaseModelSerializer.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/ErrorBasedConfidenceIntervalEstimator.java
+   A /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/StateDependentPredictor.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/TSEvaluation.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/ForecastingPanel.java
+   M /trunk/packages/internal/timeseriesForecasting/src/test/resources/wekarefs/weka/classifiers/timeseries/WekaForecasterTest.ref
+
+Incorporated addtions and changes from Pedro Ferreira to support base learners that make predictions based on their current state
+------------------------------------------------------------------------
+r13229 | mhall | 2016-08-28 10:47:31 +1200 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.21
+------------------------------------------------------------------------
+r13231 | mhall | 2016-08-28 10:47:35 +1200 (Sun, 28 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13233 | mhall | 2016-08-30 15:37:52 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+   M /trunk/packages/internal/distributedWekaBase/build_package.xml
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericAttributeBinData.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/NumericStats.java
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/TDigest.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderReduceTask.java
+
+Now uses the latest version of t-digest for quantile estimation, which is approximately 4-6 times faster. Histogram generation for numeric attributes now performs 8 equal width bins between the 10th and 90th percentiles, with two additional bins reserved for the outliers on either side. Upper and lower percentiles are adjusted if they happen to coincide with the min/max
+------------------------------------------------------------------------
+r13234 | mhall | 2016-08-30 15:39:40 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/ivy.xml
+
+Now includes Ted Dunning's t-digest
+------------------------------------------------------------------------
+r13236 | mhall | 2016-08-30 15:52:00 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/build_package.xml
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/distributed/hadoop/HadoopJob.java
+
+Will now copy the new t-digest.jar file from distributedWekaBase, if present, into HDFS
+------------------------------------------------------------------------
+r13238 | mhall | 2016-08-30 16:03:22 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Added t-digest dependency
+------------------------------------------------------------------------
+r13240 | mhall | 2016-08-30 16:04:37 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated version number
+------------------------------------------------------------------------
+r13242 | mhall | 2016-08-30 16:52:14 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/ChartUtils.java
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/distributed/CSVToARFFHeaderMapTask.java
+
+Fixed a couple of javadoc issues
+------------------------------------------------------------------------
+r13243 | mhall | 2016-08-30 17:01:55 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/distributedWekaBase/src/main/java/weka/core/stats/StatsFormatter.java
+
+Initial import
+------------------------------------------------------------------------
+r13245 | mhall | 2016-08-30 17:08:52 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated source and target to 1.7
+------------------------------------------------------------------------
+r13246 | mhall | 2016-08-30 17:16:03 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/test/java/weka/distributed/CSVToARFFHeaderMapTaskTest.java
+
+Now uses weka.distributed.core.stats.TDigest
+------------------------------------------------------------------------
+r13248 | mhall | 2016-08-30 18:14:02 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaBase-1.0.15
+------------------------------------------------------------------------
+r13250 | mhall | 2016-08-30 18:14:06 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13251 | mhall | 2016-08-30 18:19:25 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/build.properties
+
+Updated build.properties
+------------------------------------------------------------------------
+r13252 | mhall | 2016-08-30 18:22:00 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated version number
+------------------------------------------------------------------------
+r13253 | mhall | 2016-08-30 18:30:36 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Source and target are now 1.6
+------------------------------------------------------------------------
+r13254 | mhall | 2016-08-30 19:33:01 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated distributedWekaBase dependency
+------------------------------------------------------------------------
+r13255 | mhall | 2016-08-30 21:12:51 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Changed Weka dependency from 3.9.0 to 3.8.0
+------------------------------------------------------------------------
+r13256 | mhall | 2016-08-30 21:22:06 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+[maven-release-plugin] prepare release distributedWekaHadoopCore-1.0.21
+------------------------------------------------------------------------
+r13258 | mhall | 2016-08-30 21:22:09 +1200 (Tue, 30 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13260 | mhall | 2016-08-31 11:51:39 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/Description.props
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+Updated description and pom for new release. Forgot to release the new version of this package when 3.8.0 came out
+------------------------------------------------------------------------
+r13262 | mhall | 2016-08-31 11:57:09 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+[maven-release-plugin] prepare release prefuseGraphViewer-1.0.4
+------------------------------------------------------------------------
+r13263 | mhall | 2016-08-31 11:57:31 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+[maven-release-plugin] rollback the release of prefuseGraphViewer-1.0.4
+------------------------------------------------------------------------
+r13264 | mhall | 2016-08-31 11:58:40 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+Updated urls
+------------------------------------------------------------------------
+r13265 | mhall | 2016-08-31 11:59:33 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+[maven-release-plugin] prepare release prefuseGraphViewer-1.0.4
+------------------------------------------------------------------------
+r13267 | mhall | 2016-08-31 11:59:36 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraphViewer/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13269 | mhall | 2016-08-31 12:49:08 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/Description.props
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/ErrorBasedConfidenceIntervalEstimator.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/eval/TSEvaluation.java
+
+Bug fixes from Pedro Ferreira.
+------------------------------------------------------------------------
+r13270 | mhall | 2016-08-31 12:51:20 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/build.properties
+
+Updated revision number
+------------------------------------------------------------------------
+r13271 | mhall | 2016-08-31 12:53:48 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.22
+------------------------------------------------------------------------
+r13273 | mhall | 2016-08-31 12:53:51 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13275 | mhall | 2016-08-31 16:00:29 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/streamingUnivariateStats
+   A /trunk/packages/internal/streamingUnivariateStats/Description.props
+   A /trunk/packages/internal/streamingUnivariateStats/PluginManager.props
+   A /trunk/packages/internal/streamingUnivariateStats/build_package.xml
+   A /trunk/packages/internal/streamingUnivariateStats/lib
+   A /trunk/packages/internal/streamingUnivariateStats/pom.xml
+   A /trunk/packages/internal/streamingUnivariateStats/src
+   A /trunk/packages/internal/streamingUnivariateStats/src/main
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/gui
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/gui/knowledgeflow
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/gui/knowledgeflow/templates
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/gui/knowledgeflow/templates/summary.kf
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/knowledgeflow
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/knowledgeflow/steps
+   A /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/knowledgeflow/steps/StreamingUnivariateStats.java
+
+Initial import
+------------------------------------------------------------------------
+r13277 | mhall | 2016-08-31 16:28:12 +1200 (Wed, 31 Aug 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/streamingUnivariateStats/Description.props
+
+Removed a stray carriage return
+------------------------------------------------------------------------
+r13286 | mhall | 2016-09-04 13:29:52 +1200 (Sun, 04 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/knowledgeflow/steps/CorrelationMatrixHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/knowledgeflow/steps/KMeansClustererHadoopJob.java
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/weka/knowledgeflow/steps/WekaClassifierHadoopJob.java
+
+Corrected a couple of copy-and-paste bugs in the titles of textual output from these steps
+------------------------------------------------------------------------
+r13288 | eibe | 2016-09-09 16:34:27 +1200 (Fri, 09 Sep 2016) | 2 lines
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+   M /trunk/packages/external/LibSVM/src/main/java/weka/classifiers/functions/LibSVM.java
+
+Changed back from introspection-based use of libsvm to improve speed and memory consumption. Fixed some minor bugs with command-line option handling. No longer outputs debug info to terminal by default.
+
+------------------------------------------------------------------------
+r13289 | mhall | 2016-09-09 16:41:54 +1200 (Fri, 09 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Updated release date
+------------------------------------------------------------------------
+r13291 | mhall | 2016-09-09 16:49:12 +1200 (Fri, 09 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare release LibSVM-1.0.9
+------------------------------------------------------------------------
+r13293 | mhall | 2016-09-09 16:49:15 +1200 (Fri, 09 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13306 | eibe | 2016-09-17 16:49:07 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/Description.props
+   M /trunk/packages/external/prefuseGraph/src/main/java/weka/gui/visualize/plugins/PrefuseGraph.java
+
+Removed FastVector. Also, package binary needed to be recompiled to work with recent versions of Weka!
+------------------------------------------------------------------------
+r13312 | mhall | 2016-09-17 21:07:43 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r13314 | mhall | 2016-09-17 21:13:31 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/build_package.xml
+
+Upped source and target to 1.7
+------------------------------------------------------------------------
+r13316 | mhall | 2016-09-17 21:20:38 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/pom.xml
+
+Updated source and target versions in pom
+------------------------------------------------------------------------
+r13318 | mhall | 2016-09-17 21:22:03 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/pom.xml
+
+[maven-release-plugin] prepare release prefuseGraph-1.0.4
+------------------------------------------------------------------------
+r13320 | mhall | 2016-09-17 21:22:07 +1200 (Sat, 17 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/prefuseGraph/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13342 | mhall | 2016-09-26 21:51:58 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/streamingUnivariateStats/src/main/java/weka/knowledgeflow/steps/StreamingUnivariateStats.java
+
+Can now process incoming batch connections. Added javadoc
+------------------------------------------------------------------------
+r13344 | mhall | 2016-09-26 21:54:05 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/streamingUnivariateStats/Description.props
+   M /trunk/packages/internal/streamingUnivariateStats/pom.xml
+
+Updated description and pom
+------------------------------------------------------------------------
+r13346 | mhall | 2016-09-26 21:59:52 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/streamingUnivariateStats/pom.xml
+
+[maven-release-plugin] prepare release streamingUnivariateStats-1.0.1
+------------------------------------------------------------------------
+r13348 | mhall | 2016-09-26 21:59:56 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/streamingUnivariateStats/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13349 | mhall | 2016-09-26 22:10:18 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/knowledgeflow/steps/TimeSeriesForecasting.java
+
+Fixed a bug that prevented initialization to complete successfully when the model being used is serialized into the metadata for the step
+------------------------------------------------------------------------
+r13351 | mhall | 2016-09-26 22:13:36 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/Description.props
+
+Updated description
+------------------------------------------------------------------------
+r13353 | mhall | 2016-09-26 22:14:52 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/build.properties
+
+Updated build.properties
+------------------------------------------------------------------------
+r13355 | mhall | 2016-09-26 22:17:14 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.23
+------------------------------------------------------------------------
+r13357 | mhall | 2016-09-26 22:17:19 +1300 (Mon, 26 Sep 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13391 | mhall | 2016-10-07 10:14:22 +1300 (Fri, 07 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/src/main/java/weka/classifiers/rules/DTNB.java
+
+Small code changes to avoid illegal access exceptions when DTNB is loaded by a child classloader
+------------------------------------------------------------------------
+r13400 | eibe | 2016-10-13 17:37:59 +1300 (Thu, 13 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/MLRClassifier.java
+
+Updated MLRClassifier to support MLR 2.9.
+------------------------------------------------------------------------
+r13403 | eibe | 2016-10-14 16:41:46 +1300 (Fri, 14 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/Description.props
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPClassifier.java
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPModel.java
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/filters/unsupervised/attribute/MLPAutoencoder.java
+
+All three MLP* classes now produce reproducible results even if multi-threading is used; also, a seed can now be specified when training the autoencoder.
+------------------------------------------------------------------------
+r13405 | mhall | 2016-10-14 23:04:47 +1300 (Fri, 14 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.9
+------------------------------------------------------------------------
+r13407 | mhall | 2016-10-14 23:04:51 +1300 (Fri, 14 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13412 | mhall | 2016-10-26 10:30:26 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/core/TimeSeriesTranslate.java
+
+Fixed a bug that affected the structure (dataset) assigned to a transformed instance when doing a preview transformation
+------------------------------------------------------------------------
+r13415 | mhall | 2016-10-26 10:37:20 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/Description.props
+   M /trunk/packages/internal/timeseriesForecasting/build.properties
+
+Updated Description.props and build.properties
+------------------------------------------------------------------------
+r13421 | mhall | 2016-10-26 10:55:00 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.24
+------------------------------------------------------------------------
+r13423 | mhall | 2016-10-26 10:55:04 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13424 | mhall | 2016-10-26 11:00:09 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+Reverted pom to 1.0.24
+------------------------------------------------------------------------
+r13426 | mhall | 2016-10-26 11:04:16 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+Reverted pom to 1.0.24-SNAPSHOT
+------------------------------------------------------------------------
+r13427 | mhall | 2016-10-26 11:05:00 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare release timeseriesForecasting-1.0.24
+------------------------------------------------------------------------
+r13429 | mhall | 2016-10-26 11:05:03 +1300 (Wed, 26 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13441 | mhall | 2016-10-28 10:41:10 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/Description.props
+   M /trunk/packages/internal/DTNB/pom.xml
+
+Updated Description and pom with respect to dependencies
+------------------------------------------------------------------------
+r13443 | mhall | 2016-10-28 10:55:55 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/Description.props
+   M /trunk/packages/internal/DTNB/pom.xml
+
+Moved version number to odd second digit
+------------------------------------------------------------------------
+r13446 | mhall | 2016-10-28 11:15:59 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/Description.props
+   M /trunk/packages/internal/DTNB/pom.xml
+
+Reverted dependencies in pom and Description as the changes in DTNB are backward compatible with older versions of Weka
+------------------------------------------------------------------------
+r13447 | mhall | 2016-10-28 11:19:34 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/gui/PythonPanel.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/gui/beans/PythonScriptExecutorCustomizer.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/gui/explorer/PythonExplorerPanel.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/gui/knowledgeflow/steps/PythonScriptExecutorStepEditorDialog.java
+
+Small changes to support working in a child classloader
+------------------------------------------------------------------------
+r13448 | mhall | 2016-10-28 11:19:50 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Updated Description.props
+------------------------------------------------------------------------
+r13450 | mhall | 2016-10-28 11:29:59 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/src/main/java/weka/filters/MakePreconstructedFilter.java
+
+Changes in order to work in a child classloader
+------------------------------------------------------------------------
+r13451 | mhall | 2016-10-28 11:48:54 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/src/main/java/distributed/hadoop/AbstractHadoopJobConfig.java
+
+Now reads the property that indicates Hadoop 2 as a system property. This supports running in a child classloader
+------------------------------------------------------------------------
+r13453 | mhall | 2016-10-28 14:57:35 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/pom.xml
+
+Updated pom
+------------------------------------------------------------------------
+r13454 | mhall | 2016-10-28 14:58:07 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+   M /trunk/packages/internal/distributedWekaHadoop/build.properties
+   M /trunk/packages/internal/distributedWekaHadoop/pom.xml
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13455 | mhall | 2016-10-28 14:58:53 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13456 | mhall | 2016-10-28 14:59:23 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopLibs/Description.props
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13457 | mhall | 2016-10-28 15:00:08 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/Description.props
+   M /trunk/packages/internal/distributedWekaHadoop2/pom.xml
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13458 | mhall | 2016-10-28 15:00:30 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2Libs/Description.props
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13464 | mhall | 2016-10-28 15:06:42 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/build.properties
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13465 | mhall | 2016-10-28 15:06:59 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopLibs/build.properties
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13466 | mhall | 2016-10-28 15:07:13 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2Libs/build.properties
+
+Updated for child classloaders
+------------------------------------------------------------------------
+r13467 | mhall | 2016-10-28 15:08:40 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeOSX/Description.props
+
+Updated description with entries for native loaders and libraries
+------------------------------------------------------------------------
+r13468 | mhall | 2016-10-28 15:11:27 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeOSX/Description.props
+
+Added a changes entry
+------------------------------------------------------------------------
+r13469 | mhall | 2016-10-28 15:11:38 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeWindows/Description.props
+
+Updated description with entries for native loaders and libraries
+------------------------------------------------------------------------
+r13470 | mhall | 2016-10-28 15:11:53 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeLinux/Description.props
+
+Updated description with entries for native loaders and libraries
+------------------------------------------------------------------------
+r13474 | mhall | 2016-10-28 15:21:03 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/JDBCDriversDummyPackage/Description.props
+
+Updated Description for child classloaders
+------------------------------------------------------------------------
+r13484 | mhall | 2016-10-28 16:10:23 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+   M /trunk/packages/external/kfGroovy/src/main/java/weka/knowledgeflow/steps/GroovyStep.java
+
+Changes in order to work with child classloaders
+------------------------------------------------------------------------
+r13486 | mhall | 2016-10-28 16:15:35 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeseriesForecasting/Description.props
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/classifiers/timeseries/gui/ForecastingPanel.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/gui/beans/TimeSeriesForecasting.java
+   M /trunk/packages/internal/timeseriesForecasting/src/main/java/weka/knowledgeflow/steps/TimeSeriesForecasting.java
+   M /trunk/packages/internal/timeseriesForecasting/timeseriesForecasting.iml
+
+Changes to support running when loaded by a child classloader
+------------------------------------------------------------------------
+r13488 | mhall | 2016-10-28 16:38:52 +1300 (Fri, 28 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/massiveOnlineAnalysis/Description.props
+   M /trunk/packages/internal/massiveOnlineAnalysis/build.properties
+   M /trunk/packages/internal/massiveOnlineAnalysis/build_package.xml
+
+Changes in package structure to support child classloaders
+------------------------------------------------------------------------
+r13495 | mhall | 2016-10-31 09:28:08 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/Description.props
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+   M /trunk/packages/internal/percentageErrorMetrics/src/main/java/weka/classifiers/evaluation/MeanAbsolutePercentageError.java
+   M /trunk/packages/internal/percentageErrorMetrics/src/main/java/weka/classifiers/evaluation/RootMeanSquarePercentageError.java
+
+Changes to support child classloaders
+------------------------------------------------------------------------
+r13496 | mhall | 2016-10-31 09:29:51 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/Description.props
+
+Changed version number to odd second digit
+------------------------------------------------------------------------
+r13497 | mhall | 2016-10-31 09:30:19 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/Description.props
+
+Fixed version number in download URL
+------------------------------------------------------------------------
+r13498 | mhall | 2016-10-31 09:31:04 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+
+Updated version number in pom
+------------------------------------------------------------------------
+r13500 | mhall | 2016-10-31 09:35:23 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/Description.props
+   M /trunk/packages/internal/predictiveApriori/pom.xml
+   M /trunk/packages/internal/predictiveApriori/src/main/java/weka/associations/PriorEstimation.java
+   M /trunk/packages/internal/predictiveApriori/src/main/java/weka/associations/RuleGeneration.java
+   M /trunk/packages/internal/predictiveApriori/src/main/java/weka/associations/RuleItem.java
+
+Changes to support child classloaders
+------------------------------------------------------------------------
+r13502 | mhall | 2016-10-31 09:47:54 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/scriptingClassifiers/Description.props
+   M /trunk/packages/internal/scriptingClassifiers/pom.xml
+   M /trunk/packages/internal/scriptingClassifiers/src/main/java/weka/classifiers/scripting/GroovyClassifier.java
+   M /trunk/packages/internal/scriptingClassifiers/src/main/java/weka/classifiers/scripting/JythonClassifier.java
+
+Changes to support child classloaders
+------------------------------------------------------------------------
+r13504 | mhall | 2016-10-31 09:51:21 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/scriptingClassifiers/Description.props
+
+Updated date and changes in Description.props
+------------------------------------------------------------------------
+r13505 | mhall | 2016-10-31 10:12:51 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+   M /trunk/packages/internal/wekaServer/build.properties
+   M /trunk/packages/internal/wekaServer/build_package.xml
+   M /trunk/packages/internal/wekaServer/pom.xml
+   M /trunk/packages/internal/wekaServer/src/main/java/weka/gui/explorer/ClassifierPanelRemoteLauncher.java
+   M /trunk/packages/internal/wekaServer/src/main/java/weka/server/knowledgeFlow/UnscheduledNamedKnowledgeFlowTask.java
+
+Changes to support child classloaders
+------------------------------------------------------------------------
+r13507 | mhall | 2016-10-31 11:14:53 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/J48graft/Description.props
+   M /trunk/packages/external/J48graft/pom.xml
+   M /trunk/packages/external/J48graft/src/main/java/weka/classifiers/trees/J48graft.java
+   M /trunk/packages/external/J48graft/src/main/java/weka/classifiers/trees/j48/C45PruneableClassifierTreeG.java
+
+Changes to support child classloaders
+------------------------------------------------------------------------
+r13522 | mhall | 2016-10-31 21:10:34 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/src/main/java/weka/classifiers/functions/MLPModel.java
+
+Fixed an option handling bug
+------------------------------------------------------------------------
+r13524 | mhall | 2016-10-31 21:18:11 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/Description.props
+
+Updated Description.props
+------------------------------------------------------------------------
+r13526 | mhall | 2016-10-31 21:22:33 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare release multiLayerPerceptrons-1.0.10
+------------------------------------------------------------------------
+r13528 | mhall | 2016-10-31 21:22:36 +1300 (Mon, 31 Oct 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/multiLayerPerceptrons/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13545 | mhall | 2016-11-02 14:34:36 +1300 (Wed, 02 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/Description.props
+
+Added pom and updated Description.props
+------------------------------------------------------------------------
+r13546 | mhall | 2016-11-02 14:36:30 +1300 (Wed, 02 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/Description.props
+
+Updated changes in description.props
+------------------------------------------------------------------------
+r13547 | mhall | 2016-11-02 14:38:23 +1300 (Wed, 02 Nov 2016) | 1 line
+Changed paths:
+   A /trunk/packages/external/kfKettle/pom.xml
+
+initial import
+------------------------------------------------------------------------
+r13548 | mhall | 2016-11-02 14:40:13 +1300 (Wed, 02 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/pom.xml
+
+[maven-release-plugin] prepare release kfKettle-1.0.5
+------------------------------------------------------------------------
+r13550 | mhall | 2016-11-02 14:40:16 +1300 (Wed, 02 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfKettle/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13551 | mhall | 2016-11-04 16:19:20 +1300 (Fri, 04 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeLinux/Description.props
+
+Fixed a typo in the NativeLibs entry
+------------------------------------------------------------------------
+r13553 | eibe | 2016-11-04 17:23:05 +1300 (Fri, 04 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4j/GUIEditors.props
+   A /trunk/packages/internal/wekaDeeplearning4j/GenericPropertiesCreator.props
+   D /trunk/packages/internal/wekaDeeplearning4j/build-res
+   D /trunk/packages/internal/wekaDeeplearning4j/build.properties
+   M /trunk/packages/internal/wekaDeeplearning4j/build_package.xml
+   D /trunk/packages/internal/wekaDeeplearning4j/ivy.xml
+   D /trunk/packages/internal/wekaDeeplearning4j/ivysettings.xml
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/common-image-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/common-io-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/common-lang-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/commons-codec-1.10.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/commons-io-2.5.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/commons-lang3-3.5.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/commons-math3-3.6.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-api-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-data-image-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-nd4j-common-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-core-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-nn-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/guava-19.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/imageio-bmp-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/imageio-core-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/imageio-jpeg-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/imageio-metadata-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/imageio-psd-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-annotations-2.5.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-core-2.5.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-databind-2.5.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-dataformat-xml-2.5.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-dataformat-yaml-2.5.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jai-imageio-core-1.3.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/javacpp.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/javassist-3.12.1.GA.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/lombok.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-api-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-buffer-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-common-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-context-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-linux-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-macosx-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-windows-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-api-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-platform-0.6.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/opencv-3.1.0-1.2.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/reflections-0.9.10.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/slf4j-api-1.7.21.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/slf4j-jdk14-1.7.21.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/DL4JHomogenousMultiLayerClassifier.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/dl4j/Utils.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/EasyImageRecordReader.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/FileIterationListener.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/ScaleImagePixelsPreProcessor.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/ShufflingDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/SpecifiableFolderSplit.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/BinomialDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/NormalDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/UniformDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/AbstractDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/DefaultInstancesIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/ImageDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/ConvolutionLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/DenseLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/OutputLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/SubsamplingLayer.java
+   D /trunk/packages/internal/wekaDeeplearning4j/src/main/wekaDeeplearning4j.iml
+   D /trunk/packages/internal/wekaDeeplearning4j/src/test/java/weka/classifiers/functions/DL4JHomogenousMultiLayerClassifierTest.java
+   D /trunk/packages/internal/wekaDeeplearning4j/test-lib
+
+Draft package that can be used to create classifiers and regressors with Deeplearning4j 0.6. Based on code written by Mark Hall and Christopher Beckham. Unit tests still need to be fixed up. Includes all required libraries.
+------------------------------------------------------------------------
+r13560 | mhall | 2016-11-07 11:25:44 +1300 (Mon, 07 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/build_package.xml
+
+Fixed build_package.xml
+------------------------------------------------------------------------
+r13578 | eibe | 2016-11-14 17:52:10 +1300 (Mon, 14 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+   M /trunk/packages/internal/wekaDeeplearning4j/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4j/data
+   A /trunk/packages/internal/wekaDeeplearning4j/data/README
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal.arff
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1002_c2.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1003_c5.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1005_c9.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1007_c8.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1008_c1.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1009_c0.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1012_c7.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1014_c6.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1015_c4.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4j/data/mnist-minimal/1020_c3.gif.png
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/EasyImageRecordReader.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/ShufflingDataSetIterator.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/AbstractDataSetIterator.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/DefaultInstancesIterator.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/iterators/ImageDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/test/java/weka/classifiers/functions/Dl4jMlpClassifierAbstractTest.java
+
+Almost ready to make an initial release. Currently fails three classifier tests.
+------------------------------------------------------------------------
+r13580 | mhall | 2016-11-15 11:44:04 +1300 (Tue, 15 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/dl4j/Utils.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/test/java/weka/classifiers/functions/Dl4jMlpClassifierAbstractTest.java
+
+Fixed a couple of failing tests. Reformatted some code. Added a license header to Utils.java
+------------------------------------------------------------------------
+r13581 | eibe | 2016-11-15 14:16:32 +1300 (Tue, 15 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/test/java/weka/classifiers/functions/Dl4jMlpClassifierAbstractTest.java
+
+Fixed up capabilities checking so that string are only *potentially* supported. This means the classifier tests now work properly.
+------------------------------------------------------------------------
+r13582 | mhall | 2016-11-15 14:56:32 +1300 (Tue, 15 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+
+Now has real package and URL tags :-)
+------------------------------------------------------------------------
+r13596 | eibe | 2016-11-21 10:08:28 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+LibSVM 1.0.9 actually depends on 3.8 or later...
+------------------------------------------------------------------------
+r13597 | mhall | 2016-11-21 10:42:37 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Updated Descriptionl.props to 1.0.10
+------------------------------------------------------------------------
+r13598 | mhall | 2016-11-21 10:46:04 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/Description.props
+
+Updated Changes entry
+------------------------------------------------------------------------
+r13599 | mhall | 2016-11-21 11:20:17 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/build_package.xml
+
+Added a package property to the build file
+------------------------------------------------------------------------
+r13600 | mhall | 2016-11-21 11:21:10 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/build_package.xml
+
+Updated docs
+------------------------------------------------------------------------
+r13601 | mhall | 2016-11-21 11:25:07 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/build_package.xml
+
+Updated docs
+------------------------------------------------------------------------
+r13602 | mhall | 2016-11-21 11:25:56 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare release LibSVM-1.0.10
+------------------------------------------------------------------------
+r13604 | mhall | 2016-11-21 11:25:59 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13606 | mhall | 2016-11-21 11:28:34 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/LibSVM/pom.xml
+
+Updated weka dependency in pom
+------------------------------------------------------------------------
+r13614 | eibe | 2016-11-21 17:24:35 +1300 (Mon, 21 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/BinomialDistribution.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/NormalDistribution.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/UniformDistribution.java
+
+Serialization working now. Capability handling for convolutional case corrected. Model output fixed.
+------------------------------------------------------------------------
+r13615 | mhall | 2016-11-22 09:48:12 +1300 (Tue, 22 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+
+Updated Description.props to version 1.0.1
+------------------------------------------------------------------------
+r13616 | mhall | 2016-11-22 09:51:51 +1300 (Tue, 22 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+
+Updated changes entry
+------------------------------------------------------------------------
+r13621 | eibe | 2016-11-24 15:32:03 +1300 (Thu, 24 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+   M /trunk/packages/internal/wekaDeeplearning4j/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-data-image-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-nd4j-common-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-core-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-nn-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-buffer-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-common-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-context-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-jackson-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.7.0-linux-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.7.0-macosx-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.7.0-windows-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-platform-0.7.0.jar
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/BinomialDistribution.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/NormalDistribution.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/distribution/UniformDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/BatchNormalization.java
+   M /trunk/packages/internal/wekaDeeplearning4j/src/main/java/weka/dl4j/layers/ConvolutionLayer.java
+
+Upgraded to version 0.7.0 of deepLearning4j.
+------------------------------------------------------------------------
+r13622 | eibe | 2016-11-24 16:27:32 +1300 (Thu, 24 Nov 2016) | 1 line
+Changed paths:
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-api-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-data-image-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/datavec-nd4j-common-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-core-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/deeplearning4j-nn-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-annotations-2.5.1.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-core-2.5.1.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-databind-2.5.1.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-dataformat-xml-2.5.1.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/jackson-dataformat-yaml-2.5.1.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-api-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-buffer-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-common-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-context-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-linux-x86_64.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-macosx-x86_64.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0-windows-x86_64.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-api-0.6.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4j/lib/nd4j-native-platform-0.6.0.jar
+
+Removed old jar files.
+------------------------------------------------------------------------
+r13623 | eibe | 2016-11-24 16:32:54 +1300 (Thu, 24 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/data/README
+
+Updated README for example in data folder.
+------------------------------------------------------------------------
+r13641 | mhall | 2016-11-28 14:03:33 +1300 (Mon, 28 Nov 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/wekaDeeplearning4jCPU
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/build
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/build/classes
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/dist
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/dist/wekaDeeplearning4jCPU
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/dist/wekaDeeplearning4jCPU.zip
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/dist/wekaDeeplearning4jCPU/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jCPU/dist/wekaDeeplearning4jCPU/lib
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/build
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/build/classes
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs.zip
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/lib
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-linux-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-macosx-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-windows-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/lib
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-linux-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-macosx-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0-windows-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCPULibs/lib/nd4j-native-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore
+   A /trunk/packages/internal/wekaDeeplearning4jCore/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jCore/GUIEditors.props
+   A /trunk/packages/internal/wekaDeeplearning4jCore/GenericPropertiesCreator.props
+   A /trunk/packages/internal/wekaDeeplearning4jCore/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/README
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal.arff
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1002_c2.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1003_c5.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1005_c9.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1007_c8.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1008_c1.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1009_c0.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1012_c7.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1014_c6.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1015_c4.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/data/mnist-minimal/1020_c3.gif.png
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/common-image-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/common-io-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/common-lang-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/commons-codec-1.10.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/commons-io-2.5.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/commons-lang3-3.5.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/commons-math3-3.6.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/datavec-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/datavec-data-image-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/datavec-nd4j-common-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/deeplearning4j-core-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/deeplearning4j-nn-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/guava-19.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/imageio-bmp-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/imageio-core-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/imageio-jpeg-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/imageio-metadata-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/imageio-psd-3.2.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/jackson-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/jai-imageio-core-1.3.1.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/javacpp.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/javassist-3.12.1.GA.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/lombok.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-buffer-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-common-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-context-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-jackson-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/nd4j-native-api-0.7.0.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/opencv-3.1.0-1.2.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/reflections-0.9.10.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/slf4j-api-1.7.21.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/lib/slf4j-jdk14-1.7.21.jar
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers/functions/dl4j
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers/functions/dl4j/Utils.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/EasyImageRecordReader.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/FileIterationListener.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/ScaleImagePixelsPreProcessor.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/ShufflingDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/SpecifiableFolderSplit.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/distribution
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/distribution/BinomialDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/distribution/NormalDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/distribution/UniformDistribution.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/iterators
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/iterators/AbstractDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/iterators/DefaultInstancesIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/iterators/ImageDataSetIterator.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers/BatchNormalization.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers/ConvolutionLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers/DenseLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers/OutputLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/dl4j/layers/SubsamplingLayer.java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/main/wekaDeepLearing4j.iml
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test/java
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test/java/weka
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test/java/weka/classifiers
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/wekaDeeplearning4jCore/src/test/java/weka/classifiers/functions/Dl4jMlpClassifierAbstractTest.java
+   A /trunk/packages/internal/wekaDeeplearning4jGPU
+   A /trunk/packages/internal/wekaDeeplearning4jGPU/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jGPU/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/Description.props
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/build_package.xml
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/lib
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/lib/nd4j-cuda-8.0-0.7.0-linux-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/lib/nd4j-cuda-8.0-0.7.0-macosx-x86_64.jar
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/lib/nd4j-cuda-8.0-0.7.0-windows-x86_64.jar
+
+Splitting wekaDeepLearning4j into separate core and libs packages for both CPU and GPU
+------------------------------------------------------------------------
+r13643 | eibe | 2016-11-29 14:22:39 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/logarithmicErrorMetrics
+   A /trunk/packages/internal/logarithmicErrorMetrics/Description.props
+   A /trunk/packages/internal/logarithmicErrorMetrics/PluginManager.props
+   A /trunk/packages/internal/logarithmicErrorMetrics/build_package.xml
+   A /trunk/packages/internal/logarithmicErrorMetrics/pom.xml
+   A /trunk/packages/internal/logarithmicErrorMetrics/src
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java/weka
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java/weka/classifiers
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java/weka/classifiers/evaluation
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java/weka/classifiers/evaluation/MeanAbsoluteLogarithmicError.java
+   A /trunk/packages/internal/logarithmicErrorMetrics/src/main/java/weka/classifiers/evaluation/RootMeanSquareLogarithmicError.java
+
+Initial commit of logarithmicErrorMetrics package.
+------------------------------------------------------------------------
+r13644 | eibe | 2016-11-29 14:27:49 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/Description.props
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+   M /trunk/packages/internal/percentageErrorMetrics/src/main/java/weka/classifiers/evaluation/MeanAbsolutePercentageError.java
+   M /trunk/packages/internal/percentageErrorMetrics/src/main/java/weka/classifiers/evaluation/RootMeanSquarePercentageError.java
+
+Changed to make it work with both WEKA 3.8 and 3.8.1 (and later).
+------------------------------------------------------------------------
+r13645 | mhall | 2016-11-29 14:42:05 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+
+Updated pom file
+------------------------------------------------------------------------
+r13646 | mhall | 2016-11-29 14:43:04 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/build_package.xml
+
+Added package property to build_package.xml
+------------------------------------------------------------------------
+r13647 | mhall | 2016-11-29 14:53:13 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/logarithmicErrorMetrics/pom.xml
+
+Updated Weka dependency in pom
+------------------------------------------------------------------------
+r13648 | mhall | 2016-11-29 14:54:05 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/logarithmicErrorMetrics/build_package.xml
+
+Added package property to build_package.xml
+------------------------------------------------------------------------
+r13649 | mhall | 2016-11-29 14:55:44 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/logarithmicErrorMetrics/pom.xml
+
+[maven-release-plugin] prepare release logarithmicErrorMetrics-1.0.0
+------------------------------------------------------------------------
+r13651 | mhall | 2016-11-29 14:55:47 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/logarithmicErrorMetrics/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13652 | mhall | 2016-11-29 15:02:16 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+
+Fixed weka version in pom
+------------------------------------------------------------------------
+r13653 | mhall | 2016-11-29 15:02:42 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+
+[maven-release-plugin] prepare release percentageErrorMetrics-1.0.1
+------------------------------------------------------------------------
+r13655 | mhall | 2016-11-29 15:02:45 +1300 (Tue, 29 Nov 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/percentageErrorMetrics/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13667 | mhall | 2016-12-01 09:47:26 +1300 (Thu, 01 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Fixed title in description.props
+------------------------------------------------------------------------
+r13680 | mhall | 2016-12-01 16:00:31 +1300 (Thu, 01 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/knowledgeflow/steps/PythonScriptExecutor.java
+
+Fixed a bug that prevented useful error information from python from propagating back to the Knowledge Flow scripting step
+------------------------------------------------------------------------
+r13686 | eibe | 2016-12-02 11:27:48 +1300 (Fri, 02 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/stackingC/Description.props
+   M /trunk/packages/external/stackingC/src/main/java/weka/classifiers/meta/StackingC.java
+
+Added method for handling of capabilities because numeric classes are not actually supported.
+------------------------------------------------------------------------
+r13687 | mhall | 2016-12-02 13:41:31 +1300 (Fri, 02 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/stackingC/pom.xml
+
+Updated list and svn urls in pom
+------------------------------------------------------------------------
+r13689 | mhall | 2016-12-02 13:44:15 +1300 (Fri, 02 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/stackingC/pom.xml
+
+[maven-release-plugin] prepare release stackingC-1.0.3
+------------------------------------------------------------------------
+r13691 | mhall | 2016-12-02 13:44:18 +1300 (Fri, 02 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/stackingC/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r13696 | mhall | 2016-12-04 20:34:19 +1300 (Sun, 04 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/build_package.xml
+
+Moved groovy library from lib to top level when package zip is built
+------------------------------------------------------------------------
+r13698 | mhall | 2016-12-04 20:45:54 +1300 (Sun, 04 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/kfGroovy/Description.props
+
+Updated release date
+------------------------------------------------------------------------
+r13709 | mhall | 2016-12-06 14:28:58 +1300 (Tue, 06 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSpark/build_package.xml
+   M /trunk/packages/internal/distributedWekaSpark/src/main/java/distributed/spark/BaseSparkJobConfig.java
+
+Updated build_package script. Refactored BaseSparkJobConfig in order to make the mechanism for handling the runtime libraries more flexible
+------------------------------------------------------------------------
+r13740 | mhall | 2016-12-08 14:58:25 +1300 (Thu, 08 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/DTNB/Description.props
+   M /trunk/packages/internal/DTNB/build_package.xml
+
+Updated Description.props and build script
+------------------------------------------------------------------------
+r13742 | mhall | 2016-12-08 15:21:57 +1300 (Thu, 08 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaBase/Description.props
+   M /trunk/packages/internal/distributedWekaBase/build.properties
+
+Updated Description.props and build.properties
+------------------------------------------------------------------------
+r13757 | mhall | 2016-12-09 08:47:51 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/Description.props
+
+Updated Description.props
+------------------------------------------------------------------------
+r13758 | mhall | 2016-12-09 08:49:44 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/predictiveApriori/build_package.xml
+
+Added package property to build script
+------------------------------------------------------------------------
+r13760 | mhall | 2016-12-09 08:58:38 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/scriptingClassifiers/Description.props
+   M /trunk/packages/internal/scriptingClassifiers/build_package.xml
+
+Updated description.props and build script
+------------------------------------------------------------------------
+r13762 | mhall | 2016-12-09 09:10:29 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+   M /trunk/packages/internal/wekaServer/pom.xml
+
+Updated description.props and pom
+------------------------------------------------------------------------
+r13763 | mhall | 2016-12-09 09:11:32 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/build.properties
+
+Updated build.properties
+------------------------------------------------------------------------
+r13765 | mhall | 2016-12-09 09:23:45 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/J48graft/Description.props
+   M /trunk/packages/external/J48graft/build_package.xml
+
+Updated description.props and build script for 1.1.4 release
+------------------------------------------------------------------------
+r13767 | mhall | 2016-12-09 09:34:37 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/Description.props
+   M /trunk/packages/internal/distributedWekaHadoopCore/build.properties
+
+Updated description.props and build.properties
+------------------------------------------------------------------------
+r13768 | mhall | 2016-12-09 09:39:19 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopCore/pom.xml
+
+Updated a dependency
+------------------------------------------------------------------------
+r13776 | mhall | 2016-12-09 13:30:05 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoopLibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13778 | mhall | 2016-12-09 13:32:01 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2Libs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13780 | mhall | 2016-12-09 13:36:15 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13782 | mhall | 2016-12-09 13:40:42 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13783 | mhall | 2016-12-09 13:43:23 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13784 | mhall | 2016-12-09 13:45:42 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13786 | mhall | 2016-12-09 13:49:14 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaHadoop2/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13787 | mhall | 2016-12-09 14:07:21 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCPU/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13789 | mhall | 2016-12-09 14:08:20 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCore/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13792 | mhall | 2016-12-09 14:23:08 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCPULibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13794 | mhall | 2016-12-09 14:25:27 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jGPULibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13797 | mhall | 2016-12-09 14:35:22 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jGPU/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13800 | mhall | 2016-12-09 16:21:28 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCPULibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13801 | mhall | 2016-12-09 16:21:56 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jGPULibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13806 | mhall | 2016-12-09 16:33:03 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   D /trunk/packages/internal/wekaDeeplearning4jCPULibs/dist
+
+Removed accidental checkin of dist directory
+------------------------------------------------------------------------
+r13817 | mhall | 2016-12-09 22:32:07 +1300 (Fri, 09 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/external/scatterPlot3D/Description.props
+   M /trunk/packages/external/scatterPlot3D/build_package.xml
+   M /trunk/packages/external/scatterPlot3D/pom.xml
+
+Updated for new release
+------------------------------------------------------------------------
+r13823 | eibe | 2016-12-10 18:54:34 +1300 (Sat, 10 Dec 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/nd4j-cuda-8.0-0.7.0.jar
+
+Added nd4j-cuda-8.0-0.7.0.jar because it is also necessary to run Dl4j with CUDA support.
+------------------------------------------------------------------------
+r13836 | mhall | 2016-12-12 08:14:52 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   A /trunk/packages/internal/wekaDeeplearning4jGPULibs/lib/nd4j-cuda-8.0-0.7.0.jar
+   D /trunk/packages/internal/wekaDeeplearning4jGPULibs/nd4j-cuda-8.0-0.7.0.jar
+
+Moved this library to the lib directory
+------------------------------------------------------------------------
+r13838 | mhall | 2016-12-12 08:22:33 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeOSX/Description.props
+
+Updated date in Description.props
+------------------------------------------------------------------------
+r13839 | mhall | 2016-12-12 08:23:12 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeWindows/Description.props
+
+Updated date in Description.props
+------------------------------------------------------------------------
+r13840 | mhall | 2016-12-12 08:24:45 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeLinux/Description.props
+
+Updated date in Description.props
+------------------------------------------------------------------------
+r13849 | mhall | 2016-12-12 10:41:04 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCore/Description.props
+   M /trunk/packages/internal/wekaDeeplearning4jCore/src/main/java/weka/classifiers/functions/Dl4jMlpClassifier.java
+
+Fixed a deserialization issue. Removed a line of debugging output
+------------------------------------------------------------------------
+r13851 | mhall | 2016-12-12 10:53:57 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jCore/build_package.xml
+
+Promoted guava and common-lang to top-level (needed for getting GPU version to work)
+------------------------------------------------------------------------
+r13857 | mhall | 2016-12-12 11:43:49 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4jGPULibs/Description.props
+
+Updated description.props
+------------------------------------------------------------------------
+r13858 | mhall | 2016-12-12 11:53:30 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/netlibNativeLinux/Description.props
+
+Fixed package URL, was pointing to old version
+------------------------------------------------------------------------
+r13860 | mhall | 2016-12-12 15:00:03 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/src/main/java/weka/server/WekaServer.java
+
+WekaServer now forces loading of plugin evaluation metrics at start-up. This seems to resolve a strange issue that would occur when deserializing Explorer-based tasks where class loading would cause the loading of plugin evaluation metrics twice. Did not seem to affect any other plugin schemes etc.
+------------------------------------------------------------------------
+r13863 | mhall | 2016-12-12 15:04:54 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/Description.props
+   M /trunk/packages/internal/wekaServer/build.properties
+
+Updated for the 1.1.7 release
+------------------------------------------------------------------------
+r13872 | mhall | 2016-12-12 16:29:06 +1300 (Mon, 12 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaDeeplearning4j/Description.props
+
+Updated Weka dependency to <=3.8.0.
+------------------------------------------------------------------------
+r13900 | mhall | 2016-12-16 16:18:15 +1300 (Fri, 16 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/gui/beans/JavaGDConsolePanel.java
+
+Fixed an issue that broke the interactive console under the new class loading scheme
+------------------------------------------------------------------------
+r13905 | mhall | 2016-12-18 21:58:49 +1300 (Sun, 18 Dec 2016) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaServer/src/main/java/weka/server/ExecuteTaskServlet.java
+
+Now deserializes legacy tasks using the custom ObjectInputStream from SerializationHelper. This allows schemes and third-party library serialized classes to be found.
+------------------------------------------------------------------------
