@@ -33,6 +33,10 @@ grant {
   permission java.lang.RuntimePermission
     "getenv.*";
 
+  // allow the remote engine access to the class loader
+  permission java.lang.RuntimePermission
+    "getClassLoader";
+
   // file permission for data sets
   permission java.io.FilePermission
     "/path_to_data_sets/-", "read";
