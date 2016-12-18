@@ -6,7 +6,7 @@
 PackageName=wekaDeeplearning4jGPU
 
 # Version (required)
-Version=1.1.2
+Version=1.1.3
 
 #Date
 Date=2016-12-09
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library.
 
-Changes=Splitting package into a core package, CPU-related libs package and GPU-related libs package
+Changes=Now includes a message to display on installation.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPU1.1.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPU1.1.3.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
@@ -41,6 +41,9 @@ URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
 
 # Related to other packages?
 #Related=
+
+# Message to display on installation.
+MessageToDisplayOnInstallation=This package requires CUDA 8 to be installed. See instructions at http://docs.nvidia.com/cuda/
 
 # Dependencies
 Depends=weka (>=3.9.1-SNAPSHOT), wekaDeeplearning4jCore (>=1.1.2), wekaDeeplearning4jGPULibs (>=1.0.0)
