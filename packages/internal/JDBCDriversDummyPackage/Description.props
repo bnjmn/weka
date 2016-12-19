@@ -37,7 +37,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/JDBCDriversDummyPackage1.0.1.
 # Special instructions to be displayed on installation of this package
 MessageToDisplayOnInstallation=This package is a dummy package that provides\n\
  a location to drop JDBC driver jar files so that they get loaded into the classpath\n\
- by the system. Driver jar files should be placed in either:\n\
+ by the system. Driver jar files should be placed in:\n\
  ${WEKA_HOME}/packages/JDBCDriversDummyPackage
 
 # Enhances various other packages ?
