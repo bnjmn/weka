@@ -47,6 +47,7 @@ import weka.classifiers.rules.ZeroR;
 import weka.core.*;
 import weka.dl4j.FileIterationListener;
 import weka.dl4j.iterators.AbstractDataSetIterator;
+import weka.dl4j.iterators.ConvolutionalInstancesIterator;
 import weka.dl4j.iterators.DefaultInstancesIterator;
 import weka.dl4j.iterators.ImageDataSetIterator;
 import weka.dl4j.layers.DenseLayer;
@@ -64,8 +65,6 @@ import weka.filters.unsupervised.attribute.Standardize;
  *
  * @author Christopher Beckham
  * @author Eibe Frank
- *
- * @author Christopher Beckham
  *
  * @version $Revision: 11711 $
  */
@@ -418,6 +417,10 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
       ImageDataSetIterator idsi = (ImageDataSetIterator) getDataSetIterator();
       ip.setInputType(InputType.convolutionalFlat(idsi.getWidth(),
         idsi.getHeight(), idsi.getNumChannels()));
+    } else if (getDataSetIterator() instanceof ConvolutionalInstancesIterator) {
+      ConvolutionalInstancesIterator cii = (ConvolutionalInstancesIterator) getDataSetIterator();
+      ip.setInputType(InputType.convolutionalFlat(cii.getWidth(),
+              cii.getHeight(), cii.getNumChannels()));
     }
 
     ip = ip.pretrain(false).backprop(true);

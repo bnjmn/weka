@@ -80,5 +80,4 @@ public class DefaultInstancesIterator extends AbstractDataSetIterator {
 
 		return new ShufflingDataSetIterator(dataset, batchSize, seed);
 	}
-
 }
