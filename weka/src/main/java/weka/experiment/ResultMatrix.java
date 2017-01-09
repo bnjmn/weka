@@ -1690,6 +1690,10 @@ public abstract class ResultMatrix implements Serializable, RevisionHandler,
 
     result = Utils.doubleToString(d, prec);
 
+    if (prec <= 0 || Double.isInfinite(d) || Double.isNaN(d)) {
+      return result;
+    }
+
     // decimal point?
     if (result.indexOf(".") == -1) {
       result += ".";
