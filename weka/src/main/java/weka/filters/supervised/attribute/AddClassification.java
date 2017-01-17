@@ -39,6 +39,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.WekaException;
@@ -373,7 +374,9 @@ public class AddClassification extends SimpleBatchFilter {
       try {
         file = getSerializedClassifierFile();
         if (!file.isDirectory()) {
-          ois = new ObjectInputStream(new FileInputStream(file));
+          // ois = new ObjectInputStream(new FileInputStream(file));
+          ois =
+            SerializationHelper.getObjectInputStream(new FileInputStream(file));
           m_ActualClassifier = (Classifier) ois.readObject();
           m_SerializedHeader = null;
           // let's see whether there's an Instances header stored as well
@@ -773,8 +776,9 @@ public class AddClassification extends SimpleBatchFilter {
             newValues[start] = 1;
           }
         } else {
-          newValues[start] = m_ActualClassifier.classifyInstance(oldInstance)
-            - oldInstance.classValue();
+          newValues[start] =
+            m_ActualClassifier.classifyInstance(oldInstance)
+              - oldInstance.classValue();
         }
         start++;
       }

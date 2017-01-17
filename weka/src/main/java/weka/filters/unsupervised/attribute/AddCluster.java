@@ -40,6 +40,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Range;
 import weka.core.RevisionUtils;
+import weka.core.SerializationHelper;
 import weka.core.SparseInstance;
 import weka.core.Utils;
 import weka.core.WekaException;
@@ -221,7 +222,8 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
       // serialized model or build clusterer from scratch?
       File file = getSerializedClustererFile();
       if (!file.isDirectory()) {
-        ObjectInputStream ois = new ObjectInputStream(new FileInputStream(file));
+        ObjectInputStream ois = //new ObjectInputStream(new FileInputStream(file));
+          SerializationHelper.getObjectInputStream(new FileInputStream(file));
         m_ActualClusterer = (Clusterer) ois.readObject();
         Instances header = null;
         // let's see whether there's an Instances header stored as well
@@ -272,7 +274,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
    * Input an instance for filtering. Ordinarily the instance is processed and
    * made available for output immediately. Some filters require all instances
    * be read before producing output.
-   * 
+   *
    * @param instance the input instance
    * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been defined.
@@ -300,7 +302,7 @@ public class AddCluster extends Filter implements UnsupervisedFilter,
   /**
    * Convert a single instance over. The converted instance is added to the end
    * of the output queue.
-   * 
+   *
    * @param instance the instance to convert
    * @throws Exception if something goes wrong
    */
