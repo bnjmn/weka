@@ -42,6 +42,7 @@ import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.Utils;
+import weka.core.WekaException;
 import weka.distributed.DistributedWekaException;
 
 import java.io.DataOutputStream;
@@ -175,9 +176,9 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
 
   /**
    * Open the named file for writing to on either the local file system or HDFS.
-   * HDFS files should use the form {@code "hdfs://host:port/<path>"}. Note that, on the
-   * local file system, the directory path must exist. Under HDFS, the path is
-   * created automatically.
+   * HDFS files should use the form {@code "hdfs://host:port/<path>"}. Note
+   * that, on the local file system, the directory path must exist. Under HDFS,
+   * the path is created automatically.
    *
    * @param file the file to write to
    * @return an OutputStream for writing to the file
@@ -190,8 +191,8 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
   /**
    * Open the named file as a text file for writing to on either the local file
    * system or any other protocol specific file system supported by Hadoop.
-   * Protocol files should use the form "{@code protocol://host:port/<path>}." Note
-   * that, on the local file system, the directory path must exist.
+   * Protocol files should use the form "{@code protocol://host:port/<path>}."
+   * Note that, on the local file system, the directory path must exist.
    *
    * @param file the file to write to
    * @return an PrintWriter for writing to the file
@@ -228,8 +229,10 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
    * Adds necessary Weka libraries to the supplied SparkContext
    *
    * @param context the context to add dependencies to
+   * @throws WekaException if a problem occurs
    */
-  protected void addWekaLibrariesToSparkContext(JavaSparkContext context) {
+  protected void addWekaLibrariesToSparkContext(JavaSparkContext context)
+    throws WekaException {
     m_sjConfig.addWekaLibrariesToSparkContext(context, this);
   }
 
@@ -238,9 +241,11 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
    * libraries, additional weka packages etc.
    *
    * @param conf the configuration for the job
+   * @throws WekaException if a problem occurs
    * @return a SparkContext for the job
    */
-  public JavaSparkContext createSparkContextForJob(SparkJobConfig conf) {
+  public JavaSparkContext createSparkContextForJob(SparkJobConfig conf)
+    throws WekaException {
 
     JavaSparkContext context = conf.getBaseSparkContext(getJobName());
     addWekaLibrariesToSparkContext(context);

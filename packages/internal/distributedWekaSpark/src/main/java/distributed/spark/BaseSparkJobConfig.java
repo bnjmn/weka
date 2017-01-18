@@ -28,9 +28,18 @@ import org.apache.spark.api.java.JavaSparkContext;
 import weka.core.ClassloaderUtil;
 import weka.core.Option;
 import weka.core.Utils;
+import weka.core.WekaException;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.core.WekaPackageManager;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
@@ -652,15 +661,94 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
     return context;
   }
 
+  private void writeJarFromStream(InputStream inStream, File destination)
+    throws IOException {
+
+    BufferedInputStream bis = null;
+    BufferedOutputStream bos = null;
+    try {
+      bis = new BufferedInputStream(inStream);
+      bos = new BufferedOutputStream(new FileOutputStream(destination));
+      copyStreams(bis, bos);
+    } finally {
+      if (bos != null) {
+        bos.flush();
+        bos.close();
+      }
+      if (bis != null) {
+        bis.close();
+      }
+    }
+  }
+
+  private static void copyStreams(InputStream input, OutputStream output)
+    throws IOException {
+    int count;
+    byte data[] = new byte[1024];
+    while ((count = input.read(data, 0, 1024)) != -1) {
+      output.write(data, 0, count);
+    }
+  }
+
   /**
    * Adds necessary Weka libraries to the supplied SparkContext
    *
    * @param context the context to add dependencies to
    * @param job the job that is using the context
+   * @throws WekaException if a problem occurs
    */
   public void addWekaLibrariesToSparkContext(JavaSparkContext context,
-    DistributedJob job) {
+    DistributedJob job) throws WekaException {
+
+    File wekaJarFile = new File(getPathToWekaJar());
+    if (!wekaJarFile.exists()) {
+      throw new WekaException("The path to the weka jar file '"
+        + wekaJarFile.toString() + "' does not seem to exist!");
+    }
+
     context.addJar(getPathToWekaJar());
+
+    // now extract mtj-related jars from the weka.jar if necessary
+    File mtjTmpDir =
+      new File(WekaPackageManager.PACKAGES_DIR.toString() + File.separator
+        + "distributedWekaSpark" + File.separator + "mtj");
+    if (!mtjTmpDir.exists()) {
+      if (!mtjTmpDir.mkdirs()) {
+        throw new WekaException("Was unable to create a directory ("
+          + mtjTmpDir.toString() + ") in order to extract and store required "
+          + "mtj jar files");
+      }
+    }
+    File mtjFile = new File(mtjTmpDir.toString() + File.separator + "mtj.jar");
+    File coreFile =
+      new File(mtjTmpDir.toString() + File.separator + "core.jar");
+    File arpackFile =
+      new File(mtjTmpDir.toString() + File.separator
+        + "arpack_combined_all.jar");
+    if (!mtjFile.exists() || !coreFile.exists() || !arpackFile.exists()) {
+      // extract from weka.jar
+      ClassLoader coreClassLoader =
+        WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
+          .getClass().getClassLoader();
+      InputStream mtjCoreInputStream =
+        coreClassLoader.getResourceAsStream("core.jar");
+      InputStream arpackAllInputStream =
+        coreClassLoader.getResourceAsStream("arpack_combined_all.jar");
+      InputStream mtjInputStream =
+        coreClassLoader.getResourceAsStream("mtj.jar");
+
+      try {
+        writeJarFromStream(mtjInputStream, mtjFile);
+        writeJarFromStream(mtjCoreInputStream, coreFile);
+        writeJarFromStream(arpackAllInputStream, arpackFile);
+      } catch (Exception ex) {
+        throw new WekaException(ex);
+      }
+    }
+
+    context.addJar(mtjFile.toString());
+    context.addJar(coreFile.toString());
+    context.addJar(arpackFile.toString());
 
     for (String jar : s_runtimeLibraries) {
       if (new File(jar).exists()) {
@@ -672,9 +760,12 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
     }
 
     // Other dependencies and user selected packages
-    List<String> wekaPackageNames = job.getAdditionalWekaPackageNames(this);
-    if (wekaPackageNames.size() > 0) {
-      addWekaPackageLibrariesToContext(wekaPackageNames, context);
+    if (!DistributedJobConfig.isEmpty(getWekaPackages())) {
+      setUserSuppliedProperty(DistributedJob.WEKA_ADDITIONAL_PACKAGES_KEY, getWekaPackages());
+      List<String> wekaPackageNames = job.getAdditionalWekaPackageNames(this);
+      if (wekaPackageNames.size() > 0) {
+        addWekaPackageLibrariesToContext(wekaPackageNames, context);
+      }
     }
   }
 
