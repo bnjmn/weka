@@ -293,6 +293,13 @@ public interface StepManager {
   boolean isStopRequested();
 
   /**
+   * Return true if the current step is finished.
+   *
+   * @return true if the current step is finished
+   */
+  boolean isStepFinished();
+
+  /**
    * Step implementations processing batch data should call this to indicate
    * that they have started some processing. Calling this should set the busy
    * flag to true.

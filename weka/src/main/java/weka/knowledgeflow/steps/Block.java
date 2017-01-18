@@ -81,8 +81,8 @@ public class Block extends BaseStep {
   @Override
   public void stepInit() throws WekaException {
     if (m_stepToWaitFor == null || m_stepToWaitFor.length() == 0) {
-      getStepManager()
-        .logWarning("No step to wait for specified - will not block");
+      getStepManager().logWarning(
+        "No step to wait for specified - will not block");
     }
 
     m_smForStep =
@@ -111,26 +111,25 @@ public class Block extends BaseStep {
       // just pass data through
       getStepManager().outputData(data);
     } else {
-      if (m_smForStep.isStepBusy()) {
-        getStepManager().processing();
-        getStepManager().logBasic(
-          "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
-        getStepManager().statusMessage(
-          "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
-        while (m_smForStep.isStepBusy()) {
-          if (isStopRequested()) {
-            break;
-          }
-          try {
-            Thread.sleep(300);
-          } catch (InterruptedException e) {
-            getStepManager().interrupted();
-            return;
-          }
+      getStepManager().processing();
+      getStepManager().logBasic(
+        "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
+      getStepManager().statusMessage(
+        "Waiting for step '" + environmentSubstitute(m_stepToWaitFor) + "'");
+      while (!m_smForStep.isStepFinished()) {
+        if (isStopRequested()) {
+          break;
         }
-        getStepManager().logBasic("Releasing data");
-        getStepManager().statusMessage("Releasing data");
+        try {
+          Thread.sleep(300);
+        } catch (InterruptedException e) {
+          getStepManager().interrupted();
+          return;
+        }
       }
+      getStepManager().logBasic("Releasing data");
+      getStepManager().statusMessage("Releasing data");
+
     }
 
     if (isStopRequested()) {

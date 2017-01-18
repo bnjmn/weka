@@ -64,6 +64,9 @@ public class StepManagerImpl implements StepManager {
   /** True if, at the current time, the managed step is busy with processing */
   protected boolean m_stepIsBusy;
 
+  /** True if the step is finished with processing (as far as it can tell) */
+  protected boolean m_stepIsFinished;
+
   /**
    * Set and get arbitrary properties relating to this step/step manager. E.g. a
    * plugin execution environment might allow a step to be marked as execute
@@ -399,6 +402,7 @@ public class StepManagerImpl implements StepManager {
     boolean initializedOK = false;
     m_stepIsBusy = false;
     m_stopRequested = false;
+    m_stepIsFinished = false;
     try {
       getManagedStep().stepInit();
       // getManagedStep().init();
@@ -436,6 +440,16 @@ public class StepManagerImpl implements StepManager {
   }
 
   /**
+   * Return true if the current step is finished.
+   *
+   * @return true if the current step is finished
+   */
+  @Override
+  public boolean isStepFinished() {
+    return m_stepIsFinished;
+  }
+
+  /**
    * Set the status of the stop requested flag
    *
    * @param stopRequested true if a stop has been requested
@@ -459,6 +473,7 @@ public class StepManagerImpl implements StepManager {
   @Override
   public void finished() {
     m_stepIsBusy = false;
+    m_stepIsFinished = true;
     if (!isStopRequested()) {
       statusMessage("Finished.");
     }
