@@ -32,7 +32,7 @@ Description=Provides Spark wrappers for the classes in distributedWekaBase. Incl
 Changes=Fixed a bug where MTJ-related jar files were not getting into the classpath for Spark jobs running on a cluster.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSpark1.0.8.zip
+PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSpark1.1.8.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2015/03/weka-and-spark.html
