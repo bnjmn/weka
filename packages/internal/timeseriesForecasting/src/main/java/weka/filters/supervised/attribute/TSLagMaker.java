@@ -3626,11 +3626,31 @@ public class TSLagMaker extends Filter implements SupervisedFilter,
     }
   }
 
+  /**
+   * Returns the Capabilities of this filter.
+   *
+   * @return the capabilities of this object
+   * @see Capabilities
+   */
+  @Override
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enableAllAttributes();
+    result.enable(Capability.MISSING_VALUES);
+
+    // class
+    result.enableAllClasses();
+    result.enable(Capability.MISSING_CLASS_VALUES);
+    result.enable(Capability.NO_CLASS);
+
+    return result;
+  }
+
   @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
-    if (instanceInfo.classIndex() < 0) {
-      throw new Exception("No class attribute set");
-    }
     super.setInputFormat(instanceInfo);
     m_reset = true;
     m_runningAsAFilter = true;
@@ -3688,10 +3708,10 @@ public class TSLagMaker extends Filter implements SupervisedFilter,
       if (m_reset) {
         m_reset = false;
         Instances inputData = new Instances(getInputFormat());
-        String className = inputData.classAttribute().name();
+        String className = inputData.classIndex() >= 0 ? inputData.classAttribute().name() : null;
         // inputData.setClassIndex(-1);
         Instances transformed = getTransformedData(inputData, false);
-        int classIndex = transformed.attribute(className).index();
+        int classIndex = className != null ? transformed.attribute(className).index() : -1;
         transformed.setClassIndex(classIndex);
         setOutputFormat(new Instances(transformed, 0));
         // m_originalHeader.setClassIndex(getInputFormat().classIndex());
