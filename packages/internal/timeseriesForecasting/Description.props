@@ -8,7 +8,7 @@ PackageName=timeseriesForecasting
 Version=1.0.25
 
 #Date (year-month-day)
-Date=2016-10-27
+Date=2017-01-19
 
 # Title (required)
 Title=Time series forecasting environment.
@@ -35,7 +35,7 @@ PackageURL=http://prdownloads.sourceforge.net/weka/timeseriesForecasting1.0.25.z
 URL=http://wiki.pentaho.com/display/DATAMINING/Time+Series+Analysis+and+Forecasting+with+Weka
 
 # Changes in this release
-Changes=Changes to support execution when loaded by a child classloader
+Changes=Changes to support execution when loaded by a child classloader. TSLagMaker can now work on data with no class attribute set.
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
