@@ -34,9 +34,7 @@ import java.io.ObjectOutputStream;
 import java.io.ObjectStreamClass;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
@@ -185,8 +183,10 @@ public class SerializedObject implements Serializable, RevisionHandler {
                 result = Class.forName(desc.getName(), true, cl);
               } catch (ClassNotFoundException ex) {
                 for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
-                  if (l.hasThirdPartyClass(arrayStripped)) {
-                    result = Class.forName(desc.getName(), true, l);
+                  ClassLoader checked =
+                    SerializationHelper.checkForThirdPartyClass(arrayStripped, l);
+                  if (checked != null) {
+                    result = Class.forName(desc.getName(), true, checked);
                   }
                 }
               }
@@ -223,7 +223,8 @@ public class SerializedObject implements Serializable, RevisionHandler {
                       arrayStripped);
 
                 if (cl instanceof WekaPackageLibIsolatingClassLoader) {
-                  // might be third-party classes involved, store the classloader
+                  // might be third-party classes involved, store the
+                  // classloader
                   m_thirdPartyLoaders
                     .add((WekaPackageLibIsolatingClassLoader) cl);
                 }
@@ -233,8 +234,10 @@ public class SerializedObject implements Serializable, RevisionHandler {
                   result = Class.forName(desc.getName(), true, cl);
                 } catch (ClassNotFoundException ex) {
                   for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
-                    if (l.hasThirdPartyClass(arrayStripped)) {
-                      result = Class.forName(desc.getName(), true, l);
+                    ClassLoader checked =
+                      SerializationHelper.checkForThirdPartyClass(arrayStripped, l);
+                    if (checked != null) {
+                      result = Class.forName(desc.getName(), true, checked);
                     }
                   }
                 }

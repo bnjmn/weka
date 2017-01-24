@@ -282,6 +282,34 @@ public class SerializationHelper implements RevisionHandler {
   }
 
   /**
+   * Checks to see if the supplied package class loader (or any of its dependent
+   * package class loaders) has the given third party class.
+   *
+   * @param className the name of the third-party class to check for
+   * @param l the third party class loader
+   * @return the class loader that owns the named third-party class, or null if
+   *         not found.
+   */
+  public static ClassLoader checkForThirdPartyClass(String className,
+    WekaPackageLibIsolatingClassLoader l) {
+    ClassLoader result = null;
+
+    if (l.hasThirdPartyClass(className)) {
+      return l;
+    }
+
+    for (WekaPackageLibIsolatingClassLoader dep : l
+      .getPackageClassLoadersForDependencies()) {
+      result = checkForThirdPartyClass(className, dep);
+      if (result != null) {
+        break;
+      }
+    }
+
+    return result;
+  }
+
+  /**
    * Get a (Weka package classloader aware) {@code ObjectInputStream} instance
    * for reading objects from the supplied input stream
    *
@@ -323,8 +351,10 @@ public class SerializationHelper implements RevisionHandler {
           result = Class.forName(desc.getName(), true, cl);
         } catch (ClassNotFoundException ex) {
           for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
-            if (l.hasThirdPartyClass(arrayStripped)) {
-              result = Class.forName(desc.getName(), true, l);
+            ClassLoader checked =
+              checkForThirdPartyClass(arrayStripped, l);
+            if (checked != null) {
+              result = Class.forName(desc.getName(), true, checked);
             }
           }
         }

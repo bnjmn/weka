@@ -188,6 +188,20 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
   }
 
   /**
+   * Gets a list of class loaders for the packages that this one depends on
+   *
+   * @return a list of class loaders for the packages that this one depends on
+   */
+  public List<WekaPackageLibIsolatingClassLoader> getPackageClassLoadersForDependencies() {
+    List<WekaPackageLibIsolatingClassLoader> result = new ArrayList<>();
+    for (String d : m_packageDependencies) {
+      result.add(m_classloaderRepo.getPackageClassLoader(d));
+    }
+
+    return result;
+  }
+
+  /**
    * Checks for native libraries and any native library loader classes, as
    * specified by the presence of "NativeLibs" and "InjectLoader" entries in the
    * package's Description.props file respectively. Native libraries are copied
