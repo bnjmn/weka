@@ -45,18 +45,20 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       PropertyDescriptor p1;
       ArrayList<PropertyDescriptor> pds = new ArrayList<PropertyDescriptor>();
 
-      p1 = new PropertyDescriptor("computeQuartilesAsPartOfSummaryStats",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("computeQuartilesAsPartOfSummaryStats",
+          CSVToARFFHeaderMapTask.class);
       // p1.setPropertyEditorClass(weka.gui.beans.FileEnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("compressionLevelForQuartileEstimation",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("compressionLevelForQuartileEstimation",
+          CSVToARFFHeaderMapTask.class);
       // p1.setPropertyEditorClass(weka.gui.beans.FileEnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("dateAttributes",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("dateAttributes", CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
@@ -64,13 +66,19 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("enclosureCharacters",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("treatUnparsableNumericValuesAsMissing",
+          CSVToARFFHeaderMapTask.class);
+      pds.add(p1);
+
+      p1 =
+        new PropertyDescriptor("enclosureCharacters",
+          CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("fieldSeparator",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("fieldSeparator", CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
@@ -78,28 +86,31 @@ public class CSVToARFFHeaderMapTaskBeanInfo extends SimpleBeanInfo {
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("nominalAttributes",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("nominalAttributes",
+          CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("nominalLabelSpecs",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("nominalLabelSpecs",
+          CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.GenericArrayEditor.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("nominalDefaultLabelSpecs",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("nominalDefaultLabelSpecs",
+          CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.GenericArrayEditor.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("stringAttributes",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("stringAttributes", CSVToARFFHeaderMapTask.class);
       p1.setPropertyEditorClass(weka.gui.beans.EnvironmentField.class);
       pds.add(p1);
 
-      p1 = new PropertyDescriptor("numDecimalPlaces",
-        CSVToARFFHeaderMapTask.class);
+      p1 =
+        new PropertyDescriptor("numDecimalPlaces", CSVToARFFHeaderMapTask.class);
       pds.add(p1);
 
       return pds.toArray(new PropertyDescriptor[1]);
