@@ -146,6 +146,11 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   protected boolean m_computeSummaryStats = true;
   /** A map of attribute names to summary statistics */
   protected Map<String, Stats> m_summaryStats = new HashMap<String, Stats>();
+  /**
+   * We keep (potentially) temporary string stats for numeric atts too - just in
+   * case we hit an unparsable number and switch to string for that column
+   */
+  protected Map<String, StringStats> m_stringBackupStats = new HashMap<>();
   /** Decimal places for summary stats */
   protected int m_decimalPlaces = 2;
 
@@ -166,6 +171,12 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
   /** The compression level for the TDigest quantile estimator */
   protected double m_quantileCompression = NumericStats.Q_COMPRESSION;
   protected int m_parsingErrors;
+
+  /**
+   * Whether to treat values not parsable as numbers as missing value (instead
+   * of this forcing a previously thought numeric field to type string
+   */
+  protected boolean m_treatUnparsableNumericValuesAsMissing;
 
   /**
    * Constructor
@@ -202,6 +213,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    * Update the summary statistics for a given attribute with the given value
    *
    * @param summaryStats the map of summary statistics
+   * @param backupStringStats the temporary map of backup string stats kept for
+   *          numeric fields (this can be null in cases where we are sure that
+   *          there is no chance of unparsable numeric values occuring)
    * @param attName the name of the attribute being updated
    * @param value the value to update with (if the attribute is numeric)
    * @param nominalLabel holds the label/string for the attribute (if it is
@@ -215,38 +229,30 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    *          estimators
    */
   public static void updateSummaryStats(Map<String, Stats> summaryStats,
-    String attName, double value, String nominalLabel, boolean isNominal,
-    boolean isString, boolean treatZeroAsMissing, boolean estimateQuantiles,
+    Map<String, StringStats> backupStringStats, String attName, double value,
+    String nominalLabel, boolean isNominal, boolean isString,
+    boolean treatZeroAsMissing, boolean estimateQuantiles,
     double quantileCompression) {
     Stats s = summaryStats.get(attName);
+    StringStats backup =
+      backupStringStats != null ? backupStringStats.get(attName) : null;
 
     if (!isNominal && !isString) {
       // numeric attribute
       if (s == null) {
         s = new NumericStats(attName, quantileCompression);
         summaryStats.put(attName, s);
+        if (backupStringStats != null) {
+          backup = new StringStats(attName);
+          backupStringStats.put(attName, backup);
+        }
       }
 
       NumericStats ns = (NumericStats) s;
       ns.update(value, 1.0, treatZeroAsMissing, estimateQuantiles);
-      // if (Utils.isMissingValue(value) || (treatZeroAsMissing && value == 0))
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MISSING.ordinal()]++;
-      // } else {
-      // ns.m_stats[ArffSummaryNumericMetric.COUNT.ordinal()]++;
-      // ns.m_stats[ArffSummaryNumericMetric.SUM.ordinal()] += value;
-      // ns.m_stats[ArffSummaryNumericMetric.SUMSQ.ordinal()] += value * value;
-      // if (Double.isNaN(ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])) {
-      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] =
-      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-      // } else if (value < ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()])
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MIN.ordinal()] = value;
-      // } else if (value > ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()])
-      // {
-      // ns.m_stats[ArffSummaryNumericMetric.MAX.ordinal()] = value;
-      // }
-      // }
+      if (backup != null) {
+        backup.update("" + value, 1.0);
+      }
     } else if (isNominal) {
       // nominal attribute
 
@@ -278,21 +284,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
 
       NominalStats ns = (NominalStats) s;
       ns.add(nominalLabel, 1.0);
-      // if (Utils.isMissingValue(value) && nominalLabel == null) {
-      // ns.add(nominalLabel, 1.0);
-      // } else {
-      //
-      // NominalStats.Count c = ns.m_counts.get(nominalLabel);
-      // if (c == null) {
-      // c = new NominalStats.Count();
-      // ns.m_counts.put(nominalLabel, c);
-      // }
-      // c.m_count += value;
-      // }
     } else if (isString) {
       if (s == null) {
         s = new StringStats(attName);
         summaryStats.put(attName, s);
+      }
+
+      if (s instanceof NumericStats) {
+        if (backup != null) {
+          s = backup;
+          summaryStats.put(attName, s);
+          // save memory
+          backupStringStats.put(attName, null);
+          System.err.println("[CSVToARFFHeaderMapTask] Attribute '" + attName
+            + "' was numeric - now being treated as string.");
+        } else {
+          throw new IllegalStateException("Attribute '" + attName
+            + "' has been marked "
+            + "as type string, but the associated stats object is of "
+            + "type numeric and there is no backup string stats object");
+        }
       }
 
       StringStats ss = (StringStats) s;
@@ -318,7 +329,7 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       task = new CSVToARFFHeaderMapTask();
       task.setOptions(args);
       task.setComputeQuartilesAsPartOfSummaryStats(true);
-      //      task.setComputeSummaryStats(true);
+      // task.setComputeSummaryStats(true);
 
       BufferedReader br = new BufferedReader(new FileReader(args[0]));
       String line = br.readLine();
@@ -465,6 +476,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
         + "\t(default: \"yyyy-MM-dd'T'HH:mm:ss\")", "format", 1,
       "-format <date format>"));
 
+    result.add(new Option("\tFor numeric columns, treat any "
+      + "unparsable values as missing.", "unparsable-numeric", 0,
+      "-unparsable-numeric"));
+
     if (!m_suppressCSVParsingOptions) {
       result.add(new Option("\tThe string representing a missing value.\n"
         + "\t(default: ?)", "M", 1, "-M <str>"));
@@ -519,6 +534,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
       result.add(getDateAttributes());
       result.add("-format");
       result.add(getDateFormat());
+    }
+
+    if (getTreatUnparsableNumericValuesAsMissing()) {
+      result.add("-unparsable-numeric");
     }
 
     if (!m_suppressCSVParsingOptions) {
@@ -591,6 +610,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
     if (tmpStr.length() > 0) {
       setDateFormat(tmpStr);
     }
+
+    setTreatUnparsableNumericValuesAsMissing(Utils.getFlag(
+      "unparsable-numeric", options));
 
     tmpStr = Utils.getOption('M', options);
     if (tmpStr.length() != 0) {
@@ -668,6 +690,27 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
    */
   public int getNumDecimalPlaces() {
     return m_decimalPlaces;
+  }
+
+  /**
+   * Set whether, for hitherto thought to be numeric columns, to treat any
+   * unparsable values as missing value.
+   *
+   * @param unparsableNumericValuesToMissing
+   */
+  public void setTreatUnparsableNumericValuesAsMissing(
+    boolean unparsableNumericValuesToMissing) {
+    m_treatUnparsableNumericValuesAsMissing = unparsableNumericValuesToMissing;
+  }
+
+  /**
+   * Get whether, for hitherto thought to be numeric columns, to treat any
+   * unparsable values as missing value.
+   *
+   * @return true if unparsable numeric values are to be treated as missing
+   */
+  public boolean getTreatUnparsableNumericValuesAsMissing() {
+    return m_treatUnparsableNumericValuesAsMissing;
   }
 
   /**
@@ -1152,9 +1195,10 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
             m_attributeTypes[i] = TYPE.NUMERIC;
 
             if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-                value, null, false, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
+              updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                m_attributeNames.get(i), value, null, false, false,
+                m_treatZeroAsMissing, m_estimateQuantiles,
+                m_quantileCompression);
             }
           } catch (NumberFormatException ex) {
 
@@ -1174,15 +1218,26 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
               m_nominalVals.put(i, ts);
 
               if (m_computeSummaryStats) {
-                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  toAdd, true, false, m_treatZeroAsMissing,
-                  m_estimateQuantiles, m_quantileCompression);
+                updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                  m_attributeNames.get(i), 1, toAdd, true, false,
+                  m_treatZeroAsMissing, m_estimateQuantiles,
+                  m_quantileCompression);
               }
             } else {
-              m_attributeTypes[i] = TYPE.STRING;
-              if (m_computeSummaryStats) {
-                updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                  fieldVals[i].toString(), false, true, m_treatZeroAsMissing,
+              if (!m_treatUnparsableNumericValuesAsMissing) {
+                m_attributeTypes[i] = TYPE.STRING;
+                if (m_computeSummaryStats) {
+                  updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                    m_attributeNames.get(i), 1, fieldVals[i].toString(), false,
+                    true, m_treatZeroAsMissing, m_estimateQuantiles,
+                    m_quantileCompression);
+                }
+              } else {
+                // missing value
+                updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                  m_attributeNames.get(i), Utils.missingValue(), null,
+                  m_attributeTypes[i] == TYPE.NOMINAL,
+                  m_attributeTypes[i] == TYPE.STRING, m_treatZeroAsMissing,
                   m_estimateQuantiles, m_quantileCompression);
               }
             }
@@ -1198,9 +1253,9 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
             }
           }
           if (m_computeSummaryStats) {
-            updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-              d.getTime(), null, false, false, m_treatZeroAsMissing,
-              m_estimateQuantiles, m_quantileCompression);
+            updateSummaryStats(m_summaryStats, m_stringBackupStats,
+              m_attributeNames.get(i), d.getTime(), null, false, false,
+              m_treatZeroAsMissing, m_estimateQuantiles, m_quantileCompression);
           }
 
         } else if (m_attributeTypes[i] == TYPE.NOMINAL) {
@@ -1212,30 +1267,33 @@ public class CSVToARFFHeaderMapTask implements OptionHandler, Serializable {
             }
 
             if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                toUpdate, true, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
+              updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                m_attributeNames.get(i), 1, toUpdate, true, false,
+                m_treatZeroAsMissing, m_estimateQuantiles,
+                m_quantileCompression);
             }
           } else {
             m_nominalVals.get(i).add(fieldVals[i].toString());
             if (m_computeSummaryStats) {
-              updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-                fieldVals[i].toString(), true, false, m_treatZeroAsMissing,
-                m_estimateQuantiles, m_quantileCompression);
+              updateSummaryStats(m_summaryStats, m_stringBackupStats,
+                m_attributeNames.get(i), 1, fieldVals[i].toString(), true,
+                false, m_treatZeroAsMissing, m_estimateQuantiles,
+                m_quantileCompression);
             }
           }
         } else if (m_attributeTypes[i] == TYPE.STRING) {
           if (m_computeSummaryStats) {
-            updateSummaryStats(m_summaryStats, m_attributeNames.get(i), 1,
-              fieldVals[i].toString(), false, true, m_treatZeroAsMissing,
-              m_estimateQuantiles, m_quantileCompression);
+            updateSummaryStats(m_summaryStats, m_stringBackupStats,
+              m_attributeNames.get(i), 1, fieldVals[i].toString(), false, true,
+              m_treatZeroAsMissing, m_estimateQuantiles, m_quantileCompression);
           }
         }
       } else {
         // missing value
         if (m_computeSummaryStats) {
-          updateSummaryStats(m_summaryStats, m_attributeNames.get(i),
-            Utils.missingValue(), null, m_attributeTypes[i] == TYPE.NOMINAL,
+          updateSummaryStats(m_summaryStats, m_stringBackupStats,
+            m_attributeNames.get(i), Utils.missingValue(), null,
+            m_attributeTypes[i] == TYPE.NOMINAL,
             m_attributeTypes[i] == TYPE.STRING, m_treatZeroAsMissing,
             m_estimateQuantiles, m_quantileCompression);
         }

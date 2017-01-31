@@ -240,7 +240,7 @@ public class KMeansMapTask implements OptionHandler, Serializable {
           boolean isNominal = filteredInstance.attribute(i).isNominal();
           CSVToARFFHeaderMapTask
             .updateSummaryStats(
-              summaryStats,
+              summaryStats, null,
               m_transformedHeaderNoSummary
                 .attribute(i)
                 .name(),

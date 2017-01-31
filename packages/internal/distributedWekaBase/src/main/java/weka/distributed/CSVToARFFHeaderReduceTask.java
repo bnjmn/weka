@@ -633,8 +633,17 @@ public class CSVToARFFHeaderReduceTask implements Serializable {
             }
           }
         } else if (original.isString()) {
-          StringStats currentStringStats =
-            StringStats.attributeToStats(current);
+          StringStats currentStringStats = null;
+          try {
+            currentStringStats = StringStats.attributeToStats(current);
+          } catch (IllegalArgumentException e) {
+            // current is not string - means that there has been at least one
+            // split of all missing values, or cases where a value was not parsable
+            // as a number. In both cases, we drop back to treating the attribute
+            // in question as string. There will be lost statistics, but the user
+            // should examine the stats and realize that there is a data quality issue
+            currentStringStats = new StringStats(original.name());
+          }
 
           StringStats ss =
             (StringStats) aggStats.get(original.name());
