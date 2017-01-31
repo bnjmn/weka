@@ -538,6 +538,48 @@ public class CSVToARFFHeaderMapTaskTest {
   }
 
   @Test
+  public void testTreatUnparsableAsMissing() throws Exception {
+    CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
+    task.setTreatUnparsableNumericValuesAsMissing(true);
+
+    BufferedReader br = new BufferedReader(new StringReader(IRIS));
+
+    String line = br.readLine();
+    String[] names = line.split(",");
+    List<String> attNames = new ArrayList<String>();
+    for (String s : names) {
+      attNames.add(s);
+    }
+
+    int count = 0;
+    while ((line = br.readLine()) != null) {
+      if (count == 4) {
+        line = line.replace("5.0", "bob");
+      }
+      task.processRow(line, attNames);
+      count++;
+    }
+
+    assertEquals(10, task.getHeader().numAttributes());
+    for (int i = 5; i < task.getHeader().numAttributes(); i++) {
+      assertTrue(task.getHeader().attribute(i).name()
+        .startsWith("arff_summary_"));
+    }
+    assertTrue(task.getHeader().attribute(0).isNumeric());
+
+    // reduce to compute derived metrics
+    CSVToARFFHeaderReduceTask arffReduce = new CSVToARFFHeaderReduceTask();
+    List<Instances> instList = new ArrayList<Instances>();
+    instList.add(task.getHeader());
+    Instances header = arffReduce.aggregate(instList);
+    NumericStats s = NumericStats.attributeToStats(header.attribute(5));
+    assertEquals(149,
+      (int) s.getStats()[ArffSummaryNumericMetric.COUNT.ordinal()]);
+    assertEquals(1,
+      (int) s.getStats()[ArffSummaryNumericMetric.MISSING.ordinal()]);
+  }
+
+  @Test
   public void testProcessCSVSummaryAttributesTwoMapTasks() throws Exception {
     CSVToARFFHeaderMapTask task = new CSVToARFFHeaderMapTask();
 
