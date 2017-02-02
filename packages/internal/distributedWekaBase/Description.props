@@ -5,10 +5,10 @@
 PackageName=distributedWekaBase
 
 # Version (required)
-Version=1.1.16
+Version=1.1.17
 
 #Date (year-month-day)
-Date=2016-12-08
+Date=2017-02-02
 
 # Title (required)
 Title=Generic configuration classes and distributed map/reduce type tasks for Weka
@@ -29,10 +29,10 @@ License=GPL 3.0
 Description=Provides generic configuration classes and distributed map/reduce type tasks for Weka
 
 # Changes in this release
-Changes=Changes to work when loaded by a child classloader
+Changes=Fixed a bug that would cause an exception to be generated in the ARFF job if an unparsable number was encountered in what was thought to be a numeric field. Added an option to have unparsable numbers treated as missing (rather than have the type change to string).
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.1.16.zip
+PackageURL=http://downloads.sourceforge.net/project/weka/weka-packages/distributedWekaBase1.1.17.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2013/10/weka-and-hadoop-part-1.html
