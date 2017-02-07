@@ -252,7 +252,7 @@ public class ResultHistoryPanel extends JPanel {
 
   /**
    * Adds a new result to the result list.
-   * 
+   *
    * @param name the name to associate with the result
    * @param result the StringBuffer that contains the result text
    */
@@ -296,7 +296,7 @@ public class ResultHistoryPanel extends JPanel {
   /**
    * Removes one of the result buffers from the history. Any windows currently
    * displaying the contents of the buffer are not affected.
-   * 
+   *
    * @param name the name of the buffer to remove.
    */
   public void removeResult(String name) {
@@ -322,8 +322,10 @@ public class ResultHistoryPanel extends JPanel {
   }
 
   /**
-   * Adds an object to the results list
-   * 
+   * Adds an object to the results list. If an object with the same
+   * name already exists, then a number is appended to the end of the name
+   * to make it unique.
+   *
    * @param name the name to associate with the object
    * @param o the object
    */
@@ -335,6 +337,17 @@ public class ResultHistoryPanel extends JPanel {
     }
 
     m_Objs.put(nameCopy, o);
+  }
+
+  /**
+   * Adds an object to the result list. Overwrites any exsiting
+   * object with the same name
+   * 
+   * @param name the name to associate with the object
+   * @param o the object
+   */
+  public void addOrOverwriteObject(String name, Object o) {
+    m_Objs.put(name, o);
   }
 
   /**

@@ -3196,14 +3196,14 @@ public class ClassifierPanel extends AbstractPerspective implements
                     vv.add(eval.predictions());
                     vv.add(userTestStructure.classAttribute());
                   }
-                  m_History.addObject(name, vv);
+                  m_History.addOrOverwriteObject(name, vv);
                 } else {
                   ArrayList<Object> vv = new ArrayList<Object>();
                   vv.add(classifierToUse);
                   if (trainHeader != null) {
                     vv.add(trainHeader);
                   }
-                  m_History.addObject(name, vv);
+                  m_History.addOrOverwriteObject(name, vv);
                 }
               }
             } catch (Exception ex) {
