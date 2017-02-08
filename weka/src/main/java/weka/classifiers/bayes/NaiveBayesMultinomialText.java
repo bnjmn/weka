@@ -310,7 +310,7 @@ public class NaiveBayesMultinomialText extends AbstractClassifier implements
 
       LinkedHashMap<String, Count> dictForClass = m_probOfWordGivenClass.get(i);
 
-      int allWords = 0;
+      double allWords = 0;
       // for document normalization (if in use)
       double iNorm = 0;
       double fv = 0;
