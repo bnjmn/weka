@@ -1148,20 +1148,18 @@ public class WekaPackageManager {
         if (content.isDirectory()) {
           try {
             Package toLoad = getInstalledPackageInfo(content.getName());
-            checkForInjectDependencies(toLoad, injectDependencies);
             boolean load;
             // Only perform the check against the current version of Weka if
             // there exists
             // a Description.props file
             if (toLoad != null) {
-
               load = loadCheck(toLoad, content, System.err);
-
               if (load) {
                 if (verbose) {
                   System.out.println("[WekaPackageManager] loading package "
                     + content.getName());
                 }
+                checkForInjectDependencies(toLoad, injectDependencies);
                 WekaPackageClassLoaderManager
                   .getWekaPackageClassLoaderManager().addPackageToClassLoader(
                     content);
