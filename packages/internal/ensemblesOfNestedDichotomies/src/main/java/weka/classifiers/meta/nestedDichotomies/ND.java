@@ -63,14 +63,6 @@ import weka.filters.unsupervised.instance.RemoveWithValues;
  * <!-- technical-bibtex-start --> BibTeX:
  * 
  * <pre>
- * &#64;inproceedings{Dong2005,
- *    author = {Lin Dong and Eibe Frank and Stefan Kramer},
- *    booktitle = {PKDD},
- *    pages = {84-95},
- *    publisher = {Springer},
- *    title = {Ensembles of Balanced Nested Dichotomies for Multi-class Problems},
- *    year = {2005}
- * }
  * 
  * &#64;inproceedings{Frank2004,
  *    author = {Eibe Frank and Stefan Kramer},
@@ -414,22 +406,14 @@ public class ND extends RandomizableSingleClassifierEnhancer implements
     TechnicalInformation additional;
 
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    result.setValue(Field.AUTHOR, "Lin Dong and Eibe Frank and Stefan Kramer");
-    result.setValue(Field.TITLE,
-      "Ensembles of Balanced Nested Dichotomies for Multi-class Problems");
-    result.setValue(Field.BOOKTITLE, "PKDD");
-    result.setValue(Field.YEAR, "2005");
-    result.setValue(Field.PAGES, "84-95");
-    result.setValue(Field.PUBLISHER, "Springer");
 
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
-    additional.setValue(Field.TITLE,
+     result.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
+    result.setValue(Field.TITLE,
       "Ensembles of nested dichotomies for multi-class problems");
-    additional.setValue(Field.BOOKTITLE,
+    result.setValue(Field.BOOKTITLE,
       "Twenty-first International Conference on Machine Learning");
-    additional.setValue(Field.YEAR, "2004");
-    additional.setValue(Field.PUBLISHER, "ACM");
+    result.setValue(Field.YEAR, "2004");
+    result.setValue(Field.PUBLISHER, "ACM");
 
     return result;
   }

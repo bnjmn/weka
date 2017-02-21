@@ -238,14 +238,13 @@ public class END extends RandomizableIteratedSingleClassifierEnhancer implements
     TechnicalInformation additional;
 
     result = new TechnicalInformation(Type.INPROCEEDINGS);
-    additional = result.add(Type.INPROCEEDINGS);
-    additional.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
-    additional.setValue(Field.TITLE,
+    result.setValue(Field.AUTHOR, "Eibe Frank and Stefan Kramer");
+    result.setValue(Field.TITLE,
       "Ensembles of nested dichotomies for multi-class problems");
-    additional.setValue(Field.BOOKTITLE,
+    result.setValue(Field.BOOKTITLE,
       "Twenty-first International Conference on Machine Learning");
-    additional.setValue(Field.YEAR, "2004");
-    additional.setValue(Field.PUBLISHER, "ACM");
+    result.setValue(Field.YEAR, "2004");
+    result.setValue(Field.PUBLISHER, "ACM");
 
     return result;
   }
