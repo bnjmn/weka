@@ -49,14 +49,17 @@ import weka.filters.unsupervised.attribute.Remove;
 
 /**
  * <!-- globalinfo-start --> Implements basic two-level classification method
- * for multi-instance data, without attribute selection.<br/>
- * <br/>
- * For more information see:<br/>
- * <br/>
+ * for multi-instance data, without attribute selection.<br>
+ * <br>
+ * For more information see:<br>
+ * <br>
  * Nils Weidmann, Eibe Frank, Bernhard Pfahringer: A two-level learning method
  * for generalized multi-instance problems. In: Fourteenth European Conference
  * on Machine Learning, 468-479, 2003.
- * <p/>
+ * <br>
+ * Eibe Frank and Bernhard Pfahringer: Propositionalisation of Multi-instance Data Using Random Forests.
+ * In: AI 2013: Advances in Artificial Intelligence, 362-373, 2013.
+ * <p>
  * <!-- globalinfo-end -->
  * 
  * <!-- technical-bibtex-start --> BibTeX:
@@ -69,6 +72,16 @@ import weka.filters.unsupervised.attribute.Remove;
  *    publisher = {Springer},
  *    title = {A two-level learning method for generalized multi-instance problems},
  *    year = {2003}
+ * }
+ * </pre>
+ * <pre>
+ * &#64;inproceedings{FrankAndPfahringer203,
+ *    author = {Eibe Frank and Bernhard Pfahringer},
+ *    booktitle = {AI 2013: Advances in Artificial Intelligence},
+ *    pages = {362-373},
+ *    publisher = {Springer},
+ *    title = {Propositionalisation of Multi-instance Data Using Random Forests},
+ *    year = {2013}
  * }
  * </pre>
  * <p/>
@@ -277,7 +290,7 @@ public class TLC extends SingleClassifierEnhancer implements
   @Override
   public TechnicalInformation getTechnicalInformation() {
 
-    TechnicalInformation result;
+    TechnicalInformation result, additional;
 
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result.setValue(Field.AUTHOR,
@@ -289,6 +302,15 @@ public class TLC extends SingleClassifierEnhancer implements
     result.setValue(Field.YEAR, "2003");
     result.setValue(Field.PAGES, "468-479");
     result.setValue(Field.PUBLISHER, "Springer");
+
+    additional = result.add(Type.INPROCEEDINGS);
+    additional.setValue(TechnicalInformation.Field.AUTHOR, "Eibe Frank and Bernhard Pfahringer");
+    additional.setValue(TechnicalInformation.Field.TITLE,
+            "Propositionalisation of Multi-instance Data Using Random Forests");
+    additional.setValue(TechnicalInformation.Field.BOOKTITLE, "AI 2013: Advances in Artificial Intelligence");
+    additional.setValue(TechnicalInformation.Field.YEAR, "2013");
+    additional.setValue(TechnicalInformation.Field.PUBLISHER, "Springer");
+    additional.setValue(TechnicalInformation.Field.PAGES, "362-373");
 
     return result;
   }
