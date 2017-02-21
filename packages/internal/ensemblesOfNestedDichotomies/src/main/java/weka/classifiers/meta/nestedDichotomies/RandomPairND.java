@@ -582,8 +582,9 @@ public class RandomPairND extends RandomizableSingleClassifierEnhancer implement
   public String globalInfo() {
 
     return "A meta classifier for handling multi-class datasets with 2-class "
-      + "classifiers by building a nested dichotomy with random-pair selection "
-      + "to select the class subsets." ;
+            + "classifiers by building a nested dichotomy with random-pair selection "
+            + "to select the class subsets.\n\n"
+            + "For more info, check\n\n" + getTechnicalInformation().toString();
   }
 
   /**
