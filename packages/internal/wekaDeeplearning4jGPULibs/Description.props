@@ -12,7 +12,7 @@ Version=1.0.1
 Date=2016-12-12
 
 # Title (required)
-Title=CPU native libraries for wekaDeeplearning4j
+Title=GPU native libraries for wekaDeeplearning4j
 
 Category=Classification/Regression
 
