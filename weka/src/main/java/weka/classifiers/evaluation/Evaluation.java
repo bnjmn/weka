@@ -31,6 +31,7 @@ import weka.classifiers.UpdateableBatchProcessor;
 import weka.classifiers.UpdateableClassifier;
 import weka.classifiers.evaluation.output.prediction.AbstractOutput;
 import weka.classifiers.evaluation.output.prediction.PlainText;
+import weka.classifiers.misc.InputMappedClassifier;
 import weka.classifiers.pmml.consumer.PMMLClassifier;
 import weka.classifiers.xml.XMLClassifier;
 import weka.core.BatchPredictor;
@@ -1433,7 +1434,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
         if (savedStructure != null) {
           // test for compatibility with template
-          if (!template.equalHeaders(savedStructure)) {
+          if (!(classifier instanceof InputMappedClassifier) && !template.equalHeaders(savedStructure)) {
             throw new Exception("training and test set are not compatible\n"
               + template.equalHeadersMsg(savedStructure));
           }
