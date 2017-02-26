@@ -618,7 +618,7 @@ public class PredictionAppender extends BaseStep {
       Add addF = new Add();
       addF.setAttributeIndex("last");
       addF.setAttributeName("class_predicted_by: " + classifierName);
-      if (inputData.classAttribute().isNominal()) {
+      if (classAttribute.isNominal()) {
         String classLabels = classAttribute.value(0);
         for (int i = 1; i < classAttribute.numValues(); i++) {
           classLabels += "," + classAttribute.value(i);
