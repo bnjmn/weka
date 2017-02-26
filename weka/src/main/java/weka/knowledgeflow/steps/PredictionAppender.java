@@ -22,12 +22,9 @@
 package weka.knowledgeflow.steps;
 
 import weka.classifiers.UpdateableClassifier;
+import weka.classifiers.misc.InputMappedClassifier;
 import weka.clusterers.DensityBasedClusterer;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
-import weka.core.WekaException;
+import weka.core.*;
 import weka.filters.unsupervised.attribute.Add;
 import weka.gui.knowledgeflow.KFGUIConsts;
 import weka.knowledgeflow.Data;
@@ -596,6 +593,12 @@ public class PredictionAppender extends BaseStep {
     weka.classifiers.Classifier classifier, boolean distribution,
     String relationNameModifier) throws Exception {
 
+    // get class attribute from InputMappedClassifier (if necessary)
+    Attribute classAttribute = inputData.classAttribute();
+    if (classifier instanceof weka.classifiers.misc.InputMappedClassifier) {
+      classAttribute = ((InputMappedClassifier) classifier).getModelHeader(new Instances(inputData, 0)).classAttribute();
+    }
+
     String classifierName = classifier.getClass().getName();
     classifierName =
       classifierName.substring(classifierName.lastIndexOf('.') + 1,
@@ -603,11 +606,11 @@ public class PredictionAppender extends BaseStep {
     Instances newData = new Instances(inputData);
 
     if (distribution) {
-      for (int i = 0; i < inputData.classAttribute().numValues(); i++) {
+      for (int i = 0; i < classAttribute.numValues(); i++) {
         Add addF = new Add();
         addF.setAttributeIndex("last");
         addF.setAttributeName(classifierName + "_prob_"
-          + inputData.classAttribute().value(i));
+          + classAttribute.value(i));
         addF.setInputFormat(newData);
         newData = weka.filters.Filter.useFilter(newData, addF);
       }
@@ -616,9 +619,9 @@ public class PredictionAppender extends BaseStep {
       addF.setAttributeIndex("last");
       addF.setAttributeName("class_predicted_by: " + classifierName);
       if (inputData.classAttribute().isNominal()) {
-        String classLabels = inputData.classAttribute().value(0);
-        for (int i = 1; i < inputData.classAttribute().numValues(); i++) {
-          classLabels += "," + inputData.classAttribute().value(i);
+        String classLabels = classAttribute.value(0);
+        for (int i = 1; i < classAttribute.numValues(); i++) {
+          classLabels += "," + classAttribute.value(i);
         }
         addF.setNominalLabels(classLabels);
       }
