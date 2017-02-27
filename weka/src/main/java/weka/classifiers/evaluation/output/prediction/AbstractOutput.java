@@ -575,7 +575,7 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       throw new WekaException(error);
     }
 
-    doPrintClassification(classifier, preProcessInstance(inst, classifier), index);
+    doPrintClassification(classifier.distributionForInstance(inst), preProcessInstance(inst, classifier), index);
   }
 
   /**
@@ -618,12 +618,12 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     if (classifier instanceof BatchPredictor
       && ((BatchPredictor) classifier).implementsMoreEfficientBatchPrediction()) {
       test = testset.getDataSet();
-      String className = m_Header.classAttribute().name();
-      Attribute classMatch = test.attribute(className);
-      if (classMatch == null) {
-        throw new Exception("Can't find a match for the class attribute" + className + " in the test instances!");
+      if (!(classifier instanceof InputMappedClassifier)) {
+        if (!(test.equalHeaders(m_Header))) {
+          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
+        }
+        test.setClassIndex(m_Header.classIndex());
       }
-      test.setClass(classMatch);
       double[][] predictions =
         ((BatchPredictor) classifier).distributionsForInstances(test);
       for (i = 0; i < test.numInstances(); i++) {
@@ -631,15 +631,15 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       }
     } else {
       test = testset.getStructure();
-      String className = m_Header.classAttribute().name();
-      Attribute classMatch = test.attribute(className);
-      if (classMatch == null) {
-        throw new Exception("Can't find a match for the class attribute" + className + " in the test instances!");
+      if (!(classifier instanceof InputMappedClassifier)) {
+        if (!(test.equalHeaders(m_Header))) {
+          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
+        }
+        test.setClassIndex(m_Header.classIndex());
       }
-      test.setClass(classMatch);
       while (testset.hasMoreElements(test)) {
         inst = testset.nextElement(test);
-        doPrintClassification(classifier, preProcessInstance(inst, classifier), i);
+        printClassification(classifier.distributionForInstance(inst), preProcessInstance(inst, classifier), i);
         i++;
       }
     }
@@ -666,7 +666,8 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       }
     } else {
       for (i = 0; i < testset.numInstances(); i++) {
-        doPrintClassification(classifier, preProcessInstance(testset.instance(i), classifier), i);
+        printClassification(classifier.distributionForInstance(testset.instance(i)),
+                preProcessInstance(testset.instance(i), classifier), i);
       }
     }
   }
