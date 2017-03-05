@@ -212,6 +212,7 @@ public class CartesianProduct extends SimpleBatchFilter {
     result.disableAll();
 
     // attributes
+    result.enable(Capability.MISSING_VALUES);
     result.enableAllAttributes();
 
     // class
