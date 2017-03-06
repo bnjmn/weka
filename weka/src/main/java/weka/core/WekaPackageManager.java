@@ -737,8 +737,8 @@ public class WekaPackageManager {
       /*
        * for (File content : contents) { if (content.isFile() &&
        * content.getPath().endsWith(".jar")) { if (verbose) {
-       * System.out.println("[WekaPackageManager] loading " + content.getPath()); }
-       * ClassloaderUtil.addFile(content.getPath());
+       * System.out.println("[WekaPackageManager] loading " +
+       * content.getPath()); } ClassloaderUtil.addFile(content.getPath());
        * 
        * } else if (content.isDirectory() &&
        * content.getName().equalsIgnoreCase("lib")) { // add any jar files in
@@ -840,7 +840,8 @@ public class WekaPackageManager {
         }
         if (disabled != null && disabled.toString().equalsIgnoreCase("true")) {
           for (PrintStream p : progress) {
-            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package "
+              + toLoad.getName()
               + " because it has been marked as disabled at the repository");
           }
           return false;
@@ -860,7 +861,8 @@ public class WekaPackageManager {
         List<Package> preclusions = toLoad.getPrecludedPackages(installed);
         if (preclusions.size() > 0) {
           for (PrintStream p : progress) {
-            p.println("[WekaPackageManager] Skipping package " + toLoad.getName()
+            p.println("[WekaPackageManager] Skipping package "
+              + toLoad.getName()
               + " because it precludes one or more packages that are "
               + "already installed: ");
             for (Package prec : preclusions) {
@@ -913,8 +915,8 @@ public class WekaPackageManager {
         if (d.getTarget().getPackage().isInstalled()) {
           if (!loadCheck(d.getTarget().getPackage(), packageRoot, progress)) {
             for (PrintStream p : progress) {
-              p.println("[WekaPackageManager] Can't load " + toLoad.getName() + " because "
-                + d.getTarget() + " can't be loaded.");
+              p.println("[WekaPackageManager] Can't load " + toLoad.getName()
+                + " because " + d.getTarget() + " can't be loaded.");
             }
             return false;
           }
@@ -1119,6 +1121,14 @@ public class WekaPackageManager {
   public static synchronized void loadPackages(boolean verbose,
     boolean avoidTriggeringFullClassDiscovery, boolean refreshGOEProperties) {
 
+    if (!verbose) {
+      // debug property overrides
+      String debug = System.getProperty("weka.core.classloader.debug", "false");
+      verbose = debug.equalsIgnoreCase("true");
+    } else {
+      System.setProperty("weka.core.classloader.debug", "true");
+    }
+
     List<File> goePropsFiles = new ArrayList<File>();
     if (!m_loadPackages) {
       return;
@@ -1268,12 +1278,17 @@ public class WekaPackageManager {
         WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
           .getPackageClassLoader(source);
       if (sourceLoader != null) {
+        String debugS =
+          System.getProperty("weka.core.classloader.debug", "false");
+        boolean debug = debugS.equalsIgnoreCase("true");
         for (String targetPackage : targets) {
           if (WekaPackageClassLoaderManager.getWekaPackageClassLoaderManager()
             .getPackageClassLoader(targetPackage) != null) {
-            System.out
-              .println("[WekaPackageManager] Added a dependency between "
-                + source + " and " + targetPackage);
+            if (debug) {
+              System.out
+                .println("[WekaPackageManager] Added a dependency between "
+                  + source + " and " + targetPackage);
+            }
             sourceLoader.addPackageDependency(targetPackage);
           }
         }
@@ -1948,8 +1963,10 @@ public class WekaPackageManager {
    * Get the latest version of the named package that is compatible with the
    * base version of Weka being used.
    *
-   * @param packageName the name of the package to get the latest compatible version of
-   * @return the latest compatible version or null if there is no compatible package
+   * @param packageName the name of the package to get the latest compatible
+   *          version of
+   * @return the latest compatible version or null if there is no compatible
+   *         package
    * @throws Exception if a problem occurs
    */
   public static Package getLatestCompatibleVersion(String packageName)
