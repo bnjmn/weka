@@ -862,7 +862,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
       return false;
     }
 
-    if (!checkForUnsetEnvVar(p, System.err)) {
+    if (!checkForUnsetEnvVar(p)) {
       return false;
     }
 
@@ -894,8 +894,10 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
         if (keyVals.length == 2) {
           String key = keyVals[0].trim();
           String val = keyVals[1].trim();
-          for (PrintStream p : progress) {
-            p.println("[" + toString() + "] setting property: " + prop);
+          if (m_debug) {
+            for (PrintStream p : progress) {
+              p.println("[" + toString() + "] setting property: " + prop);
+            }
           }
           System.setProperty(key, val);
         }
@@ -1035,8 +1037,7 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * @param toLoad the package to check
    * @return true if good to go
    */
-  protected static boolean checkForUnsetEnvVar(Package toLoad,
-    PrintStream... progress) {
+  protected static boolean checkForUnsetEnvVar(Package toLoad) {
     Object doNotLoadIfUnsetVar =
       toLoad.getPackageMetaDataElement(DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_KEY);
 
@@ -1049,11 +1050,11 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
 
       for (String var : elements) {
         if (env.getVariableValue(var.trim()) == null) {
-          for (PrintStream p : progress) {
-            p.println("[Weka] " + toLoad.getName()
+
+            System.err.println("[Weka] " + toLoad.getName()
               + " can't be loaded because " + "the environment variable " + var
               + " is not set.");
-          }
+
 
           result = false;
           break;
@@ -1067,15 +1068,14 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
         toLoad
           .getPackageMetaDataElement(DO_NOT_LOAD_IF_ENV_VAR_NOT_SET_MESSAGE_KEY);
       if (doNotLoadMessage != null && doNotLoadMessage.toString().length() > 0) {
-        for (PrintStream p : progress) {
+
           String dnlM = doNotLoadMessage.toString();
           try {
             dnlM = Environment.getSystemWide().substitute(dnlM);
           } catch (Exception e) {
             // quietly ignore
           }
-          p.println("[Weka] " + dnlM);
-        }
+          System.err.println("[Weka] " + dnlM);
       }
     }
 
