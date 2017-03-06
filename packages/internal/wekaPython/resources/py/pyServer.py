@@ -24,7 +24,7 @@ import base64
 import math
 import traceback
 import pandas as pd
-import matplotlib.figure as mpl
+import matplotlib.pyplot as plt
 
 _global_python3 = sys.version_info >= (3, 0)
 
@@ -336,7 +336,7 @@ def send_variable_type(message):
             ok_response['type'] = 'unknown'
             if type(var_value) is pd.DataFrame:
                 ok_response['type'] = 'dataframe'
-            elif type(var_value) is mpl.Figure:
+            elif type(var_value) is plt.Figure:
                 ok_response['type'] = 'image'
             send_response(ok_response, True)
     else:
@@ -410,7 +410,7 @@ def send_image_as_png(message):
         var_name = message['variable_name']
         image = get_variable(var_name)
         if image is not None:
-            if type(image) is mpl.Figure:
+            if type(image) is plt.Figure:
                 ok_response = {}
                 ok_response['response'] = 'ok'
                 ok_response['variable_name'] = var_name
