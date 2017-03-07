@@ -619,10 +619,14 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
       && ((BatchPredictor) classifier).implementsMoreEfficientBatchPrediction()) {
       test = testset.getDataSet();
       if (!(classifier instanceof InputMappedClassifier)) {
+        try {
+          test.setClassIndex(m_Header.classIndex());
+        } catch (Exception e) {
+          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
+        }
         if (!(test.equalHeaders(m_Header))) {
           throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
         }
-        test.setClassIndex(m_Header.classIndex());
       }
       double[][] predictions =
         ((BatchPredictor) classifier).distributionsForInstances(test);
@@ -632,10 +636,14 @@ public abstract class AbstractOutput implements Serializable, OptionHandler {
     } else {
       test = testset.getStructure();
       if (!(classifier instanceof InputMappedClassifier)) {
+        try {
+          test.setClassIndex(m_Header.classIndex());
+        } catch (Exception e) {
+          throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
+        }
         if (!(test.equalHeaders(m_Header))) {
           throw new IllegalArgumentException("AbstractOutput: header of test set does not match.");
         }
-        test.setClassIndex(m_Header.classIndex());
       }
       while (testset.hasMoreElements(test)) {
         inst = testset.nextElement(test);
