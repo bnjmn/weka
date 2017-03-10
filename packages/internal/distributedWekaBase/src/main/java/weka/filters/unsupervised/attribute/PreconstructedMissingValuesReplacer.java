@@ -66,16 +66,17 @@ public class PreconstructedMissingValuesReplacer extends SimpleStreamFilter
    */
   public PreconstructedMissingValuesReplacer(Instances headerWithSummary)
     throws Exception {
-    Instances headerNoSummary = CSVToARFFHeaderReduceTask
-      .stripSummaryAtts(headerWithSummary);
+    Instances headerNoSummary =
+      CSVToARFFHeaderReduceTask.stripSummaryAtts(headerWithSummary);
 
     m_meansAndModes = new double[headerNoSummary.numAttributes()];
 
     for (int i = 0; i < headerNoSummary.numAttributes(); i++) {
       Attribute orig = headerNoSummary.attribute(i);
-      Attribute summary = headerWithSummary
-        .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
-          + orig.name());
+      Attribute summary =
+        headerWithSummary
+          .attribute(CSVToARFFHeaderMapTask.ARFF_SUMMARY_ATTRIBUTE_PREFIX
+            + orig.name());
 
       if (summary == null) {
         throw new DistributedWekaException(
@@ -90,7 +91,13 @@ public class PreconstructedMissingValuesReplacer extends SimpleStreamFilter
       } else if (orig.isNominal()) {
         m_meansAndModes[i] = NominalStats.attributeToStats(summary).getMode();
         if (m_meansAndModes[i] < 0) {
-          m_meansAndModes[i] = Utils.missingValue();
+          // this means all missing values - i.e. there were no labels that
+          // actually occurred in the data. In this case, we need to replace
+          // missing with something, so just use the first attribute value
+          // declared in the header
+
+          // m_meansAndModes[i] = Utils.missingValue();
+          m_meansAndModes[i] = 0;
         }
       }
     }
@@ -134,15 +141,17 @@ public class PreconstructedMissingValuesReplacer extends SimpleStreamFilter
         }
       }
       if (num == instance.numValues()) {
-        inst = new SparseInstance(instance.weight(), vals, indices,
-          instance.numAttributes());
+        inst =
+          new SparseInstance(instance.weight(), vals, indices,
+            instance.numAttributes());
       } else {
         double[] tempVals = new double[num];
         int[] tempInd = new int[num];
         System.arraycopy(vals, 0, tempVals, 0, num);
         System.arraycopy(indices, 0, tempInd, 0, num);
-        inst = new SparseInstance(instance.weight(), tempVals, tempInd,
-          instance.numAttributes());
+        inst =
+          new SparseInstance(instance.weight(), tempVals, tempInd,
+            instance.numAttributes());
       }
     } else {
       double[] vals = new double[getInputFormat().numAttributes()];
