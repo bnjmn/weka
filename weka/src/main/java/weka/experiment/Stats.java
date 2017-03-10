@@ -127,7 +127,7 @@ implements Serializable, RevisionHandler {
   /** The std deviation of values at the last calculateDerived() call */    
   public double stdDev = Double.NaN;
 
-  /** The mean of values at the last calculateDerived() call */    
+  /** The mean of values, or Double.NaN if no values seen */
   public double mean = Double.NaN;
 
   /** The minimum value seen, or Double.NaN if no values seen */
@@ -305,8 +305,7 @@ implements Serializable, RevisionHandler {
 
   /**
    * Tells the object to calculate any statistics that don't have their
-   * values automatically updated during add. Currently updates the mean
-   * and standard deviation.
+   * values automatically updated during add. Currently updates the standard deviation.
    */
   public void calculateDerived() {
 
