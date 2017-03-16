@@ -232,10 +232,13 @@ public class LegacyFlowLoader implements FlowLoader {
     StepManagerImpl sourceNew = flow.findStep(sourceC.getCustomName());
     StepManagerImpl targetNew = flow.findStep(targetC.getCustomName());
     if (sourceNew == null || targetNew == null) {
-      m_log.logWarning("Unable to make connection in new flow between legacy "
-        + "steps " + sourceC.getCustomName() + " and "
-        + targetC.getCustomName() + " for connection '" + conn.getEventName());
-
+      if (m_log != null) {
+        m_log
+          .logWarning("Unable to make connection in new flow between legacy "
+            + "steps " + sourceC.getCustomName() + " and "
+            + targetC.getCustomName() + " for connection '"
+            + conn.getEventName());
+      }
       return;
     }
 
