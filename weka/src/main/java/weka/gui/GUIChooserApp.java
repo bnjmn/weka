@@ -685,7 +685,7 @@ public class GUIChooserApp extends JFrame {
       for (String classname : classnames) {
         try {
           MainMenuExtension ext =
-            (MainMenuExtension) Class.forName(classname).newInstance();
+            (MainMenuExtension) WekaPackageClassLoaderManager.objectForName(classname);
 
           // menuitem in a submenu?
           JMenu submenu = null;
