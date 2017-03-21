@@ -418,14 +418,10 @@ implements AttributeTransformer, OptionHandler {
     
     // if data has a class attribute
     if (m_trainInstances.classIndex() >= 0) {
-      
       m_hasClass = true;
-      m_classIndex = m_trainInstances.classIndex();
-      
-      // set class attribute to be removed
-      attributesToRemove.add(new Integer(m_classIndex));
     }
-    // make copy of training data so the class values (if set) can be appended to final 
+
+    // make copy of training data so the class values (if set) can be appended to final
     // transformed instances and so that we can check header compatibility
     m_trainHeader = new Instances(m_trainInstances, 0);
     
@@ -440,7 +436,15 @@ implements AttributeTransformer, OptionHandler {
     m_nominalToBinaryFilter = new NominalToBinary();
     m_nominalToBinaryFilter.setInputFormat(m_trainInstances);
     m_trainInstances = Filter.useFilter(m_trainInstances, m_nominalToBinaryFilter);
-    
+
+    if (m_hasClass) {
+      m_classIndex = m_trainInstances.classIndex();
+
+      // set class attribute to be removed
+      attributesToRemove.add(new Integer(m_classIndex));
+    }
+
+
     // delete any attributes with only one distinct value or are all missing
     for (int i = 0; i < m_trainInstances.numAttributes(); i++) {
       if (m_trainInstances.numDistinctValues(i) <= 1) {
