@@ -1031,13 +1031,13 @@ public class VisibleLayout extends JPanel {
     int returnVal = JFileChooser.APPROVE_OPTION;
     File sFile = getFilePath();
     if (showDialog || sFile.getName().equals("-NONE-")) {
-      returnVal = m_mainPerspective.m_FileChooser.showSaveDialog(this);
+      returnVal = m_mainPerspective.m_saveFileChooser.showSaveDialog(this);
       shownDialog = true;
     }
 
     if (returnVal == JFileChooser.APPROVE_OPTION) {
       if (shownDialog) {
-        sFile = m_mainPerspective.m_FileChooser.getSelectedFile();
+        sFile = m_mainPerspective.m_saveFileChooser.getSelectedFile();
       }
 
       // add extension if necessary
