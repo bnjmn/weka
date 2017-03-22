@@ -1272,12 +1272,24 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       p1 = o1.getPerformance(getEvaluation());
       p2 = o2.getPerformance(getEvaluation());
 
-      if (Utils.sm(p1, p2)) {
+      if (p1 < p2) {
         result = -1;
-      } else if (Utils.gr(p1, p2)) {
+      } else if (p1 > p2) {
         result = 1;
-      } else {
-        result = 0;
+      } else { // Need to make order deterministic
+        if (o1.getValues().getX() < o2.getValues().getX()) {
+          result = -1;
+        } else if (o1.getValues().getX() > o2.getValues().getX()) {
+          result = 1;
+        } else {
+          if (o1.getValues().getY() < o2.getValues().getY()) {
+            result = -1;
+          } else if (o1.getValues().getY() > o2.getValues().getY()) {
+            result = 1;
+          } else {
+            result = 0;
+          }
+        }
       }
 
       // only correlation coefficient/accuracy/kappa obey to this order, for the
