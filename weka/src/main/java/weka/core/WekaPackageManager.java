@@ -2904,7 +2904,7 @@ public class WekaPackageManager {
         printUsage();
       }
 
-      System.exit(0);
+      // System.exit(0);
     } catch (Exception ex) {
       ex.printStackTrace();
     }
