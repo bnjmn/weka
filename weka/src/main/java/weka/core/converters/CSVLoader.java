@@ -686,9 +686,9 @@ public class CSVLoader extends AbstractFileLoader implements BatchConverter,
     if (getDateAttributes().length() > 0) {
       result.add("-D");
       result.add(getDateAttributes());
-      result.add("-format");
-      result.add(getDateFormat());
     }
+    result.add("-format");
+    result.add(getDateFormat());
 
     if (getNumericAttributes().length() > 0) {
       result.add("-R");
