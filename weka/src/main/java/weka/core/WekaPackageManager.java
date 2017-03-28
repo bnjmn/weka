@@ -2711,7 +2711,8 @@ public class WekaPackageManager {
     } else if (arg.equals("installed")) {
       packageList = PACKAGE_MANAGER.getInstalledPackages();
     } else if (arg.equals("available")) {
-      packageList = PACKAGE_MANAGER.getAvailablePackages();
+      // packageList = PACKAGE_MANAGER.getAvailablePackages();
+      packageList = getAvailableCompatiblePackages();
     } else {
       System.err.println("[WekaPackageManager] Unknown argument " + arg);
       printUsage();
@@ -2860,6 +2861,7 @@ public class WekaPackageManager {
           }
           installPackageFromRepository(args[1], version, false);
         }
+        System.exit(0);
       } else if (args[0].equals("-uninstall-package")) {
         if (args.length < 2) {
           printUsage();
