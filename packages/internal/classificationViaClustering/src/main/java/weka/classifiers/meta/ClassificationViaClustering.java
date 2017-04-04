@@ -437,7 +437,6 @@ public class ClassificationViaClustering extends AbstractClassifier {
         instance = data.instance(i);
         counts[(int) clusterAssignments[i]][(int) instance.classValue()]++;
         clusterTotals[(int) clusterAssignments[i]]++;
-        i++;
       }
       best[eval.getNumClusters()] = Double.MAX_VALUE;
       ClusterEvaluation.mapClasses(eval.getNumClusters(), 0, counts,
