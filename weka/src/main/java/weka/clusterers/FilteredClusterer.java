@@ -25,14 +25,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -96,7 +90,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  * @see weka.classifiers.meta.FilteredClassifier
  */
-public class FilteredClusterer extends SingleClustererEnhancer {
+public class FilteredClusterer extends SingleClustererEnhancer implements Drawable {
 
   /** for serialization. */
   private static final long serialVersionUID = 1420005943163412943L;
@@ -402,6 +396,34 @@ public class FilteredClusterer extends SingleClustererEnhancer {
     }
 
     return result;
+  }
+
+  /**
+   * Returns the type of graph this clusterer represents.
+   *
+   * @return the graph type of this clusterer
+   */
+  public int graphType() {
+
+    if (m_Clusterer instanceof Drawable)
+      return ((Drawable) m_Clusterer).graphType();
+    else
+      return Drawable.NOT_DRAWABLE;
+  }
+
+  /**
+   * Returns graph describing the clusterer (if possible).
+   *
+   * @return the graph of the clusterer in dotty format
+   * @throws Exception if the clusterer cannot be graphed
+   */
+  public String graph() throws Exception {
+
+    if (m_Clusterer instanceof Drawable)
+      return ((Drawable) m_Clusterer).graph();
+    else
+      throw new Exception(
+              "Clusterer: " + getClustererSpec() + " cannot be graphed");
   }
 
   /**
