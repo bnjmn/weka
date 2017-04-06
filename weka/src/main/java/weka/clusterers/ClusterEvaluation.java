@@ -801,6 +801,15 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
         ce.setClusterer(clusterer);
         ce.evaluateClusterer(train, trainFileName);
 
+        // If classifier is drawable output string describing graph
+        if ((clusterer instanceof Drawable) && (graphFileName.length() != 0)) {
+          BufferedWriter writer = new BufferedWriter(new FileWriter(graphFileName));
+          writer.write(((Drawable) clusterer).graph());
+          writer.newLine();
+          writer.flush();
+          writer.close();
+        }
+
         return "\n\n=== Clustering stats for training data ===\n\n"
           + ce.clusterResultsToString();
       }
