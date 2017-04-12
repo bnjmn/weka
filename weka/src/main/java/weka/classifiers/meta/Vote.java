@@ -23,6 +23,7 @@ package weka.classifiers.meta;
 
 import weka.classifiers.Classifier;
 import weka.classifiers.RandomizableMultipleClassifiersCombiner;
+import weka.classifiers.misc.InputMappedClassifier;
 import weka.core.Aggregateable;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -526,7 +527,7 @@ public class Vote extends RandomizableMultipleClassifiersCombiner implements
       }
       Object header = null;
       header = is.readObject();
-      if (header instanceof Instances) {
+      if ((header instanceof Instances) && !(c instanceof InputMappedClassifier)) {
         if (data != null && !data.equalHeaders((Instances) header)) {
           is.close();
           throw new Exception("\"" + path + "\" was trained with data that is "
