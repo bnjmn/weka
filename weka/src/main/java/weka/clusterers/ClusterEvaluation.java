@@ -415,8 +415,10 @@ public class ClusterEvaluation implements Serializable, RevisionHandler {
     while (source.hasMoreElements(instances)) {
       instance = source.nextElement(instances);
       if (m_clusterAssignments[i] >= 0) {
-        counts[(int) m_clusterAssignments[i]][(int) instance.classValue()]++;
-        clusterTotals[(int) m_clusterAssignments[i]]++;
+        if (!instance.classIsMissing()) {
+          counts[(int) m_clusterAssignments[i]][(int) instance.classValue()]++;
+          clusterTotals[(int) m_clusterAssignments[i]]++;
+        }
       }
       i++;
     }
