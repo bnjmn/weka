@@ -6,10 +6,10 @@
 PackageName=classificationViaClustering
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2017-04-05
+Date=2017-04-27
 
 # Title (required)
 Title=A simple meta-classifier that uses a clusterer for classification.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=A simple meta-classifier that uses a clusterer for classification. For cluster algorithms that use a fixed number of clusterers, like SimpleKMeans, the user has to make sure that the number of clusters to generate are the same as the number of class labels in the dataset in order to obtain a useful model.<br/><br/>Note: at prediction time, a missing value is returned if no cluster is found for the instance.<br/><br/>The code is based on the 'clusters to classes' functionality of the weka.clusterers.ClusterEvaluation class by Mark Hall.
 
-Changes=Fixed bug: only every second instance was used to establish per cluster class counts and total cluster counts.
+Changes=Now checks for missing class values when constructing the classes to clusters mapping.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classificationViaClustering
