@@ -30,6 +30,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
+import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.GenericObjectEditor;
 
 /**
@@ -127,7 +128,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
    */
   private static void checkForSnowball() {
     try {
-      Class.forName(SNOWBALL_PROGRAM);
+      WekaPackageClassLoaderManager.forName(SNOWBALL_PROGRAM);
       m_Present = true;
     } catch (Exception e) {
       m_Present = false;
@@ -356,7 +357,8 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
 
     if (m_Stemmers.contains(name)) {
       try {
-        snowballClass = Class.forName(getStemmerClassname(name));
+        // snowballClass = Class.forName(getStemmerClassname(name));
+        snowballClass = WekaPackageClassLoaderManager.forName(getStemmerClassname(name));
         m_Stemmer = snowballClass.newInstance();
 
         // methods
