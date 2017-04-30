@@ -32,7 +32,7 @@ Description=Contains the snowball stemmers (http://snowball.tartarus.org/).
 Changes=Now includes a GenericPropertiesCreator.props file so that stemmer algorithms can be specified in Weka >= 3.8.1.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/snowball-stemmers-1.0.2.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/snowball-stemmers1.0.2.zip?download
 
 # URL for further information
 URL=https://github.com/fracpete/snowball-stemmers-weka-package
