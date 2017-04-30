@@ -26,15 +26,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
@@ -69,6 +62,7 @@ import weka.filters.SimpleStreamFilter;
  <!-- options-end -->
  * 
  * @author fracpete (fracpete at waikato dot ac dot nz)
+ * @author eibe@cs.waikato.ac.nz
  * @version $Revision$
  */
 public class RandomSubset extends SimpleStreamFilter {
@@ -415,15 +409,47 @@ public class RandomSubset extends SimpleStreamFilter {
   @Override
   protected Instance process(Instance instance) throws Exception {
     Instance result;
-    double[] values;
-    int i;
 
-    values = new double[m_Indices.length];
-    for (i = 0; i < m_Indices.length; i++) {
-      values[i] = instance.value(m_Indices[i]);
+    if (instance instanceof SparseInstance) {
+      int n1 = instance.numValues();
+      int classIndex = getInputFormat().classIndex();
+      int n2 = classIndex >= 0 ? m_Indices.length : m_Indices.length - 1;
+      int[] indices = new int[instance.numValues()];
+      double[] values = new double[instance.numValues()];
+      int vals = 0;
+      double classValue = 0;
+      boolean classFound = false;
+      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
+        int ind1 = instance.index(p1);
+        int ind2 = m_Indices[p2];
+        if (ind1 == classIndex) {
+          classFound = true;
+          classValue = instance.valueSparse(p1);
+          p1++;
+        } else if (ind1 == ind2) {
+          indices[vals] = p2;
+          values[vals] = instance.valueSparse(p1);
+          vals++;
+          p1++;
+          p2++;
+        } else if (ind1 > ind2) {
+          p2++;
+        } else {
+          p1++;
+        }
+      }
+      if (classFound) {
+        indices[vals] = outputFormatPeek().numAttributes() - 1;
+        values[vals] = classValue;
+      }
+      result = new SparseInstance(instance.weight(), values, indices, m_Indices.length);
+    } else {
+      double[] values = new double[m_Indices.length];
+      for (int i = 0; i < m_Indices.length; i++) {
+        values[i] = instance.value(m_Indices[i]);
+      }
+      result = new DenseInstance(instance.weight(), values);
     }
-
-    result = new DenseInstance(instance.weight(), values);
 
     copyValues(result, false, instance.dataset(), outputFormatPeek());
 
