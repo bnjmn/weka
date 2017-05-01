@@ -51,6 +51,9 @@ import weka.core.Utils;
  * 
  <!-- options-start -->
  * Valid options are: <p/>
+ * <pre> -L
+ *  Evaluate an attribute by measuring the impact of leaving it out
+ *  from the full set instead of considering its worth in isolation</pre>
  * 
  * <pre> -B &lt;base learner&gt;
  *  class name of base learner to use for  accuracy estimation.
@@ -92,10 +95,6 @@ import weka.core.Utils;
  * <pre> -do-not-check-capabilities
  *  If set, classifier capabilities are not checked before classifier is built
  *  (use with caution).</pre>
- * 
- * <pre> -L
- *  Evaluate an attribute by measuring the impact of leaving it out
- *  from the full set instead of considering its worth in isolation</pre>
  * 
  * <pre> -execution-slots &lt;integer&gt;
  *  Number of attributes to evaluate in parallel.
