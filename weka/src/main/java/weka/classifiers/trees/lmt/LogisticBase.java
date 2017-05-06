@@ -1154,7 +1154,7 @@ public class LogisticBase extends AbstractClassifier implements
     double[][] coefficients = getCoefficients();
 
     for (int j = 0; j < m_numClasses; j++) {
-      s.append("\nClass " + j + " :\n");
+      s.append("\nClass " + m_train.classAttribute().value(j) + " :\n");
       // constant term
       s.append(Utils.doubleToString(coefficients[j][0], 2 + m_numDecimalPlaces, m_numDecimalPlaces) + " + \n");
       for (int i = 0; i < attributes[j].length; i++) {
