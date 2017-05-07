@@ -500,7 +500,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     }
 
     // Need to prevent R from popping up dialogue in case there is a newer source version.
-    REXP result1 = parseAndEval(requester, "options(install.packages.check.source = \"no\")");
+    REXP result1 = parseAndEval(requester, "options(install.packages.compile.from.source = \"never\")");
 
     // Now try to install the package.
     REXP result = parseAndEval(requester, "install.packages(\"" + libraryName + "\")");
