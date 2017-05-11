@@ -62,7 +62,6 @@
     <dirset dir="${packages_internal}">
       <include name="**/${build}/classes"/>
       <include name="**/${build}/testcases"/>
-      <exclude name="RPlugin" />
    </dirset>
    <dirset dir="${packages_external}">
      <include name="**/${build}/classes"/>
@@ -753,7 +752,7 @@
   <!-- Run the test cases for the core and all packages via junit's testrunner class.
    This is a faster, simpler option than running the junit task -->
 
-  <target name="run_tests_all" 
+  <target name="run_tests_all" depends="compile_tests" 
    description="Execute unit tests (fast)">
     <antcall target="apply_all_internal">
       <param name="packageCommand" value="clean"/>
