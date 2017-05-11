@@ -20,7 +20,7 @@
   <property name="wekadocs" value="wekadocs"/>
   <property name="wekaexamples" value="wekaexamples"/>
   <property name="dist"  value="dist"/>
-  <property name="branch" value="weka-development-3-7-distribution"/>
+  <property name="branch" value="weka-development-3-9-distribution"/>
 
   <!-- load the last release date -->
   <property file="last-release.props"/>
@@ -107,6 +107,11 @@
     </exec>
   </target>
 
+  <target name="run_tests" depends="init_all">
+    <echo message="Running tests..."/>
+    <ant antfile="build.xml" dir="${weka}" target="run_tests_all" inheritall="false"/>
+  </target>
+
   <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, manual">
     <copy todir="${temp}/weka/lib">
       <fileset dir="${weka}/lib">
@@ -159,7 +164,17 @@
     <delete dir="${dist}"/>
   </target>
 
-  <target name="snapshot" depends="copy-files" description="Make a SNAPSHOT distribution of Weka">
+  <target name="snapshot_no_junit" depends="copy-files" description="Make a SNAPSHOT distribution of Weka">
+    <echo message="Making snapshot zip..."/>
+    <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
+      <include name="**/*"/>
+    </zip>
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+  </target>
+
+  <target name="snapshot" depends="run_tests,copy-files" description="Make a SNAPSHOT distribution of Weka">
     <echo message="Making snapshot zip..."/>
     <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
       <include name="**/*"/>
