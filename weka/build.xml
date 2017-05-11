@@ -62,21 +62,33 @@
     <dirset dir="${packages_internal}">
       <include name="**/${build}/classes"/>
       <include name="**/${build}/testcases"/>
+      <exclude name="RPlugin/**" />
+      <exclude name="wekaPython/**" />
+      <exclude name="distributedWeka*/**" />
+      <exclude name="netlibNative*/**" />
    </dirset>
    <dirset dir="${packages_external}">
      <include name="**/${build}/classes"/>
      <include name="**/${build}/testcases"/>
+     <exclude name="associationRulesVisualizer/**" />
+     <exclude name="scatterPlot3D/**" />
    </dirset>
    <fileset dir="${packages_external}">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
+     <exclude name="associationRulesVisualizer/**" />
+     <exclude name="scatterPlot3D/**" />
    </fileset>
    <fileset dir="${packages_internal}">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
+     <exclude name="RPlugin/**" />
+     <exclude name="wekaPython/**" />
+     <exclude name="distributedWeka*/**" />
+     <exclude name="netlibNative*/**" />
    </fileset>
   </path>
-<!--  <property name="pack.cp" refid="package.class.path"/> -->
+<property name="pack.cp" refid="package.class.path"/>
 
 <!-- 
  ============================================================================
@@ -468,6 +480,7 @@
 
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="latentSemanticAnalysis"/>
+      <param name="cp" value="../../../weka/lib/*"/>
     </antcall>
 
     <antcall target="${packageCommand}_external">
@@ -772,7 +785,6 @@
     <antcall target="apply_all_external">
       <param name="packageCommand" value="compile_tests"/>
     </antcall>
-<!--    <echo message="pacakge classpath ${pack.cp}"/> -->
     <java fork="yes" dir="."
           classname="junit.textui.TestRunner"
           taskname="junit" failonerror="${run_tests_fail}">
