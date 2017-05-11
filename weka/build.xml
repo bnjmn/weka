@@ -355,7 +355,7 @@
       <param name="packageName" value="iterativeAbsoluteErrorRegression"/>
     </antcall>
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="wekaDeepLearning4j"/>
+      <param name="packageName" value="wekaDeepLearning4jCore"/>
     </antcall>
   </target>
 
@@ -622,6 +622,7 @@
          <include name="**/*.default"/>
        </fileset>
     </copy>
+    <copy file="${lib}/mtjmarker.jar" todir="${build}/classes" />
     <copy file="${lib}/core.jar" todir="${build}/classes" />
     <copy file="${lib}/mtj.jar" todir="${build}/classes" />
     <copy file="${lib}/arpack_combined_all.jar" todir="${build}/classes" />      
