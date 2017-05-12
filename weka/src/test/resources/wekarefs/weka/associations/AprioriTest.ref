@@ -18,7 +18,7 @@ Best rules found:
 
  1. Nominal1=att1val2 12 ==> Class=class2 12    <conf:(1)> lift:(1.54) lev:(0.21) [4] conv:(4.2)
  2. Nominal2=att2val2 11 ==> Class=class2 11    <conf:(1)> lift:(1.54) lev:(0.19) [3] conv:(3.85)
- 3. Nominal1=att1val2 Nominal2=att2val2 10 ==> Class=class2 10    <conf:(1)> lift:(1.54) lev:(0.18) [3] conv:(3.5)
+ 3. Nominal1=att1val2 Nominal2=att2val2 10 ==> Class=class2 10    <conf:(1)> lift:(1.54) lev:(0.17) [3] conv:(3.5)
  4. Class=class1 7 ==> Nominal1=att1val1 7    <conf:(1)> lift:(2.5) lev:(0.21) [4] conv:(4.2)
  5. Class=class1 7 ==> Nominal2=att2val1 7    <conf:(1)> lift:(2.22) lev:(0.19) [3] conv:(3.85)
  6. Nominal2=att2val1 Class=class1 7 ==> Nominal1=att1val1 7    <conf:(1)> lift:(2.5) lev:(0.21) [4] conv:(4.2)
@@ -78,5 +78,5 @@ Size of set of large itemsets L(2): 3
 Best rules found:
 
  1. Nominal2=att2val2 3 ==> Nominal1=att1val1 3    <conf:(1)> lift:(1.11) lev:(0.01) [0] conv:(0.3)
- 2. Nominal1=att1val2 2 ==> Nominal2=att2val1 2    <conf:(1)> lift:(1.18) lev:(0.02) [0] conv:(0.3)
+ 2. Nominal1=att1val2 2 ==> Nominal2=att2val1 2    <conf:(1)> lift:(1.18) lev:(0.01) [0] conv:(0.3)
 
