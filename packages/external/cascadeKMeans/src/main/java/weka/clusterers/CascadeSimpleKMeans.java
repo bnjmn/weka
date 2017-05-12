@@ -63,7 +63,7 @@ import weka.core.TechnicalInformationHandler;
  * see Calinski, T. and J. Harabasz. 1974. A dendrite method for cluster analysis. Commun. Stat. 3: 1-27.
  * quoted in German: http://books.google.com/books?id=-f9Ox0p1-D4C&lpg=PA394&ots=SV3JfRIkQn&dq=Calinski%20and%20Harabasz&hl=de&pg=PA394#v=onepage&q&f=false
  * 
- * @author Martin Gütlein (martin.guetlein@gmail.com)
+ * @author Martin Gutlein (martin.guetlein@gmail.com)
  */
 public class CascadeSimpleKMeans extends RandomizableClusterer implements Clusterer,
                                                                           TechnicalInformationHandler {
