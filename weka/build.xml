@@ -367,7 +367,7 @@
       <param name="packageName" value="iterativeAbsoluteErrorRegression"/>
     </antcall>
     <antcall target="${packageCommand}_internal">
-      <param name="packageName" value="wekaDeepLearning4jCore"/>
+      <param name="packageName" value="wekaDeeplearning4jCore"/>
     </antcall>
   </target>
 
