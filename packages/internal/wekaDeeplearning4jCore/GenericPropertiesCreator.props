@@ -9,3 +9,6 @@ org.nd4j.linalg.lossfunctions.ILossFunction =\
 
 weka.dl4j.iterators.AbstractDataSetIterator =\
  weka.dl4j.iterators
+
+org.nd4j.linalg.activations.IActivation =\
+ org.nd4j.linalg.activations.impl

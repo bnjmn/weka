@@ -28,6 +28,8 @@ import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.nd4j.linalg.activations.IActivation;
+import org.nd4j.linalg.activations.impl.ActivationIdentity;
 import org.nd4j.linalg.convolution.Convolution;
 
 import weka.core.Option;
@@ -63,7 +65,7 @@ public class BatchNormalization extends org.deeplearning4j.nn.conf.layers.BatchN
 	 */
 	public BatchNormalization() {
 		setLayerName("Batch normalization layer");
-		setActivationFunction("identity");
+		setActivationFunction(new ActivationIdentity());
 		setWeightInit(WeightInit.XAVIER);
 		setDist(new NormalDistribution());
 		setUpdater(Updater.NESTEROVS);
@@ -94,15 +96,13 @@ public class BatchNormalization extends org.deeplearning4j.nn.conf.layers.BatchN
 	}
 
 	@OptionMetadata(
-					displayName = "name of activation function",
-					description = "The name of the activation function (default = identity; options are softmax,logsoftmax,maxout,identity,abs,cos,elu,exp,log,pow,sin,acos,asin,atan,ceil,relu,sign,sqrt,step,tanh,floor,round,hardtanh,timesoneminus,negative,softplus,softsign,leakyrelu,stabilize,sigmoid).",
-					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <string>",
+					displayName = "activation function",
+					description = "The activation function to use (default = Identity).",
+					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
 					displayOrder = 2)
-	public String getActivationFunction() {
-		return this.activationFunction;
-	}
-	public void setActivationFunction(String activationFunction) {
-		this.activationFunction = activationFunction;
+	public IActivation setActivationFunction() { return this.activationFn; }
+	public void setActivationFunction(IActivation activationFn) {
+		this.activationFn = activationFn;
 	}
 
 	@OptionMetadata(
@@ -226,27 +226,27 @@ public class BatchNormalization extends org.deeplearning4j.nn.conf.layers.BatchN
 	}
 
 	@OptionMetadata(
-					displayName = "bias L1",
-					description = "The bias L1 parameter (default = 0).",
-					commandLineParamName = "biasL1", commandLineParamSynopsis = "-biasL1 <double>",
+					displayName = "L1 bias",
+					description = "The L1 bias parameter (default = 0).",
+					commandLineParamName = "l1Bias", commandLineParamSynopsis = "-l1Bias <double>",
 					displayOrder = 13)
 	public double getBiasL1() {
-		return this.biasL1;
+		return this.l1Bias;
 	}
 	public void setBiasL1(double biasL1) {
-		this.biasL1 = biasL1;
+		this.l1Bias = biasL1;
 	}
 
 	@OptionMetadata(
-					displayName = "bias L2",
-					description = "The bias L2 parameter (default = 0).",
-					commandLineParamName = "biasL2", commandLineParamSynopsis = "-biasL2 <double>",
+					displayName = "L2 bias",
+					description = "The L2 bias parameter (default = 0).",
+					commandLineParamName = "l2Bias", commandLineParamSynopsis = "-l2Bias <double>",
 					displayOrder = 14)
 	public double getBiasL2() {
-		return this.biasL2;
+		return this.l2Bias;
 	}
 	public void setBiasL2(double biasL2) {
-		this.biasL2 = biasL2;
+		this.l2Bias = biasL2;
 	}
 
 	@OptionMetadata(

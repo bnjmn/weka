@@ -21,6 +21,7 @@
 package weka.dl4j;
 
 import java.net.URI;
+import java.util.List;
 
 import org.datavec.api.split.FileSplit;
 
@@ -50,8 +51,8 @@ public class SpecifiableFolderSplit extends FileSplit {
      *
      * @param uris the list of files
      */
-    public void setFiles(URI[] uris) {
-        locations = uris;
+    public void setFiles(List<String> uris) {
+        uriStrings = uris;
     }
 
     /**

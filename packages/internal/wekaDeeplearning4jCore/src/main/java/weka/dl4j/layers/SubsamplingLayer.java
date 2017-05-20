@@ -28,6 +28,8 @@ import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.deeplearning4j.nn.weights.WeightInit;
+import org.nd4j.linalg.activations.IActivation;
+import org.nd4j.linalg.activations.impl.ActivationIdentity;
 import weka.dl4j.distribution.NormalDistribution;
 
 import weka.core.Option;
@@ -62,7 +64,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 	 */
 	public SubsamplingLayer() {
 		setLayerName("Subsampling layer");
-		setActivationFunction("identity");
+		setActivationFunction(new ActivationIdentity());
 		setWeightInit(WeightInit.XAVIER);
 		setDist(new NormalDistribution());
 		setUpdater(Updater.NESTEROVS);
@@ -77,7 +79,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 		setKernelSize(new int[] {1, 1});
 		setStride(new int[] {2, 2});
 		setPadding(new int[] {0, 0});
-		setPoolingType(PoolingType.MAX);
+		setPoolingType(org.deeplearning4j.nn.conf.layers.PoolingType.MAX);
 	}
 
 	@OptionMetadata(
@@ -93,16 +95,15 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 	}
 
 	@OptionMetadata(
-					displayName = "name of activation function",
-					description = "The name of the activation function (default = identity; options are softmax,logsoftmax,maxout,identity,abs,cos,elu,exp,log,pow,sin,acos,asin,atan,ceil,relu,sign,sqrt,step,tanh,floor,round,hardtanh,timesoneminus,negative,softplus,softsign,leakyrelu,stabilize,sigmoid).",
-					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <string>",
+					displayName = "activation function",
+					description = "The activation function to use (default = Identity).",
+					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
 					displayOrder = 2)
-	public String getActivationFunction() {
-		return this.activationFunction;
+	public IActivation setActivationFunction() { return this.activationFn; }
+	public void setActivationFunction(IActivation activationFn) {
+		this.activationFn = activationFn;
 	}
-	public void setActivationFunction(String activationFunction) {
-		this.activationFunction = activationFunction;
-	}
+
 
 	@OptionMetadata(
 					displayName = "weight initialization method",
@@ -225,27 +226,27 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 	}
 
 	@OptionMetadata(
-					displayName = "bias L1",
-					description = "The bias L1 parameter (default = 0).",
-					commandLineParamName = "biasL1", commandLineParamSynopsis = "-biasL1 <double>",
+					displayName = "L1 bias",
+					description = "The L1 bias parameter (default = 0).",
+					commandLineParamName = "l1Bias", commandLineParamSynopsis = "-l1Bias <double>",
 					displayOrder = 13)
 	public double getBiasL1() {
-		return this.biasL1;
+		return this.l1Bias;
 	}
 	public void setBiasL1(double biasL1) {
-		this.biasL1 = biasL1;
+		this.l1Bias = biasL1;
 	}
 
 	@OptionMetadata(
-					displayName = "bias L2",
-					description = "The bias L2 parameter (default = 0).",
-					commandLineParamName = "biasL2", commandLineParamSynopsis = "-biasL2 <double>",
+					displayName = "L2 bias",
+					description = "The L2 bias parameter (default = 0).",
+					commandLineParamName = "l2Bias", commandLineParamSynopsis = "-l2Bias <double>",
 					displayOrder = 14)
 	public double getBiasL2() {
-		return this.biasL2;
+		return this.l2Bias;
 	}
 	public void setBiasL2(double biasL2) {
-		this.biasL2 = biasL2;
+		this.l2Bias = biasL2;
 	}
 
 	@OptionMetadata(
@@ -451,16 +452,15 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 		this.padding = padding;
 	}
 
-
 	@OptionMetadata(
 					displayName = "pooling type",
 					description = "The type of pooling to use (default = MAX; options: MAX, AVG, SUM, NONE).",
 					commandLineParamName = "poolingType", commandLineParamSynopsis = "-poolingType <string>",
 					displayOrder = 30)
-	public PoolingType getPoolingType() {
+	public org.deeplearning4j.nn.conf.layers.PoolingType getPoolingType() {
 		return this.poolingType;
 	}
-	public void setPoolingType(PoolingType poolingType) {
+	public void setPoolingType(org.deeplearning4j.nn.conf.layers.PoolingType poolingType) {
 		this.poolingType = poolingType;
 	}
 

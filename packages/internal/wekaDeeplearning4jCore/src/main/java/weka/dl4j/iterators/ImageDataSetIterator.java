@@ -25,6 +25,7 @@ import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import java.util.Random;
 
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
@@ -152,7 +153,6 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
      */
     protected EasyImageRecordReader getImageRecordReader(Instances data, int seed) throws Exception {
 
-        URI[] locations = new URI[ data.numInstances() ];
         int len = 0;
         ArrayList<File> filenames = new ArrayList<File>();
         ArrayList<String> classes = new ArrayList<String>();
@@ -167,7 +167,7 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
         EasyImageRecordReader reader = new EasyImageRecordReader(getWidth(), getHeight(), getNumChannels(), filenames,
                 classes, seed);
         SpecifiableFolderSplit fs = new SpecifiableFolderSplit();
-        fs.setFiles(locations);
+        fs.setFiles(new ArrayList<String>());
         fs.setLength(len);
         reader.initialize(fs);
         return reader;
