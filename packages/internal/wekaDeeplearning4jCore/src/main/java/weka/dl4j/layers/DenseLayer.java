@@ -24,7 +24,6 @@ import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.nd4j.linalg.activations.IActivation;
-import org.nd4j.linalg.activations.impl.ActivationReLU;
 import weka.dl4j.distribution.NormalDistribution;
 import org.deeplearning4j.nn.weights.WeightInit;
 
@@ -32,6 +31,7 @@ import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.OptionMetadata;
 import weka.gui.ProgrammaticProperty;
+import weka.dl4j.activations.ActivationReLU;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -95,11 +95,16 @@ public class DenseLayer extends org.deeplearning4j.nn.conf.layers.DenseLayer imp
 					description = "The activation function to use (default = ReLU).",
 					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
 					displayOrder = 2)
-	public IActivation setActivationFunction() { return this.activationFn; }
+	public IActivation getActivationFunction() { return this.activationFn; }
 	public void setActivationFunction(IActivation activationFn) {
 		this.activationFn = activationFn;
 	}
 
+	@ProgrammaticProperty
+	public IActivation getActivationFn() { return super.getActivationFn(); }
+	public void setActivationFn(IActivation fn) {
+		super.setActivationFn(fn);
+	}
 
 	@OptionMetadata(
 					displayName = "weight initialization method",

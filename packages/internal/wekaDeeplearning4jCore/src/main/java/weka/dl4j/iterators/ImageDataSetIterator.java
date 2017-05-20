@@ -167,7 +167,7 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
         EasyImageRecordReader reader = new EasyImageRecordReader(getWidth(), getHeight(), getNumChannels(), filenames,
                 classes, seed);
         SpecifiableFolderSplit fs = new SpecifiableFolderSplit();
-        fs.setFiles(new ArrayList<String>());
+        fs.setFiles(new URI[0]);
         fs.setLength(len);
         reader.initialize(fs);
         return reader;

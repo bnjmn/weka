@@ -5,10 +5,10 @@ org.deeplearning4j.nn.conf.distribution.Distribution =\
  weka.dl4j.distribution
 
 org.nd4j.linalg.lossfunctions.ILossFunction =\
- org.nd4j.linalg.lossfunctions.impl
+ weka.dl4j.lossfunctions
 
 weka.dl4j.iterators.AbstractDataSetIterator =\
  weka.dl4j.iterators
 
 org.nd4j.linalg.activations.IActivation =\
- org.nd4j.linalg.activations.impl
+ weka.dl4j.activations

@@ -51,8 +51,8 @@ public class SpecifiableFolderSplit extends FileSplit {
      *
      * @param uris the list of files
      */
-    public void setFiles(List<String> uris) {
-        uriStrings = uris;
+    public void setFiles(URI[] uris) {
+        locations = uris;
     }
 
     /**

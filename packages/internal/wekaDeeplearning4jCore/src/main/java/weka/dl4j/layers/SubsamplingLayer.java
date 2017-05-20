@@ -29,13 +29,13 @@ import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.deeplearning4j.nn.weights.WeightInit;
 import org.nd4j.linalg.activations.IActivation;
-import org.nd4j.linalg.activations.impl.ActivationIdentity;
 import weka.dl4j.distribution.NormalDistribution;
 
 import weka.core.Option;
 import weka.core.OptionMetadata;
 import weka.core.OptionHandler;
 import weka.gui.ProgrammaticProperty;
+import weka.dl4j.activations.ActivationIdentity;
 
 /**
  * A version of DeepLearning4j's SubsamplingLayer that implements WEKA option handling.
@@ -99,11 +99,16 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					description = "The activation function to use (default = Identity).",
 					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
 					displayOrder = 2)
-	public IActivation setActivationFunction() { return this.activationFn; }
+	public IActivation getActivationFunction() { return this.activationFn; }
 	public void setActivationFunction(IActivation activationFn) {
 		this.activationFn = activationFn;
 	}
 
+	@ProgrammaticProperty
+	public IActivation getActivationFn() { return super.getActivationFn(); }
+	public void setActivationFn(IActivation fn) {
+		super.setActivationFn(fn);
+	}
 
 	@OptionMetadata(
 					displayName = "weight initialization method",

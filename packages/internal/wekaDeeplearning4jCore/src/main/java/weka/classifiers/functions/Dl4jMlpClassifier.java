@@ -228,9 +228,9 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   }
 
   @OptionMetadata(displayName = "layer specification",
-    description = "The specification of the layers.",
-    commandLineParamName = "layers",
-    commandLineParamSynopsis = "-layers <string>", displayOrder = 2)
+    description = "The specification of a layer. This option can be used multiple times.",
+    commandLineParamName = "layer",
+    commandLineParamSynopsis = "-layer <string>", displayOrder = 2)
   public void setLayers(Layer[] layers) {
     m_layers = layers;
   }

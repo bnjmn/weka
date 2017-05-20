@@ -24,17 +24,17 @@ import org.deeplearning4j.nn.conf.GradientNormalization;
 import org.deeplearning4j.nn.conf.Updater;
 import org.deeplearning4j.nn.conf.distribution.Distribution;
 import org.nd4j.linalg.activations.IActivation;
-import org.nd4j.linalg.activations.impl.ActivationSoftmax;
 import weka.dl4j.distribution.NormalDistribution;
 import org.deeplearning4j.nn.weights.WeightInit;
 
 import org.nd4j.linalg.lossfunctions.ILossFunction;
-import org.nd4j.linalg.lossfunctions.impl.LossMCXENT;
 
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.OptionMetadata;
 import weka.gui.ProgrammaticProperty;
+import weka.dl4j.activations.ActivationSoftmax;
+import weka.dl4j.lossfunctions.LossMCXENT;
 
 import java.io.Serializable;
 import java.util.Enumeration;
@@ -98,9 +98,15 @@ public class OutputLayer extends org.deeplearning4j.nn.conf.layers.OutputLayer i
 					description = "The activation function to use (default = ActivationSoftmax).",
 					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
 					displayOrder = 2)
-	public IActivation setActivation() { return this.activationFn; }
-	public void setActivation(IActivation activationFn) {
+	public IActivation getActivationFunction() { return this.activationFn; }
+	public void setActivationFunction(IActivation activationFn) {
 		this.activationFn = activationFn;
+	}
+
+	@ProgrammaticProperty
+	public IActivation getActivationFn() { return super.getActivationFn(); }
+	public void setActivationFn(IActivation fn) {
+		super.setActivationFn(fn);
 	}
 
 	@OptionMetadata(
