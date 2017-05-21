@@ -114,7 +114,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "eps",
 			description = "The value of the eps parameter (default = 1e-8).",
 			commandLineParamName = "eps", commandLineParamSynopsis = "-eps <double>",
-			displayOrder = 1)
+			displayOrder = 2)
 	public double getEps() {
 		return super.getEps();
 	}
@@ -126,7 +126,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "pnorm",
 			description = "The value of the pnorm parameter (default = 1).",
 			commandLineParamName = "pnorm", commandLineParamSynopsis = "-pnorm <int>",
-			displayOrder = 1)
+			displayOrder = 3)
 	public int getPnorm() { return super.getPnorm(); }
 	public void setPnorm(int p) {
 		super.setPnorm(p);
@@ -136,7 +136,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of columns in kernel",
 			description = "The number of columns in the kernel (default = 5).",
 			commandLineParamName = "kernelSizeX", commandLineParamSynopsis = "-kernelSizeX <int>",
-			displayOrder = 1)
+			displayOrder = 4)
 	public int getKernelSizeX() {
 		return this.kernelSize[0];
 	}
@@ -149,7 +149,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of rows in kernel",
 			description = "The number of rows in the kernel (default = 5).",
 			commandLineParamName = "kernelSizeY", commandLineParamSynopsis = "-kernelSizeY <int>",
-			displayOrder = 2)
+			displayOrder = 5)
 	public int getKernelSizeY() {
 		return this.kernelSize[1];
 	}
@@ -169,7 +169,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of columns in stride",
 			description = "The number of columns in the stride (default = 1).",
 			commandLineParamName = "strideX", commandLineParamSynopsis = "-strideX <int>",
-			displayOrder = 3)
+			displayOrder = 6)
 	public int getStrideX() {
 		return this.stride[0];
 	}
@@ -181,7 +181,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of rows in stride",
 			description = "The number of rows in the stride (default = 1).",
 			commandLineParamName = "strideY", commandLineParamSynopsis = "-strideY <int>",
-			displayOrder = 4)
+			displayOrder = 7)
 	public int getStrideY() {
 		return this.stride[1];
 	}
@@ -201,7 +201,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of columns in padding",
 			description = "The number of columns in the padding (default = 0).",
 			commandLineParamName = "paddingX", commandLineParamSynopsis = "-paddingX <int>",
-			displayOrder = 5)
+			displayOrder = 8)
 	public int getPaddingX() {
 		return this.padding[0];
 	}
@@ -213,7 +213,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "number of rows in padding",
 			description = "The number of rows in the padding (default = 0).",
 			commandLineParamName = "paddingY", commandLineParamSynopsis = "-paddingY <int>",
-			displayOrder = 6)
+			displayOrder = 9)
 	public int getPaddingY() {
 		return this.padding[1];
 	}
@@ -233,7 +233,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 			displayName = "pooling type",
 			description = "The type of pooling to use (default = MAX; options: MAX, AVG, SUM, NONE).",
 			commandLineParamName = "poolingType", commandLineParamSynopsis = "-poolingType <string>",
-			displayOrder = 7)
+			displayOrder = 10)
 	public org.deeplearning4j.nn.conf.layers.PoolingType getPoolingType() {
 		return this.poolingType;
 	}
@@ -244,7 +244,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "activation function",
 					description = "The activation function to use (default = Identity).",
 					commandLineParamName = "activation", commandLineParamSynopsis = "-activation <specification>",
-					displayOrder = 8)
+					displayOrder = 11)
 	public IActivation getActivationFunction() { return this.activationFn; }
 	public void setActivationFunction(IActivation activationFn) {
 		this.activationFn = activationFn;
@@ -260,7 +260,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "weight initialization method",
 					description = "The method for weight initialization (default = XAVIER).",
 					commandLineParamName = "weightInit", commandLineParamSynopsis = "-weightInit <specification>",
-					displayOrder = 9)
+					displayOrder = 12)
 	public WeightInit getWeightInit() {
 		return this.weightInit;
 	}
@@ -272,7 +272,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "bias initialization",
 					description = "The bias initialization (default = 1.0).",
 					commandLineParamName = "biasInit", commandLineParamSynopsis = "-biasInit <double>",
-					displayOrder = 10)
+					displayOrder = 13)
 	public double getBiasInit() {
 		return this.biasInit;
 	}
@@ -284,7 +284,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "distribution",
 					description = "The distribution (default = NormalDistribution(1e-3, 1)).",
 					commandLineParamName = "dist", commandLineParamSynopsis = "-dist <specification>",
-					displayOrder = 11)
+					displayOrder = 14)
 	public Distribution getDist() {
 		return this.dist;
 	}
@@ -296,7 +296,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "learning rate",
 					description = "The learning rate (default = 0.01).",
 					commandLineParamName = "lr", commandLineParamSynopsis = "-lr <double>",
-					displayOrder = 12)
+					displayOrder = 15)
 	public double getLearningRate() {
 		return this.learningRate;
 	}
@@ -308,7 +308,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "bias learning rate",
 					description = "The bias learning rate (default = 0.01).",
 					commandLineParamName = "blr", commandLineParamSynopsis = "-blr <double>",
-					displayOrder = 13)
+					displayOrder = 16)
 	public double getBiasLearningRate() {
 		return this.biasLearningRate;
 	}
@@ -320,7 +320,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "learning rate schedule",
 					description = "The learning rate schedule.",
 					commandLineParamName = "lrSchedule", commandLineParamSynopsis = "-lrSchedule <specification>",
-					displayOrder = 14)
+					displayOrder = 17)
 	public Map<Integer, Double> getLearningRateSchedule() {
 		return this.learningRateSchedule;
 	}
@@ -332,7 +332,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "momentum",
 					description = "The momentum (default = 0.9).",
 					commandLineParamName = "momentum", commandLineParamSynopsis = "-momentum <double>",
-					displayOrder = 15)
+					displayOrder = 18)
 	public double getMomentum() {
 		return this.momentum;
 	}
@@ -344,7 +344,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "momentum schedule",
 					description = "The momentum schedule.",
 					commandLineParamName = "momentumSchedule", commandLineParamSynopsis = "-momentumSchedule <specification>",
-					displayOrder = 16)
+					displayOrder = 19)
 	public Map<Integer, Double> getMomentumSchedule() {
 		return this.momentumSchedule;
 	}
@@ -356,7 +356,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "L1",
 					description = "The L1 parameter (default = 0).",
 					commandLineParamName = "L1", commandLineParamSynopsis = "-L1 <double>",
-					displayOrder = 17)
+					displayOrder = 20)
 	public double getL1() {
 		return this.l1;
 	}
@@ -368,7 +368,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "L2",
 					description = "The L2 parameter (default = 0).",
 					commandLineParamName = "L2", commandLineParamSynopsis = "-L2 <double>",
-					displayOrder = 18)
+					displayOrder = 21)
 	public double getL2() {
 		return this.l2;
 	}
@@ -380,7 +380,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "L1 bias",
 					description = "The L1 bias parameter (default = 0).",
 					commandLineParamName = "l1Bias", commandLineParamSynopsis = "-l1Bias <double>",
-					displayOrder = 19)
+					displayOrder = 22)
 	public double getBiasL1() {
 		return this.l1Bias;
 	}
@@ -392,7 +392,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "L2 bias",
 					description = "The L2 bias parameter (default = 0).",
 					commandLineParamName = "l2Bias", commandLineParamSynopsis = "-l2Bias <double>",
-					displayOrder = 20)
+					displayOrder = 23)
 	public double getBiasL2() {
 		return this.l2Bias;
 	}
@@ -404,7 +404,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "dropout parameter",
 					description = "The dropout parameter (default = 0).",
 					commandLineParamName = "dropout", commandLineParamSynopsis = "-dropout <double>",
-					displayOrder = 21)
+					displayOrder = 24)
 	public double getDropOut() {
 		return this.dropOut;
 	}
@@ -416,7 +416,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "updater for stochastic gradient descent",
 					description = "The updater for stochastic gradient descent (default NESTEROVS).",
 					commandLineParamName = "updater", commandLineParamSynopsis = "-updater <speficiation>",
-					displayOrder = 22)
+					displayOrder = 25)
 	public Updater getUpdater() {
 		return this.updater;
 	}
@@ -428,7 +428,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "ADADELTA's rho parameter",
 					description = "ADADELTA's rho parameter (default = 0).",
 					commandLineParamName = "rho", commandLineParamSynopsis = "-rho <double>",
-					displayOrder = 23)
+					displayOrder = 26)
 	public double getRho() {
 		return this.rho;
 	}
@@ -440,7 +440,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "ADADELTA's epsilon parameter",
 					description = "ADADELTA's epsilon parameter (default = 1e-6).",
 					commandLineParamName = "epsilon", commandLineParamSynopsis = "-epsilon <double>",
-					displayOrder = 24)
+					displayOrder = 27)
 	public double getEpsilon() {
 		return this.epsilon;
 	}
@@ -452,7 +452,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "RMSPROP's RMS decay parameter",
 					description = "RMSPROP's RMS decay parameter (default = 0.95).",
 					commandLineParamName = "rmsDecay", commandLineParamSynopsis = "-rmsDecay <double>",
-					displayOrder = 25)
+					displayOrder = 28)
 	public double getRmsDecay() {
 		return this.rmsDecay;
 	}
@@ -464,7 +464,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "ADAM's mean decay parameter",
 					description = "ADAM's mean decay parameter (default 0.9).",
 					commandLineParamName = "adamMeanDecay", commandLineParamSynopsis = "-adamMeanDecay <double>",
-					displayOrder = 26)
+					displayOrder = 29)
 	public double getAdamMeanDecay() { return this.adamMeanDecay; }
 	public void setAdamMeanDecay(double adamMeanDecay) {
 		this.adamMeanDecay = adamMeanDecay;
@@ -474,7 +474,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "ADAMS's var decay parameter",
 					description = "ADAM's var decay parameter (default 0.999).",
 					commandLineParamName = "adamVarDecay", commandLineParamSynopsis = "-adamVarDecay <double>",
-					displayOrder = 27)
+					displayOrder = 30)
 	public double getAdamVarDecay() {
 		return this.adamVarDecay;
 	}
@@ -486,7 +486,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "gradient normalization method",
 					description = "The gradient normalization method (default = None).",
 					commandLineParamName = "gradientNormalization", commandLineParamSynopsis = "-gradientNormalization <specification>",
-					displayOrder = 28)
+					displayOrder = 31)
 	public GradientNormalization getGradientNormalization() {
 		return this.gradientNormalization;
 	}
@@ -498,7 +498,7 @@ public class SubsamplingLayer extends org.deeplearning4j.nn.conf.layers.Subsampl
 					displayName = "gradient normalization threshold",
 					description = "The gradient normalization threshold (default = 1).",
 					commandLineParamName = "gradNormThreshold", commandLineParamSynopsis = "-gradNormThreshold <double>",
-					displayOrder = 29)
+					displayOrder = 32)
 	public double getGradientNormalizationThreshold() {
 		return this.gradientNormalizationThreshold;
 	}
