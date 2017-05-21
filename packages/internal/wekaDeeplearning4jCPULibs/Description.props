@@ -6,10 +6,10 @@
 PackageName=wekaDeeplearning4jCPULibs
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date
-Date=2016-12-09
+Date=2017-05-21
 
 # Title (required)
 Title=CPU native libraries for wekaDeeplearning4j
@@ -28,13 +28,13 @@ License=GPL 3.0
 # Description (required)
 Description=Provides the CPU native libraries for the wekaDeeplearning4jCPU package
 
-Changes=Splitting package into a core package, CPU-related libs package and GPU-related libs package
+Changes=Upgraded to deepLearning4j version 0.8.0. Several bug fixes to do with option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jCPULibs1.0.0.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jCPULibs1.0.1.zip?download
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
+URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4jCPULibs
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
@@ -45,5 +45,5 @@ URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
 # Dependencies
 Depends=weka (>=3.8.1-SNAPSHOT)
 
-# Package(s) that can't be installed alongside this one (old wekaDeepLearning4j)
+# Package(s) that can't be installed alongside this one
 Precludes=wekaDeeplearning4jGPULibs

@@ -6,10 +6,10 @@
 PackageName=wekaDeeplearning4jCore
 
 # Version (required)
-Version=1.1.5
+Version=1.1.6
 
 #Date
-Date=2016-12-23
+Date=2017-05-21
 
 # Title (required)
 Title=Weka wrappers for Deeplearning4j
@@ -28,13 +28,13 @@ License=GPL 3.0
 # Description (required)
 Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library. Do *not* install this package directly, instead install either wekaDeeplearning4jCPU (for CPU-based processing) or wekaDeeplearning4jGPU (for GPU-accelerated processing).
 
-Changes=Can now train convolutional networks from appropriate data in WEKA's Instances format, using new ConvolutionalInstancesIterator.
+Changes=Upgraded to deepLearning4j version 0.8.0. Several bug fixes to do with option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jCore1.1.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jCore1.1.6.zip?download
 
 # URL for further information
-URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
+URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4jCore
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...

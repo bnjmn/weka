@@ -78,16 +78,32 @@ public class DenseLayer extends org.deeplearning4j.nn.conf.layers.DenseLayer imp
 		setRmsDecay(0.95);
 	}
 
+	@ProgrammaticProperty
+	public int getNIn() { return super.getNIn(); }
+	public void setNIn(int nIn) {
+		this.nIn = nIn;
+	}
+
 	@OptionMetadata(
 					displayName = "layer name",
 					description = "The name of the layer (default = Hidden Layer).",
 					commandLineParamName = "name", commandLineParamSynopsis = "-name <string>",
-					displayOrder = 1)
+					displayOrder = 0)
 	public String getLayerName() {
 		return this.layerName;
 	}
 	public void setLayerName(String layerName) {
 		this.layerName = layerName;
+	}
+
+	@OptionMetadata(
+			displayName = "number of units",
+			description = "The number of units.",
+			commandLineParamName = "nOut", commandLineParamSynopsis = "-nOut <int>",
+			displayOrder = 1)
+	public int getNOut() { return super.getNOut(); }
+	public void setNOut(int nOut) {
+		this.nOut = nOut;
 	}
 
 	@OptionMetadata(
@@ -357,20 +373,12 @@ public class DenseLayer extends org.deeplearning4j.nn.conf.layers.DenseLayer imp
 	}
 
 	@ProgrammaticProperty
-	public int getNIn() { return super.getNIn(); }
-	public void setNIn(int nIn) {
-		this.nIn = nIn;
-	}
+	public double getL1Bias() { return super.getL1Bias(); }
+	public void setL1Bias(int l1bias) { super.setL1Bias(l1bias); }
 
-	@OptionMetadata(
-					displayName = "number of units",
-					description = "The number of units.",
-					commandLineParamName = "nOut", commandLineParamSynopsis = "-nOut <int>",
-					displayOrder = 25)
-	public int getNOut() { return super.getNOut(); }
-	public void setNOut(int nOut) {
-		this.nOut = nOut;
-	}
+	@ProgrammaticProperty
+	public double getL2Bias() { return super.getL2Bias(); }
+	public void setL2Bias(int l2bias) { super.setL2Bias(l2bias); }
 
 	/**
 	 * Returns an enumeration describing the available options.

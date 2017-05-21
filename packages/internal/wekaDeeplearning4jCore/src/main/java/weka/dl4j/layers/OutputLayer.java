@@ -85,12 +85,24 @@ public class OutputLayer extends org.deeplearning4j.nn.conf.layers.OutputLayer i
 					displayName = "layer name",
 					description = "The name of the layer (default = Output Layer).",
 					commandLineParamName = "name", commandLineParamSynopsis = "-name <string>",
-					displayOrder = 1)
+					displayOrder = 0)
 	public String getLayerName() {
 		return this.layerName;
 	}
 	public void setLayerName(String layerName) {
 		this.layerName = layerName;
+	}
+
+	@OptionMetadata(
+			displayName = "loss function",
+			description = "The loss function to use (default = LossMCXENT).",
+			commandLineParamName = "lossFn", commandLineParamSynopsis = "-lossFn <specification>",
+			displayOrder = 1)
+	public ILossFunction getLossFn() {
+		return this.lossFn;
+	}
+	public void setLossFn(ILossFunction lossFn) {
+		this.lossFn = lossFn;
 	}
 
 	@OptionMetadata(
@@ -371,17 +383,13 @@ public class OutputLayer extends org.deeplearning4j.nn.conf.layers.OutputLayer i
 		this.nOut = nOut;
 	}
 
-	@OptionMetadata(
-					displayName = "loss function",
-					description = "The loss function to use (default = LossMCXENT).",
-					commandLineParamName = "lossFn", commandLineParamSynopsis = "-lossFn <specification>",
-					displayOrder = 24)
-	public ILossFunction getLossFn() {
-		return this.lossFn;
-	}
-	public void setLossFn(ILossFunction lossFn) {
-		this.lossFn = lossFn;
-	}
+	@ProgrammaticProperty
+	public double getL1Bias() { return super.getL1Bias(); }
+	public void setL1Bias(int l1bias) { super.setL1Bias(l1bias); }
+
+	@ProgrammaticProperty
+	public double getL2Bias() { return super.getL2Bias(); }
+	public void setL2Bias(int l2bias) { super.setL2Bias(l2bias); }
 
 	/**
 	 * Returns an enumeration describing the available options.
