@@ -6,10 +6,10 @@
 PackageName=wekaDeeplearning4jGPULibs
 
 # Version (required)
-Version=1.0.1
+Version=1.0.2
 
 #Date
-Date=2016-12-12
+Date=2017-05-21
 
 # Title (required)
 Title=GPU native libraries for wekaDeeplearning4j
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Provides the Cuda GPU native libraries for the wekaDeeplearning4jGPU package
 
-Changes=Now includes the nd4j-cuda-8.0-0.7.0.jar file
+Changes=Upgraded to deepLearning4j version 0.8.0. Several bug fixes to do with option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPULibs1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaDeeplearning4jGPULibs1.0.2.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
@@ -45,5 +45,5 @@ URL=http://weka.sourceforge.net/doc.packages/wekaDeeplearning4j
 # Dependencies
 Depends=weka (>=3.8.1-SNAPSHOT)
 
-# Package(s) that can't be installed alongside this one (old wekaDeepLearning4j)
+# Package(s) that can't be installed alongside this one
 Precludes=wekaDeeplearning4jCPULibs
