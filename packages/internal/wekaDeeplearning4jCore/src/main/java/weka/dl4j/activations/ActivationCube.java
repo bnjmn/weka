@@ -21,6 +21,7 @@
 
 package weka.dl4j.activations;
 
+import org.nd4j.shade.jackson.annotation.JsonTypeName;
 import weka.core.Option;
 import weka.core.OptionHandler;
 import weka.core.OptionMetadata;
@@ -34,6 +35,7 @@ import java.util.Enumeration;
  *
  * @version $Revision: 11711 $
  */
+@JsonTypeName("Cube")
 public class ActivationCube extends org.nd4j.linalg.activations.impl.ActivationCube implements OptionHandler {
 
   /**

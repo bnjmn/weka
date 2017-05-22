@@ -21,6 +21,7 @@
 
 package weka.dl4j.activations;
 
+import org.nd4j.shade.jackson.annotation.JsonTypeName;
 import weka.core.Option;
 import weka.core.OptionHandler;
 
@@ -33,6 +34,7 @@ import java.util.Enumeration;
  *
  * @version $Revision: 11711 $
  */
+@JsonTypeName("HardTanh")
 public class ActivationHardTanH extends org.nd4j.linalg.activations.impl.ActivationHardTanH implements OptionHandler {
 
   /**

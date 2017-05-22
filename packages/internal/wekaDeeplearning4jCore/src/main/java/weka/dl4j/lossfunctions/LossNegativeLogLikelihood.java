@@ -21,6 +21,7 @@
 
 package weka.dl4j.lossfunctions;
 
+import org.nd4j.shade.jackson.annotation.JsonTypeName;
 import weka.core.Option;
 import weka.core.OptionHandler;
 
@@ -33,6 +34,7 @@ import java.util.Enumeration;
  *
  * @version $Revision: 11711 $
  */
+@JsonTypeName("NegativeLogLikelihood")
 public class LossNegativeLogLikelihood extends org.nd4j.linalg.lossfunctions.impl.LossNegativeLogLikelihood implements OptionHandler {
 
   /**
