@@ -26,7 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library.
+Description=Provides a wrapper classifier for feedforward networks, including convolutional networks, trained using the Deeplearning4j library. This package supersedes wekaDeepLearning4j for users of Weka 3.9.1 or higher. Installing this package will cause wekaDeepLearning4jCore and wekaDeepLearning4jCPULibs to be installed. Note that wekaDeepLearning4jGPU cannot be installed at the same time as this (the CPU) version.
 
 Changes=Upgraded to deepLearning4j version 0.8.0. Several bug fixes to do with option handling.
 
