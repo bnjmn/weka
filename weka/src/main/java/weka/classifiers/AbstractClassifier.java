@@ -298,7 +298,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * Parses a given list of options. Valid options are:
    * <p>
    *
-   * -D <br>
+   * -output-debug-info <br>
    * If set, classifier is run in debug mode and may output additional info to
    * the console.
    * <p>
