@@ -148,7 +148,7 @@ public abstract class Kernel implements Serializable, OptionHandler,
    */
   @Override
   public Enumeration<Option> listOptions() {
-    Vector<Option> result = new Vector<Option>();
+    Vector<Option> result = Option.listOptionsForClassHierarchy(this.getClass(), Kernel.class);
 
     result.addElement(new Option(
       "\tEnables debugging output (if available) to be printed.\n"
@@ -169,6 +169,8 @@ public abstract class Kernel implements Serializable, OptionHandler,
    */
   @Override
   public void setOptions(String[] options) throws Exception {
+    Option.setOptionsForHierarchy(options, this, Kernel.class);
+
     setDebug(Utils.getFlag("output-debug-info", options));
 
     setChecksTurnedOff(Utils.getFlag("no-checks", options));
@@ -184,6 +186,9 @@ public abstract class Kernel implements Serializable, OptionHandler,
   @Override
   public String[] getOptions() {
     Vector<String> result = new Vector<String>();
+    for (String s : Option.getOptionsForHierarchy(this, Kernel.class)) {
+      result.add(s);
+    }
 
     if (getDebug()) {
       result.add("-output-debug-info");
