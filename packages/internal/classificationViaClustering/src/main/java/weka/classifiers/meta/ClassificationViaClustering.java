@@ -371,7 +371,11 @@ public class ClassificationViaClustering extends AbstractClassifier {
     // class
     result.disableAllClasses();
     result.disable(Capability.NO_CLASS);
+    result.disable(Capability.NUMERIC_CLASS);
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.MISSING_CLASS_VALUES);
+
+    result.setOwner(this);
 
     return result;
   }
@@ -396,10 +400,6 @@ public class ClassificationViaClustering extends AbstractClassifier {
 
     // can classifier handle the data?
     getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
 
     // save original header (needed for clusters to classes output)
     m_OriginalHeader = new Instances(data, 0);
@@ -435,10 +435,10 @@ public class ClassificationViaClustering extends AbstractClassifier {
       current = new double[eval.getNumClusters() + 1];
       for (i = 0; i < data.numInstances(); i++) {
         instance = data.instance(i);
-	if (!instance.classIsMissing()) {
-	    counts[(int) clusterAssignments[i]][(int) instance.classValue()]++;
-	    clusterTotals[(int) clusterAssignments[i]]++;
-	}
+        if (!instance.classIsMissing()) {
+          counts[(int) clusterAssignments[i]][(int) instance.classValue()]++;
+          clusterTotals[(int) clusterAssignments[i]]++;
+        }
       }
       best[eval.getNumClusters()] = Double.MAX_VALUE;
       ClusterEvaluation.mapClasses(eval.getNumClusters(), 0, counts,
