@@ -616,7 +616,7 @@ public class CostSensitiveClassifier
 
   /**
    * Set the batch size to use. Gets passed through to the base learner if it
-   * implements BatchPrecitor. Otherwise it is just ignored.
+   * implements BatchPredictor. Otherwise it is just ignored.
    *
    * @param size the batch size to use
    */
@@ -624,6 +624,8 @@ public class CostSensitiveClassifier
 
     if (getClassifier() instanceof BatchPredictor) {
       ((BatchPredictor) getClassifier()).setBatchSize(size);
+    } else {
+      super.setBatchSize(size);
     }
   }
 
@@ -638,7 +640,7 @@ public class CostSensitiveClassifier
     if (getClassifier() instanceof BatchPredictor) {
       return ((BatchPredictor) getClassifier()).getBatchSize();
     } else {
-      return "1";
+      return super.getBatchSize();
     }
   }
 

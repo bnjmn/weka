@@ -48,19 +48,35 @@ import java.util.Vector;
  *  by filter options.
  *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
  * </pre>
- * 
+ *
  * <pre>
- * -D
- *  If set, classifier is run in debug mode and
- *  may output additional info to the console
- * </pre>
- * 
- * <pre>
- * -W
+ * -W &lt;classifier name&gt;
  *  Full name of base classifier.
  *  (default: weka.classifiers.trees.J48)
  * </pre>
- * 
+ *
+ * -doNotCheckForModifiedClassAttribute <br>
+ * If this is set, the classifier will not check whether the filter modifies the class attribute (use with caution).
+ * <p>
+ *
+ * -output-debug-info <br>
+ * If set, classifier is run in debug mode and may output additional info to
+ * the console.
+ * <p>
+ *
+ * -do-not-check-capabilities <br>
+ * If set, classifier capabilities are not checked before classifier is built
+ * (use with caution).
+ * <p>
+ *
+ * -num-decimal-laces <br>
+ * The number of decimal places for the output of numbers in the model.
+ * <p>
+ *
+ * -batch-size <br>
+ * The desired batch size for batch prediction.
+ * <p>
+ *
  * <pre>
  * Options specific to classifier weka.classifiers.trees.J48:
  * </pre>
@@ -169,14 +185,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   protected String defaultFilterString() {
 
     return "weka.filters.supervised.attribute.Discretize";
-  }
-
-  /**
-   * Use this method to determine whether classifier checks whether class attribute has been modified by filter.
-   */
-  public void setDoNotCheckForModifiedClassAttribute(boolean flag) {
-
-    m_DoNotCheckForModifiedClassAttribute = flag;
   }
 
   /**
@@ -325,6 +333,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer
         + "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"",
       "F", 1, "-F <filter specification>"));
 
+    newVector.addElement(new Option(
+            "\tIf set, classifier will not check whether the filter modifies the class (use with caution).",
+            "doNotCheckForModifiedClassAttribute", 0, "-doNotCheckForModifiedClassAttribute"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     if (getFilter() instanceof OptionHandler) {
@@ -343,25 +355,41 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    *
    * <!-- options-start --> Valid options are:
    * <p/>
-   * 
+   *
    * <pre>
    * -F &lt;filter specification&gt;
    *  Full class name of filter to use, followed
    *  by filter options.
    *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
    * </pre>
-   * 
+   *
    * <pre>
-   * -D
-   *  If set, classifier is run in debug mode and
-   *  may output additional info to the console
-   * </pre>
-   * 
-   * <pre>
-   * -W
+   * -W &lt;classifier name&gt;
    *  Full name of base classifier.
    *  (default: weka.classifiers.trees.J48)
    * </pre>
+   *
+   * -doNotCheckForModifiedClassAttribute <br>
+   * If this is set, the classifier will not check whether the filter modifies the class attribute (use with caution).
+   * <p>
+   *
+   * -output-debug-info <br>
+   * If set, classifier is run in debug mode and may output additional info to
+   * the console.
+   * <p>
+   *
+   * -do-not-check-capabilities <br>
+   * If set, classifier capabilities are not checked before classifier is built
+   * (use with caution).
+   * <p>
+   *
+   * -num-decimal-laces <br>
+   * The number of decimal places for the output of numbers in the model.
+   * <p>
+   *
+   * -batch-size <br>
+   * The desired batch size for batch prediction.
+   * <p>
    * 
    * <pre>
    * Options specific to classifier weka.classifiers.trees.J48:
@@ -440,9 +468,37 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     filterSpec[0] = "";
     setFilter((Filter) Utils.forName(Filter.class, filterName, filterSpec));
 
+    setDoNotCheckForModifiedClassAttribute(Utils.getFlag("doNotCheckForModifiedClassAttribute", options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return 		tip text for this property suitable for
+   * 			displaying in the explorer/experimenter gui
+   */
+  public String doNotCheckForModifiedClassAttributeTipText() {
+    return "Turns off check for modified class attribute - use with caution.";
+  }
+
+  /**
+   * Returns true if classifier checks whether class attribute has been modified by filter.
+   */
+  public boolean getDoNotCheckForModifiedClassAttribute() {
+
+    return m_DoNotCheckForModifiedClassAttribute;
+  }
+
+  /**
+   * Use this method to determine whether classifier checks whether class attribute has been modified by filter.
+   */
+  public void setDoNotCheckForModifiedClassAttribute(boolean flag) {
+
+    m_DoNotCheckForModifiedClassAttribute = flag;
   }
 
   /**
@@ -456,6 +512,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
     options.add("-F");
     options.add("" + getFilterSpec());
+
+    if (getDoNotCheckForModifiedClassAttribute()) {
+      options.add("-doNotCheckForModifiedClassAttribute");
+    }
 
     Collections.addAll(options, super.getOptions());
 
@@ -653,7 +713,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
   /**
    * Set the batch size to use. Gets passed through to the base learner if it
-   * implements BatchPrecitor. Otherwise it is just ignored.
+   * implements BatchPredictor. Otherwise it is just ignored.
    *
    * @param size the batch size to use
    */
@@ -661,6 +721,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
     if (getClassifier() instanceof BatchPredictor) {
       ((BatchPredictor) getClassifier()).setBatchSize(size);
+    } else {
+      super.setBatchSize(size);
     }
   }
 
@@ -675,7 +737,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (getClassifier() instanceof BatchPredictor) {
       return ((BatchPredictor) getClassifier()).getBatchSize();
     } else {
-      return "1";
+      return super.getBatchSize();
     }
   }
 
@@ -717,7 +779,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    */
   public boolean implementsMoreEfficientBatchPrediction() {
     if (!(getClassifier() instanceof BatchPredictor)) {
-      return false;
+      return super.implementsMoreEfficientBatchPrediction();
     }
 
     return ((BatchPredictor) getClassifier())

@@ -62,8 +62,6 @@ import weka.core.WeightedInstancesHandler;
  * J. Friedman, T. Hastie, R. Tibshirani (1998). Additive Logistic Regression: a
  * Statistical View of Boosting. Stanford University.<br/>
  * <br/>
- * Can do efficient internal cross-validation to determine appropriate number of
- * iterations.
  * <p/>
  * <!-- globalinfo-end -->
  *
@@ -268,9 +266,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     return "Class for performing additive logistic regression. \n"
       + "This class performs classification using a regression scheme as the "
       + "base learner, and can handle multi-class problems.  For more "
-      + "information, see\n\n" + getTechnicalInformation().toString() + "\n\n"
-      + "Can do efficient internal cross-validation to determine "
-      + "appropriate number of iterations.";
+      + "information, see\n\n" + getTechnicalInformation().toString();
   }
 
   /**
@@ -1108,7 +1104,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   }
 
   /**
-   * Performs efficient batch predcition
+   * Performs efficient batch prediction
    *
    * @return true, as LogitBoost can perform efficient batch prediction
    */
@@ -1120,7 +1116,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
   /**
    * Calculates the class membership probabilities for the given test instance.
    *
-   * @param instance the instance to be classified
+   * @param inst the instance to be classified
    * @return predicted class probability distribution
    * @throws Exception if instance could not be classified successfully
    */

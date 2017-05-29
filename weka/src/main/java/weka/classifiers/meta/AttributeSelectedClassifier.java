@@ -30,17 +30,8 @@ import weka.attributeSelection.ASEvaluation;
 import weka.attributeSelection.ASSearch;
 import weka.attributeSelection.AttributeSelection;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.AdditionalMeasureProducer;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Drawable;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 
 /**
  <!-- globalinfo-start -->
@@ -557,6 +548,94 @@ public class AttributeSelectedClassifier
     }
 
     return m_Classifier.distributionForInstance(newInstance);
+  }
+
+  /**
+   * Tool tip text for this property
+   *
+   * @return the tool tip for this property
+   */
+  public String batchSizeTipText() {
+    return "Batch size to use if base learner is a BatchPredictor";
+  }
+
+  /**
+   * Set the batch size to use. Gets passed through to the base learner if it
+   * implements BatchPredictor. Otherwise it is just ignored.
+   *
+   * @param size the batch size to use
+   */
+  public void setBatchSize(String size) {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      ((BatchPredictor) getClassifier()).setBatchSize(size);
+    } else {
+      super.setBatchSize(size);
+    }
+  }
+
+  /**
+   * Gets the preferred batch size from the base learner if it implements
+   * BatchPredictor. Returns 1 as the preferred batch size otherwise.
+   *
+   * @return the batch size to use
+   */
+  public String getBatchSize() {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      return ((BatchPredictor) getClassifier()).getBatchSize();
+    } else {
+      return super.getBatchSize();
+    }
+  }
+
+  /**
+   * Batch scoring method. Calls the appropriate method for the base learner if
+   * it implements BatchPredictor. Otherwise it simply calls the
+   * distributionForInstance() method repeatedly.
+   *
+   * @param insts the instances to get predictions for
+   * @return an array of probability distributions, one for each instance
+   * @throws Exception if a problem occurs
+   */
+  public double[][] distributionsForInstances(Instances insts)
+          throws Exception {
+
+    if (getClassifier() instanceof BatchPredictor) {
+      Instances newInstances;
+      if (m_AttributeSelection == null) {
+        //      throw new Exception("AttributeSelectedClassifier: No model built yet!");
+        newInstances = insts;
+      } else {
+        newInstances = m_AttributeSelection.reduceDimensionality(insts);
+      }
+      if (newInstances.numInstances() != insts.numInstances()) {
+        throw new WekaException(
+                "FilteredClassifier: filter has returned more/less instances than required.");
+      }
+      return ((BatchPredictor) getClassifier()).distributionsForInstances(newInstances);
+    } else {
+      double[][] result = new double[insts.numInstances()][insts.numClasses()];
+      for (int i = 0; i < insts.numInstances(); i++) {
+        result[i] = distributionForInstance(insts.instance(i));
+      }
+      return result;
+    }
+  }
+
+  /**
+   * Returns true if the base classifier implements BatchPredictor and is able
+   * to generate batch predictions efficiently
+   *
+   * @return true if the base classifier can generate batch predictions
+   *         efficiently
+   */
+  public boolean implementsMoreEfficientBatchPrediction() {
+    if (!(getClassifier() instanceof BatchPredictor)) {
+      return super.implementsMoreEfficientBatchPrediction();
+    }
+
+    return ((BatchPredictor) getClassifier()).implementsMoreEfficientBatchPrediction();
   }
 
   /**

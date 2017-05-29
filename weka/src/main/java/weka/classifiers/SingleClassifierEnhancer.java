@@ -74,7 +74,7 @@ public abstract class SingleClassifierEnhancer extends AbstractClassifier {
           + "\t(default: " + defaultClassifierString() + 
           ((defaultClassifierOptions().length > 0) ? 
            " with options " + Utils.joinOptions(defaultClassifierOptions()) + ")" : ")"),
-          "W", 1, "-W"));
+          "W", 1, "-W <classifier name>"));
     
     newVector.addAll(Collections.list(super.listOptions()));
 

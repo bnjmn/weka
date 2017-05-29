@@ -308,7 +308,7 @@ public abstract class AbstractClassifier implements Classifier, BatchPredictor,
    * (use with caution).
    * <p>
    *
-   * -num-decimal-laces <br>
+   * -num-decimal-places <br>
    * The number of decimal places for the output of numbers in the model.
    * <p>
    *
