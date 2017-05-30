@@ -38,8 +38,8 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> An instance filter that changes a percentage of a
- * given attributes values. The attribute must be nominal. Missing value can be
- * treated as value itself.
+ * given attribute's values. The attribute must be nominal. Missing value can be
+ * treated as a distinct separate value.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -59,8 +59,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -P &lt;num&gt;
- *  Specify the percentage of noise introduced 
- *  to the data (default 10)
+ *  Specify the percentage of values that are changed (default 10)
  * </pre>
  * 
  * <pre>
@@ -100,8 +99,8 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   public String globalInfo() {
 
     return "An instance filter that changes a percentage of a given"
-      + " attributes values. The attribute must be nominal."
-      + " Missing value can be treated as value itself.";
+      + " attribute's values. The attribute must be nominal."
+      + " Missing value can be treated as as a distinct separate value.";
   }
 
   /**
@@ -119,8 +118,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     newVector.addElement(new Option(
       "\tTreat missing values as an extra value \n", "M", 1, "-M"));
     newVector.addElement(new Option(
-      "\tSpecify the percentage of noise introduced \n"
-        + "\tto the data (default 10)", "P", 1, "-P <num>"));
+      "\tSpecify the percentage of values that are changed (default 10)", "P", 1, "-P <num>"));
     newVector.addElement(new Option(
       "\tSpecify the random number seed (default 1)", "S", 1, "-S <num>"));
 
@@ -147,8 +145,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -P &lt;num&gt;
-   *  Specify the percentage of noise introduced 
-   *  to the data (default 10)
+   *  Specify the percentage of values that are changed (default 10)
    * </pre>
    * 
    * <pre>
@@ -226,7 +223,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public String useMissingTipText() {
 
-    return "Flag to set if missing values are used.";
+    return "Flag to set if missing values are treated as separate values.";
   }
 
   /**
@@ -288,7 +285,7 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
    */
   public String percentTipText() {
 
-    return "Percentage of introduced noise to data.";
+    return "Percentage of values that are changed.";
   }
 
   /**
@@ -463,10 +460,10 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   /**
    * add noise to the dataset
    * 
-   * a given percentage of the instances are changed in the way, that a set of
+   * a given percentage of the instances are changed in the way that a set of
    * instances are randomly selected using seed. The attribute given by its
    * index is changed from its current value to one of the other possibly ones,
-   * also randomly. This is done with leaving the apportion the same. if
+   * also randomly. This is done while leaving the proportion the same. If
    * m_UseMissing is true, missing value is used as a value of its own
    * 
    * @param instances is the dataset
@@ -507,9 +504,9 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
     partition_count = new int[numValues];
     partition_max = new int[numValues];
     int missing_count = 0;
-    ;
+
     int missing_max = 0;
-    ;
+
 
     for (int i = 0; i < numValues; i++) {
       partition_count[i] = 0;

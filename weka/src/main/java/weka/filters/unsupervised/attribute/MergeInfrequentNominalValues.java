@@ -41,7 +41,7 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start -->
- * Merges all values of the specified nominal attribute that are sufficiently infrequent.
+ * Merges all values of the specified nominal attributes that are insufficiently frequent.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -108,7 +108,7 @@ public class MergeInfrequentNominalValues extends SimpleBatchFilter implements
    */
   @Override
   public String globalInfo() {
-    return "Merges all values of the specified nominal attribute that are sufficiently infrequent.";
+    return "Merges all values of the specified nominal attributes that are insufficiently frequent.";
   }
 
   /**

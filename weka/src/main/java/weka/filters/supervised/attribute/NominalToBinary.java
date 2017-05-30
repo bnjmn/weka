@@ -48,10 +48,10 @@ import weka.filters.SupervisedFilter;
  * <!-- globalinfo-start --> Converts all nominal attributes into binary numeric
  * attributes. An attribute with k values is transformed into k binary
  * attributes if the class is nominal (using the one-attribute-per-value
- * approach). Binary attributes are left binary, if option '-A' is not given.If
+ * approach). Binary attributes are left binary if option '-A' is not given. If
  * the class is numeric, k - 1 new binary attributes are generated in the manner
  * described in "Classification and Regression Trees" by Breiman et al. (i.e.
- * taking the average class value associated with each attribute value into
+ * by taking the average class value associated with each attribute value into
  * account)<br/>
  * <br/>
  * For more information, see:<br/>
@@ -123,11 +123,11 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary, if option '-A' is not given."
+      + "Binary attributes are left binary if option '-A' is not given. "
       + "If the class is numeric, k - 1 new binary attributes are generated "
       + "in the manner described in \"Classification and Regression "
-      + "Trees\" by Breiman et al. (i.e. taking the average class value associated "
-      + "with each attribute value into account)\n\n"
+      + "Trees\" by Breiman et al. (i.e., by taking the average class value associated "
+      + "with each attribute value into account).\n\n"
       + "For more information, see:\n\n" + getTechnicalInformation().toString();
   }
 
@@ -452,7 +452,7 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    * Convert a single instance over. The converted instance is added to the end
    * of the output queue.
    * 
-   * @param instance the instance to convert
+   * @param inst the instance to convert
    */
   private void convertInstance(Instance inst) {
 

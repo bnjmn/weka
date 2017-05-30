@@ -60,12 +60,12 @@ import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> Converts the given set of predictor variables into
- * a kernel matrix. The class value remains unchangedm, as long as the
- * preprocessing filter doesn't change it.<br/>
+ * <!-- globalinfo-start --> Converts the given set of data into
+ * a kernel matrix. The class value remains unchanged as long as the chosen
+ * preprocessing filter does not change it.<br/>
  * By default, the data is preprocessed with the Center filter, but the user can
- * choose any filter (NB: one must be careful that the filter does not alter the
- * class attribute unintentionally). With weka.filters.AllFilter the
+ * choose any filter. (NB: one must be careful that the filter does not alter the
+ * class attribute unintentionally.) With weka.filters.AllFilter the
  * preprocessing gets disabled.<br/>
  * <br/>
  * For more information regarding preprocessing the data, see:<br/>
@@ -98,7 +98,7 @@ import weka.filters.UnsupervisedFilter;
  * <p/>
  * 
  * <pre>
- * -D
+ * -output-debug-info
  *  Turns on output of debugging information.
  * </pre>
  * 
@@ -270,12 +270,12 @@ public class KernelFilter extends SimpleBatchFilter implements
    */
   @Override
   public String globalInfo() {
-    return "Converts the given set of predictor variables into a kernel matrix. "
-      + "The class value remains unchangedm, as long as the preprocessing "
-      + "filter doesn't change it.\n"
+    return "Converts the given set of data into a kernel matrix. "
+      + "The class value remains unchanged as long as the chosen preprocessing "
+      + "filter does not change it.\n\n"
       + "By default, the data is preprocessed with the Center filter, but the "
-      + "user can choose any filter (NB: one must be careful that the filter "
-      + "does not alter the class attribute unintentionally). With "
+      + "user can choose any filter. (NB: one must be careful that the filter "
+      + "does not alter the class attribute unintentionally.) With "
       + "weka.filters.AllFilter the preprocessing gets disabled.\n\n"
       + "For more information regarding preprocessing the data, see:\n\n"
       + getTechnicalInformation().toString();

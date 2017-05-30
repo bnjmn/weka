@@ -35,9 +35,9 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> A simple instance filter that renames the relation,
- * all attribute names and all nominal (and string) attribute values. For
- * exchanging sensitive datasets. Currently doesn't like string or relational
- * attributes.
+ * all attribute names and all nominal attribute values. For
+ * exchanging sensitive datasets. Leaves string and relational
+ * attributes untouched.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -58,8 +58,8 @@ public class Obfuscate extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
     return "A simple instance filter that renames the relation, all attribute names "
-      + "and all nominal (and string) attribute values. For exchanging sensitive "
-      + "datasets. Currently doesn't like string or relational attributes.";
+      + "and all nominal attribute values. For exchanging sensitive "
+      + "datasets. Leaves string and relational attributes untouched.";
   }
 
   /**

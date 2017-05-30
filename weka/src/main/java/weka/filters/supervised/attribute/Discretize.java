@@ -517,7 +517,7 @@ public class Discretize extends Filter implements SupervisedFilter,
    *         explorer/experimenter gui
    */
   public String useBinNumbersTipText() {
-    return "Use bin numbers (eg BXofY) rather than ranges for for discretized attributes";
+    return "Use bin numbers (eg BXofY) rather than ranges fordiscretized attributes";
   }
 
   /**

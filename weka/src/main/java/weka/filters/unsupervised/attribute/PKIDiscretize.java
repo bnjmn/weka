@@ -35,8 +35,8 @@ import weka.core.Utils;
 
 /**
  * <!-- globalinfo-start --> Discretizes numeric attributes using equal
- * frequency binning, where the number of bins is equal to the square root of
- * the number of non-missing values.<br/>
+ * frequency binning and forces the number of bins to be equal to the square root of
+ * the number of values of the numeric attribute.<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
@@ -75,7 +75,7 @@ import weka.core.Utils;
  * 
  * <pre>
  * -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to Discretize. First and last are valid indexes.
+ *  Specifies list of columns to discretize. First and last are valid indexes.
  *  (default: first-last)
  * </pre>
  * 
@@ -158,7 +158,7 @@ public class PKIDiscretize extends Discretize implements
       "unset-class-temporarily", 1, "-unset-class-temporarily"));
 
     result.addElement(new Option(
-      "\tSpecifies list of columns to Discretize. First"
+      "\tSpecifies list of columns to discretize. First"
         + " and last are valid indexes.\n" + "\t(default: first-last)", "R", 1,
       "-R <col1,col2-col4,...>"));
 
@@ -187,7 +187,7 @@ public class PKIDiscretize extends Discretize implements
    * 
    * <pre>
    * -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of columns to Discretize. First and last are valid indexes.
+   *  Specifies list of columns to discretize. First and last are valid indexes.
    *  (default: first-last)
    * </pre>
    * 
@@ -262,9 +262,10 @@ public class PKIDiscretize extends Discretize implements
   @Override
   public String globalInfo() {
 
-    return "Discretizes numeric attributes using equal frequency binning,"
-      + " where the number of bins is equal to the square root of the"
-      + " number of non-missing values.\n\n" + "For more information, see:\n\n"
+    return "Discretizes numeric attributes using equal" +
+            " frequency binning and forces the number of bins to be equal to the square root of" +
+            " the number of values of the numeric attribute.\n\n" +
+            "For more information, see:\n\n"
       + getTechnicalInformation().toString();
   }
 

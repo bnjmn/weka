@@ -44,8 +44,8 @@ import weka.filters.UnsupervisedFilter;
 /**
  * <!-- globalinfo-start --> A filter that creates a new dataset with a boolean
  * attribute replacing a nominal attribute. In the new dataset, a value of 1 is
- * assigned to an instance that exhibits a particular range of attribute values,
- * a 0 to an instance that doesn't. The boolean attribute is coded as numeric by
+ * assigned to an instance that exhibits a value in the given range of attribute values,
+ * and a value of 0 is assigned to an instance that does not. The boolean attribute is coded as numeric by
  * default.
  * <p/>
  * <!-- globalinfo-end -->
@@ -287,8 +287,8 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
 
     return "A filter that creates a new dataset with a boolean attribute "
       + "replacing a nominal attribute.  In the new dataset, a value of 1 is "
-      + "assigned to an instance that exhibits a particular range of attribute "
-      + "values, a 0 to an instance that doesn't. The boolean attribute is "
+      + "assigned to an instance that exhibits a value in the given range of attribute "
+      + "values, and a value of 0 is assigned to an instance that does not. The boolean attribute is "
       + "coded as numeric by default.";
   }
 
@@ -381,7 +381,6 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    * @param indices an array containing indexes of attributes to select. Since
    *          the array will typically come from a program, attributes are
    *          indexed from 0.
-   * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setValueIndicesArray(int[] indices) {
 

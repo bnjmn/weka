@@ -48,7 +48,7 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start -->
- * Reduces the dimensionality of the data by projecting it onto a lower dimensional subspace using a random matrix with columns of unit length (i.e. It will reduce the number of attributes in the data while preserving much of its variation like PCA, but at a much less computational cost).<br/>
+ * Reduces the dimensionality of the data by projecting it onto a lower dimensional subspace using a random matrix with columns of unit length. It will reduce the number of attributes in the data while preserving much of its variation like PCA, but at a much less computational cost.<br/>
  * It first applies the  NominalToBinary filter to convert all attributes to numeric before reducing the dimension. It preserves the class attribute.<br/>
  * <br/>
  * For more information, see:<br/>
@@ -341,10 +341,10 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     return "Reduces the dimensionality of the data by projecting"
       + " it onto a lower dimensional subspace using a random"
-      + " matrix with columns of unit length (i.e. It will reduce"
+      + " matrix with columns of unit length. It will reduce"
       + " the number of attributes in the data while preserving"
       + " much of its variation like PCA, but at a much less"
-      + " computational cost).\n"
+      + " computational cost.\n"
       + "It first applies the  NominalToBinary filter to"
       + " convert all attributes to numeric before reducing the"
       + " dimension. It preserves the class attribute.\n\n"

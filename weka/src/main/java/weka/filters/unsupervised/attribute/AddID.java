@@ -39,8 +39,8 @@ import weka.filters.UnsupervisedFilter;
 /**
  * <!-- globalinfo-start --> An instance filter that adds an ID attribute to the
  * dataset. The new attribute contains a unique ID for each instance.<br/>
- * Note: The ID is not reset for the second batch of files (using -b and -r and
- * -s).
+ * Note: The ID is not reset for the second batch of instances when batch mode
+ * is used from the command-line, or the FilteredClassifier.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -86,9 +86,9 @@ public class AddID extends Filter implements UnsupervisedFilter, OptionHandler {
    */
   public String globalInfo() {
     return "An instance filter that adds an ID attribute to the dataset. "
-      + "The new attribute contains a unique ID for each instance.\n"
-      + "Note: The ID is not reset for the second batch of files (using -b "
-      + "and -r and -s).";
+      + "The new attribute contains a unique ID for each instance.\n\n"
+      + "Note: The ID is not reset for the second batch of instances "
+      + "when batch mode is used from the command-line, or the FilteredClassifier.";
   }
 
   /**

@@ -43,7 +43,7 @@ import weka.filters.SimpleBatchFilter;
  * <!-- globalinfo-start --> A filter for turning numeric attributes into
  * nominal ones. Unlike discretization, it just takes all numeric values and
  * adds them to the list of nominal values of that attribute. Useful after CSV
- * imports, to enforce certain attributes to become nominal, e.g., the class
+ * imports, to force certain attributes to become nominal, e.g., the class
  * attribute, containing values from 1 to 5.
  * <p/>
  * <!-- globalinfo-end -->
@@ -53,7 +53,7 @@ import weka.filters.SimpleBatchFilter;
  * 
  * <pre>
  * -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of columns to Discretize. First and last are valid indexes.
+ *  Specifies list of columns to discretize. First and last are valid indexes.
  *  (default: first-last)
  * </pre>
  * 
@@ -92,7 +92,7 @@ public class NumericToNominal extends SimpleBatchFilter {
     return "A filter for turning numeric attributes into nominal ones. Unlike "
       + "discretization, it just takes all numeric values and adds them to "
       + "the list of nominal values of that attribute. Useful after CSV "
-      + "imports, to enforce certain attributes to become nominal, e.g., "
+      + "imports, to force certain attributes to become nominal, e.g., "
       + "the class attribute, containing values from 1 to 5.";
   }
 
@@ -107,7 +107,7 @@ public class NumericToNominal extends SimpleBatchFilter {
     Vector<Option> result = new Vector<Option>(2);
 
     result.addElement(new Option(
-      "\tSpecifies list of columns to Discretize. First"
+      "\tSpecifies list of columns to discretize. First"
         + " and last are valid indexes.\n" + "\t(default: first-last)", "R", 1,
       "-R <col1,col2-col4,...>"));
 

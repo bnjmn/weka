@@ -52,7 +52,12 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> Modify numeric attributes according to a given
- * expression
+ * mathematical expression. Supported operators are +, -, *,
+ * /, pow, log, abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), MEAN, MAX, MIN, SD, COUNT, SUM,
+ * SUMSQUARED, ifelse. The 'A' letter refers to the value of the attribute being processed. Other attribute
+ * values (numeric only) can be accessed through the variables A1, A2, A3, ...
+ *
+ * Example: pow(A,6)/(MEAN+MAX)*ifelse(A<0,0,sqrt(A))+ifelse(![A>9 && A<15])
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -68,13 +73,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -E &lt;expression&gt;
- *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
- *  Supported operators are +, -, *, /, pow, log,
- *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
- *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
- *  letter refers to the value of the attribute being processed.
- *  Other attribute values (numeric only) can be accessed through
- *  the variables A1, A2, A3, ...
+ *  Specify the expression to apply.
  * </pre>
  * 
  * <pre>
@@ -140,7 +139,11 @@ public class MathExpression extends PotentialClassIgnorer implements
    */
   public String globalInfo() {
 
-    return "Modify numeric attributes according to a given expression ";
+    return "Modify numeric attributes according to a given mathematical expression. Supported operators are +, -, *, " +
+            "/, pow, log, abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), MEAN, MAX, MIN, SD, COUNT, SUM, " +
+            "SUMSQUARED, ifelse. The 'A' letter refers to the value of the attribute being processed. Other attribute " +
+            "values (numeric only) can be accessed through the variables A1, A2, A3, ... \n\nExample:" +
+            "pow(A,6)/(MEAN+MAX)*ifelse(A<0,0,sqrt(A))+ifelse(![A>9 && A<15])";
   }
 
   /**
@@ -383,13 +386,7 @@ public class MathExpression extends PotentialClassIgnorer implements
    * 
    * <pre>
    * -E &lt;expression&gt;
-   *  Specify the expression to apply. Eg. pow(A,6)/(MEAN+MAX)
-   *  Supported operators are +, -, *, /, pow, log,
-   *  abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ), 
-   *  MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse. The 'A'
-   *  letter refers to the value of the attribute being processed.
-   *  Other attribute values (numeric only) can be accessed through
-   *  the variables A1, A2, A3, ...
+   *  Specify the expression to apply.
    * </pre>
    * 
    * <pre>
@@ -498,17 +495,7 @@ public class MathExpression extends PotentialClassIgnorer implements
    *         explorer/experimenter gui
    */
   public String expressionTipText() {
-    return "Specify the expression to apply. The 'A' letter"
-      + "refers to the value of the attribute being processed. "
-      + "MIN,MAX,MEAN,SD"
-      + "refer respectively to minimum, maximum, mean and"
-      + "standard deviation of the attribute being processed. "
-      + "Other attribute values (numeric only) can be accessed "
-      + "through the variables A1, A2, A3, ..."
-      + "\n\tSupported operators are +, -, *, /, pow, log,"
-      + "abs, cos, exp, sqrt, tan, sin, ceil, floor, rint, (, ),"
-      + "A,MEAN, MAX, MIN, SD, COUNT, SUM, SUMSQUARED, ifelse"
-      + "\n\tEg. pow(A,6)/(MEAN+MAX)*ifelse(A<0,0,sqrt(A))+ifelse(![A>9 && A<15])";
+    return "Specify the expression to apply.";
   }
 
   /**
@@ -575,7 +562,7 @@ public class MathExpression extends PotentialClassIgnorer implements
    */
   public String ignoreRangeTipText() {
 
-    return "Specify range of attributes to act on."
+    return "Specify range of attributes to ignore."
       + " This is a comma separated list of attribute indices, with"
       + " \"first\" and \"last\" valid values. Specify an inclusive"
       + " range with \"-\". E.g: \"first-3,5,6-10,last\".";

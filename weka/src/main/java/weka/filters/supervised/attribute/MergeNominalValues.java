@@ -50,7 +50,7 @@ import weka.filters.SupervisedFilter;
 /**
  * <!-- globalinfo-start --> Merges values of all nominal attributes among the
  * specified attributes, excluding the class attribute, using the CHAID method,
- * but without considering to re-split merged subsets. It implements Steps 1 and
+ * but without considering re-splitting of merged subsets. It implements Steps 1 and
  * 2 described by Kass (1980), see<br/>
  * <br/>
  * Gordon V. Kass (1980). An Exploratory Technique for Investigating Large
@@ -139,7 +139,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   @Override
   public String globalInfo() {
     return "Merges values of all nominal attributes among the specified attributes, excluding "
-      + "the class attribute, using the CHAID method, but without considering to re-split "
+      + "the class attribute, using the CHAID method, but without considering re-splitting of "
       + "merged subsets. It implements Steps 1 and 2 described by Kass (1980), see\n\n"
       + getTechnicalInformation().toString()
       + "\n\n"
@@ -333,7 +333,7 @@ public class MergeNominalValues extends SimpleBatchFilter implements
   /**
    * Sets the significance level.
    * 
-   * @param the significance level as an integer.
+   * @param sF the significance level as a double.
    */
   public void setSignificanceLevel(double sF) {
 

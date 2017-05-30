@@ -45,7 +45,7 @@ import weka.filters.UnsupervisedFilter;
  * <!-- globalinfo-start --> Converts all nominal attributes into binary numeric
  * attributes. An attribute with k values is transformed into k binary
  * attributes if the class is nominal (using the one-attribute-per-value
- * approach). Binary attributes are left binary, if option '-A' is not given.If
+ * approach). Binary attributes are left binary if option '-A' is not given. If
  * the class is numeric, you might want to use the supervised version of this
  * filter.
  * <p/>
@@ -117,7 +117,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
     return "Converts all nominal attributes into binary numeric attributes. An "
       + "attribute with k values is transformed into k binary attributes if "
       + "the class is nominal (using the one-attribute-per-value approach). "
-      + "Binary attributes are left binary, if option '-A' is not given."
+      + "Binary attributes are left binary if option '-A' is not given. "
       + "If the class is numeric, you might want to use the supervised version of "
       + "this filter.";
   }
@@ -340,7 +340,7 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String transformAllValuesTipText() {
-    return "Whether all nominal values are turned into new attributes, not only if there are more than 2.";
+    return "Whether all nominal values are turned into new attributes, not only if there are more than 2 values.";
   }
 
   /**
@@ -374,8 +374,8 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
   public String invertSelectionTipText() {
 
     return "Set attribute selection mode. If false, only selected"
-      + " (numeric) attributes in the range will be discretized; if"
-      + " true, only non-selected attributes will be discretized.";
+      + " (nominal) attributes in the range will be processed; if"
+      + " true, only non-selected attributes will be processed.";
   }
 
   /**

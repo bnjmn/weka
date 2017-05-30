@@ -45,7 +45,7 @@ import weka.gui.ProgrammaticProperty;
  <!-- globalinfo-start -->
  * Converts the values of nominal and/or numeric attributes into class conditional probabilities. If there are k classes, then k new attributes are created for each of the original ones, giving pr(att val | class k).<br/>
  * <br/>
- * Can be useful for converting nominal attributes with a lot of distinct values into something more manageable for learning schemes that can't handle nominal attributes (as opposed to creating binary indicator attributes). For nominal attributes, the user can specify the number values above which an attribute will be converted by this method.
+ * Can be useful for converting nominal attributes with a lot of distinct values into something more manageable for learning schemes that can't handle nominal attributes (as opposed to creating binary indicator attributes). For nominal attributes, the user can specify the number values above which an attribute will be converted by this method. Normal distributions are assumed for numeric attributes.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -131,7 +131,7 @@ public class ClassConditionalProbabilities extends SimpleBatchFilter {
       + "schemes that can't handle nominal attributes (as opposed to creating "
       + "binary indicator attributes). For nominal attributes, the user can "
       + "specify the number values above which an attribute will be converted "
-      + "by this method.";
+      + "by this method. Normal distributions are assumed for numeric attributes.";
   }
 
   /**

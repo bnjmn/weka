@@ -40,7 +40,7 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> Normalizes all numeric values in the given dataset
- * (apart from the class attribute, if set). The resulting values are by default
+ * (apart from the class attribute, if set). By default, the resulting values are
  * in [0,1] for the data used to compute the normalization intervals. But with
  * the scale and translation parameters one can change that, e.g., with scale =
  * 2.0 and translation = -1.0 you get values in the range [-1,+1].
@@ -101,7 +101,7 @@ public class Normalize extends PotentialClassIgnorer implements
    */
   public String globalInfo() {
     return "Normalizes all numeric values in the given dataset (apart from the "
-      + "class attribute, if set). The resulting values are by default "
+      + "class attribute, if set). By default, the resulting values are "
       + "in [0,1] for the data used to compute the normalization intervals. "
       + "But with the scale and translation parameters one can change that, "
       + "e.g., with scale = 2.0 and translation = -1.0 you get values in the "

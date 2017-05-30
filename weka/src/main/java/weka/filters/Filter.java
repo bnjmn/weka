@@ -1555,8 +1555,8 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
    *         explorer/experimenter gui
    */
   public String doNotCheckCapabilitiesTipText() {
-    return "If set, filters capabilities are not checked before filter is built"
-      + " (Use with caution to reduce runtime).";
+    return "If set, the filter's capabilities are not checked before it is built."
+      + " (Use with caution to reduce runtime.)";
   }
 
   /**
