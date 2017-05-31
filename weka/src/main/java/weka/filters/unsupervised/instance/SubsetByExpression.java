@@ -65,7 +65,7 @@ import weka.filters.SimpleBatchFilter;
  * 
  * <pre> -F
  *  Apply the filter to instances that arrive after the first
- *  (training) batch. The default is to not apply the filter (i.e.
+ *  (training) batch. The default is to not apply the filter (i.e.,
  *  always return the instance)</pre>
  * 
  * <pre> -output-debug-info
@@ -179,7 +179,7 @@ public class SubsetByExpression extends SimpleBatchFilter {
 
     result.addElement(new Option(
       "\tApply the filter to instances that arrive after the first\n"
-        + "\t(training) batch. The default is to not apply the filter (i.e.\n"
+        + "\t(training) batch. The default is to not apply the filter (i.e.,\n"
         + "\talways return the instance)", "F", 0, "-F"));
 
     result.addAll(Collections.list(super.listOptions()));
@@ -200,7 +200,7 @@ public class SubsetByExpression extends SimpleBatchFilter {
    * 
    * <pre> -F
    *  Apply the filter to instances that arrive after the first
-   *  (training) batch. The default is to not apply the filter (i.e.
+   *  (training) batch. The default is to not apply the filter (i.e.,
    *  always return the instance)</pre>
    * 
    * <pre> -output-debug-info
@@ -355,7 +355,7 @@ public class SubsetByExpression extends SimpleBatchFilter {
       + "are input after the first (training) batch. The default "
       + "is false so that, when used in a FilteredClassifier, test"
       + " instances do not potentially get 'consumed' by the filter "
-      + "an a prediction is always made.";
+      + "and a prediction is always made.";
   }
 
   /**

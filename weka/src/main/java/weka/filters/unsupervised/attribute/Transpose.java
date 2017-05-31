@@ -34,13 +34,16 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  <!-- globalinfo-start -->
- * Transposes the data: instances become attributes and attributes become instances. If the first attribute in the original data is a nominal or string identifier attribute, this identifier attribute will be used to create attribute names in the transposed data. All attributes other than the identifier attribute must be numeric. The attribute names in the original data are used to create an identifier attribute of type string in the transposed data.<br/>
+ * Transposes the data: instances become attributes and attributes become instances. If the first attribute in the
+ * original data is a nominal or string identifier attribute, this identifier attribute will be used to create attribute
+ * names in the transposed data. All attributes other than the identifier attribute must be numeric. The attribute names
+ * in the original data are used to create an identifier attribute of type string in the transposed data.<br/>
  * <br/>
- * This filter can only process one batch of data, e.g. it cannot be used in the the FilteredClassifier.<br/>
+ * This filter can only process one batch of data, e.g., it cannot be used in the the FilteredClassifier.<br/>
  * <br/>
  * This filter can only be applied when no class attribute has been set.<br/>
  * <br/>
- *  Date values will be turned into simple numeric values.<br/>
+ * Date values will be turned into simple numeric values.<br/>
  * <br/>
  * <p/>
  <!-- globalinfo-end -->
@@ -68,10 +71,10 @@ public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
       + " attributes other than the identifier attribute must be numeric. The"
       + " attribute names in the original data are used to create an identifier"
       + " attribute of type string in the transposed data.\n\n"
-      + "This filter can only process one batch of data, e.g. it cannot be used"
+      + "This filter can only process one batch of data, e.g., it cannot be used"
       + " in the the FilteredClassifier.\n\n"
       + "This filter can only be applied when no class attribute has been set.\n\n"
-      + " Date values will be turned into simple numeric values.\n\n";
+      + "Date values will be turned into simple numeric values.\n\n";
   }
 
   /**

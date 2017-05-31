@@ -57,7 +57,10 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  <!-- globalinfo-start -->
- * Converts String attributes into a set of attributes representing word occurrence (depending on the tokenizer) information from the text contained in the strings. The set of words (attributes) is determined by the first batch filtered (typically training data).
+ * Converts string attributes into a set of numeric attributes representing word occurrence
+ * information from the text contained in the strings. The dictionary is determined from the first batch of data
+ * filtered (typically training data). Note that this filter is not strictly unsupervised when a class attribute is set
+ * because it creates a separate dictionary for each class and then merges them.
  * <br><br>
  <!-- globalinfo-end -->
  *
@@ -777,10 +780,10 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Converts String attributes into a set of attributes representing "
-      + "word occurrence (depending on the tokenizer) information from the "
-      + "text contained in the strings. The set of words (attributes) is "
-      + "determined by the first batch filtered (typically training data).";
+    return "Converts string attributes into a set of numeric attributes representing word occurrence" +
+            " information from the text contained in the strings. The dictionary is determined from the first batch of data" +
+            " filtered (typically training data). Note that this filter is not strictly unsupervised when a class attribute is set" +
+            " because it creates a separate dictionary for each class and then merges them.";
   }
 
   /**
@@ -1030,9 +1033,8 @@ public class StringToWordVector extends Filter implements UnsupervisedFilter,
    *         explorer/experimenter gui
    */
   public String TFTransformTipText() {
-    return "Sets whether if the word frequencies should be transformed into:\n "
-      + "   log(1+fij) \n"
-      + "       where fij is the frequency of word i in document (instance) j.";
+    return "Sets whether if the word frequencies should be transformed into"
+      + "  log(1+fij) where fij is the frequency of word i in document (instance) j.";
   }
 
   /**

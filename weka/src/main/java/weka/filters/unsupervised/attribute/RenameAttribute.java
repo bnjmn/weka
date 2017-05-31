@@ -38,7 +38,7 @@ import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
- * <!-- globalinfo-start --> This filter is used for renaming attribute names.<br/>
+ * <!-- globalinfo-start --> This filter is used for renaming attributes.<br/>
  * Regular expressions can be used in the matching and replacing.<br/>
  * See Javadoc of java.util.regex.Pattern class for more information:<br/>
  * http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html
@@ -119,8 +119,8 @@ public class RenameAttribute extends SimpleStreamFilter {
    */
   @Override
   public String globalInfo() {
-    return "This filter is used for renaming attribute names.\n"
-      + "Regular expressions can be used in the matching and replacing.\n"
+    return "This filter is used for renaming attributes.\n\n"
+      + "Regular expressions can be used in the matching and replacing.\n\n"
       + "See Javadoc of java.util.regex.Pattern class for more information:\n"
       + "http://java.sun.com/javase/6/docs/api/java/util/regex/Pattern.html";
   }

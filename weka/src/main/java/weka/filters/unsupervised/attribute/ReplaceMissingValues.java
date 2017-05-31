@@ -35,7 +35,8 @@ import weka.filters.UnsupervisedFilter;
 
 /** 
  <!-- globalinfo-start -->
- * Replaces all missing values for nominal and numeric attributes in a dataset with the modes and means from the training data.
+ * Replaces all missing values for nominal and numeric attributes in a dataset with the modes and means
+ * from the training data. The class attribute is skipped by default.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -71,7 +72,7 @@ public class ReplaceMissingValues
   public String globalInfo() {
 
     return "Replaces all missing values for nominal and numeric attributes in a "
-      + "dataset with the modes and means from the training data.";
+      + "dataset with the modes and means from the training data. The class attribute is skipped by default.";
   }
 
   /** 

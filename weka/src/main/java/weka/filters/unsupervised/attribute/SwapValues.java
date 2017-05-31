@@ -319,8 +319,8 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
    */
   public String firstValueIndexTipText() {
 
-    return "The index of the first value."
-      + "(\"first\" and \"last\" are valid values)";
+    return "The index of the first value "
+      + "(\"first\" and \"last\" are valid values).";
   }
 
   /**
@@ -349,8 +349,8 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
    */
   public String secondValueIndexTipText() {
 
-    return "The index of the second value."
-      + "(\"first\" and \"last\" are valid values)";
+    return "The index of the second value "
+      + "(\"first\" and \"last\" are valid values).";
   }
 
   /**

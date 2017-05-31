@@ -52,7 +52,8 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -R &lt;col&gt;
- *  Sets the range of attribute indices (default last).
+ *  Sets the range of attribute indices ("first" and "last" are valid values
+ *  and ranges and lists can also be used) (default "last").
  * </pre>
  * 
  * <pre>
@@ -215,7 +216,8 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-      "\tSets the range of attribute indices (default last).", "R", 1,
+      "\tSets which attributes to process (\"first\" and \"last\" are valid values "
+              + "and ranges and lists can also be used) (default \"last\").", "R", 1,
       "-R <col>"));
 
     newVector.addElement(new Option("\tInvert the range specified by -R.", "V",
@@ -233,7 +235,8 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -R &lt;col&gt;
-   *  Sets the range of attribute indices (default last).
+   * Sets the range of attribute indices ("first" and "last" are valid values
+   * and ranges and lists can also be used) (default "last").
    * </pre>
    * 
    * <pre>
@@ -296,9 +299,8 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
    */
   public String attributeRangeTipText() {
 
-    return "Sets which attributes to process. This attributes "
-      + "must be string attributes (\"first\" and \"last\" are valid values "
-      + "as well as ranges and lists)";
+    return "Sets which attributes to process (\"first\" and \"last\" are valid values "
+      + "and ranges and lists can also be used).";
   }
 
   /**

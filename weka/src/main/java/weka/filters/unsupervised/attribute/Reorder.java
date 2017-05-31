@@ -44,16 +44,16 @@ import weka.filters.UnsupervisedFilter;
 
 /**
  * <!-- globalinfo-start --> A filter that generates output with a new order of
- * the attributes. Useful if one wants to move an attribute to the end to use it
- * as class attribute (e.g. with using "-R 2-last,1").<br/>
- * But it's not only possible to change the order of all the attributes, but
- * also to leave out attributes. E.g. if you have 10 attributes, you can
- * generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/>
- * You can also duplicate attributes, e.g. for further processing later on: e.g.
- * 1,1,1,4,4,4,2,2,2 where the second and the third column of each attribute are
- * processed differently and the first one, i.e. the original one is kept.<br/>
- * One can simply inverse the order of the attributes via 'last-first'.<br/>
- * After appyling the filter, the index of the class attribute is the last
+ * the attributes. Useful if one wants to move an attribute to the end of the list of attributes to use it
+ * as class attribute (e.g., using "-R 2-last,1").<br/><br/>
+ * It is not only possible to change the order of the attributes. Attributes can also be left out.
+ * E.g. if you have 10 attributes, you can
+ * generate the following output order: 1,3,5,7,9,10 or 10,1-5.<br/><br/>
+ * You can also duplicate attributes, e.g., for further processing later on: e.g., using
+ * 1,1,1,4,4,4,2,2,2 if one needs to process two copies of the attributes with other filters but also
+ * needs to keep the original attributes.<br/><br/>
+ * One can simply reverse the order of the attributes via 'last-first'.<br/><br/>
+ * After applying the filter, the index of the class attribute is set to the index of the last
  * attribute.
  * <p/>
  * <!-- globalinfo-end -->
@@ -63,8 +63,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -R &lt;index1,index2-index4,...&gt;
- *  Specify list of columns to copy. First and last are valid
- *  indexes. (default first-last)
+ *  Specifies the order of the attributes (default first-last).
  * </pre>
  * 
  * <!-- options-end -->
@@ -104,8 +103,7 @@ public class Reorder extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>();
 
     newVector.addElement(new Option(
-      "\tSpecify list of columns to copy. First and last are valid\n"
-        + "\tindexes. (default first-last)", "R", 1,
+      "\tSpecifies the order of the attributes (default first-last).", "R", 1,
       "-R <index1,index2-index4,...>"));
 
     return newVector.elements();
@@ -120,8 +118,7 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of columns to copy. First and last are valid
-   *  indexes. (default first-last)
+   *  Specifies the order of the attributes (default first-last).
    * </pre>
    * 
    * <!-- options-end -->
@@ -349,17 +346,16 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
     return "A filter that generates output with a new order of the "
-      + "attributes. Useful if one wants to move an attribute to the end to "
-      + "use it as class attribute (e.g. with using \"-R 2-last,1\").\n"
-      + "But it's not only possible to change the order of all the attributes, "
-      + "but also to leave out attributes. E.g. if you have 10 attributes, you "
-      + "can generate the following output order: 1,3,5,7,9,10 or 10,1-5.\n"
-      + "You can also duplicate attributes, e.g. for further processing later "
-      + "on: e.g. 1,1,1,4,4,4,2,2,2 where the second and the third column of "
-      + "each attribute are processed differently and the first one, i.e. the "
-      + "original one is kept.\n"
-      + "One can simply inverse the order of the attributes via 'last-first'.\n"
-      + "After appyling the filter, the index of the class attribute is the "
+      + "attributes. Useful if one wants to move an attribute to the end of the list of attributes to "
+      + "use it as class attribute (e.g., using \"-R 2-last,1\").\n\n"
+      + "It is not only possible to change the order of the attributes. "
+      + "Attributes can also be left out. E.g. if you have 10 attributes, you "
+      + "can generate the following output order: 1,3,5,7,9,10 or 10,1-5.\n\n"
+      + "You can also duplicate attributes, e.g., for further processing later "
+      + "on: e.g., using 1,1,1,4,4,4,2,2,2 if one needs to process two copies of the attributes "
+            + "with other filters but also needs to keep the original attributes.\n\n"
+      + "One can simply reverse the order of the attributes via 'last-first'.\n\n"
+      + "After applying the filter, the index of the class attribute is set to the index of the "
       + "last attribute.";
   }
 

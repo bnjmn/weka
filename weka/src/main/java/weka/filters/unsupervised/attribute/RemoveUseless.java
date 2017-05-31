@@ -49,7 +49,9 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -M &lt;max variance %&gt;
- *  Maximum variance percentage allowed (default 99)
+ *  Maximum variance percentage allowed (default 99). Specifically, if
+ *  (number_of_distinct_values / total_number_of_values * 100)
+ *  is greater than this value, then the attribute will be removed.
  * </pre>
  * 
  * <!-- options-end -->
@@ -221,7 +223,9 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
     Vector<Option> newVector = new Vector<Option>(1);
 
     newVector.addElement(new Option(
-      "\tMaximum variance percentage allowed (default 99)", "M", 1,
+      "\tMaximum variance percentage allowed (default 99). Specifically, if"
+                + "\t(number_of_distinct_values / total_number_of_values * 100)"
+                + "\tis greater than this value, then the attribute will be removed.", "M", 1,
       "-M <max variance %>"));
 
     return newVector.elements();
@@ -236,7 +240,9 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -M &lt;max variance %&gt;
-   *  Maximum variance percentage allowed (default 99)
+   *  Maximum variance percentage allowed (default 99). Specifically, if
+   *  (number_of_distinct_values / total_number_of_values * 100)
+   *  is greater than this value, then the attribute will be removed.
    * </pre>
    * 
    * <!-- options-end -->
@@ -299,9 +305,9 @@ public class RemoveUseless extends Filter implements UnsupervisedFilter,
    */
   public String maximumVariancePercentageAllowedTipText() {
 
-    return "Set the threshold for the highest variance allowed before a nominal attribute will be deleted."
+    return "Set the threshold for the highest variance allowed before a nominal attribute will be deleted. "
       + "Specifically, if (number_of_distinct_values / total_number_of_values * 100)"
-      + " is greater than this value then the attribute will be removed.";
+      + " is greater than this value, then the attribute will be removed.";
   }
 
   /**

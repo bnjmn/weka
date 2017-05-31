@@ -32,7 +32,11 @@ import java.util.Vector;
 
 /**
  * <!-- globalinfo-start -->
- * A filter that can be used to introduce missing values in a dataset. The specified probability is used to flip a biased coin to decide whether to replace a particular attribute value in an instance with a missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). This filter only modifies the first batch of data that is processed.
+ * A filter that can be used to introduce missing values in a dataset.
+ * The specified probability is used to flip a biased coin to decide whether to replace a particular
+ * attribute value in an instance with a missing value (i.e., a probability of 0.9 means 90% of values
+ * will be replaced with missing values). This filter only modifies the first batch of data that is processed.
+ * The class attribute is skipped by default.
  * <br><br>
  * <!-- globalinfo-end -->
  *
@@ -441,7 +445,7 @@ public class ReplaceWithMissingValue extends SimpleBatchFilter implements Unsupe
     return "A filter that can be used to introduce missing values in a dataset. The specified probability is used to" +
             " flip a biased coin to decide whether to replace a particular attribute value in an instance with a" +
             " missing value (i.e., a probability of 0.9 means 90% of values will be replaced with missing values). " +
-            "This filter only modifies the first batch of data that is processed.";
+            "This filter only modifies the first batch of data that is processed. The class attribute is skipped by default.";
   }
 
   /**
