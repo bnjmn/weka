@@ -6,10 +6,10 @@
 PackageName=classificationViaClustering
 
 # Version (required)
-Version=1.0.6
+Version=1.0.7
 
 #Date
-Date=2017-05-28
+Date=2017-06-06
 
 # Title (required)
 Title=A simple meta-classifier that uses a clusterer for classification.
@@ -26,12 +26,11 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=A simple meta-classifier that uses a clusterer for classification. For cluster algorithms that use a fixed number of clusterers, like SimpleKMeans, the user has to make sure that the number of clusters to generate are the same as the number of class labels in the dataset in order to obtain a useful model.<br/><br/>Note: at prediction time, a missing value is returned if no cluster is found for the instance.<br/><br/>The code is based on the 'clusters to classes' functionality of the weka.clusterers.ClusterEvaluation class by Mark Hall.
-
-Changes=Instances with missing classes are no longer deleted. Missing classes are now enabled as capability.
+Description=A simple meta-classifier that uses a clusterer for classification. By default, the best single cluster for each class is found using the method Weka applies for classes-to-clusters evaluation. All other clusters are left without class labels and a test instance assigned to one of the unlabeled clusters is left unclassified. Optionally, this behaviour can be changed so that each cluster is labeled based on the proportion of training instances in each class that is assigned to it. If the cluster is a probabilistic ones, cluster membership probabilities are used instead of counts to establish class probability estimates.
+Changes=Now enables optional probabilistic classification of all instances.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.7.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classificationViaClustering

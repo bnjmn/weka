@@ -27,10 +27,7 @@ import java.util.Vector;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.rules.ZeroR;
-import weka.clusterers.AbstractClusterer;
-import weka.clusterers.ClusterEvaluation;
-import weka.clusterers.Clusterer;
-import weka.clusterers.SimpleKMeans;
+import weka.clusterers.*;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.DenseInstance;
@@ -42,17 +39,15 @@ import weka.core.RevisionUtils;
 import weka.core.Utils;
 
 /**
- * <!-- globalinfo-start --> A simple meta-classifier that uses a clusterer for
- * classification. For cluster algorithms that use a fixed number of clusterers,
- * like SimpleKMeans, the user has to make sure that the number of clusters to
- * generate are the same as the number of class labels in the dataset in order
- * to obtain a useful model.<br/>
- * <br/>
- * Note: at prediction time, a missing value is returned if no cluster is found
- * for the instance.<br/>
- * <br/>
- * The code is based on the 'clusters to classes' functionality of the
- * weka.clusterers.ClusterEvaluation class by Mark Hall.
+ * <!-- globalinfo-start -->
+ * A simple meta-classifier that uses a clusterer for classification.
+ * By default, the best single cluster for each class is found using the method Weka
+ * applies for classes-to-clusters evaluation. All other clusters are left without
+ * class labels and a test instance assigned to one of the unlabeled clusters is left
+ * unclassified. Optionally, this behaviour can be changed so that each cluster is labeled
+ * based on the proportion of training instances in each class that is assigned to it.
+ * If the cluster is a probabilistic ones, cluster membership probabilities are
+ * used instead of counts to establish class probability estimates.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -60,17 +55,22 @@ import weka.core.Utils;
  * <p/>
  * 
  * <pre>
- * -D
+ * -output-debug-info
  *  If set, classifier is run in debug mode and
  *  may output additional info to the console
  * </pre>
  * 
  * <pre>
- * -W
+ * -W &lt;clusterer&gt
  *  Full name of clusterer.
  *  (default: weka.clusterers.SimpleKMeans)
  * </pre>
- * 
+ *
+ * <pre>
+ * -label-all-clusters
+ *  If set, all clusters are labeled probabilistically instead of just those ones that best fit a class
+ * </pre>
+ *
  * <pre>
  * Options specific to clusterer weka.clusterers.SimpleKMeans:
  * </pre>
@@ -110,6 +110,9 @@ public class ClassificationViaClustering extends AbstractClassifier {
   /** the cluster algorithm used (template) */
   protected Clusterer m_Clusterer;
 
+  /** whether to label all clusters probabilistically instead of just finding one cluster for each class */
+  protected boolean m_labelAllClusters;
+
   /** the actual cluster algorithm being used */
   protected Clusterer m_ActualClusterer;
 
@@ -121,6 +124,9 @@ public class ClassificationViaClustering extends AbstractClassifier {
 
   /** the mapping between clusters and classes */
   protected double[] m_ClustersToClasses;
+
+  /** the class probabilities for each cluster */
+  protected double[][] m_ClusterClassProbs;
 
   /** the default model */
   protected Classifier m_ZeroR;
@@ -141,17 +147,14 @@ public class ClassificationViaClustering extends AbstractClassifier {
    *         gui
    */
   public String globalInfo() {
-    return "A simple meta-classifier that uses a clusterer for classification. "
-      + "For cluster algorithms that use a fixed number of clusterers, like "
-      + "SimpleKMeans, the user has to make sure that the number of clusters "
-      + "to generate are the same as the number of class labels in the dataset "
-      + "in order to obtain a useful model.\n"
-      + "\n"
-      + "Note: at prediction time, a missing value is returned if no cluster "
-      + "is found for the instance.\n"
-      + "\n"
-      + "The code is based on the 'clusters to classes' functionality of the "
-      + "weka.clusterers.ClusterEvaluation class by Mark Hall.";
+    return "A simple meta-classifier that uses a clusterer for classification. " +
+            "By default, the best single cluster for each class is found using the method Weka " +
+            "applies for classes-to-clusters evaluation. All other clusters are left without " +
+            "class labels and a test instance assigned to one of the unlabeled clusters is left " +
+            "unclassified. Optionally, this behaviour can be changed so that each cluster is labeled " +
+            "based on the proportion of training instances in each class that is assigned to it. " +
+            "If the cluster is a probabilistic ones, cluster membership probabilities are " +
+            "used instead of counts to establish class probability estimates.";
   }
 
   /**
@@ -166,6 +169,9 @@ public class ClassificationViaClustering extends AbstractClassifier {
 
     result.addElement(new Option("\tFull name of clusterer.\n" + "\t(default: "
       + defaultClustererString() + ")", "W", 1, "-W"));
+
+    result.addElement(new Option("\tWhether to label all clusters.\n", "label-all-clusters",
+            0, "-label-all-clusters"));
 
     result.addAll(Collections.list(super.listOptions()));
 
@@ -191,6 +197,10 @@ public class ClassificationViaClustering extends AbstractClassifier {
     result.add("-W");
     result.add("" + getClusterer().getClass().getName());
 
+    if (getLabelAllClusters()) {
+      result.add("-label-all-clusters");
+    }
+
     Collections.addAll(result, super.getOptions());
 
     if (getClusterer() instanceof OptionHandler) {
@@ -212,17 +222,22 @@ public class ClassificationViaClustering extends AbstractClassifier {
    * <p/>
    * 
    * <pre>
-   * -D
+   * -output-debug-info
    *  If set, classifier is run in debug mode and
    *  may output additional info to the console
    * </pre>
    * 
    * <pre>
-   * -W
+   * -W &lt;clusterer&gt
    *  Full name of clusterer.
    *  (default: weka.clusterers.SimpleKMeans)
    * </pre>
-   * 
+   *
+   * <pre>
+   * -label-all-clusters
+   *  If set, all clusters are labeled probabilistically instead of just those ones that best fit a class
+   * </pre>
+   *
    * <pre>
    * Options specific to clusterer weka.clusterers.SimpleKMeans:
    * </pre>
@@ -256,9 +271,9 @@ public class ClassificationViaClustering extends AbstractClassifier {
    */
   @Override
   public void setOptions(String[] options) throws Exception {
-    String tmpStr;
 
-    tmpStr = Utils.getOption('W', options);
+    setLabelAllClusters(Utils.getFlag("label-all-clusters", options));
+    String tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() > 0) {
       setClusterer(AbstractClusterer.forName(tmpStr, null));
       setClusterer(AbstractClusterer.forName(tmpStr,
@@ -312,49 +327,88 @@ public class ClassificationViaClustering extends AbstractClassifier {
   }
 
   /**
-   * Classifies the given test instance.
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String labelAllClustersTipText() {
+    return "If true, all clusters are labeled probabilistically instead of just those ones that best fit a class.";
+  }
+
+  /**
+   * Whether to label all clusters probabilistically instead of just finding one cluster for each class.
+   *
+   * @param l set to true if all clusters are to be labeled
+   */
+  public void setLabelAllClusters(boolean l) {
+    m_labelAllClusters = l;
+  }
+
+
+  /**
+   * Get whether to label all clusters probabilistically instead of just finding one cluster for each class.
+   *
+   * @return true if all clusters are to be labeled
+   */
+  public boolean getLabelAllClusters() {
+    return m_labelAllClusters;
+  }
+
+  /**
+   * Returns class probability distribution for the given instance.
    * 
    * @param instance the instance to be classified
-   * @return the predicted most likely class for the instance or
-   *         Utils.missingValue() if no prediction is made
+   * @return the class probabilities
    * @throws Exception if an error occurred during the prediction
    */
   @Override
-  public double classifyInstance(Instance instance) throws Exception {
-    double result;
-    double[] values;
-    Instance newInst;
-    int i;
-    int n;
+  public double[] distributionForInstance(Instance instance) throws Exception {
 
     if (m_ZeroR != null) {
-      result = m_ZeroR.classifyInstance(instance);
+      return  m_ZeroR.distributionForInstance(instance);
     } else {
+      double[] result = new double[instance.numClasses()];
+
       if (m_ActualClusterer != null) {
         // build new instance
-        values = new double[m_ClusteringHeader.numAttributes()];
-        n = 0;
-        for (i = 0; i < instance.numAttributes(); i++) {
+        double[] values = new double[m_ClusteringHeader.numAttributes()];
+        int n = 0;
+        for (int i = 0; i < instance.numAttributes(); i++) {
           if (i == instance.classIndex()) {
             continue;
           }
           values[n] = instance.value(i);
           n++;
         }
-        newInst = new DenseInstance(instance.weight(), values);
+        Instance newInst = new DenseInstance(instance.weight(), values);
         newInst.setDataset(m_ClusteringHeader);
 
-        // determine cluster/class
-        result = m_ClustersToClasses[m_ActualClusterer.clusterInstance(newInst)];
-        if (result == -1) {
-          result = Utils.missingValue();
+        if (!getLabelAllClusters()) {
+
+          // determine cluster/class
+          double r = m_ClustersToClasses[m_ActualClusterer.clusterInstance(newInst)];
+          if (r == -1) {
+            return result; // Unclassified
+          } else {
+            result[(int)r] = 1.0;
+            return result;
+          }
+        } else {
+          double[] classProbs = new double[instance.numClasses()];
+          double[] dist = m_ActualClusterer.distributionForInstance(newInst);
+          for (int i = 0; i < dist.length; i++) {
+            for (int j = 0; j < instance.numClasses(); j++) {
+              classProbs[j] += dist[i] * m_ClusterClassProbs[i][j];
+            }
+          }
+          Utils.normalize(classProbs);
+          return classProbs;
         }
       } else {
-        result = Utils.missingValue();
+        return result; // Unclassified
       }
     }
-
-    return result;
   }
 
   /**
@@ -388,24 +442,15 @@ public class ClassificationViaClustering extends AbstractClassifier {
    */
   @Override
   public void buildClassifier(Instances data) throws Exception {
-    Instances clusterData;
-    ClusterEvaluation eval;
-    int i;
-    Instance instance;
-    int[][] counts;
-    int[] clusterTotals;
-    double[] best;
-    double[] current;
-    double[] clusterAssignments;
 
-    // can classifier handle the data?
+     // can classifier handle the data?
     getCapabilities().testWithFail(data);
 
     // save original header (needed for clusters to classes output)
     m_OriginalHeader = new Instances(data, 0);
 
     // remove class attribute for clusterer
-    clusterData = new Instances(data);
+    Instances clusterData = new Instances(data);
     clusterData.setClassIndex(-1);
     clusterData.deleteAttributeAt(m_OriginalHeader.classIndex());
     m_ClusteringHeader = new Instances(clusterData, 0);
@@ -422,29 +467,45 @@ public class ClassificationViaClustering extends AbstractClassifier {
       m_ActualClusterer = AbstractClusterer.makeCopy(m_Clusterer);
       m_ActualClusterer.buildClusterer(clusterData);
 
-      // evaluate clusterer on training set
-      eval = new ClusterEvaluation();
-      eval.setClusterer(m_ActualClusterer);
-      eval.evaluateClusterer(clusterData);
-      clusterAssignments = eval.getClusterAssignments();
+      if (!getLabelAllClusters()) {
 
-      // determine classes-to-clusters mapping
-      counts = new int[eval.getNumClusters()][m_OriginalHeader.numClasses()];
-      clusterTotals = new int[eval.getNumClusters()];
-      best = new double[eval.getNumClusters() + 1];
-      current = new double[eval.getNumClusters() + 1];
-      for (i = 0; i < data.numInstances(); i++) {
-        instance = data.instance(i);
-        if (!instance.classIsMissing()) {
-          counts[(int) clusterAssignments[i]][(int) instance.classValue()]++;
-          clusterTotals[(int) clusterAssignments[i]]++;
+        // determine classes-to-clusters mapping
+        ClusterEvaluation eval = new ClusterEvaluation();
+        eval.setClusterer(m_ActualClusterer);
+        eval.evaluateClusterer(clusterData);
+        double[] clusterAssignments = eval.getClusterAssignments();
+        int[][] counts  = new int[eval.getNumClusters()][m_OriginalHeader.numClasses()];
+        int[] clusterTotals  = new int[eval.getNumClusters()];
+        double[] best = new double[eval.getNumClusters() + 1];
+        double[] current = new double[eval.getNumClusters() + 1];
+        for (int i = 0; i < data.numInstances(); i++) {
+          Instance instance = data.instance(i);
+          if (!instance.classIsMissing()) {
+            counts[(int) clusterAssignments[i]][(int) instance.classValue()]++;
+            clusterTotals[(int) clusterAssignments[i]]++;
+          }
+        }
+        best[eval.getNumClusters()] = Double.MAX_VALUE;
+        ClusterEvaluation.mapClasses(eval.getNumClusters(), 0, counts,
+                clusterTotals, current, best, 0);
+        m_ClustersToClasses = new double[best.length];
+        System.arraycopy(best, 0, m_ClustersToClasses, 0, best.length);
+      } else {
+        m_ClusterClassProbs = new double[m_ActualClusterer.numberOfClusters()][data.numClasses()];
+        for (int i = 0; i < data.numInstances(); i++) {
+          Instance clusterInstance = clusterData.instance(i);
+          Instance originalInstance = data.instance(i);
+          if (!originalInstance.classIsMissing()) {
+            double[] probs = m_ActualClusterer.distributionForInstance(clusterInstance);
+            for (int j = 0; j < probs.length; j++) {
+              m_ClusterClassProbs[j][(int) originalInstance.classValue()] += probs[j];
+            }
+          }
+        }
+        for (int i = 0; i < m_ClusterClassProbs.length; i++) {
+          Utils.normalize(m_ClusterClassProbs[i]);
         }
       }
-      best[eval.getNumClusters()] = Double.MAX_VALUE;
-      ClusterEvaluation.mapClasses(eval.getNumClusters(), 0, counts,
-        clusterTotals, current, best, 0);
-      m_ClustersToClasses = new double[best.length];
-      System.arraycopy(best, 0, m_ClustersToClasses, 0, best.length);
     }
   }
 
@@ -456,7 +517,6 @@ public class ClassificationViaClustering extends AbstractClassifier {
   @Override
   public String toString() {
     StringBuffer result;
-    int i;
     int n;
     boolean found;
 
@@ -473,41 +533,52 @@ public class ClassificationViaClustering extends AbstractClassifier {
       // output clusterer
       result.append(m_ActualClusterer + "\n");
 
-      // clusters to classes
-      result.append("Clusters to classes mapping:\n");
-      for (i = 0; i < m_ClustersToClasses.length - 1; i++) {
-        result.append("  " + (i + 1) + ". Cluster: ");
-        if (m_ClustersToClasses[i] < 0) {
-          result.append("no class");
-        } else {
-          result.append(m_OriginalHeader.classAttribute().value(
-            (int) m_ClustersToClasses[i])
-            + " (" + ((int) m_ClustersToClasses[i] + 1) + ")");
-        }
-        result.append("\n");
-      }
-      result.append("\n");
+      if (!getLabelAllClusters()) {
 
-      // classes to clusters
-      result.append("Classes to clusters mapping:\n");
-      for (i = 0; i < m_OriginalHeader.numClasses(); i++) {
-        result.append("  " + (i + 1) + ". Class ("
-          + m_OriginalHeader.classAttribute().value(i) + "): ");
-
-        found = false;
-        for (n = 0; n < m_ClustersToClasses.length - 1; n++) {
-          if (((int) m_ClustersToClasses[n]) == i) {
-            found = true;
-            result.append((n + 1) + ". Cluster");
-            break;
+        // clusters to classes
+        result.append("Clusters to classes mapping:\n");
+        for (int i = 0; i < m_ClustersToClasses.length - 1; i++) {
+          result.append("  " + (i + 1) + ". Cluster: ");
+          if (m_ClustersToClasses[i] < 0) {
+            result.append("no class");
+          } else {
+            result.append(m_OriginalHeader.classAttribute().value(
+                    (int) m_ClustersToClasses[i])
+                    + " (" + ((int) m_ClustersToClasses[i] + 1) + ")");
           }
+          result.append("\n");
         }
-
-        if (!found) {
-          result.append("no cluster");
-        }
-
         result.append("\n");
+
+        // classes to clusters
+        result.append("Classes to clusters mapping:\n");
+        for (int i = 0; i < m_OriginalHeader.numClasses(); i++) {
+          result.append("  " + (i + 1) + ". Class ("
+                  + m_OriginalHeader.classAttribute().value(i) + "): ");
+
+          found = false;
+          for (n = 0; n < m_ClustersToClasses.length - 1; n++) {
+            if (((int) m_ClustersToClasses[n]) == i) {
+              found = true;
+              result.append((n + 1) + ". Cluster");
+              break;
+            }
+          }
+
+          if (!found) {
+            result.append("no cluster");
+          }
+          result.append("\n");
+        }
+      } else {
+        for (int i = 0; i < m_ClusterClassProbs.length; i++) {
+          result.append("Probabilities for cluster " + i + ":\n\n");
+          for (int j = 0; j < m_ClusterClassProbs[i].length; j++) {
+            result.append(m_OriginalHeader.classAttribute().value(j) + ":\t" +
+                    Utils.doubleToString(m_ClusterClassProbs[i][j], getNumDecimalPlaces()) + "\n");
+          }
+          result.append("\n");
+        }
       }
 
       result.append("\n");
