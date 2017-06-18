@@ -259,7 +259,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
     public ClassRunner(Class<?> theClass, String[] commandArgs)
       throws Exception {
 
-      m_classIsRun = theClass == weka.Run.class;
+      m_classIsRun = (theClass.getClass().getName().equals("weka.Run"));
 
       setDaemon(true);
       Class<?>[] argTemplate = { String[].class };
