@@ -2031,7 +2031,7 @@ public final class Utils implements RevisionHandler {
    *         future.
    */
   public static boolean getDontShowDialog(String dialogName) {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
+    File wekaHome = ResourceUtils.getWekaHome();
 
     if (!wekaHome.exists()) {
       return false;
@@ -2059,7 +2059,7 @@ public final class Utils implements RevisionHandler {
    *           $WEKA_HOME/systemDialogs
    */
   public static void setDontShowDialog(String dialogName) throws Exception {
-    File wekaHome = WekaPackageManager.WEKA_HOME;
+    File wekaHome = ResourceUtils.getWekaHome();
 
     if (!wekaHome.exists()) {
       return;
@@ -2095,7 +2095,7 @@ public final class Utils implements RevisionHandler {
       return null; // This must be the first time - no file recorded yet.
     }
 
-    File wekaHome = WekaPackageManager.WEKA_HOME;
+    File wekaHome = ResourceUtils.getWekaHome();
     File dialogSubDir =
       new File(wekaHome.toString() + File.separator + "systemDialogs"
         + File.separator + dialogName);
@@ -2118,7 +2118,7 @@ public final class Utils implements RevisionHandler {
   public static void setDontShowDialogResponse(String dialogName,
     String response) throws Exception {
 
-    File wekaHome = WekaPackageManager.WEKA_HOME;
+    File wekaHome = ResourceUtils.getWekaHome();
 
     if (!wekaHome.exists()) {
       return;

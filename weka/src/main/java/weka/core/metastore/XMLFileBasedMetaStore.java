@@ -21,7 +21,7 @@
 
 package weka.core.metastore;
 
-import weka.core.WekaPackageManager;
+import weka.core.ResourceUtils;
 import weka.core.xml.XMLBasicSerialization;
 
 import java.io.File;
@@ -43,7 +43,7 @@ public class XMLFileBasedMetaStore implements MetaStore {
 
   /** The default location for the XML files */
   public static final String DEFAULT_STORE_LOCATION =
-    WekaPackageManager.WEKA_HOME.toString() + File.separator + "wekaMetaStore";
+    ResourceUtils.getWekaHome().toString() + File.separator + "wekaMetaStore";
 
   /** The current home of the store */
   protected File m_storeHome = new File(DEFAULT_STORE_LOCATION);

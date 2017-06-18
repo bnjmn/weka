@@ -266,4 +266,13 @@ public class ResourceUtils {
 
     return new EnvironmentProperties(localProps);
   }
+
+  /**
+   * Returns the Weka home directory.
+   *
+   * @return		the home directory
+   */
+  public static File getWekaHome() {
+    return WekaPackageManager.WEKA_HOME;
+  }
 }
