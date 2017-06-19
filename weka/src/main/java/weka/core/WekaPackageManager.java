@@ -28,6 +28,7 @@ import weka.core.packageManagement.Package;
 import weka.core.packageManagement.PackageConstraint;
 import weka.core.packageManagement.PackageManager;
 import weka.core.packageManagement.VersionPackageConstraint;
+import weka.gui.ConverterFileChooser;
 import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 import weka.gui.beans.BeansProperties;
@@ -1305,6 +1306,7 @@ public class WekaPackageManager {
     GenericPropertiesCreator.regenerateGlobalOutputProperties();
     GenericObjectEditor.determineClasses();
     ConverterUtils.initialize();
+    ConverterFileChooser.initDefaultFilters();
     KnowledgeFlowApp.disposeSingleton();
     KnowledgeFlowApp.reInitialize();
   }
