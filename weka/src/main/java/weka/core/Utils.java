@@ -21,8 +21,6 @@
 
 package weka.core;
 
-import weka.gui.PropertySheetPanel;
-
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
@@ -2266,9 +2264,9 @@ public final class Utils implements RevisionHandler {
           result.append("<br>");
         }
         String caps =
-          PropertySheetPanel.addCapabilities(
-            "<font color=red>CAPABILITIES</font>",
-            ((CapabilitiesHandler) object).getCapabilities());
+          CapabilitiesUtils.addCapabilities(
+	    "<font color=red>CAPABILITIES</font>",
+	    ((CapabilitiesHandler) object).getCapabilities());
         caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
         result.append(caps);
       }
@@ -2276,10 +2274,10 @@ public final class Utils implements RevisionHandler {
       if (object instanceof MultiInstanceCapabilitiesHandler) {
         result.append("<br>");
         String caps =
-          PropertySheetPanel.addCapabilities(
-            "<font color=red>MI CAPABILITIES</font>",
-            ((MultiInstanceCapabilitiesHandler) object)
-              .getMultiInstanceCapabilities());
+          CapabilitiesUtils.addCapabilities(
+	    "<font color=red>MI CAPABILITIES</font>",
+	    ((MultiInstanceCapabilitiesHandler) object)
+	      .getMultiInstanceCapabilities());
         caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
         result.append(caps);
       }
