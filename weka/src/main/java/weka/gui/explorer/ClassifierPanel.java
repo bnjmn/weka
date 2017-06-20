@@ -1235,11 +1235,14 @@ public class ClassifierPanel extends AbstractPerspective implements
 
           try {
             if (m_TestLoader != null && m_TestLoader.getStructure() != null) {
-              if (m_ClassifierEditor.getValue() instanceof BatchPredictor
+              /* if (m_ClassifierEditor.getValue() instanceof BatchPredictor
                 && ((BatchPredictor) m_ClassifierEditor.getValue())
                   .implementsMoreEfficientBatchPrediction()
                 && m_TestLoader instanceof ArffLoader) {
                 // we're not really streaming test instances in this case...
+                ((ArffLoader) m_TestLoader).setRetainStringVals(true);
+              } */
+              if (m_TestLoader instanceof ArffLoader && m_StorePredictionsBut.isSelected()) {
                 ((ArffLoader) m_TestLoader).setRetainStringVals(true);
               }
               m_TestLoader.reset();
@@ -1394,7 +1397,7 @@ public class ClassifierPanel extends AbstractPerspective implements
             // set up the structure of the plottable instances for
             // visualization
             plotInstances = ExplorerDefaults.getClassifierErrorsPlotInstances();
-            plotInstances.setInstances(inst);
+            plotInstances.setInstances(testMode == 4 ? userTestStructure : inst);
             plotInstances.setClassifier(classifier);
             plotInstances.setClassIndex(inst.classIndex());
             plotInstances.setSaveForVisualization(saveVis);
@@ -1739,6 +1742,7 @@ public class ClassifierPanel extends AbstractPerspective implements
               eval =
                 setupEval(eval, classifier, inst, costMatrix, plotInstances,
                   classificationOutput, false);
+              plotInstances.setInstances(userTestStructure);
               eval.setMetricsToDisplay(m_selectedEvalMetrics);
 
               // plotInstances.setEvaluation(eval);
