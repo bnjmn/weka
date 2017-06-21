@@ -225,11 +225,6 @@ public class PreprocessPanel extends AbstractPerspective implements
   /** Menus provided by this perspective */
   protected List<JMenu> m_menus = new ArrayList<JMenu>();
 
-  static {
-    weka.core.WekaPackageManager.loadPackages(false);
-    GenericObjectEditor.registerEditors();
-  }
-
   /**
    * Creates the instances panel with no initial instances.
    */
