@@ -22,6 +22,7 @@ package weka.gui;
 
 import weka.core.ClassDiscovery;
 import weka.core.ClassDiscovery.StringCompare;
+import weka.core.InheritanceUtils;
 import weka.core.Utils;
 import weka.core.WekaPackageClassLoaderManager;
 import weka.core.WekaPackageManager;
@@ -461,7 +462,7 @@ public class GenericPropertiesCreator {
         for (i = 0; i < list.size(); i++) {
           try {
             cls = WekaPackageClassLoaderManager.forName(list.get(i).toString());
-            if (ClassDiscovery.hasInterface(cls, clsCurrent)) {
+            if (InheritanceUtils.hasInterface(cls, clsCurrent)) {
               result = false;
               break;
             }
@@ -477,7 +478,7 @@ public class GenericPropertiesCreator {
         for (i = 0; i < list.size(); i++) {
           try {
             cls = WekaPackageClassLoaderManager.forName(list.get(i).toString());
-            if (ClassDiscovery.isSubclass(cls, clsCurrent)) {
+            if (InheritanceUtils.isSubclass(cls, clsCurrent)) {
               result = false;
               break;
             }

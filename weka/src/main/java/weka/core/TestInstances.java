@@ -20,14 +20,14 @@
 
 package weka.core;
 
+import weka.core.Capabilities.Capability;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Random;
 import java.util.StringTokenizer;
 import java.util.Vector;
-
-import weka.core.Capabilities.Capability;
 
 /**
  * Generates artificial datasets for testing. In case of Multi-Instance data the
@@ -593,7 +593,7 @@ public class TestInstances implements Cloneable, Serializable, OptionHandler,
     tmpStr = Utils.getOption('W', options);
     if (tmpStr.length() > 0) {
       cls = Class.forName(tmpStr);
-      if (ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls)) {
+      if (InheritanceUtils.hasInterface(CapabilitiesHandler.class, cls)) {
         initialized = true;
         handler = (CapabilitiesHandler) cls.newInstance();
         if (handler instanceof OptionHandler) {

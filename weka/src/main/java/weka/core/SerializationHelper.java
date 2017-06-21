@@ -67,7 +67,7 @@ public class SerializationHelper implements RevisionHandler {
    *         Serializable interface, otherwise false
    */
   public static boolean isSerializable(Class<?> c) {
-    return ClassDiscovery.hasInterface(Serializable.class, c);
+    return InheritanceUtils.hasInterface(Serializable.class, c);
   }
 
   /**

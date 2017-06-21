@@ -176,7 +176,7 @@ public class OptionHandlerJavadoc extends Javadoc {
         return result;
       }
 
-      if (!ClassDiscovery.hasInterface(OptionHandler.class, getInstance()
+      if (!InheritanceUtils.hasInterface(OptionHandler.class, getInstance()
         .getClass())) {
         throw new Exception("Class '" + getClassname()
           + "' is not an OptionHandler!");

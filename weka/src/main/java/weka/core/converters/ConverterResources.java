@@ -20,7 +20,7 @@
 
 package weka.core.converters;
 
-import weka.core.ClassDiscovery;
+import weka.core.InheritanceUtils;
 import weka.core.PluginManager;
 import weka.core.WekaPackageClassLoaderManager;
 import weka.gui.GenericPropertiesCreator;
@@ -281,7 +281,7 @@ public class ConverterResources {
 
       // all necessary interfaces implemented?
       for (n = 0; n < intf.length; n++) {
-        if (!ClassDiscovery.hasInterface(intf[n], classname)) {
+        if (!InheritanceUtils.hasInterface(intf[n], classname)) {
           continue;
         }
       }

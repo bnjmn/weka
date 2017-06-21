@@ -189,7 +189,7 @@ public class TechnicalInformationHandlerJavadoc extends Javadoc {
       return result;
     }
 
-    if (!ClassDiscovery.hasInterface(TechnicalInformationHandler.class,
+    if (!InheritanceUtils.hasInterface(TechnicalInformationHandler.class,
       getInstance().getClass())) {
       throw new Exception("Class '" + getClassname()
         + "' is not a TechnicalInformationHandler!");

@@ -26,6 +26,7 @@ import weka.core.Capabilities.Capability;
 import weka.core.CapabilitiesHandler;
 import weka.core.ClassDiscovery;
 import weka.core.CustomDisplayStringProvider;
+import weka.core.InheritanceUtils;
 import weka.core.OptionHandler;
 import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
@@ -351,7 +352,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       try {
         // cls = Class.forName(classname);
         cls = WekaPackageClassLoaderManager.forName(classname);
-        if (!ClassDiscovery.hasInterface(CapabilitiesHandler.class, cls)) {
+        if (!InheritanceUtils.hasInterface(CapabilitiesHandler.class, cls)) {
           return;
         }
 
@@ -623,7 +624,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       JPanel panel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
       add(panel, BorderLayout.SOUTH);
 
-      if (ClassDiscovery.hasInterface(CapabilitiesHandler.class, m_ClassType)) {
+      if (InheritanceUtils.hasInterface(CapabilitiesHandler.class, m_ClassType)) {
         // filter
         m_FilterButton.setMnemonic('F');
         m_FilterButton.addActionListener(new ActionListener() {
