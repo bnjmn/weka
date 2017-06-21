@@ -21,16 +21,11 @@
 
 package weka.gui.experiment;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.util.Vector;
+import weka.core.PluginManager;
+import weka.experiment.ResultMatrix;
+import weka.experiment.ResultMatrixPlainText;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertyPanel;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -43,11 +38,17 @@ import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-
-import weka.experiment.ResultMatrix;
-import weka.experiment.ResultMatrixPlainText;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertyPanel;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * A dialog for setting various output format parameters.
@@ -146,7 +147,7 @@ public class OutputFormatDialog extends JDialog {
    * initializes the member variables.
    */
   protected void initialize() {
-    Vector<String> classes;
+    List<String> classes;
     int i;
     Class<?> cls;
     ResultMatrix matrix;
@@ -154,7 +155,7 @@ public class OutputFormatDialog extends JDialog {
     m_Result = CANCEL_OPTION;
 
     if (m_OutputFormatClasses == null) {
-      classes = GenericObjectEditor.getClassnames(ResultMatrix.class.getName());
+      classes = PluginManager.getPluginNamesOfTypeList(ResultMatrix.class.getName());
 
       // set names and classes
       m_OutputFormatClasses = new Vector<Class<?>>();

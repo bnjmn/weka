@@ -21,12 +21,13 @@
 package weka.core.converters;
 
 import weka.core.ClassDiscovery;
+import weka.core.PluginManager;
 import weka.core.WekaPackageClassLoaderManager;
-import weka.gui.GenericObjectEditor;
 import weka.gui.GenericPropertiesCreator;
 
 import java.util.Arrays;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
 import java.util.Vector;
 
@@ -149,7 +150,7 @@ public class ConverterResources {
   }
 
   public static void initialize() {
-    Vector<String> classnames;
+    List<String> classnames;
 
     try {
       // init
@@ -189,7 +190,7 @@ public class ConverterResources {
     } finally {
       // loaders
       if (m_FileLoaders.size() == 0) {
-        classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class
+        classnames = PluginManager.getPluginNamesOfTypeList(AbstractFileLoader.class
           .getName());
         if (classnames.size() > 0) {
           m_FileLoaders = getFileConverters(classnames,
@@ -202,7 +203,7 @@ public class ConverterResources {
 
       // URL loaders
       if (m_URLFileLoaders.size() == 0) {
-        classnames = GenericObjectEditor.getClassnames(AbstractFileLoader.class
+        classnames = PluginManager.getPluginNamesOfTypeList(AbstractFileLoader.class
           .getName());
         if (classnames.size() > 0) {
           m_URLFileLoaders = getFileConverters(classnames,
@@ -217,7 +218,7 @@ public class ConverterResources {
 
       // savers
       if (m_FileSavers.size() == 0) {
-        classnames = GenericObjectEditor.getClassnames(AbstractFileSaver.class
+        classnames = PluginManager.getPluginNamesOfTypeList(AbstractFileSaver.class
           .getName());
         if (classnames.size() > 0) {
           m_FileSavers = getFileConverters(classnames,
@@ -264,7 +265,7 @@ public class ConverterResources {
    * @return hashtable with ExtensionFileFilters
    */
   protected static Hashtable<String, String> getFileConverters(
-    Vector<String> classnames, String[] intf) {
+    List<String> classnames, String[] intf) {
     Hashtable<String, String> result;
     String classname;
     Class<?> cls;

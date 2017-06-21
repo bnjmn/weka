@@ -21,17 +21,18 @@
 
 package weka.core.stemmers;
 
-import java.lang.reflect.Method;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.ClassDiscovery;
 import weka.core.Option;
 import weka.core.OptionHandler;
+import weka.core.PluginManager;
 import weka.core.RevisionUtils;
 import weka.core.Utils;
 import weka.core.WekaPackageClassLoaderManager;
-import weka.gui.GenericObjectEditor;
+
+import java.lang.reflect.Method;
+import java.util.Enumeration;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * <!-- globalinfo-start --> A wrapper class for the Snowball stemmers. Only
@@ -249,7 +250,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
    * retrieves the language names of the availabel stemmers.
    */
   private static void initStemmers() {
-    Vector<String> classnames;
+    List<String> classnames;
     int i;
 
     if (m_Stemmers != null) {
@@ -262,7 +263,7 @@ public class SnowballStemmer implements Stemmer, OptionHandler {
       return;
     }
 
-    classnames = GenericObjectEditor.getClassnames(SNOWBALL_PROGRAM);
+    classnames = PluginManager.getPluginNamesOfTypeList(SNOWBALL_PROGRAM);
     // try dynamic discovery if not in props file
     if (classnames.size() == 0) {
       classnames = ClassDiscovery.find(SNOWBALL_PROGRAM, PACKAGE_EXT);

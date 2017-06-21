@@ -21,38 +21,6 @@
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
-import java.util.Vector;
-
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-
 import weka.associations.AssociationRules;
 import weka.associations.Associator;
 import weka.associations.FPGrowth;
@@ -64,6 +32,7 @@ import weka.core.Drawable;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.PluginManager;
 import weka.core.Settings;
 import weka.core.Utils;
 import weka.core.WekaPackageClassLoaderManager;
@@ -84,6 +53,37 @@ import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JViewport;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.List;
+import java.util.Vector;
 
 /**
  * This panel allows the user to select, configure, and run a scheme that learns
@@ -245,9 +245,8 @@ public class AssociationsPanel extends AbstractPerspective implements
     // check for any visualization plugins so that we
     // can add a checkbox for storing graphs or rules
     boolean showStoreOutput =
-      (GenericObjectEditor.getClassnames(
-        AssociationRuleVisualizePlugin.class.getName()).size() > 0 || GenericObjectEditor
-        .getClassnames(TreeVisualizePlugin.class.getName()).size() > 0);
+      (PluginManager.getPluginNamesOfTypeList(AssociationRuleVisualizePlugin.class.getName()).size() > 0 ||
+        PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName()).size() > 0);
 
     // Layout the GUI
     JPanel p1 = new JPanel();
@@ -664,11 +663,10 @@ public class AssociationsPanel extends AbstractPerspective implements
     if (visVect != null) {
       for (Object o : visVect) {
         if (o instanceof AssociationRules) {
-          Vector<String> pluginsVector =
-            GenericObjectEditor
-              .getClassnames(AssociationRuleVisualizePlugin.class.getName());
+          List<String> pluginsVector =
+            PluginManager.getPluginNamesOfTypeList(AssociationRuleVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (pluginsVector.elementAt(i));
+            String className = (pluginsVector.get(i));
             try {
               AssociationRuleVisualizePlugin plugin =
                 (AssociationRuleVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);
@@ -687,11 +685,10 @@ public class AssociationsPanel extends AbstractPerspective implements
             }
           }
         } else if (o instanceof String) {
-          Vector<String> pluginsVector =
-            GenericObjectEditor.getClassnames(TreeVisualizePlugin.class
-              .getName());
+          List<String> pluginsVector =
+            PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName());
           for (int i = 0; i < pluginsVector.size(); i++) {
-            String className = (pluginsVector.elementAt(i));
+            String className = (pluginsVector.get(i));
             try {
               TreeVisualizePlugin plugin =
                 (TreeVisualizePlugin) WekaPackageClassLoaderManager.objectForName(className);

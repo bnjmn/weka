@@ -21,6 +21,18 @@
 
 package weka.gui.visualize;
 
+import weka.core.PluginManager;
+import weka.gui.ExtensionFileFilter;
+
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -32,21 +44,8 @@ import java.io.FileOutputStream;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Properties;
-import java.util.Vector;
-
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
 
 /**
  * This class extends the component which is handed over in the constructor by a
@@ -253,7 +252,7 @@ public class PrintableComponent implements PrintableHandler {
    * current package
    */
   protected void initFileChooser() {
-    Vector<String> writerNames;
+    List<String> writerNames;
     int i;
     Class<?> cls;
     JComponentWriter writer;
@@ -374,7 +373,7 @@ public class PrintableComponent implements PrintableHandler {
     accessory.add(m_AspectRatioCheckBox);
 
     // determine all available writers and add them to the filechooser
-    writerNames = GenericObjectEditor.getClassnames(JComponentWriter.class
+    writerNames = PluginManager.getPluginNamesOfTypeList(JComponentWriter.class
       .getName());
     Collections.sort(writerNames);
     for (i = 0; i < writerNames.size(); i++) {

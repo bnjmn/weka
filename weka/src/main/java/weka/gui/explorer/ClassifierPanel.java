@@ -44,6 +44,7 @@ import weka.core.Environment;
 import weka.core.Instance;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.PluginManager;
 import weka.core.Range;
 import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
@@ -142,7 +143,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Random;
-import java.util.Vector;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -820,14 +820,13 @@ public class ClassifierPanel extends AbstractPerspective implements
     p2.add(m_MoreOptions);
 
     // Any launcher plugins?
-    Vector<String> pluginsVector =
-      GenericObjectEditor
-        .getClassnames(ClassifierPanelLaunchHandlerPlugin.class.getName());
+    List<String> pluginsVector =
+      PluginManager.getPluginNamesOfTypeList(ClassifierPanelLaunchHandlerPlugin.class.getName());
     JButton pluginBut = null;
     if (pluginsVector.size() == 1) {
       try {
         // Display as a single button
-        String className = pluginsVector.elementAt(0);
+        String className = pluginsVector.get(0);
         final ClassifierPanelLaunchHandlerPlugin plugin =
           (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
             .objectForName(className);
@@ -852,7 +851,7 @@ public class ClassifierPanel extends AbstractPerspective implements
       final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
 
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (pluginsVector.elementAt(i));
+        String className = (pluginsVector.get(i));
         try {
           final ClassifierPanelLaunchHandlerPlugin plugin =
             (ClassifierPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
@@ -2379,10 +2378,10 @@ public class ClassifierPanel extends AbstractPerspective implements
     boolean availablePlugins = false;
 
     // predictions
-    Vector<String> pluginsVector =
-      GenericObjectEditor.getClassnames(VisualizePlugin.class.getName());
+    List<String> pluginsVector =
+      PluginManager.getPluginNamesOfTypeList(VisualizePlugin.class.getName());
     for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (pluginsVector.elementAt(i));
+      String className = (pluginsVector.get(i));
       try {
         VisualizePlugin plugin =
           (VisualizePlugin) WekaPackageClassLoaderManager
@@ -2411,9 +2410,9 @@ public class ClassifierPanel extends AbstractPerspective implements
 
     // errros
     pluginsVector =
-      GenericObjectEditor.getClassnames(ErrorVisualizePlugin.class.getName());
+      PluginManager.getPluginNamesOfTypeList(ErrorVisualizePlugin.class.getName());
     for (int i = 0; i < pluginsVector.size(); i++) {
-      String className = (pluginsVector.elementAt(i));
+      String className = (pluginsVector.get(i));
       try {
         ErrorVisualizePlugin plugin =
           (ErrorVisualizePlugin) WekaPackageClassLoaderManager
@@ -2446,10 +2445,9 @@ public class ClassifierPanel extends AbstractPerspective implements
       // trees
       if (((Drawable) temp_classifier).graphType() == Drawable.TREE) {
         pluginsVector =
-          GenericObjectEditor
-            .getClassnames(TreeVisualizePlugin.class.getName());
+          PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName());
         for (int i = 0; i < pluginsVector.size(); i++) {
-          String className = (pluginsVector.elementAt(i));
+          String className = (pluginsVector.get(i));
           try {
             TreeVisualizePlugin plugin =
               (TreeVisualizePlugin) WekaPackageClassLoaderManager
@@ -2481,10 +2479,9 @@ public class ClassifierPanel extends AbstractPerspective implements
       // graphs
       else {
         pluginsVector =
-          GenericObjectEditor.getClassnames(GraphVisualizePlugin.class
-            .getName());
+          PluginManager.getPluginNamesOfTypeList(GraphVisualizePlugin.class.getName());
         for (int i = 0; i < pluginsVector.size(); i++) {
-          String className = (pluginsVector.elementAt(i));
+          String className = (pluginsVector.get(i));
           try {
             GraphVisualizePlugin plugin =
               (GraphVisualizePlugin) WekaPackageClassLoaderManager

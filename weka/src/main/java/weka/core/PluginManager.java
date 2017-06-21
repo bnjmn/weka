@@ -26,6 +26,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -504,6 +506,27 @@ public class PluginManager {
     }
 
     return null;
+  }
+
+  /**
+   * Get a sorted list of names of plugins that implement the supplied interface.
+   *
+   * @param interfaceName the fully qualified name of the interface to list
+   *          plugins for
+   *
+   * @return a set of names of plugins
+   */
+  public static List<String> getPluginNamesOfTypeList(String interfaceName) {
+    List<String> result;
+    Set<String> r = getPluginNamesOfType(interfaceName);
+
+    result = new ArrayList<String>();
+    if (r != null) {
+      result.addAll(r);
+    }
+    Collections.sort(result, new ClassDiscovery.StringCompare());
+
+    return result;
   }
 
   /**

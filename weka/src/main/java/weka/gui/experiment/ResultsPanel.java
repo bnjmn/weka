@@ -24,6 +24,7 @@ package weka.gui.experiment;
 import weka.core.Attribute;
 import weka.core.Instance;
 import weka.core.Instances;
+import weka.core.PluginManager;
 import weka.core.Range;
 import weka.core.converters.CSVLoader;
 import weka.experiment.CSVResultListener;
@@ -36,7 +37,6 @@ import weka.experiment.ResultMatrixPlainText;
 import weka.experiment.Tester;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
 import weka.gui.ListSelectorDialog;
 import weka.gui.Perspective;
 import weka.gui.PropertyDialog;
@@ -82,6 +82,7 @@ import java.io.FileReader;
 import java.io.Reader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.StringTokenizer;
 import java.util.Vector;
 
@@ -286,8 +287,8 @@ public class ResultsPanel extends JPanel {
    */
   public ResultsPanel() {
 
-    Vector<String> classes =
-      GenericObjectEditor.getClassnames(Tester.class.getName());
+    List<String> classes =
+      PluginManager.getPluginNamesOfTypeList(Tester.class.getName());
 
     // set names and classes
     m_Testers = new Vector<Class<?>>();

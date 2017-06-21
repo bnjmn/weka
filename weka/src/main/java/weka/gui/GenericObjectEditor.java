@@ -1925,25 +1925,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
   }
 
   /**
-   * Returns the available classnames for a certain property in the props file.
-   * 
-   * @param property the property to get the classnames for
-   * @return the classnames
-   */
-  public static Vector<String> getClassnames(String property) {
-    Vector<String> result;
-    Set<String> r = PluginManager.getPluginNamesOfType(property);
-
-    result = new Vector<String>();
-    if (r != null) {
-      result.addAll(r);
-    }
-    Collections.sort(result, new ClassDiscovery.StringCompare());
-
-    return result;
-  }
-
-  /**
    * Returns the history of the used setups.
    * 
    * @return the history

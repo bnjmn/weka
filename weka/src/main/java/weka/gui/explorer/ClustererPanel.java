@@ -21,65 +21,6 @@
 
 package weka.gui.explorer;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
-import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.InputEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
-import java.util.Vector;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.GZIPOutputStream;
-
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
-import javax.swing.filechooser.FileFilter;
-
 import weka.clusterers.ClusterEvaluation;
 import weka.clusterers.Clusterer;
 import weka.clusterers.SimpleKMeans;
@@ -91,6 +32,7 @@ import weka.core.Drawable;
 import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.OptionHandler;
+import weka.core.PluginManager;
 import weka.core.SerializationHelper;
 import weka.core.SerializedObject;
 import weka.core.Settings;
@@ -121,6 +63,63 @@ import weka.gui.treevisualizer.PlaceNode2;
 import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
+
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
+import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.InputEvent;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Random;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * This panel allows the user to select and configure a clusterer, and evaluate
@@ -504,14 +503,13 @@ public class ClustererPanel extends AbstractPerspective implements
     p2.add(m_StorePredictionsBut);
 
     // Any launcher plugins
-    Vector<String> pluginsVector =
-      GenericObjectEditor.getClassnames(ClustererPanelLaunchHandlerPlugin.class
-        .getName());
+    List<String> pluginsVector =
+      PluginManager.getPluginNamesOfTypeList(ClustererPanelLaunchHandlerPlugin.class.getName());
     JButton pluginBut = null;
     if (pluginsVector.size() == 1) {
       try {
         // display a single button
-        String className = pluginsVector.elementAt(0);
+        String className = pluginsVector.get(0);
         final ClustererPanelLaunchHandlerPlugin plugin =
           (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
             .objectForName(className);
@@ -535,7 +533,7 @@ public class ClustererPanel extends AbstractPerspective implements
       final java.awt.PopupMenu pluginPopup = new java.awt.PopupMenu();
 
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (pluginsVector.elementAt(i));
+        String className = (pluginsVector.get(i));
         try {
           final ClustererPanelLaunchHandlerPlugin plugin =
             (ClustererPanelLaunchHandlerPlugin) WekaPackageClassLoaderManager
@@ -1422,10 +1420,10 @@ public class ClustererPanel extends AbstractPerspective implements
     // trees
     if (grph != null) {
       // trees
-      Vector<String> pluginsVector =
-        GenericObjectEditor.getClassnames(TreeVisualizePlugin.class.getName());
+      List<String> pluginsVector =
+        PluginManager.getPluginNamesOfTypeList(TreeVisualizePlugin.class.getName());
       for (int i = 0; i < pluginsVector.size(); i++) {
-        String className = (pluginsVector.elementAt(i));
+        String className = (pluginsVector.get(i));
         try {
           TreeVisualizePlugin plugin =
             (TreeVisualizePlugin) WekaPackageClassLoaderManager
