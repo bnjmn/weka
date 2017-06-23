@@ -1,2 +1,2 @@
 weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.GroovyStep
-*resources*=[weka.knowledgeflow.plugin.templates|Groovy scripting|weka/gui/knowledgeflow/templates/groovyLearningCurve.kf]
+*resources*=[weka.knowledgeflow.plugin.templates|Groovy scripting - learning curves|weka/gui/knowledgeflow/templates/groovyLearningCurve.kf],[weka.knowledgeflow.plugin.templates|Groovy scripting - load ARFF files|weka/gui/knowledgeflow/templates/loadArffFromDirectory.kf]

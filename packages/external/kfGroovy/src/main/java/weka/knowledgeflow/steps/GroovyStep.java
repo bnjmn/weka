@@ -158,6 +158,17 @@ public class GroovyStep extends BaseStep {
   }
 
   /**
+   * Start processing as a start point - just gets passed to the Groovy script
+   * to handle
+   *
+   * @throws WekaException if a problem occurs
+   */
+  @Override
+  public void start() throws WekaException {
+    ((Step) m_groovyObject).start();
+  }
+
+  /**
    * Process incoming data objects - just get passed to the Groovy script to
    * handle
    *

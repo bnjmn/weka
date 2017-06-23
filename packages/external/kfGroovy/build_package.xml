@@ -180,11 +180,6 @@
           todir="${dist}/${package}"/>
     <copy file="MacOSXDefaults.groovy"
           todir="${dist}/${package}"/>
-    <copy toDir="${dist}/${package}">
-      <fileset dir=".">
-        <include name="scripts/**/*.groovy"/>
-      </fileset>
-    </copy>
     <mkdir dir="${dist}/${package}/lib"/>
     <copy todir="${dist}/${package}" >
        <fileset dir="${lib}">

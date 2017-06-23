@@ -1,0 +1,63 @@
+{
+	"flow_name" : "loadArffFromDirectory",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.GroovyStep",
+			"properties" : {
+				"name" : "GroovyStep",
+				"script" : "import java.util.List\nimport java.util.ArrayList\nimport java.io.*\nimport javax.swing.JFileChooser\nimport weka.core.*\nimport weka.knowledgeflow.Data\nimport weka.knowledgeflow.StepManager\nimport weka.knowledgeflow.StepTask\nimport weka.knowledgeflow.StepTaskCallback\nimport weka.knowledgeflow.steps.Step\nimport weka.knowledgeflow.steps.BaseStep\nimport weka.gui.knowledgeflow.StepInteractiveViewer\n\n\n// Groovy script step to load all arff files in a supplied directory\nclass MyScript extends BaseStep {\n\n  String m_filePath = \"\\${DATA_SETS}\"\n  String m_resolvedPath = \"\"\n\n  public static class Configurer extends weka.gui.knowledgeflow.BaseInteractiveViewer {\n\n    JFileChooser m_fileChooser =\n      new JFileChooser(new File(System.getProperty(\"user.dir\")))\n\n    void init() {\n      m_fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY)\n      add(m_fileChooser, java.awt.BorderLayout.CENTER);\n    }\n\n    String getViewerName() {\n      return \"Select directory\"; \n    }\n  \n    void closePressed() {\n      Step scriptStep = getStep().getWrappedGroovyStep()\n      ((MyScript) scriptStep).setFilePath(m_fileChooser.getSelectedFile().toString())\n    }\n  }\n\n  void setFilePath(String filePath) {\n    m_filePath = filePath; \n  }\n\n  String getFilePath() {\n    return filePath; \n  }\n\n\t/** Implement initialization stuff here */\n\tvoid stepInit() throws WekaException { \n    m_resolvedPath = getStepManager().environmentSubstitute(m_filePath)\n  }\n\n\t/** Main processing logic here for start points */\n\tvoid start() throws WekaException { \n    getStepManager().logBasic(\"Processing directory: \" + m_resolvedPath)\n    getStepManager().processing()\n    \n    File directory = new File(m_resolvedPath)\n    if (directory.exists()) {\n      File[] contents = directory.listFiles()\n      for (File f : contents) {\n        if (f.toString().toLowerCase().endsWith(\".arff\")) {\n          getStepManager().logBasic(\"Loading \" + f)\n\n          Instances insts = new Instances(new BufferedReader(new FileReader(f)))\n\n          Data d = new Data(StepManager.CON_DATASET, insts)\n          if (isStopRequested()) {\n            getStepManager().interrupted()\n            return  \n          }\n          getStepManager().outputData(d)\n        }        \n      }\n    }\n    getStepManager().finished()\n  }\n\n\t/** Main processing logic here for incoming connections */\n\tvoid processIncoming(Data data) throws WekaException { }\n\n\t/** Return a list of connection types that this step can\n\t *  accept. See constants defined in weka.knowledgeflow.StepManager\n\t * (or define your own connection types). */\n\tList<String> getIncomingConnectionTypes() { return null }\n\n\t/** Return a list of connection types that this step can\n\t *  produce as output. See constants defined in\n \t * weka.knowledgeflow.StepManager (or define your own connection\n\t * types). */\n\tList<String> getOutgoingConnectionTypes() { \n    return Arrays.asList(StepManager.CON_DATASET) \n  }\n\n  /** We're using the interactive viewer mechanism here to allow the user to\n    * graphically set the directory to load for our script. This is because the standard\n    * config dialog mechanism is being used by the GroovyStep wrapper to provide the\n    * script editor dialog :-) Furthermore, we're using the getInteractiveViewersImpls() method \n    * (that returns instantiated implementations of StepInteractiveViewer). Normally, a Step\n    * implementation would implement the getInteractiveViewers() method, that returns the class\n    * names of any viewers as strings - this avoids the loading of GUI classes when executing\n    * in a non-graphical environment and interactive viewers are not needed (i.e. when using the \n    * FlowRunner class). Because of the funky way Groovy compiles and loads classes, it is necessary\n    * to explicitly instantiate our interactive viewer/editor here. */\n  Map<String, StepInteractiveViewer> getInteractiveViewersImpls() {\n    Map<String, StepInteractiveViewer> result = new HashMap<String, StepInteractiveViewer>();\n    result.put(\"Choose directory to load from...\", new Configurer());\n\n    return result;\n  }\n}\n"
+			},
+			"connections" : {
+				"dataSet" : [
+					"TextViewer",
+					"DataVisualizer"
+				]
+			},
+			"coordinates" : "50,74"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "279,74"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "Configure this step\nwith a directory containing\nARFF files to load from."
+			},
+			"connections" : {
+			},
+			"coordinates" : "29,167"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "This flow demonstrates a groovy script that loads all the ARFF files from\na user-supplied directory."
+			},
+			"connections" : {
+			},
+			"coordinates" : "25,13"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.DataVisualizer",
+			"properties" : {
+				"name" : "DataVisualizer",
+				"offscreenAdditionalOpts" : "",
+				"offscreenHeight" : "400",
+				"offscreenRendererName" : "Weka Chart Renderer",
+				"offscreenWidth" : "500",
+				"offscreenXAxis" : "",
+				"offscreenYAxis" : ""
+			},
+			"connections" : {
+			},
+			"coordinates" : "278,200"
+		}
+	]
+}
