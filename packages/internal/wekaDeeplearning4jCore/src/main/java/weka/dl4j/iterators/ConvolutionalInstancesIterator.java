@@ -21,23 +21,16 @@
 
 package weka.dl4j.iterators;
 
-import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.DataSet;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 import weka.classifiers.functions.dl4j.Utils;
 import weka.core.Instances;
 import weka.core.Option;
 import weka.core.OptionMetadata;
-import weka.dl4j.EasyImageRecordReader;
-import weka.dl4j.ScaleImagePixelsPreProcessor;
 import weka.dl4j.ShufflingDataSetIterator;
-import weka.dl4j.SpecifiableFolderSplit;
 
 import java.io.File;
-import java.net.URI;
-import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Random;
 
 /**
  * Converts the given Instances object into a DataSet and then constructs and returns a ShufflingDataSetIterator.

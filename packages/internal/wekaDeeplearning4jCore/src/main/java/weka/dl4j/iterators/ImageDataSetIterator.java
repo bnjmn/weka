@@ -22,20 +22,16 @@
 package weka.dl4j.iterators;
 
 import java.io.File;
-import java.net.URI;
 import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.List;
 import java.util.Random;
 
+import org.datavec.api.split.StringSplit;
 import org.deeplearning4j.datasets.datavec.RecordReaderDataSetIterator;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
 
 import weka.core.Instances;
-import weka.core.Option;
 import weka.core.OptionMetadata;
 import weka.dl4j.EasyImageRecordReader;
-import weka.dl4j.SpecifiableFolderSplit;
 import weka.dl4j.ScaleImagePixelsPreProcessor;
 
 /**
@@ -166,10 +162,7 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
         }
         EasyImageRecordReader reader = new EasyImageRecordReader(getWidth(), getHeight(), getNumChannels(), filenames,
                 classes, seed);
-        SpecifiableFolderSplit fs = new SpecifiableFolderSplit();
-        fs.setFiles(new URI[0]);
-        fs.setLength(len);
-        reader.initialize(fs);
+        reader.initialize(new StringSplit("")); // The argument is ignored anyway
         return reader;
     }
 
