@@ -112,6 +112,11 @@
     <ant antfile="build.xml" dir="${weka}" target="run_tests_all" inheritall="false"/>
   </target>
 
+  <target name="run_tests_core" depends="init_all">
+    <echo message="Running core tests..."/>
+    <ant antfile="build.xml" dir="${weka}" target="run_tests_core" inheritall="false"/>
+  </target>
+
   <target name="copy-files" depends="javadocs, remote-engine, weka-src, changelog, manual">
     <copy todir="${temp}/weka/lib">
       <fileset dir="${weka}/lib">
@@ -165,6 +170,16 @@
   </target>
 
   <target name="snapshot_no_junit" depends="copy-files" description="Make a SNAPSHOT distribution of Weka">
+    <echo message="Making snapshot zip..."/>
+    <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
+      <include name="**/*"/>
+    </zip>
+    <echo message="Cleaning up..."/>
+    <delete dir="${temp}"/>
+    <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
+  </target>
+
+  <target name="snapshot_core_junit_only" depends="run_tests_core,copy-files" description="Make a SNAPSHOT distribution of Weka">
     <echo message="Making snapshot zip..."/>
     <zip destfile="${dist}/${branch}-SNAPSHOT.zip" basedir="${temp}">
       <include name="**/*"/>
