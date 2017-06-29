@@ -1,0 +1,167 @@
+{
+	"flow_name" : "CrossValidateThreeClassifiers",
+	"steps" : [
+		{
+			"class" : "weka.knowledgeflow.steps.CSVDataSource",
+			"properties" : {
+				"datasourceOptions" : "-min-slices 4 -output-dir ${user.home}/sparkOutput -master local[*] -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -charset UTF-8 -comment # -escape \\ -F , -csv-header -Q \"\\'\" -input-file ${WEKA_HOME}/packages/distributedWekaSparkDev/sample_data/hypothyroid_with_header_row.csv -dataset-type trainingData",
+				"name" : "CSVDataSource"
+			},
+			"connections" : {
+				"dataFrame" : [
+					"ArffHeaderSparkJob"
+				]
+			},
+			"coordinates" : "37,252"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.ArffHeaderSparkJob",
+			"properties" : {
+				"jobOptions" : "-header-file-name hypo.arff -data-source weka.distributed.spark.CSVDataSource -debug -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -charset UTF-8 -comment # -escape \\ -F , -M ? -Q \"\\'\" -dataset-type trainingData -compression 50.0 -decimal-places 2",
+				"name" : "ArffHeaderSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"RandomlyShuffleDataSparkJob"
+				]
+			},
+			"coordinates" : "197,252"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note",
+				"noteText" : "<html>Uses the hypothyroid_with_header_row \ncsv file in the <b>sample_data</b> directory of\nthe distributedWekaSpark package as input. \nThe dataset is split into 4 partitions, and \nan ARFF header with additional summary \nmetadata attributes is computed using all the\nCPU cores on your computer.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "35,358"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierEvaluationSparkJob",
+			"properties" : {
+				"jobOptions" : "-min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp1 -model-file-name outputModel.model -num-iterations 1 -class last -data-source weka.distributed.spark.CSVDataSource -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -charset UTF-8 -comment # -escape \\ -F , -M ? -Q \"\\'\" -dataset-type trainingData -compression 50.0 -decimal-places 2 -W weka.classifiers.bayes.NaiveBayes -fold-number -1 -total-folds 10 -seed 1 --",
+				"name" : "WekaClassifierEvaluationSparkJob"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"success" : [
+					"WekaClassifierEvaluationSparkJob2"
+				]
+			},
+			"coordinates" : "529,252"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.TextViewer",
+			"properties" : {
+				"name" : "TextViewer"
+			},
+			"connections" : {
+			},
+			"coordinates" : "529,404"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.RandomizedDataSparkJob",
+			"properties" : {
+				"jobOptions" : "-class last -seed 1 -num-splits 4 -data-source weka.distributed.spark.CSVDataSource -min-slices 1 -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -charset UTF-8 -comment # -escape \\ -F , -M ? -Q \"\\'\" -dataset-type trainingData -compression 50.0 -decimal-places 2",
+				"name" : "RandomlyShuffleDataSparkJob"
+			},
+			"connections" : {
+				"success" : [
+					"WekaClassifierEvaluationSparkJob"
+				]
+			},
+			"coordinates" : "350,252"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.WekaClassifierEvaluationSparkJob",
+			"properties" : {
+				"jobOptions" : "-cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -auc 0.5 -output-subdir exp2 -model-file-name outputModel.model -num-iterations 1 -class last -data-source weka.distributed.spark.CSVDataSource -cluster-mem -1.0 -overhead 3.0 -mem-fraction 0.6 -charset UTF-8 -comment # -escape \\ -F , -M ? -Q \"\\'\" -dataset-type trainingData -compression 50.0 -decimal-places 2 -W weka.classifiers.trees.RandomForest -fold-number -1 -total-folds 10 -seed 1 -- -P 100 -I 100 -num-slots 1 -K 0 -M 1.0 -V 0.001 -S 1",
+				"name" : "WekaClassifierEvaluationSparkJob2"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				],
+				"success" : [
+					"MLLibClassifierEvaluationSparkJob"
+				]
+			},
+			"coordinates" : "713,252"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note2",
+				"noteText" : "Randomly shuffle and\nstratify the data (RDD) \ninto 4 partitions."
+			},
+			"connections" : {
+			},
+			"coordinates" : "339,356"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note3",
+				"noteText" : "Perform 10-fold \ncross-validation\nusing Weka's naive \nBayes implementation."
+			},
+			"connections" : {
+			},
+			"coordinates" : "497,172"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note4",
+				"noteText" : "Perform 10-fold\ncross-validation\nusing Weka's random forest\nimplementation (100 trees \ntotal - 25 per partition)."
+			},
+			"connections" : {
+			},
+			"coordinates" : "646,168"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note22",
+				"noteText" : "<html><b>NOTE: this flow is configured to run out of the box.</b> It stores output in ${user.home}/sparkOutput.\n\nThis flow demonstrates loading data into the Spark environment via Spark's data frame-based data sources (CSV \nin this case). The (potentially) big datasets are then processed by distributed Weka's strategies for dealing with\nlarge (larger than can fit into desktop RAM) datasets. It also demonstrates cross-validation evaluation of a \nMLlib random forest classifier via the MLlibClassifierEvaluationSparkJob step. The folds created by this \nstep are the same as those created by the WekaClassifierEvaluationSparkJob, making results directly comparable \nbetween the two.</html>"
+			},
+			"connections" : {
+			},
+			"coordinates" : "22,18"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.MLlibClassifierEvaluationSparkJob",
+			"properties" : {
+				"classAttribute" : "last",
+				"classifier" : {
+					"type" : "optionHandler",
+					"class" : "weka.classifiers.mllib.MLlibRandomForest",
+					"options" : "-strategy auto -impurity Entropy -max-bins 32 -depth 5 -max-labels 4 -num-trees 100 -seed 1 -spark-opts \"-master local[*]\""
+				},
+				"evaluateOnTestSetIfPresent" : false,
+				"name" : "MLLibClassifierEvaluationSparkJob",
+				"outputSubdir" : "exp3",
+				"sampleFractionForAUC" : "0.5",
+				"totalFolds" : "10"
+			},
+			"connections" : {
+				"text" : [
+					"TextViewer"
+				]
+			},
+			"coordinates" : "713,404"
+		},
+		{
+			"class" : "weka.knowledgeflow.steps.Note",
+			"properties" : {
+				"name" : "Note23",
+				"noteText" : "Perform 10-fold\ncross-validation\nusing MLlib's random\nforest implementation\n(100 trees)."
+			},
+			"connections" : {
+			},
+			"coordinates" : "791,387"
+		}
+	]
+}

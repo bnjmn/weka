@@ -1,0 +1,10 @@
+distributed.spark
+weka.classifiers.mllib
+weka.distributed.spark
+weka.distributed.spark.mllib.util
+weka.filters.unsupervised.attribute
+weka.gui
+weka.gui.beans
+weka.gui.knowledgeflow
+weka.gui.knowledgeflow.steps
+weka.knowledgeflow.steps

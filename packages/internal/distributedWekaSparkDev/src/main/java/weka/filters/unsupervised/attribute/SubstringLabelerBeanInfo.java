@@ -1,0 +1,42 @@
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    SubstringLabelerBeanInfo
+ *    Copyright (C) 2015 University of Waikato, Hamilton, New Zealand
+ *
+ */
+
+package weka.filters.unsupervised.attribute;
+
+import java.beans.BeanDescriptor;
+import java.beans.SimpleBeanInfo;
+
+import weka.gui.beans.SubstringLabelerFilterCustomizer;
+
+/**
+ * Bean info class for the SubstringLabeler filter
+ *
+ * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @version $Revision: $
+ */
+public class SubstringLabelerBeanInfo extends SimpleBeanInfo {
+  @Override
+  public BeanDescriptor getBeanDescriptor() {
+    return new BeanDescriptor(
+      weka.filters.unsupervised.attribute.SubstringLabeler.class,
+      SubstringLabelerFilterCustomizer.class);
+  }
+}

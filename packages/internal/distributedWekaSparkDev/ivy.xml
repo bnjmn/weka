@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ivy-module version="2.0" xmlns:m="http://ant.apache.org/ivy/maven">
+    <info organisation="${ivy.artifact.group}" module="${ivy.artifact.id}" revision="${project.revision}" />
+    
+    <configurations>
+        <conf name="default"/>
+        <conf name="test" visibility="private"/>
+        <conf name="source" />          
+    </configurations>
+    
+    <publications>
+            <artifact name="${ivy.artifact.id}" type="jar" conf="default"/>
+            <artifact name="${ivy.artifact.id}" m:classifier="sources" type="source" ext="jar" conf="source"/>
+    </publications>   
+    
+    <dependencies defaultconf="default->default">
+<!--      <dependency org="org.twitter4j" name="twitter4j" rev="3.0.6" /> -->
+
+    <dependency org="org.apache.spark" name="spark-core_2.10" rev="${dependency.spark.revision}">
+      <exclude org="org.eclipse.jetty.orbit"/>
+<!--      <exclude module="hadoop-yarn-common"/>
+      <exclude module="hadoop-yarn-client"/>
+      <exclude module="hadoop-yarn-api"/> -->
+    </dependency>
+
+    <dependency org="org.apache.spark" name="spark-mllib_2.10" rev="${dependency.spark.revision}">
+      <exclude org="org.eclipse.jetty.orbit"/>
+<!--      <exclude module="hadoop-yarn-common"/>
+      <exclude module="hadoop-yarn-client"/>
+      <exclude module="hadoop-yarn-api"/> -->
+    </dependency>
+
+    <dependency org="org.apache.spark" name="spark-sql_2.10" rev="${dependency.spark.revision}" />
+    <dependency org="com.databricks" name="spark-csv_2.10" rev="${dependency.spark.csv.revision}" />
+    <dependency org="com.databricks" name="spark-avro_2.10" rev="${dependency.spark.avro.revision}" />
+
+    <dependency org="javax.servlet" name="javax.servlet-api" rev="3.1.0" />
+
+    <dependency org="junit" name="junit" rev="4.5" conf="test->default" />
+
+<!--        <dependency org="commons-logging" name="commons-logging" rev="1.1" transitive="false"/> -->
+    </dependencies>
+</ivy-module>

@@ -1,0 +1,5 @@
+# Mappings for classes to be handled in the GenericObjectEditor
+# Specify the MOA classifier editor
+
+# classifiers
+weka.classifiers.mllib.MLlibClassifier=weka.gui.GenericObjectEditor
