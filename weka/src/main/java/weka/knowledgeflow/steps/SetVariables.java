@@ -381,6 +381,23 @@ public class SetVariables extends BaseStep {
     return new ArrayList<String>();
   }
 
+  @Override
+  public Instances outputStructureForConnectionType(String connectionName)
+    throws WekaException {
+    if (getStepManager().numIncomingConnections() == 0
+      || (!connectionName.equals(StepManager.CON_DATASET)
+        && !connectionName.equals(StepManager.CON_TRAININGSET) && !connectionName
+          .equals(StepManager.CON_TESTSET))
+      && !connectionName.equals(StepManager.CON_INSTANCE)
+      && !connectionName.equals(StepManager.CON_ENVIRONMENT)) {
+      return null;
+    }
+
+    // our output structure is the same as whatever kind of input we are getting
+    return getStepManager().getIncomingStructureForConnectionType(
+      connectionName);
+  }
+
   /**
    * Return the fully qualified name of a custom editor component (JComponent)
    * to use for editing the properties of the step. This method can return null,
