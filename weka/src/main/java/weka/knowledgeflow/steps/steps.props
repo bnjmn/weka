@@ -25,4 +25,4 @@ weka.knowledgeflow.steps.FlowByExpression,weka.knowledgeflow.steps.InstanceStrea
 weka.knowledgeflow.steps.Join,weka.knowledgeflow.steps.DataGrid,weka.knowledgeflow.steps.SendToPerspective,\
 weka.knowledgeflow.steps.WriteWekaLog,weka.knowledgeflow.steps.Job,weka.knowledgeflow.steps.StorePropertiesInEnvironment,\
 weka.knowledgeflow.steps.SetPropertiesFromEnvironment,weka.knowledgeflow.steps.WriteDataToResult,\
-weka.knowledgeflow.steps.GetDataFromResult
+weka.knowledgeflow.steps.GetDataFromResult,weka.knowledgeflow.steps.ExecuteProcess
