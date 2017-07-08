@@ -21,6 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
@@ -318,8 +319,13 @@ public class MultiInstanceToPropositional extends Filter implements
     m_NumBags = -1;
 
     /* create a new output format (propositional instance format) */
-    Instances newData = instanceInfo.attribute(1).relation()
+    Instances tempData = instanceInfo.attribute(1).relation()
       .stringFreeStructure();
+    ArrayList<Attribute> atts = new ArrayList<Attribute>(tempData.numAttributes());
+    for (int i = 0; i < tempData.numAttributes(); i++) {
+      atts.add(tempData.attribute(i).copy(instanceInfo.attribute(1).name() + "_" + tempData.attribute(i).name()));
+    }
+    Instances newData = new Instances(tempData.relationName(), atts, 0);
     newData.insertAttributeAt(bagIndex, 0);
     newData.insertAttributeAt(classAttribute, newData.numAttributes());
     newData.setClassIndex(newData.numAttributes() - 1);
