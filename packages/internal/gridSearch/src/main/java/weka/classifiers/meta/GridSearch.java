@@ -23,17 +23,8 @@ package weka.classifiers.meta;
 import java.beans.PropertyDescriptor;
 import java.io.File;
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Iterator;
-import java.util.Properties;
-import java.util.Random;
-import java.util.Vector;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.*;
+import java.util.concurrent.*;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
@@ -1846,6 +1837,9 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       Class<?> c;
 
       desc = PropertyPath.getPropertyDescriptor(o, path);
+      if (desc == null) {
+        throw new IllegalArgumentException("Failed to set property " + path + " on object " + o.getClass().getName());
+      }
       c = desc.getPropertyType();
 
       // float
@@ -1912,7 +1906,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   /**
    * Helper class for evaluating a setup.
    */
-  protected static class EvaluationTask implements Runnable, RevisionHandler {
+  protected static class EvaluationTask implements Callable, RevisionHandler {
 
     /** the owner. */
     protected GridSearch m_Owner;
@@ -1963,7 +1957,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
      * Performs the evaluation.
      */
     @Override
-    public void run() {
+    public Exception call() {
       Evaluation eval;
       Classifier classifier;
       Performance performance;
@@ -1995,6 +1989,13 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
         // release slot
         m_Owner.completedEvaluation(classifier, null);
+
+        // clean up
+        m_Owner = null;
+        m_Data = null;
+
+        return null;
+
       } catch (Exception e) {
         if (m_Owner.getDebug()) {
           System.err
@@ -2006,11 +2007,14 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
           e.printStackTrace();
         }
         m_Owner.completedEvaluation(m_Values, e);
-      }
 
-      // clean up
-      m_Owner = null;
-      m_Data = null;
+
+        // clean up
+        m_Owner = null;
+        m_Data = null;
+
+        return e;
+      }
     }
 
     /**
@@ -2176,7 +2180,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   protected int m_NumExecutionSlots = 1;
 
   /** Pool of threads to train models with. */
-  protected transient ThreadPoolExecutor m_ExecutorPool;
+  protected transient ExecutorService m_ExecutorPool;
 
   /** The number of setups completed so far. */
   protected int m_Completed;
@@ -2883,7 +2887,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   @Override
   public void setOptions(String[] options) throws Exception {
     String tmpStr;
-    String[] tmpOptions;
 
     tmpStr = Utils.getOption('E', options);
     if (tmpStr.length() != 0) {
@@ -3612,9 +3615,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    * @see #m_Failed
    */
   protected void addPerformance(Performance performance, int folds) {
-    if (m_Failed > 0) {
-      return;
-    }
 
     m_Performances.add(performance);
     m_Cache.add(folds, performance);
@@ -3817,9 +3817,8 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
 
     log("Starting thread pool with " + m_NumExecutionSlots + " slots...");
 
-    m_ExecutorPool = new ThreadPoolExecutor(m_NumExecutionSlots,
-      m_NumExecutionSlots, 120, TimeUnit.SECONDS,
-      new LinkedBlockingQueue<Runnable>());
+    m_ExecutorPool = Executors.newFixedThreadPool(m_NumExecutionSlots);
+
   }
 
   /**
@@ -3833,25 +3832,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     }
 
     m_ExecutorPool = null;
-  }
-
-  /**
-   * Helper method used for blocking.
-   * 
-   * @param doBlock whether to block or not
-   */
-  protected synchronized void block(boolean doBlock) {
-    if (doBlock) {
-      try {
-        if (m_Completed + m_Failed < m_NumSetups && m_Failed == 0) {
-          wait();
-        }
-      } catch (InterruptedException ex) {
-        // ignored
-      }
-    } else {
-      notifyAll();
-    }
   }
 
   /**
@@ -3876,17 +3856,6 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     if (m_Debug) {
       System.err.println("Progress: completed=" + m_Completed + ", failed="
         + m_Failed + ", overall=" + m_NumSetups);
-    }
-
-    if ((m_Completed == m_NumSetups) || (m_Failed > 0)) {
-      if (m_Failed > 0) {
-        if (m_Debug) {
-          System.err
-            .println("Problem building classifiers - some failed to be trained.");
-        }
-      }
-      stopExecutorPool();
-      block(false);
     }
 
     m_Exception = exception;
@@ -3931,6 +3900,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
     m_Completed = 0;
     m_NumSetups = grid.width() * grid.height();
 
+    ArrayList<Future<Exception>> results = new ArrayList<Future<Exception>>();
     for (i = 0; i < size; i++) {
       if (m_Traversal == TRAVERSAL_BY_COLUMN) {
         enm = grid.column(i);
@@ -3951,27 +3921,25 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
           allCached = false;
           newTask = new EvaluationTask(this, m_Generator, inst, values, cv,
             m_Evaluation);
-
-          // executor pool gets shut down and m_ExcecutorPool set to null as
-          // soon
-          // as a task fails, so only launch if there are no errors at this
-          // point.
-          if (m_Failed == 0) {
-            m_ExecutorPool.execute(newTask);
-          }
-        }
-
-        // error encountered?
-        if (m_Failed > 0) {
-          break;
+          results.add(m_ExecutorPool.submit(newTask));
         }
       }
     }
 
     // wait for execution to finish
-    // if (m_Completed + m_Failed < m_NumSetups && m_Failed == 0) {
-    block(true);
-    // }
+    try {
+      for (Future<Exception> future : results) {
+        if (future.get() != null) {
+          throw new IllegalStateException(future.get().getMessage());
+        }
+      }
+    } catch (Exception e) {
+      stopExecutorPool();
+      throw new IllegalStateException("Thread-based execution of evaluation tasks failed: " +
+              e.getMessage());
+    }
+
+    stopExecutorPool();
 
     if (allCached) {
       log("All points were already cached - abnormal state!");
