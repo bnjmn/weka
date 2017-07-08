@@ -29,6 +29,7 @@ import weka.filters.Filter;
 
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.Vector;
 
 /**
@@ -578,8 +579,19 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
     if (getFilter() == null)
       result = super.getCapabilities();
-    else
+    else {
       result = getFilter().getCapabilities();
+
+      // By default, check that classifier can handle the class attribute
+     if (!getDoNotCheckForModifiedClassAttribute()) {
+        Capabilities classes = super.getCapabilities().getClassCapabilities();
+        Iterator<Capability> iter = classes.capabilities();
+        result.disableAllClasses();
+        while (iter.hasNext()) {
+          result.enable(iter.next());
+        }
+      }
+    }
 
     // the filtered classifier always needs a class
     result.disable(Capability.NO_CLASS);
@@ -587,6 +599,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     // set dependencies
     for (Capability cap : Capability.values())
       result.enableDependency(cap);
+
+    result.setOwner(this);
 
     return result;
   }
