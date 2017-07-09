@@ -255,11 +255,15 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
     String osType = System.getProperty("os.name");
     if (osType != null && osType.toLowerCase().contains("windows")) {
       // make sure that winutils.exe can be found so that Hadoop filesystem
-      // stuff
-      // works properly
-      System.setProperty("hadoop.home.dir",
-        WekaPackageManager.PACKAGES_DIR.toString() + File.separator
-          + "distributedWekaSparkDev" + File.separator + "windows");
+      // stuff works properly - but only if HADOOP_HOME and hadoop.home.dir are
+      // not already set
+      if (System.getProperty("hadoop.home.dir") == null
+        && System.getenv("HADOOP_HOME") == null
+        && System.getenv("hadoop_home") == null) {
+        System.setProperty("hadoop.home.dir",
+          WekaPackageManager.PACKAGES_DIR.toString() + File.separator
+            + "distributedWekaSparkDev" + File.separator + "windows");
+      }
     }
 
     JavaSparkContext context = conf.getBaseSparkContext(getJobName());
