@@ -157,7 +157,7 @@ public class DefaultModelsPanel
       System.out.println("package name: " + getPackageName());
       
       DEFAULT_PROPERTIES = Utils.readProperties(getPackageName()
-	  + PROPERTY_FILE);
+						+ PROPERTY_FILE, DefaultModelsPanel.class.getClassLoader());
       java.util.Enumeration keys = (java.util.Enumeration) DEFAULT_PROPERTIES
       .propertyNames();
       if (!keys.hasMoreElements()) {
@@ -391,8 +391,10 @@ public class DefaultModelsPanel
       + m_DefaultFileNames[index].trim() + ".model.xml";
       
       //System.out.println(defaultFileString);
-      
-      InputStream is = ClassLoader.getSystemResourceAsStream(defaultFileString);
+    
+      ClassLoader thisLoader = getClass().getClassLoader();
+      // InputStream is = ClassLoader.getSystemResourceAsStream(defaultFileString);
+      InputStream is = thisLoader.getResourceAsStream(defaultFileString);
       
       if (is == null) {
 	File f = new File(defaultFileString);
@@ -404,7 +406,8 @@ public class DefaultModelsPanel
 	
       }
       
-      classifiers = (Vector) serialization.read(ClassLoader.getSystemResourceAsStream(defaultFileString));
+      // classifiers = (Vector) serialization.read(ClassLoader.getSystemResourceAsStream(defaultFileString));
+      classifiers = (Vector) serialization.read(thisLoader.getResourceAsStream(defaultFileString));
       
       for (Iterator it = classifiers.iterator(); it.hasNext();) {
 	EnsembleLibraryModel model = m_ListModelsPanel.getLibrary().createModel((Classifier) it.next());
