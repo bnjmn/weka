@@ -56,9 +56,6 @@ public class ConvolutionalInstancesIterator extends AbstractDataSetIterator {
     /** The desired number of channels */
     protected int m_numChannels = 1;
 
-    /** The location of the folder containing the images */
-    protected File m_imagesLocation = new File(System.getProperty("user.dir"));
-
     @OptionMetadata(displayName = "size of mini batch",
             description = "The mini batch size to use in the iterator (default = 1).",
             commandLineParamName = "bs", commandLineParamSynopsis = "-bs <int>",
