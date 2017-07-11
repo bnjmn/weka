@@ -20,13 +20,12 @@
  */
 package weka.classifiers.functions;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Random;
 
+import org.apache.commons.io.output.CountingOutputStream;
+import org.apache.commons.io.output.NullOutputStream;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -94,6 +93,9 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
   /** The actual neural network model. **/
   protected transient MultiLayerNetwork m_model;
+
+  /** The size of the serialized network model in bytes. **/
+  protected long m_modelSize;
 
   /** The file that log information will be written to. */
   protected File m_logFile = new File(System.getProperty("user.dir"));
@@ -189,10 +191,17 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
    */
   private void writeObject(ObjectOutputStream oos) throws IOException {
 
+    // figure out size of the written network
+    CountingOutputStream cos = new CountingOutputStream(new NullOutputStream());
+    if (m_replaceMissing != null) {
+      ModelSerializer.writeModel(m_model, cos, false);
+    }
+    m_modelSize = cos.getByteCount();
+
     // default serialization
     oos.defaultWriteObject();
 
-    // write the network
+    // actually write the network
     if (m_replaceMissing != null) {
       ModelSerializer.writeModel(m_model, oos, false);
     }
@@ -212,9 +221,27 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
       // default deserialization
       ois.defaultReadObject();
 
-      // restore the model
+      // restore the network model
       if (m_replaceMissing != null) {
-        m_model = ModelSerializer.restoreMultiLayerNetwork(ois, false);
+        File tmpFile = File.createTempFile("restore", "multiLayer");
+        tmpFile.deleteOnExit();
+        BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tmpFile));
+        long remaining = m_modelSize;
+        while (remaining > 0) {
+          int bsize = 10024;
+          if (remaining < 10024) {
+            bsize = (int)remaining;
+          }
+          byte[] buffer = new byte[bsize];
+          int len = ois.read(buffer);
+          if (len == -1) {
+            throw new IOException("Reached end of network model prematurely during deserialization.");
+          }
+          bos.write(buffer, 0, len);
+          remaining -= len;
+        }
+        bos.flush();
+        m_model = ModelSerializer.restoreMultiLayerNetwork(tmpFile, false);
       }
     } finally {
       Thread.currentThread().setContextClassLoader(origLoader);
