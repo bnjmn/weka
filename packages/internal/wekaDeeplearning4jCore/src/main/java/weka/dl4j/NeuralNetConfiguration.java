@@ -8,6 +8,7 @@ import weka.core.OptionHandler;
 import weka.core.OptionMetadata;
 import weka.dl4j.stepfunctions.NegativeGradientStepFunction;
 import weka.gui.ProgrammaticProperty;
+import java.io.Serializable;
 
 import java.util.Enumeration;
 
@@ -18,7 +19,7 @@ import java.util.Enumeration;
  *
  * @version $Revision: 11711 $
  */
-public class NeuralNetConfiguration extends org.deeplearning4j.nn.conf.NeuralNetConfiguration implements OptionHandler {
+public class NeuralNetConfiguration extends org.deeplearning4j.nn.conf.NeuralNetConfiguration implements Serializable, OptionHandler {
 
   /**
    * Constructor that provides default values for the settings.

@@ -131,7 +131,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
   /** Whether to normalize/standardize/neither */
   protected int m_filterType = FILTER_STANDARDIZE;
-  
+
   /** Coefficients used for normalizing the class */
   protected double m_x1 = 1.0;
   protected double m_x0 = 0.0;
@@ -206,19 +206,18 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
    * @throws IOException
    */
   private void readObject(ObjectInputStream ois) throws ClassNotFoundException, IOException {
+    ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      // default deserialization
+      ois.defaultReadObject();
 
-    // default deserialization
-    ois.defaultReadObject();
-
-    // restore the model
-    if (m_replaceMissing != null) {
-      ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
-      try {
-        Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+      // restore the model
+      if (m_replaceMissing != null) {
         m_model = ModelSerializer.restoreMultiLayerNetwork(ois, false);
-      } finally {
-        Thread.currentThread().setContextClassLoader(origLoader);
       }
+    } finally {
+      Thread.currentThread().setContextClassLoader(origLoader);
     }
   }
 
