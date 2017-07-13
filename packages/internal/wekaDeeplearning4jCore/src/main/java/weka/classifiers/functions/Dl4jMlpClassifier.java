@@ -113,7 +113,10 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   protected int m_NumEpochsPerformed;
 
   /** The actual dataset iterator. */
-  protected DataSetIterator m_Iterator;
+  protected transient DataSetIterator m_Iterator;
+
+  /** The training instances (set to null when done() is called). */
+  protected Instances m_Data;
 
   /** The dataset iterator to use. */
   protected AbstractDataSetIterator m_iterator = new DefaultInstancesIterator();
@@ -373,9 +376,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     initializeClassifier(data);
 
     // For the given number of iterations
-    while (next()) {
-    }
-    ;
+    while (next()) {}
 
     // Clean up
     done();
@@ -535,9 +536,10 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
     m_model.setListeners(listeners);
 
-    // Abusing the MultipleEpochsIterator because it splits the data into
-    // batches
-    m_Iterator = getDataSetIterator().getIterator(data, getSeed());
+    m_Data = data;
+
+    // Abusing the MultipleEpochsIterator because it splits the data into batches
+    m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
     m_NumEpochsPerformed = 0;
   }
 
@@ -546,12 +548,15 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
    */
   public boolean next() throws Exception {
 
-    if (m_NumEpochsPerformed >= getNumEpochs() || m_zeroR != null) {
+    if (m_NumEpochsPerformed >= getNumEpochs() || m_zeroR != null || m_Data == null) {
       return false;
     }
 
-    m_model.fit(m_Iterator); // Note that this calls the reset() method of the
-    // iterator
+    if (m_Iterator == null) {
+      m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
+    }
+
+    m_model.fit(m_Iterator); // Note that this calls the reset() method of the iterator
     if (getDebug()) {
       m_log.info("*** Completed epoch {} ***", m_NumEpochsPerformed + 1);
     }
@@ -565,6 +570,8 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
    * Clean up after learning.
    */
   public void done() {
+
+    m_Data = null;
 
     Thread.currentThread().setContextClassLoader(m_OriginalClassLoader);
   }
