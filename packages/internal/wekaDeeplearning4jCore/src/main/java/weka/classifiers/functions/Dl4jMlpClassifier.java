@@ -546,7 +546,7 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
    */
   public boolean next() throws Exception {
 
-    if (m_NumEpochsPerformed >= getNumEpochs()) {
+    if (m_NumEpochsPerformed >= getNumEpochs() || m_zeroR != null) {
       return false;
     }
 
