@@ -63,7 +63,7 @@ public class ShufflingDataSetIterator implements DataSetIterator, Serializable {
 	public ShufflingDataSetIterator(DataSet data, int batchSize, int seed) {
 
 		m_data = data;
-		m_batchSize = batchSize;
+		m_batchSize = Math.min(batchSize, data.numExamples());
 		m_random = new Random(seed);
 	}
 

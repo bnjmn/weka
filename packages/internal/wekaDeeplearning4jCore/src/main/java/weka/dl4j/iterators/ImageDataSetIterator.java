@@ -179,6 +179,7 @@ public class ImageDataSetIterator extends AbstractDataSetIterator {
     @Override
     public DataSetIterator getIterator(Instances data, int seed, int batchSize) throws Exception {
 
+        batchSize = Math.min(data.numInstances(), batchSize);
         validate(data);
         data.randomize(new Random(seed));
         EasyImageRecordReader reader = getImageRecordReader(data, seed);

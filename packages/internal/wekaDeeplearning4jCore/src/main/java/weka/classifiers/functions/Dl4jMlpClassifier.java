@@ -141,9 +141,6 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   protected double m_x1 = 1.0;
   protected double m_x0 = 0.0;
 
-  /** Variable used to backup reference to original class loader. */
-  protected transient ClassLoader m_OriginalClassLoader;
-
   /**
    * The main method for running this class.
    *
@@ -391,10 +388,6 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   @Override
   public void initializeClassifier(Instances data) throws Exception {
 
-    m_OriginalClassLoader = Thread.currentThread().getContextClassLoader();
-
-    Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
-
     // Can classifier handle the data?
     getCapabilities().testWithFail(data);
 
@@ -469,78 +462,85 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     Random rand = new Random(getSeed());
     data.randomize(rand);
 
-    // Initialize random number generator for construction of network
-    NeuralNetConfiguration.Builder builder = new NeuralNetConfiguration.Builder(m_configuration);
-    builder.setSeed(rand.nextInt());
+    ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
 
-    // Construct the mlp configuration
-    ListBuilder ip = builder.list(getLayers());
-    int numInputAttributes = getDataSetIterator().getNumAttributes(data);
+      // Initialize random number generator for construction of network
+      NeuralNetConfiguration.Builder builder = new NeuralNetConfiguration.Builder(m_configuration);
+      builder.setSeed(rand.nextInt());
 
-    // Connect up the layers appropriately
-    for (int x = 0; x < m_layers.length; x++) {
+      // Construct the mlp configuration
+      ListBuilder ip = builder.list(getLayers());
+      int numInputAttributes = getDataSetIterator().getNumAttributes(data);
 
-      // Is this the first hidden layer?
-      if (x == 0) {
-        setNumIncoming(m_layers[x], numInputAttributes);
-      } else {
-        setNumIncoming(m_layers[x], getNumUnits(m_layers[x - 1]));
+      // Connect up the layers appropriately
+      for (int x = 0; x < m_layers.length; x++) {
+
+        // Is this the first hidden layer?
+        if (x == 0) {
+          setNumIncoming(m_layers[x], numInputAttributes);
+        } else {
+          setNumIncoming(m_layers[x], getNumUnits(m_layers[x - 1]));
+        }
+
+        // Is this the output layer?
+        if (x == m_layers.length - 1) {
+          ((OutputLayer) m_layers[x]).setNOut(data.numClasses());
+        }
+        ip = ip.layer(x, m_layers[x]);
       }
 
-      // Is this the output layer?
-      if (x == m_layers.length - 1) {
-        ((OutputLayer) m_layers[x]).setNOut(data.numClasses());
+      // If we have a convolutional network
+      if (getDataSetIterator() instanceof ImageDataSetIterator) {
+        ImageDataSetIterator idsi = (ImageDataSetIterator) getDataSetIterator();
+        ip.setInputType(InputType.convolutionalFlat(idsi.getWidth(),
+                idsi.getHeight(), idsi.getNumChannels()));
+      } else if (getDataSetIterator() instanceof ConvolutionalInstancesIterator) {
+        ConvolutionalInstancesIterator cii = (ConvolutionalInstancesIterator) getDataSetIterator();
+        ip.setInputType(InputType.convolutionalFlat(cii.getWidth(),
+                cii.getHeight(), cii.getNumChannels()));
       }
-      ip = ip.layer(x, m_layers[x]);
+
+      ip = ip.backprop(true);
+
+      MultiLayerConfiguration conf = ip.build();
+
+      if (getDebug()) {
+        System.err.println(conf.toJson());
+      }
+
+      // build the network
+      m_model = new MultiLayerNetwork(conf);
+      m_model.init();
+
+      if (getDebug()) {
+        System.err.println(m_model.conf().toYaml());
+      }
+
+      ArrayList<IterationListener> listeners = new ArrayList<IterationListener>();
+      listeners.add(new ScoreIterationListener(data.numInstances()
+              / getDataSetIterator().getTrainBatchSize()));
+
+      // if the log file doesn't point to a directory, set up the listener
+      if (getLogFile() != null && !getLogFile().isDirectory()) {
+        int numMiniBatches =
+                (int) Math.ceil(((double) data.numInstances())
+                        / ((double) getDataSetIterator().getTrainBatchSize()));
+        listeners.add(new FileIterationListener(getLogFile().getAbsolutePath(),
+                numMiniBatches));
+      }
+
+      m_model.setListeners(listeners);
+
+      m_Data = data;
+
+      // Abusing the MultipleEpochsIterator because it splits the data into batches
+      m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
+      m_NumEpochsPerformed = 0;
+    } finally {
+      Thread.currentThread().setContextClassLoader(origLoader);
     }
-
-    // If we have a convolutional network
-    if (getDataSetIterator() instanceof ImageDataSetIterator) {
-      ImageDataSetIterator idsi = (ImageDataSetIterator) getDataSetIterator();
-      ip.setInputType(InputType.convolutionalFlat(idsi.getWidth(),
-              idsi.getHeight(), idsi.getNumChannels()));
-    } else if (getDataSetIterator() instanceof ConvolutionalInstancesIterator) {
-      ConvolutionalInstancesIterator cii = (ConvolutionalInstancesIterator) getDataSetIterator();
-      ip.setInputType(InputType.convolutionalFlat(cii.getWidth(),
-              cii.getHeight(), cii.getNumChannels()));
-    }
-
-    ip = ip.backprop(true);
-
-    MultiLayerConfiguration conf = ip.build();
-
-    if (getDebug()) {
-      System.err.println(conf.toJson());
-    }
-
-    // build the network
-    m_model = new MultiLayerNetwork(conf);
-    m_model.init();
-
-    if (getDebug()) {
-      System.err.println(m_model.conf().toYaml());
-    }
-
-    ArrayList<IterationListener> listeners = new ArrayList<IterationListener>();
-    listeners.add(new ScoreIterationListener(data.numInstances()
-            / getDataSetIterator().getTrainBatchSize()));
-
-    // if the log file doesn't point to a directory, set up the listener
-    if (getLogFile() != null && !getLogFile().isDirectory()) {
-      int numMiniBatches =
-              (int) Math.ceil(((double) data.numInstances())
-                      / ((double) getDataSetIterator().getTrainBatchSize()));
-      listeners.add(new FileIterationListener(getLogFile().getAbsolutePath(),
-              numMiniBatches));
-    }
-
-    m_model.setListeners(listeners);
-
-    m_Data = data;
-
-    // Abusing the MultipleEpochsIterator because it splits the data into batches
-    m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
-    m_NumEpochsPerformed = 0;
   }
 
   /**
@@ -556,12 +556,19 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
       m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
     }
 
-    m_model.fit(m_Iterator); // Note that this calls the reset() method of the iterator
-    if (getDebug()) {
-      m_log.info("*** Completed epoch {} ***", m_NumEpochsPerformed + 1);
+    ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
+    try {
+      Thread.currentThread().setContextClassLoader(this.getClass().getClassLoader());
+
+      m_model.fit(m_Iterator); // Note that this calls the reset() method of the iterator
+      if (getDebug()) {
+        m_log.info("*** Completed epoch {} ***", m_NumEpochsPerformed + 1);
+      }
+      m_Iterator.reset();
+      m_NumEpochsPerformed++;
+    } finally {
+      Thread.currentThread().setContextClassLoader(origLoader);
     }
-    m_Iterator.reset();
-    m_NumEpochsPerformed++;
 
     return true;
   }
@@ -572,8 +579,6 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   public void done() {
 
     m_Data = null;
-
-    Thread.currentThread().setContextClassLoader(m_OriginalClassLoader);
   }
 
   /**
