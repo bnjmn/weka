@@ -45,30 +45,32 @@ public class Utils {
    * @return a DataSet
    */
   public static DataSet instancesToDataSet(Instances insts) {
-    INDArray data = Nd4j.ones(insts.numInstances(), insts.numAttributes() - 1);
-    double[][] outcomes =
-      new double[insts.numInstances()][(insts.classAttribute().numValues() == 0) ? 1
-        : insts.classAttribute().numValues()];
+    INDArray data = Nd4j.zeros(insts.numInstances(), insts.numAttributes() - 1);
+    INDArray outcomes = Nd4j.zeros(insts.numInstances(), insts.numClasses());
 
     for (int i = 0; i < insts.numInstances(); i++) {
       double[] independent = new double[insts.numAttributes() - 1];
-      int index = 0;
+      double[] dependent = new double[insts.numClasses()];
       Instance current = insts.instance(i);
-      for (int j = 0; j < insts.numAttributes(); j++) {
-        if (j != insts.classIndex()) {
-          independent[index++] = current.value(j);
+      for (int j = 0; j < current.numValues(); j++) {
+        int index = current.index(j);
+        if (index < insts.classIndex()) {
+          independent[index] = current.valueSparse(j);
+        } else if (index > insts.classIndex()) {
+          independent[index - 1] = current.valueSparse(j);
         } else {
-          // if classification
-          if (insts.numClasses() > 1)
-            outcomes[i][(int) current.classValue()] = 1;
-          else
-            outcomes[i][0] = current.classValue();
+          if (insts.numClasses() > 1) {
+            dependent[(int)current.valueSparse(j)] = 1.0;
+          } else {
+            dependent[0] = current.valueSparse(j);
+          }
         }
       }
       data.putRow(i, Nd4j.create(independent));
+      outcomes.putRow(i, Nd4j.create(dependent));
     }
 
-    DataSet dataSet = new DataSet(data, Nd4j.create(outcomes));
+    DataSet dataSet = new DataSet(data, outcomes);
     return dataSet;
   }
 

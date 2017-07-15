@@ -26,6 +26,7 @@ import java.util.Random;
 
 import org.apache.commons.io.output.CountingOutputStream;
 import org.apache.commons.io.output.NullOutputStream;
+import org.deeplearning4j.datasets.iterator.AsyncDataSetIterator;
 import org.deeplearning4j.nn.conf.inputs.InputType;
 import org.deeplearning4j.util.ModelSerializer;
 import org.nd4j.linalg.dataset.api.iterator.DataSetIterator;
@@ -35,7 +36,6 @@ import org.deeplearning4j.nn.multilayer.MultiLayerNetwork;
 import org.deeplearning4j.optimize.api.IterationListener;
 import org.deeplearning4j.optimize.listeners.ScoreIterationListener;
 import org.nd4j.linalg.api.ndarray.INDArray;
-import org.nd4j.linalg.dataset.DataSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -120,6 +120,9 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
   /** The dataset iterator to use. */
   protected AbstractDataSetIterator m_iterator = new DefaultInstancesIterator();
+
+  /** Queue size for AsyncDataSetIterator (if < 1, AsyncDataSetIterator is not used) */
+  protected int m_queueSize = 0;
 
   /** filter: Normalize training data */
   public static final int FILTER_NORMALIZE = 0;
@@ -326,6 +329,17 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
     if (newType.getTags() == TAGS_FILTER) {
       m_filterType = newType.getSelectedTag().getID();
     }
+  }
+
+  public int getQueueSize() {
+    return m_queueSize;
+  }
+
+  @OptionMetadata(description = "The queue size for asynchronous data transfer (default: 0, synchronous transfer).",
+          displayName = "queue size for asynchronous data transfer", commandLineParamName = "queueSize",
+          commandLineParamSynopsis = "-queueSize <int>", displayOrder = 9)
+  public void setQueueSize(int QueueSize) {
+    m_queueSize = QueueSize;
   }
 
   /**
@@ -535,8 +549,10 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
       m_Data = data;
 
-      // Abusing the MultipleEpochsIterator because it splits the data into batches
       m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
+      if (m_queueSize > 0) {
+        m_Iterator = new AsyncDataSetIterator(m_Iterator, m_queueSize);
+      }
       m_NumEpochsPerformed = 0;
     } finally {
       Thread.currentThread().setContextClassLoader(origLoader);
@@ -554,6 +570,9 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
 
     if (m_Iterator == null) {
       m_Iterator = getDataSetIterator().getIterator(m_Data, getSeed());
+      if (m_queueSize > 0) {
+        m_Iterator = new AsyncDataSetIterator(m_Iterator, m_queueSize);
+      }
     }
 
     ClassLoader origLoader = Thread.currentThread().getContextClassLoader();
@@ -564,7 +583,6 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
       if (getDebug()) {
         m_log.info("*** Completed epoch {} ***", m_NumEpochsPerformed + 1);
       }
-      m_Iterator.reset();
       m_NumEpochsPerformed++;
     } finally {
       Thread.currentThread().setContextClassLoader(origLoader);
@@ -582,7 +600,19 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   }
 
   /**
-   * The method to use when making predictions for a test instance.
+   * Performs efficient batch prediction
+   *
+   * @return true, as LogitBoost can perform efficient batch prediction
+   */
+  @Override
+  public boolean implementsMoreEfficientBatchPrediction() {
+    return true;
+  }
+
+
+  /**
+   * The method to use when making a prediction for a test instance. Use distributionsForInstances() instead
+   * for speed if possible.
    *
    * @param inst the instance to get a prediction for
    * @return the class probability estimates (if the class is nominal) or the
@@ -592,35 +622,48 @@ public class Dl4jMlpClassifier extends RandomizableClassifier implements
   @Override
   public double[] distributionForInstance(Instance inst) throws Exception {
 
+    Instances data = new Instances(inst.dataset());
+    data.add(inst);
+    return distributionsForInstances(data)[0];
+  }
+
+  /**
+   * The method to use when making predictions for test instances.
+   *
+   * @param insts the instances to get predictions for
+   * @return the class probability estimates (if the class is nominal) or the
+   *         numeric predictions (if it is numeric)
+   * @throws Exception if something goes wrong at prediction time
+   */
+  @Override
+  public double[][] distributionsForInstances(Instances insts) throws Exception {
+
     // Do we only have a ZeroR model?
     if (m_zeroR != null) {
-      return m_zeroR.distributionForInstance(inst);
+      return m_zeroR.distributionsForInstances(insts);
     }
 
     // Filter the instance
-    m_replaceMissing.input(inst);
-    inst = m_replaceMissing.output();
-    m_nominalToBinary.input(inst);
-    inst = m_nominalToBinary.output();
+    insts = Filter.useFilter(insts, m_replaceMissing);
+    insts = Filter.useFilter(insts, m_nominalToBinary);
     if (m_Filter != null) {
-      m_Filter.input(inst);
-      inst = m_Filter.output();
+      insts = m_Filter.useFilter(insts, m_Filter);
     }
 
-    Instances insts = new Instances(inst.dataset(), 0);
-    insts.add(inst);
-    DataSet ds = getDataSetIterator().getIterator(insts, getSeed(), 1).next();
-    INDArray predicted = m_model.output(ds.getFeatureMatrix(), false);
-    predicted = predicted.getRow(0);
-    double[] preds = new double[inst.numClasses()];
+    DataSetIterator it = getDataSetIterator().getIterator(insts, getSeed());
+    INDArray predicted = m_model.output(it, false);
+    double[][] preds = new double[insts.numInstances()][insts.numClasses()];
     for (int i = 0; i < preds.length; i++) {
-      preds[i] = predicted.getDouble(i);
-    }
-    // only normalise if we're dealing with classification
-    if (preds.length > 1) {
-      weka.core.Utils.normalize(preds);
-    } else {
-      preds[0] = preds[0] * m_x1 + m_x0;
+      for (int j = 0; j < preds[i].length; j++) {
+        preds[i][j] = predicted.getRow(i).getDouble(j);
+      }
+
+      // only normalise if we're dealing with classification
+      if (preds[i].length > 1) {
+        weka.core.Utils.normalize(preds[i]);
+      } else {
+        preds[i][0] = preds[i][0] * m_x1 + m_x0;
+      }
     }
     return preds;
   }
