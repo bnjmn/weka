@@ -52,13 +52,13 @@ import java.util.Vector;
 
 /**
  <!-- globalinfo-start -->
- * Classifier for building 'Functional trees', which are classification trees  that could have logistic regression functions at the inner nodes and/or leaves. The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
+ * Builds 'functional trees' for classification, more specifically, functional trees with  logistic regression functions at the inner nodes and/or leaves. The algorithm can deal with binary and multi-class target variables, numeric and nominal attributes and missing values.<br/>
  * <br/>
  * For more information see: <br/>
  * <br/>
- * Joao Gama (2004). Functional Trees.<br/>
+ * Joao Gama (2004). Functional Trees.  Machine Learning. 55(3):219-250.<br/>
  * <br/>
- * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees.
+ * Niels Landwehr, Mark Hall, Eibe Frank (2005). Logistic Model Trees. Machine Learning. 95(1-2):161-205.
  * <p/>
  <!-- globalinfo-end -->
  *
@@ -665,7 +665,7 @@ public class FT
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return "Classifier for building 'Functional trees', which are classification trees  that could have "
+    return "Builds 'functional trees' for classification, more specifically, functional trees with "
       +"logistic regression functions at the inner nodes and/or leaves. The algorithm can deal with " 
       +"binary and multi-class target variables, numeric and nominal attributes and missing values.\n\n"
       +"For more information see: \n\n"
@@ -687,7 +687,7 @@ public class FT
     result = new TechnicalInformation(Type.ARTICLE);
     result.setValue(Field.AUTHOR, "Joao Gama");
     result.setValue(Field.TITLE, "Functional Trees");
-    result.setValue(Field.BOOKTITLE, "Machine Learning");
+    result.setValue(Field.JOURNAL, "Machine Learning");
     result.setValue(Field.YEAR, "2004");
     result.setValue(Field.VOLUME, "55");
     result.setValue(Field.PAGES, "219-250");
@@ -696,7 +696,7 @@ public class FT
     additional = result.add(Type.ARTICLE);
     additional.setValue(Field.AUTHOR, "Niels Landwehr and Mark Hall and Eibe Frank");
     additional.setValue(Field.TITLE, "Logistic Model Trees");
-    additional.setValue(Field.BOOKTITLE, "Machine Learning");
+    additional.setValue(Field.JOURNAL, "Machine Learning");
     additional.setValue(Field.YEAR, "2005");
     additional.setValue(Field.VOLUME, "95");
     additional.setValue(Field.PAGES, "161-205");
