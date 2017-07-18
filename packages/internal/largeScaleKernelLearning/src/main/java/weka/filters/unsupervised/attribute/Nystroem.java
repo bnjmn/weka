@@ -350,7 +350,9 @@ public class Nystroem extends SimpleBatchFilter implements TechnicalInformationH
             atts.add((Attribute) inputFormat.classAttribute().copy());
         }
         Instances d = new Instances(inputFormat.relationName(), atts, 0);
-        d.setClassIndex(d.numAttributes() - 1);
+        if (hasClass) {
+          d.setClassIndex(d.numAttributes() - 1);
+        }
         return d;
     }
 
