@@ -963,6 +963,10 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng.setLog(this, m_logger);
     eng.clearConsoleBuffer(this);
 
+    // Change to a temporary directory where we have write access
+    // in case an mlr scheme tries to write a local file
+    eng.parseAndEval(this, "setwd(tempdir())");
+
     // Set seed for random number generator in R in a data-dependent manner
     eng.parseAndEval(this,
       "set.seed(" + data.getRandomNumberGenerator(getSeed()).nextInt() + ")");
