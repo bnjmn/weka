@@ -199,7 +199,7 @@ import java.util.Vector;
  */
 public class FindWithCapabilities implements OptionHandler,
                                              CapabilitiesHandler, 
-                                             RevisionHandler {
+                                             RevisionHandler, CommandlineRunnable {
 
   /** the capabilities to look for. */
   protected Capabilities m_Capabilities = new Capabilities(this);
@@ -953,8 +953,10 @@ public class FindWithCapabilities implements OptionHandler,
       m_Packages.toArray(new String[m_Packages.size()]));
     for (i = 0; i < list.size(); i++) {
       try {
-        cls = Class.forName(list.get(i));
-        obj = cls.newInstance();
+        // cls = Class.forName(list.get(i));
+        cls = WekaPackageClassLoaderManager.forName(list.get(i));
+        // obj = cls.newInstance();
+        obj = WekaPackageClassLoaderManager.objectForName(list.get(i));
 
         // exclude itself
         if (cls == this.getClass()) {
@@ -1030,6 +1032,19 @@ public class FindWithCapabilities implements OptionHandler,
    * @param args the commandline parameters
    */
   public static void main(String[] args) {
+    try {
+      FindWithCapabilities find = new FindWithCapabilities();
+      find.run(find, args);
+    } catch (Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  @Override public void preExecution() throws Exception {
+
+  }
+
+  @Override public void run(Object toRun, String[] args) throws Exception {
     FindWithCapabilities find;
     Vector<String> list;
     String result;
@@ -1125,6 +1140,12 @@ public class FindWithCapabilities implements OptionHandler,
       System.out.println();
     } catch (Exception ex) {
       System.err.println(ex.getMessage());
+    } finally {
+      System.exit(0);
     }
+  }
+
+  @Override public void postExecution() throws Exception {
+
   }
 }
