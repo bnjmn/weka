@@ -8,7 +8,7 @@ PackageName=distributedWekaSparkDev
 Version=1.1.0
 
 #Date (year-month-day)
-Date=2017-06-29
+Date=2017-07-28
 
 # Title (required)
 Title=Spark wrappers for Weka
@@ -35,7 +35,7 @@ Description=Development continuation of distributedWekaSpark. Adds access to sou
 PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSparkDev1.1.0.zip
 
 # URL for further information
-URL=http://markahall.blogspot.co.nz/2015/03/weka-and-spark.html
+URL=http://markahall.blogspot.co.nz/2017/07/integrating-spark-mllib-into-weka.html
 
 # Enhances various other packages ?
 # Enhances=packageName1,packageName2,...
