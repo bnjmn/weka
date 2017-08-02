@@ -117,7 +117,7 @@ public class TwoClassStats implements RevisionHandler {
    */
   public double getTruePositiveRate() {
     if (0 == (m_TruePos + m_FalseNeg)) {
-      return 0;
+      return Double.NaN;
     } else {
       return m_TruePos / (m_TruePos + m_FalseNeg);
     }
@@ -137,7 +137,7 @@ public class TwoClassStats implements RevisionHandler {
    */
   public double getFalsePositiveRate() {
     if (0 == (m_FalsePos + m_TrueNeg)) {
-      return 0;
+      return Double.NaN;
     } else {
       return m_FalsePos / (m_FalsePos + m_TrueNeg);
     }
@@ -157,7 +157,7 @@ public class TwoClassStats implements RevisionHandler {
    */
   public double getPrecision() {
     if (0 == (m_TruePos + m_FalsePos)) {
-      return 0;
+      return Double.NaN;
     } else {
       return m_TruePos / (m_TruePos + m_FalsePos);
     }
@@ -198,7 +198,7 @@ public class TwoClassStats implements RevisionHandler {
     double precision = getPrecision();
     double recall = getRecall();
     if ((precision + recall) == 0) {
-      return 0;
+      return Double.NaN;
     }
     return 2 * precision * recall / (precision + recall);
   }
@@ -217,7 +217,7 @@ public class TwoClassStats implements RevisionHandler {
    */
   public double getFallout() {
     if (0 == (m_TruePos + m_FalsePos)) {
-      return 0;
+      return Double.NaN;
     } else {
       return m_FalsePos / (m_TruePos + m_FalsePos);
     }

@@ -3344,9 +3344,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       total += m_ConfusionMatrix[classIndex][j];
     }
-    if (total == 0) {
-      return 0;
-    }
     return correct / total;
   }
 
@@ -3428,9 +3425,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           total += m_ConfusionMatrix[i][j];
         }
       }
-    }
-    if (total == 0) {
-      return 0;
     }
     return correct / total;
   }
@@ -3514,9 +3508,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
       }
     }
-    if (total == 0) {
-      return 0;
-    }
     return incorrect / total;
   }
 
@@ -3599,9 +3590,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
       }
     }
-    if (total == 0) {
-      return 0;
-    }
     return incorrect / total;
   }
 
@@ -3648,9 +3636,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double d =
       (numTP + numFP) * (numTP + numFN) * (numTN + numFP) * (numTN + numFN);
     d = Math.sqrt(d);
-    if (d == 0) {
-      d = 1;
-    }
 
     return n / d;
   }
@@ -3734,9 +3719,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       total += m_ConfusionMatrix[i][classIndex];
     }
-    if (total == 0) {
-      return 0;
-    }
     return correct / total;
   }
 
@@ -3783,9 +3765,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     double precision = precision(classIndex);
     double recall = recall(classIndex);
-    if ((precision + recall) == 0) {
-      return 0;
-    }
     return 2 * precision * recall / (precision + recall);
   }
 
