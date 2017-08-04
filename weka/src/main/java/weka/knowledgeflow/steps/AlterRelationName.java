@@ -66,7 +66,11 @@ public class AlterRelationName extends BaseStep {
   /** For regex replacement */
   protected Pattern m_regexPattern;
 
+  /** Regex string to match */
   protected String m_regexMatch = "";
+
+  /** Whether to replace all rexex matches, or just the first */
+  protected boolean m_replaceAll;
 
   /**
    * Initialize the step
@@ -148,6 +152,27 @@ public class AlterRelationName extends BaseStep {
   }
 
   /**
+   * Set whether to replace all regular expression matches, or just the first.
+   *
+   * @param replaceAll true to replace all regex matches
+   */
+  @OptionMetadata(displayName = "Replace all regex matches",
+    description = "Replace all matching occurrences if set to true, or just "
+      + "the first match if set to false", displayOrder = 3)
+  public void setReplaceAll(boolean replaceAll) {
+    m_replaceAll = replaceAll;
+  }
+
+  /**
+   * Get whether to replace all regular expression matches, or just the first.
+   *
+   * @return true to replace all regex matches
+   */
+  public boolean getReplaceAll() {
+    return m_replaceAll;
+  }
+
+  /**
    * Process incoming data
    *
    * @param data the payload to process
@@ -206,7 +231,11 @@ public class AlterRelationName extends BaseStep {
       break;
     case REGEX:
       String rel = insts.relationName();
-      rel = m_regexPattern.matcher(rel).replaceAll(m_relationNameModText);
+      if (m_replaceAll) {
+        rel = m_regexPattern.matcher(rel).replaceAll(m_relationNameModText);
+      } else {
+        rel = m_regexPattern.matcher(rel).replaceFirst(m_relationNameModText);
+      }
       insts.setRelationName(rel);
       break;
     }
