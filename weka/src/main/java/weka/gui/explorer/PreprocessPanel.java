@@ -178,6 +178,9 @@ public class PreprocessPanel extends AbstractPerspective implements
   /** Click to apply filters and save the results */
   protected JButton m_ApplyFilterBut = new JButton("Apply");
 
+  /** Click to stop a running filter */
+  protected JButton m_StopBut = new JButton("Stop");
+
   /** The file chooser for selecting data files */
   protected ConverterFileChooser m_FileChooser;
 
@@ -304,6 +307,7 @@ public class PreprocessPanel extends AbstractPerspective implements
 
     m_SaveBut.setToolTipText("Save the working relation to a file");
     m_ApplyFilterBut.setToolTipText("Apply the current filter to the data");
+    m_StopBut.setToolTipText("Stop the filtering process");
 
     m_FileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
     m_OpenURLBut.addActionListener(new ActionListener() {
@@ -373,6 +377,19 @@ public class PreprocessPanel extends AbstractPerspective implements
     m_ApplyFilterBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
         applyFilter((Filter) m_FilterEditor.getValue());
+      }
+    });
+    m_StopBut.addActionListener(new ActionListener() {
+      public void actionPerformed(ActionEvent e) {
+        if (m_IOThread != null) {
+          m_IOThread.stop();
+          m_StopBut.setEnabled(false);
+          m_IOThread = null;
+          if (m_Log instanceof TaskLogger) {
+            ((TaskLogger) m_Log).taskFinished();
+          }
+          m_Log.statusMessage("Filtering process stopped prematurely");
+        }
       }
     });
     m_AttPanel.getSelectionModel().addListSelectionListener(
@@ -445,6 +462,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     m_EditBut.setEnabled(false);
     m_SaveBut.setEnabled(false);
     m_ApplyFilterBut.setEnabled(false);
+    m_StopBut.setEnabled(false);
 
     // Set up the GUI layout
     JPanel buttons = new JPanel();
@@ -467,7 +485,12 @@ public class PreprocessPanel extends AbstractPerspective implements
     filter.setBorder(BorderFactory.createTitledBorder("Filter"));
     filter.setLayout(new BorderLayout());
     filter.add(m_FilterPanel, BorderLayout.CENTER);
-    filter.add(m_ApplyFilterBut, BorderLayout.EAST);
+    JPanel ssButs = new JPanel();
+    ssButs.setBorder(BorderFactory.createEmptyBorder(0, 0, 0, 0));
+    ssButs.setLayout(new GridLayout(1, 2, 2, 0));
+    ssButs.add(m_ApplyFilterBut);
+    ssButs.add(m_StopBut);
+    filter.add(ssButs, BorderLayout.EAST);
 
     JPanel attVis = new JPanel();
     attVis.setLayout(new GridLayout(2, 1));
@@ -682,6 +705,7 @@ public class PreprocessPanel extends AbstractPerspective implements
           m_AttVisualizePanel.setAttribute(0);
 
           m_ApplyFilterBut.setEnabled(true);
+          m_StopBut.setEnabled(false);
 
           m_Log.logMessage("Base relation is now " + m_Instances.relationName()
             + " (" + m_Instances.numInstances() + " instances)");
@@ -851,9 +875,11 @@ public class PreprocessPanel extends AbstractPerspective implements
               }
               Instances copy = new Instances(m_Instances);
               copy.setClassIndex(classIndex);
+              m_StopBut.setEnabled(true);
               Filter filterCopy = Filter.makeCopy(filter);
               filterCopy.setInputFormat(copy);
               Instances newInstances = Filter.useFilter(copy, filterCopy);
+              m_StopBut.setEnabled(false);
               if (newInstances == null || newInstances.numAttributes() < 1) {
                 throw new Exception("Dataset is empty.");
               }
