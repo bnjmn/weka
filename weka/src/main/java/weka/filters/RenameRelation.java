@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class RenameRelation extends Filter {
+public class RenameRelation extends Filter implements StreamableFilter {
   private static final long serialVersionUID = 8082179220141937043L;
 
   /** Text to modify the relation name with */
