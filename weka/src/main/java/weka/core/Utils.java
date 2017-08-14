@@ -2351,7 +2351,8 @@ public final class Utils implements RevisionHandler {
       String[] parts = rangeString.split(",");
       if (parts.length == 0) {
         throw new Exception(
-          "Must specify attributes to replace missing values for!");
+          "Must specify a list of attributes to configure the range object "
+            + "with!");
       }
 
       StringBuilder indexList = new StringBuilder();
