@@ -2265,8 +2265,8 @@ public final class Utils implements RevisionHandler {
         }
         String caps =
           CapabilitiesUtils.addCapabilities(
-	    "<font color=red>CAPABILITIES</font>",
-	    ((CapabilitiesHandler) object).getCapabilities());
+            "<font color=red>CAPABILITIES</font>",
+            ((CapabilitiesHandler) object).getCapabilities());
         caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
         result.append(caps);
       }
@@ -2275,9 +2275,9 @@ public final class Utils implements RevisionHandler {
         result.append("<br>");
         String caps =
           CapabilitiesUtils.addCapabilities(
-	    "<font color=red>MI CAPABILITIES</font>",
-	    ((MultiInstanceCapabilitiesHandler) object)
-	      .getMultiInstanceCapabilities());
+            "<font color=red>MI CAPABILITIES</font>",
+            ((MultiInstanceCapabilitiesHandler) object)
+              .getMultiInstanceCapabilities());
         caps = Utils.lineWrap(caps, lineWidth).replace("\n", "<br>");
         result.append(caps);
       }
@@ -2328,6 +2328,50 @@ public final class Utils implements RevisionHandler {
       previous = next;
     }
     return sb.toString();
+  }
+
+  /**
+   * Returns a configured Range object given a 1-based range index string (such
+   * as 1-20,35,last) or a comma-separated list of attribute names.
+   * 
+   * @param instanceInfo the header of the instances to configure the range for
+   * @param rangeString a string containing a range of attribute indexes, or a
+   *          comma-separated list of attribute names
+   * @return a Range object configured to cover the supplied rangeString
+   * @throws Exception if a problem occured
+   */
+  public static Range configureRangeFromRangeStringOrAttributeNameList(
+    Instances instanceInfo, String rangeString) throws Exception {
+    Range result = new Range(rangeString);
+
+    try {
+      result.setUpper(instanceInfo.numAttributes() - 1);
+    } catch (IllegalArgumentException e) {
+      // now try as a list of named attributes
+      String[] parts = rangeString.split(",");
+      if (parts.length == 0) {
+        throw new Exception(
+          "Must specify attributes to replace missing values for!");
+      }
+
+      StringBuilder indexList = new StringBuilder();
+      for (String att : parts) {
+        att = att.trim();
+        Attribute a = instanceInfo.attribute(att);
+        if (a == null) {
+          throw new Exception("I can't find the requested attribute '" + att
+            + "' in the supplied instances information.");
+        }
+        indexList.append(a.index() + 1).append(",");
+      }
+      if (indexList.length() > 0) {
+        indexList.setLength(indexList.length() - 1);
+      }
+      result = new Range(indexList.toString());
+      result.setUpper(instanceInfo.numAttributes() - 1);
+    }
+
+    return result;
   }
 
   /**
