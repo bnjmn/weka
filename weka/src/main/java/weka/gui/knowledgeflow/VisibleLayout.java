@@ -98,7 +98,7 @@ public class VisibleLayout extends JPanel {
   protected FlowExecutor m_flowExecutor;
 
   /** Environment variables to use */
-  protected Environment m_env = Environment.getSystemWide();
+  protected Environment m_env = new Environment();
 
   /** True if this flow is executing */
   protected boolean m_isExecuting;
