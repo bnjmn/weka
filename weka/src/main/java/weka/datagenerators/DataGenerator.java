@@ -760,9 +760,15 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
         output.println(inst);
       }
     } else { // generator produces all instances at once
-      Instances dataset = generator.generateExamples();
+      Instances data = generator.generateExamples();
       // output of dataset
-      output.println(dataset);
+      for (i = 0; i < data.numInstances(); i++) {
+	if (i % 1000 == 0) {
+          output.flush();
+        }
+        output.println(data.instance(i));
+      }
+      output.flush();
     }
     // comment at end of ARFF File
     String commentAtEnd = generator.generateFinished();
