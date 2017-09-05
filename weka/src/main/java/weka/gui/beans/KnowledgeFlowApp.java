@@ -434,11 +434,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
 
       int realIndex = -1;
       int visibleIndex = -1;
-      @SuppressWarnings("unchecked")
-      Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(
+      Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(
         children);
       while (e.hasMoreElements()) {
-        InvisibleNode node = e.nextElement();
+        InvisibleNode node = (InvisibleNode)e.nextElement();
         if (node.isVisible()) {
           visibleIndex++;
         }
@@ -460,11 +459,10 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
       }
 
       int count = 0;
-      @SuppressWarnings("unchecked")
-      Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(
+      Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(
         children);
       while (e.hasMoreElements()) {
-        InvisibleNode node = e.nextElement();
+        InvisibleNode node = (InvisibleNode)e.nextElement();
         if (node.isVisible()) {
           count++;
         }
@@ -2391,7 +2389,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                   category = ((KFStep) ann).category();
 
                   // Does this category already exist?
-                  Enumeration<Object> children = jtreeRoot.children();
+                  Enumeration<TreeNode> children = jtreeRoot.children();
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();
                     if (child instanceof DefaultMutableTreeNode) {
@@ -2502,7 +2500,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
                     + ((KFStep) ann).toolTipText() + "</font></html>";
 
                   // Does this category already exist?
-                  Enumeration<Object> children = jtreeRoot.children();
+                  Enumeration<TreeNode> children = jtreeRoot.children();
 
                   while (children.hasMoreElements()) {
                     Object child = children.nextElement();

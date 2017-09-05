@@ -35,11 +35,7 @@ import weka.knowledgeflow.steps.WekaAlgorithmWrapper;
 
 import javax.swing.Icon;
 import javax.swing.JTree;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeCellRenderer;
-import javax.swing.tree.DefaultTreeSelectionModel;
-import javax.swing.tree.TreePath;
-import javax.swing.tree.TreeSelectionModel;
+import javax.swing.tree.*;
 import java.awt.Component;
 import java.awt.Cursor;
 import java.awt.event.InputEvent;
@@ -347,7 +343,7 @@ public class StepTree extends JTree {
     DefaultMutableTreeNode targetFolder = null;
 
     @SuppressWarnings("unchecked")
-    Enumeration<Object> children = jtreeRoot.children();
+    Enumeration<TreeNode> children = jtreeRoot.children();
     while (children.hasMoreElements()) {
       Object child = children.nextElement();
       if (child instanceof DefaultMutableTreeNode) {

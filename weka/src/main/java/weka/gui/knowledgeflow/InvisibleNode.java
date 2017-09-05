@@ -90,10 +90,9 @@ public class InvisibleNode extends DefaultMutableTreeNode {
 
     int realIndex = -1;
     int visibleIndex = -1;
-    @SuppressWarnings("unchecked")
-    Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(children);
+    Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(children);
     while (e.hasMoreElements()) {
-      InvisibleNode node = e.nextElement();
+      InvisibleNode node = (InvisibleNode)e.nextElement();
       if (node.isVisible()) {
         visibleIndex++;
       }
@@ -122,10 +121,9 @@ public class InvisibleNode extends DefaultMutableTreeNode {
     }
 
     int count = 0;
-    @SuppressWarnings("unchecked")
-    Enumeration<InvisibleNode> e = new WekaEnumeration<InvisibleNode>(children);
+    Enumeration<TreeNode> e = new WekaEnumeration<TreeNode>(children);
     while (e.hasMoreElements()) {
-      InvisibleNode node = e.nextElement();
+      InvisibleNode node = (InvisibleNode)e.nextElement();
       if (node.isVisible()) {
         count++;
       }
