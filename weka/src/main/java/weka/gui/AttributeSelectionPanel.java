@@ -464,7 +464,11 @@ public class AttributeSelectionPanel extends JPanel {
                   b.append(prev + 1).append(",");
                 }
               }
-              b.append(v + 1).append("-");
+              if (v == m_Model.getRowCount() - 1) {
+                b.append("last");
+              } else {
+                b.append(v + 1).append("-");
+              }
               prev = v;
               lastInString = v;
             }
@@ -473,7 +477,11 @@ public class AttributeSelectionPanel extends JPanel {
         if (b.charAt(b.length() - 1) == '-') {
           if (selected.length > 1 &&
             lastInString != selected[selected.length - 1]) {
-            b.append(selected[selected.length - 1] + 1);
+            if (selected[selected.length - 1] == m_Model.getRowCount() - 1) {
+              b.append("last");
+            } else {
+              b.append(selected[selected.length - 1] + 1);
+            }
           } else {
             b.setLength(b.length() - 1);
           }
