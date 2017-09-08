@@ -186,9 +186,13 @@ public class RUtils {
 
       if (att.isNumeric() || att.isString()) {
         temp.append(cleanedAttNames[i]);
-      } else if (att.isNominal()) {
-        temp.append(cleanedAttNames[i] + "_factor");
+      } else  if (att.isNominal()) {
+        temp.append(cleanedAttNames[i] + ",");
+        temp.append(cleanedAttNames[i] + "_factor,");
+        temp.append(cleanedAttNames[i] + "_labels,");
+        temp.append(cleanedAttNames[i] + "_levels");
       }
+      
 
       if (i < insts.numAttributes() - 1) {
         temp.append(",");
