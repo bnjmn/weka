@@ -36,6 +36,7 @@ import org.rosuda.REngine.REngine;
 import org.rosuda.REngine.REngineCallbacks;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.REngineOutputInterface;
+import org.rosuda.REngine.REngineInputInterface;
 
 /**
  * Maintains a singleton object for managing R sessions. Because only one
@@ -82,7 +83,7 @@ import org.rosuda.REngine.REngineOutputInterface;
  * @version $Revision$
  */
 public class RSessionImpl implements RSessionAPI, REngineCallbacks,
-  REngineOutputInterface {
+                                     REngineOutputInterface, REngineInputInterface {
 
   /** The current session holder */
   private static Object s_sessionHolder;
@@ -107,7 +108,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     if (s_engine == null) {
       try {
         s_engine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine",
-          new String[] { "--no-save" }, s_sessionSingleton, false);
+          new String[] { "--slave" }, s_sessionSingleton, false);
 
         // install a default mirror to use for package downloads so that R
         // does not try and start a tcl/tk interface for mirror selection!
@@ -779,6 +780,19 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
         m_logger.logMessage(t);
       }
     }
+  }
+
+  /**
+   * called when R reads from the console (not supported).
+   * 
+   * @param eng calling engine
+   * @param prompt the prompt
+   * @param addToHistoriy extra parameter
+   */
+  @Override
+  public String RReadConsole(REngine re, String prompt, int addToHistory)  {
+
+    return "";
   }
 
   @Override
