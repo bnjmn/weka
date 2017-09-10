@@ -593,6 +593,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
             if (m_historyPos > 0 && !m_firstHistoryAccess) {
               m_historyPos--;
             }
+            m_firstHistoryAccess = false;
 
             if (m_historyBuffer.size() > 0) {
               String history = m_historyBuffer.get(m_historyPos);
@@ -611,13 +612,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
                 e1.printStackTrace();
               }
             }
-
-            if (m_historyPos > 0 && m_firstHistoryAccess) {
-              m_historyPos--;
-              m_firstHistoryAccess = false;
-            }
           } else if (keyV.equalsIgnoreCase("down")) {
-
             if (m_historyBuffer.size() > 0
               && m_historyPos < m_historyBuffer.size() - 1) {
               // if (m_historyPos < m_historyBuffer.size() - 1) {

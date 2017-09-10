@@ -259,6 +259,7 @@ public class JRILoader {
     byte[] byteCodeRSession = getByteCode("/weka/core/RSessionImpl.bytecode");
     byte[] byteCodeJRINative = getByteCode("/weka/core/JRINativeLoader.bytecode");
     byte[] byteCodeJavaGDNotifier = getByteCode("/weka/core/JavaGDNotifier.bytecode");
+    byte[] byteCodeRniIdle = getByteCode("/weka/core/RniIdle.bytecode");
 
     List<byte[]> preloadClassByteCode = new ArrayList<byte[]>();
 
@@ -298,6 +299,8 @@ public class JRILoader {
 
       // Create REngineImpl class and other directly dependent classes from byte
       // code
+      defineClass.invoke(rootClassLoader, "weka.core.RniIdle",
+        byteCodeRniIdle, 0, byteCodeRniIdle.length, pd);
       defineClass.invoke(rootClassLoader, "weka.core.RLoggerAPI",
         byteCodeLogger, 0, byteCodeLogger.length, pd);
       defineClass.invoke(rootClassLoader, "weka.core.RSessionAPI", byteCodeAPI,
