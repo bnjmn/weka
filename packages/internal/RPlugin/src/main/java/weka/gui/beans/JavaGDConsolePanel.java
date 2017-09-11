@@ -423,7 +423,8 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
     JPanel consolePan = new JPanel();
     consolePan.setLayout(new BorderLayout());
     JScrollPane consoleScroller = new JScrollPane(m_rConsole);
-    consoleScroller.setBorder(BorderFactory.createTitledBorder("R console"));
+    consoleScroller.setBorder(BorderFactory.
+      createTitledBorder("R console (requires R >= 3.4.0)"));
     consolePan.add(consoleScroller, BorderLayout.CENTER);
     // add(consolePan, BorderLayout.SOUTH);
     consolePan.setMinimumSize(new Dimension(810, 100));
