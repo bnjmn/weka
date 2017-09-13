@@ -20,7 +20,11 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.*;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
@@ -28,8 +32,8 @@ import weka.filters.SimpleBatchFilter;
 
 /**
  * <!-- globalinfo-start -->
- * A filter for turning date attributes into numeric ones.
- * The numeric value will be the number of milliseconds since January 1, 1970, 00:00:00 GMT,
+ * A filter for turning numeric attributes into date attributes.
+ * The numeric value is assumed to be the number of milliseconds since January 1, 1970, 00:00:00 GMT,
  * corresponding to the given date."
  * <p/>
  * <!-- globalinfo-end -->
@@ -40,7 +44,7 @@ import weka.filters.SimpleBatchFilter;
  *
  * <pre>
  * -R &lt;col1,col2-col4,...&gt;
- *  Specifies list of attributes to turn into numeric ones. Only date attributes will be converted.
+ *  Specifies list of attributes to turn into date ones. Only numeric attributes will be converted.
  *  First and last are valid indexes.
  *  (default: first-last)
  * </pre>
@@ -50,21 +54,32 @@ import weka.filters.SimpleBatchFilter;
  *  Invert matching sense of column indexes.
  * </pre>
  *
+ * <pre>
+ * -F &lt;value index&gt;
+ *  Sets the output date format string (default corresponds to ISO-8601).
+ * </pre>
+ *
  * <!-- options-end -->
  *
  * @author eibe (eibe at waikato dot ac dot nz)
  * @version $Revision: 14274 $
  */
-public class DateToNumeric extends SimpleBatchFilter {
+public class NumericToDate extends SimpleBatchFilter {
 
   /** for serialization */
-  private static final long serialVersionUID = -6614650822291796239L;
+  private static final long serialVersionUID = -6514657821295776239L;
 
-  /** Stores which columns to turn into numeric attributes */
+  /** Stores which columns to turn into date attributes */
   protected Range m_Cols = new Range("first-last");
 
-  /** The default columns to turn into numeric attributes */
+  /** The default columns to turn into date attributes */
   protected String m_DefaultCols = "first-last";
+
+  /** The default output date format. Corresponds to ISO-8601 format. */
+  protected static final SimpleDateFormat DEFAULT_FORMAT = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+
+  /** The output date format. */
+  protected SimpleDateFormat m_DateFormat = DEFAULT_FORMAT;
 
   /**
    * Returns a string describing this filter
@@ -74,8 +89,9 @@ public class DateToNumeric extends SimpleBatchFilter {
    */
   @Override
   public String globalInfo() {
-    return "A filter for turning date attributes into numeric ones. The numeric value will be the number " +
-            "of milliseconds since January 1, 1970, 00:00:00 GMT, corresponding to the given date.";
+    return "A filter for turning numeric attributes into date attributes." +
+        "The numeric value is assumed to be the number of milliseconds since January 1, 1970, 00:00:00 GMT, " +
+        "corresponding to the given date.";
   }
 
   /**
@@ -96,6 +112,10 @@ public class DateToNumeric extends SimpleBatchFilter {
     result.addElement(new Option("\tInvert matching sense of column indexes.",
       "V", 0, "-V"));
 
+    result.addElement(new Option(
+                    "\tSets the output date format string (default corresponds to ISO-8601).",
+                    "F", 1, "-F <value index>"));
+
     return result.elements();
   }
 
@@ -108,7 +128,7 @@ public class DateToNumeric extends SimpleBatchFilter {
    *
    * <pre>
    * -R &lt;col1,col2-col4,...&gt;
-   *  Specifies list of attributes to turn into numeric ones. Only date attributes will be converted.
+   *  Specifies list of attributes to turn into date ones. Only numeric attributes will be converted.
    *  First and last are valid indexes.
    *  (default: first-last)
    * </pre>
@@ -116,6 +136,11 @@ public class DateToNumeric extends SimpleBatchFilter {
    * <pre>
    * -V
    *  Invert matching sense of column indexes.
+   * </pre>
+   *
+   * <pre>
+   * -F &lt;value index&gt;
+   *  Sets the output date format string (default corresponds to ISO-8601).
    * </pre>
    *
    * <!-- options-end -->
@@ -137,6 +162,13 @@ public class DateToNumeric extends SimpleBatchFilter {
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
+    }
+
+    String formatString = Utils.getOption('F', options);
+    if (formatString.length() != 0) {
+      setDateFormat(formatString);
+    } else {
+      setDateFormat(DEFAULT_FORMAT);
     }
 
     super.setOptions(options);
@@ -162,10 +194,54 @@ public class DateToNumeric extends SimpleBatchFilter {
     if (getInvertSelection()) {
       result.add("-V");
     }
+    result.add("-F");
+    result.add("" + getDateFormat().toPattern());
 
     Collections.addAll(result, super.getOptions());
 
     return result.toArray(new String[result.size()]);
+  }
+
+  /**
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String dateFormatTipText() {
+
+    return "The date format to use. This should be a "
+            + "format understood by Java's SimpleDateFormat class.";
+  }
+
+  /**
+   * Get the date format used in output.
+   *
+   * @return the output date format.
+   */
+  public SimpleDateFormat getDateFormat() {
+
+    return m_DateFormat;
+  }
+
+  /**
+   * Sets the output date format.
+   *
+   * @param dateFormat the output date format.
+   */
+  public void setDateFormat(String dateFormat) {
+
+    setDateFormat(new SimpleDateFormat(dateFormat));
+  }
+
+  /**
+   * Sets the output date format.
+   *
+   * @param dateFormat the output date format.
+   */
+  public void setDateFormat(SimpleDateFormat dateFormat) {
+    if (dateFormat == null) {
+      throw new NullPointerException();
+    }
+    m_DateFormat = dateFormat;
   }
 
   /**
@@ -176,8 +252,8 @@ public class DateToNumeric extends SimpleBatchFilter {
    */
   public String invertSelectionTipText() {
     return "Set attribute selection mode. If false, only selected"
-      + " (date) attributes in the range will be turned into numeric attributes; if"
-      + " true, only non-selected attributes will be turned into numeric attributes.";
+      + " (numeric) attributes in the range will be turned into date attributes; if"
+      + " true, only non-selected attributes will be turned into date attributes.";
   }
 
   /**
@@ -222,7 +298,7 @@ public class DateToNumeric extends SimpleBatchFilter {
   }
 
   /**
-   * Sets which attributes are to be turned into numeric attributes (only date attributes
+   * Sets which attributes are to be turned into date attributes (only numeric attributes
    * among the selection will be transformed).
    *
    * @param value a string representing the list of attributes. Since the string
@@ -235,10 +311,10 @@ public class DateToNumeric extends SimpleBatchFilter {
   }
 
   /**
-   * Sets which attributes are to be transformed to numeric attributes (only date
+   * Sets which attributes are to be transformed to date attributes (only numeric
    * attributes among the selection will be transformed).
    *
-   * @param value an array containing indexes of attributes to turn into numeric ones. Since
+   * @param value an array containing indexes of attributes to turn into date ones. Since
    *          the array will typically come from a program, attributes are
    *          indexed from 0.
    * @throws IllegalArgumentException if an invalid set of ranges is supplied
@@ -288,10 +364,10 @@ public class DateToNumeric extends SimpleBatchFilter {
     m_Cols.setUpper(data.numAttributes() - 1);
     ArrayList<Attribute> atts = new ArrayList<Attribute>();
     for (int i = 0; i < data.numAttributes(); i++) {
-      if (!m_Cols.isInRange(i) || !data.attribute(i).isDate()) {
+      if (!m_Cols.isInRange(i) || !data.attribute(i).isNumeric()) {
         atts.add(data.attribute(i));
       } else {
-        Attribute newAtt = new Attribute(data.attribute(i).name());
+        Attribute newAtt = new Attribute(data.attribute(i).name(), getDateFormat().toPattern());
         newAtt.setWeight(data.attribute(i).weight());
         atts.add(newAtt);
       }
@@ -354,6 +430,6 @@ public class DateToNumeric extends SimpleBatchFilter {
    * @param args the commandline options
    */
   public static void main(String[] args) {
-    runFilter(new DateToNumeric(), args);
+    runFilter(new NumericToDate(), args);
   }
 }
