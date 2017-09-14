@@ -226,6 +226,9 @@ public class ClassifierPanel extends AbstractPerspective implements
   /** Check to output the model built from the training data. */
   protected JCheckBox m_OutputModelBut = new JCheckBox("Output model");
 
+  /** Check to output the models built from the training splits. */
+  protected JCheckBox m_OutputModelsForTrainingSplitsBut = new JCheckBox("Output models for training splits");
+
   /** Check to output true/false positives, precision/recall for each class. */
   protected JCheckBox m_OutputPerClassBut = new JCheckBox(
     "Output per-class stats");
@@ -430,6 +433,8 @@ public class ClassifierPanel extends AbstractPerspective implements
         + "prediction margin (affects classification only)");
     m_OutputModelBut
       .setToolTipText("Output the model obtained from the full training set");
+    m_OutputModelsForTrainingSplitsBut
+            .setToolTipText("Output the models obtained from the training splits");
     m_OutputPerClassBut.setToolTipText("Output precision/recall & true/false"
       + " positives for each class");
     m_OutputConfusionBut
@@ -457,6 +462,7 @@ public class ClassifierPanel extends AbstractPerspective implements
     m_StorePredictionsBut.setSelected(ExplorerDefaults
       .getClassifierStorePredictionsForVis());
     m_OutputModelBut.setSelected(ExplorerDefaults.getClassifierOutputModel());
+    m_OutputModelsForTrainingSplitsBut.setSelected(ExplorerDefaults.getClassifierOutputModelsForTrainingSplits());
     m_OutputPerClassBut.setSelected(ExplorerDefaults
       .getClassifierOutputPerClassStats());
     m_OutputConfusionBut.setSelected(ExplorerDefaults
@@ -623,6 +629,7 @@ public class ClassifierPanel extends AbstractPerspective implements
         moreOptionsPanel.setBorder(BorderFactory.createEmptyBorder(0, 5, 5, 5));
         moreOptionsPanel.setLayout(new GridLayout(0, 1));
         moreOptionsPanel.add(m_OutputModelBut);
+        moreOptionsPanel.add(m_OutputModelsForTrainingSplitsBut);
         moreOptionsPanel.add(m_OutputPerClassBut);
         moreOptionsPanel.add(m_OutputEntropyBut);
         moreOptionsPanel.add(m_OutputConfusionBut);
@@ -1257,6 +1264,7 @@ public class ClassifierPanel extends AbstractPerspective implements
               new CostMatrix((CostMatrix) m_CostMatrixEditor.getValue());
           }
           boolean outputModel = m_OutputModelBut.isSelected();
+          boolean outputModelsForTrainingSplits = m_OutputModelsForTrainingSplitsBut.isSelected();
           boolean outputConfusion = m_OutputConfusionBut.isSelected();
           boolean outputPerClass = m_OutputPerClassBut.isSelected();
           boolean outputSummary = true;
@@ -1606,6 +1614,10 @@ public class ClassifierPanel extends AbstractPerspective implements
                     + ex.getMessage());
                 }
                 current.buildClassifier(train);
+                if (outputModelsForTrainingSplits) {
+                  outBuff.append("\n=== Classifier model for fold " + (fold + 1) + " ===\n\n");
+                  outBuff.append(current.toString() + "\n");
+                }
                 Instances test = inst.testCV(numFolds, fold);
                 m_Log.statusMessage("Evaluating model for fold " + (fold + 1)
                   + "...");
@@ -1676,6 +1688,10 @@ public class ClassifierPanel extends AbstractPerspective implements
                   + ex.getMessage());
               }
               current.buildClassifier(train);
+              if (outputModelsForTrainingSplits) {
+                outBuff.append("\n=== Classifier model for training split (" + trainSize + " instances) ===\n\n");
+                outBuff.append(current.toString() + "\n");
+              }
               eval = new Evaluation(train, costMatrix);
 
               // make adjustments if the classifier is an InputMappedClassifier
@@ -3404,6 +3420,10 @@ public class ClassifierPanel extends AbstractPerspective implements
           .getApplicationSettings().getSetting(getPerspectiveID(),
             ClassifierPanelDefaults.OUTPUT_MODEL_KEY,
             ClassifierPanelDefaults.OUTPUT_MODEL, Environment.getSystemWide()));
+        m_OutputModelsForTrainingSplitsBut.setSelected(getMainApplication()
+                .getApplicationSettings().getSetting(getPerspectiveID(),
+                        ClassifierPanelDefaults.OUTPUT_MODELS_FOR_TRAINING_SPLITS_KEY,
+                        ClassifierPanelDefaults.OUTPUT_MODELS_FOR_TRAINING_SPLITS, Environment.getSystemWide()));
         m_OutputPerClassBut.setSelected(getMainApplication()
           .getApplicationSettings().getSetting(getPerspectiveID(),
             ClassifierPanelDefaults.OUTPUT_PER_CLASS_STATS_KEY,
@@ -3513,6 +3533,15 @@ public class ClassifierPanel extends AbstractPerspective implements
    */
   public boolean isSelectedOutputModel() {
     return m_OutputModelBut.isSelected();
+  }
+
+  /**
+   * Gets whether the user has opted to output the models for the training splits
+   *
+   * @return true if the models for the training splits are to be output
+   */
+  public boolean isSelectedOutputModelsForTrainingSplits() {
+    return m_OutputModelsForTrainingSplitsBut.isSelected();
   }
 
   /**
@@ -3730,6 +3759,11 @@ public class ClassifierPanel extends AbstractPerspective implements
         + " the full training set", "");
     protected static final boolean OUTPUT_MODEL = true;
 
+    protected static final Settings.SettingKey OUTPUT_MODELS_FOR_TRAINING_SPLITS_KEY =
+            new Settings.SettingKey(ID + ".outputModelsForTrainingSplits", "Output models obtained from"
+                    + " the training splits", "");
+    protected static final boolean OUTPUT_MODELS_FOR_TRAINING_SPLITS = false;
+
     protected static final Settings.SettingKey OUTPUT_PER_CLASS_STATS_KEY =
       new Settings.SettingKey(ID + ".outputPerClassStats",
         "Output per-class statistics", "");
@@ -3822,6 +3856,7 @@ public class ClassifierPanel extends AbstractPerspective implements
       m_defaults.put(CROSS_VALIDATION_FOLDS_KEY, CROSS_VALIDATION_FOLDS);
       m_defaults.put(PERCENTAGE_SPLIT_KEY, PERCENTAGE_SPLIT);
       m_defaults.put(OUTPUT_MODEL_KEY, OUTPUT_MODEL);
+      m_defaults.put(OUTPUT_MODELS_FOR_TRAINING_SPLITS_KEY, OUTPUT_MODELS_FOR_TRAINING_SPLITS);
       m_defaults.put(OUTPUT_PER_CLASS_STATS_KEY, OUTPUT_PER_CLASS_STATS);
       m_defaults.put(OUTPUT_ENTROPY_EVAL_METRICS_KEY,
         OUTPUT_ENTROPY_EVAL_METRICS);
