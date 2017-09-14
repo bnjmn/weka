@@ -51,7 +51,7 @@ public class HierarchyVisualizer extends PrintablePanel implements ComponentList
 			parseNewick(sNewick);
 		} catch (Exception e) {
 			e.printStackTrace();
-			System.exit(0);
+			//		System.exit(0);
 		}
 		addComponentListener(this);
 	} // c'tor

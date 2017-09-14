@@ -447,6 +447,7 @@ public class PreprocessPanel extends AbstractPerspective implements
             "Remove Attributes", JOptionPane.ERROR_MESSAGE);
           m_Log.logMessage("Problem removing attributes: " + ex.getMessage());
           m_Log.statusMessage("Problem removing attributes");
+          ex.printStackTrace();
         }
       }
     });
@@ -907,6 +908,7 @@ public class PreprocessPanel extends AbstractPerspective implements
               "Apply Filter", JOptionPane.ERROR_MESSAGE);
             m_Log.logMessage("Problem filtering instances: " + ex.getMessage());
             m_Log.statusMessage("Problem filtering instances");
+            ex.printStackTrace();
           }
           m_IOThread = null;
         }

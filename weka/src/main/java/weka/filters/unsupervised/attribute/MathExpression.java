@@ -189,7 +189,7 @@ public class MathExpression extends PotentialClassIgnorer implements
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       if (m_SelectCols.isInRange(i)
           && instanceInfo.attribute(i).isNumeric()
-          && instanceInfo.classIndex() != i) {
+          && (instanceInfo.classIndex() != i) || getIgnoreClass()) {
         
         m_attStats[i] = new Stats();
       }
