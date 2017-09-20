@@ -1245,8 +1245,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @throws Exception if model could not be evaluated successfully
    * @return a string describing the results
    */
-  public static String evaluateModel(Classifier classifier, String[] options)
-    throws Exception {
+  public static String evaluateModel(Classifier classifier, String[] options) throws Exception {
 
     StringBuffer schemeOptionsText = null;
     long trainTimeStart = 0, trainTimeElapsed = 0, testTimeStart = 0, testTimeElapsed = 0;
@@ -1261,10 +1260,15 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
 
     // do we get the input from XML instead of normal command-line parameters?
-    String xml = Utils.getOption("xml", options);
-    if (!xml.equals("")) {
-      options = new XMLOptions(xml).toArray(); // All other options are ignored
+    try {
+      String xml = Utils.getOption("xml", options);
+      if (!xml.equals("")) {
+        options = new XMLOptions(xml).toArray(); // All other options are ignored
+      }
+    } catch (Exception ex) {
+      throw new Exception("\nWeka exception: " + ex.getMessage() + makeOptionString(classifier, false));
     }
+
 
     // Store settings for (almost all) general options
     boolean noCrossValidation = Utils.getFlag("no-cv", options);
@@ -1311,6 +1315,17 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           toggleList.add(p.trim().toLowerCase());
         }
       }
+
+      // Read potential .xml model file that may hold scheme-specific options
+      if ((objectInputFileName.length() != 0) && (objectInputFileName.endsWith(".xml"))) {
+        try { // Try to load scheme-specific options as XMLClassifier
+          OptionHandler cl = (OptionHandler) new XMLClassifier().read(objectInputFileName);
+          options = Stream.concat(Arrays.stream(cl.getOptions()), Arrays.stream(options)).toArray(String[]::new);
+          objectInputFileName = ""; // We have not actually read a built model, only some options
+        } catch (Exception ex) {
+        }
+      }
+
       // Basic checking for global parameter settings
       if (trainFileName.length() == 0) {
         if (objectInputFileName.length() == 0) {
@@ -1320,8 +1335,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           throw new IllegalArgumentException("No training file and no test file given.");
         }
       } else if ((objectInputFileName.length() != 0)
-              && ((!(classifier instanceof UpdateableClassifier)) || (testFileName.length() == 0))) {
-        throw new IllegalArgumentException("Classifier not incremental, or no test file provided: can't use both training and model file.");
+              && ((!(classifier instanceof UpdateableClassifier) || forceBatchTraining) || (testFileName.length() == 0))) {
+        throw new IllegalArgumentException("Classifier not incremental or batch training forced, or no test file provided: can't use both training and model file.");
       }
       if ((objectInputFileName.length() != 0) && ((splitPercentageString.length() != 0) || (foldsString.length() != 0))) {
         throw new IllegalArgumentException("Cannot perform percentage split or cross-validation when model provided.");
@@ -1375,6 +1390,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       if (splitPercentageString.length() > 0 && testFileName.length() != 0) {
         throw new IllegalArgumentException("Cannot perform percentage split when explicit test file is provided!");
       }
+      if ((thresholdFile.length() != 0) && discardPredictions) {
+        throw new IllegalArgumentException("Can only output to threshold file when predictions are not discarded!");
+      }
+
+      // Set seed, number of folds, and class index if required
       if (seedString.length() != 0) {
         seed = Integer.parseInt(seedString);
       }
@@ -1392,8 +1412,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
 
       // Try to open training and/or test file
-      try {
-        if (testFileName.length() != 0) {
+      if (testFileName.length() != 0) {
+        try {
           template = test = new DataSource(testFileName).getStructure();
           if (classIndex != -1) {
             test.setClassIndex(classIndex - 1);
@@ -1403,8 +1423,12 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
             }
           }
           actualClassIndex = test.classIndex();
+        } catch(Exception e){
+          throw new Exception("Can't open file " + testFileName + '.');
         }
-        if (trainFileName.length() != 0) {
+      }
+      if (trainFileName.length() != 0) {
+        try {
           template = train = new DataSource(trainFileName).getStructure();
           if (classIndex != -1) {
             train.setClassIndex(classIndex - 1);
@@ -1414,26 +1438,55 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
             }
           }
           actualClassIndex = train.classIndex();
-          if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
-            if ((test != null) && !test.equalHeaders(train)) {
-              throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
-            }
-          }
+        } catch (Exception e) {
+          throw new Exception("Can't open file " + trainFileName + '.');
         }
-      } catch (Exception e) {
-        throw new Exception("Can't open file " + e.getMessage() + '.');
+      }
+
+      // Need to check whether train and test file are compatible
+      if (!(classifier instanceof weka.classifiers.misc.InputMappedClassifier)) {
+        if ((test != null) && (train != null) && !test.equalHeaders(train)) {
+          throw new IllegalArgumentException("Train and test file not compatible!\n" + test.equalHeadersMsg(train));
+        }
       }
 
       // Need to check whether output of threshold file is possible if desired by user
       if ((thresholdFile.length() != 0) && !template.classAttribute().isNominal()) {
         throw new IllegalArgumentException("Can only output to threshold file when class attribute is nominal!");
       }
-      if ((thresholdFile.length() != 0) && discardPredictions) {
-        throw new IllegalArgumentException("Can only output to threshold file when predictions are not discarded!");
+
+      // Need to check whether output of margins is possible if desired by user
+      if (printMargins && !template.classAttribute().isNominal()) {
+        throw new IllegalArgumentException("Can only print margins when class is nominal!");
+      }
+
+      // Read model file if appropriate (which may just hold scheme-specific options, and not a built model)
+      if (objectInputFileName.length() != 0) {
+        Classifier backedUpClassifier = classifier;
+        if (objectInputFileName.endsWith(".xml")) {
+          try { // Try to load scheme-specific options as XMLClassifier
+            OptionHandler cl = (OptionHandler) new XMLClassifier().read(objectInputFileName);
+            options = Stream.concat(Arrays.stream(cl.getOptions()), Arrays.stream(options)).toArray(String[]::new);
+            objectInputFileName = ""; // We have not actually read a built model, only some options
+          } catch (IllegalArgumentException ex) {
+            classifier = getModelFromFile(objectInputFileName, template);
+          }
+        } else {
+          classifier = getModelFromFile(objectInputFileName, template);
+        }
+        if (!classifier.getClass().equals(backedUpClassifier.getClass())) {
+          throw new IllegalArgumentException("Loaded classifier is " + classifier.getClass().getCanonicalName() +
+                  ", not " + backedUpClassifier.getClass().getCanonicalName() + "!");
+        }
       }
 
       // Check for cost matrix
       costMatrix = handleCostOption(Utils.getOption('m', options), template.numClasses());
+
+      // Need to check whether use of cost matrix is possible if desired by user
+      if ((costMatrix != null) && !template.classAttribute().isNominal()) {
+        throw new IllegalArgumentException("Can only use cost matrix when class attribute is nominal!");
+      }
 
       // Determine if predictions are to be output
       if (classifications.length() > 0) {
@@ -1461,25 +1514,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       if (labelIndex == -1) {
         throw new IllegalArgumentException("Class label '" + thresholdLabel + "' is unknown!");
-      }
-
-      // Read model file if appropriate
-      if (objectInputFileName.length() != 0) {
-        Classifier backedUpClassifier = classifier;
-        if (objectInputFileName.endsWith(".xml")) {
-          try { // Try to load scheme-specific options as XMLClassifier
-            OptionHandler cl = (OptionHandler) new XMLClassifier().read(objectInputFileName);
-            options = Stream.concat(Arrays.stream(cl.getOptions()), Arrays.stream(options)).toArray(String[]::new);
-          } catch (IllegalArgumentException ex) {
-            classifier = getModelFromFile(objectInputFileName, template);
-          }
-        } else {
-          classifier = getModelFromFile(objectInputFileName, template);
-        }
-        if (!classifier.getClass().equals(backedUpClassifier.getClass())) {
-          throw new IllegalArgumentException("Loaded classifier is " + classifier.getClass().getCanonicalName() +
-                  ", not " + backedUpClassifier.getClass().getCanonicalName() + "!");
-        }
       }
 
       // If a model file is given, we shouldn't process scheme-specific options
@@ -1572,7 +1606,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
       }
       text.append("\n" + classifier.toString() + "\n");
-      text.append("\nTime taken to build model: " + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds");
+      text.append("\nTime taken to build model: " + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds\n");
     }
 
     // Stop here if no output of performance statistics or predictions is required and no threshold data is required
@@ -1931,13 +1965,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     int numClasses) throws Exception {
 
     if ((costFileName != null) && (costFileName.length() != 0)) {
-      System.out
-        .println("NOTE: The behaviour of the -m option has changed between WEKA 3.0"
-          + " and WEKA 3.1. -m now carries out cost-sensitive *evaluation*"
-          + " only. For cost-sensitive *prediction*, use one of the"
-          + " cost-sensitive metaschemes such as"
-          + " weka.classifiers.meta.CostSensitiveClassifier or"
-          + " weka.classifiers.meta.MetaCost");
 
       Reader costReader = null;
       try {
