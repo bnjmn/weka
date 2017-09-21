@@ -130,6 +130,10 @@ import java.util.zip.GZIPOutputStream;
  * Outputs statistics only, not the classifier.
  * <p/>
  *
+ * -output-models-for-training-splits <br/>
+ * Output models for training splits if cross-validation or percentage-split evaluation is used.
+ * <p/>
+ *
  * -do-not-output-per-class-statistics <br/>
  * Do not output statistics per class.
  * <p/>
@@ -800,15 +804,33 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * @param data                   the data on which the cross-validation is to be performed
    * @param numFolds               the number of folds for the cross-validation
    * @param random                 random number generator for randomization
-   * @param forPredictionsPrinting varargs parameter that, if supplied, is
+   * @throws Exception if a classifier could not be generated successfully or
+   *                   the class is not defined
+   */
+  public void crossValidateModel(Classifier classifier, Instances data, int numFolds, Random random)
+          throws Exception {
+    crossValidateModel(classifier, data, numFolds, random, new Object[0]);
+  }
+
+  /**
+   * Performs a (stratified if class is nominal) cross-validation for a
+   * classifier on a set of instances. Performs a deep copy of the
+   * classifier before each call to buildClassifier() (just in case the
+   * classifier is not initialized properly).
+   *
+   * @param classifier             the classifier with any options set.
+   * @param data                   the data on which the cross-validation is to be performed
+   * @param numFolds               the number of folds for the cross-validation
+   * @param random                 random number generator for randomization
+   * @param forPrinting varargs parameter that, if supplied, is
    *                               expected to hold a
    *                               weka.classifiers.evaluation.output.prediction.AbstractOutput
-   *                               object
+   *                               object or a StringBuffer for model output
    * @throws Exception if a classifier could not be generated successfully or
    *                   the class is not defined
    */
   public void crossValidateModel(Classifier classifier, Instances data,
-                                 int numFolds, Random random, Object... forPredictionsPrinting)
+                                 int numFolds, Random random, Object... forPrinting)
           throws Exception {
 
     // Make a copy of the data we can reorder
@@ -821,9 +843,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     // We assume that the first element is a
     // weka.classifiers.evaluation.output.prediction.AbstractOutput object
     AbstractOutput classificationOutput = null;
-    if (forPredictionsPrinting.length > 0) {
+    if (forPrinting.length > 0 && forPrinting[0] instanceof AbstractOutput) {
       // print the header first
-      classificationOutput = (AbstractOutput) forPredictionsPrinting[0];
+      classificationOutput = (AbstractOutput) forPrinting[0];
       classificationOutput.setHeader(data);
       classificationOutput.printHeader();
     }
@@ -834,8 +856,16 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       setPriors(train);
       Classifier copiedClassifier = AbstractClassifier.makeCopy(classifier);
       copiedClassifier.buildClassifier(train);
+      if (classificationOutput == null && forPrinting.length > 0) {
+        ((StringBuffer)forPrinting[0]).append("\n=== Classifier model (training fold " + (i + 1) +") ===\n\n" +
+                copiedClassifier);
+      }
       Instances test = data.testCV(numFolds, i);
-      evaluateModel(copiedClassifier, test, forPredictionsPrinting);
+      if (classificationOutput != null){
+        evaluateModel(copiedClassifier, test, forPrinting);
+      } else {
+        evaluateModel(copiedClassifier, test);
+      }
     }
     m_NumFolds = numFolds;
 
@@ -927,6 +957,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * <p>
    * -o <br/>
    * Outputs statistics only, not the classifier.
+   * <p/>
+   * <p>
+   * -output-models-for-training-splits <br/>
+   * Output models for training splits if cross-validation or percentage-split evaluation is used.
    * <p/>
    * <p>
    * -do-not-output-per-class-statistics <br/>
@@ -1193,6 +1227,10 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    * Outputs statistics only, not the classifier.
    * <p/>
    *
+   * -output-models-for-training-splits <br/>
+   * Output models for training splits if cross-validation or percentage-split evaluation is used.
+   * <p/>
+   *
    * -do-not-output-per-class-statistics <br/>
    * Do not output statistics per class.
    * <p/>
@@ -1279,6 +1317,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     String testFileName = Utils.getOption('T', options);
     String foldsString = Utils.getOption('x', options);
     String seedString = Utils.getOption('s', options);
+    boolean outputModelsForTrainingSplits = Utils.getFlag("output-models-for-training-splits", options);
     boolean classStatistics = !Utils.getFlag("do-not-output-per-class-statistics", options);
     boolean noOutput = Utils.getFlag('o', options);
     boolean trainStatistics = !Utils.getFlag('v', options);
@@ -1392,6 +1431,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
       if ((thresholdFile.length() != 0) && discardPredictions) {
         throw new IllegalArgumentException("Can only output to threshold file when predictions are not discarded!");
+      }
+      if (outputModelsForTrainingSplits && (testFileName.length() > 0 ||
+              ((splitPercentageString.length() == 0) && noCrossValidation))) {
+        throw new IllegalArgumentException("Can only output models for training splits if cross-validation or " +
+              "percentage split evaluation is performed!");
       }
 
       // Set seed, number of folds, and class index if required
@@ -1605,7 +1649,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
           text.append("\nOptions: " + schemeOptionsText + "\n");
         }
       }
-      text.append("\n" + classifier.toString() + "\n");
+      text.append("\n=== Classifier model (full training set) ===\n\n" + classifier.toString() + "\n");
       text.append("\nTime taken to build model: " + Utils.doubleToString(trainTimeElapsed / 1000.0, 2) + " seconds\n");
     }
 
@@ -1814,6 +1858,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         Instances trainInst = new Instances(tmpInst, 0, trainSize);
         classifier = AbstractClassifier.makeCopy(classifierBackup);
         classifier.buildClassifier(trainInst);
+        if (outputModelsForTrainingSplits) {
+          text.append("\n=== Classifier model (training split) ===\n\n" + classifier.toString() + "\n");
+        }
         testingEvaluation.setPriors(trainInst);
         trainInst = null;
         Instances testInst = new Instances(tmpInst, trainSize, testSize);
@@ -1876,7 +1923,13 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         // use untrained (!) classifier for cross-validation
         classifier = AbstractClassifier.makeCopy(classifierBackup);
         testTimeStart = System.currentTimeMillis();
-        testingEvaluation.crossValidateModel(classifier, new DataSource(trainFileName).getDataSet(actualClassIndex), folds, random);
+        if (!outputModelsForTrainingSplits) {
+          testingEvaluation.crossValidateModel(classifier, new DataSource(trainFileName).getDataSet(actualClassIndex),
+                  folds, random);
+        } else {
+          testingEvaluation.crossValidateModel(classifier, new DataSource(trainFileName).getDataSet(actualClassIndex),
+                  folds, random, text);
+        }
         testTimeElapsed = System.currentTimeMillis() - testTimeStart;
         if (printMargins) {
           return testingEvaluation.toCumulativeMarginDistributionString();
@@ -4007,6 +4060,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
    *   recall + precision
    * </pre>
    *
+   * Returns zero when both precision and recall are zero
+   *
    * @param classIndex the index of the class to consider as "positive"
    * @return the F-Measure
    */
@@ -4014,6 +4069,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
     double precision = precision(classIndex);
     double recall = recall(classIndex);
+    if ((precision == 0) && (recall == 0)) {
+      return 0;
+    }
     return 2 * precision * recall / (precision + recall);
   }
 
@@ -4349,6 +4407,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     optionsText.append("\tOutputs no statistics for training data.\n");
     optionsText.append("-o\n");
     optionsText.append("\tOutputs statistics only, not the classifier.\n");
+    optionsText.append("-output-models-for-training-splits\n");
+    optionsText.append("\tOutput models for training splits if cross-validation or percentage-split evaluation is used.\n");
     optionsText.append("-do-not-output-per-class-statistics\n");
     optionsText.append("\tDo not output statistics for each class.\n");
     optionsText.append("-k\n");
