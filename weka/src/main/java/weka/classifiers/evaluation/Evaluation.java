@@ -719,7 +719,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double aucTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = areaUnderROC(i);
-      if (!Utils.isMissingValue(temp)) {
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
         aucTotal += (temp * classCounts[i]);
       }
     }
@@ -765,7 +765,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double auprcTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = areaUnderPRC(i);
-      if (!Utils.isMissingValue(temp)) {
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
         auprcTotal += (temp * classCounts[i]);
       }
     }
@@ -3605,7 +3605,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double truePosTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = truePositiveRate(i);
-      truePosTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        truePosTotal += (temp * classCounts[i]);
+      }
     }
 
     return truePosTotal / classCountSum;
@@ -3687,7 +3689,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double trueNegTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = trueNegativeRate(i);
-      trueNegTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        trueNegTotal += (temp * classCounts[i]);
+      }
     }
 
     return trueNegTotal / classCountSum;
@@ -3769,7 +3773,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double falsePosTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = falsePositiveRate(i);
-      falsePosTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        falsePosTotal += (temp * classCounts[i]);
+      }
     }
 
     return falsePosTotal / classCountSum;
@@ -3851,7 +3857,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double falseNegTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = falseNegativeRate(i);
-      falseNegTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        falseNegTotal += (temp * classCounts[i]);
+      }
     }
 
     return falseNegTotal / classCountSum;
@@ -3898,7 +3906,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double mccTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = matthewsCorrelationCoefficient(i);
-      if (!Utils.isMissingValue(temp)) {
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
         mccTotal += (temp * classCounts[i]);
       }
     }
@@ -3980,7 +3988,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double precisionTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = precision(i);
-      precisionTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        precisionTotal += (temp * classCounts[i]);
+      }
     }
 
     return precisionTotal / classCountSum;
@@ -4026,7 +4036,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     double fMeasureTotal = 0;
     for (int i = 0; i < m_NumClasses; i++) {
       double temp = fMeasure(i);
-      fMeasureTotal += (temp * classCounts[i]);
+      if (classCounts[i] > 0) { // If temp is NaN, we want the sum to also be NaN if count > 0
+        fMeasureTotal += (temp * classCounts[i]);
+      }
     }
 
     return fMeasureTotal / classCountSum;
