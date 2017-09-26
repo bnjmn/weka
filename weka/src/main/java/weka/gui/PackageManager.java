@@ -321,7 +321,7 @@ public class PackageManager extends JPanel {
         .keySet().size()) {
         // package(s) have disappeared from the repository.
         // Force a cache refresh...
-        RefreshCache r = new RefreshCache();
+        RefreshCache r = new RefreshCache(true);
         r.execute();
 
         return null;
@@ -353,8 +353,7 @@ public class PackageManager extends JPanel {
 
       if (newPackagesBuff.length() > 0 || updatedPackagesBuff.length() > 0) {
         String information =
-          "<html><font size=-2>There are new and/or updated packages available "
-            + "on the server (do a cache refresh for more " + "information):";
+          "<html><font size=-2>New and/or updated packages: ";
         if (newPackagesBuff.length() > 0) {
           information += "<br><br><b>New:</b><br>" + newPackagesBuff.toString();
         }
@@ -367,6 +366,11 @@ public class PackageManager extends JPanel {
         m_newPackagesAvailableL.setToolTipText(information);
         m_browserTools.add(m_newPackagesAvailableL);
 
+        // force a cache refresh (to match command line package manager client
+        // behaviour)
+        RefreshCache r = new RefreshCache(false);
+        r.execute();
+
         m_browserTools.revalidate();
       }
 
@@ -377,6 +381,11 @@ public class PackageManager extends JPanel {
   class RefreshCache extends SwingWorker<Void, Void> implements Progressable {
     private int m_progressCount = 0;
     private Exception m_error = null;
+    private boolean m_removeUpdateIcon;
+
+    public RefreshCache(boolean removeUpdateIcon) {
+      m_removeUpdateIcon = removeUpdateIcon;
+    }
 
     @Override
     public void makeProgress(String progressMessage) {
@@ -454,8 +463,10 @@ public class PackageManager extends JPanel {
       updateTable();
 
       try {
-        m_browserTools.remove(m_newPackagesAvailableL);
-        m_browserTools.revalidate();
+        if (m_removeUpdateIcon) {
+          m_browserTools.remove(m_newPackagesAvailableL);
+          m_browserTools.revalidate();
+        }
       } catch (Exception ex) {
       }
 
@@ -1631,7 +1642,7 @@ public class PackageManager extends JPanel {
     m_refreshCacheBut.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        RefreshCache r = new RefreshCache();
+        RefreshCache r = new RefreshCache(true);
         r.execute();
       }
     });
@@ -2134,6 +2145,13 @@ public class PackageManager extends JPanel {
     // create the new packages available icon
     m_newPackagesAvailableL =
       new JLabel(new ImageIcon(loadImage("weka/gui/images/information.gif")));
+    m_newPackagesAvailableL.addMouseListener(new MouseAdapter() {
+      @Override public void mouseClicked(MouseEvent e) {
+        super.mouseClicked(e);
+        m_browserTools.remove(m_newPackagesAvailableL);
+        m_browserTools.revalidate();
+      }
+    });
 
     // Start loading the home page
     Thread homePageThread = new HomePageThread();
