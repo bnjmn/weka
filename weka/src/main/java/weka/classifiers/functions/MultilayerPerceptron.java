@@ -52,6 +52,7 @@ import javax.swing.JTextField;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
+import weka.classifiers.IterativeClassifier;
 import weka.classifiers.functions.neural.LinearUnit;
 import weka.classifiers.functions.neural.NeuralConnection;
 import weka.classifiers.functions.neural.NeuralNode;
@@ -169,7 +170,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * @version $Revision$
  */
 public class MultilayerPerceptron extends AbstractClassifier implements
-  OptionHandler, WeightedInstancesHandler, Randomizable {
+  OptionHandler, WeightedInstancesHandler, Randomizable, IterativeClassifier {
 
   /** for serialization */
   private static final long serialVersionUID = -5990607817048210779L;
@@ -1757,30 +1758,50 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     return result;
   }
 
+  /** The instances in the validation set (if any) */
+  protected transient Instances valSet = null;
+
+  /** The number of instances in the validation set (if any) */
+  protected transient int numInVal = 0;
+
+  /** Total weight of the instances in the training set */
+  protected transient double totalWeight = 0;
+
+  /** Total weight of the instances in the validation set (if any) */
+  protected transient double totalValWeight = 0;
+
+  /** Drift off counter */
+  protected transient double driftOff = 0;
+
+  /** To keep track of error */
+  protected transient double lastRight = Double.POSITIVE_INFINITY;
+  protected transient double bestError = Double.POSITIVE_INFINITY;
+
+  /** Data in original format (in case learning rate gets reset */
+  protected transient Instances originalFormatData = null;
+
   /**
-   * Call this function to build and train a neural network for the training
-   * data provided.
-   * 
-   * @param i The training data.
-   * @throws Exception if can't build classification properly.
+   * Initializes an iterative classifier.
+   *
+   * @param data the instances to be used in induction
+   * @exception Exception if the model cannot be initialized
    */
-  @Override
-  public void buildClassifier(Instances i) throws Exception {
+  public void initializeClassifier(Instances data) throws Exception {
 
     // can classifier handle the data?
-    getCapabilities().testWithFail(i);
+    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
-    i = new Instances(i);
-    i.deleteWithMissingClass();
+    data = new Instances(data);
+    data.deleteWithMissingClass();
+    originalFormatData = data;
 
     m_ZeroR = new weka.classifiers.rules.ZeroR();
-    m_ZeroR.buildClassifier(i);
+    m_ZeroR.buildClassifier(data);
     // only class? -> use ZeroR model
-    if (i.numAttributes() == 1) {
-      System.err
-        .println("Cannot build model (only class attribute present in data!), "
-          + "using ZeroR model instead!");
+    if (data.numAttributes() == 1) {
+      System.err.println("Cannot build model (only class attribute present in data!), "
+                      + "using ZeroR model instead!");
       m_useDefaultModel = true;
       return;
     } else {
@@ -1805,7 +1826,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     m_stopIt = true;
     m_stopped = true;
     m_accepted = false;
-    m_instances = new Instances(i);
+    m_instances = new Instances(data);
     m_random = new Random(m_randomSeed);
     m_instances.randomize(m_random);
 
@@ -1820,9 +1841,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     setClassType(m_instances);
 
     // this sets up the validation set.
-    Instances valSet = null;
     // numinval is needed later
-    int numInVal = (int) (m_valSize / 100.0 * m_instances.numInstances());
+    numInVal = (int) (m_valSize / 100.0 * m_instances.numInstances());
     if (m_valSize > 0) {
       if (numInVal == 0) {
         numInVal = 1;
@@ -1849,9 +1869,9 @@ public class MultilayerPerceptron extends AbstractClassifier implements
           boolean k = m_stopIt;
           m_stopIt = true;
           int well = JOptionPane.showConfirmDialog(m_win, "Are You Sure...\n"
-            + "Click Yes To Accept" + " The Neural Network"
-            + "\n Click No To Return", "Accept Neural Network",
-            JOptionPane.YES_NO_OPTION);
+                          + "Click Yes To Accept" + " The Neural Network"
+                          + "\n Click No To Return", "Accept Neural Network",
+                  JOptionPane.YES_NO_OPTION);
 
           if (well == 0) {
             m_win.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -1877,8 +1897,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       m_nodePanel.revalidate();
 
       JScrollPane sp = new JScrollPane(m_nodePanel,
-        JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-        JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+              JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+              JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
       m_controlPanel = new ControlPanel();
 
       m_win.getContentPane().add(sp, BorderLayout.CENTER);
@@ -1901,23 +1921,16 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       setEndsToLinear();
     }
     if (m_accepted) {
-      m_win.dispose();
-      m_controlPanel = null;
-      m_nodePanel = null;
-      m_instances = new Instances(m_instances, 0);
-      m_currentInstance = null;
       return;
     }
 
     // connections done.
-    double right = 0;
-    double driftOff = 0;
-    double lastRight = Double.POSITIVE_INFINITY;
-    double bestError = Double.POSITIVE_INFINITY;
-    double tempRate;
-    double totalWeight = 0;
-    double totalValWeight = 0;
-    double origRate = m_learningRate; // only used for when reset
+
+    totalWeight = 0;
+    totalValWeight = 0;
+    driftOff = 0;
+    lastRight = Double.POSITIVE_INFINITY;
+    bestError = Double.POSITIVE_INFINITY;
 
     // ensure that at least 1 instance is trained through.
     if (numInVal == m_instances.numInstances()) {
@@ -1939,146 +1952,183 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       }
     }
     m_stopped = false;
+  }
 
-    for (int noa = 1; noa < m_numEpochs + 1; noa++) {
-      right = 0;
-      for (int nob = numInVal; nob < m_instances.numInstances(); nob++) {
-        m_currentInstance = m_instances.instance(nob);
+  /**
+   * Performs one iteration.
+   *
+   * @return false if no further iterations could be performed, true otherwise
+   * @exception Exception if this iteration fails for unexpected reasons
+   */
+  public boolean next() throws Exception {
 
-        if (!m_currentInstance.classIsMissing()) {
+    if (m_accepted || m_useDefaultModel) { // Has user accepted the network already or do we need to use default model?
+      return false;
+    }
+    m_epoch++;
+    double right = 0;
+    for (int nob = numInVal; nob < m_instances.numInstances(); nob++) {
+      m_currentInstance = m_instances.instance(nob);
 
-          // this is where the network updating (and training occurs, for the
-          // training set
-          resetNetwork();
-          calculateOutputs();
-          tempRate = m_learningRate * m_currentInstance.weight();
-          if (m_decay) {
-            tempRate /= noa;
-          }
+      if (!m_currentInstance.classIsMissing()) {
 
-          right += (calculateErrors() / m_instances.numClasses())
-            * m_currentInstance.weight();
-          updateNetworkWeights(tempRate, m_momentum);
-
+        // this is where the network updating (and training occurs, for the
+        // training set
+        resetNetwork();
+        calculateOutputs();
+        double tempRate = m_learningRate * m_currentInstance.weight();
+        if (m_decay) {
+          tempRate /= m_epoch;
         }
 
-      }
-      right /= totalWeight;
-      if (Double.isInfinite(right) || Double.isNaN(right)) {
-        if (!m_reset) {
-          m_instances = null;
-          throw new Exception("Network cannot train. Try restarting with a"
-            + " smaller learning rate.");
-        } else {
-          // reset the network if possible
-          if (m_learningRate <= Utils.SMALL) {
-            throw new IllegalStateException("Learning rate got too small ("
-              + m_learningRate + " <= " + Utils.SMALL + ")!");
-          }
-          m_learningRate /= 2;
-          buildClassifier(i);
-          m_learningRate = origRate;
-          m_instances = new Instances(m_instances, 0);
-          m_currentInstance = null;
-          return;
-        }
-      }
-
-      // //////////////////////do validation testing if applicable
-      if (m_valSize != 0) {
-        right = 0;
-        for (int nob = 0; nob < valSet.numInstances(); nob++) {
-          m_currentInstance = valSet.instance(nob);
-          if (!m_currentInstance.classIsMissing()) {
-            // this is where the network updating occurs, for the validation set
-            resetNetwork();
-            calculateOutputs();
-            right += (calculateErrors() / valSet.numClasses())
-              * m_currentInstance.weight();
-            // note 'right' could be calculated here just using
-            // the calculate output values. This would be faster.
-            // be less modular
-          }
-
-        }
-
-        if (right < lastRight) {
-          if (right < bestError) {
-            bestError = right;
-            // save the network weights at this point
-            for (int noc = 0; noc < m_numClasses; noc++) {
-              m_outputs[noc].saveWeights();
-            }
-            driftOff = 0;
-          }
-        } else {
-          driftOff++;
-        }
-        lastRight = right;
-        if (driftOff > m_driftThreshold || noa + 1 >= m_numEpochs) {
-          for (int noc = 0; noc < m_numClasses; noc++) {
-            m_outputs[noc].restoreWeights();
-          }
-          m_accepted = true;
-        }
-        right /= totalValWeight;
-      }
-      m_epoch = noa;
-      m_error = right;
-      // shows what the neuralnet is upto if a gui exists.
-      updateDisplay();
-      // This junction controls what state the gui is in at the end of each
-      // epoch, Such as if it is paused, if it is resumable etc...
-      if (m_gui) {
-        while ((m_stopIt || (m_epoch >= m_numEpochs && m_valSize == 0))
-          && !m_accepted) {
-          m_stopIt = true;
-          m_stopped = true;
-          if (m_epoch >= m_numEpochs && m_valSize == 0) {
-
-            m_controlPanel.m_startStop.setEnabled(false);
-          } else {
-            m_controlPanel.m_startStop.setEnabled(true);
-          }
-          m_controlPanel.m_startStop.setText("Start");
-          m_controlPanel.m_startStop.setActionCommand("Start");
-          m_controlPanel.m_changeEpochs.setEnabled(true);
-          m_controlPanel.m_changeLearning.setEnabled(true);
-          m_controlPanel.m_changeMomentum.setEnabled(true);
-
-          blocker(true);
-          if (m_numeric) {
-            setEndsToLinear();
-          }
-        }
-        m_controlPanel.m_changeEpochs.setEnabled(false);
-        m_controlPanel.m_changeLearning.setEnabled(false);
-        m_controlPanel.m_changeMomentum.setEnabled(false);
-
-        m_stopped = false;
-        // if the network has been accepted stop the training loop
-        if (m_accepted) {
-          m_win.dispose();
-          m_controlPanel = null;
-          m_nodePanel = null;
-          m_instances = new Instances(m_instances, 0);
-          m_currentInstance = null;
-          return;
-        }
-      }
-      if (m_accepted) {
-        m_instances = new Instances(m_instances, 0);
-        m_currentInstance = null;
-        return;
+        right += (calculateErrors() / m_instances.numClasses())
+                * m_currentInstance.weight();
+        updateNetworkWeights(tempRate, m_momentum);
       }
     }
+    right /= totalWeight;
+    if (Double.isInfinite(right) || Double.isNaN(right)) {
+      if ((!m_reset) || (originalFormatData == null)){
+        m_instances = null;
+        throw new Exception("Network cannot train. Try restarting with a smaller learning rate.");
+      } else {
+        // reset the network if possible
+        if (m_learningRate <= Utils.SMALL) {
+          throw new IllegalStateException("Learning rate got too small ("
+                  + m_learningRate + " <= " + Utils.SMALL + ")!");
+        }
+        double origRate = m_learningRate; // only used for when reset
+        m_learningRate /= 2;
+        buildClassifier(originalFormatData);
+        m_learningRate = origRate;
+        return false;
+      }
+    }
+
+    // //////////////////////do validation testing if applicable
+    if (m_valSize != 0) {
+      right = 0;
+      if (valSet == null) {
+        throw new IllegalArgumentException("Trying to use validation set but validation set is null.");
+      }
+      for (int nob = 0; nob < valSet.numInstances(); nob++) {
+        m_currentInstance = valSet.instance(nob);
+        if (!m_currentInstance.classIsMissing()) {
+          // this is where the network updating occurs, for the validation set
+          resetNetwork();
+          calculateOutputs();
+          right += (calculateErrors() / valSet.numClasses()) * m_currentInstance.weight();
+          // note 'right' could be calculated here just using
+          // the calculate output values. This would be faster.
+          // be less modular
+        }
+      }
+
+      if (right < lastRight) {
+        if (right < bestError) {
+          bestError = right;
+          // save the network weights at this point
+          for (int noc = 0; noc < m_numClasses; noc++) {
+            m_outputs[noc].saveWeights();
+          }
+          driftOff = 0;
+        }
+      } else {
+        driftOff++;
+      }
+      lastRight = right;
+      if (driftOff > m_driftThreshold || m_epoch + 1 >= m_numEpochs) {
+        for (int noc = 0; noc < m_numClasses; noc++) {
+          m_outputs[noc].restoreWeights();
+        }
+        m_accepted = true;
+      }
+      right /= totalValWeight;
+    }
+    m_error = right;
+    // shows what the neuralnet is upto if a gui exists.
+    updateDisplay();
+    // This junction controls what state the gui is in at the end of each
+    // epoch, Such as if it is paused, if it is resumable etc...
+    if (m_gui) {
+      while ((m_stopIt || (m_epoch >= m_numEpochs && m_valSize == 0)) && !m_accepted) {
+        m_stopIt = true;
+        m_stopped = true;
+        if (m_epoch >= m_numEpochs && m_valSize == 0) {
+
+          m_controlPanel.m_startStop.setEnabled(false);
+        } else {
+          m_controlPanel.m_startStop.setEnabled(true);
+        }
+        m_controlPanel.m_startStop.setText("Start");
+        m_controlPanel.m_startStop.setActionCommand("Start");
+        m_controlPanel.m_changeEpochs.setEnabled(true);
+        m_controlPanel.m_changeLearning.setEnabled(true);
+        m_controlPanel.m_changeMomentum.setEnabled(true);
+
+        blocker(true);
+        if (m_numeric) {
+          setEndsToLinear();
+        }
+      }
+      m_controlPanel.m_changeEpochs.setEnabled(false);
+      m_controlPanel.m_changeLearning.setEnabled(false);
+      m_controlPanel.m_changeMomentum.setEnabled(false);
+
+      m_stopped = false;
+      // if the network has been accepted stop the training loop
+      if (m_accepted) {
+        return false;
+      }
+    }
+    if (m_accepted) {
+      return false;
+    }
+    if (m_epoch < m_numEpochs) {
+      return true; // We can keep iterating
+    } else {
+      return false;
+    }
+  }
+
+  /**
+   * Signal end of iterating, useful for any house-keeping/cleanup
+   *
+   * @exception Exception if cleanup fails
+   */
+  public void done() throws Exception {
+
     if (m_gui) {
       m_win.dispose();
       m_controlPanel = null;
       m_nodePanel = null;
     }
-    m_instances = new Instances(m_instances, 0);
+    if (!m_useDefaultModel) {
+      m_instances = new Instances(m_instances, 0);
+    }
     m_currentInstance = null;
+    originalFormatData = null;
+  }
+
+  /**
+   * Call this function to build and train a neural network for the training
+   * data provided.
+   * 
+   * @param i The training data.
+   * @throws Exception if can't build classification properly.
+   */
+  @Override
+  public void buildClassifier(Instances i) throws Exception {
+
+    // Initialize classifier
+    initializeClassifier(i);
+
+    // For the given number of iterations
+    while (next()) {
+    }
+
+    // Clean up
+    done();
   }
 
   /**
