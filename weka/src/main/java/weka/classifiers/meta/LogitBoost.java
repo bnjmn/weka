@@ -572,6 +572,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     if (getUseEstimatedPriors()) {
       options.add("-use-estimated-priors");
     }
+    options.add("-L");
     options.add("" + getLikelihoodThreshold());
     options.add("-H");
     options.add("" + getShrinkage());
