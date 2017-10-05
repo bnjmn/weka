@@ -1386,7 +1386,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
         splitPercentage = Double.parseDouble(splitPercentageString);
         if ((splitPercentage <= 0) || (splitPercentage >= 100)) {
-          throw new IllegalArgumentException("Split percentage needs be >0 and <100.");
+          throw new IllegalArgumentException("Split percentage needs to be >0 and <100.");
         }
       }
       if ((preserveOrder) && (splitPercentage == -1)) {

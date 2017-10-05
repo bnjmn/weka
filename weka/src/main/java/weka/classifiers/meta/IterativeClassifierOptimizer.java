@@ -53,10 +53,11 @@ import weka.core.AdditionalMeasureProducer;
 
 /**
  * Chooses the best number of iterations for an IterativeClassifier such as
- * LogitBoost using cross-validation.
+ * LogitBoost using cross-validation or a percentage split evaluation.
  * 
  <!-- globalinfo-start -->
- * Optimizes the number of iterations of the given iterative classifier using cross-validation.
+ * Optimizes the number of iterations of the given iterative classifier using cross-validation or a percentage
+ * split evaluation.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -157,7 +158,15 @@ import weka.core.AdditionalMeasureProducer;
  * <pre> -I &lt;num&gt;
  *  Number of iterations.
  *  (default 10)</pre>
- * 
+ *
+ * <pre> -percentage &lt;num&gt;
+ *  The percentage of data to be used for training (if 0, k-fold cross-validation is used).
+ *  (default 0)</pre>
+ *
+ * <pre> -order
+ *  Whether to preserve order when a percentage split evaluation is performed.
+ *  </pre>
+ *
  * <pre> -W
  *  Full name of base classifier.
  *  (default: weka.classifiers.trees.DecisionStump)</pre>
@@ -248,6 +257,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
   /** The size of the thread pool. */
   protected int m_poolSize = 1;
 
+  /** The percentage of data to be used for training (if 0, k-fold cross-validation is used). */
+  protected double m_splitPercentage = 0.0;
+
+  /** Whether to preserve order when a percentage split evaluation is performed. */
+  protected boolean m_preserveOrderInPercentageSplitEvaluation = false;
+
   /**
    * Returns a string describing classifier
    * 
@@ -256,8 +271,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
    */
   public String globalInfo() {
 
-    return "Optimizes the number of iterations of the given iterative "
-      + "classifier using cross-validation.";
+    return "Optimizes the number of iterations of the given iterative classifier using cross-validation " +
+    "or a percentage split evaluation.";
   }
 
   /**
@@ -467,6 +482,66 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String splitPercentageTipText() {
+    return "The percentage of data to be used for training (if 0, k-fold cross-validation is used).";
+  }
+
+  /**
+   * Get the value of SplitPercentage.
+   *
+   * @return Value of SplitPercentage.
+   */
+  public double getSplitPercentage() {
+
+    return m_splitPercentage;
+  }
+
+  /**
+   * Set the value of SplitPercentage.
+   *
+   * @param newSplitPercentage Value to assign to SplitPercentage.
+   */
+  public void setSplitPercentage(double newSplitPercentage) {
+
+    m_splitPercentage = newSplitPercentage;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String preserveOrderInPercentageSplitEvaluationTipText() {
+    return "Whether to preserve order when a percentage split evaluation is performed.";
+  }
+
+  /**
+   * Get the value of PreserveOrderInPercentageSplitEvaluation.
+   *
+   * @return Value of PreserveOrderInPercentageSplitEvaluation.
+   */
+  public boolean getPreserveOrderInPercentageSplitEvaluation() {
+
+    return m_preserveOrderInPercentageSplitEvaluation;
+  }
+
+  /**
+   * Set the value of PreserveOrderInPercentageSplitEvaluation.
+   *
+   * @param newPreserveOrderInPercentageSplitEvaluation Value to assign to PreserveOrderInPercentageSplitEvaluation.
+   */
+  public void setPreserveOrderInPercentageSplitEvaluation(boolean newPreserveOrderInPercentageSplitEvaluation) {
+
+    m_preserveOrderInPercentageSplitEvaluation = newPreserveOrderInPercentageSplitEvaluation;
+  }
+
+  /**
    * Builds the classifier.
    */
   @Override
@@ -495,22 +570,44 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
       m_NumFolds = data.numInstances();
     }
 
+    // Local variables holding the actual number of folds and runs
+    int numFolds = m_NumFolds;
+    int numRuns = m_NumRuns;
+    if (getSplitPercentage() != 0) {
+      if ((getSplitPercentage() < 0) || (getSplitPercentage() > 100)) {
+        throw new IllegalArgumentException("Split percentage in IterativeClassifierOptimizer not in [0,100]");
+      }
+      numFolds = 1;
+      numRuns = 1;
+    }
+
     // Initialize datasets and classifiers
-    Instances[][] trainingSets = new Instances[m_NumRuns][m_NumFolds];
-    Instances[][] testSets = new Instances[m_NumRuns][m_NumFolds];
-    final IterativeClassifier[][] classifiers = new IterativeClassifier[m_NumRuns][m_NumFolds];
-    for (int j = 0; j < m_NumRuns; j++) {
-      data.randomize(randomInstance);
-      if (data.classAttribute().isNominal()) {
-        data.stratify(m_NumFolds);
+    Instances[][] trainingSets = new Instances[numRuns][numFolds];
+    Instances[][] testSets = new Instances[numRuns][numFolds];
+    final IterativeClassifier[][] classifiers = new IterativeClassifier[numRuns][numFolds];
+    if (getSplitPercentage() == 0) {
+      for (int j = 0; j < numRuns; j++) {
+        data.randomize(randomInstance);
+        if (data.classAttribute().isNominal()) {
+          data.stratify(numFolds);
+        }
+        for (int i = 0; i < numFolds; i++) {
+          trainingSets[j][i] = data.trainCV(numFolds, i, randomInstance);
+          testSets[j][i] = data.testCV(numFolds, i);
+          classifiers[j][i] = (IterativeClassifier) AbstractClassifier.makeCopy(m_IterativeClassifier);
+          classifiers[j][i].initializeClassifier(trainingSets[j][i]);
+        }
       }
-      for (int i = 0; i < m_NumFolds; i++) {
-        trainingSets[j][i] = data.trainCV(m_NumFolds, i, randomInstance);
-        testSets[j][i] = data.testCV(m_NumFolds, i);
-        classifiers[j][i] =
-          (IterativeClassifier) AbstractClassifier.makeCopy(m_IterativeClassifier);
-        classifiers[j][i].initializeClassifier(trainingSets[j][i]);
+    } else {
+      if (!getPreserveOrderInPercentageSplitEvaluation()) {
+        data.randomize(randomInstance);
       }
+      int trainSize = (int) Math.round(data.numInstances() * getSplitPercentage() / 100);
+      int testSize = data.numInstances() - trainSize;
+      trainingSets[0][0] = new Instances(data, 0, trainSize);
+      testSets[0][0] = new Instances(data, trainSize, testSize);
+      classifiers[0][0] = (IterativeClassifier) AbstractClassifier.makeCopy(m_IterativeClassifier);
+      classifiers[0][0].initializeClassifier(trainingSets[0][0]);
     }
 
     // The thread pool to be used for parallel execution.
@@ -541,8 +638,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
         if (!m_UseAverage) {
           eval = new Evaluation(data);
           helper.setEvaluation(eval);
-          for (int r = 0; r < m_NumRuns; r++) {
-            for (int i = 0; i < m_NumFolds; i++) {
+          for (int r = 0; r < numRuns; r++) {
+            for (int i = 0; i < numFolds; i++) {
               eval.evaluateModel(classifiers[r][i], testSets[r][i]);
             }
           }
@@ -554,8 +651,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
         } else {
           
           // Using average score
-          for (int r = 0; r < m_NumRuns; r++) {
-            for (int i = 0; i < m_NumFolds; i++) {            
+          for (int r = 0; r < numRuns; r++) {
+            for (int i = 0; i < numFolds; i++) {
               eval = new Evaluation(trainingSets[r][i]);
               helper.setEvaluation(eval);
               eval.evaluateModel(classifiers[r][i], testSets[r][i]);
@@ -576,12 +673,12 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
               }
             }
           }
-          result /= (double)(m_NumFolds * m_NumRuns);
+          result /= (double)(numFolds * numRuns);
           
           // Compute average thresholds if applicable
           if (tempThresholds != null) {
             for (int j = 0; j < tempThresholds.length; j++) {
-              tempThresholds[j] /= (double) (m_NumRuns * m_NumFolds);
+              tempThresholds[j] /= (double) (numRuns * numFolds);
             }
           }
         }
@@ -615,17 +712,18 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
       }
         
       // Set up result set, and chunk size
-      int numRuns = m_NumRuns * m_NumFolds;
-      final int N = m_NumFolds;
-      final int chunksize = numRuns / m_numThreads;
+      int numberOfInvocations = numRuns * numFolds;
+      final int N = numFolds;
+      final int chunksize = numberOfInvocations / m_numThreads;
       Set<Future<Boolean>> results = new HashSet<Future<Boolean>>();
+      final int nIts = numIts;
       
       // For each thread
       for (int j = 0; j < m_numThreads; j++) {
 
         // Determine batch to be processed
         final int lo = j * chunksize;
-        final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : numRuns;
+        final int hi = (j < m_numThreads - 1) ? (lo + chunksize) : numberOfInvocations;
 
         // Create and submit new job
         Future<Boolean> futureT = pool.submit(new Callable<Boolean>() {
@@ -634,7 +732,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
               for (int k = lo; k < hi; k++) {
                 if (!classifiers[k / N][k % N].next()) {
                   if (m_Debug) {
-                    System.err.println("Classifier failed to iterate in cross-validation.");
+                    System.err.println("Classifier failed to iterate for run " + ((k / N) + 1) + " and fold " +
+                            ((k % N) + 1) + " when performing iteration " + nIts + ".");
                   }
                   return false;
                 }
@@ -666,7 +765,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
     testSets = null;
     data = null;
 
-    // Build classifieer based on identified number of iterations
+    // Build classifier based on identified number of iterations
     m_IterativeClassifier.initializeClassifier(origData);
     int i = 0;
     while (i++ < m_bestNumIts && m_IterativeClassifier.next()) {
@@ -735,7 +834,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
     Vector<Option> newVector = new Vector<Option>(7);
 
     newVector.addElement(new Option("\tIf set, average estimate is used rather "
-                                    + "than one estimate from pooled predictions.\n", "A", 0, "-A"));
+                                    + "than one estimate from pooled predictions.", "A", 0, "-A"));
     newVector.addElement(new Option("\t" + lookAheadIterationsTipText() + "\n"
       + "\t(default 50)", "L", 1, "-L <num>"));
     newVector.addElement(new Option(
@@ -748,6 +847,11 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
       + "\t(default 10)", "F", 1, "-F <num>"));
     newVector.addElement(new Option("\tNumber of runs for cross-validation.\n"
       + "\t(default 1)", "R", 1, "-R <num>"));
+    newVector.addElement(new Option("\tThe percentage of data to be used for training (if 0, k-fold "
+            + "cross-validation is used)\n"
+            + "\t(default 0)", "percentage", 1, "-percentage <num>"));
+    newVector.addElement(new Option("\tWhether to preserve order when a percentage split evaluation "
+            + "is performed.", "order", 0, "-order"));
 
     newVector
       .addElement(new Option("\tFull name of base classifier.\n"
@@ -790,15 +894,8 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
   }
 
   /**
-   * Parses a given list of options. Valid options are:
-   * <p>
-   * 
-   * -W classname <br>
-   * Specify the full class name of the base learner.
-   * <p>
-   * 
+   * Parses a given list of options.
    * Options after -- are passed to the designated classifier.
-   * <p>
    * 
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
@@ -850,6 +947,15 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
       setNumRuns(1);
     }
 
+    String splitPercentage = Utils.getOption("percentage", options);
+    if (splitPercentage.length() != 0) {
+      setSplitPercentage(Double.parseDouble(splitPercentage));
+    } else {
+      setSplitPercentage(0.0);
+    }
+
+    setPreserveOrderInPercentageSplitEvaluation(Utils.getFlag("order", options));
+
     String evalMetric = Utils.getOption("metric", options);
     if (evalMetric.length() > 0) {
       boolean found = false;
@@ -888,7 +994,7 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
    * Get classifier for string.
    * 
    * @return a classifier
-   * @throws exception if a problem occurs
+   * @throws Exception if a problem occurs
    */
   protected IterativeClassifier getIterativeClassifier(String name,
     String[] options) throws Exception {
@@ -935,6 +1041,13 @@ public class IterativeClassifierOptimizer extends RandomizableClassifier
     options.add("" + getNumFolds());
     options.add("-R");
     options.add("" + getNumRuns());
+
+    options.add("-percentage");
+    options.add("" + getSplitPercentage());
+
+    if (getPreserveOrderInPercentageSplitEvaluation()) {
+      options.add("-order");
+    }
 
     options.add("-metric");
     options.add(getEvaluationMetric().getSelectedTag().getIDStr());
