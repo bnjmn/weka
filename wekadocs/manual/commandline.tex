@@ -356,14 +356,6 @@ If a test file is specified, this parameter shows you the predictions and one at
 \\
 \\
 
--i 
-& 
-\begin{minipage}{10cm}
-A more detailed performance description via precision, recall, true- and false positive rate is additionally output with this parameter. All these values can also be computed from the confusion matrix. 
-\end{minipage}
-\\
-\\
-
 -o 
 & 
 \begin{minipage}{10cm}
@@ -471,7 +463,7 @@ Based on a simple example, we will now explain the output of a typical classifie
 	\end{minipage}
 	&
 	\begin{minipage}{5cm}
-	This is quite boring: our classifier is perfect, at least on the training data -- all instances were classified correctly and all errors are zero. As is usually the case, the training set accuracy is too optimistic. The detailed accuracy by class, which is output via \texttt{-i}, and the confusion matrix is similarily trivial.
+	This is quite boring: our classifier is perfect, at least on the training data -- all instances were classified correctly and all errors are zero. As is usually the case, the training set accuracy is too optimistic. The detailed accuracy by class and the confusion matrix is similarily trivial.
 	\end{minipage}
 	\\
 \end{tabular}
@@ -541,20 +533,27 @@ These measures are useful for comparing classifiers. However, if more detailed i
 	\begin{minipage}{8cm}
 		{\scriptsize
 		\begin{verbatim}
-		0 diaporthe-stem-canker 0.9999672587892333 diaporthe-stem-canker
-		1 diaporthe-stem-canker 0.9999992614503429 diaporthe-stem-canker
-		2 diaporthe-stem-canker 0.999998948559035 diaporthe-stem-canker
-		3 diaporthe-stem-canker 0.9999998441238833 diaporthe-stem-canker
-		4 diaporthe-stem-canker 0.9999989997681132 diaporthe-stem-canker
-		5 rhizoctonia-root-rot 0.9999999395928124 rhizoctonia-root-rot
-		6 rhizoctonia-root-rot 0.999998912860593 rhizoctonia-root-rot
-		7 rhizoctonia-root-rot 0.9999994386283236 rhizoctonia-root-rot
-		...
+
+
+=== Predictions on test data ===
+
+    inst#     actual  predicted error prediction
+        1 1:diaporthe-stem-canker 1:diaporthe-stem-canker       1 
+        2 1:diaporthe-stem-canker 1:diaporthe-stem-canker       1 
+        3 1:diaporthe-stem-canker 1:diaporthe-stem-canker       1 
+        4 1:diaporthe-stem-canker 1:diaporthe-stem-canker       1 
+        5 1:diaporthe-stem-canker 1:diaporthe-stem-canker       1 
+        6 3:rhizoctonia-root-rot 3:rhizoctonia-root-rot       1 
+        7 3:rhizoctonia-root-rot 3:rhizoctonia-root-rot       1 
+        ...      
+      171 18:2-4-d-injury 18:2-4-d-injury       0.622 
+
+
 		\end{verbatim}}
 	\end{minipage}
 	&
 	\begin{minipage}{5cm}
-	The values in each line are separated by a single space. The fields are the zero-based test instance id, followed by the predicted class value, the confidence for the prediction (estimated probability of predicted class), and the true class. All these are correctly classified, so let's look at a few erroneous ones.
+	The values in each line are separated by spaces. The fields are the test instance id, followed by the actual class value, the predicted class value, a '+' (to indicate a misclassification) and the confidence for the prediction (estimated probability of predicted class). All these are correctly classified, so let's look at a few erroneous ones.
 	\end{minipage}
 	\\
 \end{tabular}
@@ -565,15 +564,15 @@ These measures are useful for comparing classifiers. However, if more detailed i
 	\begin{minipage}{8cm}
 		{\scriptsize
 		\begin{verbatim}
-		32 phyllosticta-leaf-spot 0.7789710144361445 brown-spot
+		33 8:brown-spot 13:phyllosticta-leaf-spot   +   0.779 
 		...
-		39 alternarialeaf-spot 0.6403333824349896 brown-spot
+		40 8:brown-spot 14:alternarialeaf-spot   +   0.64
 		...
-		44 phyllosticta-leaf-spot 0.893568420641914 brown-spot
+		45 8:brown-spot 13:phyllosticta-leaf-spot   +   0.894 
 		...
-		46 alternarialeaf-spot 0.5788190397739439 brown-spot
+		47 8:brown-spot 14:alternarialeaf-spot   +   0.579 
 		...
-		73 brown-spot 0.4943768155314637 alternarialeaf-spot
+		74 14:alternarialeaf-spot 8:brown-spot   +   0.494 
 		...
 		\end{verbatim}}
 	\end{minipage}
@@ -586,16 +585,16 @@ These measures are useful for comparing classifiers. However, if more detailed i
 
 \vspace{0.5cm}
 
-If we had chosen a range of attributes via \texttt{-p}, e.g. \texttt{-p first-last}, the mentioned attributes would have been output afterwards as comma-separated values, in (parentheses). However, the zero-based instance id in the first column offers a safer way to determine the test instances.
+If we had chosen a range of attributes via \texttt{-p}, e.g. \texttt{-p first-last}, the mentioned attributes would have been output afterwards as comma-separated values, in (parentheses). However, the instance id in the first column offers a safer way to determine the test instances.
 
 If we had saved the output of \texttt{-p} in \textit{soybean-test.preds}, the following call would compute the number of correctly classified instances:
 
 {\scriptsize
 \begin{verbatim}
-  cat soybean-test.preds | awk '$2==$4&&$0!=""' | wc -l
+  cat soybean-test.preds | awk '$2==$3&&$0!=""' | wc -l
 \end{verbatim}}
 
-\noindent Dividing by the number of instances in the test set, i.e. \texttt{wc -l < soybean-test.preds} minus one (= trailing newline), we get the training set accuracy.
+\noindent Dividing by the number of instances in the test set, i.e. \texttt{wc -l < soybean-test.preds} minus six (= header and footer), we get the training set accuracy.
 
 \section{Examples}
 
@@ -603,11 +602,11 @@ Usually, if you evaluate a classifier for a longer experiment, you will do somet
 
 {\scriptsize
 \begin{verbatim}
-  java -Xmx1024m weka.classifiers.trees.J48 -t data.arff -i -k \
-    -d J48-data.model >&! J48-data.out &
+  java -Xmx1024m weka.classifiers.trees.J48 -t data.arff -k \
+    -d J48-data.model >& J48-data.out &
 \end{verbatim}}
 
-The \texttt{-Xmx1024m} parameter for maximum heap size ensures your task will get enough memory. There is no overhead involved, it just leaves more room for the heap to grow. \texttt{-i} and \texttt{-k} gives you some additional information, which may be useful, e.g. precision and recall for all classes. In case your model performs well, it makes sense to save it via \texttt{-d} - you can always delete it later! The implicit cross-validation gives a more reasonable estimate of the expected accuracy on unseen data than the training set accuracy. The output both of standard error and output should be redirected, so you get both errors and the normal output of your classifier. The last \texttt{\&} starts the task in the background. Keep an eye on your task via top and if you notice the hard disk works hard all the time (for linux), this probably means your task needs too much memory and will not finish in time for the exam. In that case, switch to a faster classifier or use filters, e.g. for \texttt{Resample} to reduce the size of your dataset or \texttt{StratifiedRemoveFolds} to create training and test sets - for most classifiers, training takes more time than testing.
+The \texttt{-Xmx1024m} parameter for maximum heap size ensures your task will get enough memory. There is no overhead involved, it just leaves more room for the heap to grow. \texttt{-k} gives you some additional information, which may be useful. In case your model performs well, it makes sense to save it via \texttt{-d} - you can always delete it later! The implicit cross-validation gives a more reasonable estimate of the expected accuracy on unseen data than the training set accuracy. The output for both standard error and standard output is redirected to a file, so you get both errors and the normal output of your classifier. The last \texttt{\&} starts the task in the background. Keep an eye on your task via top and if you notice the hard disk works hard all the time (for linux), this probably means your task needs too much memory and will not finish in time for the exam. In that case, switch to a faster classifier or use filters, e.g. for \texttt{Resample} to reduce the size of your dataset or \texttt{StratifiedRemoveFolds} to create training and test sets - for most classifiers, training takes more time than testing.
 
 So, now you have run a lot of experiments -- which classifier is best? Try
 
