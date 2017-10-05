@@ -1196,7 +1196,7 @@ public class LogitBoost extends RandomizableIteratedSingleClassifierEnhancer
     Instance instance = (Instance) inst.copy();
     instance.setDataset(m_NumericClassData);
 
-    return processInstance(inst);
+    return processInstance(instance);
   }
 
   /**
