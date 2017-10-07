@@ -537,6 +537,30 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
     }
 
     /**
+     * Computes the logarithm of x plus y given the logarithms of x and y.
+     * 
+     * This is based on Tobias P. Mann's description in "Numerically Stable Hidden
+     * Markov Implementation" (2006).
+     */
+    protected double logOfSum(double logOfX, double logOfY) {
+
+      // Check for cases where log of zero is present
+      if (Double.isNaN(logOfX)) {
+        return logOfY;
+      }
+      if (Double.isNaN(logOfY)) {
+        return logOfX;
+      }
+
+      // Otherwise return proper result, taken care of overflows
+      if (logOfX > logOfY) {
+        return logOfX + Math.log(1 + Math.exp(logOfY - logOfX));
+      } else {
+        return logOfY + Math.log(1 + Math.exp(logOfX - logOfY));
+      }
+    }
+
+    /**
      * Evaluate objective function
      * 
      * @param x the current values of variables
@@ -556,19 +580,16 @@ public class Logistic extends AbstractClassifier implements OptionHandler,
             exp[offset] += m_Data[i][j] * x[index + j];
           }
         }
-        double max = exp[Utils.maxIndex(exp)];
-        double denom = Math.exp(-max);
-        double num;
-        if (cls[i] == m_NumClasses - 1) { // Class of this instance
-          num = -max;
-        } else {
-          num = exp[cls[i]] - max;
+        double num = 0;
+        if (cls[i] < m_NumClasses - 1) { // Class of this instance
+          num = exp[cls[i]];
         }
+        double denom = 0;
         for (int offset = 0; offset < m_NumClasses - 1; offset++) {
-          denom += Math.exp(exp[offset] - max);
+	  denom = logOfSum(denom, exp[offset]);
         }
 
-        nll -= weights[i] * (num - Math.log(denom)); // Weighted NLL
+        nll -= weights[i] * (num - denom); // Weighted NLL
       }
 
       // Ridge: note that intercepts NOT included
