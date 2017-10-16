@@ -303,12 +303,11 @@ public abstract class MLlibClassifier extends AbstractClassifier implements
   }
 
   /**
-   * Build the classifier
+   * Build this MLlib classifier.
    * 
    * @param instances the instances to train with
    * @throws Exception if a problem occurs
    */
-  @Override
   public void buildClassifier(Instances instances) throws Exception {
     ClassLoader orig = Thread.currentThread().getContextClassLoader();
     try {
@@ -318,7 +317,6 @@ public abstract class MLlibClassifier extends AbstractClassifier implements
       // can classifier handle the data?
       getCapabilities().testWithFail(instances);
 
-      // setClassName(instances.classAttribute().name());
       instances.deleteWithMissingClass();
       SimpleClassifierJob job = new SimpleClassifierJob();
       job.setMLlibClassifier(this);
@@ -332,14 +330,11 @@ public abstract class MLlibClassifier extends AbstractClassifier implements
       if (currentContext == null) {
         currentWriterAppender = job.initJob(null);
         currentContext = job.getSparkContext();
-        // MLlibSparkContextManager.setSparkContext(currentContext,
-        //  currentWriterAppender);
       }
       job.runJobWithContext(currentContext);
     } finally {
       Thread.currentThread().setContextClassLoader(orig);
     }
-    // job.runJob();
   }
 
   /**
