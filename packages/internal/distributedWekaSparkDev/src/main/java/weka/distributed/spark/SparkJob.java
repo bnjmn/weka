@@ -630,11 +630,13 @@ public abstract class SparkJob extends DistributedJob implements OptionHandler {
       logAppender = initSparkLogAppender();
     }
     if (context == null) {
-      m_currentContext = MLlibSparkContextManager.getSparkContext();
+      synchronized (MLlibSparkContextManager.class) {
+        m_currentContext = MLlibSparkContextManager.getSparkContext();
 
-      if (m_currentContext == null) {
-        m_currentContext = createSparkContextForJob(m_sjConfig);
-        MLlibSparkContextManager.setSparkContext(m_currentContext, logAppender);
+        if (m_currentContext == null) {
+          m_currentContext = createSparkContextForJob(m_sjConfig);
+          MLlibSparkContextManager.setSparkContext(m_currentContext, logAppender);
+        }
       }
     }
     applyConfigProperties(m_currentContext);
