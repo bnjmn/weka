@@ -65,8 +65,8 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
 
   /** The path to the distributedWekaSpark.jar */
   public static final String DISTRIBUTED_WEKA_SPARK_JAR =
-    WekaPackageManager.PACKAGES_DIR.toString() + File.separator
-      + PACKAGE_NAME + File.separator + "distributedWekaSparkDev.jar";
+    WekaPackageManager.PACKAGES_DIR.toString() + File.separator + PACKAGE_NAME
+      + File.separator + "distributedWekaSparkDev.jar";
 
   /** The path to the distributedWekaBase.jar */
   public static final String DISTRIBUTED_WEKA_BASE_JAR =
@@ -164,6 +164,9 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
 
   protected List<String> m_additonalJobLibraries = new ArrayList<>();
 
+  protected static String WEKA_JAR_FILE_NAME = System.getProperty(
+    "weka.jar.filename", "weka.jar");
+
   /**
    * A default path to a weka.jar file. If the classpath contains a weka.jar
    * file (rather than a directory of weka classes) when Weka is started then
@@ -171,7 +174,7 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
    * classpath.
    */
   protected static String DEFAULT_WEKA_JAR_PATH = System
-    .getProperty("user.home") + File.separator + "weka.jar";
+    .getProperty("user.home") + File.separator + WEKA_JAR_FILE_NAME;
 
   // Attempt to locate the weka.jar in the classpath and set a
   // the default path to it
@@ -182,7 +185,7 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
         URL[] urls = ((URLClassLoader) cl).getURLs();
 
         for (URL u : urls) {
-          if (u.toString().endsWith("weka.jar")) {
+          if (u.toString().endsWith(WEKA_JAR_FILE_NAME)) {
             File f = new File(u.toURI());
             DEFAULT_WEKA_JAR_PATH = f.toString();
             break;
