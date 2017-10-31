@@ -15,7 +15,7 @@ import java.awt.BorderLayout;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 
-@PerspectiveInfo(ID = "r_console", title = "R Scripting",
+@PerspectiveInfo(ID = "r_console", title = "R Console",
   toolTipText = "Interactive R console, and visualizations using JavaGD",
   iconPath = "weka/gui/knowledgeflow/icons/Rlogo_small.png")
 public class RConsolePerspective extends AbstractPerspective {

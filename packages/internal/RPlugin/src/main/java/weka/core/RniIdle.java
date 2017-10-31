@@ -36,5 +36,12 @@ public class RniIdle implements Runnable {
     m_engine = (JRIEngine)rengine;
   }
 
-  public void run() { m_engine.getRni().rniIdle();}
+  public void run() {
+    boolean obtainedLock = m_engine.getRni().getRsync().safeLock();
+    try {
+      m_engine.getRni().rniIdle();
+    } finally {
+      if (obtainedLock) m_engine.getRni().getRsync().unlock();
+    }
+  }
 }

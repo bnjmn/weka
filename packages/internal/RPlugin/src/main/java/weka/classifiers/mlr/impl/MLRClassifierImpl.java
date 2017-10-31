@@ -144,22 +144,11 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   /** Whether the selected scheme can produce probabilities */
   protected boolean m_schemeProducesProbs;
 
-  /**
-   * A small thread that will remove the model from R after 5 seconds have
-   * elapsed. This gets launched the first time distributionForInstance() is
-   * called. Subsequent calls to distributionForInstance() will reset the
-   * countdown timer back to 5
-   */
-  protected transient Thread m_modelCleaner;
-
-  /** Thread safe integer used by the model cleaner thread */
-  protected transient AtomicInteger m_counter;
+  /** Debugging output */
+  protected boolean m_Debug;
 
   /** Simple console logger to capture info/warning messages from R */
   protected transient RLoggerAPI m_logger;
-
-  /** Debugging output */
-  protected boolean m_Debug;
 
   /**
    * Fall back to Zero R if there are no instances with non-missing class or
@@ -201,15 +190,21 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       eng.setLog(this, m_logger);
       eng.clearConsoleBuffer(this);
 
+      if (m_modelHash == null) {
+        m_modelHash = "" + hashCode();
+      }
+
       String learnString = "";
-      learnString = "l <- makeLearner(\"" + mlrIdentifier + "\")";
+      learnString = "l" + m_modelHash + " <- makeLearner(\"" + mlrIdentifier + "\")";
 
       // Make learner in R
       eng.parseAndEval(this, learnString);
 
       // Get list of properties
       List<String> props =
-        Arrays.asList(eng.parseAndEval(this, "l$properties").asStrings());
+        Arrays.asList(eng.parseAndEval(this, "l" + m_modelHash + "$properties").asStrings());
+
+      eng.parseAndEval(this, "remove(l" + m_modelHash + ")");
 
       if (props.contains("numerics")) {
         result.enable(Capability.NUMERIC_ATTRIBUTES);
@@ -839,11 +834,17 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     eng.clearConsoleBuffer(this);
 
+    if (m_modelHash == null) {
+      m_modelHash = "" + hashCode();
+    }
+
     String learnString = "";
-    learnString = "l <- makeLearner(\"" + mlrIdentifier + "\")";
+    learnString = "l" + m_modelHash + " <- makeLearner(\"" + mlrIdentifier + "\")";
 
     eng.parseAndEval(this, learnString);
-    eng.parseAndEval(this, "print(l)");
+    eng.parseAndEval(this, "print(l" + m_modelHash + ")");
+
+    eng.parseAndEval(this, "remove(l" + m_modelHash + ")");
 
     String output = eng.getConsoleBuffer(this);
 
@@ -971,12 +972,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng.parseAndEval(this,
       "set.seed(" + data.getRandomNumberGenerator(getSeed()).nextInt() + ")");
 
-    // clean up any previous model
-    // suffix model identifier with hashcode of this object
-    eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
-
     // transfer training data into a data frame in R
-    Object[] result = RUtils.instancesToDataFrame(eng, this, data, "mlr_data");
+    Object[] result = RUtils.instancesToDataFrame(eng, this, data, "mlr_data" + m_modelHash);
     m_cleanedAttNames = (String[])result[0];
     m_cleanedAttValues = (String[][])result[1];
 
@@ -998,10 +995,10 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       // make classification/regression task
       String taskString = null;
       if (data.classAttribute().isNominal()) {
-        taskString = "task <- makeClassifTask(data = mlr_data, target = \""
+        taskString = "task"+ m_modelHash + " <- makeClassifTask(data = mlr_data"+ m_modelHash + ", target = \""
           + m_cleanedAttNames[data.classIndex()] + "\")";
       } else {
-        taskString = "task <- makeRegrTask(data = mlr_data, target = \""
+        taskString = "task"+ m_modelHash + " <- makeRegrTask(data = mlr_data"+ m_modelHash + ", target = \""
           + m_cleanedAttNames[data.classIndex()] + "\")";
       }
 
@@ -1020,11 +1017,11 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
           ? ", predict.type = \"prob\"" : "";
       String learnString = null;
       if (m_schemeOptions != null && m_schemeOptions.length() > 0) {
-        learnString = "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs
+        learnString = "l"+ m_modelHash + " <- makeLearner(\"" + mlrIdentifier + "\"" + probs
           + ", " + m_schemeOptions + ")";
       } else {
         learnString =
-          "l <- makeLearner(\"" + mlrIdentifier + "\"" + probs + ")";
+          "l"+ m_modelHash + " <- makeLearner(\"" + mlrIdentifier + "\"" + probs + ")";
       }
 
       if (m_Debug) {
@@ -1038,7 +1035,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       // train model
       eng.parseAndEval(this,
-        "weka_r_model" + m_modelHash + " <- train(l, task)");
+        "weka_r_model" + m_modelHash + " <- train(l"+ m_modelHash + ", task"+ m_modelHash + ")");
 
       checkForErrors();
 
@@ -1064,14 +1061,20 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       }
     } catch (Exception ex) {
       ex.printStackTrace();
-      // remove R training data frame after completion
-      eng.parseAndEval(this, "remove(mlr_data)");
+      // remove R training data frame and model after completion
+      eng.parseAndEval(this, "remove(mlr_data" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(l" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(task" + m_modelHash + ")");
       RSession.releaseSession(this);
 
       throw new Exception(ex.getMessage());
     }
 
-    eng.parseAndEval(this, "remove(mlr_data)");
+    eng.parseAndEval(this, "remove(mlr_data" + m_modelHash + ")");
+    eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
+    eng.parseAndEval(this, "remove(l" + m_modelHash + ")");
+    eng.parseAndEval(this, "remove(task" + m_modelHash + ")");
     RSession.releaseSession(this);
   }
 
@@ -1212,13 +1215,13 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     throws Exception {
     double[][] probs = null;
 
+    if (m_zeroR != null) {
+      return batchScoreWithZeroR(insts);
+    }
+
     if ((m_serializedModel == null || m_serializedModel.length() == 0)
       && m_zeroR == null) {
       throw new Exception("No model has been built yet!");
-    }
-
-    if (m_zeroR != null) {
-      return batchScoreWithZeroR(insts);
     }
 
     if (!m_initialized) {
@@ -1279,70 +1282,22 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng.setLog(this, m_logger);
 
     try {
-      // we need to check whether the model has been pushed into R. There
-      // is some overhead in having to check every time but its probably less
-      // than naively pushing the model over every time distForInst() is called
-      if (eng.isVariableSet(this, "weka_r_model" + m_modelHash)) {
-        if (m_Debug) {
-          System.err.println(
-            "No need to push serialized model to R - it's already there.");
-        }
-      } else {
-        if (m_Debug) {
-          System.err.println("Pushing serialized model to R...");
-        }
-        // we need to push it over
-        pushModelToR(eng);
+      if (m_Debug) {
+        System.err.println("Pushing serialized model to R...");
       }
+
+      // we need to push it over
+      pushModelToR(eng);
 
       checkForErrors();
-
-      if (System.getProperty("r.shutdown", "false").equalsIgnoreCase("false")) {
-        if (m_modelCleaner == null) {
-          m_counter = new AtomicInteger(5);
-          m_modelCleaner = new Thread() {
-            @Override
-            public void run() {
-              while (m_counter.get() > 0) {
-                try {
-                  Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
-                m_counter.decrementAndGet();
-              }
-
-              // cleanup the model in R
-              try {
-                if (m_Debug) {
-                  System.err.println("Cleaning up model in R...");
-                }
-                RSession teng = RSession.acquireSession(this);
-                teng.setLog(this, m_logger);
-                teng.parseAndEval(this,
-                  "remove(weka_r_model" + m_modelHash + ")");
-                RSession.releaseSession(this);
-              } catch (Exception ex) {
-                System.err.println("A problem occurred whilst trying "
-                  + "to clean up the model in R: " + ex.getMessage());
-              }
-              m_modelCleaner = null;
-            }
-          };
-
-          m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
-          m_modelCleaner.start();
-        } else {
-          m_counter.set(5);
-        }
-      }
 
       // Instances toPush = m_dontReplaceMissingValues ? insts : m_testHeader;
       Instances toPush = m_testHeader;
       toPush.compactify();
-      RUtils.instancesToDataFrame(eng, this, toPush, "weka_r_test");
+      RUtils.instancesToDataFrame(eng, this, toPush, "weka_r_test" + m_modelHash);
 
       String testB =
-        "p <- predict(weka_r_model" + m_modelHash + ", newdata = weka_r_test)";
+        "p" + m_modelHash + " <- predict(weka_r_model" + m_modelHash + ", newdata = weka_r_test" + m_modelHash + ")";
 
       if (m_Debug) {
         System.err.println("Excuting prediction: ");
@@ -1353,17 +1308,30 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       checkForErrors();
 
-      testB = "p <- p$data";
+      // cleanup the model in R
+      if (m_Debug) {
+        System.err.println("Cleaning up model in R...");
+      }
+      eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(weka_r_test" + m_modelHash + ")");
+
+      checkForErrors();
+
+      testB = "p" + m_modelHash + " <- p" + m_modelHash + "$data";
       eng.parseAndEval(this, testB);
 
-      REXP result = eng.parseAndEval(this, "p");
+      REXP result = eng.parseAndEval(this, "p" + m_modelHash + "");
 
       probs =
         frameToPreds(eng, result, insts.classAttribute(), insts.numInstances());
 
-      eng.parseAndEval(this, "remove(p)");
+      eng.parseAndEval(this, "remove(p" + m_modelHash + ")");
     } catch (Exception ex) {
       ex.printStackTrace();
+
+      eng.parseAndEval(this, "remove(weka_r_model" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(weka_r_test" + m_modelHash + ")");
+      eng.parseAndEval(this, "remove(p" + m_modelHash + ")");
 
       RSession.releaseSession(this);
       throw new Exception(ex.getMessage());
@@ -1383,167 +1351,11 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
    * @throws Exception if distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
-    if ((m_serializedModel == null || m_serializedModel.length() == 0)
-      && m_zeroR == null) {
-      throw new Exception("No model has been built yet!");
-    }
 
-    if (m_zeroR != null) {
-      return m_zeroR.distributionForInstance(inst);
-    }
-
-    if (!m_initialized) {
-      init();
-    }
-
-    if (!m_mlrAvailable) {
-      throw new Exception(
-        "MLR is not available for some reason - can't continue!");
-    }
-
-    if (m_errorsFromR == null) {
-      m_errorsFromR = new ArrayList<String>();
-    }
-
-    if (m_removeUseless != null) {
-      m_removeUseless.input(inst);
-      inst = m_removeUseless.output();
-    }
-
-    if (m_originalTrainingHeader != null) {
-      // we removed some zero frequency nominal labels
-
-      for (int j = 0; j < inst.numAttributes(); j++) {
-        if (inst.attribute(j).isNominal() && !inst.isMissing(j)) {
-          int index =
-            m_testHeader.attribute(j).indexOfValue(inst.stringValue(j));
-          if (index < 0) {
-            // replace with missing value
-            inst = (Instance) inst.copy();
-            inst.setValue(j, Utils.missingValue());
-          } else {
-            if (index != (int) inst.value(j)) {
-              // remap
-              inst = (Instance) inst.copy();
-              inst.setValue(j, index);
-            }
-          }
-        }
-      }
-    }
-
-    if (!m_dontReplaceMissingValues) {
-      m_missingFilter.input(inst);
-      inst = m_missingFilter.output();
-    }
-
-    if (m_testHeader.numInstances() > 0) {
-      m_testHeader.delete();
-    }
-    m_testHeader.add(inst);
-
-    if (m_Debug) {
-      System.err.println("Instance to predict: " + inst.toString());
-    }
-
-    double[] pred = null;
-
-    RSession eng = null;
-    eng = RSession.acquireSession(this);
-    eng.setLog(this, m_logger);
-
-    try {
-      // we need to check whether the model has been pushed into R. There
-      // is some overhead in having to check every time but its probably less
-      // than naively pushing the model over every time distForInst() is called
-      if (eng.isVariableSet(this, "weka_r_model" + m_modelHash)) {
-        if (m_Debug) {
-          System.err.println(
-            "No need to push serialized model to R - it's already there.");
-        }
-      } else {
-        if (m_Debug) {
-          System.err.println("Pushing serialized model to R...");
-        }
-        // we need to push it over
-        pushModelToR(eng);
-      }
-
-      checkForErrors();
-
-      // if (!m_launchedFromCommandLine) {
-      if (System.getProperty("r.shutdown", "false").equalsIgnoreCase("false")) {
-        if (m_modelCleaner == null) {
-          m_counter = new AtomicInteger(5);
-          m_modelCleaner = new Thread() {
-            @Override
-            public void run() {
-              while (m_counter.get() > 0) {
-                try {
-                  Thread.sleep(1000);
-                } catch (InterruptedException ex) {
-                }
-                m_counter.decrementAndGet();
-              }
-
-              // cleanup the model in R
-              try {
-                if (m_Debug) {
-                  System.err.println("Cleaning up model in R...");
-                }
-                RSession teng = RSession.acquireSession(this);
-                teng.setLog(this, m_logger);
-                teng.parseAndEval(this,
-                  "remove(weka_r_model" + m_modelHash + ")");
-                RSession.releaseSession(this);
-              } catch (Exception ex) {
-                System.err.println("A problem occurred whilst trying "
-                  + "to clean up the model in R: " + ex.getMessage());
-              }
-              m_modelCleaner = null;
-            }
-          };
-
-          m_modelCleaner.setPriority(Thread.MIN_PRIORITY);
-          m_modelCleaner.start();
-        } else {
-          m_counter.set(5);
-        }
-      }
-
-      RUtils.instancesToDataFrame(eng, this, m_testHeader, "weka_r_test");
-
-      String testB =
-        "p <- predict(weka_r_model" + m_modelHash + ", newdata = weka_r_test)";
-
-      if (m_Debug) {
-        System.err.println("Excuting prediction: ");
-        System.err.println(testB);
-      }
-
-      eng.parseAndEval(this, testB);
-
-      checkForErrors();
-
-      testB = "p <- p$data";
-      eng.parseAndEval(this, testB);
-
-      REXP result = eng.parseAndEval(this, "p");
-
-      pred = frameToPreds(eng, result, inst.classAttribute(), 1)[0];
-
-      eng.parseAndEval(this, "remove(p)");
-    } catch (Exception ex) {
-      ex.printStackTrace();
-
-      RSession.releaseSession(this);
-      throw new Exception(ex.getMessage());
-    }
-
-    checkForErrors();
-    RSession.releaseSession(this);
-
-    return pred;
+    Instances data = new Instances(inst.dataset(), 1);
+    data.add(inst);
+    double[][] result = distributionsForInstances(data);
+    return result[0];
   }
 
   /**
