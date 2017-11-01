@@ -25,6 +25,7 @@ import java.util.ArrayList;
 
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPDouble;
+import org.rosuda.REngine.REXPFactor;
 import org.rosuda.REngine.REXPGenericVector;
 import org.rosuda.REngine.REXPInteger;
 import org.rosuda.REngine.REXPMismatchException;
@@ -110,34 +111,21 @@ public class RUtils {
             d[j] = insts.instance(j).value(i);
           }
         }
-        session.assign(requester, cleanedAttNames[i], d);
+        session.assign(requester, cleanedAttNames[i], new REXPDouble(d));
       } else if (att.isNominal()) {
         int[] d = new int[insts.numInstances()];
         String[] labels = new String[att.numValues()];
-        int[] levels = new int[att.numValues()];
         for (int j = 0; j < att.numValues(); j++) {
           labels[j] = cleanedAttValues[i][j];
-          levels[j] = j;
         }
         for (int j = 0; j < insts.numInstances(); j++) {
           if (insts.instance(j).isMissing(i)) {
             d[j] = REXPInteger.NA;
           } else {
-            d[j] = (int) insts.instance(j).value(i);
+            d[j] = (int) insts.instance(j).value(i) + 1;
           }
         }
-        session.assign(requester, cleanedAttNames[i], d);
-        session.assign(requester, cleanedAttNames[i] + "_labels", labels);
-        session.assign(requester, cleanedAttNames[i] + "_levels", levels);
-        /*
-         * System.err.println("Evaluating : " + quote(att.name() + "_factor") +
-         * "=factor(" + quote(att.name()) + ",labels=" + quote(att.name() +
-         * "_levels") + ")");
-         */
-
-        session.parseAndEval( requester,
-                cleanedAttNames[i] + "_factor"  + "=factor(" + cleanedAttNames[i] + ",levels=" +
-                        cleanedAttNames[i] + "_levels"  + ",labels=" + cleanedAttNames[i] + "_labels"  + ")" );
+        session.assign(requester, cleanedAttNames[i], new REXPFactor(d, labels));
       } else if (att.isString()) {
         String[] d = new String[insts.numInstances()];
         for (int j = 0; j < insts.numInstances(); j++) {
@@ -148,7 +136,7 @@ public class RUtils {
             d[j] = insts.instance(j).stringValue(i);
           }
         }
-        session.assign(requester, cleanedAttNames[i], d);
+        session.assign(requester, cleanedAttNames[i], new REXPString(d));
       }
     }
 
@@ -163,14 +151,7 @@ public class RUtils {
     temp.append(frameName + "=data.frame(");
     for (int i = 0; i < insts.numAttributes(); i++) {
       Attribute att = insts.attribute(i);
-
-      if (att.isNumeric() || att.isString()) {
-        temp.append("\"" + cleanedAttNames[i] + "\"" +  "=" + cleanedAttNames[i]);
-      } else if (att.isNominal()) {
-        temp
-          .append("\"" + cleanedAttNames[i] +"\"" + "=" + cleanedAttNames[i] + "_factor");
-      }
-
+      temp.append("\"" + cleanedAttNames[i] + "\"" +  "=" + cleanedAttNames[i]);
       if (i < insts.numAttributes() - 1) {
         temp.append(",");
       }
@@ -183,17 +164,7 @@ public class RUtils {
     temp.append("remove(");
     for (int i = 0; i < insts.numAttributes(); i++) {
       Attribute att = insts.attribute(i);
-
-      if (att.isNumeric() || att.isString()) {
-        temp.append(cleanedAttNames[i]);
-      } else  if (att.isNominal()) {
-        temp.append(cleanedAttNames[i] + ",");
-        temp.append(cleanedAttNames[i] + "_factor,");
-        temp.append(cleanedAttNames[i] + "_labels,");
-        temp.append(cleanedAttNames[i] + "_levels");
-      }
-      
-
+      temp.append(cleanedAttNames[i]);
       if (i < insts.numAttributes() - 1) {
         temp.append(",");
       }

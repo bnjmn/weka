@@ -800,6 +800,18 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       if (result) {
         s_engine = null;
       }
+      s_executor.shutdown();
+      try {
+        if (!s_executor.awaitTermination(5, TimeUnit.SECONDS)) {
+          s_executor.shutdownNow();
+          if (!s_executor.awaitTermination(5, TimeUnit.SECONDS)) {
+            System.err.println("RSessionImpl: Executor did not terminate");
+          }
+        }
+      } catch (InterruptedException ie) {
+        s_executor.shutdownNow();
+        Thread.currentThread().interrupt();
+      }
     }
   }
 }
