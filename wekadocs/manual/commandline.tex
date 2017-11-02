@@ -615,7 +615,16 @@ So, now you have run a lot of experiments -- which classifier is best? Try
   cat *.out | grep -A 3 "Stratified" | grep "^Correctly"
 \end{verbatim}}
 
-\noindent ...this should give you all cross-validated accuracies. If the cross-validated accuracy is roughly the same as the training set accuracy, this indicates that your classifiers is presumably not overfitting the training set.
+\noindent ...this should give you all cross-validated accuracies.
+
+To get all the training set accuracies, you can use
+
+{\scriptsize
+\begin{verbatim}
+  cat *.out | grep -A 3 "training" | grep "^Correctly"
+\end{verbatim}}
+
+If the cross-validated accuracy is roughly the same as the training set accuracy, this indicates that your classifiers is presumably not overfitting the training set.
 
 Now you have found the best classifier. To apply it on a new dataset, use e.g.
 
