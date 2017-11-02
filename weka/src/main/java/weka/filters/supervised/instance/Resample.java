@@ -26,16 +26,11 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
+import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> Produces a random subsample of a dataset using
@@ -88,7 +83,7 @@ import weka.filters.SupervisedFilter;
  * @author Eibe Frank
  * @version $Revision$
  */
-public class Resample extends Filter implements SupervisedFilter, OptionHandler {
+public class Resample extends Filter implements SupervisedFilter, OptionHandler, Randomizable {
 
   /** for serialization. */
   static final long serialVersionUID = 7079064953548300681L;
@@ -333,6 +328,16 @@ public class Resample extends Filter implements SupervisedFilter, OptionHandler 
    */
   public void setRandomSeed(int newSeed) {
     m_RandomSeed = newSeed;
+  }
+
+  @ProgrammaticProperty
+  public void setSeed(int seed) {
+    setRandomSeed(seed);
+  }
+
+  @ProgrammaticProperty
+  public int getSeed() {
+    return getRandomSeed();
   }
 
   /**

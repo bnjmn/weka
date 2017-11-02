@@ -26,18 +26,11 @@ import java.util.Hashtable;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.UnassignedClassException;
-import weka.core.UnsupportedClassTypeException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
+import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> Produces a random subsample of a dataset. The
@@ -81,7 +74,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
-  OptionHandler {
+  OptionHandler, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = -3947033795243930016L;
@@ -365,6 +358,16 @@ public class SpreadSubsample extends Filter implements SupervisedFilter,
   public void setRandomSeed(int newSeed) {
 
     m_RandomSeed = newSeed;
+  }
+
+  @ProgrammaticProperty
+  public void setSeed(int seed) {
+    setRandomSeed(seed);
+  }
+
+  @ProgrammaticProperty
+  public int getSeed() {
+    return getRandomSeed();
   }
 
   /**
