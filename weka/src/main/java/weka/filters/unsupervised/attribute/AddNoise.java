@@ -24,17 +24,11 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
+import weka.gui.ProgrammaticProperty;
 
 /**
  * <!-- globalinfo-start --> An instance filter that changes a percentage of a
@@ -73,7 +67,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class AddNoise extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = -8499673222857299082L;
@@ -275,6 +269,16 @@ public class AddNoise extends Filter implements UnsupervisedFilter,
   public void setRandomSeed(int newSeed) {
 
     m_RandomSeed = newSeed;
+  }
+
+  @ProgrammaticProperty
+  public void setSeed(int seed) {
+    setRandomSeed(seed);
+  }
+
+  @ProgrammaticProperty
+  public int getSeed() {
+    return getRandomSeed();
   }
 
   /**

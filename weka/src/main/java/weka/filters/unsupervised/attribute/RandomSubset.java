@@ -65,7 +65,7 @@ import weka.filters.SimpleStreamFilter;
  * @author eibe@cs.waikato.ac.nz
  * @version $Revision$
  */
-public class RandomSubset extends SimpleStreamFilter {
+public class RandomSubset extends SimpleStreamFilter implements Randomizable {
 
   /** for serialization. */
   private static final long serialVersionUID = 2911221724251628050L;

@@ -21,17 +21,12 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
+import weka.gui.ProgrammaticProperty;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -81,7 +76,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class ReservoirSample extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter {
+  OptionHandler, StreamableFilter, Randomizable {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;
@@ -224,6 +219,16 @@ public class ReservoirSample extends Filter implements UnsupervisedFilter,
    */
   public void setRandomSeed(int newSeed) {
     m_RandomSeed = newSeed;
+  }
+
+  @ProgrammaticProperty
+  public void setSeed(int seed) {
+    setRandomSeed(seed);
+  }
+
+  @ProgrammaticProperty
+  public int getSeed() {
+    return getRandomSeed();
   }
 
   /**
