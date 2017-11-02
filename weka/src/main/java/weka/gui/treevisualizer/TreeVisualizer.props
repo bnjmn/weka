@@ -14,7 +14,7 @@ FontColor=black
 BackgroundColor=
 
 # the node color (can use R,G,B format)
-NodeColor=gray
+NodeColor=lightGray
 
 # the line color (can use R,G,B format)
 LineColor=black

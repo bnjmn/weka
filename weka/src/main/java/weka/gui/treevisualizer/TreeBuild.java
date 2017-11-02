@@ -196,7 +196,7 @@ public class TreeBuild {
 
       if (t.m_color == null) {
         if (m_noObj.m_color == null) {
-          color = Color.gray;
+          color = Color.lightGray;
         } else {
           color = m_colorTable.get(m_noObj.m_color.toLowerCase());
         }
@@ -204,7 +204,7 @@ public class TreeBuild {
         color = m_colorTable.get(t.m_color.toLowerCase());
       }
       if (color == null) {
-        color = Color.gray;
+        color = Color.lightGray;
       }
 
       m_aNodes.addElement(new Node(label, id, style.intValue(), shape
