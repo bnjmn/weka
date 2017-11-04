@@ -38,18 +38,12 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JToolBar;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 
 import weka.core.Environment;
+import weka.core.Utils;
 import weka.gui.Logger;
 import weka.gui.ResultHistoryPanel;
 
@@ -204,7 +198,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
       if (m_history == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Image Viewer");
+      m_resultsFrame = Utils.getWekaJFrame("Image Viewer", this);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(new MainPanel(m_history, m_plotter),
         BorderLayout.CENTER);
@@ -216,6 +210,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
         }
       });
       m_resultsFrame.pack();
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();

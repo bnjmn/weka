@@ -46,23 +46,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
@@ -960,9 +944,8 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
       mp.setInstances(ti);
       String plotName = ti.relationName();
       final javax.swing.JFrame jf =
-        new javax.swing.JFrame("Weka Attribute Selection Visualize: "
-          + plotName);
-      jf.setSize(800, 600);
+              Utils.getWekaJFrame("Weka Attribute Selection Visualize: "
+                      + plotName, this);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(mp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -971,6 +954,9 @@ public class AttributeSelectionPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
       jf.setVisible(true);
     }

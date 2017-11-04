@@ -22,6 +22,7 @@
 package weka.gui.experiment;
 
 import weka.classifiers.Classifier;
+import weka.core.Utils;
 import weka.core.xml.KOML;
 import weka.experiment.CSVResultListener;
 import weka.experiment.ClassifierSplitEvaluator;
@@ -36,19 +37,7 @@ import weka.experiment.SplitEvaluator;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
@@ -210,7 +199,7 @@ public class SimpleSetupPanel
   protected JButton m_NotesButton =  new JButton("Notes");
 
   /** Frame for the notes */
-  protected JFrame m_NotesFrame = new JFrame("Notes");
+  protected JFrame m_NotesFrame = Utils.getWekaJFrame("Notes", this);
 
   /** Area for user notes Default of 10 rows */
   protected JTextArea m_NotesText = new JTextArea(null, 10, 0);
@@ -397,11 +386,14 @@ public class SimpleSetupPanel
 	}
       });
     m_NotesFrame.getContentPane().add(new JScrollPane(m_NotesText));
-    m_NotesFrame.setSize(600, 400);
+    m_NotesFrame.pack();
+    m_NotesFrame.setSize(800, 600);
 
     m_NotesButton.addActionListener(new ActionListener() {
 	public void actionPerformed(ActionEvent e) {
 	  m_NotesButton.setEnabled(false);
+	  m_NotesFrame.setIconImage(((JFrame)SwingUtilities.getWindowAncestor(SimpleSetupPanel.this)).getIconImage());
+	  m_NotesFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SimpleSetupPanel.this));
 	  m_NotesFrame.setVisible(true);
 	}
       });

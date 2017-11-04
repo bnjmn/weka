@@ -1861,7 +1861,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     // ///////////////////////////
     // this sets up the gui for usage
     if (m_gui) {
-      m_win = new JFrame();
+      m_win = Utils.getWekaJFrame("Neural Network", null);
 
       m_win.addWindowListener(new WindowAdapter() {
         @Override
@@ -1885,7 +1885,6 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       });
 
       m_win.getContentPane().setLayout(new BorderLayout());
-      m_win.setTitle("Neural Network");
       m_nodePanel = new NodePanel();
       // without the following two lines, the
       // NodePanel.paintComponents(Graphics)

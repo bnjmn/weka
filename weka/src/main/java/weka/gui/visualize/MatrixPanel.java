@@ -21,37 +21,14 @@
 
 package weka.gui.visualize;
 
-import weka.core.Attribute;
-import weka.core.Environment;
-import weka.core.Instances;
-import weka.core.Settings;
+import weka.core.*;
 import weka.gui.ExtensionFileFilter;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSplitPane;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Color;
+import java.awt.*;
 import java.awt.Dialog.ModalityType;
-import java.awt.Dimension;
-import java.awt.Graphics;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -1033,8 +1010,7 @@ public class MatrixPanel extends JPanel {
         return;
       }
 
-      JFrame jf =
-        new JFrame("Weka Explorer: Visualizing " + m_data.relationName());
+      JFrame jf = Utils.getWekaJFrame("Weka Explorer: Visualizing " + m_data.relationName(), this);
       VisualizePanel vp = new VisualizePanel();
       try {
         PlotData2D pd = new PlotData2D(m_data);
@@ -1051,7 +1027,9 @@ public class MatrixPanel extends JPanel {
         ex.printStackTrace();
       }
       jf.getContentPane().add(vp);
+      jf.pack();
       jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
     }
 

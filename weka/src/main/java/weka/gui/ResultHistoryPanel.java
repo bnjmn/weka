@@ -21,10 +21,7 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -37,21 +34,14 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListModel;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import javax.swing.text.JTextComponent;
 
+import weka.core.Utils;
 import weka.gui.visualize.PrintableComponent;
 
 /**
@@ -169,7 +159,7 @@ public class ResultHistoryPanel extends JPanel {
 //          }
         } else {
           // if there are stored objects then assume that the storer
-          // will handle popping up the text in a seperate frame
+          // will handle popping up the text in a separate frame
           if (m_HandleRightClicks) {
             int index = m_List.locationToIndex(e.getPoint());
             if (index != -1) {
@@ -473,7 +463,7 @@ public class ResultHistoryPanel extends JPanel {
       ta.setEditable(false);
       ta.setText(buff.toString());
       m_FramedOutput.put(name, ta);
-      final JFrame jf = new JFrame(name);
+      final JFrame jf = Utils.getWekaJFrame(name, this);
       jf.addWindowListener(new WindowAdapter() {
         @Override
         public void windowClosing(WindowEvent e) {
@@ -484,7 +474,8 @@ public class ResultHistoryPanel extends JPanel {
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(new JScrollPane(ta), BorderLayout.CENTER);
       jf.pack();
-      jf.setSize(450, 350);
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
     }
   }

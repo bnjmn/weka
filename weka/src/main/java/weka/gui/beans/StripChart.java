@@ -36,9 +36,7 @@ import java.util.LinkedList;
 import java.util.Random;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import javax.swing.border.TitledBorder;
 
 import weka.core.Instance;
@@ -464,7 +462,7 @@ public class StripChart extends JPanel implements ChartListener,
    */
   public void showChart() {
     if (m_outputFrame == null) {
-      m_outputFrame = new JFrame("Strip Chart");
+      m_outputFrame = Utils.getWekaJFrame("Strip Chart", this);
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
       JPanel panel = new JPanel(new BorderLayout());
       new PrintableComponent(panel);
@@ -499,6 +497,7 @@ public class StripChart extends JPanel implements ChartListener,
       m_outputFrame.pack();
       m_outputFrame.setSize(600, 150);
       m_outputFrame.setResizable(false);
+      m_outputFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(StripChart.this));
       m_outputFrame.setVisible(true);
       m_outputFrame.setAlwaysOnTop(true);
       // m_outputFrame.setLocationByPlatform(true);
@@ -910,7 +909,7 @@ public class StripChart extends JPanel implements ChartListener,
 
     try {
       final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Knowledge Flow : StipChart");
+        "Weka Knowledge Flow : StripChart");
       jf.getContentPane().setLayout(new BorderLayout());
       final StripChart jd = new StripChart();
       jf.getContentPane().add(jd, BorderLayout.CENTER);

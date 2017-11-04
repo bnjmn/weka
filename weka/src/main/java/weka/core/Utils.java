@@ -21,6 +21,8 @@
 
 package weka.core;
 
+import javax.swing.*;
+import java.awt.*;
 import java.beans.BeanInfo;
 import java.beans.Introspector;
 import java.beans.MethodDescriptor;
@@ -1041,6 +1043,31 @@ public final class Utils implements RevisionHandler {
     String[] options) throws Exception {
 
     return ResourceUtils.forName(classType, className, options);
+  }
+
+  /**
+   * Returns a JFrame with the given title. The JFrame will be placed relative
+   * to the ancestor window of the given component (or relative to the given component itself, if it is a window),
+   * and will receive the icon image from that window if the window is a frame.
+   *
+   * @param title the title of the window
+   * @param component the component for which the ancestor window is found
+   * @return the JFrame
+   */
+  public static JFrame getWekaJFrame(String title, Component component) {
+    JFrame jf = new JFrame(title);
+    Window windowAncestor = null;
+    if (component != null) {
+      if (component instanceof Window) {
+        windowAncestor = (Window)component;
+      } else {
+        windowAncestor = SwingUtilities.getWindowAncestor(component);
+      }
+      if (windowAncestor instanceof Frame) {
+        jf.setIconImage(((Frame) windowAncestor).getIconImage());
+      }
+    }
+    return jf;
   }
 
   /**

@@ -54,16 +54,7 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.plugins.AssociationRuleVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.BorderLayout;
@@ -545,8 +536,7 @@ public class AssociationsPanel extends AbstractPerspective implements
    */
   protected void visualizeTree(String dottyString, String treeName) {
     final javax.swing.JFrame jf =
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
-    jf.setSize(500, 400);
+      Utils.getWekaJFrame("Weka Associator Tree Visualizer: " + treeName, this);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
     jf.getContentPane().add(tv, BorderLayout.CENTER);
@@ -556,7 +546,9 @@ public class AssociationsPanel extends AbstractPerspective implements
         jf.dispose();
       }
     });
-
+    jf.pack();
+    jf.setSize(800, 600);
+    jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     jf.setVisible(true);
     tv.fitToScreen();
   }

@@ -41,15 +41,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.Properties;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.JFrame;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButtonMenuItem;
-import javax.swing.Timer;
+import javax.swing.*;
 
 import weka.core.Instances;
 import weka.core.Utils;
@@ -873,9 +865,11 @@ public class TreeVisualizer extends PrintablePanel implements
         if ((inst = m_nodes[m_focusNode].m_node.getInstances()) != null) {
           VisualizePanel pan = new VisualizePanel();
           pan.setInstances(inst);
-          JFrame nf = new JFrame();
-          nf.setSize(400, 300);
+          JFrame nf = Utils.getWekaJFrame("", this);
           nf.getContentPane().add(pan);
+          nf.pack();
+          nf.setSize(800, 600);
+          nf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
           nf.setVisible(true);
         } else {
           JOptionPane.showMessageDialog(this, "Sorry, there is no "

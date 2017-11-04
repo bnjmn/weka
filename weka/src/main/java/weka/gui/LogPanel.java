@@ -21,21 +21,12 @@
 
 package weka.gui;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JViewport;
+import weka.core.Utils;
+
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.BorderLayout;
-import java.awt.Font;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -145,7 +136,7 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
     if (logHidden) {
 
       // create log window
-      final JFrame jf = new JFrame("Log");
+      final JFrame jf = Utils.getWekaJFrame("Log", this);
       jf.addWindowListener(new WindowAdapter() {
         public void windowClosing(WindowEvent e) {
           jf.setVisible(false);
@@ -154,11 +145,16 @@ public class LogPanel extends JPanel implements Logger, TaskLogger {
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(js, BorderLayout.CENTER);
       jf.pack();
-      jf.setSize(450, 350);
+      jf.setSize(800, 600);
 
       // display log window on request
       m_logButton.addActionListener(new ActionListener() {
         public void actionPerformed(ActionEvent e) {
+          Window windowAncestor = SwingUtilities.getWindowAncestor(LogPanel.this);
+          if (windowAncestor instanceof Frame) {
+            jf.setIconImage(((Frame) windowAncestor).getIconImage());
+          }
+          jf.setLocationRelativeTo(LogPanel.this);
           jf.setVisible(true);
         }
       });

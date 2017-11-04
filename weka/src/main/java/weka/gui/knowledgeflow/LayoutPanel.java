@@ -21,10 +21,7 @@
 
 package weka.gui.knowledgeflow;
 
-import weka.core.EnvironmentHandler;
-import weka.core.Instances;
-import weka.core.WekaException;
-import weka.core.WekaPackageClassLoaderManager;
+import weka.core.*;
 import weka.core.converters.FileSourcedConverter;
 import weka.gui.Perspective;
 import weka.gui.knowledgeflow.VisibleLayout.LayoutOperation;
@@ -1198,7 +1195,7 @@ public class LayoutPanel extends PrintablePanel {
         .getManagedStep());
       ((StepInteractiveViewer) viewer).setMainKFPerspective(m_visLayout
         .getMainPerspective());
-      JFrame jf = new JFrame(viewerName);
+      JFrame jf = Utils.getWekaJFrame(viewerName, this);
       ((StepInteractiveViewer) viewer).setParentWindow(jf);
       ((StepInteractiveViewer) viewer).init();
       jf.setLayout(new BorderLayout());

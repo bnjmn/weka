@@ -21,11 +21,7 @@
 
 package weka.gui.experiment;
 
-import weka.core.Attribute;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.PluginManager;
-import weka.core.Range;
+import weka.core.*;
 import weka.core.converters.CSVLoader;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -1424,7 +1420,7 @@ public class ResultsPanel extends JPanel {
         Explorer exp = new Explorer();
         exp.getPreprocessPanel().setInstances(m_Instances);
 
-        final JFrame jf = new JFrame("Weka Explorer");
+        final JFrame jf = Utils.getWekaJFrame("Weka Explorer", this);
         jf.getContentPane().setLayout(new BorderLayout());
         jf.getContentPane().add(exp, BorderLayout.CENTER);
         jf.addWindowListener(new WindowAdapter() {
@@ -1434,13 +1430,9 @@ public class ResultsPanel extends JPanel {
           }
         });
         jf.pack();
-        jf.setSize(800, 600);
+        jf.setSize(1024, 768);
+        jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
         jf.setVisible(true);
-        Image icon =
-          Toolkit.getDefaultToolkit().getImage(
-            exp.getClass().getClassLoader()
-              .getResource("weka/gui/weka_icon_new_48.png"));
-        jf.setIconImage(icon);
       } else {
         m_mainPerspective.setInstances(m_Instances);
         m_mainPerspective.getMainApplication().getPerspectiveManager()

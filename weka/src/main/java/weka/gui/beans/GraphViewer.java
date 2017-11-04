@@ -35,11 +35,10 @@ import java.util.Date;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 
 import weka.core.Drawable;
+import weka.core.Utils;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.graphvisualizer.BIFFormatException;
 import weka.gui.graphvisualizer.GraphVisualizer;
@@ -253,7 +252,7 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
       if (m_history == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Graph Viewer");
+      m_resultsFrame = Utils.getWekaJFrame("Graph Viewer", this);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.CENTER);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -264,6 +263,7 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
         }
       });
       m_resultsFrame.pack();
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();

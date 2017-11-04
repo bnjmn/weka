@@ -64,28 +64,7 @@ import weka.gui.treevisualizer.TreeVisualizer;
 import weka.gui.visualize.VisualizePanel;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -743,12 +722,14 @@ public class ClustererPanel extends AbstractPerspective implements
       });
       // Add propertychangelistener to update m_TestInstances whenever
       // it changes in the settestframe
-      m_SetTestFrame = new JFrame("Test Instances");
+      m_SetTestFrame = Utils.getWekaJFrame("Test Instances", this);
       sp.setParentFrame(m_SetTestFrame); // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
+      m_SetTestFrame.setSize(400,200);
     }
+    m_SetTestFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     m_SetTestFrame.setVisible(true);
   }
 
@@ -1170,8 +1151,7 @@ public class ClustererPanel extends AbstractPerspective implements
    */
   protected void visualizeTree(String graphString, String treeName) {
     final javax.swing.JFrame jf =
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
-    jf.setSize(500, 400);
+      Utils.getWekaJFrame("Weka Cluster Tree Visualizer: " + treeName, this);
     jf.getContentPane().setLayout(new BorderLayout());
     if (graphString.contains("digraph")) {
       TreeVisualizer tv =
@@ -1183,6 +1163,9 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
       tv.fitToScreen();
     } else if (graphString.startsWith("Newick:")) {
@@ -1195,6 +1178,9 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
       tv.fitToScreen();
     }
@@ -1209,8 +1195,7 @@ public class ClustererPanel extends AbstractPerspective implements
     if (sp != null) {
       String plotName = sp.getName();
       final javax.swing.JFrame jf =
-        new javax.swing.JFrame("Weka Clusterer Visualize: " + plotName);
-      jf.setSize(500, 400);
+        Utils.getWekaJFrame("Weka Clusterer Visualize: " + plotName, this);
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(sp, BorderLayout.CENTER);
       jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -1219,6 +1204,10 @@ public class ClustererPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
+
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
       jf.setVisible(true);
     }

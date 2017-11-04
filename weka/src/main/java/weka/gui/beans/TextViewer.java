@@ -43,15 +43,9 @@ import java.util.EventObject;
 import java.util.List;
 import java.util.Vector;
 
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
+import javax.swing.*;
 
+import weka.core.Utils;
 import weka.gui.Logger;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
@@ -399,7 +393,7 @@ public class TextViewer extends JPanel implements TextListener,
       if (m_outText == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = new JFrame("Text Viewer");
+      m_resultsFrame = Utils.getWekaJFrame("Text Viewer", this);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       final JScrollPane js = new JScrollPane(m_outText);
       js.setBorder(BorderFactory.createTitledBorder("Text"));
@@ -417,6 +411,7 @@ public class TextViewer extends JPanel implements TextListener,
         }
       });
       m_resultsFrame.pack();
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();

@@ -90,27 +90,7 @@ import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 import weka.gui.visualize.plugins.VisualizePlugin;
 
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JViewport;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -997,7 +977,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Sets the Logger to receive informational messages.
-   * 
+   *
    * @param newLog the Logger that will now get info messages
    */
   @Override
@@ -1008,7 +988,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Tells the panel to use a new set of instances.
-   * 
+   *
    * @param inst a set of Instances
    */
   @Override
@@ -1050,7 +1030,7 @@ public class ClassifierPanel extends AbstractPerspective implements
    * Sets the user test set. Information about the current test set is displayed
    * in an InstanceSummaryPanel and the user is given the ability to load
    * another set from a file or url.
-   * 
+   *
    */
   protected void setTestSet() {
 
@@ -1089,12 +1069,14 @@ public class ClassifierPanel extends AbstractPerspective implements
       });
       // Add propertychangelistener to update m_TestLoader whenever
       // it changes in the settestframe
-      m_SetTestFrame = new JFrame("Test Instances");
+      m_SetTestFrame = Utils.getWekaJFrame("Test Instances", this);
       sp.setParentFrame(m_SetTestFrame); // enable Close-Button
       m_SetTestFrame.getContentPane().setLayout(new BorderLayout());
       m_SetTestFrame.getContentPane().add(sp, BorderLayout.CENTER);
       m_SetTestFrame.pack();
+      m_SetTestFrame.setSize(400,200);
     }
+    m_SetTestFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     m_SetTestFrame.setVisible(true);
   }
 
@@ -1992,7 +1974,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Handles constructing a popup menu with visualization options.
-   * 
+   *
    * @param names the name of the result history list entry clicked on by the
    *          user
    * @param x the x coordinate for popping up the menu
@@ -2538,13 +2520,13 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Pops up a TreeVisualizer for the classifier from the currently selected
    * item in the results list.
-   * 
+   *
    * @param dottyString the description of the tree in dotty format
    * @param treeName the title to assign to the display
    */
   protected void visualizeTree(String dottyString, String treeName) {
     final javax.swing.JFrame jf =
-      new javax.swing.JFrame("Weka Classifier Tree Visualizer: " + treeName);
+            Utils.getWekaJFrame("Weka Classifier Tree Visualizer: " + treeName, this);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     TreeVisualizer tv = new TreeVisualizer(null, dottyString, new PlaceNode2());
@@ -2555,7 +2537,9 @@ public class ClassifierPanel extends AbstractPerspective implements
         jf.dispose();
       }
     });
-
+    jf.pack();
+    jf.setSize(800, 600);
+    jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     jf.setVisible(true);
     tv.fitToScreen();
   }
@@ -2563,13 +2547,13 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Pops up a GraphVisualizer for the BayesNet classifier from the currently
    * selected item in the results list.
-   * 
+   *
    * @param XMLBIF the description of the graph in XMLBIF ver. 0.3
    * @param graphName the name of the graph
    */
   protected void visualizeBayesNet(String XMLBIF, String graphName) {
     final javax.swing.JFrame jf =
-      new javax.swing.JFrame("Weka Classifier Graph Visualizer: " + graphName);
+      Utils.getWekaJFrame("Weka Classifier Graph Visualizer: " + graphName, this);
     jf.setSize(500, 400);
     jf.getContentPane().setLayout(new BorderLayout());
     GraphVisualizer gv = new GraphVisualizer();
@@ -2589,12 +2573,16 @@ public class ClassifierPanel extends AbstractPerspective implements
       }
     });
 
+    jf.pack();
+    jf.setSize(800, 600);
+    jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+
     jf.setVisible(true);
   }
 
   /**
    * Pops up the Cost/Benefit analysis panel.
-   * 
+   *
    * @param cb the CostBenefitAnalysis panel to pop up
    */
   protected void visualizeCostBenefitAnalysis(CostBenefitAnalysis cb,
@@ -2604,8 +2592,7 @@ public class ClassifierPanel extends AbstractPerspective implements
       if (classifierAndRelationName != null) {
         windowTitle += "- " + classifierAndRelationName;
       }
-      final javax.swing.JFrame jf = new javax.swing.JFrame(windowTitle);
-      jf.setSize(1000, 600);
+      final javax.swing.JFrame jf = Utils.getWekaJFrame(windowTitle, this);
       jf.getContentPane().setLayout(new BorderLayout());
 
       jf.getContentPane().add(cb, BorderLayout.CENTER);
@@ -2615,6 +2602,9 @@ public class ClassifierPanel extends AbstractPerspective implements
           jf.dispose();
         }
       });
+      jf.pack();
+      jf.setSize(1024, 700);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
 
       jf.setVisible(true);
     }
@@ -2623,7 +2613,7 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Pops up a VisualizePanel for visualizing the data and errors for the
    * classifier from the currently selected item in the results list.
-   * 
+   *
    * @param sp the VisualizePanel to pop up.
    */
   protected void visualizeClassifierErrors(VisualizePanel sp) {
@@ -2631,8 +2621,7 @@ public class ClassifierPanel extends AbstractPerspective implements
     if (sp != null) {
       String plotName = sp.getName();
       final javax.swing.JFrame jf =
-        new javax.swing.JFrame("Weka Classifier Visualize: " + plotName);
-      jf.setSize(600, 400);
+        Utils.getWekaJFrame("Weka Classifier Visualize: " + plotName, this);
       jf.getContentPane().setLayout(new BorderLayout());
 
       jf.getContentPane().add(sp, BorderLayout.CENTER);
@@ -2643,13 +2632,17 @@ public class ClassifierPanel extends AbstractPerspective implements
         }
       });
 
+      jf.pack();
+      jf.setSize(800, 600);
+      jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+
       jf.setVisible(true);
     }
   }
 
   /**
    * Save the currently selected classifier output to a file.
-   * 
+   *
    * @param name the name of the buffer to save
    */
   protected void saveBuffer(String name) {
@@ -2677,7 +2670,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Saves the currently selected classifier.
-   * 
+   *
    * @param name the name of the run
    * @param classifier the classifier to save
    * @param trainHeader the header of the training instances
@@ -2840,7 +2833,7 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Re-evaluates the named classifier with the current test set. Unpredictable
    * things will happen if the data set is not compatible with the classifier.
-   * 
+   *
    * @param name the name of the classifier entry
    * @param classifier the classifier to evaluate
    * @param trainHeader the header of the training set
@@ -3251,7 +3244,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * updates the capabilities filter of the GOE.
-   * 
+   *
    * @param filter the new filter to use
    */
   protected void updateCapabilitiesFilter(Capabilities filter) {
@@ -3298,7 +3291,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * method gets called in case of a change event.
-   * 
+   *
    * @param e the associated change event
    */
   @Override
@@ -3313,7 +3306,7 @@ public class ClassifierPanel extends AbstractPerspective implements
   /**
    * Sets the Explorer to use as parent frame (used for sending notifications
    * about changes in the data).
-   * 
+   *
    * @param parent the parent frame
    */
   @Override
@@ -3323,7 +3316,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * returns the parent Explorer frame.
-   * 
+   *
    * @return the parent
    */
   @Override
@@ -3333,7 +3326,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Returns the title for the tab in the Explorer.
-   * 
+   *
    * @return the title of this tab
    */
   @Override
@@ -3343,7 +3336,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Returns the tooltip for the tab in the Explorer.
-   * 
+   *
    * @return the tooltip of this tab
    */
   @Override
@@ -3880,7 +3873,7 @@ public class ClassifierPanel extends AbstractPerspective implements
 
   /**
    * Tests out the classifier panel from the command line.
-   * 
+   *
    * @param args may optionally contain the name of a dataset to load.
    */
   public static void main(String[] args) {

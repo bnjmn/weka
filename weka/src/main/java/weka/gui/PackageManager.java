@@ -1685,7 +1685,7 @@ public class PackageManager extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (m_unofficialFrame == null) {
-          final JFrame jf = new JFrame("Unofficial package install");
+          final JFrame jf = Utils.getWekaJFrame("Unofficial package install", PackageManager.this);
           jf.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1704,6 +1704,8 @@ public class PackageManager extends JPanel {
           jf.add(m_unofficialChooser, BorderLayout.CENTER);
           jf.add(butHolder, BorderLayout.SOUTH);
           jf.pack();
+          jf.setSize(600,150);
+          jf.setLocationRelativeTo(PackageManager.this);
           jf.setVisible(true);
           m_unofficialFrame = jf;
           m_unofficialBut.setEnabled(false);

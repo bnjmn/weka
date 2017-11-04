@@ -21,17 +21,13 @@
 
 package weka.gui.beans;
 
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
+import weka.core.*;
 import weka.core.PluginManager;
 import weka.gui.Logger;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.JFrame;
-import javax.swing.JPanel;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.awt.image.BufferedImage;
@@ -582,7 +578,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               + "visualization (DataVisualizer)");
             ex.printStackTrace();
           }
-          final JFrame jf = new JFrame("Visualize");
+          final JFrame jf = Utils.getWekaJFrame("Visualize", this);
           jf.setSize(800, 600);
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(vis, BorderLayout.CENTER);
@@ -593,6 +589,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               m_framePoppedUp = false;
             }
           });
+          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
           jf.setVisible(true);
           m_popupFrame = jf;
         } else {
