@@ -143,6 +143,7 @@ public class PropertySheetPanel extends JPanel implements
       getContentPane().add(new JScrollPane(m_CapabilitiesText),
         BorderLayout.CENTER);
       pack();
+      setLocationRelativeTo(getOwner());
     }
 
     /**

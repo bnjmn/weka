@@ -55,28 +55,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
 
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
 import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
@@ -469,7 +448,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
       if (dlg == null) {
-        dlg = new JDialog();
+        dlg = new JDialog(SwingUtilities.getWindowAncestor(GUI.this));
         dlg.setTitle("Generate Random Bayesian Network Options");
 
         final JLabel jLbNrOfNodes = new JLabel("Nr of nodes");
@@ -574,13 +553,15 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         dlg.add(jBtCancel);
       }
+      //dlg.pack();
+      //dlg.setLocation(100, 100);
+      //dlg.setVisible(true);
+      dlg.setSize(450, 350);
+      //dlg.setVisible(false);
       dlg.pack();
-      dlg.setLocation(100, 100);
+      dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GUI.this));
       dlg.setVisible(true);
-      dlg.setSize(dlg.getPreferredSize());
-      dlg.setVisible(false);
-      dlg.setVisible(true);
-      dlg.repaint();
+      //dlg.repaint();
     } // actionPerformed
   } // class ActionGenerate
 
@@ -604,7 +585,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
       if (dlg == null) {
-        dlg = new JDialog();
+        dlg = new JDialog(SwingUtilities.getWindowAncestor(GUI.this));
         dlg.setTitle("Generate Random Data Options");
 
         final JLabel jLbNrOfInstances = new JLabel("Nr of instances");
@@ -726,12 +707,14 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         dlg.add(jBtCancel);
       }
-      dlg.setLocation(100, 100);
+      //dlg.setLocation(100, 100);
+      //dlg.setVisible(true);
+      dlg.setSize(450, 350);
+      //dlg.setVisible(false);
+      dlg.pack();
+      dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GUI.this));
       dlg.setVisible(true);
-      dlg.setSize(dlg.getPreferredSize());
-      dlg.setVisible(false);
-      dlg.setVisible(true);
-      dlg.repaint();
+      //dlg.repaint();
 
     } // actionPerformed
   } // class ActionGenerateData
@@ -750,7 +733,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
       if (dlg == null) {
-        dlg = new JDialog();
+        dlg = new JDialog(SwingUtilities.getWindowAncestor(GUI.this));
         dlg.setTitle("Learn Bayesian Network");
 
         final JButton jBtOptions = new JButton("Options");
@@ -856,12 +839,14 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         dlg.add(jBtCancel);
       }
-      dlg.setLocation(100, 100);
+      //dlg.setLocation(100, 100);
+      //dlg.setVisible(true);
+      dlg.setSize(450, 350);
+      //dlg.setVisible(false);
+      dlg.pack();
+      dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GUI.this));
       dlg.setVisible(true);
-      dlg.setSize(dlg.getPreferredSize());
-      dlg.setVisible(false);
-      dlg.setVisible(true);
-      dlg.repaint();
+      //dlg.repaint();
     } // actionPerformed
   } // class ActionLearn
 
@@ -1016,7 +1001,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
     void addNode() {
       if (dlg == null) {
-        dlg = new JDialog();
+        dlg = new JDialog(SwingUtilities.getWindowAncestor(GUI.this));
         dlg.setTitle("Add node");
         JLabel jLbName = new JLabel("Name");
         jTfName.setHorizontalAlignment(JTextField.CENTER);
@@ -1079,9 +1064,11 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         dlg.add(jTfCard);
         dlg.add(jBtOk);
         dlg.add(jBtCancel);
-        dlg.setSize(dlg.getPreferredSize());
+        dlg.setSize(450, 350);
       }
       jTfName.setText("Node" + (m_BayesNet.getNrOfNodes() + 1));
+      dlg.pack();
+      dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GUI.this));
       dlg.setVisible(true);
     } // addNode
 
@@ -1787,7 +1774,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     @Override
     public void actionPerformed(ActionEvent ae) {
       if (dlg == null) {
-        dlg = new JDialog();
+        dlg = new JDialog(SwingUtilities.getWindowAncestor(GUI.this));
         dlg.setTitle("Graph Layout Options");
         final JCheckBox jCbCustomNodeSize = new JCheckBox("Custom Node Size");
         final JLabel jLbNodeWidth = new JLabel("Width");
@@ -1899,12 +1886,15 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
         gbc.gridwidth = GridBagConstraints.REMAINDER;
         dlg.add(jBtCancel);
       }
-      dlg.setLocation(100, 100);
+      //dlg.setLocation(100, 100);
+      //dlg.setVisible(true);
+      dlg.setSize(450, 350);
+      //dlg.setVisible(false);
+      dlg.pack();
+      dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GUI.this));
+
       dlg.setVisible(true);
-      dlg.setSize(dlg.getPreferredSize());
-      dlg.setVisible(false);
-      dlg.setVisible(true);
-      dlg.repaint();
+      //dlg.repaint();
     }
   } // class ActionLayout
 
@@ -3668,9 +3658,8 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     final JDialog dlg = new JDialog((Frame) GUI.this.getTopLevelAncestor(),
       "Probability Distribution Table For "
         + m_BayesNet.getNodeName(nTargetNode), true);
-    dlg.setSize(500, 400);
-    dlg.setLocation(GUI.this.getLocation().x + GUI.this.getWidth() / 2 - 250,
-      GUI.this.getLocation().y + GUI.this.getHeight() / 2 - 200);
+    /*dlg.setLocation(GUI.this.getLocation().x + GUI.this.getWidth() / 2 - 250,
+      GUI.this.getLocation().y + GUI.this.getHeight() / 2 - 200);*/
 
     dlg.getContentPane().setLayout(new BorderLayout());
     dlg.getContentPane().add(js, BorderLayout.CENTER);
@@ -3716,6 +3705,9 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     c.add(jBtCancel);
 
     dlg.getContentPane().add(c, BorderLayout.SOUTH);
+    dlg.pack();
+    dlg.setSize(450, 350);
+    dlg.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     dlg.setVisible(true);
   } // editCPT
 

@@ -59,15 +59,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -827,7 +819,8 @@ public class ResultsPanel extends JPanel {
        */
 
       DatabaseConnectionDialog dbd =
-        new DatabaseConnectionDialog(null, dbaseURL, username);
+        new DatabaseConnectionDialog((Frame)SwingUtilities.getWindowAncestor(ResultsPanel.this), dbaseURL, username);
+      dbd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(ResultsPanel.this));
       dbd.setVisible(true);
 
       // if (dbaseURL == null) {
@@ -871,7 +864,7 @@ public class ResultsPanel extends JPanel {
       int result;
       // display dialog only if there's not just one result!
       if (jl.getModel().getSize() != 1) {
-        ListSelectorDialog jd = new ListSelectorDialog(null, jl);
+        ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), jl);
         result = jd.showDialog();
       } else {
         result = ListSelectorDialog.APPROVE_OPTION;
@@ -1256,7 +1249,7 @@ public class ResultsPanel extends JPanel {
 
   public void setResultKeyFromDialog() {
 
-    ListSelectorDialog jd = new ListSelectorDialog(null, m_ResultKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_ResultKeyList);
 
     // Open the dialog
     int result = jd.showDialog();
@@ -1284,7 +1277,7 @@ public class ResultsPanel extends JPanel {
 
   public void setDatasetKeyFromDialog() {
 
-    ListSelectorDialog jd = new ListSelectorDialog(null, m_DatasetKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_DatasetKeyList);
 
     // Open the dialog
     int result = jd.showDialog();
@@ -1330,14 +1323,14 @@ public class ResultsPanel extends JPanel {
   }
 
   public void setTestBaseFromDialog() {
-    ListSelectorDialog jd = new ListSelectorDialog(null, m_TestsList);
+    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_TestsList);
 
     // Open the dialog
     jd.showDialog();
   }
 
   public void setDisplayedFromDialog() {
-    ListSelectorDialog jd = new ListSelectorDialog(null, m_DisplayedList);
+    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_DisplayedList);
 
     // Open the dialog
     jd.showDialog();

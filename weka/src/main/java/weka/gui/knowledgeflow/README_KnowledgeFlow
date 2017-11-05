@@ -201,5 +201,5 @@ the pop-up menu for the TextViewer step.
 Other cool things to add to this flow: connect a TextViewer and/or a
 GraphViewer to J48 in order to view the textual or graphical
 representations of the trees produced for each fold of the cross
-validation (this is something that is not possible in the Explorer).
+validation.
 -----------------------------

@@ -48,20 +48,7 @@ import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.JToolBar;
+import javax.swing.*;
 import javax.swing.table.AbstractTableModel;
 
 import weka.gui.ExtensionFileFilter;
@@ -1345,15 +1332,17 @@ public class GraphVisualizer extends JPanel implements GraphConstants,
             (Frame) GraphVisualizer.this.getTopLevelAncestor(),
             "Probability Distribution Table For " + n.lbl,
             ModalityType.DOCUMENT_MODAL);
-          jd.setSize(500, 400);
-          jd.setLocation(
+          /*jd.setLocation(
             GraphVisualizer.this.getLocation().x
               + GraphVisualizer.this.getWidth() / 2 - 250,
             GraphVisualizer.this.getLocation().y
-              + GraphVisualizer.this.getHeight() / 2 - 200);
+              + GraphVisualizer.this.getHeight() / 2 - 200);*/
 
           jd.getContentPane().setLayout(new BorderLayout());
           jd.getContentPane().add(js, BorderLayout.CENTER);
+          jd.pack();
+          jd.setSize(450, 350);
+          jd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(GraphVisualizer.this));
           jd.setVisible(true);
 
           return;

@@ -393,7 +393,7 @@ public class TextViewer extends JPanel implements TextListener,
       if (m_outText == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = Utils.getWekaJFrame("Text Viewer", this);
+      m_resultsFrame = Utils.getWekaJFrame("Text Viewer", m_visual);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       final JScrollPane js = new JScrollPane(m_outText);
       js.setBorder(BorderFactory.createTitledBorder("Text"));
@@ -411,7 +411,7 @@ public class TextViewer extends JPanel implements TextListener,
         }
       });
       m_resultsFrame.pack();
-      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();

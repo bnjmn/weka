@@ -21,22 +21,13 @@
 
 package weka.gui.sql;
 
-import java.awt.BorderLayout;
-import java.awt.FlowLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.HashSet;
 import java.util.Iterator;
 
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.CaretEvent;
 import javax.swing.event.CaretListener;
 
@@ -67,7 +58,7 @@ public class ConnectionPanel extends JPanel implements CaretListener {
   /** the parent frame. */
   protected JFrame m_Parent = null;
 
-  /** the databae connection dialog. */
+  /** the database connection dialog. */
   protected DatabaseConnectionDialog m_DbDialog;
 
   /** the URL to use. */
@@ -352,8 +343,16 @@ public class ConnectionPanel extends JPanel implements CaretListener {
    * displays the database dialog.
    */
   protected void showDialog() {
-    m_DbDialog = new DatabaseConnectionDialog(m_Parent, getURL(), getUser(),
+    JFrame parent = m_Parent;
+    if (parent == null) {
+      Window window = SwingUtilities.getWindowAncestor(this);
+      if (window instanceof JFrame) {
+        parent = (JFrame)window;
+      }
+    }
+    m_DbDialog = new DatabaseConnectionDialog(parent, getURL(), getUser(),
       false);
+    m_DbDialog.setLocationRelativeTo(parent);
     m_DbDialog.setVisible(true);
     if (m_DbDialog.getReturnValue() == JOptionPane.OK_OPTION) {
       setURL(m_DbDialog.getURL());

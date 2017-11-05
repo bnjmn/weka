@@ -54,23 +54,7 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTable;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -829,8 +813,8 @@ public class GUIChooserApp extends JFrame {
     jMenuItemToolsSql.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        final SqlViewer sql = new SqlViewer(null);
         final JFrame frame = Utils.getWekaJFrame("SqlViewer", m_Self);
+        final SqlViewer sql = new SqlViewer(frame);
         frame.getContentPane().setLayout(new BorderLayout());
         frame.getContentPane().add(sql, BorderLayout.CENTER);
         frame.addWindowListener(new WindowAdapter() {

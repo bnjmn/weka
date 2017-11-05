@@ -21,11 +21,7 @@
 
 package weka.gui;
 
-import java.awt.BorderLayout;
-import java.awt.Container;
-import java.awt.Dimension;
-import java.awt.Frame;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.regex.Pattern;
@@ -79,10 +75,10 @@ public class ListSelectorDialog
   /**
    * Create the list selection dialog.
    *
-   * @param parentFrame the parent frame of the dialog
+   * @param parentFrame the parent window of the dialog
    * @param userList the JList component the user will select from
    */
-  public ListSelectorDialog(Frame parentFrame, JList userList) {
+  public ListSelectorDialog(Window parentFrame, JList userList) {
     
     super(parentFrame, "Select items", ModalityType.DOCUMENT_MODAL);
     m_List = userList;
@@ -130,6 +126,7 @@ public class ListSelectorDialog
     int height = getHeight() > screen.getHeight() 
                     ? (int) screen.getHeight() : getHeight();
     setSize(width, height);
+    setLocationRelativeTo(parentFrame);
   }
 
   /**

@@ -1464,7 +1464,7 @@ public class ClustererPanel extends AbstractPerspective implements
   }
 
   private void setIgnoreColumns() {
-    ListSelectorDialog jd = new ListSelectorDialog(null, m_ignoreKeyList);
+    ListSelectorDialog jd = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), m_ignoreKeyList);
 
     // Open the dialog
     int result = jd.showDialog();

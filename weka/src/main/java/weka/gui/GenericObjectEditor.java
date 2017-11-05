@@ -634,6 +634,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
               CapabilitiesFilterDialog dialog = new CapabilitiesFilterDialog();
               dialog.setCapabilities(m_CapabilitiesFilter);
               dialog.setPopup(m_Self);
+              dialog.setLocationRelativeTo(m_Self);
               dialog.setVisible(true);
               m_Support.firePropertyChange("", null, null);
               repaint();

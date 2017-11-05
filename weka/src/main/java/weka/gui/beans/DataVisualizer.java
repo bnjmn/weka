@@ -578,8 +578,7 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               + "visualization (DataVisualizer)");
             ex.printStackTrace();
           }
-          final JFrame jf = Utils.getWekaJFrame("Visualize", this);
-          jf.setSize(800, 600);
+          final JFrame jf = Utils.getWekaJFrame("Visualize", m_visual);
           jf.getContentPane().setLayout(new BorderLayout());
           jf.getContentPane().add(vis, BorderLayout.CENTER);
           jf.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -589,7 +588,9 @@ public class DataVisualizer extends JPanel implements DataSourceListener,
               m_framePoppedUp = false;
             }
           });
-          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+          jf.pack();
+          jf.setSize(800, 600);
+          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
           jf.setVisible(true);
           m_popupFrame = jf;
         } else {

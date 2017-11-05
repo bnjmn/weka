@@ -198,7 +198,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
       if (m_history == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = Utils.getWekaJFrame("Image Viewer", this);
+      m_resultsFrame = Utils.getWekaJFrame("Image Viewer", m_visual);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(new MainPanel(m_history, m_plotter),
         BorderLayout.CENTER);
@@ -210,7 +210,7 @@ public class ImageViewer extends JPanel implements ImageListener, BeanCommon,
         }
       });
       m_resultsFrame.pack();
-      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();

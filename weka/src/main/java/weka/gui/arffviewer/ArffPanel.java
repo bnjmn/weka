@@ -29,13 +29,7 @@ import weka.gui.ComponentHelper;
 import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
 
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.TableModelEvent;
@@ -770,7 +764,8 @@ public class ArffPanel extends JPanel implements ActionListener,
     int result;
 
     list = new JList(getAttributes());
-    dialog = new ListSelectorDialog(null, list);
+
+    dialog = new ListSelectorDialog(SwingUtilities.getWindowAncestor(this), list);
     result = dialog.showDialog();
 
     if (result != ListSelectorDialog.APPROVE_OPTION) {

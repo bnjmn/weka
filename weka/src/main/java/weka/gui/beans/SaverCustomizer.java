@@ -34,16 +34,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.IOException;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 
 import weka.core.Environment;
@@ -614,6 +605,7 @@ implements BeanCustomizer, CustomizerCloseRequester, EnvironmentHandler {
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
           m_fileChooserFrame = jf;
           jf.pack();
+          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SaverCustomizer.this));
           jf.setVisible(true);
         } catch (Exception ex) {
           ex.printStackTrace();

@@ -45,32 +45,7 @@ import weka.gui.LookAndFeel;
 import weka.gui.beans.xml.XMLBeans;
 import weka.gui.visualize.PrintablePanel;
 
-import javax.swing.AbstractAction;
-import javax.swing.AbstractButton;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.JToolBar;
-import javax.swing.JTree;
-import javax.swing.JWindow;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -3628,6 +3603,7 @@ public class KnowledgeFlowApp extends JPanel implements PropertyChangeListener,
      */
 
     d.pack();
+    d.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
     d.setVisible(true);
   }
 

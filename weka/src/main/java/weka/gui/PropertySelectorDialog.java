@@ -137,6 +137,7 @@ public class PropertySelectorDialog extends JDialog {
       TreeSelectionModel.SINGLE_TREE_SELECTION);
     c.add(new JScrollPane(m_Tree), BorderLayout.CENTER);
     pack();
+    setLocationRelativeTo(parentFrame);
   }
 
   /**

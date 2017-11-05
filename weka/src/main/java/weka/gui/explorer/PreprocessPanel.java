@@ -318,7 +318,12 @@ public class PreprocessPanel extends AbstractPerspective implements
     });
     m_OpenDBBut.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent e) {
-        SqlViewerDialog dialog = new SqlViewerDialog(null);
+        JFrame frame = null;
+        Window window = SwingUtilities.getWindowAncestor(PreprocessPanel.this);
+        if (window instanceof JFrame) {
+          frame = (JFrame)window;
+        }
+        SqlViewerDialog dialog = new SqlViewerDialog(frame);
         dialog.pack();
         dialog.setSize(800, 700);
         dialog.setIconImage(((Frame) SwingUtilities.getWindowAncestor(PreprocessPanel.this)).getIconImage());
@@ -1190,7 +1195,7 @@ public class PreprocessPanel extends AbstractPerspective implements
    * @param data the data to display
    */
   protected void showGeneratedInstances(String data) {
-    final JDialog dialog = new JDialog();
+    final JDialog dialog = new JDialog(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
     final JButton saveButton = new JButton("Save");
     final JButton closeButton = new JButton("Close");
     final JTextArea textData = new JTextArea(data);
@@ -1248,6 +1253,8 @@ public class PreprocessPanel extends AbstractPerspective implements
       dialog.getHeight() > screen.getHeight() * 0.8 ? (int) (screen.getHeight() * 0.8)
         : dialog.getHeight();
     dialog.setSize(width, height);
+    dialog.pack();
+    dialog.setLocationRelativeTo(SwingUtilities.getWindowAncestor(PreprocessPanel.this));
 
     // display dialog
     dialog.setVisible(true);

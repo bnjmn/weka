@@ -34,15 +34,7 @@ import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.util.Arrays;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.JScrollPane;
-import javax.swing.SwingConstants;
+import javax.swing.*;
 
 import weka.core.Environment;
 import weka.core.EnvironmentHandler;
@@ -593,6 +585,7 @@ public class LoaderCustomizer extends JPanel implements BeanCustomizer,
           jf.getContentPane().add(m_fileChooser, BorderLayout.CENTER);
           m_fileChooserFrame = jf;
           jf.pack();
+          jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(LoaderCustomizer.this));
           jf.setVisible(true);
         } catch (Exception ex) {
           ex.printStackTrace();

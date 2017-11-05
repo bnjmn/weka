@@ -131,6 +131,7 @@ public class ViewerDialog
     panel.add(m_CancelButton);
 
     pack();
+    setLocationRelativeTo(getParent());
   }
   
   /**

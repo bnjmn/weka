@@ -149,7 +149,7 @@ public class PropertyDialog
       setSize(getWidth(), (int) ((double) screenHeight * 0.95));
     
     if ((x == -1) && (y == -1)) {
-      setLocationRelativeTo(null);
+      setLocationRelativeTo(getOwner());
     }
     else {
       // adjust position if necessary

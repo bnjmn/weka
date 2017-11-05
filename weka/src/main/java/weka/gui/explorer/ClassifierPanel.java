@@ -513,12 +513,12 @@ public class ClassifierPanel extends AbstractPerspective implements
             m_SetCostsFrame =
               new PropertyDialog(PropertyDialog
                 .getParentDialog(ClassifierPanel.this), m_CostMatrixEditor,
-                100, 100);
+                -1, -1);
           } else {
             m_SetCostsFrame =
               new PropertyDialog(PropertyDialog
-                .getParentFrame(ClassifierPanel.this), m_CostMatrixEditor, 100,
-                100);
+                .getParentFrame(ClassifierPanel.this), m_CostMatrixEditor, -1,
+                -1);
           }
           m_SetCostsFrame.setTitle("Cost Matrix Editor");
           // pd.setSize(250,150);

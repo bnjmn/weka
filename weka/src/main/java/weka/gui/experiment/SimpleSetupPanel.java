@@ -41,11 +41,7 @@ import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-import java.awt.BorderLayout;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.GridLayout;
-import java.awt.Insets;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -1185,7 +1181,9 @@ public class SimpleSetupPanel
   private void chooseURLUsername() {
     String dbaseURL=((DatabaseResultListener)m_Exp.getResultListener()).getDatabaseURL();
     String username=((DatabaseResultListener)m_Exp.getResultListener()).getUsername();
-    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog(null,dbaseURL,username);
+    DatabaseConnectionDialog dbd= new DatabaseConnectionDialog((Frame)SwingUtilities.
+            getWindowAncestor(SimpleSetupPanel.this),dbaseURL,username);
+    dbd.setLocationRelativeTo(SwingUtilities.getWindowAncestor(SimpleSetupPanel.this));
     dbd.setVisible(true);
       
     //if (dbaseURL == null) {

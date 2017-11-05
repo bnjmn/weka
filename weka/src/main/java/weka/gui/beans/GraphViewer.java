@@ -252,7 +252,7 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
       if (m_history == null) {
         setUpResultHistory();
       }
-      m_resultsFrame = Utils.getWekaJFrame("Graph Viewer", this);
+      m_resultsFrame = Utils.getWekaJFrame("Graph Viewer", m_visual);
       m_resultsFrame.getContentPane().setLayout(new BorderLayout());
       m_resultsFrame.getContentPane().add(m_history, BorderLayout.CENTER);
       m_resultsFrame.addWindowListener(new java.awt.event.WindowAdapter() {
@@ -263,7 +263,7 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
         }
       });
       m_resultsFrame.pack();
-      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
+      m_resultsFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_resultsFrame.setVisible(true);
     } else {
       m_resultsFrame.toFront();
@@ -282,9 +282,8 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
     grphString = (String) graph.get(graph.size() - 1);
 
     if (grphType == Drawable.TREE) {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Tree Visualizer: " + name);
-      jf.setSize(500, 400);
+      final javax.swing.JFrame jf = Utils.getWekaJFrame(
+        "Weka Classifier Tree Visualizer: " + name, m_resultsFrame);
       jf.getContentPane().setLayout(new BorderLayout());
       TreeVisualizer tv = new TreeVisualizer(null, grphString, new PlaceNode2());
       jf.getContentPane().add(tv, BorderLayout.CENTER);
@@ -294,13 +293,14 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
           jf.dispose();
         }
       });
-
+      jf.pack();
+      jf.setSize(500, 400);
+      jf.setLocationRelativeTo(m_resultsFrame);
       jf.setVisible(true);
     }
     if (grphType == Drawable.BayesNet) {
-      final javax.swing.JFrame jf = new javax.swing.JFrame(
-        "Weka Classifier Graph Visualizer: " + name);
-      jf.setSize(500, 400);
+      final javax.swing.JFrame jf = Utils.getWekaJFrame(
+        "Weka Classifier Graph Visualizer: " + name, m_resultsFrame);
       jf.getContentPane().setLayout(new BorderLayout());
       GraphVisualizer gv = new GraphVisualizer();
       try {
@@ -317,7 +317,9 @@ public class GraphViewer extends JPanel implements Visible, GraphListener,
           jf.dispose();
         }
       });
-
+      jf.pack();
+      jf.setSize(500, 400);
+      jf.setLocationRelativeTo(m_resultsFrame);
       jf.setVisible(true);
     }
   }
