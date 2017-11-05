@@ -462,7 +462,7 @@ public class StripChart extends JPanel implements ChartListener,
    */
   public void showChart() {
     if (m_outputFrame == null) {
-      m_outputFrame = Utils.getWekaJFrame("Strip Chart", this);
+      m_outputFrame = Utils.getWekaJFrame("Strip Chart", m_visual);
       m_outputFrame.getContentPane().setLayout(new BorderLayout());
       JPanel panel = new JPanel(new BorderLayout());
       new PrintableComponent(panel);
@@ -497,7 +497,7 @@ public class StripChart extends JPanel implements ChartListener,
       m_outputFrame.pack();
       m_outputFrame.setSize(600, 150);
       m_outputFrame.setResizable(false);
-      m_outputFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(StripChart.this));
+      m_outputFrame.setLocationRelativeTo(SwingUtilities.getWindowAncestor(m_visual));
       m_outputFrame.setVisible(true);
       m_outputFrame.setAlwaysOnTop(true);
       // m_outputFrame.setLocationByPlatform(true);
