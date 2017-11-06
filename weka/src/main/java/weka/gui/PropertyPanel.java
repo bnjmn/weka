@@ -265,16 +265,17 @@ public class PropertyPanel extends JPanel {
 
     if (m_Editor.getValue() != null) {
       if (m_PD == null) {
-        int x = getLocationOnScreen().x;
-        int y = getLocationOnScreen().y;
         if (PropertyDialog.getParentDialog(this) != null)
-          m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
-              m_Editor, x, y);
+          m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this), m_Editor, -1, -1);
         else
-          m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
-              m_Editor, x, y);
+          m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this), m_Editor, -1, -1);
         m_PD.setVisible(true);
       } else {
+        if (PropertyDialog.getParentDialog(this) != null) {
+          m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
+        } else {
+          m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
+        }
         m_PD.setVisible(true);
       }
       // make sure that m_Backup is correctly initialized!

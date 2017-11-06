@@ -147,16 +147,12 @@ public class GenericArrayEditor implements PropertyEditor {
             m_Editor.setValue(m_ElementList.getSelectedValue());
           }
           if (m_Editor.getValue() != null) {
-            int x = getLocationOnScreen().x;
-            int y = getLocationOnScreen().y;
             if (PropertyDialog.getParentDialog(CustomEditor.this) != null) {
               m_PD = new PropertyDialog(
-                PropertyDialog.getParentDialog(CustomEditor.this), m_Editor, x,
-                y);
+                PropertyDialog.getParentDialog(CustomEditor.this), m_Editor, -1, -1);
             } else {
               m_PD = new PropertyDialog(
-                PropertyDialog.getParentFrame(CustomEditor.this), m_Editor, x,
-                y);
+                PropertyDialog.getParentFrame(CustomEditor.this), m_Editor, -1, -1);
             }
             m_PD.setVisible(true);
             if (!(m_Editor instanceof GenericObjectEditor)

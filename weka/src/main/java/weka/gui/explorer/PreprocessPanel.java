@@ -1283,12 +1283,10 @@ public class PreprocessPanel extends AbstractPerspective implements
     PropertyDialog pd;
     if (PropertyDialog.getParentDialog(this) != null)
       pd =
-        new PropertyDialog(PropertyDialog.getParentDialog(this), convEd, 100,
-          100);
+        new PropertyDialog(PropertyDialog.getParentDialog(this), convEd, -1, -1);
     else
       pd =
-        new PropertyDialog(PropertyDialog.getParentFrame(this), convEd, 100,
-          100);
+        new PropertyDialog(PropertyDialog.getParentFrame(this), convEd, -1, -1);
     pd.setVisible(true);
   }
 

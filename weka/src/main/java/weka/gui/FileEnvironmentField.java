@@ -238,17 +238,20 @@ public class FileEnvironmentField extends EnvironmentField {
 
   private void showFileEditor() {
     if (m_fileEditorDialog == null) {
-      int x = getLocationOnScreen().x;
-      int y = getLocationOnScreen().y;
       if (PropertyDialog.getParentDialog(this) != null) {
         m_fileEditorDialog =
           new PropertyDialog(PropertyDialog.getParentDialog(this),
-            m_fileEditor, x, y);
+            m_fileEditor, -1, -1);
       } else {
-        m_fileEditorDialog =
+       m_fileEditorDialog =
           new PropertyDialog(PropertyDialog.getParentFrame(this), m_fileEditor,
-            x, y);
+            -1, -1);
       }
+    }
+    if (PropertyDialog.getParentDialog(this) != null) {
+      m_fileEditorDialog.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
+    } else {
+      m_fileEditorDialog.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
     }
     m_fileEditorDialog.setVisible(true);
   }

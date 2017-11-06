@@ -750,10 +750,10 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
               PropertyDialog pd;
               if (PropertyDialog.getParentDialog(GUI.this) != null) {
                 pd = new PropertyDialog(PropertyDialog
-                  .getParentDialog(GUI.this), ce, 100, 100);
+                  .getParentDialog(GUI.this), ce, -1, -1);
               } else {
                 pd = new PropertyDialog(
-                  PropertyDialog.getParentFrame(GUI.this), ce, 100, 100);
+                  PropertyDialog.getParentFrame(GUI.this), ce, -1, -1);
               }
               pd.addWindowListener(new WindowAdapter() {
                 @Override

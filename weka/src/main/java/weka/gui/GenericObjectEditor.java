@@ -53,14 +53,7 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
-import java.awt.BorderLayout;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.FontMetrics;
-import java.awt.Frame;
-import java.awt.GridLayout;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
@@ -700,15 +693,25 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       super.show(invoker, x, y);
 
       // calculate available screen area for popup
-      java.awt.Point location = getLocationOnScreen();
-      java.awt.Dimension screenSize = getToolkit().getScreenSize();
-      int maxWidth = (int) (screenSize.getWidth() - location.getX());
-      int maxHeight = (int) (screenSize.getHeight() - location.getY());
+      Rectangle r = new Rectangle();
+      GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      GraphicsDevice[] gs = ge.getScreenDevices();
+      for (int j = 0; j < gs.length; j++) {
+        GraphicsDevice gd = gs[j];
+        GraphicsConfiguration[] gc = gd.getConfigurations();
+        for (int i =0 ; i < gc.length; i++) {
+          r = r.union(gc[i].getBounds());
+        }
+      }
+
+      java.awt.Point location = invoker.getLocationOnScreen();
+      int maxWidth = (int) (r.getX() + r.getWidth() - location.getX());
+      int maxHeight = (int) (r.getY() + r.getHeight() - location.getY());
 
       // if the part of the popup goes off the screen then resize it
-      Dimension scrollerSize = m_scroller.getPreferredSize();
-      int height = (int) scrollerSize.getHeight();
-      int width = (int) scrollerSize.getWidth();
+      Dimension size = getPreferredSize();
+      int height = (int) size.getHeight();
+      int width = (int) size.getWidth();
       if (width > maxWidth) {
         width = maxWidth;
       }
@@ -717,7 +720,8 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       }
 
       // commit any size changes
-      m_scroller.setPreferredSize(new Dimension(width, height));
+      setPreferredSize(new Dimension(width, height));
+      setLocation(location);
       revalidate();
       pack();
     }

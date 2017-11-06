@@ -509,16 +509,12 @@ public class ClassifierPanel extends AbstractPerspective implements
       public void actionPerformed(ActionEvent e) {
         m_SetCostsBut.setEnabled(false);
         if (m_SetCostsFrame == null) {
-          if (PropertyDialog.getParentDialog(ClassifierPanel.this) != null) {
+          if (PropertyDialog.getParentDialog(m_SetCostsBut) != null) {
             m_SetCostsFrame =
-              new PropertyDialog(PropertyDialog
-                .getParentDialog(ClassifierPanel.this), m_CostMatrixEditor,
-                -1, -1);
+              new PropertyDialog(PropertyDialog.getParentDialog(m_SetCostsBut), m_CostMatrixEditor, -1, -1);
           } else {
             m_SetCostsFrame =
-              new PropertyDialog(PropertyDialog
-                .getParentFrame(ClassifierPanel.this), m_CostMatrixEditor, -1,
-                -1);
+              new PropertyDialog(PropertyDialog.getParentFrame(m_SetCostsBut), m_CostMatrixEditor, -1, -1);
           }
           m_SetCostsFrame.setTitle("Cost Matrix Editor");
           // pd.setSize(250,150);
@@ -532,7 +528,6 @@ public class ClassifierPanel extends AbstractPerspective implements
               }
             }
           });
-          m_SetCostsFrame.setVisible(true);
         }
 
         // do we need to change the size of the matrix?
@@ -543,6 +538,11 @@ public class ClassifierPanel extends AbstractPerspective implements
           m_CostMatrixEditor.setValue(new CostMatrix(numClasses));
         }
 
+        if (PropertyDialog.getParentDialog(m_SetCostsBut) != null) {
+          m_SetCostsFrame.setLocationRelativeTo(PropertyDialog.getParentDialog(m_SetCostsBut));
+        } else {
+          m_SetCostsFrame.setLocationRelativeTo(PropertyDialog.getParentFrame(m_SetCostsBut));
+        }
         m_SetCostsFrame.setVisible(true);
       }
     });
@@ -3407,7 +3407,7 @@ public class ClassifierPanel extends AbstractPerspective implements
             ClassifierPanelDefaults.PERCENTAGE_SPLIT,
             Environment.getSystemWide()));
 
-        // TODO these widgets will disapear, as the "More options" dialog will
+        // TODO these widgets will disappear, as the "More options" dialog will
         // not be necessary
         m_OutputModelBut.setSelected(getMainApplication()
           .getApplicationSettings().getSetting(getPerspectiveID(),

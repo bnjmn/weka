@@ -36,6 +36,7 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JRadioButton;
 
+import weka.core.Utils;
 import weka.experiment.Experiment;
 import weka.experiment.RemoteExperiment;
 
@@ -186,7 +187,7 @@ public class DistributeExperimentPanel
    */
   private void popupHostPanel() {
     try {
-      final JFrame jf = new JFrame("Edit host names");
+      final JFrame jf = Utils.getWekaJFrame("Edit host names", this);
       
       jf.getContentPane().setLayout(new BorderLayout());
       jf.getContentPane().add(m_hostList,
@@ -197,6 +198,7 @@ public class DistributeExperimentPanel
 	  }
 	});
       jf.pack();
+      jf.setLocationRelativeTo(this);
       jf.setVisible(true);
     } catch (Exception ex) {
       ex.printStackTrace();

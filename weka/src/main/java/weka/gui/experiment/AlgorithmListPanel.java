@@ -532,17 +532,20 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
     if (e.getSource() == m_AddBut) {
       m_Editing = false;
       if (m_PD == null) {
-        int x = getLocationOnScreen().x;
-        int y = getLocationOnScreen().y;
         if (PropertyDialog.getParentDialog(this) != null) {
           m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
-            m_ClassifierEditor, x, y);
+            m_ClassifierEditor, -1, -1);
         } else {
           m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
-            m_ClassifierEditor, x, y);
+            m_ClassifierEditor, -1, -1);
         }
         m_PD.setVisible(true);
       } else {
+        if (PropertyDialog.getParentDialog(this) != null) {
+          m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
+        } else {
+          m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
+        }
         m_PD.setVisible(true);
       }
 
@@ -557,13 +560,18 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
           int y = getLocationOnScreen().y;
           if (PropertyDialog.getParentDialog(this) != null) {
             m_PD = new PropertyDialog(PropertyDialog.getParentDialog(this),
-              m_ClassifierEditor, x, y);
+              m_ClassifierEditor, -1, -1);
           } else {
             m_PD = new PropertyDialog(PropertyDialog.getParentFrame(this),
-              m_ClassifierEditor, x, y);
+              m_ClassifierEditor, -1, -1);
           }
           m_PD.setVisible(true);
         } else {
+          if (PropertyDialog.getParentDialog(this) != null) {
+            m_PD.setLocationRelativeTo(PropertyDialog.getParentDialog(this));
+          } else {
+            m_PD.setLocationRelativeTo(PropertyDialog.getParentFrame(this));
+          }
           m_PD.setVisible(true);
         }
       }
