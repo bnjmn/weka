@@ -1145,8 +1145,10 @@ public class PreprocessPanel extends AbstractPerspective implements
               .setToolTipText("Generates the dataset according the settings.");
             generateButton.addActionListener(new ActionListener() {
               public void actionPerformed(ActionEvent evt) {
+                boolean showOutput = showOutputCheckBox.isSelected();
+
                 // generate
-                generatorPanel.execute();
+                generatorPanel.execute(showOutput);
                 boolean generated = (generatorPanel.getInstances() != null);
                 if (generated)
                   setInstances(generatorPanel.getInstances());
@@ -1158,7 +1160,7 @@ public class PreprocessPanel extends AbstractPerspective implements
                 m_DataGenerator = generatorPanel.getGenerator();
 
                 // display output?
-                if ((generated) && (showOutputCheckBox.isSelected()))
+                if ((generated) && (showOutput))
                   showGeneratedInstances(generatorPanel.getOutput());
               }
             });

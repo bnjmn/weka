@@ -674,6 +674,59 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   }
 
   /**
+   * Gets the prologue string.
+   *
+   * @return prologue
+   */
+  public String getPrologue() throws Exception {
+
+    StringBuilder sb = new StringBuilder();
+
+    // output of options
+    sb.append("%");
+    sb.append("% Commandline");
+    sb.append("%");
+    sb.append("% " + getClass().getName() + " "  + Utils.joinOptions(getOptions()));
+    sb.append("%");
+
+    // comment at beginning of ARFF File
+    String commentAtStart = generateStart();
+
+    if (commentAtStart.length() > 0) {
+      sb.append("%");
+      sb.append("% Prologue");
+      sb.append("%");
+      sb.append(commentAtStart.trim());
+      sb.append("%");
+    }
+
+    return sb.toString();
+  }
+
+  /**
+   * Gets the epilogue string.
+   *
+   * @return epilogue
+   */
+  public String getEpilogue() throws Exception {
+
+    StringBuilder sb = new StringBuilder();
+
+    // comment at end of ARFF File
+    String commentAtEnd = generateFinished();
+
+    if (commentAtEnd.length() > 0) {
+      sb.append("%");
+      sb.append("% Epilogue");
+      sb.append("%");
+      sb.append(commentAtEnd.trim());
+      sb.append("%");
+    }
+
+    return sb.toString();
+  }
+
+  /**
    * Calls the data generator.
    * 
    * @param generator one of the data generators
@@ -683,12 +736,8 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
   public static void makeData(DataGenerator generator, String[] options)
     throws Exception {
 
-    boolean printhelp;
-    Vector<String> unknown;
-    int i;
-
     // help?
-    printhelp = (Utils.getFlag('h', options));
+    boolean printhelp = (Utils.getFlag('h', options));
 
     // read options
     if (!printhelp) {
@@ -697,15 +746,15 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
         generator.setOptions(options);
 
         // check for left-over options, but don't raise exception
-        unknown = new Vector<String>();
-        for (i = 0; i < options.length; i++) {
+        Vector<String> unknown = new Vector<String>();
+        for (int i = 0; i < options.length; i++) {
           if (options[i].length() != 0) {
             unknown.add(options[i]);
           }
         }
         if (unknown.size() > 0) {
           System.out.print("Unknown options:");
-          for (i = 0; i < unknown.size(); i++) {
+          for (int i = 0; i < unknown.size(); i++) {
             System.out.print(" " + unknown.get(i));
           }
           System.out.println();
@@ -725,27 +774,9 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     // computes actual number of examples to be produced
     generator.setDatasetFormat(generator.defineDataFormat());
 
-    // get print writer
+    // get print writer and print header
     PrintWriter output = generator.getOutput();
-
-    // output of options
-    output.println("%");
-    output.println("% Commandline");
-    output.println("%");
-    output.println("% " + generator.getClass().getName() + " "
-      + Utils.joinOptions(generator.getOptions()));
-    output.println("%");
-
-    // comment at beginning of ARFF File
-    String commentAtStart = generator.generateStart();
-
-    if (commentAtStart.length() > 0) {
-      output.println("%");
-      output.println("% Prologue");
-      output.println("%");
-      output.println(commentAtStart.trim());
-      output.println("%");
-    }
+    output.println(generator.getPrologue());
 
     // ask data generator which mode
     boolean singleMode = generator.getSingleModeFlag();
@@ -754,33 +785,23 @@ public abstract class DataGenerator implements OptionHandler, Randomizable,
     if (singleMode) {
       // output of dataset header
       output.println(generator.toStringFormat());
-      for (i = 0; i < generator.getNumExamplesAct(); i++) {
+      for (int i = 0; i < generator.getNumExamplesAct(); i++) {
         // over all examples to be produced
-        Instance inst = generator.generateExample();
-        output.println(inst);
+        output.println(generator.generateExample());
       }
     } else { // generator produces all instances at once
       Instances data = generator.generateExamples();
       // output of dataset
-      for (i = 0; i < data.numInstances(); i++) {
-	if (i % 1000 == 0) {
+      for (int i = 0; i < data.numInstances(); i++) {
+        if (i % 1000 == 0) {
           output.flush();
         }
         output.println(data.instance(i));
       }
       output.flush();
     }
-    // comment at end of ARFF File
-    String commentAtEnd = generator.generateFinished();
 
-    if (commentAtEnd.length() > 0) {
-      output.println("%");
-      output.println("% Epilogue");
-      output.println("%");
-      output.println(commentAtEnd.trim());
-      output.println("%");
-    }
-
+    output.println(generator.getEpilogue());
     output.flush();
 
     if (generator.getOutput() != generator.defaultOutput()) {
