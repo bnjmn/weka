@@ -21,13 +21,7 @@
 package weka.core;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Properties;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.converters.ConverterUtils.DataSource;
 
@@ -81,6 +75,59 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
 
   /** the actual properties */
   protected static Properties PROPERTIES;
+
+  /** Capabilities defined by interfaces */
+  protected static HashSet<Class> INTERFACE_DEFINED_CAPABILITIES;
+
+  /** whether to perform any tests at all */
+  protected static boolean TEST;
+
+  /** whether to perform data based tests */
+  protected static boolean INSTANCES_TEST;
+
+  /** whether to perform attribute based tests */
+  protected static boolean ATTRIBUTE_TEST;
+
+  /** whether to test for missing values */
+  protected static boolean MISSING_VALUES_TEST;
+
+  /** whether to test for missing class values */
+  protected static boolean MISSING_CLASS_VALUES_TEST;
+
+  /** whether to test for minimum number of instances */
+  protected static boolean MINIMUM_NUMBER_INSTANCES_TEST;
+
+  static {
+    // load properties
+    if (PROPERTIES == null) {
+      try {
+        PROPERTIES = Utils.readProperties(PROPERTIES_FILE);
+
+        TEST = Boolean.parseBoolean(PROPERTIES.getProperty("Test", "true"));
+        INSTANCES_TEST = Boolean.parseBoolean(PROPERTIES.getProperty(
+                "InstancesTest", "true")) && TEST;
+        ATTRIBUTE_TEST = Boolean.parseBoolean(PROPERTIES.getProperty(
+                "AttributeTest", "true")) && TEST;
+        MISSING_VALUES_TEST = Boolean.parseBoolean(PROPERTIES.getProperty(
+                "MissingValuesTest", "true")) && TEST;
+        MISSING_CLASS_VALUES_TEST = Boolean.parseBoolean(PROPERTIES.getProperty(
+                "MissingClassValuesTest", "true")) && TEST;
+        MINIMUM_NUMBER_INSTANCES_TEST = Boolean.parseBoolean(PROPERTIES.getProperty(
+                "MinimumNumberInstancesTest", "true")) && TEST;
+
+        INTERFACE_DEFINED_CAPABILITIES = new HashSet<Class>();
+        for (String key : PROPERTIES.stringPropertyNames()) {
+          if (key.endsWith("InterfaceCapability")) {
+            INTERFACE_DEFINED_CAPABILITIES.add(Class.forName(PROPERTIES.getProperty(key)));
+          }
+        }
+
+      } catch (Exception e) {
+        e.printStackTrace();
+        PROPERTIES = new Properties();
+      }
+    }
+  }
 
   /** defines an attribute type */
   private final static int ATTRIBUTE = 1;
@@ -216,7 +263,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     public String toString() {
       return m_Display;
     }
-  };
+  }
 
   /** the object that owns this capabilities instance */
   protected CapabilitiesHandler m_Owner;
@@ -227,6 +274,9 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   /** the hashset for storing dependent capabilities, eg for meta-classifiers */
   protected HashSet<Capability> m_Dependencies;
 
+  /** the interface-defined capabilities*/
+  protected HashSet<Class> m_InterfaceDefinedCapabilities;
+
   /** the reason why the test failed, used to throw an exception */
   protected Exception m_FailReason = null;
 
@@ -234,22 +284,22 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   protected int m_MinimumNumberInstances = 1;
 
   /** whether to perform any tests at all */
-  protected boolean m_Test;
+  protected boolean m_Test = TEST;
 
   /** whether to perform data based tests */
-  protected boolean m_InstancesTest;
+  protected boolean m_InstancesTest = INSTANCES_TEST;
 
   /** whether to perform attribute based tests */
-  protected boolean m_AttributeTest;
+  protected boolean m_AttributeTest = ATTRIBUTE_TEST;
 
   /** whether to test for missing values */
-  protected boolean m_MissingValuesTest;
+  protected boolean m_MissingValuesTest = MISSING_VALUES_TEST;
 
   /** whether to test for missing class values */
-  protected boolean m_MissingClassValuesTest;
+  protected boolean m_MissingClassValuesTest = MISSING_CLASS_VALUES_TEST;
 
   /** whether to test for minimum number of instances */
-  protected boolean m_MinimumNumberInstancesTest;
+  protected boolean m_MinimumNumberInstancesTest = MINIMUM_NUMBER_INSTANCES_TEST;
 
   /**
    * initializes the capabilities for the given owner
@@ -268,28 +318,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     if (doNotCheckCapabilities()) {
       return;
     }
-
-    // load properties
-    if (PROPERTIES == null) {
-      try {
-        PROPERTIES = Utils.readProperties(PROPERTIES_FILE);
-      } catch (Exception e) {
-        e.printStackTrace();
-        PROPERTIES = new Properties();
-      }
-    }
-
-    m_Test = Boolean.parseBoolean(PROPERTIES.getProperty("Test", "true"));
-    m_InstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty(
-      "InstancesTest", "true")) && m_Test;
-    m_AttributeTest = Boolean.parseBoolean(PROPERTIES.getProperty(
-      "AttributeTest", "true")) && m_Test;
-    m_MissingValuesTest = Boolean.parseBoolean(PROPERTIES.getProperty(
-      "MissingValuesTest", "true")) && m_Test;
-    m_MissingClassValuesTest = Boolean.parseBoolean(PROPERTIES.getProperty(
-      "MissingClassValuesTest", "true")) && m_Test;
-    m_MinimumNumberInstancesTest = Boolean.parseBoolean(PROPERTIES.getProperty(
-      "MinimumNumberInstancesTest", "true")) && m_Test;
 
     if (owner instanceof weka.classifiers.UpdateableClassifier
       || owner instanceof weka.clusterers.UpdateableClusterer) {
@@ -354,6 +382,8 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     }
 
     setMinimumNumberInstances(c.getMinimumNumberInstances());
+
+    m_InterfaceDefinedCapabilities = new HashSet(c.m_InterfaceDefinedCapabilities);
   }
 
   /**
@@ -388,6 +418,14 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     if (c.getMinimumNumberInstances() > getMinimumNumberInstances()) {
       setMinimumNumberInstances(c.getMinimumNumberInstances());
     }
+
+    HashSet<Class> intersection = new HashSet<Class>();
+    for (Class cl : c.m_InterfaceDefinedCapabilities) {
+      if (m_InterfaceDefinedCapabilities.contains(cl)) {
+        intersection.add(cl);
+      }
+    }
+    m_InterfaceDefinedCapabilities = intersection;
   }
 
   /**
@@ -421,11 +459,13 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     if (c.getMinimumNumberInstances() < getMinimumNumberInstances()) {
       setMinimumNumberInstances(c.getMinimumNumberInstances());
     }
+
+    m_InterfaceDefinedCapabilities.addAll(c.m_InterfaceDefinedCapabilities);
   }
 
   /**
    * Returns true if the currently set capabilities support at least all of the
-   * capabiliites of the given Capabilities object (checks only the enum!)
+   * capabilities of the given Capabilities object (checks only the enum!)
    * 
    * @param c the capabilities to support at least
    * @return true if all the requested capabilities are supported
@@ -437,18 +477,20 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       return true;
     }
 
-    boolean result;
-
-    result = true;
-
     for (Capability cap : Capability.values()) {
       if (c.handles(cap) && !handles(cap)) {
-        result = false;
-        break;
+        return false;
       }
     }
 
-    return result;
+    // Check interface-based capabilities
+    for (Class cl : c.m_InterfaceDefinedCapabilities) {
+      if (!m_InterfaceDefinedCapabilities.contains(cl)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -467,18 +509,20 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       return true;
     }
 
-    boolean result;
-
-    result = true;
-
     for (Capability cap : Capability.values()) {
       if (c.handles(cap) && !(handles(cap) || hasDependency(cap))) {
-        result = false;
-        break;
+        return false;
       }
     }
 
-    return result;
+    // Check interface-based capabilities
+    for (Class cl : c.m_InterfaceDefinedCapabilities) {
+      if (!m_InterfaceDefinedCapabilities.contains(cl)) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -488,6 +532,14 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void setOwner(CapabilitiesHandler value) {
     m_Owner = value;
+    m_InterfaceDefinedCapabilities = new HashSet<Class>();
+    if (m_Owner != null) {
+      for (Class c : INTERFACE_DEFINED_CAPABILITIES) {
+        if (c.isInstance(m_Owner)) {
+          m_InterfaceDefinedCapabilities.add(c);
+        }
+      }
+    }
   }
 
   /**
@@ -1209,6 +1261,19 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   }
 
   /**
+   * Gets the class for the given name. Return Object if class is not found.
+   */
+  protected static Class getClass(String name) {
+
+    try {
+      return Class.forName(name);
+    } catch (Exception ex) {
+      System.err.println("Class: " + name + " not found in Capabilities");
+      return new Object().getClass();
+    }
+  }
+
+  /**
    * Tests a certain range of attributes of the given data, whether it can be
    * processed by the handler, given its capabilities. Classifiers implementing
    * the <code>MultiInstanceCapabilitiesHandler</code> interface are checked
@@ -1265,6 +1330,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       && (data.classIndex() <= toIndex);
 
     // attributes
+    Class weightedAttributesHandler = getClass("weka.core.WeightedAttributesHandler");
     for (i = fromIndex; i <= toIndex; i++) {
       att = data.attribute(i);
 
@@ -1276,6 +1342,15 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       // check attribute types
       if (!test(att)) {
         return false;
+      }
+
+      if (att.weight() != 1.0) {
+        if (INTERFACE_DEFINED_CAPABILITIES.contains(weightedAttributesHandler) &&
+                !m_InterfaceDefinedCapabilities.contains(weightedAttributesHandler)) {
+          m_FailReason = new WekaException(createMessage("Some attribute weights are not equal to 1 and " +
+            "scheme does not implement the WeightedAttributesHandler interface!"));
+          return false;
+        }
       }
     }
 
@@ -1342,13 +1417,23 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       }
     }
 
-    // missing values
-    if (m_MissingValuesTest) {
-      if (!handles(Capability.MISSING_VALUES)) {
-        missing = false;
-        for (i = 0; i < data.numInstances(); i++) {
-          inst = data.instance(i);
+    // missing values and instance weights
+    missing = false;
+    Class weightedInstancesHandler = getClass("weka.core.WeightedInstancesHandler");
+    for (i = 0; i < data.numInstances(); i++) {
+      inst = data.instance(i);
 
+      if (inst.weight() != 1.0) {
+        if (INTERFACE_DEFINED_CAPABILITIES.contains(weightedInstancesHandler) &&
+                !m_InterfaceDefinedCapabilities.contains(weightedInstancesHandler)) {
+          m_FailReason = new WekaException(createMessage("Some instance weights are not equal to 1 and " +
+                  "scheme does not implement the WeightedInstancesHandler interface!"));
+          return false;
+        }
+      }
+
+      if (m_MissingValuesTest) {
+        if (!handles(Capability.MISSING_VALUES)) {
           if (inst instanceof SparseInstance) {
             for (m = 0; m < inst.numValues(); m++) {
               n = inst.index(m);
@@ -1386,8 +1471,7 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
           }
 
           if (missing) {
-            m_FailReason = new NoSupportForMissingValuesException(
-              createMessage("Cannot handle missing values!"));
+            m_FailReason = new NoSupportForMissingValuesException(createMessage("Cannot handle missing values!"));
             return false;
           }
         }
@@ -1509,6 +1593,79 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
   }
 
   /**
+   * returns a comma-separated list of all the capabilities, excluding interface-based ones.
+   * @return the string describing the capabilities
+   */
+  public String listCapabilities() {
+
+    Iterator<Capability> iter = capabilities();
+    ArrayList<String> caps = new ArrayList();
+    while (iter.hasNext()) {
+      caps.add(iter.next().toString());
+    }
+    Collections.sort(caps);
+    String s = caps.toString();
+    return s.substring(1, s.length() - 1);
+  }
+
+  /**
+   * generates a string from the capabilities, suitable to add to the help
+   * text.
+   *
+   * @param title the title for the capabilities
+   * @return a string describing the capabilities
+   */
+  public String addCapabilities(String title) {
+    String result;
+    String caps;
+
+    result = title + "\n";
+
+    // class
+    caps = getClassCapabilities().listCapabilities();
+    if (caps.length() != 0) {
+      result += "Class -- ";
+      result += caps;
+      result += "\n\n";
+    }
+
+    // attribute
+    caps = getAttributeCapabilities().listCapabilities();
+    if (caps.length() != 0) {
+      result += "Attributes -- ";
+      result += caps;
+      result += "\n\n";
+    }
+
+    // other capabilities
+    caps = getOtherCapabilities().listCapabilities();
+    if (caps.length() != 0) {
+      result += "Other -- ";
+      result += caps;
+      result += "\n\n";
+    }
+
+    // interface-defined capabilities
+    ArrayList<String> interfaceNames = new ArrayList<String>();
+    for (Class c : m_InterfaceDefinedCapabilities) {
+      interfaceNames.add(c.getSimpleName());
+    }
+    Collections.sort(interfaceNames);
+    if (interfaceNames.size() > 0) {
+      result += "Interfaces -- ";
+      String s = interfaceNames.toString();
+      result += s.substring(1, s.length() - 1);
+      result += "\n\n";
+    }
+
+    // additional stuff
+    result += "Additional\n";
+    result += "Minimum number of instances: " + getMinimumNumberInstances() + "\n";
+    result += "\n";
+
+    return result;
+  }
+  /**
    * returns a string representation of the capabilities
    * 
    * @return a string representation of this object
@@ -1531,8 +1688,16 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     Collections.sort(sorted);
     result.append("Dependencies: " + sorted.toString() + "\n");
 
+    // interface-defined capabilities
+    ArrayList<String> interfaceNames = new ArrayList<String>();
+    for (Class c : m_InterfaceDefinedCapabilities) {
+      interfaceNames.add(c.getSimpleName());
+    }
+    Collections.sort(interfaceNames);
+    result.append("Interfaces: " + interfaceNames.toString() + "\n");
+
     // other stuff
-    result.append("min # Instance: " + getMinimumNumberInstances() + "\n");
+    result.append("Minimum number of instances: " + getMinimumNumberInstances() + "\n");
 
     return result.toString();
   }
@@ -1671,6 +1836,8 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
 
     result = new Capabilities(null);
 
+    result.m_InterfaceDefinedCapabilities = new HashSet<Class>();
+
     // class
     if (data.classIndex() == -1) {
       result.enable(Capability.NO_CLASS);
@@ -1717,10 +1884,15 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     }
 
     // attributes
+    Class weightedAttributesHandler = getClass("weka.core.WeightedAttributesHandler");
     for (i = 0; i < data.numAttributes(); i++) {
       // skip class
       if (i == data.classIndex()) {
         continue;
+      }
+
+      if (data.attribute(i).weight() != 1.0) {
+        result.m_InterfaceDefinedCapabilities.add(weightedAttributesHandler);
       }
 
       switch (data.attribute(i).type()) {
@@ -1755,10 +1927,15 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
       }
     }
 
-    // missing values
+    // missing values and instance weights
     missing = false;
+    Class weightedInstancesHandler = getClass("weka.core.WeightedInstancesHandler");
     for (i = 0; i < data.numInstances(); i++) {
       inst = data.instance(i);
+
+      if (inst.weight() != 1.0) {
+        result.m_InterfaceDefinedCapabilities.add(weightedInstancesHandler);
+      }
 
       if (inst instanceof SparseInstance) {
         for (m = 0; m < inst.numValues(); m++) {

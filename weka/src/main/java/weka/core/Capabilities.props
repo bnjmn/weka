@@ -26,3 +26,10 @@ MissingClassValuesTest=true
 # test for minimum number of instances
 # see weka.core.Capabilities.test(Instances,int,int)
 MinimumNumberInstancesTest=true
+
+# Capabilities defined by interfaces
+WeightedInstancesHandlerInterfaceCapability=weka.core.WeightedInstancesHandler
+WeightedAttributesHandlerInterfaceCapability=weka.core.WeightedAttributesHandler
+RandomizableInterfaceCapability=weka.core.Randomizable
+DrawableInterfaceCapability=weka.core.Drawable
+PartitionGeneratorInterfaceCapability=weka.core.PartitionGenerator

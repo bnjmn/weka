@@ -20,10 +20,6 @@
 
 package weka.core;
 
-import weka.core.Capabilities.Capability;
-
-import java.util.Iterator;
-
 /**
  * Helper class for Capabilities.
  *
@@ -33,29 +29,17 @@ import java.util.Iterator;
 public class CapabilitiesUtils {
 
   /**
-   * returns a comma-separated list of all the capabilities.
+   * returns a comma-separated list of all the capabilities, excluding interface-based ones.
    *
    * @param c the capabilities to get a string representation from
    * @return the string describing the capabilities
    */
   public static String listCapabilities(Capabilities c) {
-    String result;
-    Iterator<Capability> iter;
-
-    result = "";
-    iter = c.capabilities();
-    while (iter.hasNext()) {
-      if (result.length() != 0) {
-        result += ", ";
-      }
-      result += iter.next().toString();
-    }
-
-    return result;
+    return c.listCapabilities();
   }
 
   /**
-   * generates a string from the capapbilities, suitable to add to the help
+   * generates a string from the capabilities, suitable to add to the help
    * text.
    *
    * @param title the title for the capabilities
@@ -63,40 +47,6 @@ public class CapabilitiesUtils {
    * @return a string describing the capabilities
    */
   public static String addCapabilities(String title, Capabilities c) {
-    String result;
-    String caps;
-
-    result = title + "\n";
-
-    // class
-    caps = listCapabilities(c.getClassCapabilities());
-    if (caps.length() != 0) {
-      result += "Class -- ";
-      result += caps;
-      result += "\n\n";
-    }
-
-    // attribute
-    caps = listCapabilities(c.getAttributeCapabilities());
-    if (caps.length() != 0) {
-      result += "Attributes -- ";
-      result += caps;
-      result += "\n\n";
-    }
-
-    // other capabilities
-    caps = listCapabilities(c.getOtherCapabilities());
-    if (caps.length() != 0) {
-      result += "Other -- ";
-      result += caps;
-      result += "\n\n";
-    }
-
-    // additional stuff
-    result += "Additional\n";
-    result += "min # of instances: " + c.getMinimumNumberInstances() + "\n";
-    result += "\n";
-
-    return result;
+   return c.addCapabilities(title);
   }
 }
