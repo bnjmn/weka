@@ -25,18 +25,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -83,7 +73,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class NominalToBinary extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter {
+  OptionHandler, StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -1130642825710549138L;
@@ -478,7 +468,9 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
             if (att.numValues() == 2) {
               value = "=" + att.value(1);
             }
-            newAtts.add(new Attribute(att.name() + value));
+            Attribute a = new Attribute(att.name() + value);
+            a.setWeight(att.weight());
+            newAtts.add(a);
           } else {
             newAtts.add((Attribute) att.copy());
           }
@@ -493,12 +485,16 @@ public class NominalToBinary extends Filter implements UnsupervisedFilter,
             attributeName = new StringBuffer(att.name() + "=");
             attributeName.append(att.value(k));
             if (m_Numeric) {
-              newAtts.add(new Attribute(attributeName.toString()));
+              Attribute a = new Attribute(attributeName.toString());
+              a.setWeight(att.weight() / att.numValues());
+              newAtts.add(a);
             } else {
               vals = new ArrayList<String>(2);
               vals.add("f");
               vals.add("t");
-              newAtts.add(new Attribute(attributeName.toString(), vals));
+              Attribute a = new Attribute(attributeName.toString(), vals);
+              a.setWeight(att.weight() / att.numValues());
+              newAtts.add(a);
             }
           }
         }

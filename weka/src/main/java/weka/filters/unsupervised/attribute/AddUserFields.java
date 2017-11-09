@@ -30,18 +30,8 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -76,7 +66,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class AddUserFields extends Filter implements OptionHandler,
-  EnvironmentHandler, UnsupervisedFilter {
+  EnvironmentHandler, UnsupervisedFilter, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -2761427344847891585L;

@@ -25,17 +25,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -69,7 +60,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class SwapValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6155834679414275855L;
@@ -169,11 +160,9 @@ public class SwapValues extends Filter implements UnsupervisedFilter,
     }
     Instance newInstance = (Instance) instance.copy();
     if (!newInstance.isMissing(m_AttIndex.getIndex())) {
-      if ((int) newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex
-        .getIndex()) {
+      if ((int) newInstance.value(m_AttIndex.getIndex()) == m_SecondIndex.getIndex()) {
         newInstance.setValue(m_AttIndex.getIndex(), m_FirstIndex.getIndex());
-      } else if ((int) newInstance.value(m_AttIndex.getIndex()) == m_FirstIndex
-        .getIndex()) {
+      } else if ((int) newInstance.value(m_AttIndex.getIndex()) == m_FirstIndex.getIndex()) {
         newInstance.setValue(m_AttIndex.getIndex(), m_SecondIndex.getIndex());
       }
     }

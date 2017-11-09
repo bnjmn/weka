@@ -24,13 +24,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.core.expressionlanguage.common.IfElseMacro;
 import weka.core.expressionlanguage.common.JavaMacro;
 import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
@@ -81,7 +76,8 @@ import weka.filters.SimpleBatchFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class SubsetByExpression extends SimpleBatchFilter {
+public class SubsetByExpression extends SimpleBatchFilter
+  implements WeightedInstancesHandler, WeightedAttributesHandler{
 
   /** for serialization. */
   private static final long serialVersionUID = 5628686110979589602L;

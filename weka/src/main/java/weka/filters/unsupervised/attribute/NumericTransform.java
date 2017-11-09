@@ -26,17 +26,8 @@ import java.lang.reflect.Method;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -79,7 +70,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class NumericTransform extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8561413333351366934L;
@@ -450,7 +441,6 @@ public class NumericTransform extends Filter implements UnsupervisedFilter,
    *          string will typically come from a user, attributes are indexed
    *          from 1. <br>
    *          eg: first-3,5,6-last
-   * @throws InvalidArgumentException if an invalid range list is supplied
    */
 
   public void setAttributeIndices(String rangeList) {
@@ -464,7 +454,6 @@ public class NumericTransform extends Filter implements UnsupervisedFilter,
    * @param attributes an array containing indexes of attributes to select.
    *          Since the array will typically come from a program, attributes are
    *          indexed from 0.
-   * @throws InvalidArgumentException if an invalid set of ranges is supplied
    */
   public void setAttributeIndicesArray(int[] attributes) {
 

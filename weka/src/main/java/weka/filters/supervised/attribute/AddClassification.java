@@ -32,18 +32,7 @@ import java.util.Vector;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.misc.InputMappedClassifier;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SerializationHelper;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.WekaException;
+import weka.core.*;
 import weka.filters.SimpleBatchFilter;
 
 /**
@@ -108,7 +97,8 @@ import weka.filters.SimpleBatchFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class AddClassification extends SimpleBatchFilter {
+public class AddClassification extends SimpleBatchFilter
+        implements WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = -1931467132568441909L;

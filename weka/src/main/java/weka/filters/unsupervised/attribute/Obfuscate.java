@@ -23,12 +23,8 @@ package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -45,7 +41,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class Obfuscate extends Filter implements UnsupervisedFilter,
-  StreamableFilter {
+  StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -343922772462971561L;

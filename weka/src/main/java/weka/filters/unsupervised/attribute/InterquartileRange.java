@@ -25,16 +25,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 
 /**
@@ -118,7 +110,7 @@ import weka.filters.SimpleBatchFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class InterquartileRange extends SimpleBatchFilter {
+public class InterquartileRange extends SimpleBatchFilter implements WeightedAttributesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -227879653639723030L;
@@ -688,18 +680,24 @@ public class InterquartileRange extends SimpleBatchFilter {
         values = new ArrayList<String>();
         values.add("no");
         values.add("yes");
-        atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-          .name() + "_Outlier", values));
+        Attribute aO = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+                .name() + "_Outlier", values);
+        aO.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
+        atts.add(aO);
 
         values = new ArrayList<String>();
         values.add("no");
         values.add("yes");
-        atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-          .name() + "_ExtremeValue", values));
+        Attribute aE = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+                .name() + "_ExtremeValue", values);
+        aE.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
+        atts.add(aE);
 
         if (getOutputOffsetMultiplier()) {
-          atts.add(new Attribute(inputFormat.attribute(m_AttributeIndices[i])
-            .name() + "_Offset"));
+          Attribute aF = new Attribute(inputFormat.attribute(m_AttributeIndices[i])
+                  .name() + "_Offset");
+          aF.setWeight(inputFormat.attribute(m_AttributeIndices[i]).weight());
+          atts.add(aF);
         }
       }
     }

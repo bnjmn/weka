@@ -142,13 +142,6 @@ public class MakeDecList implements Serializable, CapabilitiesHandler,
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
-
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-
     ClassifierDecList currentRule;
     double currentWeight;
     Instances oldGrowData, newGrowData, oldPruneData, newPruneData;

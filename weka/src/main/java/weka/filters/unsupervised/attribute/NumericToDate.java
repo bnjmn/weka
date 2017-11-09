@@ -64,7 +64,7 @@ import weka.filters.SimpleBatchFilter;
  * @author eibe (eibe at waikato dot ac dot nz)
  * @version $Revision: 14274 $
  */
-public class NumericToDate extends SimpleBatchFilter {
+public class NumericToDate extends SimpleBatchFilter implements WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6514657821295776239L;

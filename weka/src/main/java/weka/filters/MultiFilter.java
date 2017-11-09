@@ -25,13 +25,7 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 
 /**
  * <!-- globalinfo-start --> Applies several filters successively. In case all
@@ -58,7 +52,7 @@ import weka.core.Utils;
  * @version $Revision$
  * @see weka.filters.StreamableFilter
  */
-public class MultiFilter extends SimpleStreamFilter {
+public class MultiFilter extends SimpleStreamFilter implements WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6293720886005713120L;

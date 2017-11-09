@@ -66,7 +66,8 @@ import java.util.Vector;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 10215 $
  */
-public class ReplaceWithMissingValue extends SimpleBatchFilter implements UnsupervisedFilter, Randomizable {
+public class ReplaceWithMissingValue extends SimpleBatchFilter
+        implements UnsupervisedFilter, Randomizable, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -2356630932899796239L;

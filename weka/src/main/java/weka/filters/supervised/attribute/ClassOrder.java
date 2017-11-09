@@ -25,15 +25,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -69,7 +62,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class ClassOrder extends Filter implements SupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -2116226838887628411L;

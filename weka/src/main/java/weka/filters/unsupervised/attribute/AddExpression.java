@@ -24,17 +24,8 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.core.expressionlanguage.common.IfElseMacro;
 import weka.core.expressionlanguage.common.JavaMacro;
 import weka.core.expressionlanguage.common.MacroDeclarationsCompositor;
@@ -85,7 +76,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class AddExpression extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 402130384261736245L;

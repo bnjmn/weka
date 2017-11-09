@@ -27,18 +27,8 @@ import java.util.Comparator;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.Tag;
-import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
@@ -57,8 +47,8 @@ import weka.filters.SimpleStreamFilter;
  * 
  * <pre>
  * -R &lt;index1,index2-index4,...&gt;
- *  Specify list of string attributes to convert to words.
- *  (default: select all relational attributes)
+ *  Specify list of attributes to process.
+ *  (default: select all nominal attributes)
  * </pre>
  * 
  * <pre>
@@ -79,7 +69,7 @@ import weka.filters.SimpleStreamFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class SortLabels extends SimpleStreamFilter {
+public class SortLabels extends SimpleStreamFilter implements WeightedInstancesHandler, WeightedAttributesHandler{
 
   /** for serialization. */
   private static final long serialVersionUID = 7815204879694105691L;
@@ -212,8 +202,8 @@ public class SortLabels extends SimpleStreamFilter {
     Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option(
-      "\tSpecify list of string attributes to convert to words.\n"
-        + "\t(default: select all relational attributes)", "R", 1,
+      "\tSpecify list of attributes to process.\n"
+        + "\t(default: select all nominal attributes)", "R", 1,
       "-R <index1,index2-index4,...>"));
 
     result.addElement(new Option(
@@ -248,8 +238,8 @@ public class SortLabels extends SimpleStreamFilter {
    * 
    * <pre>
    * -R &lt;index1,index2-index4,...&gt;
-   *  Specify list of string attributes to convert to words.
-   *  (default: select all relational attributes)
+   *  Specify list of attributes to process.
+   *  (default: select all nominal attributes)
    * </pre>
    * 
    * <pre>

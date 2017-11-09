@@ -21,11 +21,7 @@
 
 package weka.filters;
 
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
-import weka.core.RevisionUtils;
+import weka.core.*;
 
 import java.util.regex.Pattern;
 
@@ -36,7 +32,8 @@ import java.util.regex.Pattern;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class RenameRelation extends Filter implements StreamableFilter {
+public class RenameRelation extends Filter
+        implements StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
   private static final long serialVersionUID = 8082179220141937043L;
 
   /** Text to modify the relation name with */

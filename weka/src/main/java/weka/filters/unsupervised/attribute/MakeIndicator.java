@@ -25,27 +25,17 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
 /**
- * <!-- globalinfo-start --> A filter that creates a new dataset with a boolean
+ * <!-- globalinfo-start --> A filter that creates a new dataset with a Boolean
  * attribute replacing a nominal attribute. In the new dataset, a value of 1 is
  * assigned to an instance that exhibits a value in the given range of attribute values,
- * and a value of 0 is assigned to an instance that does not. The boolean attribute is coded as numeric by
+ * and a value of 0 is assigned to an instance that does not. The Boolean attribute is coded as numeric by
  * default.
  * <p/>
  * <!-- globalinfo-end -->
@@ -66,7 +56,7 @@ import weka.filters.UnsupervisedFilter;
  * 
  * <pre>
  * -N &lt;index&gt;
- *  Set if new boolean attribute nominal.
+ *  Set if new Boolean attribute nominal.
  * </pre>
  * 
  * <!-- options-end -->
@@ -75,7 +65,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class MakeIndicator extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 766001176862773163L;
@@ -86,7 +76,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
   /** The value's index */
   private final Range m_ValIndex;
 
-  /** Make boolean attribute numeric. */
+  /** Make Boolean attribute numeric. */
   private boolean m_Numeric = true;
 
   /**
@@ -198,7 +188,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
       "\tSpecify the list of values to indicate. First and last are\n"
         + "\tvalid indexes (default last)", "V", 1,
       "-V <index1,index2-index4,...>"));
-    newVector.addElement(new Option("\tSet if new boolean attribute nominal.",
+    newVector.addElement(new Option("\tSet if new Boolean attribute nominal.",
       "N", 0, "-N <index>"));
 
     return newVector.elements();
@@ -224,7 +214,7 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    * 
    * <pre>
    * -N &lt;index&gt;
-   *  Set if new boolean attribute nominal.
+   *  Set if new Boolean attribute nominal.
    * </pre>
    * 
    * <!-- options-end -->
@@ -285,10 +275,10 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
    */
   public String globalInfo() {
 
-    return "A filter that creates a new dataset with a boolean attribute "
+    return "A filter that creates a new dataset with a Boolean attribute "
       + "replacing a nominal attribute.  In the new dataset, a value of 1 is "
       + "assigned to an instance that exhibits a value in the given range of attribute "
-      + "values, and a value of 0 is assigned to an instance that does not. The boolean attribute is "
+      + "values, and a value of 0 is assigned to an instance that does not. The Boolean attribute is "
       + "coded as numeric by default.";
   }
 
@@ -438,7 +428,9 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
         newAtts.add(att);
       } else {
         if (m_Numeric) {
-          newAtts.add(new Attribute(att.name()));
+          Attribute a = new Attribute(att.name());
+          a.setWeight(att.weight());
+          newAtts.add(a);
         } else {
           String vals;
           int[] sel = m_ValIndex.getSelection();
@@ -450,7 +442,9 @@ public class MakeIndicator extends Filter implements UnsupervisedFilter,
           newVals = new ArrayList<String>(2);
           newVals.add("neg_" + vals);
           newVals.add("pos_" + vals);
-          newAtts.add(new Attribute(att.name(), newVals));
+          Attribute a = new Attribute(att.name(), newVals);
+          a.setWeight(att.weight());
+          newAtts.add(a);
         }
       }
     }

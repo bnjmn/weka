@@ -1030,6 +1030,7 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
     copy.m_Type = m_Type;
     copy.m_AttributeInfo = m_AttributeInfo;
     copy.m_AttributeMetaInfo = m_AttributeMetaInfo;
+    copy.m_Weight = m_Weight;
 
     return copy;
   }

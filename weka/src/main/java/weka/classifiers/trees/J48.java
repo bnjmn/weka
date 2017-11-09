@@ -274,6 +274,8 @@ public class J48 extends AbstractClassifier implements OptionHandler, Drawable,
   @Override
   public void buildClassifier(Instances instances) throws Exception {
 
+    getCapabilities().testWithFail(instances);
+
     ModelSelection modSelection;
 
     if (m_binarySplits) {

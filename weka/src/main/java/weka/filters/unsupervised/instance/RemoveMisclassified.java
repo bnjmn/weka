@@ -26,13 +26,7 @@ import java.util.Vector;
 
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
-import weka.core.Capabilities;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -89,7 +83,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5469157004717663171L;
@@ -175,7 +169,7 @@ public class RemoveMisclassified extends Filter implements UnsupervisedFilter,
 
     Instance inst;
     Instances buildSet = new Instances(data);
-    Instances temp = new Instances(data, data.numInstances());
+    Instances temp;
     Instances inverseSet = new Instances(data, data.numInstances());
     int count = 0;
     double ans;

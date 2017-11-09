@@ -24,15 +24,8 @@ package weka.filters.unsupervised.instance;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -62,7 +55,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class RemoveRange extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3064641215340828695L;

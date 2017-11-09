@@ -74,7 +74,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  */
 public class Resample extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable {
+  OptionHandler, Randomizable, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;

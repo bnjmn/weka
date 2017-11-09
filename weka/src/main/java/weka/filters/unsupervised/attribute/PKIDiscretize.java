@@ -24,14 +24,9 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
+import weka.core.*;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
 
 /**
  * <!-- globalinfo-start --> Discretizes numeric attributes using equal
@@ -95,7 +90,7 @@ import weka.core.Utils;
  * @version $Revision$
  */
 public class PKIDiscretize extends Discretize implements
-  TechnicalInformationHandler {
+  TechnicalInformationHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6153101248977702675L;
@@ -128,14 +123,14 @@ public class PKIDiscretize extends Discretize implements
     Instances toFilter = getInputFormat();
 
     // Find number of instances for attribute where not missing
-    int numOfInstances = toFilter.numInstances();
-    for (int i = 0; i < toFilter.numInstances(); i++) {
-      if (toFilter.instance(i).isMissing(index)) {
-        numOfInstances--;
+    double sum = 0;
+    for (Instance inst : toFilter) {
+      if (!inst.isMissing(index)) {
+        sum += inst.weight();
       }
     }
 
-    m_NumBins = (int) (Math.sqrt(numOfInstances));
+    m_NumBins = (int) Math.sqrt(sum);
 
     if (m_NumBins > 0) {
       calculateCutPointsByEqualFrequencyBinning(index);

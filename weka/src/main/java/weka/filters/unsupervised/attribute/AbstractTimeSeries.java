@@ -24,13 +24,7 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Queue;
-import weka.core.Range;
-import weka.core.Utils;
+import weka.core.*;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -69,7 +63,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public abstract class AbstractTimeSeries extends Filter implements
-  UnsupervisedFilter, OptionHandler {
+  UnsupervisedFilter, OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -3795656792078022357L;

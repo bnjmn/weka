@@ -83,7 +83,8 @@ import weka.gui.ProgrammaticProperty;
  * @author Eibe Frank
  * @version $Revision$
  */
-public class Resample extends Filter implements SupervisedFilter, OptionHandler, Randomizable {
+public class Resample extends Filter
+        implements SupervisedFilter, OptionHandler, Randomizable, WeightedAttributesHandler {
 
   /** for serialization. */
   static final long serialVersionUID = 7079064953548300681L;

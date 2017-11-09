@@ -52,7 +52,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  */
 public class Randomize extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable {
+  OptionHandler, Randomizable, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8854479785121877582L;

@@ -22,13 +22,8 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -44,7 +39,7 @@ import weka.filters.UnsupervisedFilter;
  */
 public class SparseToNonSparse 
   extends Filter 
-  implements UnsupervisedFilter, StreamableFilter {
+  implements UnsupervisedFilter, StreamableFilter, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 2481634184210236074L;

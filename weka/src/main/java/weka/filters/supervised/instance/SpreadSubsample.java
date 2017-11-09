@@ -74,7 +74,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  **/
 public class SpreadSubsample extends Filter implements SupervisedFilter,
-  OptionHandler, Randomizable {
+  OptionHandler, Randomizable, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3947033795243930016L;

@@ -23,12 +23,8 @@ package weka.filters.unsupervised.attribute;
 
 import java.util.ArrayList;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.UnsupervisedFilter;
 
@@ -51,7 +47,8 @@ import weka.filters.UnsupervisedFilter;
  * @author Eibe Frank
  * @version $Revision: 10215 $
  */
-public class Transpose extends SimpleBatchFilter implements UnsupervisedFilter {
+public class Transpose extends SimpleBatchFilter
+        implements UnsupervisedFilter, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 213999899640387499L;

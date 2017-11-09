@@ -24,15 +24,8 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.AttributeStats;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -60,7 +53,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class RemoveUseless extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8659417851407640038L;

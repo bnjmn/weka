@@ -26,15 +26,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.SimpleStreamFilter;
 
 /**
@@ -94,7 +87,7 @@ import weka.filters.SimpleStreamFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class RenameAttribute extends SimpleStreamFilter {
+public class RenameAttribute extends SimpleStreamFilter implements WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = 4216491776378279596L;

@@ -20,11 +20,8 @@
 
 package weka.filters.unsupervised.instance;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
 import weka.filters.SimpleBatchFilter;
 import weka.classifiers.rules.DecisionTableHashKey;
 
@@ -47,7 +44,7 @@ import java.util.HashSet;
  * @author  Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 9804 $
  */
-public class RemoveDuplicates extends SimpleBatchFilter {
+public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttributesHandler, WeightedInstancesHandler{
 
   /** for serialization. */
   private static final long serialVersionUID = 4518686110979589602L;

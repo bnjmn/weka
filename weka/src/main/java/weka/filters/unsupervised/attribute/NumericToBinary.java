@@ -25,17 +25,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
@@ -65,7 +56,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class NumericToBinary extends PotentialClassIgnorer implements
-  UnsupervisedFilter, StreamableFilter {
+  UnsupervisedFilter, StreamableFilter, WeightedInstancesHandler, WeightedAttributesHandler {
 	
   /** Stores which columns to turn into binary */
   protected Range m_Cols = new Range("first-last");
@@ -337,13 +328,15 @@ public class NumericToBinary extends PotentialClassIgnorer implements
     for (int j = 0; j < getInputFormat().numAttributes(); j++) {
       Attribute att = getInputFormat().attribute(j);
       if ((j == newClassIndex) || (!att.isNumeric()) || !m_Cols.isInRange(j) ) {
-        newAtts.add((Attribute) att.copy());
+        newAtts.add(att); // Not necessary to make a copy because index does not change
       } else {
         attributeName = new StringBuffer(att.name() + "_binarized");
         vals = new ArrayList<String>(2);
         vals.add("0");
         vals.add("1");
-        newAtts.add(new Attribute(attributeName.toString(), vals));
+        Attribute a = new Attribute(attributeName.toString(), vals);
+        a.setWeight(att.weight());
+        newAtts.add(a);
       }
     }
     outputFormat = new Instances(getInputFormat().relationName(), newAtts, 0);

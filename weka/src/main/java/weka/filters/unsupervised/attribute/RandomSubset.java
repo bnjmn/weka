@@ -65,7 +65,8 @@ import weka.filters.SimpleStreamFilter;
  * @author eibe@cs.waikato.ac.nz
  * @version $Revision$
  */
-public class RandomSubset extends SimpleStreamFilter implements Randomizable {
+public class RandomSubset extends SimpleStreamFilter
+        implements Randomizable, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization. */
   private static final long serialVersionUID = 2911221724251628050L;
@@ -387,7 +388,7 @@ public class RandomSubset extends SimpleStreamFilter implements Randomizable {
     atts = new ArrayList<Attribute>();
     m_Indices = new int[subset.size()];
     for (i = 0; i < subset.size(); i++) {
-      atts.add(inputFormat.attribute(subset.get(i)));
+      atts.add((Attribute)inputFormat.attribute(subset.get(i)).copy());
       m_Indices[i] = subset.get(i);
     }
     result = new Instances(inputFormat.relationName(), atts, 0);

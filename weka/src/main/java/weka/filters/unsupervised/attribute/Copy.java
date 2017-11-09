@@ -24,18 +24,8 @@ package weka.filters.unsupervised.attribute;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -69,7 +59,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class Copy extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8543707493627441566L;
@@ -215,8 +205,7 @@ public class Copy extends Filter implements UnsupervisedFilter,
     }
 
     // adapt locators
-    int[] newIndices = new int[instanceInfo.numAttributes()
-      + m_SelectedAttributes.length];
+    int[] newIndices = new int[instanceInfo.numAttributes() + m_SelectedAttributes.length];
     for (int i = 0; i < instanceInfo.numAttributes(); i++) {
       newIndices[i] = i;
     }

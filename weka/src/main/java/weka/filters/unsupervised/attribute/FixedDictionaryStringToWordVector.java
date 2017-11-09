@@ -28,13 +28,7 @@ import java.io.Reader;
 
 import javax.swing.JFileChooser;
 
-import weka.core.Capabilities;
-import weka.core.DictionaryBuilder;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
+import weka.core.*;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.stopwords.Null;
@@ -145,7 +139,7 @@ import weka.gui.FilePropertyMetadata;
  * @version $Revision$
  */
 public class FixedDictionaryStringToWordVector extends SimpleStreamFilter
-  implements UnsupervisedFilter, EnvironmentHandler {
+  implements UnsupervisedFilter, EnvironmentHandler, WeightedInstancesHandler {
 
   private static final long serialVersionUID = 7990892846966916757L;
 

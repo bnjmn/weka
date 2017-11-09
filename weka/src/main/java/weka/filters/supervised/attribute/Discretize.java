@@ -28,25 +28,10 @@ import java.util.List;
 import java.util.Set;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.ContingencyTables;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.SpecialFunctions;
-import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -120,7 +105,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class Discretize extends Filter implements SupervisedFilter,
-  OptionHandler, WeightedInstancesHandler, TechnicalInformationHandler {
+  OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3141006402280129097L;

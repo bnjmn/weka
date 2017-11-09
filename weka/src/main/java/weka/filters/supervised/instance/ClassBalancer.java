@@ -58,7 +58,8 @@ import weka.filters.unsupervised.attribute.Discretize;
  * @author Eibe Frank
  * @version $Revision: 10215 $
  */
-public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter, WeightedInstancesHandler {
+public class ClassBalancer extends SimpleBatchFilter implements SupervisedFilter,
+        WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 6237337831221353842L;

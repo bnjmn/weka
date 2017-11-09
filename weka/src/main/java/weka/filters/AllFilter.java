@@ -22,11 +22,8 @@
 
 package weka.filters;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
 
 /** 
  * A simple instance filter that passes all instances directly
@@ -37,7 +34,7 @@ import weka.core.RevisionUtils;
  */
 public class AllFilter
   extends Filter
-  implements Sourcable {
+  implements Sourcable, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 5022109283147503266L;

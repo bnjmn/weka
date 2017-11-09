@@ -140,9 +140,6 @@ public class ClassifierTree implements Drawable, Serializable,
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
-
     // remove instances with missing class
     data = new Instances(data);
     data.deleteWithMissingClass();

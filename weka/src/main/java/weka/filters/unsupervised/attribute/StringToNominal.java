@@ -25,17 +25,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.UnsupervisedFilter;
 
@@ -67,7 +58,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class StringToNominal extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4864084427902797605L;
@@ -157,8 +148,7 @@ public class StringToNominal extends Filter implements UnsupervisedFilter,
       for (int i = 0; i < newInstance.numAttributes(); i++) {
         if (newInstance.attribute(i).isString() && !newInstance.isMissing(i)
           && m_AttIndices.isInRange(i)) {
-          Attribute outAtt = getOutputFormat().attribute(
-            newInstance.attribute(i).name());
+          Attribute outAtt = outputFormatPeek().attribute(i);
           String inVal = newInstance.stringValue(i);
           int outIndex = outAtt.indexOfValue(inVal);
           if (outIndex < 0) {

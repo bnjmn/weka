@@ -21,19 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionMetadata;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
+import weka.core.*;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
 
@@ -66,7 +54,7 @@ import java.util.Vector;
  * @version $Revision: $
  */
 public class OrdinalToNumeric extends PotentialClassIgnorer implements
-  StreamableFilter, UnsupervisedFilter, EnvironmentHandler {
+  StreamableFilter, UnsupervisedFilter, EnvironmentHandler, WeightedAttributesHandler, WeightedInstancesHandler  {
 
   /** For serialization */
   private static final long serialVersionUID = -5199516576940135696L;
@@ -236,9 +224,11 @@ public class OrdinalToNumeric extends PotentialClassIgnorer implements
         if (m_selectedRange.isInRange(i)
           && instancesInfo.attribute(i).isNominal()
           && i != instancesInfo.classIndex()) {
-          atts.add(new Attribute(instancesInfo.attribute(i).name()));
+          Attribute att = new Attribute(instancesInfo.attribute(i).name());
+          att.setWeight(instancesInfo.attribute(i).weight());
+          atts.add(att);
         } else {
-          atts.add((Attribute) instancesInfo.attribute(i).copy());
+          atts.add(instancesInfo.attribute(i)); // Copy not necessary
         }
       }
 
@@ -271,28 +261,7 @@ public class OrdinalToNumeric extends PotentialClassIgnorer implements
       m_NewBatch = false;
     }
 
-    double[] vals = new double[inst.numAttributes()];
-    for (int i = 0; i < inst.numAttributes(); i++) {
-      vals[i] = inst.value(i);
-      if (inst.attribute(i).isString() && !inst.isMissing(i)) {
-        if (inst.attribute(i).numValues() <= 1) {
-          outputFormatPeek().attribute(i).setStringValue(inst.stringValue(i));
-          vals[i] = 0;
-        } else {
-          vals[i] =
-            outputFormatPeek().attribute(i).addStringValue(inst.stringValue(i));
-        }
-      }
-    }
-
-    Instance output = null;
-    if (inst instanceof SparseInstance) {
-      output = new SparseInstance(inst.weight(), vals);
-    } else {
-      output = new DenseInstance(inst.weight(), vals);
-    }
-    output.setDataset(getOutputFormat());
-    push(output);
+    push(inst);
 
     return true;
   }

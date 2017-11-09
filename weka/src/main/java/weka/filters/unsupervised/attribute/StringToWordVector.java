@@ -31,23 +31,10 @@ import java.util.List;
 import java.util.TreeMap;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DictionaryBuilder;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.SparseInstance;
 import weka.core.stopwords.StopwordsHandler;
 import weka.core.stopwords.Null;
-import weka.core.Tag;
-import weka.core.Utils;
 import weka.core.stemmers.NullStemmer;
 import weka.core.stemmers.Stemmer;
 import weka.core.tokenizers.Tokenizer;
@@ -146,7 +133,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class StringToWordVector extends Filter implements UnsupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedInstancesHandler {
 
   /** Used to build and manage the dictionary + vectorization */
   protected DictionaryBuilder m_dictionaryBuilder = new DictionaryBuilder();

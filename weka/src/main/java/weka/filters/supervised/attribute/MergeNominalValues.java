@@ -26,24 +26,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.ContingencyTables;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SpecialFunctions;
-import weka.core.Statistics;
-import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.WeightedInstancesHandler;
 import weka.filters.SimpleBatchFilter;
 import weka.filters.SupervisedFilter;
 
@@ -107,7 +93,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class MergeNominalValues extends SimpleBatchFilter implements
-  SupervisedFilter, WeightedInstancesHandler, TechnicalInformationHandler {
+  SupervisedFilter, WeightedInstancesHandler, WeightedAttributesHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = 7447337831221353842L;
@@ -572,7 +558,9 @@ public class MergeNominalValues extends SimpleBatchFilter implements
         for (StringBuilder val : vals) {
           valsAsStrings.add(val.toString());
         }
-        atts.add(new Attribute(att.name() + "_merged_values", valsAsStrings));
+        Attribute a = new Attribute(att.name() + "_merged_values", valsAsStrings);
+        a.setWeight(att.weight());
+        atts.add(a);
       } else {
         atts.add((Attribute) att.copy());
       }

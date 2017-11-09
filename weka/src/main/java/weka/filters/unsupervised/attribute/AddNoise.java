@@ -67,7 +67,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  */
 public class AddNoise extends Filter implements UnsupervisedFilter,
-  OptionHandler, Randomizable {
+  OptionHandler, Randomizable, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8499673222857299082L;

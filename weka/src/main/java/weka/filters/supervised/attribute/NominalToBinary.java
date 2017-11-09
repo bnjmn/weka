@@ -25,22 +25,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.UnassignedClassException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -95,7 +83,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class NominalToBinary extends Filter implements SupervisedFilter,
-  OptionHandler, TechnicalInformationHandler {
+  OptionHandler, TechnicalInformationHandler, WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -5004607029857673950L;
@@ -503,7 +491,9 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
             if (att.numValues() == 2) {
               value = "=" + att.value(1);
             }
-            newAtts.add(new Attribute(att.name() + value));
+            Attribute a = new Attribute(att.name() + value);
+            a.setWeight(att.weight());
+            newAtts.add(a);
           } else {
             newAtts.add((Attribute) att.copy());
           }
@@ -518,12 +508,16 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
             attributeName = new StringBuffer(att.name() + "=");
             attributeName.append(att.value(k));
             if (m_Numeric) {
-              newAtts.add(new Attribute(attributeName.toString()));
+              Attribute a = new Attribute(attributeName.toString());
+              a.setWeight(att.weight() / att.numValues());
+              newAtts.add(a);
             } else {
               vals = new ArrayList<String>(2);
               vals.add("f");
               vals.add("t");
-              newAtts.add(new Attribute(attributeName.toString(), vals));
+              Attribute a = new Attribute(attributeName.toString(), vals);
+              a.setWeight(att.weight() / att.numValues());
+              newAtts.add(a);
             }
           }
         }
@@ -588,12 +582,16 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
             attributeName.append(att.value(m_Indices[j][l]));
           }
           if (m_Numeric) {
-            newAtts.add(new Attribute(attributeName.toString()));
+            Attribute a = new Attribute(attributeName.toString());
+            a.setWeight(att.weight() / att.numValues());
+            newAtts.add(a);
           } else {
             vals = new ArrayList<String>(2);
             vals.add("f");
             vals.add("t");
-            newAtts.add(new Attribute(attributeName.toString(), vals));
+            Attribute a = new Attribute(attributeName.toString(), vals);
+            a.setWeight(att.weight() / att.numValues());
+            newAtts.add(a);
           }
         }
       }

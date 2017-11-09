@@ -26,17 +26,8 @@ import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.SingleIndex;
-import weka.core.UnsupportedAttributeTypeException;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -75,7 +66,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class MergeManyValues extends PotentialClassIgnorer implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = 4649332102154713625L;
@@ -340,35 +331,15 @@ public class MergeManyValues extends PotentialClassIgnorer implements Unsupervis
       m_NewBatch = false;
     }
 
-    Attribute att = getInputFormat().attribute(m_AttIndex.getIndex());
-    ArrayList<String> newVals = new ArrayList<String>(att.numValues() - 1);
-    for (int i = 0; i < att.numValues(); i++) {
-      boolean inMergeList = false;
-
-      if (att.value(i).equalsIgnoreCase(m_Label)) {
-        // don't want to add this one.
-        inMergeList = true;
-      } else {
-        inMergeList = m_MergeRange.isInRange(i);
-      }
-
-      if (!inMergeList) {
-        // add it.
-        newVals.add(att.value(i));
-      }
-    }
-    newVals.add(m_Label);
-
-    Attribute temp = new Attribute(att.name(), newVals);
+    Attribute att = outputFormatPeek().attribute(m_AttIndex.getIndex());
 
     Instance newInstance = (Instance) instance.copy();
-    if (!newInstance.isMissing(m_AttIndex.getIndex())) {
-      String currValue = newInstance.stringValue(m_AttIndex.getIndex());
-      if (temp.indexOfValue(currValue) == -1) {
-        newInstance.setValue(m_AttIndex.getIndex(), temp.indexOfValue(m_Label));
+    if (!instance.isMissing(m_AttIndex.getIndex())) {
+      int index = att.indexOfValue(instance.stringValue(m_AttIndex.getIndex()));
+      if (index == -1) {
+        newInstance.setValue(m_AttIndex.getIndex(), att.indexOfValue(m_Label));
       } else {
-        newInstance.setValue(m_AttIndex.getIndex(),
-          temp.indexOfValue(currValue));
+        newInstance.setValue(m_AttIndex.getIndex(), index);
       }
     }
 

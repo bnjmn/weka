@@ -113,6 +113,20 @@ public class M5P extends M5Base implements Drawable {
   static final long serialVersionUID = -6118439039768244417L;
 
   /**
+   * returns information about the classifier
+   *
+   * @return a description suitable for displaying in the explorer/experimenter
+   *         gui
+   */
+  public String globalInfo() {
+    return "Implements the M5' model tree algorithm. "
+            + "The original M5 algorithm was developed by R. Quinlan. Yong Wang "
+            + "made improvements leading to M5'.\n\n"
+            + "For more information see:\n\n"
+            + getTechnicalInformation().toString();
+  }
+
+  /**
    * Creates a new <code>M5P</code> instance.
    */
   public M5P() {

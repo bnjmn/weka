@@ -28,19 +28,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
-import weka.core.WekaException;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -84,7 +73,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class RenameNominalValues extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** For serialization */
   private static final long serialVersionUID = -2121767582746512209L;
@@ -213,8 +202,8 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
               valsForAtt.add(origV);
             }
           }
-          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(),
-            valsForAtt);
+          Attribute newAtt = new Attribute(instanceInfo.attribute(i).name(), valsForAtt);
+          newAtt.setWeight(instanceInfo.attribute(i).weight());
           attributes.add(newAtt);
         } else {
           // ignore any selected attributes that are not nominal

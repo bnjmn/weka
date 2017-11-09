@@ -111,7 +111,7 @@ import weka.filters.SimpleStreamFilter;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class NumericCleaner extends SimpleStreamFilter {
+public class NumericCleaner extends SimpleStreamFilter implements WeightedAttributesHandler, WeightedInstancesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -352890679895066592L;

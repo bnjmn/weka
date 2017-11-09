@@ -20,17 +20,8 @@
 
 package weka.filters.unsupervised.attribute;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.SimpleBatchFilter;
 
 import java.util.ArrayList;
@@ -67,7 +58,7 @@ import java.util.Vector;
  * @author fracpete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
-public class NumericToNominal extends SimpleBatchFilter {
+public class NumericToNominal extends SimpleBatchFilter implements WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6614630932899796239L;

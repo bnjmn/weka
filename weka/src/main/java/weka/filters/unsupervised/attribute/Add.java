@@ -26,19 +26,8 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Attribute;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.Range;
-import weka.core.RevisionUtils;
-import weka.core.SelectedTag;
-import weka.core.SingleIndex;
-import weka.core.Tag;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.StreamableFilter;
 import weka.filters.UnsupervisedFilter;
@@ -85,14 +74,19 @@ import weka.filters.UnsupervisedFilter;
  *  The format of the date values (see ISO-8601)
  *  (default: yyyy-MM-dd'T'HH:mm:ss)
  * </pre>
- * 
+ *
+ * <pre>
+ * -W &lt;double&gt;
+ *  The weight for the new attribute (default: 1.0)
+ * </pre>
+ *  *
  * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
 public class Add extends Filter implements UnsupervisedFilter,
-  StreamableFilter, OptionHandler {
+  StreamableFilter, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization. */
   static final long serialVersionUID = 761386447332932389L;
@@ -118,6 +112,9 @@ public class Add extends Filter implements UnsupervisedFilter,
 
   /** The date format. */
   protected String m_DateFormat = "yyyy-MM-dd'T'HH:mm:ss";
+
+  /** The weight for the new attribute. */
+  protected double m_Weight = 1.0;
 
   /**
    * Returns a string describing this filter.
@@ -170,6 +167,10 @@ public class Add extends Filter implements UnsupervisedFilter,
       "\tThe format of the date values (see ISO-8601)\n"
         + "\t(default: yyyy-MM-dd'T'HH:mm:ss)", "F", 1, "-F <format>"));
 
+    newVector.addElement(new Option(
+            "\tThe weight for the new attribute\n"
+                    + "\t(default: 1.0)", "W", 1, "-W <double>"));
+
     return newVector.elements();
   }
 
@@ -213,7 +214,12 @@ public class Add extends Filter implements UnsupervisedFilter,
    *  The format of the date values (see ISO-8601)
    *  (default: yyyy-MM-dd'T'HH:mm:ss)
    * </pre>
-   * 
+   *
+   * <pre>
+   * -W &lt;double&gt;
+   *  The weight for the new attribute (default: 1.0)
+   * </pre>
+   *
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -250,6 +256,14 @@ public class Add extends Filter implements UnsupervisedFilter,
       }
     }
 
+    tmpStr = Utils.getOption('W', options);
+    if (tmpStr.length() == 0) {
+      setWeight(1.0);
+    } else {
+      setWeight(Double.parseDouble(tmpStr));
+    }
+
+    setAttributeIndex(tmpStr);
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
@@ -286,6 +300,9 @@ public class Add extends Filter implements UnsupervisedFilter,
 
     result.add("-C");
     result.add("" + getAttributeIndex());
+
+    result.add("-W");
+    result.add("" + getWeight());
 
     return result.toArray(new String[result.size()]);
   }
@@ -346,6 +363,7 @@ public class Add extends Filter implements UnsupervisedFilter,
     default:
       throw new IllegalArgumentException("Unknown attribute type in Add");
     }
+    newAttribute.setWeight(getWeight());
 
     if ((m_Insert.getIndex() < 0)
       || (m_Insert.getIndex() > getInputFormat().numAttributes())) {
@@ -463,6 +481,36 @@ public class Add extends Filter implements UnsupervisedFilter,
     m_Insert.setSingleIndex(attIndex);
   }
 
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String weightTipText() {
+
+    return "The weight for the new attribute.";
+  }
+
+  /**
+   * Get the weight of the attribute used.
+   *
+   * @return the weight of the attribute
+   */
+  public double getWeight() {
+
+    return m_Weight;
+  }
+
+  /**
+   * Sets weight of the attribute used.
+   *
+   * @param weight the weight of the attribute
+   */
+  public void setWeight(double weight) {
+
+    m_Weight = weight;
+  }
   /**
    * Returns the tip text for this property.
    * 

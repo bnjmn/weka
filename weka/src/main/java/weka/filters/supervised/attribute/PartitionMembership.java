@@ -56,7 +56,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class PartitionMembership extends Filter implements SupervisedFilter,
-  OptionHandler, RevisionHandler, TechnicalInformationHandler {
+  OptionHandler, RevisionHandler, TechnicalInformationHandler, WeightedInstancesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 333532554667754026L;

@@ -148,21 +148,6 @@ public abstract class M5Base extends AbstractClassifier implements
   }
 
   /**
-   * returns information about the classifier
-   * 
-   * @return a description suitable for displaying in the explorer/experimenter
-   *         gui
-   */
-  public String globalInfo() {
-    return "M5Base. Implements base routines for generating M5 Model trees and "
-      + "rules\n"
-      + "The original algorithm M5 was invented by R. Quinlan and Yong Wang "
-      + "made improvements.\n\n"
-      + "For more information see:\n\n"
-      + getTechnicalInformation().toString();
-  }
-
-  /**
    * Returns an instance of a TechnicalInformation object, containing detailed
    * information about the technical background of this class, e.g., paper
    * reference or book this class is based on.
@@ -430,7 +415,22 @@ public abstract class M5Base extends AbstractClassifier implements
    */
   @Override
   public Capabilities getCapabilities() {
-    return new LinearRegression().getCapabilities();
+
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
+    result.enable(Capabilities.Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capabilities.Capability.NUMERIC_CLASS);
+    result.enable(Capabilities.Capability.DATE_CLASS);
+    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+
+    return result;
   }
 
   /**

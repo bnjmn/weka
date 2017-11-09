@@ -76,7 +76,7 @@ import java.util.Vector;
  * @version $Revision$
  */
 public class ReservoirSample extends Filter implements UnsupervisedFilter,
-  OptionHandler, StreamableFilter, Randomizable {
+  OptionHandler, StreamableFilter, Randomizable, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 3119607037607101160L;

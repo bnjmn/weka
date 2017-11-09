@@ -27,14 +27,7 @@ import java.util.List;
 import java.util.Map;
 
 import weka.classifiers.bayes.NaiveBayes;
-import weka.core.Attribute;
-import weka.core.Capabilities;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.OptionMetadata;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
+import weka.core.*;
 import weka.estimators.Estimator;
 import weka.filters.Filter;
 import weka.filters.SimpleBatchFilter;
@@ -75,7 +68,8 @@ import weka.gui.ProgrammaticProperty;
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @version $Revision: $
  */
-public class ClassConditionalProbabilities extends SimpleBatchFilter {
+public class ClassConditionalProbabilities extends SimpleBatchFilter
+  implements WeightedAttributesHandler, WeightedInstancesHandler{
 
   /** For serialization */
   private static final long serialVersionUID = 1684310720200284263L;
@@ -270,7 +264,9 @@ public class ClassConditionalProbabilities extends SimpleBatchFilter {
           String name =
             "pr_" + inputFormat.attribute(i).name() + "|"
               + inputFormat.classAttribute().value(j);
-          atts.add(new Attribute(name));
+          Attribute a = new Attribute(name);
+          a.setWeight(inputFormat.attribute(i).weight() / inputFormat.classAttribute().numValues());
+          atts.add(a);
         }
       }
     }

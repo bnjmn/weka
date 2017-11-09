@@ -25,16 +25,8 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.DenseInstance;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.SparseInstance;
-import weka.core.Utils;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
@@ -76,7 +68,7 @@ import weka.filters.UnsupervisedFilter;
  * @version $Revision$
  */
 public class Normalize extends PotentialClassIgnorer implements
-  UnsupervisedFilter, Sourcable, OptionHandler {
+  UnsupervisedFilter, Sourcable, OptionHandler, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization. */
   static final long serialVersionUID = -8158531150984362898L;

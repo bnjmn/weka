@@ -25,14 +25,8 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.SupervisedFilter;
 
@@ -73,7 +67,7 @@ import weka.filters.SupervisedFilter;
  * @version $Revision$
  */
 public class StratifiedRemoveFolds extends Filter implements SupervisedFilter,
-  OptionHandler {
+  OptionHandler, WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -7069148179905814324L;
