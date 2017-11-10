@@ -436,7 +436,7 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
         // see if we have the closing brace
         m_Tokenizer.nextToken();
         if (m_Tokenizer.ttype != '}') {
-          errorMessage("Problem reading instance weight");
+          errorMessage("Problem reading instance weight: } expected");
         }
       }
       return weight;
@@ -854,31 +854,43 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
             .equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_INTEGER)
           || m_Tokenizer.sval
             .equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_NUMERIC)) {
-          attributes.add(new Attribute(attributeName, attributes.size()));
+          Attribute att = new Attribute(attributeName, attributes.size());
+          att.setWeight(getAttributeWeight());
+          attributes.add(att);
           readTillEOL();
         } else if (m_Tokenizer.sval
           .equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_STRING)) {
-          attributes.add(new Attribute(attributeName, (ArrayList<String>) null,
-            attributes.size()));
+          Attribute att = new Attribute(attributeName, (ArrayList<String>) null, attributes.size());
+          att.setWeight(getAttributeWeight());
           readTillEOL();
+          attributes.add(att);
         } else if (m_Tokenizer.sval
           .equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_DATE)) {
           String format = null;
-          if (m_Tokenizer.nextToken() != StreamTokenizer.TT_EOL) {
+          m_Tokenizer.nextToken();
+          if (m_Tokenizer.ttype == '{') { // No date format but it looks like there is an attribute weight
+            m_Tokenizer.pushBack();
+            Attribute att = new Attribute(attributeName, format, attributes.size());
+            att.setWeight(getAttributeWeight());
+            attributes.add(att);
+            readTillEOL();
+          } else if (m_Tokenizer.ttype != StreamTokenizer.TT_EOL) { // Looks like there is a date format
             if ((m_Tokenizer.ttype != StreamTokenizer.TT_WORD)
               && (m_Tokenizer.ttype != '\'') && (m_Tokenizer.ttype != '\"')) {
               errorMessage("not a valid date format");
             }
             format = m_Tokenizer.sval;
+            Attribute att = new Attribute(attributeName, format, attributes.size());
+            att.setWeight(getAttributeWeight()); // Now check for attribute weight
+            attributes.add(att);
             readTillEOL();
           } else {
             m_Tokenizer.pushBack();
+            attributes.add(new Attribute(attributeName, format, attributes.size()));
           }
-          attributes
-            .add(new Attribute(attributeName, format, attributes.size()));
-
         } else if (m_Tokenizer.sval
           .equalsIgnoreCase(Attribute.ARFF_ATTRIBUTE_RELATIONAL)) {
+          double weight = getAttributeWeight();
           readTillEOL();
 
           // Read attributes for subrelation
@@ -912,8 +924,10 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
           // Make relation and restore original set of attributes
           Instances relation = new Instances(attributeName, attributes, 0);
           attributes = atts;
-          attributes.add(new Attribute(attributeName, relation, attributes
-            .size()));
+          Attribute att = new Attribute(attributeName, relation, attributes.size());
+          att.setWeight(weight);
+          attributes.add(att);
+
         } else {
           errorMessage("no valid attribute type or invalid " + "enumeration");
         }
@@ -934,8 +948,10 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
             attributeValues.add(m_Tokenizer.sval);
           }
         }
-        attributes.add(new Attribute(attributeName, attributeValues, attributes
-          .size()));
+        Attribute att = new Attribute(attributeName, attributeValues, attributes.size());
+        att.setWeight(getAttributeWeight());
+        attributes.add(att);
+        readTillEOL();
       }
       getLastToken(false);
       getFirstToken();
@@ -957,6 +973,36 @@ public class ArffLoader extends AbstractFileLoader implements BatchConverter,
 
       m_Tokenizer.pushBack();
     }
+
+    /**
+     * Gets the value of an attribute's weight (if one exists).
+     *
+     * @return the value of the attribute's weight, or 1.0 if no weight has been
+     *         supplied in the file
+     */
+    protected double getAttributeWeight() throws IOException {
+
+      double weight = 1.0;
+      m_Tokenizer.nextToken();
+      if (m_Tokenizer.ttype == StreamTokenizer.TT_EOL || m_Tokenizer.ttype == StreamTokenizer.TT_EOF) {
+        m_Tokenizer.pushBack();
+        return weight;
+      }
+      // see if we can read an attribute weight
+      if (m_Tokenizer.ttype == '{') {
+        m_Tokenizer.nextToken();
+        try {
+          weight = Double.parseDouble(m_Tokenizer.sval);
+        } catch (NumberFormatException ex) {
+          errorMessage("Problem reading attribute weight " + ex.getMessage());
+        }
+        m_Tokenizer.nextToken();
+        if (m_Tokenizer.ttype != '}') {
+          errorMessage("Problem reading attribute weight: } expected");
+        }
+      }
+      return weight;
+     }
 
     /**
      * Returns the header format

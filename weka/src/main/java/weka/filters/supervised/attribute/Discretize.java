@@ -21,12 +21,7 @@
 
 package weka.filters.supervised.attribute;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
@@ -97,7 +92,11 @@ import weka.filters.SupervisedFilter;
  * <pre> -precision &lt;integer&gt;
  *  Precision for bin boundary labels.
  *  (default = 6 decimal places).</pre>
- * 
+ *
+ * <pre>-spread-attribute-weight
+ *  When generating binary attributes, spread weight of old
+ *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+ *
  <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
@@ -130,6 +129,9 @@ public class Discretize extends Filter implements SupervisedFilter,
 
   /** Precision for bin range labels */
   protected int m_BinRangePrecision = 6;
+
+  /** Whether to spread attribute weight when creating binary attributes */
+  protected boolean m_SpreadAttributeWeight = false;
 
   /** Constructor - initialises the filter */
   public Discretize() {
@@ -168,10 +170,13 @@ public class Discretize extends Filter implements SupervisedFilter,
     newVector.addElement(new Option("\tUse Kononenko's MDL criterion.", "K", 0,
       "-K"));
 
-    newVector
-      .addElement(new Option("\tPrecision for bin boundary labels.\n\t"
+    newVector.addElement(new Option("\tPrecision for bin boundary labels.\n\t"
         + "(default = 6 decimal places).", "precision", 1,
         "-precision <integer>"));
+
+    newVector.addElement(new Option("\tWhen generating binary attributes, spread weight of old "
+                    + "attribute across new attributes. Do not give each new attribute the old weight.\n\t",
+                    "spread-attribute-weight", 0, "-spread-attribute-weight"));
 
     return newVector.elements();
   }
@@ -205,7 +210,11 @@ public class Discretize extends Filter implements SupervisedFilter,
    * <pre> -precision &lt;integer&gt;
    *  Precision for bin boundary labels.
    *  (default = 6 decimal places).</pre>
-   * 
+   *
+   * <pre>-spread-attribute-weight
+   *  When generating binary attributes, spread weight of old
+   *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+   *
    <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -231,6 +240,8 @@ public class Discretize extends Filter implements SupervisedFilter,
     if (precisionS.length() > 0) {
       setBinRangePrecision(Integer.parseInt(precisionS));
     }
+
+    setSpreadAttributeWeight(Utils.getFlag("spread-attribute-weight", options));
 
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
@@ -271,6 +282,10 @@ public class Discretize extends Filter implements SupervisedFilter,
 
     options.add("-precision");
     options.add("" + getBinRangePrecision());
+
+    if (getSpreadAttributeWeight()) {
+      options.add("-spread-attribute-weight");
+    }
 
     return options.toArray(new String[options.size()]);
   }
@@ -430,6 +445,37 @@ public class Discretize extends Filter implements SupervisedFilter,
       "http://ai.fri.uni-lj.si/papers/kononenko95-ijcai.ps.gz");
 
     return result;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String spreadAttributeWeightTipText() {
+    return "When generating binary attributes, spread weight of old attribute across new attributes. " +
+            "Do not give each new attribute the old weight.";
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @param p whether weight is spread
+   */
+  public void setSpreadAttributeWeight(boolean p) {
+    m_SpreadAttributeWeight = p;
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @return whether weight is spread
+   */
+  public boolean getSpreadAttributeWeight() {
+    return m_SpreadAttributeWeight;
   }
 
   /**
@@ -1044,27 +1090,23 @@ public class Discretize extends Filter implements SupervisedFilter,
               }
             } else {
               for (int j = 0, n = cutPoints.length; j <= n; ++j) {
-                String newBinRangeString = binRangeString(cutPoints, j,
-                  m_BinRangePrecision);
-                if (cutPointsCheck.contains(newBinRangeString)) {
+                String newBinRangeString = binRangeString(cutPoints, j, m_BinRangePrecision);
+                if (!cutPointsCheck.add(newBinRangeString)) {
                   throw new IllegalArgumentException(
-                    "A duplicate bin range was detected. "
-                      + "Try increasing the bin range precision.");
+                    "A duplicate bin range was detected. Try increasing the bin range precision.");
                 }
                 attribValues.add("'" + newBinRangeString + "'");
               }
             }
           }
-          Attribute newAtt = new Attribute(
-            getInputFormat().attribute(i).name(), attribValues);
+          Attribute newAtt = new Attribute(getInputFormat().attribute(i).name(), attribValues);
           newAtt.setWeight(getInputFormat().attribute(i).weight());
           attributes.add(newAtt);
         } else {
           if (cutPoints == null) {
             ArrayList<String> attribValues = new ArrayList<String>(1);
             attribValues.add("'All'");
-            Attribute newAtt = new Attribute(getInputFormat().attribute(i)
-              .name(), attribValues);
+            Attribute newAtt = new Attribute(getInputFormat().attribute(i).name(), attribValues);
             newAtt.setWeight(getInputFormat().attribute(i).weight());
             attributes.add(newAtt);
           } else {
@@ -1078,21 +1120,22 @@ public class Discretize extends Filter implements SupervisedFilter,
                 attribValues.add("'B2of2'");
               } else {
                 double[] binaryCutPoint = { cutPoints[j] };
-                String newBinRangeString1 = binRangeString(binaryCutPoint, 0,
-                  m_BinRangePrecision);
-                String newBinRangeString2 = binRangeString(binaryCutPoint, 1,
-                  m_BinRangePrecision);
+                String newBinRangeString1 = binRangeString(binaryCutPoint, 0, m_BinRangePrecision);
+                String newBinRangeString2 = binRangeString(binaryCutPoint, 1, m_BinRangePrecision);
                 if (newBinRangeString1.equals(newBinRangeString2)) {
                   throw new IllegalArgumentException(
-                    "A duplicate bin range was detected. "
-                      + "Try increasing the bin range precision.");
+                    "A duplicate bin range was detected. Try increasing the bin range precision.");
                 }
                 attribValues.add("'" + newBinRangeString1 + "'");
                 attribValues.add("'" + newBinRangeString2 + "'");
               }
               Attribute newAtt = new Attribute(getInputFormat().attribute(i)
                 .name() + "_" + (j + 1), attribValues);
-              newAtt.setWeight(getInputFormat().attribute(i).weight());
+              if (getSpreadAttributeWeight()) {
+                newAtt.setWeight(getInputFormat().attribute(i).weight() / cutPoints.length);
+              } else {
+                newAtt.setWeight(getInputFormat().attribute(i).weight());
+              }
               attributes.add(newAtt);
             }
           }

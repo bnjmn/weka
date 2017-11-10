@@ -705,19 +705,25 @@ public class Attribute implements Copyable, Serializable, RevisionHandler {
         }
       }
       text.append('}');
+      text.append((weight() != 1.0) ? " {" + weight() + "}" : "");
       break;
     case NUMERIC:
       text.append(ARFF_ATTRIBUTE_NUMERIC);
+      text.append((weight() != 1.0) ?  " {" + weight() + "}" : "");
       break;
     case STRING:
       text.append(ARFF_ATTRIBUTE_STRING);
+      text.append((weight() != 1.0) ?  " {" + weight() + "}" : "");
       break;
     case DATE:
       text.append(ARFF_ATTRIBUTE_DATE).append(" ")
         .append(Utils.quote(((DateAttributeInfo)m_AttributeInfo).m_DateFormat.toPattern()));
+      text.append((weight() != 1.0) ?  " {" + weight() + "}" : "");
       break;
     case RELATIONAL:
-      text.append(ARFF_ATTRIBUTE_RELATIONAL).append("\n");
+      text.append(ARFF_ATTRIBUTE_RELATIONAL);
+      text.append((weight() != 1.0) ?  " {" + weight() + "}" : "");
+      text.append("\n");
       Enumeration<Attribute> enm = ((RelationalAttributeInfo)m_AttributeInfo).m_Header.enumerateAttributes();
       while (enm.hasMoreElements()) {
         text.append(enm.nextElement()).append("\n");

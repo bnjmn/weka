@@ -21,10 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
@@ -93,7 +90,15 @@ import weka.filters.UnsupervisedFilter;
  * -Y
  *  Use bin numbers rather than ranges for discretized attributes.
  * </pre>
- * 
+ *
+ * <pre> -precision &lt;integer&gt;
+ *  Precision for bin boundary labels.
+ *  (default = 6 decimal places).</pre>
+ *
+ * <pre>-spread-attribute-weight
+ *  When generating binary attributes, spread weight of old
+ *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+ *
  * <!-- options-end -->
  * 
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
@@ -132,6 +137,12 @@ public class Discretize extends PotentialClassIgnorer implements
 
   /** The default columns to discretize */
   protected String m_DefaultCols;
+
+  /** Precision for bin range labels */
+  protected int m_BinRangePrecision = 6;
+
+  /** Whether to spread attribute weight when creating binary attributes */
+  protected boolean m_SpreadAttributeWeight = false;
 
   /** Constructor - initialises the filter */
   public Discretize() {
@@ -198,6 +209,14 @@ public class Discretize extends PotentialClassIgnorer implements
       "\tUse bin numbers rather than ranges for discretized attributes.", "Y",
       0, "-Y"));
 
+    result.addElement(new Option("\tPrecision for bin boundary labels.\n\t"
+                    + "(default = 6 decimal places).", "precision", 1,
+                    "-precision <integer>"));
+
+    result.addElement(new Option("\tWhen generating binary attributes, spread weight of old "
+                    + "attribute across new attributes. Do not give each new attribute the old weight.\n\t",
+                    "spread-attribute-weight", 0, "-spread-attribute-weight"));
+
     result.addAll(Collections.list(super.listOptions()));
 
     return result.elements();
@@ -263,7 +282,15 @@ public class Discretize extends PotentialClassIgnorer implements
    * -Y
    *  Use bin numbers rather than ranges for discretized attributes.
    * </pre>
-   * 
+   *
+   * <pre> -precision &lt;integer&gt;
+   *  Precision for bin boundary labels.
+   *  (default = 6 decimal places).</pre>
+   *
+   * <pre>-spread-attribute-weight
+   *  When generating binary attributes, spread weight of old
+   *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+   *
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -302,6 +329,13 @@ public class Discretize extends PotentialClassIgnorer implements
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    String precisionS = Utils.getOption("precision", options);
+    if (precisionS.length() > 0) {
+      setBinRangePrecision(Integer.parseInt(precisionS));
+    }
+
+    setSpreadAttributeWeight(Utils.getFlag("spread-attribute-weight", options));
 
     super.setOptions(options);
 
@@ -347,6 +381,13 @@ public class Discretize extends PotentialClassIgnorer implements
     if (!getAttributeIndices().equals("")) {
       result.add("-R");
       result.add(getAttributeIndices());
+    }
+
+    result.add("-precision");
+    result.add("" + getBinRangePrecision());
+
+    if (getSpreadAttributeWeight()) {
+      result.add("-spread-attribute-weight");
     }
 
     Collections.addAll(result, super.getOptions());
@@ -765,6 +806,69 @@ public class Discretize extends PotentialClassIgnorer implements
   }
 
   /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String spreadAttributeWeightTipText() {
+    return "When generating binary attributes, spread weight of old attribute across new attributes. " +
+            "Do not give each new attribute the old weight.";
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @param p whether weight is spread
+   */
+  public void setSpreadAttributeWeight(boolean p) {
+    m_SpreadAttributeWeight = p;
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @return whether weight is spread
+   */
+  public boolean getSpreadAttributeWeight() {
+    return m_SpreadAttributeWeight;
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String binRangePrecisionTipText() {
+    return "The number of decimal places for cut points to use when generating bin labels";
+  }
+
+  /**
+   * Set the precision for bin boundaries. Only affects the boundary values used
+   * in the labels for the converted attributes; internal cutpoints are at full
+   * double precision.
+   *
+   * @param p the precision for bin boundaries
+   */
+  public void setBinRangePrecision(int p) {
+    m_BinRangePrecision = p;
+  }
+
+  /**
+   * Get the precision for bin boundaries. Only affects the boundary values used
+   * in the labels for the converted attributes; internal cutpoints are at full
+   * double precision.
+   *
+   * @return the precision for bin boundaries
+   */
+  public int getBinRangePrecision() {
+    return m_BinRangePrecision;
+  }
+
+  /**
    * Gets the cut points for an attribute
    * 
    * @param attributeIndex the index (from 0) of the attribute to get the cut
@@ -810,7 +914,7 @@ public class Discretize extends PotentialClassIgnorer implements
         sb.append(',');
       }
 
-      sb.append(binRangeString(cutPoints, j));
+      sb.append(binRangeString(cutPoints, j, getBinRangePrecision()));
     }
 
     return sb.toString();
@@ -821,20 +925,21 @@ public class Discretize extends PotentialClassIgnorer implements
    * 
    * @param cutPoints The attribute's cut points; never null.
    * @param j The bin number (zero based); never out of range.
-   * 
+   * @param precision the precision for the range values
+   *
    * @return The bin range string.
    */
-  private static String binRangeString(double[] cutPoints, int j) {
+  private static String binRangeString(double[] cutPoints, int j, int precision) {
     assert cutPoints != null;
 
     int n = cutPoints.length;
     assert 0 <= j && j <= n;
 
     return j == 0 ? "" + "(" + "-inf" + "-"
-      + Utils.doubleToString(cutPoints[0], 6) + "]" : j == n ? "" + "("
-      + Utils.doubleToString(cutPoints[n - 1], 6) + "-" + "inf" + ")" : ""
-      + "(" + Utils.doubleToString(cutPoints[j - 1], 6) + "-"
-      + Utils.doubleToString(cutPoints[j], 6) + "]";
+      + Utils.doubleToString(cutPoints[0], precision) + "]" : j == n ? "" + "("
+      + Utils.doubleToString(cutPoints[n - 1], precision) + "-" + "inf" + ")" : ""
+      + "(" + Utils.doubleToString(cutPoints[j - 1], precision) + "-"
+      + Utils.doubleToString(cutPoints[j], precision) + "]";
   }
 
   /** Generate the cutpoints for each attribute */
@@ -1073,6 +1178,8 @@ public class Discretize extends PotentialClassIgnorer implements
       if ((m_DiscretizeCols.isInRange(i))
         && (getInputFormat().attribute(i).isNumeric())
         && (getInputFormat().classIndex() != i)) {
+
+        Set<String> cutPointsCheck = new HashSet<String>();
         double[] cutPoints = m_CutPoints[i];
         if (!m_MakeBinary) {
           ArrayList<String> attribValues;
@@ -1087,20 +1194,23 @@ public class Discretize extends PotentialClassIgnorer implements
               }
             } else {
               for (int j = 0, n = cutPoints.length; j <= n; ++j) {
-                attribValues.add("'" + binRangeString(cutPoints, j) + "'");
+                String newBinRangeString = binRangeString(cutPoints, j, getBinRangePrecision());
+                if (!cutPointsCheck.add(newBinRangeString)) {
+                  throw new IllegalArgumentException(
+                          "A duplicate bin range was detected. Try increasing the bin range precision.");
+                }
+                attribValues.add("'" + newBinRangeString + "'");
               }
             }
           }
-          Attribute newAtt = new Attribute(
-            getInputFormat().attribute(i).name(), attribValues);
+          Attribute newAtt = new Attribute(getInputFormat().attribute(i).name(), attribValues);
           newAtt.setWeight(getInputFormat().attribute(i).weight());
           attributes.add(newAtt);
         } else {
           if (cutPoints == null) {
             ArrayList<String> attribValues = new ArrayList<String>(1);
             attribValues.add("'All'");
-            Attribute newAtt = new Attribute(getInputFormat().attribute(i)
-              .name(), attribValues);
+            Attribute newAtt = new Attribute(getInputFormat().attribute(i).name(), attribValues);
             newAtt.setWeight(getInputFormat().attribute(i).weight());
             attributes.add(newAtt);
           } else {
@@ -1114,12 +1224,22 @@ public class Discretize extends PotentialClassIgnorer implements
                 attribValues.add("'B2of2'");
               } else {
                 double[] binaryCutPoint = { cutPoints[j] };
-                attribValues.add("'" + binRangeString(binaryCutPoint, 0) + "'");
-                attribValues.add("'" + binRangeString(binaryCutPoint, 1) + "'");
+                String newBinRangeString1 = binRangeString(binaryCutPoint, 0, m_BinRangePrecision);
+                String newBinRangeString2 = binRangeString(binaryCutPoint, 1, m_BinRangePrecision);
+                if (newBinRangeString1.equals(newBinRangeString2)) {
+                  throw new IllegalArgumentException(
+                          "A duplicate bin range was detected. Try increasing the bin range precision.");
+                }
+                attribValues.add("'" + newBinRangeString1 + "'");
+                attribValues.add("'" + newBinRangeString2 + "'");
               }
               Attribute newAtt = new Attribute(getInputFormat().attribute(i)
                 .name() + "_" + (j + 1), attribValues);
-              newAtt.setWeight(getInputFormat().attribute(i).weight() / (cutPoints.length - 1.0));
+              if (getSpreadAttributeWeight()) {
+                newAtt.setWeight(getInputFormat().attribute(i).weight() / cutPoints.length);
+              } else {
+                newAtt.setWeight(getInputFormat().attribute(i).weight());
+              }
               attributes.add(newAtt);
             }
           }

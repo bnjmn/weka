@@ -76,7 +76,11 @@ import weka.filters.SupervisedFilter;
  *  For each nominal value a new attribute is created, 
  *  not only if there are more than 2 values.
  * </pre>
- * 
+ *
+ * <pre>-spread-attribute-weight
+ *  When generating binary attributes, spread weight of old
+ *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+ *
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -99,6 +103,9 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
 
   /** Whether we need to transform at all */
   private boolean m_needToTransform = false;
+
+  /** Whether to spread attribute weight when creating binary attributes */
+  protected boolean m_SpreadAttributeWeight = false;
 
   /**
    * Returns a string describing this filter
@@ -265,6 +272,10 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       "\tFor each nominal value a new attribute is created, \n"
         + "\tnot only if there are more than 2 values.", "A", 0, "-A"));
 
+    newVector.addElement(new Option("\tWhen generating binary attributes, spread weight of old "
+            + "attribute across new attributes. Do not give each new attribute the old weight.\n\t",
+            "spread-attribute-weight", 0, "-spread-attribute-weight"));
+
     return newVector.elements();
   }
 
@@ -285,7 +296,11 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
    *  For each nominal value a new attribute is created, 
    *  not only if there are more than 2 values.
    * </pre>
-   * 
+   *
+   * <pre>-spread-attribute-weight
+   *  When generating binary attributes, spread weight of old
+   *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+   *
    * <!-- options-end -->
    * 
    * @param options the list of options as an array of strings
@@ -301,6 +316,8 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }
+
+    setSpreadAttributeWeight(Utils.getFlag("spread-attribute-weight", options));
 
     Utils.checkForRemainingOptions(options);
   }
@@ -323,7 +340,42 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
       options.add("-A");
     }
 
+    if (getSpreadAttributeWeight()) {
+      options.add("-spread-attribute-weight");
+    }
+
     return options.toArray(new String[0]);
+  }
+
+  /**
+   * Returns the tip text for this property
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String spreadAttributeWeightTipText() {
+    return "When generating binary attributes, spread weight of old attribute across new attributes. " +
+            "Do not give each new attribute the old weight.";
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @param p whether weight is spread
+   */
+  public void setSpreadAttributeWeight(boolean p) {
+    m_SpreadAttributeWeight = p;
+  }
+
+  /**
+   * If true, when generating binary attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @return whether weight is spread
+   */
+  public boolean getSpreadAttributeWeight() {
+    return m_SpreadAttributeWeight;
   }
 
   /**
@@ -509,14 +561,22 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
             attributeName.append(att.value(k));
             if (m_Numeric) {
               Attribute a = new Attribute(attributeName.toString());
-              a.setWeight(att.weight() / att.numValues());
+              if (getSpreadAttributeWeight()) {
+                a.setWeight(att.weight() / att.numValues());
+              } else {
+                a.setWeight(att.weight());
+              }
               newAtts.add(a);
             } else {
               vals = new ArrayList<String>(2);
               vals.add("f");
               vals.add("t");
               Attribute a = new Attribute(attributeName.toString(), vals);
-              a.setWeight(att.weight() / att.numValues());
+              if (getSpreadAttributeWeight()) {
+                a.setWeight(att.weight() / att.numValues());
+              } else {
+                a.setWeight(att.weight());
+              }
               newAtts.add(a);
             }
           }
@@ -583,14 +643,22 @@ public class NominalToBinary extends Filter implements SupervisedFilter,
           }
           if (m_Numeric) {
             Attribute a = new Attribute(attributeName.toString());
-            a.setWeight(att.weight() / att.numValues());
+            if (getSpreadAttributeWeight()) {
+              a.setWeight(att.weight() / (att.numValues() - 1));
+            } else {
+              a.setWeight(att.weight());
+            }
             newAtts.add(a);
           } else {
             vals = new ArrayList<String>(2);
             vals.add("f");
             vals.add("t");
             Attribute a = new Attribute(attributeName.toString(), vals);
-            a.setWeight(att.weight() / att.numValues());
+            if (getSpreadAttributeWeight()) {
+              a.setWeight(att.weight() / (att.numValues() - 1));
+            } else {
+              a.setWeight(att.weight());
+            }
             newAtts.add(a);
           }
         }

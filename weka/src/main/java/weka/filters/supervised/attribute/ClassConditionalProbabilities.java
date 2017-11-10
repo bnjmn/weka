@@ -62,7 +62,11 @@ import weka.gui.ProgrammaticProperty;
  * <pre> -do-not-check-capabilities
  *  If set, filter capabilities are not checked before filter is built
  *  (use with caution).</pre>
- * 
+ *
+ * <pre>-spread-attribute-weight
+ *  When generating binary attributes, spread weight of old
+ *  attribute across new attributes. Do not give each new attribute the old weight.</pre>
+ *
  <!-- options-end -->
  *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
@@ -100,6 +104,9 @@ public class ClassConditionalProbabilities extends SimpleBatchFilter
 
   /** A lookup of estimators from Naive Bayes */
   protected Map<String, Estimator[]> m_estimatorLookup;
+
+  /** Whether to spread attribute weight when creating binary attributes */
+  protected boolean m_SpreadAttributeWeight = false;
 
   /**
    * Main method for testing this class
@@ -170,6 +177,31 @@ public class ClassConditionalProbabilities extends SimpleBatchFilter
    */
   public void setExcludeNominalAttributes(boolean e) {
     m_excludeNominalAttributes = e;
+  }
+
+  /**
+   * If true, when generating attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @param p whether weight is spread
+   */
+  @OptionMetadata(displayName = "Spread weight across new attributes",
+          description = "When generating attributes, spread weight of old\n" +
+                  "attribute across new attributes. Do not give each new attribute the old weight.",
+          commandLineParamName = "spread-attribute-weight", commandLineParamIsFlag = true,
+          commandLineParamSynopsis = "-spread-attribute-weight", displayOrder = 3)
+  public void setSpreadAttributeWeight(boolean p) {
+    m_SpreadAttributeWeight = p;
+  }
+
+  /**
+   * If true, when generating attributes, spread weight of old
+   * attribute across new attributes. Do not give each new attribute the old weight.
+   *
+   * @return whether weight is spread
+   */
+  public boolean getSpreadAttributeWeight() {
+    return m_SpreadAttributeWeight;
   }
 
   /**
@@ -265,7 +297,11 @@ public class ClassConditionalProbabilities extends SimpleBatchFilter
             "pr_" + inputFormat.attribute(i).name() + "|"
               + inputFormat.classAttribute().value(j);
           Attribute a = new Attribute(name);
-          a.setWeight(inputFormat.attribute(i).weight() / inputFormat.classAttribute().numValues());
+          if (getSpreadAttributeWeight()) {
+            a.setWeight(inputFormat.attribute(i).weight() / inputFormat.classAttribute().numValues());
+          } else {
+            a.setWeight(inputFormat.attribute(i).weight());
+          }
           atts.add(a);
         }
       }
