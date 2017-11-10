@@ -88,13 +88,7 @@ import weka.core.Utils;
  *  Enables debugging output (if available) to be printed.
  *  (default: off)
  * </pre>
- * 
- * <pre>
- * -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)
- * </pre>
- * 
+ *
  * <pre>
  * -P &lt;0|1&gt;
  *  The pruning method to use:
@@ -547,13 +541,7 @@ public class StringKernel extends Kernel implements TechnicalInformationHandler 
    *  Enables debugging output (if available) to be printed.
    *  (default: off)
    * </pre>
-   * 
-   * <pre>
-   * -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)
-   * </pre>
-   * 
+   *
    * <pre>
    * -P &lt;0|1&gt;
    *  The pruning method to use:

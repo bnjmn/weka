@@ -44,11 +44,7 @@ import weka.core.Capabilities.Capability;
  * <pre> -output-debug-info
  *  Enables debugging output (if available) to be printed.
  *  (default: off)</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
- * 
+ *
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)

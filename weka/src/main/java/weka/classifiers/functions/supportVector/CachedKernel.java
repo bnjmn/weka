@@ -383,10 +383,6 @@ public abstract class CachedKernel extends Kernel {
    */
   @Override
   public void buildKernel(Instances data) throws Exception {
-    // does kernel handle the data?
-    if (!getChecksTurnedOff()) {
-      getCapabilities().testWithFail(data);
-    }
 
     initVars(data);
   }

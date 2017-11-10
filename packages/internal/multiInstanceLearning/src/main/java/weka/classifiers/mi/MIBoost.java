@@ -479,6 +479,12 @@ public class MIBoost extends SingleClassifierEnhancer implements OptionHandler,
      * datasets)
      */
 
+    // convert the training dataset into single-instance dataset
+    m_ConvertToSI.setInputFormat(train);
+    Instances data = Filter.useFilter(train, m_ConvertToSI);
+
+    data.deleteAttributeAt(0); // remove the bagIndex attribute;
+
     // Initialize the bags' weights
     double N = train.numInstances(), sumNi = 0;
     for (int i = 0; i < N; i++) {
@@ -488,12 +494,6 @@ public class MIBoost extends SingleClassifierEnhancer implements OptionHandler,
     for (int i = 0; i < N; i++) {
       train.instance(i).setWeight(sumNi / N);
     }
-
-    // convert the training dataset into single-instance dataset
-    m_ConvertToSI.setInputFormat(train);
-    Instances data = Filter.useFilter(train, m_ConvertToSI);
-
-    data.deleteAttributeAt(0); // remove the bagIndex attribute;
 
     // Assume the order of the instances are preserved in the Discretize filter
     if (m_DiscretizeBin > 0) {

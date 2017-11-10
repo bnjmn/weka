@@ -41,11 +41,7 @@ import weka.core.Capabilities.Capability;
  * <pre> -D
  *  Enables debugging output (if available) to be printed.
  *  (default: off)</pre>
- * 
- * <pre> -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)</pre>
- * 
+ *
  * <pre> -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
  *  -1 to turn it off.

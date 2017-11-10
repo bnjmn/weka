@@ -56,13 +56,7 @@ import weka.core.Utils;
  *  Enables debugging output (if available) to be printed.
  *  (default: off)
  * </pre>
- * 
- * <pre>
- * -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)
- * </pre>
- * 
+ *
  * <pre>
  * -C &lt;num&gt;
  *  The size of the cache (a prime number), 0 for full cache and 
@@ -204,13 +198,7 @@ public class Puk extends CachedKernel implements TechnicalInformationHandler {
    *  Enables debugging output (if available) to be printed.
    *  (default: off)
    * </pre>
-   * 
-   * <pre>
-   * -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)
-   * </pre>
-   * 
+   *
    * <pre>
    * -C &lt;num&gt;
    *  The size of the cache (a prime number), 0 for full cache and 
@@ -419,10 +407,6 @@ public class Puk extends CachedKernel implements TechnicalInformationHandler {
    */
   @Override
   public void buildKernel(Instances data) throws Exception {
-    // does kernel handle the data?
-    if (!getChecksTurnedOff()) {
-      getCapabilities().testWithFail(data);
-    }
 
     initVars(data);
 

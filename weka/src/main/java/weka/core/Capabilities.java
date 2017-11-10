@@ -314,11 +314,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
     m_Capabilities = new HashSet<Capability>();
     m_Dependencies = new HashSet<Capability>();
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     if (owner instanceof weka.classifiers.UpdateableClassifier
       || owner instanceof weka.clusterers.UpdateableClusterer) {
       setMinimumNumberInstances(0);
@@ -361,11 +356,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void assign(Capabilities c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       // capability
       if (c.handles(cap)) {
@@ -393,11 +383,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capabilities to AND with
    */
   public void and(Capabilities c) {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     for (Capability cap : Capability.values()) {
       // capability
@@ -436,11 +421,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void or(Capabilities c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       // capability
       if (handles(cap) || c.handles(cap)) {
@@ -472,11 +452,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public boolean supports(Capabilities c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return true;
-    }
-
     for (Capability cap : Capability.values()) {
       if (c.handles(cap) && !handles(cap)) {
         return false;
@@ -503,11 +478,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    *         have a dependency)
    */
   public boolean supportsMaybe(Capabilities c) {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return true;
-    }
 
     for (Capability cap : Capability.values()) {
       if (c.handles(cap) && !(handles(cap) || hasDependency(cap))) {
@@ -604,11 +574,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void enable(Capability c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enable(Capability.BINARY_ATTRIBUTES);
@@ -638,11 +603,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void enableDependency(Capability c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
- 
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       enableDependency(Capability.BINARY_ATTRIBUTES);
@@ -667,11 +627,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void enableAllClasses() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         enable(cap);
@@ -686,11 +641,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void enableAllClassDependencies() {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
@@ -707,11 +657,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void enableAllAttributes() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         enable(cap);
@@ -727,11 +672,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void enableAllAttributeDependencies() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         enableDependency(cap);
@@ -743,11 +683,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * enables all attribute and class types (including dependencies)
    */
   public void enableAll() {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     enableAllAttributes();
     enableAllAttributeDependencies();
@@ -768,11 +703,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @param c the capability to disable
    */
   public void disable(Capability c) {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
@@ -806,11 +736,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void disableDependency(Capability c) {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     // attributes
     if (c == Capability.NOMINAL_ATTRIBUTES) {
       disableDependency(Capability.BINARY_ATTRIBUTES);
@@ -839,11 +764,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void disableAllClasses() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
         disable(cap);
@@ -858,11 +778,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @see #getClassCapabilities()
    */
   public void disableAllClassDependencies() {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     for (Capability cap : Capability.values()) {
       if (cap.isClass()) {
@@ -879,11 +794,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void disableAllAttributes() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         disable(cap);
@@ -899,11 +809,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   public void disableAllAttributeDependencies() {
 
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
-
     for (Capability cap : Capability.values()) {
       if (cap.isAttribute()) {
         disableDependency(cap);
@@ -915,11 +820,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * disables all attribute and class types (including dependencies)
    */
   public void disableAll() {
-
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return;
-    }
 
     disableAllAttributes();
     disableAllAttributeDependencies();
@@ -1004,11 +904,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if the classifier handler has the capability
    */
   public boolean handles(Capability c) {
-    
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return true;
-    }
 
     return m_Capabilities.contains(c);
   }
@@ -1021,11 +916,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if the classifier handler has a dependency for the capability
    */
   public boolean hasDependency(Capability c) {
-    
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return false;
-    }
 
     return m_Dependencies.contains(c);
   }
@@ -1036,11 +926,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return true if there is at least one dependency for a capability
    */
   public boolean hasDependencies() {
-    
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return false;
-    }
 
     return (m_Dependencies.size() > 0);
   }
@@ -1051,11 +936,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    * @return the reason why the tests failed
    */
   public Exception getFailReason() {
-    
-    // Do we actually want to check capabilities?
-    if (doNotCheckCapabilities()) {
-      return null;
-    }
 
     return m_FailReason;
   }
@@ -1069,8 +949,6 @@ public class Capabilities implements Cloneable, Serializable, RevisionHandler {
    */
   protected String createMessage(String msg) {
     String result;
-
-    result = "";
 
     if (getOwner() != null) {
       result = getOwner().getClass().getName();

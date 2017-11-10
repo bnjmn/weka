@@ -54,19 +54,13 @@ import weka.core.matrix.Matrix;
  *  Enables debugging output (if available) to be printed.
  *  (default: off)
  * </pre>
- * 
- * <pre>
- * -no-checks
- *  Turns off all checks - use with caution!
- *  (default: checks on)
- * </pre>
- * 
+ *
  * <pre>
  * -M &lt;file name&gt;
  *  The file name of the file that holds the kernel matrix.
  *  (default: kernelMatrix.matrix)
  * </pre>
- * 
+ *
  * <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -147,13 +141,7 @@ public class PrecomputedKernelMatrixKernel extends Kernel implements Copyable {
    *  Enables debugging output (if available) to be printed.
    *  (default: off)
    * </pre>
-   * 
-   * <pre>
-   * -no-checks
-   *  Turns off all checks - use with caution!
-   *  (default: checks on)
-   * </pre>
-   * 
+   *
    * <pre>
    * -M &lt;file name&gt;
    *  The file name of the file that holds the kernel matrix.
