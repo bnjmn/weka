@@ -178,25 +178,28 @@ public class J48graft
   }
 
   /**
-   * Returns default capabilities of the classifier.
+   * Returns default capabilities of the classifier tree.
    *
-   * @return      the capabilities of this classifier
+   * @return      the capabilities of this classifier tree
    */
-  /* public Capabilities getCapabilities() {
-    Capabilities      result;
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
 
-    try {
-     result = new C45PruneableClassifierTreeG(null, !m_unpruned, m_CF, m_subtreeRaising, m_relabel, !m_noCleanup).getCapabilities();
-    }
-    catch (Exception e) {
-      result = new Capabilities(this);
-      result.disableAll();
-    }
+    // attributes
+    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capabilities.Capability.MISSING_VALUES);
 
-    result.setOwner(this);
+    // class
+    result.enable(Capabilities.Capability.NOMINAL_CLASS);
+    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
 
     return result;
-  } */
+  }
 
   /**
    * Generates the classifier.
@@ -206,6 +209,9 @@ public class J48graft
    */
   public void buildClassifier(Instances instances)
        throws Exception {
+
+    // can classifier tree handle the data?
+    getCapabilities().testWithFail(instances);
 
     ModelSelection modSelection;
 

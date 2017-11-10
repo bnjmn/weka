@@ -90,31 +90,6 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
     m_relabel = relabel;
   }
 
-
-  /**
-   * Returns default capabilities of the classifier tree.
-   *
-   * @return      the capabilities of this classifier tree
-   */
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-
-    return result;
-  }
-
   /**
    * Constructor for pruneable tree structure. Used to create new nodes
    * in the tree during grafting.
@@ -160,9 +135,6 @@ public class C45PruneableClassifierTreeG extends ClassifierTree{
    * @throws Exception if something goes wrong
    */
   public void buildClassifier(Instances data) throws Exception {
-
-    // can classifier tree handle the data?
-    getCapabilities().testWithFail(data);
 
     // remove instances with missing class
     data = new Instances(data);
