@@ -40,7 +40,7 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ClassifierTree implements Drawable, Serializable, RevisionHandler {
+public class ClassifierTree implements Drawable, Serializable, RevisionHandler, CapabilitiesHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8722249377542734193L;
@@ -108,6 +108,19 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler {
   protected static void resetID() {
 
     PRINTED_NODES = 0;
+  }
+  
+  /**
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return the capabilities of this classifier tree
+   */
+  @Override
+  public Capabilities getCapabilities() {
+    Capabilities result = new Capabilities(this);
+    result.enableAll();
+
+    return result;
   }
 
   /**
