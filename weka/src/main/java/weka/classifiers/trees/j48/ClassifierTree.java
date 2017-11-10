@@ -40,8 +40,7 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ClassifierTree implements Drawable, Serializable,
-  CapabilitiesHandler, RevisionHandler {
+public class ClassifierTree implements Drawable, Serializable, RevisionHandler {
 
   /** for serialization */
   static final long serialVersionUID = -8722249377542734193L;
@@ -117,19 +116,6 @@ public class ClassifierTree implements Drawable, Serializable,
   public ClassifierTree(ModelSelection toSelectLocModel) {
 
     m_toSelectModel = toSelectLocModel;
-  }
-
-  /**
-   * Returns default capabilities of the classifier tree.
-   * 
-   * @return the capabilities of this classifier tree
-   */
-  @Override
-  public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.enableAll();
-
-    return result;
   }
 
   /**

@@ -43,32 +43,6 @@ public class NBTreeClassifierTree extends ClassifierTree {
   }
 
   /**
-   * Returns default capabilities of the classifier tree.
-   * 
-   * @return the capabilities of this classifier tree
-   */
-  @Override
-  public Capabilities getCapabilities() {
-    Capabilities result = super.getCapabilities();
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    // instances
-    result.setMinimumNumberInstances(0);
-
-    return result;
-  }
-
-  /**
    * Method for building a naive bayes classifier tree
    * 
    * @exception Exception if something goes wrong

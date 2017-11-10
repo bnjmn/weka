@@ -42,8 +42,7 @@ import weka.core.Utils;
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class MakeDecList implements Serializable, CapabilitiesHandler,
-  RevisionHandler {
+public class MakeDecList implements Serializable, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -1427481323245079123L;
@@ -110,29 +109,6 @@ public class MakeDecList implements Serializable, CapabilitiesHandler,
     unpruned = false;
     minNumObj = minNum;
     m_seed = seed;
-  }
-
-  /**
-   * Returns default capabilities of the classifier.
-   * 
-   * @return the capabilities of this classifier
-   */
-  @Override
-  public Capabilities getCapabilities() {
-    Capabilities result = new Capabilities(this);
-    result.disableAll();
-
-    // attributes
-    result.enable(Capability.NOMINAL_ATTRIBUTES);
-    result.enable(Capability.NUMERIC_ATTRIBUTES);
-    result.enable(Capability.DATE_ATTRIBUTES);
-    result.enable(Capability.MISSING_VALUES);
-
-    // class
-    result.enable(Capability.NOMINAL_CLASS);
-    result.enable(Capability.MISSING_CLASS_VALUES);
-
-    return result;
   }
 
   /**
@@ -256,7 +232,7 @@ public class MakeDecList implements Serializable, CapabilitiesHandler,
     // Get probabilities.
     sumProbs = new double[instance.numClasses()];
     i = 0;
-    while (Utils.gr(weight, 0)) {
+    while ((Utils.gr(weight, 0)) && (i < theRules.size())) {
       currentWeight = theRules.elementAt(i).weight(instance);
       if (Utils.gr(currentWeight, 0)) {
         currentProbs = theRules.elementAt(i).distributionForInstance(instance);

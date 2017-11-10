@@ -263,7 +263,6 @@ public class Add extends Filter implements UnsupervisedFilter,
       setWeight(Double.parseDouble(tmpStr));
     }
 
-    setAttributeIndex(tmpStr);
     if (getInputFormat() != null) {
       setInputFormat(getInputFormat());
     }

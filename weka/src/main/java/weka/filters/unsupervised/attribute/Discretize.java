@@ -326,16 +326,16 @@ public class Discretize extends PotentialClassIgnorer implements
       setAttributeIndices(m_DefaultCols);
     }
 
-    if (getInputFormat() != null) {
-      setInputFormat(getInputFormat());
-    }
-
     String precisionS = Utils.getOption("precision", options);
     if (precisionS.length() > 0) {
       setBinRangePrecision(Integer.parseInt(precisionS));
     }
 
     setSpreadAttributeWeight(Utils.getFlag("spread-attribute-weight", options));
+
+    if (getInputFormat() != null) {
+      setInputFormat(getInputFormat());
+    }
 
     super.setOptions(options);
 
