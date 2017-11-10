@@ -6,10 +6,10 @@
 PackageName=naiveBayesTree
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date
-Date=2013-12-06
+Date=2017-11-07
 
 # Title (required)
 Title=Class for generating a decision tree with naive Bayes classifiers at the leaves.
@@ -31,7 +31,7 @@ Description=Class for generating a decision tree with naive Bayes classifiers at
 Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/naiveBayesTree1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/naiveBayesTree1.0.4.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/naiveBayesTree

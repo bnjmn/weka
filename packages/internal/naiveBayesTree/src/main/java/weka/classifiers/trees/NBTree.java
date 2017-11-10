@@ -131,13 +131,29 @@ public class NBTree extends AbstractClassifier implements
   }
 
   /**
-   * Returns default capabilities of the classifier.
-   * 
-   * @return the capabilities of this classifier
+   * Returns default capabilities of the classifier tree.
+   *
+   * @return the capabilities of this classifier tree
    */
   @Override
   public Capabilities getCapabilities() {
-    return new NBTreeClassifierTree(null).getCapabilities();
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
+    result.enable(Capabilities.Capability.MISSING_VALUES);
+
+    // class
+    result.enable(Capabilities.Capability.NOMINAL_CLASS);
+    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
+
+    // instances
+    result.setMinimumNumberInstances(0);
+
+    return result;
   }
 
   /**
@@ -148,6 +164,9 @@ public class NBTree extends AbstractClassifier implements
    */
   @Override
   public void buildClassifier(Instances instances) throws Exception {
+
+    // can classifier handle the data?
+    getCapabilities().testWithFail(instances);
 
     NBTreeModelSelection modSelection = new NBTreeModelSelection(m_minNumObj,
       instances);
