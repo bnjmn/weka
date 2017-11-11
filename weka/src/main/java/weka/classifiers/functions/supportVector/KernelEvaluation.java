@@ -231,6 +231,7 @@ public class KernelEvaluation implements RevisionHandler {
 
     // build kernel
     startTime = System.currentTimeMillis();
+    kernel.getCapabilities().testWithFail(data);
     kernel.buildKernel(data);
     endTime = System.currentTimeMillis();
     m_Result.append("\n=== Model ===\n\n");

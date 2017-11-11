@@ -27,7 +27,6 @@ import java.util.Vector;
 
 import weka.core.Capabilities;
 import weka.core.CapabilitiesHandler;
-import weka.core.CapabilitiesIgnorer;
 import weka.core.Copyable;
 import weka.core.Instance;
 import weka.core.Instances;
@@ -48,8 +47,7 @@ import weka.gui.ProgrammaticProperty;
  * @version $Revision$
  */
 public abstract class Kernel implements Serializable, OptionHandler,
-  CapabilitiesHandler, CapabilitiesIgnorer,
-  RevisionHandler {
+  CapabilitiesHandler, RevisionHandler {
 
   /** for serialization */
   private static final long serialVersionUID = -6102771099905817064L;

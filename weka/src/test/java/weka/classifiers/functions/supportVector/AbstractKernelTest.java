@@ -709,6 +709,7 @@ public abstract class AbstractKernelTest
       fail("Problem setting up to use Kernel: " + e);
     }
 
+    kernel.getCapabilities().testWithFail(data);
     kernel.buildKernel(data);
     for (int n = 0; n < data.numInstances(); n++) {
       for (int i = n; i < data.numInstances(); i++) {

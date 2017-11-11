@@ -1057,6 +1057,7 @@ public class CheckKernel extends CheckScheme {
     }
     try {
       Instances trainCopy = new Instances(train);
+      kernel.getCapabilities().testWithFail(train);
       kernel.buildKernel(trainCopy);
       compareDatasets(train, trainCopy);
 
@@ -1154,6 +1155,7 @@ public class CheckKernel extends CheckScheme {
       throw new Error("Error setting up for tests: " + ex.getMessage());
     }
     try {
+      kernel.getCapabilities().testWithFail(train);
       kernel.buildKernel(train);
       println("yes");
       result[0] = true;
