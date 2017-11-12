@@ -37,28 +37,14 @@ import weka.core.logging.Logger;
 import weka.gui.CheckBoxList.CheckBoxListModel;
 import weka.core.PluginManager;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JTree;
-import javax.swing.ToolTipManager;
+import javax.swing.*;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseEvent;
-import java.awt.event.WindowAdapter;
-import java.awt.event.WindowEvent;
+import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -674,7 +660,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
       m_scroller = new JScrollPane(treeView);
 
-      m_scroller.setPreferredSize(new Dimension(300, 400));
+      m_scroller.setPreferredSize(new Dimension(350, 500));
       m_scroller.getVerticalScrollBar().setUnitIncrement(20);
 
       add(m_scroller);
@@ -724,6 +710,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       setLocation(location);
       revalidate();
       pack();
+      m_tree.requestFocusInWindow();
     }
   }
 
@@ -1679,8 +1666,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
         if (e.getSource() instanceof Component) {
           Component comp = (Component) e.getSource();
           popup.show(comp, comp.getX(), comp.getY());
-          popup.pack();
-          popup.repaint();
         }
       }
     });
@@ -1690,7 +1675,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
   /**
    * creates a classname from the given path.
-   * 
+   *
    * @param path the path to generate the classname from
    * @return the generated classname
    */
@@ -1707,8 +1692,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       if (i > start) {
         classname.append(".");
       }
-      classname.append((String) ((GOETreeNode) path.getPathComponent(i))
-        .getUserObject());
+      classname.append((String) ((GOETreeNode) path.getPathComponent(i)).getUserObject());
     }
 
     return classname.toString();
@@ -1728,15 +1712,20 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     final JTree tree = createTree(m_ObjectNames);
     if (m_treeNodeOfCurrentObject != null) {
       tree.setSelectionPath(new TreePath(m_treeNodeOfCurrentObject.getPath()));
+    } else {
+      TreePath path = tree.getPathForRow(0);
+      if (path != null) {
+        tree.setSelectionPath(path);
+      }
     }
-    tree.getSelectionModel().setSelectionMode(
-      TreeSelectionModel.SINGLE_TREE_SELECTION);
+    tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
 
     // create the popup
     final JPopupMenu popup = new JTreePopupMenu(tree);
 
-    // respond when the user chooses a class
+    //  respond when the user chooses a class
     tree.addTreeSelectionListener(new TreeSelectionListener() {
+
       @Override
       public void valueChanged(TreeSelectionEvent e) {
         GOETreeNode node = (GOETreeNode) tree.getLastSelectedPathComponent();
@@ -1747,10 +1736,30 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
 
         if (node.isLeaf()) {
           classSelected(getClassnameFromPath(tree.getSelectionPath()));
+        }
+      }
+    });
+
+    MouseListener ml = new MouseAdapter() {
+      public void mousePressed(MouseEvent e) {
+        if(tree.getRowForLocation(e.getX(), e.getY()) != -1) {
+          if(e.getClickCount() == 2) {
+            popup.setVisible(false);
+          }
+        }
+      }
+    };
+    tree.addMouseListener(ml);
+
+    tree.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "enter_action");
+    tree.getActionMap().put("enter_action", new AbstractAction() {
+      public void actionPerformed(ActionEvent e) {
+        if (((GOETreeNode)tree.getLastSelectedPathComponent()).isLeaf()) {
           popup.setVisible(false);
         }
       }
     });
+
 
     return popup;
   }
