@@ -2675,7 +2675,7 @@ public class ClassifierPanel extends AbstractPerspective implements
    * @param classifier the classifier to save
    * @param trainHeader the header of the training instances
    */
-  protected void saveClassifier(String name, Classifier classifier,
+  public void saveClassifier(String name, Classifier classifier,
     Instances trainHeader) {
 
     File sFile = null;
