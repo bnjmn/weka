@@ -5,7 +5,7 @@
 Search Method:
 	Greedy Stepwise (forwards).
 	Start set: no attributes
-	Merit of best subset found:    0    
+	Merit of best subset found:    1    
 
 Attribute Subset Evaluator (supervised, Class (nominal): 5 Class):
 	Classifier Subset Evaluator
