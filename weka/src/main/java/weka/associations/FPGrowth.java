@@ -882,7 +882,7 @@ public class FPGrowth extends AbstractAssociator implements
             DefaultAssociationRule candidate = new DefaultAssociationRule(
               premise, consequence, metricToUse, supportPremise,
               supportConsequence, totalSupport, totalTransactions);
-            if (candidate.getPrimaryMetricValue() > metricThreshold
+            if (candidate.getPrimaryMetricValue() >= metricThreshold
               && candidate.getTotalSupport() >= lowerBoundMinSuppAsInstances
               && candidate.getTotalSupport() <= upperBoundMinSuppAsInstances) {
               // accept this rule
