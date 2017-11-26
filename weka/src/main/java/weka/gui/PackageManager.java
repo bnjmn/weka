@@ -44,11 +44,14 @@ import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.io.PrintStream;
+import java.io.StringWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -1010,6 +1013,21 @@ public class PackageManager extends JPanel {
               m_unsuccessfulInstalls.add(packageToInstall);
               continue;
             }
+
+            // Check for any os/arch constraints
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            PrintStream ps = new PrintStream(baos);
+            if (!WekaPackageManager.osAndArchCheck(packageToInstall, ps)) {
+              String probString = new String(baos.toByteArray());
+              probString =
+                probString
+                  .replace("[WekaPackageManager] Skipping package ", "");
+              JOptionPane.showMessageDialog(PackageManager.this,
+                "Unable to install package\n" + probString,
+                "Weka Package Manager", JOptionPane.ERROR_MESSAGE);
+              m_unsuccessfulInstalls.add(packageToInstall);
+              continue;
+            }
           } catch (Exception e) {
             e.printStackTrace();
             displayErrorDialog("Problem determining dependency on base system"
@@ -1685,7 +1703,9 @@ public class PackageManager extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         if (m_unofficialFrame == null) {
-          final JFrame jf = Utils.getWekaJFrame("Unofficial package install", PackageManager.this);
+          final JFrame jf =
+            Utils.getWekaJFrame("Unofficial package install",
+              PackageManager.this);
           jf.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosing(WindowEvent e) {
@@ -1704,7 +1724,7 @@ public class PackageManager extends JPanel {
           jf.add(m_unofficialChooser, BorderLayout.CENTER);
           jf.add(butHolder, BorderLayout.SOUTH);
           jf.pack();
-          jf.setSize(600,150);
+          jf.setSize(600, 150);
           jf.setLocationRelativeTo(PackageManager.this);
           jf.setVisible(true);
           m_unofficialFrame = jf;
@@ -2148,7 +2168,8 @@ public class PackageManager extends JPanel {
     m_newPackagesAvailableL =
       new JLabel(new ImageIcon(loadImage("weka/gui/images/information.gif")));
     m_newPackagesAvailableL.addMouseListener(new MouseAdapter() {
-      @Override public void mouseClicked(MouseEvent e) {
+      @Override
+      public void mouseClicked(MouseEvent e) {
         super.mouseClicked(e);
         m_browserTools.remove(m_newPackagesAvailableL);
         m_browserTools.revalidate();

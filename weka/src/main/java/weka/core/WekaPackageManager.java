@@ -94,6 +94,22 @@ public class WekaPackageManager {
   public static final String PRECLUDES_KEY = "Precludes";
 
   /**
+   * Package metadata key for OS name. Entries in this list are checked against
+   * the java property os.name using a String.contains() operation - any match
+   * in the list is taken as passing the test.
+   */
+  public static final String OS_NAME_KEY = "OSName";
+
+  /**
+   * Package metadata key for OS architecture. Entries in this list are checked
+   * against the java property os.arch using a String.equalsIgnoreCase()
+   * operation, with the exception of entries that are either "64" or "32" in
+   * which case the os.arch is checked to see if it contains these numbers. Any
+   * match in the list is considered as passing the test.
+   */
+  public static final String OS_ARCH_KEY = "OSArch";
+
+  /**
    * Package metadata key for preventing load if an environment variable is not
    * set
    */
@@ -854,6 +870,10 @@ public class WekaPackageManager {
       return true;
     }
 
+    if (!osAndArchCheck(toLoad, progress)) {
+      return false;
+    }
+
     // check for precludes
     Object precludes = toLoad.getPackageMetaDataElement(PRECLUDES_KEY);
     if (precludes != null) {
@@ -939,6 +959,83 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       ex.printStackTrace();
       return false;
+    }
+
+    return true;
+  }
+
+  /**
+   * Checks the supplied package against the current OS and architecture.
+   * Packages that don't specify OS and (optionally) architecture constraints
+   * are assumed to be OK. OS names in the OSName entry of the package's
+   * Description.props are checked against System.getProperty("os.name") via a
+   * String.contains() comparison. Any single match results in a pass. If
+   * supplied, the package's OSArch entries are checked against
+   * System.getProperty("os.arch") using a String.equalsIgnoreCase() comparison,
+   * with the exception of the values "64" and "32" which are checked for with
+   * String.contains().
+   * 
+   * @param toLoad the package to check
+   * @param progress PrintStream for progress info
+   * @return true if the supplied package passes OS/arch constraints.
+   */
+  public static boolean osAndArchCheck(Package toLoad,
+    PrintStream... progress) {
+    // check for OS restrictions
+    try {
+      Object osNames = toLoad.getPackageMetaDataElement(OS_NAME_KEY);
+      Object archNames = toLoad.getPackageMetaDataElement(OS_ARCH_KEY);
+
+      if (osNames != null) {
+        boolean osCheck = false;
+        String[] osElements = osNames.toString().split(",");
+        String thisOs = System.getProperty("os.name");
+        if (thisOs != null) {
+          for (String osEntry : osElements) {
+            if (thisOs.toLowerCase().contains(osEntry.trim().toLowerCase())) {
+              osCheck = true;
+              break;
+            }
+          }
+
+          String thisArch = System.getProperty("os.arch");
+          if (osCheck && archNames != null) {
+            String[] archElements = archNames.toString().split(",");
+            if (thisArch != null) {
+              boolean archCheck = false;
+              for (String archEntry : archElements) {
+                if (archEntry.trim().equalsIgnoreCase("32")
+                  || archEntry.trim().equalsIgnoreCase("64")) {
+                  if (thisArch.toLowerCase().contains(archEntry.trim())) {
+                    archCheck = true;
+                    break;
+                  }
+                } else {
+                  if (thisArch.trim().equalsIgnoreCase(archEntry.trim())) {
+                    archCheck = true;
+                    break;
+                  }
+                }
+              }
+              osCheck = archCheck;
+            }
+          }
+
+          if (!osCheck) {
+            for (PrintStream p : progress) {
+              p.println("[WekaPackageManager] Skipping package "
+                + toLoad.getName() + " because the OS/arch (" + thisOs + " "
+                + (thisArch != null ? thisArch : "")
+                + ") does not meet package OS/arch constraints: "
+                + osNames.toString() + " "
+                + (archNames != null ? archNames.toString() : ""));
+            }
+            return false;
+          }
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
 
     return true;
@@ -2461,6 +2558,10 @@ public class WekaPackageManager {
         System.err.println("Can't install package " + packageName
           + " because it requires " + depList.toString());
         return;
+      }
+
+      if (!osAndArchCheck(toInstall, System.out)) {
+        return; // bail out here
       }
 
       if (toInstall.isInstalled()) {
