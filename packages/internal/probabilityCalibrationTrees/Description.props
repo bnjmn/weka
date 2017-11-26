@@ -1,0 +1,50 @@
+# Template Description file for a Weka package
+#
+# 
+
+# Package name (required)
+PackageName=probabilityCalibrationTrees
+
+# Version (required)
+Version=1.0.0
+
+#Date
+Date=2017-11-27
+
+# Title (required)
+Title=Probability calibration trees plus ensemble learning using cascade generalization
+
+Category=Probability calibration, Ensemble learning
+
+# Author (required)
+Author=Tim Leathart
+
+# Maintainer (required)
+Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
+
+# License (required)
+License=GPL 3.0
+
+# Description (required)
+Description=Provides probability calibration trees (PCTs) for local calibration of class probability estimates. To achieve
+calibration of a base learner, the PCT class must be used as the meta learner in the CascadeGeneralization class, which
+is also included in this package. The classifier to be calibrated must be used as the base learner in the CascadeGeneralization class.
+The CascadeGeneralization class can also be used independently to perform CascadeGeneralization for ensemble learning.
+The code for PCTs is largely the same as the LMT code for growing logistic model trees.
+
+#Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://prdownloads.sourceforge.net/weka/probabilityCalibrationTrees1.0.0.zip?download
+
+# URL for further information
+URL=http://weka.sourceforge.net/doc.packages/probabilityCalibrationTrees
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+#Related=
+
+# Dependencies
+Depends=weka (>=3.7.1)
