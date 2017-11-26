@@ -26,11 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Provides probability calibration trees (PCTs) for local calibration of class probability estimates. To achieve
-calibration of a base learner, the PCT class must be used as the meta learner in the CascadeGeneralization class, which
-is also included in this package. The classifier to be calibrated must be used as the base learner in the CascadeGeneralization class.
-The CascadeGeneralization class can also be used independently to perform CascadeGeneralization for ensemble learning.
-The code for PCTs is largely the same as the LMT code for growing logistic model trees.
+Description=Provides probability calibration trees (PCTs) for local calibration of class probability estimates. To achieve calibration of a base learner, the PCT class must be used as the meta learner in the CascadeGeneralization class, which is also included in this package. The classifier to be calibrated must be used as the base learner in the CascadeGeneralization class. The CascadeGeneralization class can also be used independently to perform CascadeGeneralization for ensemble learning. The code for PCTs is largely the same as the LMT code for growing logistic model trees.
 
 #Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
