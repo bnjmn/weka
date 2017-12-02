@@ -217,7 +217,7 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
   /**
    * Set the value of n_min.
    * 
-   * @param k value to assign to n_min.
+   * @param n value to assign to n_min.
    */
   public void setNmin(int n) {
 
@@ -419,11 +419,11 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
         for (int i = 0; i < 2; i++) {
           Instances tempData = new Instances(data, data.numInstances());
           for (int j = 0; j < data.numInstances(); j++) {
-            if ((i == 0) && (data.instance(j).value(m_attIndex) < m_splitPoint)) {
+            if ((i == 0) && (data.instance(j).value(m_attIndex) <= m_splitPoint)) {
               tempData.add(data.instance(j));
             }
             if ((i == 1)
-              && (data.instance(j).value(m_attIndex) >= m_splitPoint)) {
+              && (data.instance(j).value(m_attIndex) > m_splitPoint)) {
               tempData.add(data.instance(j));
             }
           }
@@ -448,20 +448,18 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
         Instance inst = data.instance(i);
         double weight = inst.weight();
         if (data.classAttribute().isNominal()) {
-          if ((inst.value(attIndex) < splitPoint)) {
+          if ((inst.value(attIndex) <= splitPoint)) {
             dist[0][(int) inst.classValue()] += weight;
-          }
-          if ((inst.value(attIndex) >= splitPoint)) {
+          } else {
             dist[1][(int) inst.classValue()] += weight;
           }
         } else {
           sumOfWeights += weight;
           mean += weight * inst.classValue();
-          if ((inst.value(attIndex) < splitPoint)) {
+          if ((inst.value(attIndex) <= splitPoint)) {
             dist[0][0] += weight * inst.classValue();
             numLeft += weight;
-          }
-          if ((inst.value(attIndex) >= splitPoint)) {
+          } else {
             dist[1][0] += weight * inst.classValue();
           }
         }
@@ -488,11 +486,10 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
         for (int i = 0; i < data.numInstances(); i++) {
           Instance inst = data.instance(i);
           double weight = inst.weight();
-          if ((inst.value(attIndex) < splitPoint)) {
+          if ((inst.value(attIndex) <= splitPoint)) {
             double diff = (inst.classValue() - dist[0][0]);
             var[0] += weight * diff * diff;
-          }
-          if ((inst.value(attIndex) >= splitPoint)) {
+          } else {
             double diff = (inst.classValue() - dist[1][0]);
             var[1] += weight * diff * diff;
           }
@@ -517,7 +514,7 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
         return m_dist;
       } else {
         double val = inst.value(m_attIndex);
-        if (val < m_splitPoint) {
+        if (val <= m_splitPoint) {
           return m_successors[0].distributionForInstance(inst);
         } else {
           return m_successors[1].distributionForInstance(inst);
@@ -676,7 +673,7 @@ public class ExtraTree extends RandomizableClassifier implements Serializable,
 
       // Compute weight distribution
       double[] weights = new double[node.m_successors.length];
-      if (instance.value(node.m_attIndex) < node.m_splitPoint) {
+      if (instance.value(node.m_attIndex) <= node.m_splitPoint) {
         weights[0] = 1.0;
       } else {
         weights[1] = 1.0;
