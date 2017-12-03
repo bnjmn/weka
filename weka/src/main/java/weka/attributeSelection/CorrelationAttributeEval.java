@@ -111,6 +111,7 @@ public class CorrelationAttributeEval extends ASEvaluation implements
 
     // class
     result.enable(Capability.NOMINAL_CLASS);
+    result.enable(Capability.NUMERIC_CLASS);
     result.enable(Capability.MISSING_CLASS_VALUES);
 
     return result;
