@@ -171,7 +171,7 @@ import weka.filters.unsupervised.attribute.MakeIndicator;
  * @see OptionHandler
  */
 public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
-  OptionHandler, TechnicalInformationHandler, BatchPredictor {
+  OptionHandler, TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -3461971774059603636L;
@@ -427,27 +427,6 @@ public class OrdinalClassClassifier extends SingleClassifierEnhancer implements
     } else {
       return m_ZeroR.distributionForInstance(inst);
     }
-  }
-
-  /**
-   * The tool tip for this property
-   * @return the tip
-   */
-  public String batchSizeTipText() {
-	return "Preferred batch size for prediction";
-    }
-
-  /**
-   * Dummy method to satisfy BatchPredictor interface.
-   */
-  public void setBatchSize(String i) {
-  }
-
-  /**
-   * Dummy method to satisfy BatchPredictor interface.
-   */
-  public String getBatchSize() {
-    return "";
   }
 
   /**

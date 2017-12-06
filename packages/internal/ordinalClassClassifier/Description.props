@@ -6,10 +6,10 @@
 PackageName=ordinalClassClassifier
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2015-12-15
+Date=2017-12-06
 
 # Title (required)
 Title=Meta classifier that allows standard classification algorithms to be applied to ordinal class problems.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Meta classifier that allows standard classification algorithms to be applied to ordinal class problems.<br/><br/>For more information see: <br/><br/>Eibe Frank, Mark Hall: A Simple Approach to Ordinal Classification. In: 12th European Conference on Machine Learning, 145-156, 2001.<br/><br/>Robert E. Schapire, Peter Stone, David A. McAllester, Michael L. Littman, Janos A. Csirik: Modeling Auction Price Uncertainty Using Boosting-based Conditional Density Estimation. In: Machine Learning, Proceedings of the Nineteenth International Conference (ICML 2002), 546-553, 2002.
 
-Changes=Now includes method implementsMoreEfficientBatchPrediction() so that fast batch prediction actually works!
+Changes=Getter and setter for batch size removed. Correct implementations are inherited.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/ordinalClassClassifier1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/ordinalClassClassifier1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/ordinalClassClassifier
