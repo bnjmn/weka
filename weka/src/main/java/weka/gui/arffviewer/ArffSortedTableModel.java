@@ -208,7 +208,17 @@ public class ArffSortedTableModel
   public void renameAttributeAt(int columnIndex, String newName) {
     ((ArffTableModel) getModel()).renameAttributeAt(columnIndex, newName);
   }
-  
+
+  /**
+   * sets the weight of the attribute at the given col index
+   *
+   * @param columnIndex		the index of the column
+   * @param weight		the new weight of the attribute
+   */
+  public void setAttributeWeightAt(int columnIndex, double weight) {
+    ((ArffTableModel) getModel()).setAttributeWeightAt(columnIndex, weight);
+  }
+
   /**
    * sets the attribute at the given col index as the new class attribute
    * 

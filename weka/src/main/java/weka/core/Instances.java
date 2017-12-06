@@ -1136,8 +1136,49 @@ RevisionHandler {
   }
 
   /**
-   * Renames an attribute. This change only affects this dataset.
+   * Sets the weight of an attribute. This change only affects this dataset.
    * 
+   * @param att the attribute
+   * @param weight the new weight
+   */
+  public void setAttributeWeight(Attribute att, double weight) {
+
+    setAttributeWeight(att.index(), weight);
+  }
+
+  /**
+   * Sets the weight of an attribute. This change only affects this dataset.
+   *
+   * @param att the attribute's index (index starts with 0)
+   * @param weight the new weight
+   */
+  public void setAttributeWeight(int att, double weight) {
+
+    Attribute existingAtt = attribute(att);
+    if (existingAtt.weight() == weight) {
+      return;
+    }
+
+    Attribute newAtt = (Attribute)existingAtt.copy();
+    newAtt.setWeight(weight);
+    ArrayList<Attribute> newVec = new ArrayList<Attribute>(numAttributes());
+    HashMap<String, Integer> newMap = new HashMap<String, Integer>((int)(numAttributes() / 0.75));
+    for (Attribute attr : m_Attributes) {
+      if (attr.index() == att) {
+        newVec.add(newAtt);
+        newMap.put(newAtt.name(), att);
+      } else {
+        newVec.add(attr);
+        newMap.put(attr.name(), attr.index());
+      }
+    }
+    m_Attributes = newVec;
+    m_NamesToAttributeIndices = newMap;
+  }
+
+  /**
+   * Renames an attribute. This change only affects this dataset.
+   *
    * @param att the attribute
    * @param name the new name
    */

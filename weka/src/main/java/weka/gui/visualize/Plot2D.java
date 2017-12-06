@@ -546,6 +546,9 @@ public class Plot2D extends JPanel {
                   (Instance) temp_plot.m_plotInstances.instance(i).copy());
                 insts.append("\nPlot : " + temp_plot.m_plotName
                   + "\nInstance: " + (i + 1) + "\n");
+                if (temp_plot.m_plotInstances.instance(i).weight() != 1.0) {
+                  insts.append("Weight : " + temp_plot.m_plotInstances.instance(i).weight() + "\n");
+                }
                 for (int j = 0; j < temp_plot.m_plotInstances.numAttributes(); j++) {
                   for (int k = 0; k < (longest - temp_plot.m_plotInstances
                     .attribute(j).name().length()); k++) {

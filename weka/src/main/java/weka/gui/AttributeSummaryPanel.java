@@ -61,6 +61,12 @@ public class AttributeSummaryPanel extends JPanel {
   /** Displays the name of the relation */
   protected JLabel m_AttributeNameLab = new JLabel(NO_SOURCE);
 
+  /** Displays the weight of attribute */
+  protected JLabel m_AttributeWeightLab = new JLabel(NO_SOURCE);
+
+  /** Displays the string "Weight:" */
+  protected JLabel m_WeightLab = new JLabel("Weight:", SwingConstants.RIGHT);
+
   /** Displays the type of attribute */
   protected JLabel m_AttributeTypeLab = new JLabel(NO_SOURCE);
 
@@ -127,6 +133,25 @@ public class AttributeSummaryPanel extends JPanel {
     gbL.setConstraints(m_AttributeNameLab, gbC);
     simple.add(m_AttributeNameLab);
     m_AttributeNameLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
+
+    m_WeightLab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.EAST;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 0;
+    gbC.gridx = 2;
+    gbL.setConstraints(m_WeightLab, gbC);
+    simple.add(m_WeightLab);
+    gbC = new GridBagConstraints();
+    gbC.anchor = GridBagConstraints.WEST;
+    gbC.fill = GridBagConstraints.HORIZONTAL;
+    gbC.gridy = 0;
+    gbC.gridx = 3;
+    gbC.weightx = 100;
+    gbC.gridwidth = 3;
+    gbL.setConstraints(m_AttributeWeightLab, gbC);
+    simple.add(m_AttributeWeightLab);
+    m_AttributeWeightLab.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 10));
 
     lab = new JLabel("Type:", SwingConstants.RIGHT);
     lab.setBorder(BorderFactory.createEmptyBorder(0, 10, 0, 0));
@@ -223,6 +248,7 @@ public class AttributeSummaryPanel extends JPanel {
     m_AttributeStats = new AttributeStats[inst.numAttributes()];
     m_AttributeNameLab.setText(NO_SOURCE);
     m_AttributeTypeLab.setText(NO_SOURCE);
+    m_AttributeWeightLab.setText(NO_SOURCE);
     m_MissingLab.setText(NO_SOURCE);
     m_UniqueLab.setText(NO_SOURCE);
     m_DistinctLab.setText(NO_SOURCE);
@@ -358,6 +384,14 @@ public class AttributeSummaryPanel extends JPanel {
     default:
       m_AttributeTypeLab.setText("Unknown");
       break;
+    }
+    if (att.weight() != 1.0) {
+      m_AttributeWeightLab.setText(Utils.doubleToString(att.weight(), 3));
+      m_AttributeWeightLab.setVisible(true);
+      m_WeightLab.setVisible(true);
+    } else {
+      m_AttributeWeightLab.setVisible(false);
+      m_WeightLab.setVisible(false);
     }
     m_MissingLab.setText("...");
     m_UniqueLab.setText("...");

@@ -6,7 +6,7 @@
 weka.gui.visualize.precision=10
 
 # Colour for the axis in the 2D plot (can use R,G,B format)
-weka.gui.visualize.Plot2D.axisColour=green
+weka.gui.visualize.Plot2D.axisColour=black
 
 # Colour for the background of the 2D plot (can use R,G,B format)
 weka.gui.visualize.Plot2D.backgroundColour=white

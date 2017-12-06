@@ -86,6 +86,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
   /** whether to display the attribute index in the table header. */
   protected boolean m_ShowAttributeIndex;
 
+  /** whether to show attribute weights. */
+  protected boolean m_ShowAttributeWeights;
+
   /**
    * for caching long relational and string values that get processed for
    * display.
@@ -132,6 +135,12 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     this();
 
     this.m_Data = data;
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (data.attribute(i).weight() != 1.0) {
+        m_ShowAttributeWeights = true;
+        break;
+      }
+    }
   }
 
   /**
@@ -226,6 +235,13 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    */
   public void setInstances(Instances data) {
     m_Data = data;
+    m_ShowAttributeWeights = false;
+    for (int i = 0; i < data.numAttributes(); i++) {
+      if (data.attribute(i).weight() != 1.0) {
+        m_ShowAttributeWeights = true;
+        break;
+      }
+    }
     m_Cache.clear();
     fireTableDataChanged();
   }
@@ -344,6 +360,31 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
       addUndoPoint();
       m_Data.renameAttribute(columnIndex - 1, newName);
+      notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+    }
+  }
+
+  /**
+   * set the attribute weight at the given col index
+   *
+   * @param columnIndex the index of the column
+   * @param weight the new weight of the attribute
+   */
+  public void setAttributeWeightAt(int columnIndex, double weight) {
+    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+      addUndoPoint();
+      m_Data.setAttributeWeight(columnIndex - 1, weight);
+      if (weight != 1.0) {
+        m_ShowAttributeWeights = true;
+      } else {
+        m_ShowAttributeWeights = false;
+        for (int i = 0; i < m_Data.numAttributes(); i++) {
+          if (m_Data.attribute(i).weight() != 1.0) {
+            m_ShowAttributeWeights = true;
+            break;
+          }
+        }
+      }
       notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
   }
@@ -625,8 +666,11 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     if ((columnIndex >= 0) && (columnIndex < getColumnCount())) {
       if (columnIndex == 0) {
-        result =
-          "<html><center>No.<br><font size=\"-2\">&nbsp;</font></center></html>";
+        result = "<html><center>No.<br><font size=\"-2\">&nbsp;";
+        if (m_ShowAttributeWeights) {
+          result += "</font><br><font size=\"-2\">&nbsp;</font>";
+        }
+        result += "</center></html>";
       } else {
         if (m_Data != null) {
           if ((columnIndex - 1 < m_Data.numAttributes())) {
@@ -640,31 +684,38 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
             // name
             if (isClassIndex(columnIndex)) {
               result +=
-                "<b>" + m_Data.attribute(columnIndex - 1).name() + "</b>";
+                      "<b>" + m_Data.attribute(columnIndex - 1).name() + "</b>";
             } else {
               result += m_Data.attribute(columnIndex - 1).name();
             }
 
             // attribute type
             switch (getType(columnIndex)) {
-            case Attribute.DATE:
-              result += "<br><font size=\"-2\">Date</font>";
-              break;
-            case Attribute.NOMINAL:
-              result += "<br><font size=\"-2\">Nominal</font>";
-              break;
-            case Attribute.STRING:
-              result += "<br><font size=\"-2\">String</font>";
-              break;
-            case Attribute.NUMERIC:
-              result += "<br><font size=\"-2\">Numeric</font>";
-              break;
-            case Attribute.RELATIONAL:
-              result += "<br><font size=\"-2\">Relational</font>";
-              break;
-            default:
-              result += "<br><font size=\"-2\">???</font>";
+              case Attribute.DATE:
+                result += "<br><font size=\"-2\">Date</font>";
+                break;
+              case Attribute.NOMINAL:
+                result += "<br><font size=\"-2\">Nominal</font>";
+                break;
+              case Attribute.STRING:
+                result += "<br><font size=\"-2\">String</font>";
+                break;
+              case Attribute.NUMERIC:
+                result += "<br><font size=\"-2\">Numeric</font>";
+                break;
+              case Attribute.RELATIONAL:
+                result += "<br><font size=\"-2\">Relational</font>";
+                break;
+              default:
+                result += "<br><font size=\"-2\">???</font>";
             }
+
+            if (m_ShowAttributeWeights) {
+              result += "<br><font size=\"-2\">Weight : " +
+                      Utils.doubleToString(m_Data.attribute(columnIndex - 1).weight(), 3) +
+                      "</font>";
+            }
+
 
             result += "</center></html>";
           }
