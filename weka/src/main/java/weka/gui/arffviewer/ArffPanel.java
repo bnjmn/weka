@@ -290,7 +290,7 @@ public class ArffPanel extends JPanel implements ActionListener,
     isNull = (model.getInstances() == null);
     hasColumns = !isNull && (model.getInstances().numAttributes() > 0);
     hasRows = !isNull && (model.getInstances().numInstances() > 0);
-    attSelected = hasColumns && (m_CurrentCol > 0);
+    attSelected = hasColumns && model.isAttribute(m_CurrentCol);
     isNumeric = attSelected && (model.getAttributeAt(m_CurrentCol).isNumeric());
 
     menuItemUndo.setEnabled(canUndo());
@@ -305,6 +305,7 @@ public class ArffPanel extends JPanel implements ActionListener,
     menuItemSetAttributeWeight.setEnabled(attSelected);
     menuItemDeleteAttribute.setEnabled(attSelected);
     menuItemDeleteAttributes.setEnabled(attSelected);
+    menuItemAttributeAsClass.setEnabled(attSelected);
     menuItemSortInstances.setEnabled(hasRows && attSelected);
     menuItemDeleteSelectedInstance.setEnabled(hasRows
       && m_TableArff.getSelectedRow() > -1);
@@ -624,7 +625,7 @@ public class ArffPanel extends JPanel implements ActionListener,
 
     mean = 0;
     for (i = 0; i < model.getRowCount(); i++) {
-      mean += model.getInstances().instance(i).value(m_CurrentCol - 1);
+      mean += model.getInstances().instance(i).value(model.getAttributeIndex(m_CurrentCol));
     }
     mean = mean / model.getRowCount();
 

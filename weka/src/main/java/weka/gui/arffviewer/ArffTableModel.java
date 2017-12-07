@@ -52,7 +52,7 @@ import java.util.Vector;
 
 /**
  * The model for the Arff-Viewer.
- * 
+ *
  * 
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
@@ -89,6 +89,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
   /** whether to show attribute weights. */
   protected boolean m_ShowAttributeWeights;
 
+  /** whether to show instance weights. */
+  protected boolean m_ShowInstanceWeights;
+
   /**
    * for caching long relational and string values that get processed for
    * display.
@@ -109,6 +112,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     m_UndoEnabled = true;
     m_ReadOnly = false;
     m_ShowAttributeIndex = false;
+    m_ShowAttributeWeights = false;
+    m_ShowInstanceWeights = false;
     m_Cache = new Hashtable<String, String>();
   }
 
@@ -138,6 +143,12 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     for (int i = 0; i < data.numAttributes(); i++) {
       if (data.attribute(i).weight() != 1.0) {
         m_ShowAttributeWeights = true;
+        break;
+      }
+    }
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (data.instance(i).weight() != 1.0) {
+        m_ShowInstanceWeights = true;
         break;
       }
     }
@@ -242,6 +253,13 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
         break;
       }
     }
+    m_ShowInstanceWeights = false;
+    for (int i = 0; i < data.numInstances(); i++) {
+      if (data.instance(i).weight() != 1.0) {
+        m_ShowInstanceWeights = true;
+        break;
+      }
+    }
     m_Cache.clear();
     fireTableDataChanged();
   }
@@ -256,6 +274,38 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
   }
 
   /**
+   * Returns the attribute index for the given column index.
+   *
+   * @param columnIndex the column index
+   *
+   * @return the attribute index
+   */
+  public int getAttributeIndex(int columnIndex) {
+
+    if (m_ShowInstanceWeights) {
+      return columnIndex - 2;
+    } else {
+      return columnIndex - 1;
+    }
+  }
+
+  /**
+   * Check if given index is in range of column indices for attributes
+   *
+   * @param columnIndex the column index
+   *
+   * @return true if the column corresponds to attribute
+   */
+  public boolean isAttribute(int columnIndex) {
+
+    if (m_ShowInstanceWeights) {
+      return (columnIndex > 1) && (columnIndex < getColumnCount());
+    } else {
+      return (columnIndex > 0) && (columnIndex < getColumnCount());
+    }
+  }
+
+  /**
    * returns the attribute at the given index, can be NULL if not an attribute
    * column
    * 
@@ -263,8 +313,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @return the attribute at the position
    */
   public Attribute getAttributeAt(int columnIndex) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
-      return m_Data.attribute(columnIndex - 1);
+    if (isAttribute(columnIndex)) {
+      return m_Data.attribute(getAttributeIndex(columnIndex));
     } else {
       return null;
     }
@@ -292,11 +342,10 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     result = Attribute.STRING;
 
-    if ((rowIndex < 0) && columnIndex > 0 && columnIndex < getColumnCount()) {
-      result = m_Data.attribute(columnIndex - 1).type();
-    } else if ((rowIndex >= 0) && (rowIndex < getRowCount())
-      && (columnIndex > 0) && (columnIndex < getColumnCount())) {
-      result = m_Data.instance(rowIndex).attribute(columnIndex - 1).type();
+    if ((rowIndex < 0) && isAttribute(columnIndex)) {
+      result = m_Data.attribute(getAttributeIndex(columnIndex)).type();
+    } else if ((rowIndex >= 0) && (rowIndex < getRowCount()) && isAttribute(columnIndex)) {
+      result = m_Data.instance(rowIndex).attribute(getAttributeIndex(columnIndex)).type();
     }
 
     return result;
@@ -318,11 +367,11 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param notify whether to notify the listeners
    */
   public void deleteAttributeAt(int columnIndex, boolean notify) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       if (!m_IgnoreChanges) {
         addUndoPoint();
       }
-      m_Data.deleteAttributeAt(columnIndex - 1);
+      m_Data.deleteAttributeAt(getAttributeIndex(columnIndex));
       if (notify) {
         notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
       }
@@ -357,9 +406,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param newName the new name of the attribute
    */
   public void renameAttributeAt(int columnIndex, String newName) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       addUndoPoint();
-      m_Data.renameAttribute(columnIndex - 1, newName);
+      m_Data.renameAttribute(getAttributeIndex(columnIndex), newName);
       notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
     }
   }
@@ -371,9 +420,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param weight the new weight of the attribute
    */
   public void setAttributeWeightAt(int columnIndex, double weight) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       addUndoPoint();
-      m_Data.setAttributeWeight(columnIndex - 1, weight);
+      m_Data.setAttributeWeight(getAttributeIndex(columnIndex), weight);
       if (weight != 1.0) {
         m_ShowAttributeWeights = true;
       } else {
@@ -400,7 +449,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     String order;
     int i;
 
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       addUndoPoint();
 
       try {
@@ -408,7 +457,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
         order = "";
         for (i = 1; i < m_Data.numAttributes() + 1; i++) {
           // skip new class
-          if (i == columnIndex) {
+          if (i - 1 == getAttributeIndex(columnIndex)){
             continue;
           }
 
@@ -420,7 +469,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
         if (!order.equals("")) {
           order += ",";
         }
-        order += Integer.toString(columnIndex);
+        order += Integer.toString(getAttributeIndex(columnIndex) + 1);
 
         // process data
         reorder = new Reorder();
@@ -528,9 +577,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param columnIndex the index of the column
    */
   public void sortInstances(int columnIndex) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       addUndoPoint();
-      m_Data.stableSort(columnIndex - 1);
+      m_Data.stableSort(getAttributeIndex(columnIndex));
       notifyListener(new TableModelEvent(this));
     }
   }
@@ -542,9 +591,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param ascending ascending if true, otherwise descending
    */
   public void sortInstances(int columnIndex, boolean ascending) {
-    if ((columnIndex > 0) && (columnIndex < getColumnCount())) {
+    if (isAttribute(columnIndex)) {
       addUndoPoint();
-      m_Data.stableSort(columnIndex - 1);
+      m_Data.stableSort(getAttributeIndex(columnIndex));
       if (!ascending) {
         Instances reversedData = new Instances(m_Data, m_Data.numInstances());
         int i = m_Data.numInstances();
@@ -552,8 +601,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
           i--;
           int equalCount = 1;
           while ((i > 0)
-            && (m_Data.instance(i).value(columnIndex - 1) == m_Data.instance(
-              i - 1).value(columnIndex - 1))) {
+            && (m_Data.instance(i).value(getAttributeIndex(columnIndex)) == m_Data.instance(
+              i - 1).value(getAttributeIndex(columnIndex)))) {
             equalCount++;
             i--;
           }
@@ -583,7 +632,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     for (i = 0; i < m_Data.numAttributes(); i++) {
       if (m_Data.attribute(i).name().equals(name)) {
-        result = i + 1;
+        result = i + (m_ShowInstanceWeights ? 2 : 1);
         break;
       }
     }
@@ -607,7 +656,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     if ((columnIndex >= 0) && (columnIndex < getColumnCount())) {
       if (columnIndex == 0) {
         result = Integer.class;
-      } else if (getType(columnIndex) == Attribute.NUMERIC) {
+      } else if ((getType(columnIndex) == Attribute.NUMERIC) || (m_ShowInstanceWeights && (columnIndex == 1))) {
         result = Double.class;
       } else {
         result = String.class; // otherwise no input of "?"!!!
@@ -627,6 +676,9 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     int result;
 
     result = 1;
+    if (m_ShowInstanceWeights) {
+      result++;
+    }
     if (m_Data != null) {
       result += m_Data.numAttributes();
     }
@@ -646,8 +698,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     index = m_Data.classIndex();
     result =
-      ((index == -1) && (m_Data.numAttributes() == columnIndex))
-        || (index == columnIndex - 1);
+      ((index == -1) && (m_Data.numAttributes() - 1 == getAttributeIndex(columnIndex)))
+        || (index == getAttributeIndex(columnIndex));
 
     return result;
   }
@@ -671,22 +723,28 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
           result += "</font><br><font size=\"-2\">&nbsp;</font>";
         }
         result += "</center></html>";
+      } else if ((columnIndex == 1) && (m_ShowInstanceWeights)) {
+        result = "<html><center>Weight<br><font size=\"-2\">&nbsp;";
+        if (m_ShowAttributeWeights) {
+          result += "</font><br><font size=\"-2\">&nbsp;</font>";
+        }
+        result += "</center></html>";
       } else {
         if (m_Data != null) {
-          if ((columnIndex - 1 < m_Data.numAttributes())) {
+          if ((getAttributeIndex(columnIndex) < m_Data.numAttributes())) {
             result = "<html><center>";
 
             // index
             if (m_ShowAttributeIndex) {
-              result += columnIndex + ": ";
+              result += (m_ShowInstanceWeights ?  (columnIndex - 1) : columnIndex) + ": ";
             }
 
             // name
             if (isClassIndex(columnIndex)) {
               result +=
-                      "<b>" + m_Data.attribute(columnIndex - 1).name() + "</b>";
+                      "<b>" + m_Data.attribute(getAttributeIndex(columnIndex)).name() + "</b>";
             } else {
-              result += m_Data.attribute(columnIndex - 1).name();
+              result += m_Data.attribute(getAttributeIndex(columnIndex)).name();
             }
 
             // attribute type
@@ -712,7 +770,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
             if (m_ShowAttributeWeights) {
               result += "<br><font size=\"-2\">Weight : " +
-                      Utils.doubleToString(m_Data.attribute(columnIndex - 1).weight(), 3) +
+                      Utils.doubleToString(m_Data.attribute(getAttributeIndex(columnIndex)).weight(), 3) +
                       "</font>";
             }
 
@@ -752,9 +810,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     result = false;
 
-    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex > 0)
-      && (columnIndex < getColumnCount())) {
-      result = (m_Data.instance(rowIndex).isMissing(columnIndex - 1));
+    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && isAttribute(columnIndex)) {
+      result = (m_Data.instance(rowIndex).isMissing(getAttributeIndex(columnIndex)));
     }
 
     return result;
@@ -773,9 +830,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     result = -1;
 
-    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex > 0)
-      && (columnIndex < getColumnCount())) {
-      result = m_Data.instance(rowIndex).value(columnIndex - 1);
+    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && isAttribute(columnIndex)) {
+      result = m_Data.instance(rowIndex).value(getAttributeIndex(columnIndex));
     }
 
     return result;
@@ -798,10 +854,11 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     result = null;
     key = rowIndex + "-" + columnIndex;
 
-    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex >= 0)
-      && (columnIndex < getColumnCount())) {
+    if ((rowIndex >= 0) && (rowIndex < getRowCount()) && (columnIndex >= 0) && (columnIndex < getColumnCount())) {
       if (columnIndex == 0) {
         result = new Integer(rowIndex + 1);
+      } else if ((columnIndex == 1) && (m_ShowInstanceWeights)) {
+        result = new Double(m_Data.instance(rowIndex).weight());
       } else {
         if (isMissingAt(rowIndex, columnIndex)) {
           result = null;
@@ -814,11 +871,11 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
             case Attribute.NOMINAL:
             case Attribute.STRING:
             case Attribute.RELATIONAL:
-              result = m_Data.instance(rowIndex).stringValue(columnIndex - 1);
+              result = m_Data.instance(rowIndex).stringValue(getAttributeIndex(columnIndex));
               break;
             case Attribute.NUMERIC:
               result =
-                new Double(m_Data.instance(rowIndex).value(columnIndex - 1));
+                new Double(m_Data.instance(rowIndex).value(getAttributeIndex(columnIndex)));
               break;
             default:
               result = "-can't display-";
@@ -871,7 +928,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    */
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return (columnIndex > 0) && !isReadOnly();
+    return (isAttribute(columnIndex)) && !isReadOnly();
   }
 
   /**
@@ -911,7 +968,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     oldValue = getValueAt(rowIndex, columnIndex);
     type = getType(rowIndex, columnIndex);
-    index = columnIndex - 1;
+    index = getAttributeIndex(columnIndex);
     inst = m_Data.instance(rowIndex);
     att = inst.attribute(index);
 

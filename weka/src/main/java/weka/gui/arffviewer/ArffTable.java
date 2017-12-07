@@ -104,7 +104,7 @@ public class ArffTable extends JTable {
           dialog = new ViewerDialog(null);
           dialog.setTitle("Relational attribute Viewer - "
             + ((ArffSortedTableModel) getModel()).getInstances()
-              .attribute(m_ColumnIndex - 1).name());
+              .attribute(((ArffSortedTableModel)getModel()).getAttributeIndex(columnIndex)).name());
           result = dialog.showDialog(m_CurrentInst);
           if (result == ViewerDialog.APPROVE_OPTION) {
             m_CurrentInst = dialog.getInstances();
@@ -130,7 +130,7 @@ public class ArffTable extends JTable {
 
       model = (ArffSortedTableModel) getModel();
       value = model.getInstancesValueAt(rowIndex, columnIndex);
-      result = model.getInstances().attribute(columnIndex - 1)
+      result = model.getInstances().attribute(model.getAttributeIndex(columnIndex))
         .relation((int) value);
 
       return result;
@@ -293,7 +293,7 @@ public class ArffTable extends JTable {
         if (arffModel.getType(i) == Attribute.NOMINAL) {
           combo = new JComboBox();
           combo.addItem(null);
-          enm = arffModel.getInstances().attribute(i - 1).enumerateValues();
+          enm = arffModel.getInstances().attribute(arffModel.getAttributeIndex(i)).enumerateValues();
           while (enm.hasMoreElements()) {
             Object o = enm.nextElement();
             if (o instanceof SerializedObject) {
@@ -336,7 +336,11 @@ public class ArffTable extends JTable {
       if (columnIndex == 0) {
         result = "No.";
       } else {
-        result = arffModel.getAttributeAt(columnIndex).name();
+        if (arffModel.getAttributeIndex(columnIndex) < 0) {
+          result = "Weight";
+        } else {
+          result = arffModel.getAttributeAt(columnIndex).name();
+        }
       }
     }
 

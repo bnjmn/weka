@@ -128,7 +128,31 @@ public class ArffSortedTableModel
   public void setReadOnly(boolean value) {
     ((ArffTableModel) getModel()).setReadOnly(value);
   }
-  
+
+  /**
+   * Returns the attribute index for the given column index.
+   *
+   * @param columnIndex the column index
+   *
+   * @return the attribute index
+   */
+  public int getAttributeIndex(int columnIndex) {
+
+    return ((ArffTableModel) getModel()).getAttributeIndex(columnIndex);
+  }
+
+  /**
+   * Check if given index is in range of column indices for attributes
+   *
+   * @param columnIndex the column index
+   *
+   * @return true if the column corresponds to attribute
+   */
+  public boolean isAttribute(int columnIndex) {
+
+    return ((ArffTableModel) getModel()).isAttribute(columnIndex);
+  }
+
   /**
    * returns the double value of the underlying Instances object at the
    * given position, -1 if out of bounds
