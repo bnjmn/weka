@@ -682,7 +682,8 @@
              destdir="${doc}" 
              packagenames="weka.*, org.*"
              Author="yes" 
-             Public="yes" 
+             Public="yes"
+	     additionalparam="-Xdoclint:none"
              maxmemory="500m"/>
     
     <!-- insert the links to our homepage and documentation.html -->
