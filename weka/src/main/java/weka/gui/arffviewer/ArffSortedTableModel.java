@@ -270,7 +270,16 @@ public class ArffSortedTableModel
   public void insertInstance(int index) {
     ((ArffTableModel) getModel()).insertInstance(index);
   }
-  
+
+  /**
+   * Sets the weight of the selected instance
+   *
+   * @param index the index of the instance
+   * @param weight the weight
+   */
+  public void setInstanceWeight(int index, double weight) {
+    ((ArffTableModel) getModel()).setInstanceWeight(index, weight);
+  }
   /**
    * deletes the instances at the given positions
    * 

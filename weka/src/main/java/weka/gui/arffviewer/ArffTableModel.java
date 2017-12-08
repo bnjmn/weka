@@ -516,6 +516,27 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
     }
   }
 
+  public void setInstanceWeight(int index, double weight) {
+    setInstanceWeight(index, weight,true);
+  }
+
+  public void setInstanceWeight(int index, double weight, boolean notify) {
+    if (!m_IgnoreChanges) {
+      addUndoPoint();
+    }
+    m_Data.instance(index).setWeight(weight);
+    if (notify) {
+      if (m_ShowInstanceWeights) {
+        notifyListener(new TableModelEvent(this, index, 1));
+      } else {
+        if (weight != 1.0) {
+          m_ShowInstanceWeights = true;
+          notifyListener(new TableModelEvent(this, TableModelEvent.HEADER_ROW));
+        }
+      }
+    }
+  }
+
   public void insertInstance(int index) {
     insertInstance(index, true);
   }
@@ -577,11 +598,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param columnIndex the index of the column
    */
   public void sortInstances(int columnIndex) {
-    if (isAttribute(columnIndex)) {
-      addUndoPoint();
-      m_Data.stableSort(getAttributeIndex(columnIndex));
-      notifyListener(new TableModelEvent(this));
-    }
+    sortInstances(columnIndex, false);
   }
 
   /**
@@ -591,20 +608,39 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param ascending ascending if true, otherwise descending
    */
   public void sortInstances(int columnIndex, boolean ascending) {
-    if (isAttribute(columnIndex)) {
+    if (isAttribute(columnIndex) || (m_ShowInstanceWeights && columnIndex == 1)) {
       addUndoPoint();
-      m_Data.stableSort(getAttributeIndex(columnIndex));
+
+      double[] vals = new double[m_Data.numInstances()];
+      Instance[] backup = new Instance[vals.length];
+      for (int i = 0; i < vals.length; i++) {
+        Instance inst = m_Data.instance(i);
+        backup[i] = inst;
+        vals[i] = isAttribute(columnIndex) ? inst.value(getAttributeIndex(columnIndex)) : inst.weight();
+      }
+      int[] sortOrder = Utils.stableSort(vals);
+      for (int i = 0; i < vals.length; i++) {
+        m_Data.set(i, backup[sortOrder[i]]);
+      }
       if (!ascending) {
         Instances reversedData = new Instances(m_Data, m_Data.numInstances());
         int i = m_Data.numInstances();
         while (i > 0) {
           i--;
           int equalCount = 1;
-          while ((i > 0)
-            && (m_Data.instance(i).value(getAttributeIndex(columnIndex)) == m_Data.instance(
-              i - 1).value(getAttributeIndex(columnIndex)))) {
-            equalCount++;
-            i--;
+          if (isAttribute(columnIndex)) {
+            while ((i > 0)
+                    && (m_Data.instance(i).value(getAttributeIndex(columnIndex)) == m_Data.instance(
+                    i - 1).value(getAttributeIndex(columnIndex)))) {
+              equalCount++;
+              i--;
+            }
+          } else {
+            while ((i > 0)
+                    && (m_Data.instance(i).weight() == m_Data.instance(i - 1).weight())) {
+              equalCount++;
+              i--;
+            }
           }
           int j = 0;
           while (j < equalCount) {
@@ -928,7 +964,7 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    */
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return (isAttribute(columnIndex)) && !isReadOnly();
+    return ((m_ShowInstanceWeights && (columnIndex == 1)) || isAttribute(columnIndex)) && !isReadOnly();
   }
 
   /**
@@ -953,8 +989,8 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
    * @param columnIndex the column index
    * @param notify whether to notify the listeners
    */
-  public void setValueAt(Object aValue, int rowIndex, int columnIndex,
-    boolean notify) {
+  public void setValueAt(Object aValue, int rowIndex, int columnIndex, boolean notify) {
+
     int type;
     int index;
     String tmp;
@@ -964,6 +1000,25 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
 
     if (!m_IgnoreChanges) {
       addUndoPoint();
+    }
+
+    // Is this actually an instance weight?
+    if (m_ShowInstanceWeights && columnIndex == 1) {
+      double oldWeight = m_Data.instance(rowIndex).weight();
+      try {
+        double newWeight = Double.parseDouble(aValue.toString());
+        if (oldWeight != newWeight) {
+          m_Data.instance(rowIndex).setWeight(newWeight);
+        } else {
+          return;
+        }
+      } catch (Exception e) {
+        // ignore
+      }
+      if (notify) {
+        notifyListener(new TableModelEvent(this, rowIndex, columnIndex));
+      }
+      return;
     }
 
     oldValue = getValueAt(rowIndex, columnIndex);
