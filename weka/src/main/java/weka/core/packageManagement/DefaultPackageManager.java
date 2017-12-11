@@ -591,7 +591,7 @@ public class DefaultPackageManager extends PackageManager {
       Package toDownload = toInstall.get(i);
       if (toDownload.isInstalled()) {
         for (PrintStream p : progress) {
-          p.println("[DefaultPackageManager] cleanining installed package: "
+          p.println("[DefaultPackageManager] cleaning installed package: "
             + toDownload.getName());
           uninstallPackage(toDownload.getName(), progress);
         }
@@ -740,7 +740,7 @@ public class DefaultPackageManager extends PackageManager {
     Package toInstall = getRepositoryPackageInfo(packageName, version);
     if (toInstall.isInstalled()) {
       for (PrintStream p : progress) {
-        p.println("[DefaultPackageManager] cleanining installed package: "
+        p.println("[DefaultPackageManager] cleaning installed package: "
           + toInstall.getName());
         uninstallPackage(toInstall.getName(), progress);
       }
