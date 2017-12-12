@@ -686,6 +686,12 @@ public class WekaPackageLibIsolatingClassLoader extends URLClassLoader {
    * Try to clear classloader file locks under Windows
    */
   protected void closeClassLoader() {
+    try {
+      super.close();
+    } catch (Exception ex) {
+      System.err.println("Failed to close class loader.");
+      ex.printStackTrace();
+    }
     HashSet<String> closedFiles = new HashSet<String>();
     try {
       Object obj = getFieldObject(URLClassLoader.class, "ucp", this);
