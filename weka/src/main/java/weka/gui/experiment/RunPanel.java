@@ -34,23 +34,21 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.ObjectInputStream;
 import java.io.Serializable;
-import java.io.StringReader;
-import java.io.StringWriter;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
+import weka.core.SerializedObject;
 import weka.core.Utils;
 import weka.experiment.Experiment;
 import weka.experiment.RemoteExperiment;
 import weka.experiment.RemoteExperimentEvent;
 import weka.experiment.RemoteExperimentListener;
-import weka.experiment.xml.XMLExperiment;
 import weka.gui.LogPanel;
 
-/** 
+/**
  * This panel controls the running of an experiment.
  *
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
@@ -95,7 +93,7 @@ public class RunPanel
     private static final long serialVersionUID = -5591889874714150118L;
 
     Experiment m_ExpCopy;
-    
+
     public ExperimentRunner(final Experiment exp) throws Exception {
 
       // Create a full copy using serialization
@@ -105,15 +103,9 @@ public class RunPanel
 	System.err.println("Running experiment: " + exp.toString());
       }
       System.err.println("Writing experiment copy");
-      XMLExperiment xe = new XMLExperiment();
-      StringWriter memWriter = new StringWriter();
-      xe.write(memWriter, exp);
+      SerializedObject so = new SerializedObject(exp);
       System.err.println("Reading experiment copy");
-      StringReader memReader = new StringReader(memWriter.getBuffer().toString());
-      m_ExpCopy = (Experiment) xe.read(memReader);
-
-      // SerializedObject so = new SerializedObject(exp);
-      // m_ExpCopy = (Experiment) so.getObject();
+      m_ExpCopy = (Experiment) so.getObject();
       System.err.println("Made experiment copy");
     }
 
