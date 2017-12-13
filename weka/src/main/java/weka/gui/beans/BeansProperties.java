@@ -110,9 +110,14 @@ public class BeansProperties implements Serializable {
     throws Exception {
     Properties tempP = new Properties();
 
-    tempP.load(new FileInputStream(beanPropsFile));
-    if (BEAN_PLUGINS_PROPERTIES.contains(tempP)) {
-      BEAN_PLUGINS_PROPERTIES.remove(tempP);
+    FileInputStream fis = new FileInputStream(beanPropsFile);
+    try {
+      tempP.load(fis);
+      if (BEAN_PLUGINS_PROPERTIES.contains(tempP)) {
+        BEAN_PLUGINS_PROPERTIES.remove(tempP);
+      }
+    } finally {
+      fis.close();
     }
   }
 
@@ -147,8 +152,7 @@ public class BeansProperties implements Serializable {
       if (VISIBLE_PERSPECTIVES == null) {
         // set up built-in perspectives
         Properties pp = new Properties();
-        pp.setProperty(
-          "weka.gui.beans.KnowledgeFlow.Perspectives",
+        pp.setProperty("weka.gui.beans.KnowledgeFlow.Perspectives",
           "weka.gui.beans.ScatterPlotMatrix,weka.gui.beans.AttributeSummarizer,"
             + "weka.gui.beans.SQLViewerPerspective");
         BEAN_PLUGINS_PROPERTIES.add(pp);
@@ -156,12 +160,13 @@ public class BeansProperties implements Serializable {
         VISIBLE_PERSPECTIVES = new TreeSet<String>();
         try {
 
-          Properties visible = Utils
-            .readProperties(VISIBLE_PERSPECTIVES_PROPERTIES_FILE);
+          Properties visible =
+            Utils.readProperties(VISIBLE_PERSPECTIVES_PROPERTIES_FILE);
           Enumeration<?> keys = visible.propertyNames();
           if (keys.hasMoreElements()) {
-            String listedPerspectives = visible
-              .getProperty("weka.gui.beans.KnowledgeFlow.SelectedPerspectives");
+            String listedPerspectives =
+              visible
+                .getProperty("weka.gui.beans.KnowledgeFlow.SelectedPerspectives");
             if (listedPerspectives != null && listedPerspectives.length() > 0) {
               // split up the list of user selected perspectives and populate
               // VISIBLE_PERSPECTIVES
@@ -172,8 +177,7 @@ public class BeansProperties implements Serializable {
                 String perspectiveName = st.nextToken().trim();
                 weka.core.logging.Logger.log(
                   weka.core.logging.Logger.Level.INFO, "Adding perspective "
-                    + perspectiveName
-                    + " to visible list");
+                    + perspectiveName + " to visible list");
                 VISIBLE_PERSPECTIVES.add(perspectiveName);
               }
             }
@@ -193,10 +197,11 @@ public class BeansProperties implements Serializable {
 
       try {
         Properties templateProps = Utils.readProperties(TEMPLATE_PROPERTY_FILE);
-        String paths = templateProps
-          .getProperty("weka.gui.beans.KnowledgeFlow.templates");
-        String descriptions = templateProps
-          .getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
+        String paths =
+          templateProps.getProperty("weka.gui.beans.KnowledgeFlow.templates");
+        String descriptions =
+          templateProps
+            .getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
         if (paths == null || paths.length() == 0) {
           weka.core.logging.Logger.log(weka.core.logging.Logger.Level.WARNING,
             "[KnowledgeFlow] WARNING: no templates found in classpath");
@@ -225,8 +230,8 @@ public class BeansProperties implements Serializable {
       for (int i = 0; i < BEAN_PLUGINS_PROPERTIES.size(); i++) {
         Properties tempP = BEAN_PLUGINS_PROPERTIES.get(i);
         // Check for OffScreenChartRenderers
-        String offscreenRenderers = tempP
-          .getProperty("weka.gui.beans.OffscreenChartRenderer");
+        String offscreenRenderers =
+          tempP.getProperty("weka.gui.beans.OffscreenChartRenderer");
         if (offscreenRenderers != null && offscreenRenderers.length() > 0) {
           String[] parts = offscreenRenderers.split(",");
           for (String renderer : parts) {
@@ -234,15 +239,15 @@ public class BeansProperties implements Serializable {
             // Check that we can instantiate it successfully
             try {
               Object p = WekaPackageClassLoaderManager.objectForName(renderer);
-                // Class.forName(renderer).newInstance();
+              // Class.forName(renderer).newInstance();
               if (p instanceof OffscreenChartRenderer) {
                 String name = ((OffscreenChartRenderer) p).rendererName();
                 PluginManager.addPlugin(
                   "weka.gui.beans.OffscreenChartRenderer", name, renderer);
                 weka.core.logging.Logger.log(
                   weka.core.logging.Logger.Level.INFO,
-                  "[KnowledgeFlow] registering chart rendering "
-                    + "plugin: " + renderer);
+                  "[KnowledgeFlow] registering chart rendering " + "plugin: "
+                    + renderer);
               }
             } catch (Exception ex) {
 
@@ -258,10 +263,10 @@ public class BeansProperties implements Serializable {
         }
 
         // Check for user templates
-        String templatePaths = tempP
-          .getProperty("weka.gui.beans.KnowledgeFlow.templates");
-        String templateDesc = tempP
-          .getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
+        String templatePaths =
+          tempP.getProperty("weka.gui.beans.KnowledgeFlow.templates");
+        String templateDesc =
+          tempP.getProperty("weka.gui.beans.KnowledgeFlow.templates.desc");
         if (templatePaths != null && templatePaths.length() > 0
           && templateDesc != null && templateDesc.length() > 0) {
           String[] templates = templatePaths.split(",");
