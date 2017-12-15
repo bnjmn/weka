@@ -2403,6 +2403,76 @@ public final class Utils implements RevisionHandler {
   }
 
   /**
+   * Takes a sample based on the given array of weights based on Walker's method.
+   * Returns an array of the same size that gives the frequency of each item in the sample.
+   * For Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley (1987).
+   *
+   * @param weights the (positive) weights to be used to determine sample probabilities by normalization
+   * @param random the random number generator to be used
+   *
+   * @return the histogram of items in the sample
+   */
+  public static int[] takeSample(double[] weights, Random random) {
+
+    // Walker's method, see pp. 232 of "Stochastic Simulation" by B.D. Ripley
+    double[] P = new double[weights.length];
+    System.arraycopy(weights, 0, P, 0, weights.length);
+    Utils.normalize(P);
+    double[] Q = new double[weights.length];
+    int[] A = new int[weights.length];
+    int[] W = new int[weights.length];
+    int M = weights.length;
+    int NN = -1;
+    int NP = M;
+    for (int I = 0; I < M; I++) {
+      if (P[I] < 0) {
+        throw new IllegalArgumentException("Weights have to be positive.");
+      }
+      Q[I] = M * P[I];
+      if (Q[I] < 1.0) {
+        W[++NN] = I;
+      } else {
+        W[--NP] = I;
+      }
+    }
+    if (NN > -1 && NP < M) {
+      for (int S = 0; S < M - 1; S++) {
+        int I = W[S];
+        int J = W[NP];
+        A[I] = J;
+        Q[J] += Q[I] - 1.0;
+        if (Q[J] < 1.0) {
+          NP++;
+        }
+        if (NP >= M) {
+          break;
+        }
+      }
+      // A[W[M]] = W[M];
+    }
+
+    for (int I = 0; I < M; I++) {
+      Q[I] += I;
+    }
+
+    int[] result = new int[weights.length];
+
+    for (int i = 0; i < weights.length; i++) {
+      int ALRV;
+      double U = M * random.nextDouble();
+      int I = (int) U;
+      if (U < Q[I]) {
+        ALRV = I;
+      } else {
+        ALRV = A[I];
+      }
+      result[ALRV]++;
+    }
+
+    return result;
+  }
+
+  /**
    * Returns the revision string.
    * 
    * @return the revision

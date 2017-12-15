@@ -349,6 +349,45 @@ RevisionHandler {
   }
 
   /**
+   * Returns true if all attribute weights are the same and false otherwise. Returns true if there are no attributes.
+   * The class attribute (if set) is skipped when this test is performed.
+   */
+  public boolean allAttributeWeightsIdentical() {
+
+    boolean foundOne = false;
+    double weight = 0;
+    for (int i = 0; i < numAttributes(); i++) {
+      if (i != classIndex()) {
+        if (foundOne && (attribute(i).weight() != weight)) {
+          return false;
+        } else if (!foundOne) {
+          foundOne = true;
+          weight = attribute(i).weight();
+        }
+      }
+    }
+    return true;
+  }
+
+  /**
+   * Returns true if all instance weights are the same and false otherwise. Returns true if there are no instances.
+   */
+  public boolean allInstanceWeightsIdentical() {
+
+    if (numInstances() == 0) {
+      return true;
+    } else {
+      double weight = instance(0).weight();
+      for (int i = 1; i < numInstances(); i++) {
+        if (instance(i).weight() != weight) {
+          return false;
+        }
+      }
+      return true;
+    }
+  }
+
+  /**
    * Returns an attribute.
    * 
    * @param index the attribute's index (index starts with 0)

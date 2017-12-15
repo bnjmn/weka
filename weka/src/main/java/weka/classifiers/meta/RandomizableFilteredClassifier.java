@@ -55,7 +55,10 @@ import weka.filters.Filter;
  * <pre> -W
  *  Full name of base classifier.
  *  (default: weka.classifiers.trees.J48)</pre>
- * 
+ *
+ * <pre> -S num
+ * Set the random number seed (default 1). </pre>
+ *
  * <pre> 
  * Options specific to classifier weka.classifiers.trees.J48:
  * </pre>

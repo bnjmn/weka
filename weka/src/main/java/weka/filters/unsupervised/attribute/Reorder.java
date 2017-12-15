@@ -21,10 +21,7 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.StringTokenizer;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
@@ -81,6 +78,11 @@ public class Reorder extends Filter implements UnsupervisedFilter,
    * filtering process -- some entries may be duplicated
    */
   protected int[] m_InputStringIndex;
+
+  /**
+   * Whether to set all attribute weights to 1.0 in the reordered data.
+   */
+  protected boolean m_setAllAttributeWeightsToOne;
 
   /**
    * Returns an enumeration describing the available options.
@@ -269,14 +271,36 @@ public class Reorder extends Filter implements UnsupervisedFilter,
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
 
+    // An array to keep track of how of how often each attribute is chosen
+    int[] frequency = new int[instanceInfo.numAttributes()];
+    m_SelectedAttributes = determineIndices(instanceInfo.numAttributes());
+    boolean atLeastOneAttributeOccursMoreThanOnce = false;
+    for (int current : m_SelectedAttributes) {
+      frequency[current]++;
+      if (frequency[current] > 1) {
+        if (current == instanceInfo.classIndex()) {
+          throw new IllegalArgumentException("Reorder filter: Cannot duplicate class attribute");
+        }
+        atLeastOneAttributeOccursMoreThanOnce = true;
+        break;
+      }
+    }
+    Arrays.fill(frequency, 0);
+
     ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     int outputClass = -1;
-    m_SelectedAttributes = determineIndices(instanceInfo.numAttributes());
     for (int current : m_SelectedAttributes) {
       if (instanceInfo.classIndex() == current) {
         outputClass = attributes.size();
       }
-      Attribute keep = (Attribute) instanceInfo.attribute(current).copy();
+      String newName = instanceInfo.attribute(current).name();
+      if (atLeastOneAttributeOccursMoreThanOnce) {
+        newName += "_" + (++frequency[current]); // Make sure attribute names in filtered data are unique
+      }
+      Attribute keep = (Attribute) instanceInfo.attribute(current).copy(newName);
+      if (m_setAllAttributeWeightsToOne) {
+        keep.setWeight(1.0);
+      }
       attributes.add(keep);
     }
 
@@ -288,6 +312,14 @@ public class Reorder extends Filter implements UnsupervisedFilter,
     setOutputFormat(outputFormat);
 
     return true;
+  }
+
+  /**
+   * Whether to set all attribute weights to one in output data.
+   */
+  public void setAllAttributeWeightsToOne(boolean b) {
+
+    m_setAllAttributeWeightsToOne = b;
   }
 
   /**
