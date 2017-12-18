@@ -36,7 +36,7 @@ import weka.filters.UnsupervisedFilter;
 /**
  * <!-- globalinfo-start -->
  * Reduces the dimensionality of the data by projecting it onto a lower dimensional subspace using a random matrix with columns of unit length. It will reduce the number of attributes in the data while preserving much of its variation like PCA, but at a much less computational cost.<br/>
- * It first applies the  NominalToBinary filter to convert all attributes to numeric before reducing the dimension. It preserves the class attribute.<br/>
+ * It first applies the NominalToBinary filter to convert all attributes to numeric before reducing the dimension. It preserves the class attribute.<br/>
  * <br/>
  * For more information, see:<br/>
  * <br/>
@@ -82,7 +82,7 @@ import weka.filters.UnsupervisedFilter;
  *  than zero.</pre>
  * 
  * <pre> -M
- *  Replace missing values using the ReplaceMissingValues filter</pre>
+ *  Replace missing values using the ReplaceMissingValues filter instead of just skipping them.</pre>
  * 
  * <pre> -R &lt;num&gt;
  *  The random seed for the random number generator used for
@@ -138,8 +138,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   protected boolean m_OutputFormatDefined = false;
 
   /** The NominalToBinary filter applied to the data before this filter */
-  protected Filter m_ntob; // = new
-                           // weka.filters.unsupervised.attribute.NominalToBinary();
+  protected Filter m_ntob;
 
   /** The ReplaceMissingValues filter */
   protected Filter m_replaceMissing;
@@ -188,7 +187,8 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
           + "\tthan zero.", "P", 1, "-P <percent>"));
 
     newVector.addElement(new Option(
-      "\tReplace missing values using the ReplaceMissingValues filter", "M", 0,
+      "\tReplace missing values using the ReplaceMissingValues filter instead of just skipping them.",
+            "M", 0,
       "-M"));
 
     newVector.addElement(new Option(
@@ -224,7 +224,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    *  than zero.</pre>
    * 
    * <pre> -M
-   *  Replace missing values using the ReplaceMissingValues filter</pre>
+   *  Replace missing values using the ReplaceMissingValues filter instead of just skipping them.</pre>
    * 
    * <pre> -R &lt;num&gt;
    *  The random seed for the random number generator used for
@@ -240,8 +240,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
 
     String mString = Utils.getOption('P', options);
     if (mString.length() != 0) {
-      setPercent(Double.parseDouble(mString)); // setNumberOfAttributes((int)
-                                               // Integer.parseInt(mString));
+      setPercent(Double.parseDouble(mString));
     } else {
       setPercent(0);
       mString = Utils.getOption('N', options);
@@ -274,11 +273,6 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       setReplaceMissingValues(false);
     }
 
-    // if(Utils.getFlag('G', options))
-    // setUseGaussian(true);
-    // else
-    // setUseGaussian(false);
-
     Utils.checkForRemainingOptions(options);
   }
 
@@ -291,10 +285,6 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   public String[] getOptions() {
 
     Vector<String> options = new Vector<String>();
-
-    // if (getUseGaussian()) {
-    // options[current++] = "-G";
-    // }
 
     if (getReplaceMissingValues()) {
       options.add("-M");
@@ -332,7 +322,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       + " the number of attributes in the data while preserving"
       + " much of its variation like PCA, but at a much less"
       + " computational cost.\n"
-      + "It first applies the  NominalToBinary filter to"
+      + "It first applies the NominalToBinary filter to"
       + " convert all attributes to numeric before reducing the"
       + " dimension. It preserves the class attribute.\n\n"
       + "For more information, see:\n\n" + getTechnicalInformation().toString();
@@ -356,7 +346,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     result
       .setValue(
         Field.BOOKTITLE,
-        "KDD '03: Proceedings of the ninth ACM SIGKDD international conference on Knowledge discovery and data mining");
+        "KDD '03: Proceedings of the ninth ACM SIGKDD International Conference on Knowledge Discovery and Data mining");
     result.setValue(Field.YEAR, "003");
     result.setValue(Field.PAGES, "517-522");
     result.setValue(Field.PUBLISHER, "ACM Press");
@@ -405,7 +395,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   public String percentTipText() {
 
     return " The percentage of dimensions (attributes) the data should"
-      + " be reduced to  (inclusive of the class attribute). This "
+      + " be reduced to  (inclusive of the class attribute). The "
       + " NumberOfAttributes option is ignored if this option is"
       + " present or is greater than zero.";
   }
@@ -440,7 +430,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    */
   public String seedTipText() {
     return "The random seed used by the random"
-      + " number generator used for generating" + " the random matrix ";
+      + " number generator used for generating the random matrix ";
   }
 
   /**
@@ -509,7 +499,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   public String replaceMissingValuesTipText() {
 
     return "If set the filter uses weka.filters.unsupervised.attribute.ReplaceMissingValues"
-      + " to replace the missing values";
+      + " to replace the missing values instead of just skipping them.";
   }
 
   /**
@@ -545,6 +535,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
     result.disable(Capability.STRING_ATTRIBUTES);
+    result.disable(Capability.RELATIONAL_ATTRIBUTES);
 
     // class
     result.enable(Capability.NUMERIC_CLASS);
@@ -568,48 +559,31 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   @Override
   public boolean setInputFormat(Instances instanceInfo) throws Exception {
     super.setInputFormat(instanceInfo);
-    /*
-     * if (instanceInfo.classIndex() < 0) { throw new
-     * UnassignedClassException("No class has been assigned to the instances");
-     * }
-     */
 
-    for (int i = 0; i < instanceInfo.numAttributes(); i++) {
-      if (i != instanceInfo.classIndex()
-        && instanceInfo.attribute(i).isNominal()) {
-        if (instanceInfo.classIndex() >= 0) {
-          m_ntob = new weka.filters.supervised.attribute.NominalToBinary();
-        } else {
-          m_ntob = new weka.filters.unsupervised.attribute.NominalToBinary();
-        }
-
-        break;
-      }
+    if (instanceInfo.classIndex() >= 0) {
+      m_ntob = new weka.filters.supervised.attribute.NominalToBinary();
+    } else {
+      m_ntob = new weka.filters.unsupervised.attribute.NominalToBinary();
     }
 
-    // r.setSeed(m_rndmSeed); //in case the setSeed() is not
-    // called we better set the seed to its
-    // default value of 42.
-    boolean temp = true;
-    if (m_replaceMissing != null) {
-      m_replaceMissing = new weka.filters.unsupervised.attribute.ReplaceMissingValues();
-      if (m_replaceMissing.setInputFormat(instanceInfo)) {
-        temp = true;
-      } else {
-        temp = false;
-      }
-    }
-
-    if (m_ntob != null) {
-      if (m_ntob.setInputFormat(instanceInfo)) {
+    m_replaceMissing = null;
+    m_OutputFormatDefined = false;
+    if (getReplaceMissingValues()) {
+      m_replaceMissing = new ReplaceMissingValues();
+      m_replaceMissing.setInputFormat(instanceInfo);
+      if (m_ntob.setInputFormat(m_replaceMissing.getOutputFormat())) {
         setOutputFormat();
-        return temp && true;
+        return true;
       } else {
         return false;
       }
-    } else {
+    }
+
+    if (m_ntob.setInputFormat(instanceInfo)) {
       setOutputFormat();
-      return temp && true;
+      return true;
+    } else {
+      return false;
     }
   }
 
@@ -623,55 +597,27 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
   @Override
   public boolean input(Instance instance) throws Exception {
 
-    Instance newInstance = null;
-
     if (getInputFormat() == null) {
       throw new IllegalStateException("No input instance format defined");
     }
     if (m_NewBatch) {
       resetQueue();
-      // if(ntob!=null)
-      // ntob.m_NewBatch=true;
       m_NewBatch = false;
     }
 
-    boolean replaceDone = false;
-    if (m_replaceMissing != null) {
-      if (m_replaceMissing.input(instance)) {
-        if (m_OutputFormatDefined == false) {
-          setOutputFormat();
-        }
-        newInstance = m_replaceMissing.output();
-        replaceDone = true;
-      } else {
-        return false;
+    if ((m_OutputFormatDefined) && ((!m_useReplaceMissing) || isFirstBatchDone())) {
+      if (m_replaceMissing != null) {
+        m_replaceMissing.input(instance);
+        instance = m_replaceMissing.output();
       }
-      ;
-    }
+      m_ntob.input(instance);
+      instance = m_ntob.output();
 
-    if (m_ntob != null) {
-      if (replaceDone == false) {
-        newInstance = instance;
-      }
-      if (m_ntob.input(newInstance)) {
-        if (m_OutputFormatDefined == false) {
-          setOutputFormat();
-        }
-        newInstance = m_ntob.output();
-        newInstance = convertInstance(newInstance);
-        push(newInstance, false); // No need to copy
-        return true;
-      } else {
-        return false;
-      }
-    } else {
-      if (replaceDone == false) {
-        newInstance = instance;
-      }
-      newInstance = convertInstance(newInstance);
-      push(newInstance, false); // No need to copy
+      push(convertInstance(instance), false);
       return true;
     }
+    bufferInput(instance);
+    return false;
   }
 
   /**
@@ -683,100 +629,55 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
    */
   @Override
   public boolean batchFinished() throws Exception {
+
     if (getInputFormat() == null) {
       throw new NullPointerException("No input instance format defined");
     }
 
-    boolean conversionDone = false;
-    if (m_replaceMissing != null) {
-      if (m_replaceMissing.batchFinished()) {
-        Instance newInstance, instance;
+    Instances insts = getInputFormat();
+    if (m_useReplaceMissing) {
+      insts = Filter.useFilter(insts, m_replaceMissing);
+    }
+    insts = Filter.useFilter(insts, m_ntob);
 
-        while ((instance = m_replaceMissing.output()) != null) {
-          if (!m_OutputFormatDefined) {
-            setOutputFormat();
-          }
-          if (m_ntob != null) {
-            m_ntob.input(instance);
-          } else {
-            newInstance = convertInstance(instance);
-            push(newInstance, false); // No need to copy
-          }
-        }
-
-        if (m_ntob != null) {
-          if (m_ntob.batchFinished()) {
-            // Instance newInstance, instance;
-            while ((instance = m_ntob.output()) != null) {
-              if (!m_OutputFormatDefined) {
-                setOutputFormat();
-              }
-              newInstance = convertInstance(instance);
-              push(newInstance, false); // No need to copy
-            }
-            m_ntob = null;
-          }
-        }
-        m_replaceMissing = null;
-        conversionDone = true;
-      }
+    if (!m_OutputFormatDefined) {
+      setOutputFormat();
     }
 
-    if (conversionDone == false && m_ntob != null) {
-      if (m_ntob.batchFinished()) {
-        Instance newInstance, instance;
-        while ((instance = m_ntob.output()) != null) {
-          if (!m_OutputFormatDefined) {
-            setOutputFormat();
-          }
-          newInstance = convertInstance(instance);
-          push(newInstance, false); // No need to copy
-        }
-        m_ntob = null;
-      }
+    for (Instance instance : insts) {
+       push(convertInstance(instance), false); // No need to copy
     }
-    m_OutputFormatDefined = false;
-    return super.batchFinished();
+
+    flushInput();
+    m_NewBatch = true;
+    m_FirstBatchDone = true;
+
+    return (numPendingOutput() != 0);
   }
 
   /** Sets the output format */
-  protected void setOutputFormat() {
-    Instances currentFormat;
-    if (m_ntob != null) {
-      currentFormat = m_ntob.getOutputFormat();
-    } else {
-      currentFormat = getInputFormat();
-    }
+  protected void setOutputFormat() throws Exception {
+
+    Instances currentFormat = m_ntob.getOutputFormat();
 
     if (m_percent > 0) {
       m_k = (int) ((getInputFormat().numAttributes() - 1) * m_percent);
-      // System.out.print("numAtts: "+currentFormat.numAttributes());
-      // System.out.print("percent: "+m_percent);
-      // System.out.print("percent*numAtts: "+(currentFormat.numAttributes()*m_percent));
-      // System.out.println("m_k: "+m_k);
     }
 
-    Instances newFormat;
-    int newClassIndex = -1;
     ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     for (int i = 0; i < m_k; i++) {
       attributes.add(new Attribute("K" + (i + 1)));
     }
-    if (currentFormat.classIndex() != -1) { // if classindex is set
-      // attributes.removeElementAt(attributes.size()-1);
-      attributes.add((Attribute) currentFormat.attribute(
-        currentFormat.classIndex()).copy());
-      newClassIndex = attributes.size() - 1;
+    if (getInputFormat().classIndex() > -1) {
+      attributes.add((Attribute) getInputFormat().classAttribute().copy());
     }
 
-    newFormat = new Instances(currentFormat.relationName(), attributes, 0);
-    if (newClassIndex != -1) {
-      newFormat.setClassIndex(newClassIndex);
+    Instances newFormat = new Instances(currentFormat.relationName(), attributes, 0);
+    if (getInputFormat().classIndex() > -1) {
+      newFormat.setClassIndex(attributes.size() - 1);
     }
-    m_OutputFormatDefined = true;
 
-    m_random = new Random();
-    m_random.setSeed(m_rndmSeed);
+    m_random = new Random(m_rndmSeed);
 
     m_rmatrix = new double[m_k][currentFormat.numAttributes()];
     if (m_distribution == GAUSSIAN) {
@@ -794,58 +695,34 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
       }
     }
 
+    m_OutputFormatDefined = true;
     setOutputFormat(newFormat);
   }
 
   /**
    * converts a single instance to the required format
    * 
-   * @param currentInstance the instance to convert
+   * @param instance the instance to convert
    * @return the converted instance
    */
-  protected Instance convertInstance(Instance currentInstance) {
+  protected Instance convertInstance(Instance instance) throws Exception {
 
-    Instance newInstance;
-    double vals[] = new double[getOutputFormat().numAttributes()];
-    int classIndex = (m_ntob == null) ? getInputFormat().classIndex() : m_ntob
-      .getOutputFormat().classIndex();
+    double vals[] = new double[outputFormatPeek().numAttributes()];
 
-    for (int i = 0; i < m_k; i++) {
-      vals[i] = computeRandomProjection(i, classIndex, currentInstance);
-    }
-    if (classIndex != -1) {
-      vals[m_k] = currentInstance.value(classIndex);
-    }
-
-    newInstance = new DenseInstance(currentInstance.weight(), vals);
-    newInstance.setDataset(getOutputFormat());
-
-    return newInstance;
-  }
-
-  /**
-   * computes one random projection for a given instance (skip missing values)
-   * 
-   * @param rpIndex offset the new random projection attribute
-   * @param classIndex classIndex of the input instance
-   * @param instance the instance to convert
-   * @return the random sum
-   */
-
-  protected double computeRandomProjection(int rpIndex, int classIndex,
-    Instance instance) {
-
-    double sum = 0.0;
-    for (int i = 0; i < instance.numValues(); i++) {
-      int index = instance.index(i);
-      if (index != classIndex) {
-        double value = instance.valueSparse(i);
-        if (!Utils.isMissingValue(value)) {
-          sum += m_rmatrix[rpIndex][index] * value;
+    for (int j = 0; j < m_k; j++) {
+      for (int i = 0; i < instance.numValues(); i++) {
+        int index = instance.index(i);
+        if (index != instance.classIndex()) {
+          double value = instance.valueSparse(i);
+          if (!Utils.isMissingValue(value)) {
+            vals[j] += m_rmatrix[j][index] * value;
+          }
+        } else {
+          vals[m_k] = instance.valueSparse(i);
         }
       }
     }
-    return sum;
+    return new DenseInstance(instance.weight(), vals);
   }
 
   private static final int weights[] = { 1, 1, 4 };
