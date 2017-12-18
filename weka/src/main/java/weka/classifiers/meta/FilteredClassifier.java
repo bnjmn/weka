@@ -22,6 +22,7 @@
 package weka.classifiers.meta;
 
 import weka.classifiers.IterativeClassifier;
+import weka.classifiers.RandomizableSingleClassifierEnhancer;
 import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.*;
 import weka.core.Capabilities.Capability;
@@ -50,7 +51,7 @@ import java.util.*;
  * -F &lt;filter specification&gt;
  *  Full class name of filter to use, followed
  *  by filter options.
- *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
+ *  default: "weka.filters.supervised.attribute.Discretize -R first-last -precision 6"
  * </pre>
  *
  * <pre>
@@ -59,9 +60,8 @@ import java.util.*;
  *  (default: weka.classifiers.trees.J48)
  * </pre>
  *
- * <pre> -Q num
- * The random number seed to be used to resample attributes/instances if filter/base learner is unable to deal
- * with weights (default 1). </pre>
+ * <pre> -S num
+ * The random number seed to be used (default 1). </pre>
  *
  * -doNotCheckForModifiedClassAttribute <br>
  * If this is set, the classifier will not check whether the filter modifies the class attribute (use with caution).
@@ -139,7 +139,7 @@ import java.util.*;
  * </pre>
  * 
  * <pre>
- * -Q &lt;seed&gt;
+ * -S &lt;seed&gt;
  *  Seed for random data shuffling (default 1).
  * </pre>
  * 
@@ -148,7 +148,7 @@ import java.util.*;
  * @author Len Trigg (trigg@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class FilteredClassifier extends SingleClassifierEnhancer
+public class FilteredClassifier extends RandomizableSingleClassifierEnhancer
   implements Drawable, PartitionGenerator, IterativeClassifier, BatchPredictor,
         WeightedInstancesHandler, WeightedAttributesHandler {
 
@@ -164,9 +164,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   /** Flag that can be set to true if class attribute is not to be checked for modifications by the filer. */
   protected boolean m_DoNotCheckForModifiedClassAttribute = false;
 
-  /** The random number seed. */
-  protected int m_SeedForResampling = 1;
-
   /** If the attributes are resampled, we store the filter for this */
   protected Reorder m_ReorderOriginal;
   protected Reorder m_ReorderFiltered;
@@ -179,9 +176,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    */
   public String globalInfo() {
     return "Class for running an arbitrary classifier on data that has been passed "
-      + "through an arbitrary filter. Like the classifier, the structure of the filter "
-      + "is based exclusively on the training data and test instances will be processed "
-      + "by the filter without changing their structure.\n\n" +
+            + "through an arbitrary filter. Like the classifier, the structure of the filter "
+            + "is based exclusively on the training data and test instances will be processed "
+            + "by the filter without changing their structure.\n\n" +
             "If unequal instance weights or attribute weights are present, and the filter " +
             "or the classifier are unable to deal with them, the instances and/or attributes " +
             "are resampled with replacement based on the weights before they are passed " +
@@ -203,7 +200,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    */
   protected String defaultFilterString() {
 
-    return "weka.filters.supervised.attribute.Discretize";
+    return "weka.filters.supervised.attribute.Discretize -R first-last -precision 6";
   }
 
   /**
@@ -308,17 +305,28 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    */
   public void initializeClassifier(Instances data) throws Exception {
 
+    if (m_Classifier == null) {
+      throw new Exception("No base classifier has been set!");
+    }
+
+    getCapabilities().testWithFail(data);
+
     if (m_Classifier instanceof IterativeClassifier) {
-      data = setUp(data);
+      Random r = (data.numInstances() > 0) ? data.getRandomNumberGenerator(getSeed()) : new Random(getSeed());
+      data = setUp(data, r);
       if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-        data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling())); // The filter may have assigned weights.
+        data = data.resampleWithWeights(r); // The filter may have assigned weights.
       }
       if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
-        data = resampleAttributes(data, false);
+        data = resampleAttributes(data, false, r);
       }
 
       // can classifier handle the data?
       getClassifier().getCapabilities().testWithFail(data);
+
+      if (m_Classifier instanceof Randomizable) {
+        ((Randomizable)m_Classifier).setSeed(r.nextInt());
+      }
 
       ((IterativeClassifier) m_Classifier).initializeClassifier(data);
      } else {
@@ -337,8 +345,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (m_Classifier instanceof IterativeClassifier)
       return ((IterativeClassifier) m_Classifier).next();
     else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " is not an IterativeClassifier");
+      throw new Exception("Classifier: " + getClassifierSpec() + " is not an IterativeClassifier");
   }
 
   /**
@@ -352,8 +359,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (m_Classifier instanceof IterativeClassifier)
       ((IterativeClassifier) m_Classifier).done();
     else
-      throw new Exception("Classifier: " + getClassifierSpec()
-        + " is not an IterativeClassifier");
+      throw new Exception("Classifier: " + getClassifierSpec() + " is not an IterativeClassifier");
   }
 
   /**
@@ -367,18 +373,12 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     newVector.addElement(new Option(
       "\tFull class name of filter to use, followed\n"
         + "\tby filter options.\n"
-        + "\teg: \"weka.filters.unsupervised.attribute.Remove -V -R 1,2\"",
+        + "\tdefault: \"" + defaultFilterString() + "\"",
       "F", 1, "-F <filter specification>"));
 
     newVector.addElement(new Option(
             "\tIf set, classifier will not check whether the filter modifies the class (use with caution).",
             "doNotCheckForModifiedClassAttribute", 0, "-doNotCheckForModifiedClassAttribute"));
-
-    newVector.addElement(new Option(
-            "\tThe random number seed to be used to resample attributes/instances if filter/base learner\n"
-            + "\tis unable to deal with weights.\n"
-                    + "\t(default 1)",
-            "Q", 1, "-Q <num>"));
 
     newVector.addAll(Collections.list(super.listOptions()));
 
@@ -403,7 +403,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    * -F &lt;filter specification&gt;
    *  Full class name of filter to use, followed
    *  by filter options.
-   *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"
+   *  default: "weka.filters.supervised.attribute.Discretize -R first-last -precision 6"
    * </pre>
    *
    * <pre>
@@ -412,9 +412,8 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    *  (default: weka.classifiers.trees.J48)
    * </pre>
    *
-   * <pre> -Q num
-   * The random number seed to be used to resample attributes/instances if filter/base learner is unable to deal
-   * with weights (default 1). </pre>
+   * <pre> -S num
+   * The random number seed to be used. </pre>
    *
    * -doNotCheckForModifiedClassAttribute <br>
    * If this is set, the classifier will not check whether the filter modifies the class attribute (use with caution).
@@ -507,12 +506,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (filterString.length() <= 0) {
       filterString = defaultFilterString();
     }
-    String seed = Utils.getOption('Q', options);
-    if (seed.length() != 0) {
-      setSeedForResampling(Integer.parseInt(seed));
-    } else {
-      setSeedForResampling(1);
-    }
     String[] filterSpec = Utils.splitOptions(filterString);
     if (filterSpec.length == 0) {
       throw new IllegalArgumentException("Invalid filter specification string");
@@ -565,9 +558,6 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
     options.add("-F");
     options.add("" + getFilterSpec());
-
-    options.add("-Q");
-    options.add("" + getSeedForResampling());
 
     if (getDoNotCheckForModifiedClassAttribute()) {
       options.add("-doNotCheckForModifiedClassAttribute");
@@ -661,47 +651,11 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   }
 
   /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-
-    return "The random number seed to be used to resample attributes/instances if filter/base learner is unable " +
-      "to process weights.";
-  }
-
-  /**
-   * Set the seed for random number generation.
-   *
-   * @param seed the seed
-   */
-  public void setSeedForResampling(int seed) {
-
-    m_SeedForResampling = seed;
-  }
-
-  /**
-   * Gets the seed for the random number generations
-   *
-   * @return the seed for the random number generation
-   */
-  public int getSeedForResampling() {
-
-    return m_SeedForResampling;
-  }
-  /**
    * Sets up the filter and runs checks.
    *
    * @return filtered data
    */
-  protected Instances setUp(Instances data) throws Exception {
-
-    if (m_Classifier == null) {
-      throw new Exception("No base classifier has been set!");
-    }
-
-    getCapabilities().testWithFail(data);
+  protected Instances setUp(Instances data, Random random) throws Exception {
 
     m_ReorderOriginal = null;
     m_ReorderFiltered = null;
@@ -709,10 +663,10 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (data.allInstanceWeightsIdentical() || (m_Filter instanceof WeightedInstancesHandler)) {
       data = new Instances(data);
     } else {
-      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling()));
+      data = data.resampleWithWeights(random);
     }
     if (!data.allAttributeWeightsIdentical() && !(m_Filter instanceof WeightedAttributesHandler)) {
-      data = resampleAttributes(data, true);
+      data = resampleAttributes(data, true, random);
     }
 
     /*
@@ -721,6 +675,11 @@ public class FilteredClassifier extends SingleClassifierEnhancer
      * util.Timer.getTimer("FilteredClassifier::" + fname); t.start();
      */
     Attribute classAttribute = (Attribute)data.classAttribute().copy();
+
+    if (m_Filter instanceof Randomizable) {
+      ((Randomizable)m_Filter).setSeed(random.nextInt());
+    }
+
     m_Filter.setInputFormat(data); // filter capabilities are checked here
     data = Filter.useFilter(data, m_Filter);
     if ((!classAttribute.equals(data.classAttribute())) && (!m_DoNotCheckForModifiedClassAttribute)) {
@@ -737,8 +696,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    *
    * @param data the data to be filtered
    * @param original whether the original or the filtered data are to be resampled
+   * @param random the random number generator to use
    */
-  protected Instances resampleAttributes(Instances data, boolean original) throws Exception {
+  protected Instances resampleAttributes(Instances data, boolean original, Random random) throws Exception {
 
     // Need to sample attributes so that weights are represented by sample
     int nAtt = (data.classIndex() >= 0) ? data.numAttributes() - 1: data.numAttributes();
@@ -749,7 +709,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
         attributeWeights[index++] = data.attribute(i).weight();
       }
     }
-    int[] frequencies = Utils.takeSample(attributeWeights, data.getRandomNumberGenerator(getSeedForResampling()));
+    int[] frequencies = Utils.takeSample(attributeWeights, random);
 
     // Make list of attribute indices based on frequencies in sample
     ArrayList<Integer> al = new ArrayList<Integer>();
@@ -789,16 +749,27 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    data = setUp(data);
+    if (m_Classifier == null) {
+      throw new Exception("No base classifier has been set!");
+    }
+
+    getCapabilities().testWithFail(data);
+
+    Random r = (data.numInstances() > 0) ? data.getRandomNumberGenerator(getSeed()) : new Random(getSeed());
+    data = setUp(data, r);
     if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling())); // The filter may have assigned weights.
+      data = data.resampleWithWeights(r); // The filter may have assigned weights.
     }
     if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
-      data = resampleAttributes(data, false);
+      data = resampleAttributes(data, false, r);
     }
 
     // can classifier handle the data?
     getClassifier().getCapabilities().testWithFail(data);
+
+    if (m_Classifier instanceof Randomizable) {
+      ((Randomizable)m_Classifier).setSeed(r.nextInt());
+    }
 
     m_Classifier.buildClassifier(data);
   }

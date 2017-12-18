@@ -173,7 +173,7 @@ public class RandomProjection extends Filter implements UnsupervisedFilter,
         "\tThe distribution to use for calculating the random matrix.\n"
           + "\tSparse1 is:\n"
           + "\t  sqrt(3)*{-1 with prob(1/6), 0 with prob(2/3), +1 with prob(1/6)}\n"
-          + "\tSparse2 is:\n" + "\t  {-1 with prob(1/2), +1 with prob(1/2)}\n",
+          + "\tSparse2 is:\n" + "\t  {-1 with prob(1/2), +1 with prob(1/2)}",
         "D", 1, "-D [SPARSE1|SPARSE2|GAUSSIAN]"));
 
     // newVector.addElement(new Option(

@@ -21,14 +21,7 @@
 
 package weka.classifiers.meta;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-import java.util.Random;
-
-import weka.classifiers.IterativeClassifier;
 import weka.core.*;
-import weka.filters.Filter;
 
 /**
  <!-- globalinfo-start -->
@@ -42,7 +35,7 @@ import weka.filters.Filter;
  * <pre> -F &lt;filter specification&gt;
  *  Full class name of filter to use, followed
  *  by filter options.
- *  eg: "weka.filters.unsupervised.attribute.Remove -V -R 1,2"</pre>
+ *  default: "weka.filters.unsupervised.attribute.RandomProjection -N 10 -D Sparse1"</pre>
  * 
  * <pre> -D
  *  If set, classifier is run in debug mode and
@@ -50,61 +43,53 @@ import weka.filters.Filter;
  * 
  * <pre> -W
  *  Full name of base classifier.
- *  (default: weka.classifiers.trees.J48)</pre>
+ *  (default: weka.classifiers.lazy.IBk)</pre>
  *
  * <pre> -S num
  * Set the random number seed (default 1). </pre>
  *
  * <pre> 
- * Options specific to classifier weka.classifiers.trees.J48:
+ * Options specific to classifier weka.classifiers.lazy.IBk:
  * </pre>
- * 
- * <pre> -U
- *  Use unpruned tree.</pre>
- * 
- * <pre> -C &lt;pruning confidence&gt;
- *  Set confidence threshold for pruning.
- *  (default 0.25)</pre>
- * 
- * <pre> -M &lt;minimum number of instances&gt;
- *  Set minimum number of instances per leaf.
- *  (default 2)</pre>
- * 
- * <pre> -R
- *  Use reduced error pruning.</pre>
- * 
- * <pre> -N &lt;number of folds&gt;
- *  Set number of folds for reduced error
- *  pruning. One fold is used as pruning set.
- *  (default 3)</pre>
- * 
- * <pre> -B
- *  Use binary splits only.</pre>
- * 
- * <pre> -S
- *  Don't perform subtree raising.</pre>
- * 
- * <pre> -L
- *  Do not clean up after the tree has been built.</pre>
- * 
+ *
+ * <pre> -I
+ *  Weight neighbours by the inverse of their distance
+ *  (use when k &gt; 1)</pre>
+ *
+ * <pre> -F
+ *  Weight neighbours by 1 - their distance
+ *  (use when k &gt; 1)</pre>
+ *
+ * <pre> -K &lt;number of neighbors&gt;
+ *  Number of nearest neighbours (k) used in classification.
+ *  (Default = 1)</pre>
+ *
+ * <pre> -E
+ *  Minimise mean squared error rather than mean absolute
+ *  error when using -X option with numeric prediction.</pre>
+ *
+ * <pre> -W &lt;window size&gt;
+ *  Maximum number of training instances maintained.
+ *  Training instances are dropped FIFO. (Default = no window)</pre>
+ *
+ * <pre> -X
+ *  Select the number of nearest neighbours between 1
+ *  and the k value specified using hold-one-out evaluation
+ *  on the training data (use when k &gt; 1)</pre>
+ *
  * <pre> -A
- *  Laplace smoothing for predicted probabilities.</pre>
- * 
- * <pre> -Q &lt;seed&gt;
- *  Seed for random data shuffling (default 1).</pre>
- * 
+ *  The nearest neighbour search algorithm to use (default: weka.core.neighboursearch.LinearNNSearch).
+ * </pre>
+ *
  <!-- options-end -->
  *
  * @author Eibe Frank
  * @version $Revision: 9117 $
  */
-public class RandomizableFilteredClassifier extends FilteredClassifier implements Randomizable {
+public class RandomizableFilteredClassifier extends FilteredClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -4523466618555717333L;
-
-  /** The random number seed. */
-  protected int m_Seed = 1;
 
   /**
    * Returns a string describing this classifier
@@ -112,9 +97,10 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
    * displaying in the explorer/experimenter gui
    */
   public String globalInfo() {
-    return   "A simple variant of the FilteredClassifier that implements the Randomizable interface, useful for "
-      + "building ensemble classifiers using the RandomCommittee meta learner. It requires " +
-      "that either the filter or the base learner implement the Randomizable interface.";
+    return   "A simple variant of the FilteredClassifier that instantiates the model with a randomizable filter, " +
+            "more specifically, RandomProjection, and IBk as the base classifier. Other than this, and checking " +
+            "that at least one of the two base schemes implements the Randomizable interface, it implements " +
+            "exactly the same functionality as FilteredClassifier, which (now) also implements Randomizable.";
   }
 
   /**
@@ -132,7 +118,7 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
    */
   protected String defaultFilterString() {
 
-    return "weka.filters.unsupervised.attribute.RandomProjection";
+    return "weka.filters.unsupervised.attribute.RandomProjection -N 10 -D Sparse1";
   }
 
   /**
@@ -142,111 +128,6 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
 
     m_Classifier = new weka.classifiers.lazy.IBk();
     m_Filter = new weka.filters.unsupervised.attribute.RandomProjection();
-  }
-
-  /**
-   * Returns an enumeration describing the available options.
-   *
-   * @return an enumeration of all the available options.
-   */
-  public Enumeration<Option> listOptions() {
-
-    Vector<Option> newVector = new Vector<Option>(1);
-
-    newVector.addElement(new Option(
-          "\tRandom number seed.\n"
-          + "\t(default 1)",
-          "S", 1, "-S <num>"));
-
-    newVector.addAll(Collections.list(super.listOptions()));
-    
-    if (getFilter() instanceof OptionHandler) {
-      newVector.addElement(new Option(
-        "",
-        "", 0, "\nOptions specific to filter "
-          + getFilter().getClass().getName() + ":"));
-      newVector.addAll(Collections.list(((OptionHandler)getFilter()).listOptions()));
-    }
-    
-    return newVector.elements();
-  }
-
-  /**
-   * Parses a given list of options. Valid options are:<p>
-   *
-   * -W classname <br>
-   * Specify the full class name of the base learner.<p>
-   *
-   * -I num <br>
-   * Set the number of iterations (default 10). <p>
-   *
-   * -S num <br>
-   * Set the random number seed (default 1). <p>
-   *
-   * Options after -- are passed to the designated classifier.<p>
-   *
-   * @param options the list of options as an array of strings
-   * @exception Exception if an option is not supported
-   */
-  public void setOptions(String[] options) throws Exception {
-
-    String seed = Utils.getOption('S', options);
-    if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
-    } else {
-      setSeed(1);
-    }
-
-    super.setOptions(options);
-    
-    Utils.checkForRemainingOptions(options);
-  }
-
-  /**
-   * Gets the current settings of the classifier.
-   *
-   * @return an array of strings suitable for passing to setOptions
-   */
-  public String [] getOptions() {
-
-    Vector<String> options = new Vector<String>();
-   
-    options.add("-S");
-    options.add("" + getSeed());
-
-    Collections.addAll(options, super.getOptions());
-    
-    return options.toArray(new String[0]);
-  }
-
-  /**
-   * Returns the tip text for this property
-   * @return tip text for this property suitable for
-   * displaying in the explorer/experimenter gui
-   */
-  public String seedTipText() {
-
-    return "The random number seed to be used.";
-  }
-
-  /**
-   * Set the seed for random number generation.
-   *
-   * @param seed the seed
-   */
-  public void setSeed(int seed) {
-
-    m_Seed = seed;
-  }
-
-  /**
-   * Gets the seed for the random number generations
-   *
-   * @return the seed for the random number generation
-   */
-  public int getSeed() {
-
-    return m_Seed;
   }
 
   /**
@@ -263,34 +144,7 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
       throw new Exception("Either the classifier or the filter must implement the Randomizable interface.");
     }
 
-    if (m_Classifier instanceof IterativeClassifier) {
-
-      // get a random number generator
-      Random r = data.getRandomNumberGenerator(m_Seed);
-
-      if (m_Filter instanceof Randomizable) {
-        ((Randomizable)m_Filter).setSeed(r.nextInt());
-      }
-
-      data = setUp(data);
-      if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-        data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeed())); // The filter may have assigned weights.
-      }
-      if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
-        data = resampleAttributes(data, false);
-      }
-
-      // can classifier handle the data?
-      getClassifier().getCapabilities().testWithFail(data);
-
-      if (m_Classifier instanceof Randomizable) {
-        ((Randomizable)m_Classifier).setSeed(r.nextInt());
-      }
-
-      ((IterativeClassifier) m_Classifier).initializeClassifier(data);
-    } else {
-      throw new Exception("Classifier: " + getClassifierSpec() + " is not an IterativeClassifier");
-    }
+    super.initializeClassifier(data);
   }
 
   /**
@@ -303,33 +157,10 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
 
     if (!(m_Classifier instanceof Randomizable) &&
         !(m_Filter instanceof Randomizable)) {
-      throw new Exception("Either the classifier or the filter must implement " +
-                          "the Randomizable interface.");
+      throw new Exception("Either the classifier or the filter must implement the Randomizable interface.");
     }
 
-    // get a random number generator
-    Random r = data.getRandomNumberGenerator(m_Seed);
-
-    if (m_Filter instanceof Randomizable) {
-      ((Randomizable)m_Filter).setSeed(r.nextInt());
-    }
-
-    data = setUp(data);
-    if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeed())); // The filter may have assigned weights.
-    }
-    if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
-      data = resampleAttributes(data, false);
-    }
-
-    // can classifier handle the data?
-    getClassifier().getCapabilities().testWithFail(data);
-
-    if (m_Classifier instanceof Randomizable) {
-      ((Randomizable)m_Classifier).setSeed(r.nextInt());
-    }
-
-    m_Classifier.buildClassifier(data);
+    super.buildClassifier(data);
   }
 
   /**
