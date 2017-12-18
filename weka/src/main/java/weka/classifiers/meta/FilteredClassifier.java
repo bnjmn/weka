@@ -311,7 +311,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (m_Classifier instanceof IterativeClassifier) {
       data = setUp(data);
       if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-        data = data.resampleWithWeights(new Random(getSeed())); // The filter may have assigned weights.
+        data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling())); // The filter may have assigned weights.
       }
       if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
         data = resampleAttributes(data, false);
@@ -509,9 +509,9 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     }
     String seed = Utils.getOption('Q', options);
     if (seed.length() != 0) {
-      setSeed(Integer.parseInt(seed));
+      setSeedForResampling(Integer.parseInt(seed));
     } else {
-      setSeed(1);
+      setSeedForResampling(1);
     }
     String[] filterSpec = Utils.splitOptions(filterString);
     if (filterSpec.length == 0) {
@@ -567,7 +567,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     options.add("" + getFilterSpec());
 
     options.add("-Q");
-    options.add("" + getSeed());
+    options.add("" + getSeedForResampling());
 
     if (getDoNotCheckForModifiedClassAttribute()) {
       options.add("-doNotCheckForModifiedClassAttribute");
@@ -676,7 +676,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    *
    * @param seed the seed
    */
-  public void setSeed(int seed) {
+  public void setSeedForResampling(int seed) {
 
     m_SeedForResampling = seed;
   }
@@ -686,7 +686,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
    *
    * @return the seed for the random number generation
    */
-  public int getSeed() {
+  public int getSeedForResampling() {
 
     return m_SeedForResampling;
   }
@@ -698,7 +698,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
   protected Instances setUp(Instances data) throws Exception {
 
     if (m_Classifier == null) {
-      throw new Exception("No base classifiers have been set!");
+      throw new Exception("No base classifier has been set!");
     }
 
     getCapabilities().testWithFail(data);
@@ -709,7 +709,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
     if (data.allInstanceWeightsIdentical() || (m_Filter instanceof WeightedInstancesHandler)) {
       data = new Instances(data);
     } else {
-      data = data.resampleWithWeights(new Random(getSeed()));
+      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling()));
     }
     if (!data.allAttributeWeightsIdentical() && !(m_Filter instanceof WeightedAttributesHandler)) {
       data = resampleAttributes(data, true);
@@ -749,7 +749,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
         attributeWeights[index++] = data.attribute(i).weight();
       }
     }
-    int[] frequencies = Utils.takeSample(attributeWeights, new Random(getSeed()));
+    int[] frequencies = Utils.takeSample(attributeWeights, data.getRandomNumberGenerator(getSeedForResampling()));
 
     // Make list of attribute indices based on frequencies in sample
     ArrayList<Integer> al = new ArrayList<Integer>();
@@ -791,7 +791,7 @@ public class FilteredClassifier extends SingleClassifierEnhancer
 
     data = setUp(data);
     if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
-      data = data.resampleWithWeights(new Random(getSeed())); // The filter may have assigned weights.
+      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeedForResampling())); // The filter may have assigned weights.
     }
     if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
       data = resampleAttributes(data, false);

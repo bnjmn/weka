@@ -26,12 +26,8 @@ import java.util.Enumeration;
 import java.util.Vector;
 import java.util.Random;
 
-import weka.core.Instances;
-import weka.core.Option;
-import weka.core.OptionHandler;
-import weka.core.RevisionUtils;
-import weka.core.Utils;
-import weka.core.Randomizable;
+import weka.classifiers.IterativeClassifier;
+import weka.core.*;
 import weka.filters.Filter;
 
 /**
@@ -254,6 +250,50 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
   }
 
   /**
+   * Initializes an iterative classifier. (If the base classifier supports
+   * this.)
+   *
+   * @param data the instances to be used in induction
+   * @exception Exception if the model cannot be initialized
+   */
+  public void initializeClassifier(Instances data) throws Exception {
+
+    if (!(m_Classifier instanceof Randomizable) &&
+            !(m_Filter instanceof Randomizable)) {
+      throw new Exception("Either the classifier or the filter must implement the Randomizable interface.");
+    }
+
+    if (m_Classifier instanceof IterativeClassifier) {
+
+      // get a random number generator
+      Random r = data.getRandomNumberGenerator(m_Seed);
+
+      if (m_Filter instanceof Randomizable) {
+        ((Randomizable)m_Filter).setSeed(r.nextInt());
+      }
+
+      data = setUp(data);
+      if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
+        data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeed())); // The filter may have assigned weights.
+      }
+      if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
+        data = resampleAttributes(data, false);
+      }
+
+      // can classifier handle the data?
+      getClassifier().getCapabilities().testWithFail(data);
+
+      if (m_Classifier instanceof Randomizable) {
+        ((Randomizable)m_Classifier).setSeed(r.nextInt());
+      }
+
+      ((IterativeClassifier) m_Classifier).initializeClassifier(data);
+    } else {
+      throw new Exception("Classifier: " + getClassifierSpec() + " is not an IterativeClassifier");
+    }
+  }
+
+  /**
    * Build the classifier on the filtered data.
    *
    * @param data the training data
@@ -261,26 +301,11 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    if (m_Classifier == null) {
-      throw new Exception("No base classifiers have been set!");
-    }
-
     if (!(m_Classifier instanceof Randomizable) &&
         !(m_Filter instanceof Randomizable)) {
       throw new Exception("Either the classifier or the filter must implement " +
                           "the Randomizable interface.");
     }
-
-    getCapabilities().testWithFail(data);
-
-    // get fresh instances object
-    data = new Instances(data);
-    
-    if (data.numInstances() == 0) {
-      throw new Exception("No training instances.");
-    }
-
-    try {
 
     // get a random number generator
     Random r = data.getRandomNumberGenerator(m_Seed);
@@ -289,23 +314,22 @@ public class RandomizableFilteredClassifier extends FilteredClassifier implement
       ((Randomizable)m_Filter).setSeed(r.nextInt());
     }
 
-    m_Filter.setInputFormat(data);  // filter capabilities are checked here
-    data = Filter.useFilter(data, m_Filter);
+    data = setUp(data);
+    if (!data.allInstanceWeightsIdentical() && !(m_Classifier instanceof WeightedInstancesHandler)) {
+      data = data.resampleWithWeights(data.getRandomNumberGenerator(getSeed())); // The filter may have assigned weights.
+    }
+    if (!data.allAttributeWeightsIdentical() && !(m_Classifier instanceof WeightedAttributesHandler)) {
+      data = resampleAttributes(data, false);
+    }
 
     // can classifier handle the data?
     getClassifier().getCapabilities().testWithFail(data);
 
-    m_FilteredInstances = data.stringFreeStructure();
-
     if (m_Classifier instanceof Randomizable) {
       ((Randomizable)m_Classifier).setSeed(r.nextInt());
     }
-    m_Classifier.buildClassifier(data);
 
-    } catch (Exception e) {
-      e.printStackTrace();
-      System.exit(1);
-    }
+    m_Classifier.buildClassifier(data);
   }
 
   /**
