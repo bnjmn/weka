@@ -396,50 +396,44 @@ public class RandomSubSpace
 
     // get fresh Instances object
     m_data = new Instances(data);
-       
+
     // only class? -> build ZeroR model
     if (m_data.numAttributes() == 1) {
       System.err.println(
-	  "Cannot build model (only class attribute present in data!), "
-	  + "using ZeroR model instead!");
+              "Cannot build model (only class attribute present in data!), "
+                      + "using ZeroR model instead!");
       m_ZeroR = new weka.classifiers.rules.ZeroR();
       m_ZeroR.buildClassifier(m_data);
       return;
-    }
-    else {
+    } else {
       m_ZeroR = null;
     }
-    
+
     super.buildClassifier(data);
 
-    Integer[] indices = new Integer[data.numAttributes()-1];
+    Integer[] indices = new Integer[data.numAttributes() - 1];
     int classIndex = data.classIndex();
     int offset = 0;
-    for(int i = 0; i < indices.length+1; i++) {
+    for (int i = 0; i < indices.length + 1; i++) {
       if (i != classIndex) {
-	indices[offset++] = i+1;
+        indices[offset++] = i + 1;
       }
     }
     int subSpaceSize = numberOfAttributes(indices.length, getSubSpaceSize());
     Random random = data.getRandomNumberGenerator(m_Seed);
-    
+
     for (int j = 0; j < m_Classifiers.length; j++) {
-      if (m_Classifier instanceof Randomizable) {
-	((Randomizable) m_Classifiers[j]).setSeed(random.nextInt());
-      }
       FilteredClassifier fc = new FilteredClassifier();
+      fc.setSeed(random.nextInt());
       fc.setClassifier(m_Classifiers[j]);
       m_Classifiers[j] = fc;
       Remove rm = new Remove();
-      rm.setOptions(new String[]{"-V", "-R", randomSubSpace(indices,subSpaceSize,classIndex+1,random)});
+      rm.setOptions(new String[]{"-V", "-R", randomSubSpace(indices, subSpaceSize, classIndex + 1, random)});
       fc.setFilter(rm);
-
-      // build the classifier
-      //m_Classifiers[j].buildClassifier(m_data);
     }
-    
+
     buildClassifiers();
-    
+
     // save memory
     m_data = null;
   }
@@ -472,9 +466,9 @@ public class RandomSubSpace
     if (m_ZeroR != null) {
       return m_ZeroR.distributionForInstance(instance);
     }
-    
-    double[] sums = new double [instance.numClasses()], newProbs; 
-    
+
+    double[] sums = new double[instance.numClasses()], newProbs;
+
     double numPreds = 0;
     for (int i = 0; i < m_NumIterations; i++) {
       if (instance.classAttribute().isNumeric() == true) {
@@ -484,9 +478,9 @@ public class RandomSubSpace
           numPreds++;
         }
       } else {
-	newProbs = m_Classifiers[i].distributionForInstance(instance);
-	for (int j = 0; j < newProbs.length; j++)
-	  sums[j] += newProbs[j];
+        newProbs = m_Classifiers[i].distributionForInstance(instance);
+        for (int j = 0; j < newProbs.length; j++)
+          sums[j] += newProbs[j];
       }
     }
     if (instance.classAttribute().isNumeric() == true) {
