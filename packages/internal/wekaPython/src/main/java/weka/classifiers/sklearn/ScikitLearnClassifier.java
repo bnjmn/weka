@@ -408,6 +408,13 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     }
   }
 
+  /**
+   * Holds the version number of scikit-learn. API for LDA and QDA changed in
+   * version 0.17.0, so we need to check for this in order to adjust code for
+   * these methods.
+   */
+  protected double m_scikitVersion = -1;
+
   /** The scikit learner to use */
   protected Learner m_learner = Learner.DecisionTreeClassifier;
 
@@ -453,6 +460,9 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
    * only the class is present in the data
    */
   protected ZeroR m_zeroR;
+
+  /** Class priors for use if there are numerical problems */
+  protected double[] m_classPriors;
 
   /**
    * Global help info
@@ -513,6 +523,29 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     }
 
     if (pythonAvailable) {
+
+      if (m_scikitVersion < 0) {
+        // try and establish scikit-learn version
+        try {
+          PythonSession session = PythonSession.acquireSession(this);
+          String script = "import sklearn\nskv = sklearn.__version__\n";
+          List<String> outAndErr = session.executeScript(script, getDebug());
+
+          String versionNumber =
+            session.getVariableValueFromPythonAsPlainString("skv", getDebug());
+          if (versionNumber != null && versionNumber.length() > 0) {
+            // strip minor version
+            versionNumber =
+              versionNumber.substring(0, versionNumber.lastIndexOf('.'));
+            m_scikitVersion = Double.parseDouble(versionNumber);
+          }
+        } catch (WekaException e) {
+          e.printStackTrace();
+        } finally {
+          PythonSession.releaseSession(this);
+        }
+      }
+
       result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
       result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
       result.enable(Capabilities.Capability.DATE_ATTRIBUTES);
@@ -746,6 +779,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
 
     data = new Instances(data);
     data.deleteWithMissingClass();
+    m_zeroR = new ZeroR();
+    m_zeroR.buildClassifier(data);
+    m_classPriors =
+      data.numInstances() > 0 ? m_zeroR.distributionForInstance(data
+        .instance(0)) : new double[data.classAttribute().numValues()];
     if (data.numInstances() == 0 || data.numAttributes() == 1) {
       if (data.numInstances() == 0) {
         System.err
@@ -754,9 +792,9 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         System.err.println("Only the class attribute is present in "
           + "the data - using ZeroR model");
       }
-      m_zeroR = new ZeroR();
-      m_zeroR.buildClassifier(data);
       return;
+    } else {
+      m_zeroR = null;
     }
 
     if (data.classAttribute().isNominal()) {
@@ -793,9 +831,17 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       StringBuilder learnScript = new StringBuilder();
       learnScript.append("from sklearn import *").append("\n")
         .append("import numpy as np").append("\n");
+      String learnerModule = m_learner.getModule();
+      String learnerMethod = m_learner.toString();
+      if (m_scikitVersion > 0.18) {
+        if (learnerMethod.equalsIgnoreCase("LDA")) {
+          learnerMethod = "LinearDiscriminantAnalysis";
+          learnerModule = "discriminant_analysis";
+        }
+      }
       learnScript.append(
-        MODEL_ID + m_modelHash + " = " + m_learner.getModule() + "."
-          + m_learner.toString() + "("
+        MODEL_ID + m_modelHash + " = " + learnerModule + "."
+          + learnerMethod + "("
           + (getLearnerOpts().length() > 0 ? getLearnerOpts() : "") + ")")
         .append("\n");
       learnScript.append(MODEL_ID + m_modelHash + ".fit(X,np.ravel(Y))")
@@ -904,9 +950,18 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
           m_pickledModel, getDebug());
       }
 
+      String learnerModule = m_learner.getModule();
+      String learnerMethod = m_learner.toString();
+      if (m_scikitVersion > 0.18) {
+        if (learnerMethod.equalsIgnoreCase("LDA")) {
+          learnerMethod = "LinearDiscriminantAnalysis";
+          learnerModule = "discriminant_analysis";
+        }
+      }
+
       predictScript.append(
-        "from sklearn." + m_learner.getModule() + " import "
-          + m_learner.toString()).append("\n");
+        "from sklearn." + learnerModule + " import "
+          + learnerMethod).append("\n");
       predictScript.append(
         "preds = " + MODEL_ID + m_modelHash + ".predict"
           + (m_learner.producesProbabilities(m_learnerOpts) ? "_proba" : "")
@@ -948,7 +1003,13 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
             }
             newDist[i] = dist.get(k++).doubleValue();
           }
-          Utils.normalize(newDist);
+          try {
+            Utils.normalize(newDist);
+          } catch (IllegalArgumentException e) {
+            newDist = m_classPriors;
+            System.err.println("WARNING: " + e.getMessage()
+              + ". Predicting using class priors");
+          }
           results[j++] = newDist;
         }
       } else {
