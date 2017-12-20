@@ -1743,7 +1743,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     MouseListener ml = new MouseAdapter() {
       public void mousePressed(MouseEvent e) {
         if(tree.getRowForLocation(e.getX(), e.getY()) != -1) {
-          if(e.getClickCount() == 2) {
+          if(e.getClickCount() == 1) {
             popup.setVisible(false);
           }
         }
