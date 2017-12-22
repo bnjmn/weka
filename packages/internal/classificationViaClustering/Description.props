@@ -6,10 +6,10 @@
 PackageName=classificationViaClustering
 
 # Version (required)
-Version=1.0.7
+Version=1.0.8
 
 #Date
-Date=2017-06-06
+Date=2017-12-22
 
 # Title (required)
 Title=A simple meta-classifier that uses a clusterer for classification.
@@ -27,10 +27,10 @@ License=GPL 3.0
 
 # Description (required)
 Description=A simple meta-classifier that uses a clusterer for classification. By default, the best single cluster for each class is found using the method Weka applies for classes-to-clusters evaluation. All other clusters are left without class labels and a test instance assigned to one of the unlabeled clusters is left unclassified. Optionally, this behaviour can be changed so that each cluster is labeled based on the proportion of training instances in each class that is assigned to it. If the cluster is a probabilistic ones, cluster membership probabilities are used instead of counts to establish class probability estimates.
-Changes=Now enables optional probabilistic classification of all instances.
+Changes=Now works properly if string or relational attributes are present in the data.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.7.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/classificationViaClustering1.0.8.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/classificationViaClustering
