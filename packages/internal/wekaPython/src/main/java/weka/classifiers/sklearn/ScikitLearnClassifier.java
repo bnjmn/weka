@@ -558,6 +558,10 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       if (m_learner.isRegressor()) {
         result.enable(Capabilities.Capability.NUMERIC_CLASS);
       }
+    } else {
+      System.err.println("The python environment is either not available or "
+        + "is not configured correctly:\n\n"
+        + PythonSession.getPythonEnvCheckResults());
     }
 
     return result;

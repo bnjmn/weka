@@ -256,7 +256,9 @@ public class PythonScriptExecutor extends BaseStep {
           executeScript(session, script);
         }
       } finally {
-        PythonSession.releaseSession(this);
+        if (PythonSession.pythonAvailable()) {
+          PythonSession.releaseSession(this);
+        }
         getStepManager().finished();
       }
     }
@@ -329,7 +331,7 @@ public class PythonScriptExecutor extends BaseStep {
       // try initializing
       if (!PythonSession.initSession("python", getDebug())) {
         String envEvalResults = PythonSession.getPythonEnvCheckResults();
-        throw new WekaException("Was unable to start python environment: "
+        throw new WekaException("Was unable to start python environment:\n\n"
           + envEvalResults);
       }
     }

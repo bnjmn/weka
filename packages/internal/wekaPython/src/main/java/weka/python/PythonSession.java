@@ -141,12 +141,12 @@ public class PythonSession {
     StringWriter writer = new StringWriter();
     IOUtils.copy(pyProcess.getInputStream(), writer);
     s_pythonEnvCheckResults = writer.toString();
-    s_sessionSingleton = this;
     m_shutdown = false;
 
     // launch the server socket and python server
     if (s_pythonEnvCheckResults.length() < 5) {
       launchServer(true);
+      s_sessionSingleton = this;
     }
   }
 

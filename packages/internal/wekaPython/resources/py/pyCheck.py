@@ -36,9 +36,14 @@ def check_libraries():
     else:
         check_library('StringIO')
     check_library('math')
+    check_library('traceback')
     check_library('socket')
+    check_library('struct')
     check_library('os')
+    check_library('json')
+    check_library('base64')
     check_library('pickle')
+    check_library('scipy')
     check_library('sklearn')
     check_library('matplotlib')
 
