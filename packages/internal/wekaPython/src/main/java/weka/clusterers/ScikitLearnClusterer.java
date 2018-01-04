@@ -220,6 +220,10 @@ public class ScikitLearnClusterer extends AbstractClusterer implements
       result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
       result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
       result.enable(Capabilities.Capability.MISSING_VALUES);
+    } else {
+      System.err.println("The python environment is either not available or "
+        + "is not configured correctly:\n\n"
+        + PythonSession.getPythonEnvCheckResults());
     }
 
     return result;
