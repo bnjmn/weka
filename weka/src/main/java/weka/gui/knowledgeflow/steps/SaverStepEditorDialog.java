@@ -116,6 +116,10 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
     m_primaryEditorHolder.add(p, BorderLayout.CENTER);
     add(m_editorHolder, BorderLayout.CENTER);
 
+    if (!wrappedStep.getRelationNameForFilename()) {
+      m_prefLab.setText("File");
+    }
+
     try {
       String dir = wrappedStep.getSaver().retrieveDir();
       String prefixOrFile = wrappedStep.getSaver().filePrefix();
