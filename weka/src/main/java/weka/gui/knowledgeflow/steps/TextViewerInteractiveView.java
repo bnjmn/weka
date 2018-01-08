@@ -122,18 +122,16 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
 
     // copy all results over to the history panel.
     Map<String, String> runResults = ((TextViewer) getStep()).getResults();
+    String lastName = "";
     if (runResults.size() > 0) {
-      boolean first = true;
-      String firstKey = "";
       for (Map.Entry<String, String> e : runResults.entrySet()) {
-        if (first) {
-          firstKey = e.getKey();
-          first = false;
-        }
         m_history
           .addResult(e.getKey(), new StringBuffer().append(e.getValue()));
+        lastName = e.getKey();
       }
-      m_history.setSingle(firstKey);
+      if (lastName.length() > 0) {
+        m_history.setSingle(lastName);
+      }
     }
 
     m_clearButton.addActionListener(new ActionListener() {
