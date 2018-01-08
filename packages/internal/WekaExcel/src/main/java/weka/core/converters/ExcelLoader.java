@@ -65,7 +65,7 @@ import java.util.Vector;
  * <pre>
  * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: '')
+ *  (default is ? but empty cell is also treated as missing value)
  * </pre>
  * 
  * <!-- options-end -->
@@ -101,13 +101,13 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
   protected transient InputStream m_sourceStream = null;
 
   /** the currently open Excel document. */
-  protected Workbook m_Workbook;
+  protected transient Workbook m_Workbook;
 
   /** the sheet to load. */
   protected SingleIndex m_SheetIndex = new SingleIndex("first");
 
   /** The placeholder for missing values. */
-  protected String m_MissingValue = "";
+  protected String m_MissingValue = "?";
 
   /**
    * Returns a string describing this Loader.
@@ -137,7 +137,8 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
         "sheet", 1, "-sheet <index>"));
 
     result.addElement(new Option("\tThe string representing a missing value.\n"
-      + "\t(default: '')", "M", 1, "-M <str>"));
+      + "\t(default is ? but empty cell is also treated as missing value)", "M",
+            1, "-M <str>"));
 
     return result.elements();
   }
@@ -177,7 +178,7 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
    * <pre>
    * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: '')
+   *  (default is ? but empty cell is also treated as missing value)
    * </pre>
    * 
    * <!-- options-end -->
@@ -192,11 +193,15 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
     tmpStr = Utils.getOption("sheet", options);
     if (tmpStr.length() > 0) {
       setSheetIndex(tmpStr);
+    } else {
+      setSheetIndex("first");
     }
 
     tmpStr = Utils.getOption('M', options);
     if (tmpStr.length() != 0) {
       setMissingValue(tmpStr);
+    } else {
+      setMissingValue("?");
     }
 
     Utils.checkForRemainingOptions(options);
@@ -227,7 +232,8 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
    *         explorer/experimenter gui
    */
   public String missingValueTipText() {
-    return "The placeholder for missing values, default is '' (empty cell).";
+    return "The placeholder for missing values, default is ? " +
+            "but empty cell is also treated as missing value.";
   }
 
   /**
@@ -460,8 +466,7 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
             dataRow[n] = cell.getNumericCellValue();
             break;
           default:
-            if ((m_MissingValue.length() > 0)
-              && cell.getStringCellValue().equals(m_MissingValue)) {
+            if (cell.getStringCellValue().equals(m_MissingValue)) {
               dataRow[n] = null;
             } else {
               dataRow[n] = cell.getStringCellValue();
@@ -520,6 +525,7 @@ public class ExcelLoader extends AbstractFileLoader implements BatchConverter,
 
       // close the stream
       m_sourceStream.close();
+      m_Workbook = null;
     } catch (Exception ex) {
       System.err.println("Failed to load Excel document");
       ex.printStackTrace();

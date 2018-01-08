@@ -59,7 +59,7 @@ import weka.core.Utils;
  * <pre>
  * -M &lt;str&gt;
  *  The string representing a missing value.
- *  (default: ?)
+ *  (default is empty cell represented by '')
  * </pre>
  * 
  * <pre>
@@ -90,7 +90,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
   private static final long serialVersionUID = -7446832500561589653L;
 
   /** The placeholder for missing values. */
-  protected String m_MissingValue = "";
+  protected String m_MissingValue = "''";
 
   /** whether to use OOXML. */
   protected boolean m_UseOOXML;
@@ -110,7 +110,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
    */
   public String globalInfo() {
     return "Writes to a destination that is in MS Excel spreadsheet format (97-2007).\n"
-      + "For instance for spreadsheets that can be read with the Microsoft Office Suite.";
+      + "For instance for spreadsheets that can be read with the Microsoft Office Suite.\n";
   }
 
   /**
@@ -123,7 +123,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
     Vector<Option> result = new Vector<Option>();
 
     result.addElement(new Option("\tThe string representing a missing value.\n"
-      + "\t(default: ?)", "M", 1, "-M <str>"));
+      + "\t(default is empty cell represented by '')", "M", 1, "-M <str>"));
 
     result.addAll(Collections.list(super.listOptions()));
 
@@ -140,9 +140,9 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
    * <pre>
    * -M &lt;str&gt;
    *  The string representing a missing value.
-   *  (default: ?)
+   *  (default is empty cell represented by '')
    * </pre>
-   * 
+   *
    * <pre>
    * -i &lt;the input file&gt;
    *  The input file
@@ -165,6 +165,8 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
     tmpStr = Utils.getOption('M', options);
     if (tmpStr.length() != 0) {
       setMissingValue(tmpStr);
+    } else {
+      setMissingValue("''");
     }
 
     super.setOptions(options);
@@ -215,7 +217,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
    *         explorer/experimenter gui
    */
   public String missingValueTipText() {
-    return "The placeholder for missing values, default is '' (empty cell).";
+    return "The placeholder for missing values, default is empty cell represented by ''.";
   }
 
   /**
@@ -227,7 +229,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
 
     setUseOOXML(false);
     setFileExtension(ExcelLoader.FILE_EXTENSION);
-    setMissingValue("");
+    setMissingValue("''");
   }
 
   /**
@@ -358,7 +360,7 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
           cell = row.createCell(i);
 
           if (inst.isMissing(i)) {
-            if (m_MissingValue.length() > 0) {
+            if (!m_MissingValue.equals("''")) {
               cell.setCellValue(m_MissingValue);
             } else {
               cell.setCellType(Cell.CELL_TYPE_BLANK);
