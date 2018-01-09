@@ -184,7 +184,8 @@ public class SerializedObject implements Serializable, RevisionHandler {
               } catch (ClassNotFoundException ex) {
                 for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
                   ClassLoader checked =
-                    SerializationHelper.checkForThirdPartyClass(arrayStripped, l);
+                    SerializationHelper.checkForThirdPartyClass(arrayStripped,
+                      l);
                   if (checked != null) {
                     result = Class.forName(desc.getName(), true, checked);
                   }
@@ -192,8 +193,11 @@ public class SerializedObject implements Serializable, RevisionHandler {
               }
 
               if (result == null) {
-                throw new ClassNotFoundException("Unable to find class "
-                  + arrayStripped);
+                result = super.resolveClass(desc);
+                if (result == null) {
+                  throw new ClassNotFoundException("Unable to find class "
+                    + arrayStripped);
+                }
               }
 
               return result;
@@ -235,7 +239,8 @@ public class SerializedObject implements Serializable, RevisionHandler {
                 } catch (ClassNotFoundException ex) {
                   for (WekaPackageLibIsolatingClassLoader l : m_thirdPartyLoaders) {
                     ClassLoader checked =
-                      SerializationHelper.checkForThirdPartyClass(arrayStripped, l);
+                      SerializationHelper.checkForThirdPartyClass(
+                        arrayStripped, l);
                     if (checked != null) {
                       result = Class.forName(desc.getName(), true, checked);
                     }
@@ -243,8 +248,11 @@ public class SerializedObject implements Serializable, RevisionHandler {
                 }
 
                 if (result == null) {
-                  throw new ClassNotFoundException("Unable to find class "
-                    + arrayStripped);
+                  result = super.resolveClass(desc);
+                  if (result == null) {
+                    throw new ClassNotFoundException("Unable to find class "
+                      + arrayStripped);
+                  }
                 }
 
                 return result;
