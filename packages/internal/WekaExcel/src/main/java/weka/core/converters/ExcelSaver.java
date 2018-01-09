@@ -232,6 +232,13 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
     setMissingValue("''");
   }
 
+  @Override
+  public void setFilePrefix(String prefix) {
+    super.setFilePrefix(prefix);
+
+    setUseOOXML(prefix.toLowerCase().endsWith(ExcelLoader.FILE_EXTENSION_OOXML));
+  }
+
   /**
    * Returns a description of the file type.
    * 
@@ -260,6 +267,11 @@ public class ExcelSaver extends AbstractFileSaver implements BatchConverter {
    */
   public void setUseOOXML(boolean value) {
     m_UseOOXML = value;
+    if (m_UseOOXML) {
+      setFileExtension(ExcelLoader.FILE_EXTENSION_OOXML);
+    } else {
+      setFileExtension(ExcelLoader.FILE_EXTENSION);
+    }
   }
 
   /**

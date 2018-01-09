@@ -6,10 +6,10 @@
 PackageName=WekaExcel
 
 # Version (required)
-Version=1.0.6
+Version=1.0.7
 
 #Date (year-month-day)
-Date=2018-01-08
+Date=2018-01-09
 
 # Title (required)
 Title=WEKA MS Excel loader/saver
@@ -30,10 +30,10 @@ License=GPL 3.0
 Description=WekaExcel adds support to directly read from and write to spreadsheets in Microsoft Excel 97-2007 format. It uses Apache POI (http://poi.apache.org/), specifically POI-HSSF and POI-XSSF (http://poi.apache.org/spreadsheet/), in order to read/write Excel spreadsheets.
 
 # Changes in this release
-Changes=Missing value default string was empty string, which did not work when saving options. Fixed by using a pair of empty single quotes to denote an empty cell in ExcelSaver.
+Changes=Prefix of created file is now correct when selecting xlsx files in the Knowledge Flow's ExcelSaver step.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/WekaExcel1.0.6.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/WekaExcel1.0.7.zip?download
 
 # URL for further information
 URL=http://poi.apache.org/spreadsheet/how-to.html
