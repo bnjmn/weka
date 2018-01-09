@@ -238,7 +238,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
   private class Filter extends DocumentFilter {
     @Override
     public void insertString(final FilterBypass fb, final int offset,
-      final String string, final AttributeSet attr) throws BadLocationException {
+      String string, final AttributeSet attr) throws BadLocationException {
       int promptPos = m_rConsole.getText().lastIndexOf(">>> ") + 4;
       if (offset >= promptPos) {
         super.insertString(fb, offset, string, attr);
@@ -256,12 +256,29 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
 
     @Override
     public void replace(final FilterBypass fb, final int offset,
-      final int length, final String text, final AttributeSet attrs)
+      final int length, String text, final AttributeSet attrs)
       throws BadLocationException {
       int promptPos = m_rConsole.getText().lastIndexOf(">>> ") + 4;
       if (offset >= promptPos) {
         super.replace(fb, offset, length, text, attrs);
       }
+    }
+  }
+
+  private class FilterNewLines extends Filter {
+    @Override
+    public void insertString(final FilterBypass fb, final int offset,
+                             String string, final AttributeSet attr) throws BadLocationException {
+      string = string.replaceAll("\\n", "");
+      super.insertString(fb, offset, string, attr);
+    }
+
+    @Override
+    public void replace(final FilterBypass fb, final int offset,
+                        final int length, String text, final AttributeSet attrs)
+            throws BadLocationException {
+      text = text.replaceAll("\\n", "");
+      super.replace(fb, offset, length, text, attrs);
     }
   }
 
@@ -455,7 +472,7 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
       e1.printStackTrace();
     }
 
-    doc.setDocumentFilter(new Filter());
+    doc.setDocumentFilter(new FilterNewLines());
 
     // prevent up and down arrow keys from moving the cursor up and down -
     // we want to use these to access the command history buffer
@@ -499,35 +516,45 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
               int promptPos = m_rConsole.getText().lastIndexOf(">>> ") + 4;
               if (m_rConsole.getCaretPosition() >= promptPos) {
 
+                ((AbstractDocument) (m_rConsole.getDocument())).setDocumentFilter(new Filter());
+
+                try {
+                  m_rConsole.getDocument().insertString(m_rConsole.getText().length(), "\n", null);
+                  m_rConsole.setCaretPosition(m_rConsole.getText().length());
+                } catch (BadLocationException e1) {
+                  e1.printStackTrace();
+                }
+
                 String text = m_rConsole.getText();
                 String lastTyped = text.substring(text.lastIndexOf(">>> ") + 4,
-                                                  text.length() - 1); // remove newline at the end
+                                                  text.length());
                 if (lastTyped.length() > 0) {
+
                   RSession eng = null;
                   try {
                     if (lastTyped.matches(".*;[ ]*q\\(.*") || lastTyped.matches("[ ]*q\\(.*")) {
                       m_rConsole.getDocument().insertString(
-                        m_rConsole.getText().length(), "q() is not supported. R "
-                          + "will exit when Weka quits.\n", null);
+                              m_rConsole.getText().length(), "q() is not supported. R "
+                                      + "will exit when Weka quits.\n", null);
                     } else if (lastTyped.matches(".*;[ ]*quit\\(.*") || lastTyped.matches("[ ]*quit\\(.*")) {
                       m_rConsole.getDocument().insertString(
-                        m_rConsole.getText().length(), "q() is not supported. R "
-                          + "will exit when Weka quits.\n", null);
+                              m_rConsole.getText().length(), "q() is not supported. R "
+                                      + "will exit when Weka quits.\n", null);
                     } else if (lastTyped.matches(".*;[ ]*readline\\(.*") || lastTyped.matches("[ ]*readline\\(.*")) {
                       m_rConsole.getDocument().insertString(
-                        m_rConsole.getText().length(), "readline() is not supported.\n", null);
+                              m_rConsole.getText().length(), "readline() is not supported.\n", null);
                     } else {
                       m_statusLogger.statusMessage("Working...");
                       eng = RSession.acquireSession(JavaGDConsolePanel.this);
                       eng.setLog(JavaGDConsolePanel.this, m_rLogger);
                       eng.clearConsoleBuffer(JavaGDConsolePanel.this);
-                      REXP result = eng.parseAndEval(JavaGDConsolePanel.this, 
-                                                     "withAutoprint({" + lastTyped + "}, echo = FALSE)");
+                      REXP result = eng.parseAndEval(JavaGDConsolePanel.this,
+                              "withAutoprint({" + lastTyped + "}, echo = FALSE)");
                       String consoleOut = eng.getConsoleBuffer(JavaGDConsolePanel.this);
                       if (consoleOut != null && consoleOut.length() > 0) {
                         m_rConsole.getDocument()
-                          .insertString(m_rConsole.getText().length(),
-                            consoleOut, null);
+                                .insertString(m_rConsole.getText().length(),
+                                        consoleOut, null);
                       }
 
                       m_statusLogger.statusMessage("Ready.");
@@ -535,11 +562,11 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
                   } catch (Exception ex) {
                     ex.printStackTrace();
                     m_statusLogger
-                      .statusMessage("An error occurred.");
+                            .statusMessage("An error occurred.");
                     try {
                       m_rConsole.getDocument()
-                        .insertString(m_rConsole.getText().length(),
-                          ex.getMessage() + ": '" + lastTyped +"'\n", null);
+                              .insertString(m_rConsole.getText().length(),
+                                      ex.getMessage() + ": '" + lastTyped + "'\n", null);
                     } catch (BadLocationException e1) {
                       e1.printStackTrace();
                     }
@@ -550,6 +577,8 @@ public class JavaGDConsolePanel extends JPanel implements JavaGDListener {
                     m_firstHistoryAccess = true;
                   }
                 }
+
+                ((AbstractDocument)(m_rConsole.getDocument())).setDocumentFilter(new FilterNewLines());
 
                 try {
                   m_rConsole.getDocument().insertString(

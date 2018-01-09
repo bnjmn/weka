@@ -122,8 +122,9 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
         s_engine.parseAndEval("local({r <- getOption(\"repos\"); "
           + "r[\"CRAN\"] <- \"http://cloud.r-project.org\"; "
           + "options(repos=r)})");
-   
+
         s_engine.parseAndEval("local(options(help_type = \"html\"))");
+        s_engine.parseAndEval("local(options(install.packages.compile.from.source = \"never\"))");
         s_executor = Executors.newScheduledThreadPool(1);
         s_executor.scheduleAtFixedRate(new RniIdle(s_engine), 100, 100, TimeUnit.MILLISECONDS);
           
