@@ -491,6 +491,15 @@ public class Classifier extends WekaAlgorithmWrapper implements
     // test data
     Instances testSplit = data.getPrimaryPayload();
 
+    if (m_trainedClassifierHeader != null
+      && !testSplit.equalHeaders(m_trainedClassifierHeader)) {
+      if (!(m_trainedClassifier instanceof InputMappedClassifier)) {
+        throw new WekaException(
+          "Structure of incoming data does not match "
+            + "that of the trained classifier");
+      }
+    }
+
     // paired training data
     Instances trainingSplit =
       helper.getIndexedValueFromNamedStore("trainingSplits", setNum);
