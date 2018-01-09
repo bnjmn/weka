@@ -117,7 +117,7 @@ public class SaverStepEditorDialog extends GOEStepEditorDialog {
     add(m_editorHolder, BorderLayout.CENTER);
 
     if (!wrappedStep.getRelationNameForFilename()) {
-      m_prefLab.setText("File");
+      m_prefLab.setText("Filename");
     }
 
     try {
