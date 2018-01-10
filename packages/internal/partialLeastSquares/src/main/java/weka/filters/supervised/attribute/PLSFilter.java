@@ -21,11 +21,6 @@
 
 package weka.filters.supervised.attribute;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Vector;
-
 import weka.core.Attribute;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
@@ -50,6 +45,11 @@ import weka.filters.unsupervised.attribute.Center;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
 import weka.filters.unsupervised.attribute.Standardize;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Vector;
+
 /**
  * <!-- globalinfo-start --> Runs Partial Least Square Regression over the given
  * instances and computes the resulting beta matrix for prediction.<br/>
@@ -68,9 +68,9 @@ import weka.filters.unsupervised.attribute.Standardize;
  * regression. Chemometrics and Intelligent Laboratory Systems. 18:251-263.
  * <p/>
  * <!-- globalinfo-end -->
- * 
+ *
  * <!-- technical-bibtex-start --> BibTeX:
- * 
+ *
  * <pre>
  * &#64;book{Naes2002,
  *    author = {Tormod Naes and Tomas Isaksson and Tom Fearn and Tony Davies},
@@ -79,21 +79,21 @@ import weka.filters.unsupervised.attribute.Standardize;
  *    year = {2002},
  *    ISBN = {0-9528666-2-5}
  * }
- * 
+ *
  * &#64;misc{missing_id,
  *    author = {StatSoft, Inc.},
  *    booktitle = {Electronic Textbook StatSoft},
  *    title = {Partial Least Squares (PLS)},
  *    HTTP = {http://www.statsoft.com/textbook/stpls.html}
  * }
- * 
+ *
  * &#64;misc{missing_id,
  *    author = {Bent Jorgensen and Yuri Goegebeur},
  *    booktitle = {ST02: Multivariate Data Analysis and Chemometrics},
  *    title = {Module 7: Partial least squares regression I},
  *    HTTP = {http://statmaster.sdu.dk/courses/ST02/module07/}
  * }
- * 
+ *
  * &#64;article{Jong1993,
  *    author = {S. de Jong},
  *    journal = {Chemometrics and Intelligent Laboratory Systems},
@@ -105,47 +105,47 @@ import weka.filters.unsupervised.attribute.Standardize;
  * </pre>
  * <p/>
  * <!-- technical-bibtex-end -->
- * 
+ *
  * <!-- options-start --> Valid options are:
  * <p/>
- * 
+ *
  * <pre>
  * -D
  *  Turns on output of debugging information.
  * </pre>
- * 
+ *
  * <pre>
  * -C &lt;num&gt;
  *  The number of components to compute.
  *  (default: 20)
  * </pre>
- * 
+ *
  * <pre>
  * -U
  *  Updates the class attribute as well.
  *  (default: off)
  * </pre>
- * 
+ *
  * <pre>
  * -M
  *  Turns replacing of missing values on.
  *  (default: off)
  * </pre>
- * 
+ *
  * <pre>
  * -A &lt;SIMPLS|PLS1&gt;
  *  The algorithm to use.
  *  (default: PLS1)
  * </pre>
- * 
+ *
  * <pre>
  * -P &lt;none|center|standardize&gt;
  *  The type of preprocessing that is applied to the data.
  *  (default: center)
  * </pre>
- * 
+ *
  * <!-- options-end -->
- * 
+ *
  * @author FracPete (fracpete at waikato dot ac dot nz)
  * @version $Revision$
  */
@@ -233,7 +233,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns a string describing this classifier.
-   * 
+   *
    * @return a description of the classifier suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -249,7 +249,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
    * Returns an instance of a TechnicalInformation object, containing detailed
    * information about the technical background of this class, e.g., paper
    * reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   @Override
@@ -297,7 +297,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Gets an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options.
    */
   @Override
@@ -346,7 +346,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the options of the current setup
-   * 
+   *
    * @return the current options
    */
   @Override
@@ -379,47 +379,47 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
   /**
    * Parses the options for this object.
    * <p/>
-   * 
+   *
    * <!-- options-start --> Valid options are:
    * <p/>
-   * 
+   *
    * <pre>
    * -D
    *  Turns on output of debugging information.
    * </pre>
-   * 
+   *
    * <pre>
    * -C &lt;num&gt;
    *  The number of components to compute.
    *  (default: 20)
    * </pre>
-   * 
+   *
    * <pre>
    * -U
    *  Updates the class attribute as well.
    *  (default: off)
    * </pre>
-   * 
+   *
    * <pre>
    * -M
    *  Turns replacing of missing values on.
    *  (default: off)
    * </pre>
-   * 
+   *
    * <pre>
    * -A &lt;SIMPLS|PLS1&gt;
    *  The algorithm to use.
    *  (default: PLS1)
    * </pre>
-   * 
+   *
    * <pre>
    * -P &lt;none|center|standardize&gt;
    *  The type of preprocessing that is applied to the data.
    *  (default: center)
    * </pre>
-   * 
+   *
    * <!-- options-end -->
-   * 
+   *
    * @param options the options to use
    * @throws Exception if the option setting fails
    */
@@ -459,7 +459,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -469,7 +469,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * sets the maximum number of attributes to use.
-   * 
+   *
    * @param value the maximum number of attributes
    */
   public void setNumComponents(int value) {
@@ -478,7 +478,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the maximum number of attributes to use.
-   * 
+   *
    * @return the current maximum number of attributes
    */
   public int getNumComponents() {
@@ -487,7 +487,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -497,7 +497,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Sets whether to update the class attribute with the predicted value.
-   * 
+   *
    * @param value if true the class value will be replaced by the predicted
    *          value.
    */
@@ -507,7 +507,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Gets whether the class attribute is updated with the predicted value.
-   * 
+   *
    * @return true if the class attribute is updated
    */
   public boolean getPerformPrediction() {
@@ -516,7 +516,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -526,7 +526,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Sets the type of algorithm to use
-   * 
+   *
    * @param value the algorithm type
    */
   public void setAlgorithm(SelectedTag value) {
@@ -537,7 +537,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Gets the type of algorithm to use
-   * 
+   *
    * @return the current algorithm type.
    */
   public SelectedTag getAlgorithm() {
@@ -546,7 +546,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -556,7 +556,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Sets whether to replace missing values.
-   * 
+   *
    * @param value if true missing values are replaced with the
    *          ReplaceMissingValues filter.
    */
@@ -566,7 +566,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Gets whether missing values are replace.
-   * 
+   *
    * @return true if missing values are replaced with the ReplaceMissingValues
    *         filter
    */
@@ -576,7 +576,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Returns the tip text for this property
-   * 
+   *
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -586,7 +586,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Sets the type of preprocessing to use
-   * 
+   *
    * @param value the preprocessing type
    */
   public void setPreprocessing(SelectedTag value) {
@@ -597,7 +597,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * Gets the type of preprocessing to use
-   * 
+   *
    * @return the current preprocessing type.
    */
   public SelectedTag getPreprocessing() {
@@ -609,7 +609,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
    * case the output format cannot be returned immediately, i.e.,
    * immediateOutputFormat() returns false, then this method will be called from
    * batchFinished().
-   * 
+   *
    * @param inputFormat the input format to base the output format on
    * @return the output format
    * @throws Exception in case the determination goes wrong
@@ -626,7 +626,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
     for (int i = 0; i < getNumComponents(); i++) {
       atts.add(new Attribute(prefix + "_" + (i + 1)));
     }
-    atts.add(new Attribute("Class"));
+    atts.add(new Attribute(inputFormat.classAttribute().name()));
     Instances result = new Instances(prefix, atts, 0);
     result.setClassIndex(result.numAttributes() - 1);
 
@@ -635,7 +635,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the data minus the class column as matrix
-   * 
+   *
    * @param instances the data to work on
    * @return the data without class attribute
    */
@@ -671,7 +671,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the data minus the class column as matrix
-   * 
+   *
    * @param instance the instance to work on
    * @return the data without the class attribute
    */
@@ -692,7 +692,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the data class column as matrix
-   * 
+   *
    * @param instances the data to work on
    * @return the class attribute
    */
@@ -713,7 +713,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the data class column as matrix
-   * 
+   *
    * @param instance the instance to work on
    * @return the class attribute
    */
@@ -732,7 +732,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
   /**
    * returns the X and Y matrix again as Instances object, based on the given
    * header (must have a class attribute set).
-   * 
+   *
    * @param header the format of the instance object
    * @param x the X matrix (data)
    * @param y the Y matrix (class)
@@ -775,7 +775,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the given column as a vector (actually a n x 1 matrix)
-   * 
+   *
    * @param m the matrix to work on
    * @param columnIndex the column to return
    * @return the column as n x 1 matrix
@@ -796,7 +796,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
   /**
    * stores the data from the (column) vector in the matrix at the specified
    * index
-   * 
+   *
    * @param v the vector to store in the matrix
    * @param m the receiving matrix
    * @param columnIndex the column to store the values in
@@ -807,7 +807,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * returns the (column) vector of the matrix at the specified index
-   * 
+   *
    * @param m the matrix to work on
    * @param columnIndex the column to get the values from
    * @return the column vector
@@ -818,7 +818,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * determines the dominant eigenvector for the given matrix and returns it
-   * 
+   *
    * @param m the matrix to determine the dominant eigenvector for
    * @return the dominant eigenvector
    */
@@ -838,7 +838,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * normalizes the given vector (inplace)
-   * 
+   *
    * @param v the vector to normalize
    */
   protected void normalizeVector(Matrix v) {
@@ -860,7 +860,7 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
 
   /**
    * processes the instances using the PLS1 algorithm
-   * 
+   *
    * @param instances the data to process
    * @return the modified data
    * @throws Exception in case the processing goes wrong
@@ -875,7 +875,6 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
     Matrix b_hat;
     int i;
     int j;
-    Matrix X_new;
     Matrix tmp;
     Instances result;
     Instances tmpInst;
@@ -921,9 +920,6 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
       // W*(P^T*W)^-1
       tmp = W.times(((P.transpose()).times(W)).inverse());
 
-      // X_new = X*W*(P^T*W)^-1
-      X_new = getX(instances).times(tmp);
-
       // factor = W*(P^T*W)^-1 * b_hat
       m_PLS1_RegVector = tmp.times(b_hat);
 
@@ -931,42 +927,34 @@ public class PLSFilter extends SimpleBatchFilter implements SupervisedFilter,
       m_PLS1_P = P;
       m_PLS1_W = W;
       m_PLS1_b_hat = b_hat;
+    }
+
+    result = new Instances(getOutputFormat());
+
+    for (i = 0; i < instances.numInstances(); i++) {
+      // work on each instance
+      tmpInst = new Instances(instances, 0);
+      tmpInst.add((Instance) instances.instance(i).copy());
+      x = getX(tmpInst);
+      X = new Matrix(1, getNumComponents());
+      T = new Matrix(1, getNumComponents());
+
+      for (j = 0; j < getNumComponents(); j++) {
+        setVector(x, X, j);
+        // 1. step: tj = xj * wj
+        t = x.times(getVector(m_PLS1_W, j));
+        setVector(t, T, j);
+        // 2. step: xj+1 = xj - tj*pj^T (tj is 1x1 matrix!)
+        x = x.minus(getVector(m_PLS1_P, j).transpose().times(t.get(0, 0)));
+      }
 
       if (getPerformPrediction()) {
-        result = toInstances(getOutputFormat(), X_new, y);
+        tmpInst = toInstances(getOutputFormat(), T, T.times(m_PLS1_b_hat));
       } else {
-        result = toInstances(getOutputFormat(), X_new, getY(instances));
+        tmpInst = toInstances(getOutputFormat(), T, getY(tmpInst));
       }
-    }
-    // prediction
-    else {
-      result = new Instances(getOutputFormat());
 
-      for (i = 0; i < instances.numInstances(); i++) {
-        // work on each instance
-        tmpInst = new Instances(instances, 0);
-        tmpInst.add((Instance) instances.instance(i).copy());
-        x = getX(tmpInst);
-        X = new Matrix(1, getNumComponents());
-        T = new Matrix(1, getNumComponents());
-
-        for (j = 0; j < getNumComponents(); j++) {
-          setVector(x, X, j);
-          // 1. step: tj = xj * wj
-          t = x.times(getVector(m_PLS1_W, j));
-          setVector(t, T, j);
-          // 2. step: xj+1 = xj - tj*pj^T (tj is 1x1 matrix!)
-          x = x.minus(getVector(m_PLS1_P, j).transpose().times(t.get(0, 0)));
-        }
-
-        if (getPerformPrediction()) {
-          tmpInst = toInstances(getOutputFormat(), T, T.times(m_PLS1_b_hat));
-        } else {
-          tmpInst = toInstances(getOutputFormat(), T, getY(tmpInst));
-        }
-
-        result.add(tmpInst.instance(0));
-      }
+      result.add(tmpInst.instance(0));
     }
 
     return result;

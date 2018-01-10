@@ -6,10 +6,10 @@
 PackageName=partialLeastSquares
 
 # Version (required)
-Version=1.0.4
+Version=1.0.5
 
 #Date
-Date=2015-12-22
+Date=2018-01-11
 
 # Title (required)
 Title=Partial least squares filter and classifier for performing PLS regression.
@@ -31,7 +31,7 @@ Description=This package contains a filter for computing partial least squares a
 Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/partialLeastSquares1.0.4.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/partialLeastSquares1.0.5.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/partialLeastSquares
