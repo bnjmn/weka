@@ -1,4 +1,5 @@
-<project name="weka" default="compile" basedir=".">
+<project name="weka" default="compile" basedir="."
+ xmlns:if="ant:if" xmlns:unless="ant:unless">
 <!-- 
   ===========================================================================
    Ant build file for weka. Tested with ant 1.6.5 and Junit 3.8.2. Requires
@@ -39,6 +40,15 @@
   <!-- valid values for the following: make, compile, compile_tests, clean -->
   <property name="packageCommand" value="make"/>
 
+  <!-- check whether packages present -->
+  <condition property="packages_present" else="false">
+    <and>
+      <available file="${packages_internal}" type="dir"/>
+      <available file="${packages_external}" type="dir"/>
+    </and>
+  </condition>
+  <echo message="Packages present: ${packages_present}"/>
+
   <target name="init_all">
     <!-- Create the time stamp -->
     <tstamp/>
@@ -59,7 +69,7 @@
   <property name="proj.cp" refid="project.class.path"/>
   <path id="package.class.path">
     <pathelement path="${proj.cp}"/>
-    <dirset dir="${packages_internal}">
+    <dirset dir="${packages_internal}" if:true="packages_present">
       <include name="**/${build}/classes"/>
       <include name="**/${build}/testcases"/>
       <exclude name="RPlugin/**" />
@@ -67,19 +77,19 @@
       <exclude name="distributedWeka*/**" />
       <exclude name="netlibNative*/**" />
    </dirset>
-   <dirset dir="${packages_external}">
+   <dirset dir="${packages_external}" if:true="packages_present">
      <include name="**/${build}/classes"/>
      <include name="**/${build}/testcases"/>
      <exclude name="associationRulesVisualizer/**" />
      <exclude name="scatterPlot3D/**" />
    </dirset>
-   <fileset dir="${packages_external}">
+   <fileset dir="${packages_external}" if:true="packages_present">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
      <exclude name="associationRulesVisualizer/**" />
      <exclude name="scatterPlot3D/**" />
    </fileset>
-   <fileset dir="${packages_internal}">
+   <fileset dir="${packages_internal}" if:true="packages_present">
      <include name="**/lib/*.jar"/>
      <include name="**/lib/*.zip"/>
      <exclude name="RPlugin/**" />
@@ -88,7 +98,13 @@
      <exclude name="netlibNative*/**" />
    </fileset>
   </path>
-<property name="pack.cp" refid="package.class.path"/>
+  <property name="pack.cp" refid="package.class.path"/>
+
+  <!-- check whether RemoteEngine present (for rmic call) -->
+  <condition property="remoteengine_present" else="false">
+    <available file="${src}/weka/experiment/RemoteEngine.java" type="file"/>
+  </condition>
+  <echo message="RemoteEngine present: ${remoteengine_present}"/>
 
 <!-- 
  ============================================================================
@@ -97,6 +113,7 @@
 -->
 
   <target name="compile_tests_internal" depends="compile_tests" description="Compile tests for a named internal package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Compiling ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${wekatestclasses}:${junitjar}:${cp}"/>  
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="compile_tests" inheritall="false">
@@ -106,6 +123,7 @@
   </target>
       
   <target name="compile_internal" depends="compile" description="Compile a named internal package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Compiling ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${cp}:${wekalib}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="compile" inheritall="false">
@@ -115,6 +133,7 @@
   </target>
 
   <target name="clean_internal" description="Clean a named internal package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Clean ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="clean" inheritall="false">
@@ -124,6 +143,7 @@
   </target>
 
   <target name="make_internal" description="Make a named internal package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Making ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${wekalib}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_internal}/${packageName}" target="make_package" inheritall="false">
@@ -133,6 +153,7 @@
   </target>
 
   <target name="apply_all_internal" depends="compile" description="Apply command to all internal packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <antcall target="${packageCommand}_internal">
       <param name="packageName" value="hotSpot"/>
     </antcall>
@@ -372,6 +393,7 @@
   </target>
 
   <target name="compile_tests_external"  description="Compile tests for a named external package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Compiling ${packageName}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile_tests" inheritall="false">
       <property name="package" value="${packageName}" />
@@ -380,6 +402,7 @@
   </target>
 
   <target name="compile_external" depends="compile" description="Compile a named external package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Compiling ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${wekalib}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="compile" inheritall="false">
@@ -389,6 +412,7 @@
   </target>
 
   <target name="clean_external" description="Clean a named external package (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Clean ${packageName}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="clean" inheritall="false">
       <property name="package" value="${packageName}" />
@@ -397,6 +421,7 @@
   </target>
 
   <target name="make_external" description="Make a named external package - compiles, generates javadoc and creates the zip file (run with -DpackageName=package name)">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <echo message="Making ${packageName}"/>
     <echo message="CLASSPATH ${wekaclasses}:${cp}"/>
     <ant antfile="build_package.xml" dir="${packages_external}/${packageName}" target="make_package" inheritall="false">
@@ -406,6 +431,7 @@
   </target>
 
   <target name="apply_all_external" depends="compile" description="Apply command to all external packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <antcall target="${packageCommand}_external">
       <param name="packageName" value="CLOPE"/>
     </antcall>
@@ -588,7 +614,7 @@
     </antcall>
   </target>
 
-  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]"> 
+  <target name="apply_all" depends="compile" description="Apply command to all packages. Use -DpackageCommand=[make|compile|compile_tests|clean]">
     <antcall target="apply_all_internal"/>
     <antcall target="apply_all_external"/>
   </target>
@@ -639,7 +665,7 @@
     <copy file="${lib}/mtj.jar" todir="${build}/classes" />
     <copy file="${lib}/arpack_combined_all.jar" todir="${build}/classes" />      
     <rmic base="${build}/classes"
-       classname="weka.experiment.RemoteEngine"/>
+       classname="weka.experiment.RemoteEngine" if:true="remoteengine_present"/>
     <unzip src="${lib}/java-cup.jar" dest="${build}/classes">
       <patternset>
         <include name="java_cup/runtime/**/*"/>
@@ -825,6 +851,7 @@
   <!-- Put everything in ${build}/classes into the weka.jar file -->
   <target name="exejar-monolithic" depends="compile, init_dist"
    description="Create an executable jar file containing core classes and all classes from internal packages in ./dist">
+    <fail message="No package directories present!" unless="${packages_present}"/>
     <antcall target="apply_all_internal">
       <param name="packageCommand" value="make"/>
     </antcall>
