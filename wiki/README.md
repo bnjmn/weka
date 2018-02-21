@@ -9,7 +9,8 @@ to generate the content.
 
 *mkdocs* works with Python 2.7 and 3.x.
 
-Best approach is to install mkdocs in a virtual environment (`venv` directory):
+Best approach is to install mkdocs (>= 0.16.0) in a virtual environment 
+(`venv` directory):
 
 * Python 2.7
 
