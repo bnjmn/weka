@@ -6,14 +6,16 @@ theme_dir: 'weka_theme'
 # if page names start with a blank, eg ' Some name', then they get 
 # excluded from the navigation on the left-hand side
 pages:
-    - Home: index.md
-    - Resources:
-      - FAQ: faq.md
-      - Troubleshooting: troubleshooting.md
-      - Learning resources: learning_resources.md
-    - Packages: packages/index.md
+    - 'Home': index.md
+    - 'Resources':
+      - 'FAQ': faq.md
+      - 'Not so FAQ': not_so_faq.md
+      - 'Troubleshooting': troubleshooting.md
+      - 'Learning resources': learning_resources.md
+    - 'Packages': packages/index.md
     - ' Package manager': packages/manager.md
     - ' Unofficial packages': packages/unofficial.md
     - ' Package structure': packages/structure.md
-    - Mailing list: mailing_list.md
-
+    - 'Mailing list': mailing_list.md
+    - ' GeneralizedSequentialPatterns': not_so_faq/gsp.md
+    - ' What do those numbers mean in a J48 tree?': not_so_faq/j48_numbers.md

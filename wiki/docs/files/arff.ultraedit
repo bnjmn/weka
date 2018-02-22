@@ -1,0 +1,20 @@
+/L20"ARFF" Nocase Line Comment = % String Chars = ' File Extensions = arff
+/Function String = "%"
+/C1"Reserved words"
+attribute
+relation
+end
+data
+string
+integer
+real
+numeric
+date
+/C2"Directives"
+/C3"Operators"
+/C4"Special symbols"
+{
+}
+@
+?
+,

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA | object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "yes">
+   <!ATTLIST object array     CDATA "no">
+]
+>
+
+<object name="__root__" class="weka.experiment.Experiment" primitive="no" array="no">
+   <object name="propertyArray" class="weka.classifiers.Classifier" primitive="no" array="yes">
+      <object name="0" class="weka.classifiers.trees.J48" primitive="no" array="no">
+         <object name="debug" class="boolean" primitive="yes" array="no">false</object>
+         <object name="options" class="java.lang.String" primitive="no" array="yes">
+            <object name="0" class="java.lang.String" primitive="no" array="no">-C</object>
+            <object name="1" class="java.lang.String" primitive="no" array="no">0.25</object>
+            <object name="2" class="java.lang.String" primitive="no" array="no">-M</object>
+            <object name="3" class="java.lang.String" primitive="no" array="no">2</object>
+            <object name="4" class="java.lang.String" primitive="no" array="no"/>
+            <object name="5" class="java.lang.String" primitive="no" array="no"/>
+            <object name="6" class="java.lang.String" primitive="no" array="no"/>
+            <object name="7" class="java.lang.String" primitive="no" array="no"/>
+            <object name="8" class="java.lang.String" primitive="no" array="no"/>
+            <object name="9" class="java.lang.String" primitive="no" array="no"/>
+            <object name="10" class="java.lang.String" primitive="no" array="no"/>
+            <object name="11" class="java.lang.String" primitive="no" array="no"/>
+            <object name="12" class="java.lang.String" primitive="no" array="no"/>
+            <object name="13" class="java.lang.String" primitive="no" array="no"/>
+         </object>
+      </object>
+   </object>
+   <object name="datasets" class="javax.swing.DefaultListModel" primitive="no" array="no">
+      <object name="0" class="java.io.File" primitive="no" array="no">.\test\datasets\anneal.arff</object>
+      <object name="1" class="java.io.File" primitive="no" array="no">.\test\datasets\anneal.ORIG.arff</object>
+      <object name="2" class="java.io.File" primitive="no" array="no">.\test\datasets\arrhythmia.arff</object>
+      <object name="3" class="java.io.File" primitive="no" array="no">.\test\datasets\audiology.arff</object>
+      <object name="4" class="java.io.File" primitive="no" array="no">.\test\datasets\autos.arff</object>
+      <object name="5" class="java.io.File" primitive="no" array="no">.\test\datasets\balance-scale.arff</object>
+      <object name="6" class="java.io.File" primitive="no" array="no">.\test\datasets\breast-cancer.arff</object>
+      <object name="7" class="java.io.File" primitive="no" array="no">.\test\datasets\breast-w.arff</object>
+      <object name="8" class="java.io.File" primitive="no" array="no">.\test\datasets\colic.arff</object>
+      <object name="9" class="java.io.File" primitive="no" array="no">.\test\datasets\colic.ORIG.arff</object>
+      <object name="10" class="java.io.File" primitive="no" array="no">.\test\datasets\credit-a.arff</object>
+      <object name="11" class="java.io.File" primitive="no" array="no">.\test\datasets\credit-g.arff</object>
+      <object name="12" class="java.io.File" primitive="no" array="no">.\test\datasets\diabetes.arff</object>
+      <object name="13" class="java.io.File" primitive="no" array="no">.\test\datasets\ecoli.arff</object>
+      <object name="14" class="java.io.File" primitive="no" array="no">.\test\datasets\glass.arff</object>
+      <object name="15" class="java.io.File" primitive="no" array="no">.\test\datasets\heart-c.arff</object>
+      <object name="16" class="java.io.File" primitive="no" array="no">.\test\datasets\heart-h.arff</object>
+      <object name="17" class="java.io.File" primitive="no" array="no">.\test\datasets\heart-statlog.arff</object>
+      <object name="18" class="java.io.File" primitive="no" array="no">.\test\datasets\hepatitis.arff</object>
+      <object name="19" class="java.io.File" primitive="no" array="no">.\test\datasets\hypothyroid.arff</object>
+      <object name="20" class="java.io.File" primitive="no" array="no">.\test\datasets\ionosphere.arff</object>
+      <object name="21" class="java.io.File" primitive="no" array="no">.\test\datasets\iris.arff</object>
+      <object name="22" class="java.io.File" primitive="no" array="no">.\test\datasets\kr-vs-kp.arff</object>
+      <object name="23" class="java.io.File" primitive="no" array="no">.\test\datasets\labor.arff</object>
+      <object name="24" class="java.io.File" primitive="no" array="no">.\test\datasets\letter.arff</object>
+      <object name="25" class="java.io.File" primitive="no" array="no">.\test\datasets\lymph.arff</object>
+      <object name="26" class="java.io.File" primitive="no" array="no">.\test\datasets\mushroom.arff</object>
+      <object name="27" class="java.io.File" primitive="no" array="no">.\test\datasets\old\breast-cancer.arff</object>
+      <object name="28" class="java.io.File" primitive="no" array="no">.\test\datasets\old\breast-cancer_test.arff</object>
+      <object name="29" class="java.io.File" primitive="no" array="no">.\test\datasets\old\breast-cancer_train.arff</object>
+      <object name="30" class="java.io.File" primitive="no" array="no">.\test\datasets\old\ionosphere_test.arff</object>
+      <object name="31" class="java.io.File" primitive="no" array="no">.\test\datasets\old\ionosphere_train.arff</object>
+      <object name="32" class="java.io.File" primitive="no" array="no">.\test\datasets\old\labor_test.arff</object>
+      <object name="33" class="java.io.File" primitive="no" array="no">.\test\datasets\old\labor_train.arff</object>
+      <object name="34" class="java.io.File" primitive="no" array="no">.\test\datasets\old\liver-disorders_test.arff</object>
+      <object name="35" class="java.io.File" primitive="no" array="no">.\test\datasets\old\liver-disorders_train.arff</object>
+      <object name="36" class="java.io.File" primitive="no" array="no">.\test\datasets\old\sick_test.arff</object>
+      <object name="37" class="java.io.File" primitive="no" array="no">.\test\datasets\old\sick_train.arff</object>
+      <object name="38" class="java.io.File" primitive="no" array="no">.\test\datasets\old\spambase_test.arff</object>
+      <object name="39" class="java.io.File" primitive="no" array="no">.\test\datasets\old\spambase_train.arff</object>
+      <object name="40" class="java.io.File" primitive="no" array="no">.\test\datasets\old\spect_test.arff</object>
+      <object name="41" class="java.io.File" primitive="no" array="no">.\test\datasets\old\spect_train.arff</object>
+      <object name="42" class="java.io.File" primitive="no" array="no">.\test\datasets\old\tic-tac-toe_test.arff</object>
+      <object name="43" class="java.io.File" primitive="no" array="no">.\test\datasets\old\tic-tac-toe_train.arff</object>
+      <object name="44" class="java.io.File" primitive="no" array="no">.\test\datasets\old\trains_test.arff</object>
+      <object name="45" class="java.io.File" primitive="no" array="no">.\test\datasets\old\trains_train.arff</object>
+      <object name="46" class="java.io.File" primitive="no" array="no">.\test\datasets\old\vote_test.arff</object>
+      <object name="47" class="java.io.File" primitive="no" array="no">.\test\datasets\old\vote_train.arff</object>
+      <object name="48" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\breast-cancer.arff</object>
+      <object name="49" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\breast-w.arff</object>
+      <object name="50" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\colic.arff</object>
+      <object name="51" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\credit-a.arff</object>
+      <object name="52" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\credit-g.arff</object>
+      <object name="53" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\diabetes.arff</object>
+      <object name="54" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\hepatitis.arff</object>
+      <object name="55" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\ionosphere.arff</object>
+      <object name="56" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\kr-vs-kp.arff</object>
+      <object name="57" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\mushroom.arff</object>
+      <object name="58" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\sick.arff</object>
+      <object name="59" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\sonar.arff</object>
+      <object name="60" class="java.io.File" primitive="no" array="no">.\test\datasets\old2\vote.arff</object>
+      <object name="61" class="java.io.File" primitive="no" array="no">.\test\datasets\optdigits.arff</object>
+      <object name="62" class="java.io.File" primitive="no" array="no">.\test\datasets\pendigits.arff</object>
+      <object name="63" class="java.io.File" primitive="no" array="no">.\test\datasets\primary-tumor.arff</object>
+      <object name="64" class="java.io.File" primitive="no" array="no">.\test\datasets\segment.arff</object>
+      <object name="65" class="java.io.File" primitive="no" array="no">.\test\datasets\sick.arff</object>
+      <object name="66" class="java.io.File" primitive="no" array="no">.\test\datasets\sonar.arff</object>
+      <object name="67" class="java.io.File" primitive="no" array="no">.\test\datasets\soybean.arff</object>
+      <object name="68" class="java.io.File" primitive="no" array="no">.\test\datasets\splice.arff</object>
+      <object name="69" class="java.io.File" primitive="no" array="no">.\test\datasets\vehicle.arff</object>
+      <object name="70" class="java.io.File" primitive="no" array="no">.\test\datasets\vote.arff</object>
+      <object name="71" class="java.io.File" primitive="no" array="no">.\test\datasets\vowel.arff</object>
+      <object name="72" class="java.io.File" primitive="no" array="no">.\test\datasets\waveform-5000.arff</object>
+      <object name="73" class="java.io.File" primitive="no" array="no">.\test\datasets\zoo.arff</object>
+   </object>
+   <object name="runUpper" class="int" primitive="yes" array="no">10</object>
+   <object name="resultProducer" class="weka.experiment.CrossValidationResultProducer" primitive="no" array="no">
+      <object name="options" class="java.lang.String" primitive="no" array="yes">
+         <object name="0" class="java.lang.String" primitive="no" array="no">-X</object>
+         <object name="1" class="java.lang.String" primitive="no" array="no">10</object>
+         <object name="2" class="java.lang.String" primitive="no" array="no">-O</object>
+         <object name="3" class="java.lang.String" primitive="no" array="no">splitEvalutorOut.zip</object>
+         <object name="4" class="java.lang.String" primitive="no" array="no">-W</object>
+         <object name="5" class="java.lang.String" primitive="no" array="no">weka.experiment.ClassifierSplitEvaluator</object>
+         <object name="6" class="java.lang.String" primitive="no" array="no">--</object>
+         <object name="7" class="java.lang.String" primitive="no" array="no">-W</object>
+         <object name="8" class="java.lang.String" primitive="no" array="no">weka.classifiers.rules.ZeroR</object>
+         <object name="9" class="java.lang.String" primitive="no" array="no">-I</object>
+         <object name="10" class="java.lang.String" primitive="no" array="no">0</object>
+         <object name="11" class="java.lang.String" primitive="no" array="no">-C</object>
+         <object name="12" class="java.lang.String" primitive="no" array="no">1</object>
+         <object name="13" class="java.lang.String" primitive="no" array="no">--</object>
+         <object name="14" class="java.lang.String" primitive="no" array="no"/>
+         <object name="15" class="java.lang.String" primitive="no" array="no"/>
+      </object>
+   </object>
+   <object name="usePropertyIterator" class="boolean" primitive="yes" array="no">true</object>
+   <object name="propertyPath" class="weka.experiment.PropertyNode" primitive="no" array="yes">
+      <object name="0" class="weka.experiment.PropertyNode" primitive="no" array="no">
+         <object name="value" class="weka.experiment.ClassifierSplitEvaluator" primitive="no" array="no">
+            <object name="options" class="java.lang.String" primitive="no" array="yes">
+               <object name="0" class="java.lang.String" primitive="no" array="no">-W</object>
+               <object name="1" class="java.lang.String" primitive="no" array="no">weka.classifiers.rules.ZeroR</object>
+               <object name="2" class="java.lang.String" primitive="no" array="no">-I</object>
+               <object name="3" class="java.lang.String" primitive="no" array="no">0</object>
+               <object name="4" class="java.lang.String" primitive="no" array="no">-C</object>
+               <object name="5" class="java.lang.String" primitive="no" array="no">1</object>
+               <object name="6" class="java.lang.String" primitive="no" array="no">--</object>
+               <object name="7" class="java.lang.String" primitive="no" array="no"/>
+            </object>
+         </object>
+         <object name="parentClass" class="java.lang.String" primitive="no" array="no">weka.experiment.CrossValidationResultProducer</object>
+         <object name="property" class="java.lang.String" primitive="no" array="no">splitEvaluator</object>
+      </object>
+      <object name="1" class="weka.experiment.PropertyNode" primitive="no" array="no">
+         <object name="value" class="weka.classifiers.rules.ZeroR" primitive="no" array="no">
+            <object name="debug" class="boolean" primitive="yes" array="no">false</object>
+            <object name="options" class="java.lang.String" primitive="no" array="yes"/>
+         </object>
+         <object name="parentClass" class="java.lang.String" primitive="no" array="no">weka.experiment.ClassifierSplitEvaluator</object>
+         <object name="property" class="java.lang.String" primitive="no" array="no">classifier</object>
+      </object>
+   </object>
+   <object name="notes" class="java.lang.String" primitive="no" array="no"/>
+   <object name="resultListener" class="weka.experiment.InstancesResultListener" primitive="no" array="no">
+      <object name="options" class="java.lang.String" primitive="no" array="yes">
+         <object name="0" class="java.lang.String" primitive="no" array="no">-O</object>
+         <object name="1" class="java.lang.String" primitive="no" array="no">output.arff</object>
+      </object>
+      <object name="outputFile" class="java.io.File" primitive="no" array="no">.\test\output.arff</object>
+   </object>
+   <object name="advanceDataSetFirst" class="boolean" primitive="yes" array="no">true</object>
+   <object name="runLower" class="int" primitive="yes" array="no">1</object>
+   <object name="classFirst" class="java.lang.Boolean" primitive="no" array="no">false</object>
+</object>

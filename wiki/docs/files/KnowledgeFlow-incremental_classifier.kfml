@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA|object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "no">
+   <!ATTLIST object array     CDATA "no">   <!-- the dimensions of the array; no=0, yes=1 -->
+   <!ATTLIST object null      CDATA "no">
+   <!ATTLIST object version   CDATA "3.5.8">
+]
+>
+
+<object class="java.util.Vector" name="__root__" version="3.5.8">
+   <object class="java.util.Vector" name="0">
+      <object class="weka.gui.beans.BeanInstance" name="0">
+         <object class="int" name="id" primitive="yes">0</object>
+         <object class="int" name="x" primitive="yes">60</object>
+         <object class="int" name="y" primitive="yes">62</object>
+         <object class="weka.gui.beans.Loader" name="bean">
+            <object class="weka.core.converters.ArffLoader" name="loader">
+               <object class="java.lang.String" name="file">/home/fracpete/development/datasets/uci/nominal/anneal.arff</object>
+               <object class="boolean" name="useRelativePath" primitive="yes">false</object>
+            </object>
+            <object class="java.beans.beancontext.BeanContextSupport" name="beanContext">
+               <object class="boolean" name="designTime" primitive="yes">true</object>
+               <object class="null" name="beanContext" null="yes"/>
+            </object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="1">
+         <object class="int" name="id" primitive="yes">1</object>
+         <object class="int" name="x" primitive="yes">236</object>
+         <object class="int" name="y" primitive="yes">62</object>
+         <object class="java.lang.String" name="custom_name">NaiveBayesUpdateable</object>
+         <object class="weka.gui.beans.Classifier" name="bean">
+            <object class="weka.classifiers.bayes.NaiveBayesUpdateable" name="wrappedAlgorithm">
+               <object class="boolean" name="debug" primitive="yes">false</object>
+               <object array="yes" class="java.lang.String" name="options">
+                  <object class="java.lang.String" name="0"/>
+                  <object class="java.lang.String" name="1"/>
+                  <object class="java.lang.String" name="2"/>
+               </object>
+            </object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="2">
+         <object class="int" name="id" primitive="yes">2</object>
+         <object class="int" name="x" primitive="yes">237</object>
+         <object class="int" name="y" primitive="yes">224</object>
+         <object class="java.lang.String" name="custom_name">IncrementalClassifierEvaluator</object>
+         <object class="weka.gui.beans.IncrementalClassifierEvaluator" name="bean">
+            <object class="int" name="statusFrequency" primitive="yes">100</object>
+            <object class="boolean" name="outputPerClassInfoRetrievalStats" primitive="yes">false</object>
+         </object>
+      </object>
+      <object class="weka.gui.beans.BeanInstance" name="3">
+         <object class="int" name="id" primitive="yes">3</object>
+         <object class="int" name="x" primitive="yes">441</object>
+         <object class="int" name="y" primitive="yes">223</object>
+         <object class="java.lang.String" name="custom_name">StripChart</object>
+         <object class="weka.gui.beans.StripChart" name="bean">
+            <object class="int" name="xLabelFreq" primitive="yes">500</object>
+            <object class="int" name="refreshFreq" primitive="yes">5</object>
+         </object>
+      </object>
+   </object>
+   <object class="java.util.Vector" name="1">
+      <object class="weka.gui.beans.BeanConnection" name="0">
+         <object class="int" name="source_id" primitive="yes">0</object>
+         <object class="int" name="target_id" primitive="yes">1</object>
+         <object class="java.lang.String" name="eventname">instance</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="1">
+         <object class="int" name="source_id" primitive="yes">1</object>
+         <object class="int" name="target_id" primitive="yes">2</object>
+         <object class="java.lang.String" name="eventname">incrementalClassifier</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+      <object class="weka.gui.beans.BeanConnection" name="2">
+         <object class="int" name="source_id" primitive="yes">2</object>
+         <object class="int" name="target_id" primitive="yes">3</object>
+         <object class="java.lang.String" name="eventname">chart</object>
+         <object class="boolean" name="hidden" primitive="yes">false</object>
+      </object>
+   </object>
+</object>

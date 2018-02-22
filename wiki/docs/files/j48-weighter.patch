@@ -1,0 +1,1043 @@
+diff -Naur orig/classifiers/trees/j48/BinC45ModelSelection.java weka/classifiers/trees/j48/BinC45ModelSelection.java
+--- orig/classifiers/trees/j48/BinC45ModelSelection.java	2004-11-12 15:44:52.000000000 +0000
++++ weka/classifiers/trees/j48/BinC45ModelSelection.java	2005-04-04 16:37:12.000000000 +0000
+@@ -83,7 +83,7 @@
+       // enough Instances to split.
+       checkDistribution = new Distribution(data);
+       noSplitModel = new NoSplit(checkDistribution);
+-      if (Utils.sm(checkDistribution.total(),2*m_minNoObj) ||
++      if (Utils.sm(checkDistribution.count(),2*m_minNoObj) ||
+ 	  Utils.eq(checkDistribution.total(),
+ 		   checkDistribution.perClass(checkDistribution.maxClass())))
+ 	return noSplitModel;
+diff -Naur orig/classifiers/trees/j48/C45ModelSelection.java weka/classifiers/trees/j48/C45ModelSelection.java
+--- orig/classifiers/trees/j48/C45ModelSelection.java	2004-11-12 15:44:52.000000000 +0000
++++ weka/classifiers/trees/j48/C45ModelSelection.java	2005-04-04 16:38:36.000000000 +0000
+@@ -84,7 +84,7 @@
+       // enough Instances to split.
+       checkDistribution = new Distribution(data);
+       noSplitModel = new NoSplit(checkDistribution);
+-      if (Utils.sm(checkDistribution.total(),2*m_minNoObj) ||
++      if (Utils.sm(checkDistribution.count(),2*m_minNoObj) ||
+ 	  Utils.eq(checkDistribution.total(),
+ 		   checkDistribution.perClass(checkDistribution.maxClass())))
+ 	return noSplitModel;
+diff -Naur orig/classifiers/trees/j48/C45PruneableClassifierTree.java weka/classifiers/trees/j48/C45PruneableClassifierTree.java
+--- orig/classifiers/trees/j48/C45PruneableClassifierTree.java	2003-11-24 13:57:58.000000000 +0000
++++ weka/classifiers/trees/j48/C45PruneableClassifierTree.java	2005-04-04 03:11:18.000000000 +0000
+@@ -249,7 +249,7 @@
+       return 0;
+     else
+       return theDistribution.numIncorrect()+
+-	Stats.addErrs(theDistribution.total(),
++	Stats.addErrs(theDistribution.count(), theDistribution.total(),
+ 		      theDistribution.numIncorrect(),m_CF);
+   }
+ 
+diff -Naur orig/classifiers/trees/j48/ClassifierSplitModel.java weka/classifiers/trees/j48/ClassifierSplitModel.java
+--- orig/classifiers/trees/j48/ClassifierSplitModel.java	2002-12-05 21:17:36.000000000 +0000
++++ weka/classifiers/trees/j48/ClassifierSplitModel.java	2005-05-12 18:31:40.000000000 +0000
+@@ -173,16 +173,23 @@
+    */
+   public final String dumpLabel(int index,Instances data) throws Exception {
+ 
+-    StringBuffer text;
++    StringBuffer text = new StringBuffer();
++    double W  = m_distribution.perBag(index);
++    double We = m_distribution.numIncorrect(index);
++    long   N  = m_distribution.nByBag(index);
++    long   Ne = m_distribution.unwIncorrect(index);
+ 
+-    text = new StringBuffer();
+     text.append(((Instances)data).classAttribute().
+ 		value(m_distribution.maxClass(index)));
+-    text.append(" ("+Utils.roundDouble(m_distribution.perBag(index),2));
+-    if (Utils.gr(m_distribution.numIncorrect(index),0))
+-      text.append("/"+Utils.roundDouble(m_distribution.numIncorrect(index),2));
++    if (W != N || We != Ne) { // weighted counts
++      text.append(" ("+Utils.roundDouble(W,2));
++      if (Utils.gr(We,0))
++        text.append("/"+Utils.roundDouble(We,2));
++      text.append(")");
++      }
++    text.append(" ("+N);
++    if (Utils.gr(Ne,0)) text.append("/"+Ne);
+     text.append(")");
+-
+     return text.toString();
+   }
+   
+diff -Naur orig/classifiers/trees/j48/Distribution.java weka/classifiers/trees/j48/Distribution.java
+--- orig/classifiers/trees/j48/Distribution.java	2004-11-12 15:44:52.000000000 +0000
++++ weka/classifiers/trees/j48/Distribution.java	2005-08-05 14:23:08.000000000 +0000
+@@ -46,6 +46,18 @@
+   /** Total weight of instances. */
+   private double totaL;            
+ 
++  /** Count of instances per class per bag. */
++  private long m_nByClassPerBag[][]; 
++
++  /** Count of instances per bag. */
++  private long m_nByBag[];           
++
++  /** Count of instances per class. */
++  private long m_nByClass[];         
++
++  /** Total count of instances. */
++  private long counT;            
++
+   /**
+    * Creates and initializes a new distribution.
+    */
+@@ -56,18 +68,25 @@
+     m_perClassPerBag = new double [numBags][0];
+     m_perBag = new double [numBags];
+     m_perClass = new double [numClasses];
+-    for (i=0;i<numBags;i++)
++    m_nByClassPerBag = new long [numBags][0];
++    m_nByBag = new long [numBags];
++    m_nByClass = new long [numClasses];
++    for (i=0;i<numBags;i++){
+       m_perClassPerBag[i] = new double [numClasses];
++      m_nByClassPerBag[i] = new long [numClasses];
++      }
+     totaL = 0;
++    counT = 0;
+   }
+ 
+   /**
+    * Creates and initializes a new distribution using the given
+    * array. WARNING: it just copies a reference to this array.
+    */
+-  public Distribution(double [][] table) {
++  public Distribution(double [][] table) throws Exception {
+ 
+     int i, j;
++    if (true) throw new Exception("Constructor won't handle weights.");
+ 
+     m_perClassPerBag = table;
+     m_perBag = new double [table.length];
+@@ -91,8 +110,13 @@
+     m_perClassPerBag = new double [1][0];
+     m_perBag = new double [1];
+     totaL = 0;
++    m_nByClassPerBag = new long [1][0];
++    m_nByBag = new long [1];
++    counT = 0;
+     m_perClass = new double [source.numClasses()];
+     m_perClassPerBag[0] = new double [source.numClasses()];
++    m_nByClass = new long [source.numClasses()];
++    m_nByClassPerBag[0] = new long [source.numClasses()];
+     Enumeration enu = source.enumerateInstances();
+     while (enu.hasMoreElements())
+       add(0,(Instance) enu.nextElement());
+@@ -116,9 +140,15 @@
+     m_perClassPerBag = new double [modelToUse.numSubsets()][0];
+     m_perBag = new double [modelToUse.numSubsets()];
+     totaL = 0;
++    m_nByClassPerBag = new long [modelToUse.numSubsets()][0];
++    m_nByBag = new long [modelToUse.numSubsets()];
++    counT = 0;
+     m_perClass = new double [source.numClasses()];
+-    for (int i = 0; i < modelToUse.numSubsets(); i++)
++    m_nByClass = new long [source.numClasses()];
++    for (int i = 0; i < modelToUse.numSubsets(); i++){
+       m_perClassPerBag[i] = new double [source.numClasses()];
++      m_nByClassPerBag[i] = new long [source.numClasses()];
++      }
+     Enumeration enu = source.enumerateInstances();
+     while (enu.hasMoreElements()) {
+       instance = (Instance) enu.nextElement();
+@@ -147,6 +177,15 @@
+ 		     toMerge.numClasses());
+     m_perBag = new double [1];
+     m_perBag[0] = totaL;
++    counT = toMerge.counT;
++    m_nByClass = new long [toMerge.numClasses()];
++    System.arraycopy(toMerge.m_nByClass,0,m_nByClass,0,toMerge.numClasses());
++    m_nByClassPerBag = new long [1] [0];
++    m_nByClassPerBag[0] = new long [toMerge.numClasses()];
++    System.arraycopy(toMerge.m_nByClass,0,m_nByClassPerBag[0],0,
++		     toMerge.numClasses());
++    m_nByBag = new long [1];
++    m_nByBag[0] = counT;
+   }
+ 
+   /**
+@@ -170,6 +209,19 @@
+     m_perBag = new double [2];
+     m_perBag[0] = toMerge.m_perBag[index];
+     m_perBag[1] = totaL-m_perBag[0];
++    counT = toMerge.counT;
++    m_nByClass = new long [toMerge.numClasses()];
++    System.arraycopy(toMerge.m_nByClass,0,m_nByClass,0,toMerge.numClasses());
++    m_nByClassPerBag = new long [2] [0];
++    m_nByClassPerBag[0] = new long [toMerge.numClasses()];
++    System.arraycopy(toMerge.m_nByClassPerBag[index],0,m_nByClassPerBag[0],0,
++		     toMerge.numClasses());
++    m_nByClassPerBag[1] = new long [toMerge.numClasses()];
++    for (i=0;i<toMerge.numClasses();i++)
++      m_nByClassPerBag[1][i] = toMerge.m_nByClass[i]-m_nByClassPerBag[0][i];
++    m_nByBag = new long [2];
++    m_nByBag[0] = toMerge.m_nByBag[index];
++    m_nByBag[1] = counT-m_nByBag[0];
+   }
+   
+   /**
+@@ -230,11 +282,14 @@
+ 
+     classIndex = (int)instance.classValue();
+     weight = instance.weight();
+-    m_perClassPerBag[bagIndex][classIndex] = 
+-      m_perClassPerBag[bagIndex][classIndex]+weight;
+-    m_perBag[bagIndex] = m_perBag[bagIndex]+weight;
+-    m_perClass[classIndex] = m_perClass[classIndex]+weight;
+-    totaL = totaL+weight;
++    m_perClassPerBag[bagIndex][classIndex] += weight;
++    m_perBag[bagIndex] += weight;
++    m_perClass[classIndex] += weight;
++    totaL += weight;
++    m_nByClassPerBag[bagIndex][classIndex]++;
++    m_nByBag[bagIndex]++;
++    m_nByClass[classIndex]++;
++    counT++;
+   }
+ 
+   /**
+@@ -250,18 +305,22 @@
+ 
+     classIndex = (int)instance.classValue();
+     weight = instance.weight();
+-    m_perClassPerBag[bagIndex][classIndex] = 
+-      m_perClassPerBag[bagIndex][classIndex]-weight;
+-    m_perBag[bagIndex] = m_perBag[bagIndex]-weight;
+-    m_perClass[classIndex] = m_perClass[classIndex]-weight;
+-    totaL = totaL-weight;
++    m_perClassPerBag[bagIndex][classIndex] -= weight;
++    m_perBag[bagIndex] -= weight;
++    m_perClass[classIndex] -= weight;
++    totaL -= weight;
++    m_nByClassPerBag[bagIndex][classIndex]--;
++    m_nByBag[bagIndex]--;
++    m_nByClass[classIndex]--;
++    counT--;
+   }
+ 
+   /**
+    * Adds counts to given bag.
+    */
+-  public final void add(int bagIndex, double[] counts) {
++  public final void add(int bagIndex, double[] counts) throws Exception {
+     
++    if (true) throw new Exception("Method won't handle weights.");
+     double sum = Utils.sum(counts);
+ 
+     for (int i = 0; i < counts.length; i++)
+@@ -302,13 +361,12 @@
+       if (instance.isMissing(attIndex)) {
+ 	classIndex = (int)instance.classValue();
+ 	weight = instance.weight();
+-	m_perClass[classIndex] = m_perClass[classIndex]+weight;
+-	totaL = totaL+weight;
++	m_perClass[classIndex] += weight;
++	totaL += weight;
+ 	for (j = 0; j < m_perBag.length; j++) {
+ 	  newWeight = probs[j]*weight;
+-	  m_perClassPerBag[j][classIndex] = m_perClassPerBag[j][classIndex]+
+-	    newWeight;
+-	  m_perBag[j] = m_perBag[j]+newWeight;
++	  m_perClassPerBag[j][classIndex] += newWeight;
++	  m_perBag[j] += newWeight;
+ 	}
+       }
+     }
+@@ -324,6 +382,7 @@
+        throws Exception {
+ 
+     double sumOfWeights = 0;
++    double count        = 0;
+     int classIndex;
+     Instance instance;
+     int i;
+@@ -331,12 +390,17 @@
+     for (i = startIndex; i < lastPlusOne; i++) {
+       instance = (Instance) source.instance(i);
+       classIndex = (int)instance.classValue();
+-      sumOfWeights = sumOfWeights+instance.weight();
++      sumOfWeights += instance.weight();
+       m_perClassPerBag[bagIndex][classIndex] += instance.weight();
+       m_perClass[classIndex] += instance.weight();
++      m_nByClassPerBag[bagIndex][classIndex]++;
++      m_nByClass[classIndex]++;
++      count++;
+     }
+     m_perBag[bagIndex] += sumOfWeights;
+     totaL += sumOfWeights;
++    m_nByBag[bagIndex] += count;
++    counT += count;
+   }
+ 
+   /**
+@@ -354,10 +418,12 @@
+     classIndex = (int)instance.classValue();
+     for (i=0;i<m_perBag.length;i++) {
+       double weight = instance.weight() * weights[i];
+-      m_perClassPerBag[i][classIndex] = m_perClassPerBag[i][classIndex] + weight;
+-      m_perBag[i] = m_perBag[i] + weight;
+-      m_perClass[classIndex] = m_perClass[classIndex] + weight;
++      m_perClassPerBag[i][classIndex] +=  weight;
++      m_perBag[i] += weight;
++      m_perClass[classIndex] += weight;
+       totaL = totaL + weight;
++      // This is apparently only used for distributing missing values,
++      // so m_nBy (actual, non-missing) counts remain unaffected. 
+     }
+   }
+ 
+@@ -369,8 +435,8 @@
+     int counter = 0;
+     int i;
+ 
+-    for (i=0;i<m_perBag.length;i++)
+-      if (Utils.grOrEq(m_perBag[i],minNoObj))
++    for (i=0;i<m_nByBag.length;i++)
++      if (Utils.grOrEq(m_nByBag[i],minNoObj))
+ 	counter++;
+     if (counter > 1)
+       return true;
+@@ -389,12 +455,18 @@
+ 						     m_perClass.length);
+     for (i=0;i<m_perBag.length;i++) {
+       newDistribution.m_perBag[i] = m_perBag[i];
+-      for (j=0;j<m_perClass.length;j++)
++      newDistribution.m_nByBag[i] = m_nByBag[i];
++      for (j=0;j<m_perClass.length;j++) {
+ 	newDistribution.m_perClassPerBag[i][j] = m_perClassPerBag[i][j];
++	newDistribution.m_nByClassPerBag[i][j] = m_nByClassPerBag[i][j];
++	}
+     }
+-    for (j=0;j<m_perClass.length;j++)
++    for (j=0;j<m_perClass.length;j++) {
+       newDistribution.m_perClass[j] = m_perClass[j];
++      newDistribution.m_nByClass[j] = m_nByClass[j];
++      }
+     newDistribution.totaL = totaL;
++    newDistribution.counT = counT;
+   
+     return newDistribution;
+   }
+@@ -412,11 +484,14 @@
+ 
+     classIndex = (int)instance.classValue();
+     weight = instance.weight();
+-    m_perClassPerBag[bagIndex][classIndex] = 
+-      m_perClassPerBag[bagIndex][classIndex]-weight;
+-    m_perBag[bagIndex] = m_perBag[bagIndex]-weight;
+-    m_perClass[classIndex] = m_perClass[classIndex]-weight;
+-    totaL = totaL-weight;
++    m_perClassPerBag[bagIndex][classIndex] -= weight;
++    m_perBag[bagIndex] -= weight;
++    m_perClass[classIndex] -= weight;
++    totaL -= weight;
++    m_nByClassPerBag[bagIndex][classIndex]--;
++    m_nByBag[bagIndex]--;
++    m_nByClass[classIndex]--;
++    counT--;
+   }
+ 
+   /**
+@@ -429,6 +504,7 @@
+        throws Exception {
+ 
+     double sumOfWeights = 0;
++    long count = 0;
+     int classIndex;
+     Instance instance;
+     int i;
+@@ -436,12 +512,17 @@
+     for (i = startIndex; i < lastPlusOne; i++) {
+       instance = (Instance) source.instance(i);
+       classIndex = (int)instance.classValue();
+-      sumOfWeights = sumOfWeights+instance.weight();
++      sumOfWeights += instance.weight();
++      count++;
+       m_perClassPerBag[bagIndex][classIndex] -= instance.weight();
+       m_perClass[classIndex] -= instance.weight();
++      m_nByClassPerBag[bagIndex][classIndex]--;
++      m_nByClass[classIndex]--;
+     }
+     m_perBag[bagIndex] -= sumOfWeights;
+     totaL -= sumOfWeights;
++    m_perBag[bagIndex] -= count;
++    counT -= count;
+   }
+ 
+   /**
+@@ -475,6 +556,7 @@
+       for (int j = 0; j < m_perClass.length; j++)
+ 	m_perClassPerBag[i][j] = 0;
+     totaL = 0;
++    counT = 0;
+   }
+ 
+   /**
+@@ -616,6 +698,63 @@
+   }
+ 
+   /**
++   * Returns nByClass(maxClass()).
++   */
++  public final long unwCorrect() {
++
++    return m_nByClass[maxClass()];
++  }
++
++  /**
++   * Returns nByClassPerBag(index,maxClass(index)).
++   */
++  public final long unwCorrect(int index) {
++
++    return m_nByClassPerBag[index][maxClass(index)];
++  }
++
++  /**
++   * Returns count-unwCorrect().
++   */
++  public final long unwIncorrect() {
++
++    return counT-unwCorrect();
++  }
++
++  /**
++   * Returns nByBag(index)-unwCorrect(index).
++   */
++  public final long unwIncorrect(int index) {
++
++    return m_nByBag[index]-unwCorrect(index);
++  }
++
++  /**
++   * Returns count of instances of given class in 
++   * given bag.
++   */
++  public final long nByClassPerBag(int bagIndex, int classIndex) {
++
++    return m_nByClassPerBag[bagIndex][classIndex];
++  }
++
++  /**
++   * Returns count of instances in given bag.
++   */
++  public final long nByBag(int bagIndex) {
++
++    return m_nByBag[bagIndex];
++  }
++
++  /**
++   * Returns count of instances of given class.
++   */
++  public final long nByClass(int classIndex) {
++
++    return m_nByClass[classIndex];
++  }
++
++  /**
+    * Returns relative frequency of class over all bags with
+    * Laplace correction.
+    */
+@@ -661,15 +800,19 @@
+    * Subtracts the given distribution from this one. The results
+    * has only one bag.
+    */
+-  public final Distribution subtract(Distribution toSubstract) {
++  public final Distribution subtract(Distribution toSubtract) {
+ 
+     Distribution newDist = new Distribution(1,m_perClass.length);
+ 
+-    newDist.m_perBag[0] = totaL-toSubstract.totaL;
++    newDist.m_perBag[0] = totaL-toSubtract.totaL;
++    newDist.m_nByBag[0] = counT-toSubtract.counT;
+     newDist.totaL = newDist.m_perBag[0];
++    newDist.counT = newDist.m_nByBag[0];
+     for (int i = 0; i < m_perClass.length; i++) {
+-      newDist.m_perClassPerBag[0][i] = m_perClass[i] - toSubstract.m_perClass[i];
++      newDist.m_perClassPerBag[0][i] = m_perClass[i] - toSubtract.m_perClass[i];
+       newDist.m_perClass[i] = newDist.m_perClassPerBag[0][i];
++      newDist.m_nByClassPerBag[0][i] = m_nByClass[i] - toSubtract.m_nByClass[i];
++      newDist.m_nByClass[i] = newDist.m_nByClassPerBag[0][i];
+     }
+     return newDist;
+   }
+@@ -683,6 +826,14 @@
+   }
+ 
+   /**
++   * Returns unweighted count of instances.
++   */
++  public final double count() {
++
++    return (double)counT;
++  }
++
++  /**
+    * Shifts given instance from one bag to another one.
+    *
+    * @exception Exception if something goes wrong
+@@ -699,6 +850,10 @@
+     m_perClassPerBag[to][classIndex] += weight;
+     m_perBag[from] -= weight;
+     m_perBag[to] += weight;
++    m_nByClassPerBag[from][classIndex]--;
++    m_nByClassPerBag[to][classIndex]++;
++    m_nByBag[from]--;
++    m_nByBag[to]++;
+   }
+ 
+   /**
+@@ -723,6 +878,10 @@
+       m_perClassPerBag[to][classIndex] += weight;
+       m_perBag[from] -= weight;
+       m_perBag[to] += weight;
++      m_nByClassPerBag[from][classIndex]--;
++      m_nByClassPerBag[to][classIndex]++;
++      m_nByBag[from]--;
++      m_nByBag[to]++;
+     }
+   }
+ }
+diff -Naur orig/classifiers/trees/j48/NBTreeModelSelection.java weka/classifiers/trees/j48/NBTreeModelSelection.java
+--- orig/classifiers/trees/j48/NBTreeModelSelection.java	2004-11-12 15:44:52.000000000 +0000
++++ weka/classifiers/trees/j48/NBTreeModelSelection.java	2005-04-04 16:32:56.000000000 +0000
+@@ -97,7 +97,7 @@
+       // Check if all Instances belong to one class or if not
+       // enough Instances to split.
+       checkDistribution = new Distribution(data);
+-      if (Utils.sm(checkDistribution.total(), m_minNoObj) ||
++      if (Utils.sm(checkDistribution.count(), m_minNoObj) ||
+ 	  Utils.eq(checkDistribution.total(),
+ 		   checkDistribution.perClass(checkDistribution.maxClass()))) {
+ 	return noSplitModel;
+diff -Naur orig/classifiers/trees/j48/Stats.java weka/classifiers/trees/j48/Stats.java
+--- orig/classifiers/trees/j48/Stats.java	2001-11-07 22:25:14.000000000 +0000
++++ weka/classifiers/trees/j48/Stats.java	2005-08-05 15:52:38.000000000 +0000
+@@ -78,7 +78,7 @@
+     double z = Statistics.normalInverse(1 - CF);
+ 
+     // Compute upper limit of confidence interval
+-    double  f = (e + 0.5) / N;
++    double f = (e + 0.5) / N;
+     double r = (f + (z * z) / (2 * N) +
+ 		z * Math.sqrt((f / N) - 
+ 			      (f * f / N) + 
+@@ -87,12 +87,22 @@
+ 
+     return (r * N) - e;
+   }
+-}
+-
+-
+-
+-
+-
+-
+ 
++  /**
++   * Computes estimated extra error for given total number of instances
++   * and error using normal approximation to binomial distribution
++   * (and continuity correction).
++   *
++   * @param n number of instances
++   * @param N weighted number of instances
++   * @param e weighted observed error
++   * @param CF confidence value
++   */
++  public static double addErrs(double n, double N, double e, float CF){
++
++    // Rescale e to approximate integer binomial random variable.
++    // Also makes inference independent of scale of weights.
++    return addErrs(n, Math.round(e*n/N), CF) * N/n;
++    }
++}
+ 
+diff -Naur orig/core/Instance.java weka/core/Instance.java
+--- orig/core/Instance.java	2005-02-28 21:43:10.000000000 +0000
++++ weka/core/Instance.java	2005-05-10 01:53:43.000000000 +0000
+@@ -826,6 +826,8 @@
+       if (i > 0) text.append(",");
+       text.append(toString(i));
+     }
++    if (m_Dataset!=null && m_Dataset.getWeight()!=null)
++      text.append(",").append(Utils.doubleToString(weight(),6));
+ 
+     return text.toString();
+   }
+diff -Naur orig/core/Instances.java weka/core/Instances.java
+--- orig/core/Instances.java	2005-06-23 20:19:48.000000000 +0000
++++ weka/core/Instances.java	2005-08-05 03:15:31.000000000 +0000
+@@ -71,6 +71,13 @@
+   /** The keyword used to denote the start of the arff data section */
+   static String ARFF_DATA = "@data";
+ 
++  /** The attribute name separator for the weight attribute */
++  public static String ARFF_NAMESEP = "::";
++
++  /** The attribute name prefix used to append the instance weight */
++  public static String ARFF_WEIGHT =
++  		ARFF_NAMESEP + "weight" + ARFF_NAMESEP;
++
+   /** The dataset's name. */
+   protected /*@spec_public non_null@*/ String m_RelationName;         
+ 
+@@ -93,6 +100,9 @@
+   /** Buffer of indices for sparse instance */
+   protected int[] m_IndicesBuffer;
+ 
++  /** Attribute name for persistent weighting in arff */
++  protected String m_Weight = null;
++
+   /**
+    * Reads an ARFF file from a reader, and assigns a weight of
+    * one to each instance. Lets the index of the class 
+@@ -177,6 +187,7 @@
+     m_RelationName = dataset.m_RelationName;
+     m_Attributes = dataset.m_Attributes;
+     m_Instances = new FastVector(capacity);
++    m_Weight = dataset.m_Weight;
+   }
+ 
+   /**
+@@ -242,6 +253,7 @@
+     }
+     Instances result = new Instances(relationName(), atts, 0);
+     result.m_ClassIndex = m_ClassIndex;
++    result.m_Weight     = m_Weight    ;
+     return result;
+   }
+ 
+@@ -637,7 +649,8 @@
+   public double kthSmallestValue(int attIndex, int k) {
+     
+     if (!attribute(attIndex).isNumeric()) {
+-      throw new IllegalArgumentException("Instances: attribute must be numeric to compute kth-smallest value.");
++      throw new IllegalArgumentException(
++      "Instances: attribute must be numeric to compute kth-smallest value.");
+     }
+ 
+     int i,j;
+@@ -658,7 +671,8 @@
+     }
+ 
+     if ((k < 0) || (k > j)) {
+-      throw new IllegalArgumentException("Instances: value for k for computing kth-smallest value too large.");
++      throw new IllegalArgumentException(
++      "Instances: value for k for computing kth-smallest value too large.");
+     }
+ 
+     return instance(select(attIndex, 0, j, k)).value(attIndex);
+@@ -1045,6 +1059,13 @@
+     m_ClassIndex = classIndex;
+   }
+ 
++  /** 
++   * Sets the attribute name for weighted arff.
++   *
++   * @param N attribute name for weighted arff
++   */
++  public void setWeight(String S) { m_Weight = S; } /* null ok */
++
+   /**
+    * Sets the relation's name.
+    *
+@@ -1203,6 +1224,11 @@
+     for (int i = 0; i < numAttributes(); i++) {
+       text.append(attribute(i)).append("\n");
+     }
++    for (int i = 1; m_Weight==null && i<numInstances(); i++) {
++      if (instance(i).weight() != 1) m_Weight = ""; // unnamed weight
++      }
++    if(m_Weight!=null)
++      text.append("@attribute " + ARFF_WEIGHT + m_Weight + " real\n");
+     text.append("\n").append(ARFF_DATA).append("\n");
+     for (int i = 0; i < numInstances(); i++) {
+       text.append(instance(i));
+@@ -1326,6 +1352,13 @@
+   }
+   
+   /**
++   * Returns the attribute name for weighted arff.
++   *
++   * @return the attribute name for weighted arff
++   */
++  public String getWeight() { return m_Weight; }
++
++  /**
+    * Calculates summary statistics on the values that appear in this
+    * set of instances for a specified attribute.
+    *
+@@ -1519,6 +1552,7 @@
+        throws IOException {
+ 
+     int valIndex, numValues = 0, maxIndex = -1;
++    double Wt = 1;
+     
+     // Get values
+     do {
+@@ -1538,6 +1572,18 @@
+       if (m_IndicesBuffer[numValues] <= maxIndex) {
+ 	errms(tokenizer,"indices have to be ordered");
+       }
++      if (m_Weight!=null &&
++          m_IndicesBuffer[numValues] == numAttributes()) {
++        getNextToken(tokenizer);
++	try{
++	  Wt = Double.valueOf(tokenizer.sval).doubleValue();
++          }
++        catch (NumberFormatException e) {
++	    errms(tokenizer,"numeric weight expected");
++	  }
++        maxIndex = m_IndicesBuffer[numValues];
++        continue;
++        }
+       if ((m_IndicesBuffer[numValues] < 0) || 
+ 	  (m_IndicesBuffer[numValues] >= numAttributes())) {
+ 	errms(tokenizer,"index out of bounds");
+@@ -1602,7 +1648,7 @@
+     int[] tempIndices = new int[numValues];
+     System.arraycopy(m_ValueBuffer, 0, tempValues, 0, numValues);
+     System.arraycopy(m_IndicesBuffer, 0, tempIndices, 0, numValues);
+-    add(new SparseInstance(1, tempValues, tempIndices, numAttributes()));
++    add(new SparseInstance(Wt, tempValues, tempIndices, numAttributes()));
+     return true;
+   }
+ 
+@@ -1624,6 +1670,7 @@
+ 
+     double[] instance = new double[numAttributes()];
+     int index;
++    double Wt = 1;
+     
+     // Get values for all attributes.
+     for (int i = 0; i < numAttributes(); i++){
+@@ -1675,12 +1722,18 @@
+ 	}
+       }
+     }
++    if (m_Weight!=null) {
++      getNextToken(tokenizer);
++      try{ Wt = Double.valueOf(tokenizer.sval).doubleValue(); }
++      catch (NumberFormatException e) {
++        errms(tokenizer,"numeric weight expected"); }
++      }
+     if (flag) {
+       getLastToken(tokenizer,true);
+     }
+       
+     // Add instance to dataset
+-    add(new Instance(1, instance));
++    add(new Instance(Wt, instance));
+     return true;
+   }
+ 
+@@ -1804,6 +1857,13 @@
+     // Allocate buffers in case sparse instances have to be read
+     m_ValueBuffer = new double[numAttributes()];
+     m_IndicesBuffer = new int[numAttributes()];
++
++    String W = ((Attribute)m_Attributes.lastElement()).name();
++    if( W.startsWith(ARFF_WEIGHT) ) {
++      freshAttributeInfo();
++      m_Attributes.removeElementAt(m_Attributes.size()-1);
++      m_Weight = W.substring(ARFF_WEIGHT.length());
++      }
+   }
+ 
+   /**
+diff -Naur orig/filters/unsupervised/attribute/Weighter.java weka/filters/unsupervised/attribute/Weighter.java
+--- orig/filters/unsupervised/attribute/Weighter.java	1970-01-01 00:00:00.000000000 +0000
++++ weka/filters/unsupervised/attribute/Weighter.java	2005-08-09 19:01:16.000000000 +0000
+@@ -0,0 +1,285 @@
++/*
++ *    This program is free software; you can redistribute it and/or modify
++ *    it under the terms of the GNU General Public License as published by
++ *    the Free Software Foundation; either version 2 of the License, or
++ *    (at your option) any later version.
++ *
++ *    This program is distributed in the hope that it will be useful,
++ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ *    GNU General Public License for more details.
++ *
++ *    You should have received a copy of the GNU General Public License
++ *    along with this program; if not, write to the Free Software
++ *    Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
++ */
++
++/*
++ *    Weighter.java
++ *    Copyright (C) 2005 Joe Burpee
++ *
++ */
++
++package weka.filters.unsupervised.attribute;
++
++import weka.filters.*;
++import java.io.*;
++import java.util.*;
++import weka.core.*;
++import java.lang.Math;
++
++/** 
++ * Initializes instance weights to the value of a
++ * specified numeric attribute. That attribute is then removed.
++ * If applied repeatedly, it multiplies the specified weights.
++ * If no attribute is specified, it inverts the process,
++ * appending a new attribute containing the current weight and
++ * removing the weight.
++ * <p>
++ * 
++ * Valid filter-specific options are: <p>
++ *
++ * -C column <br>
++ * Index of the weight attribute.<p>
++ *
++ * @author Joe Burpee (jeb@burkby.com)
++ * @version $Revision: $
++ *
++ */
++public class Weighter extends Filter /* PotentialClassIgnorer? */
++  implements UnsupervisedFilter, OptionHandler, StreamableFilter {
++
++/* weight attribute index */
++private SingleIndex m_Windex = new SingleIndex();
++/* weight attribute index has been specified? */
++private boolean     m_Win    = false;
++
++/**
++ * Returns an enumeration describing the available options.
++ *
++ * @return an enumeration of all the available options.
++ */
++public Enumeration listOptions() {
++Vector V = new Vector(1);
++
++V.addElement(new Option(
++	"\tSets the weight attribute index.", "C", 1, "-C <column>"));
++
++return V.elements();
++}
++
++/**
++ * Parses the options for this object. Valid filter-specific options are: <p>
++ *
++ * @param options the list of options as an array of strings
++ * @exception Exception if an option is not supported
++ */
++public void setOptions(String[] options) throws Exception {
++
++setWeightIndex(Utils.getOption('C', options)); // String, e.g. "last"
++
++if (getInputFormat() != null) setInputFormat(getInputFormat());
++}
++
++/**
++ * Gets the current settings of the filter.
++ *
++ * @return an array of strings suitable for passing to setOptions
++ */
++public String [] getOptions() {
++String [] options = new String [2];
++int i = 0;
++
++if (m_Win) { options[i++] = "-C"; options[i++] = getWeightIndex(); }
++
++while (i < options.length) { options[i++] = ""; }
++
++return options;
++}
++
++/**
++ * @return a description of the filter suitable for
++ * displaying in the explorer/experimenter gui
++ */
++public String globalInfo() { return
++"Initializes instance weights to the value of a "+
++"specified numeric attribute. That attribute is then removed. "+
++"If applied repeatedly, it multiplies the specified weights. "+
++"If no attribute is specified, it inverts the process, "+
++"appending a new attribute containing the current weight and "+
++"removing the weight. "+
++"";}
++
++/**
++ * @return tip text for this property suitable for
++ * displaying in the explorer/experimenter gui
++ */ 
++public String weightIndexTipText() { return
++"Index of the (numeric) attribute containing the instance weight.";
++}
++/**
++ * Get index of the weight attribute used.
++ *
++ * @return the index of the weight attribute
++ */
++public String getWeightIndex() { return m_Windex.getSingleIndex(); }
++
++/**
++ * Sets index of the weight attribute used.
++ *
++ * @param I the index of the weight attribute
++ */
++public void setWeightIndex(String I) {
++m_Win = !I.equals("");
++if (m_Win) m_Windex.setSingleIndex(I);
++}
++
++/**
++ * Sets the format of the input instances.
++ *
++ * @param instanceInfo an Instances object containing the input 
++ * instance structure (any instances contained in the object are 
++ * ignored - only the structure is required).
++ * @return true if the outputFormat may be collected immediately
++ * @exception UnsupportedAttributeTypeException the selected attribute is not numeric
++ */
++public boolean setInputFormat(Instances instanceInfo) throws Exception {
++
++super.setInputFormat(instanceInfo);
++if (m_Win) {
++  m_Windex.setUpper(instanceInfo.numAttributes() - 1);
++  if (!instanceInfo.attribute(m_Windex.getIndex()).isNumeric()) 
++    throw new UnsupportedAttributeTypeException(
++	"Weight attribute not numeric.");
++  }
++setOutputFormat();
++return true;
++}
++
++/**
++ * Input an instance for filtering. The instance is processed
++ * and made available for output immediately.
++ * Input an instance for filtering. Filter requires all
++ * training instances be read before producing output.
++ *
++ * @param I the input instance
++ * @return true if the filtered instance may now be
++ * collected with output().
++ * @exception IllegalStateException if no input format has been set.
++ */
++public boolean input(Instance I) {
++
++if (getInputFormat() == null)
++  throw new IllegalStateException("No input instance format defined");
++if (m_NewBatch) { resetQueue(); m_NewBatch = false; }
++bufferInput(I);
++return false;
++}
++
++/**
++ * Set the output format.
++ */
++private void setOutputFormat() {
++
++Instances D = getInputFormat();
++int N = D.numAttributes();
++int C = D.classIndex();
++int W = -1; // weight index
++String Wname = null;
++String Wpref = Instances.ARFF_WEIGHT; // weight name prefix
++
++if (m_Win) {
++  Wname = "";
++  if (D.getWeight()!=null) Wname = D.getWeight() + Instances.ARFF_NAMESEP;
++  W = m_Windex.getIndex();
++  String S = D.attribute(W).name();
++  Wname += S.startsWith(Wpref)? S.substring(Wpref.length()) : S;
++  }
++
++// Remove/add weight attribute
++FastVector A = new FastVector(N + (m_Win?-1:1));
++for (int j = 0; j < N; j++)
++  if (j!=W) A.addElement((Attribute)D.attribute(j).copy());
++if (m_Win) { if (C==W) C = -1; else if (C>W) C--; }
++else A.addElement(new Attribute(
++  Wpref + ( D.getWeight()==null? "": D.getWeight() ) ));
++  
++// Construct new header
++D = new Instances(D.relationName(), A, 0);
++D.setClassIndex(C);
++D.setWeight(Wname);
++setOutputFormat(D);
++}
++
++/**
++ * Signify that this batch of input to the filter is finished. 
++ * If the filter requires all instances prior to filtering,
++ * output() may now be called to retrieve the filtered instances.
++ *
++ * @return true if there are instances pending output
++ * @exception IllegalStateException if no input structure has been defined
++ */
++public boolean batchFinished() throws Exception /*from super*/ {
++
++if (getInputFormat() == null)
++  throw new IllegalStateException("No input instance format defined");
++
++// Convert pending input instances
++for (int i = 0; i < getInputFormat().numInstances(); i++)
++  convertInstance(getInputFormat().instance(i));
++
++flushInput(); // Free memory
++m_NewBatch = true;
++return (numPendingOutput() != 0);
++}
++
++/**
++ * Convert a single instance over. The converted instance is 
++ * added to the end of the output queue.
++ *
++ * @param instance the instance to convert
++ */
++private void convertInstance(Instance I) {
++
++Instances OF = getOutputFormat();
++int N = OF.numAttributes();
++if (N == 0) return;
++
++double [] vals = new double[N];
++double Wt = I.weight(); 
++int i, j, W = -1;
++
++if (m_Win) {
++  W = m_Windex.getIndex();
++  Wt *= I.isMissing(W)? 0 : I.value(W); // missing => error?
++  for (j=i=0; j < N+1; j++) // delete weight, copy the rest
++    if (j != W) vals[i++] = I.value(j);
++  }
++else {
++  System.arraycopy(I.toDoubleArray(), 0, vals, 0, N-1);
++  vals[N-1] = Wt;  Wt = 1;
++  }
++
++Instance O = I instanceof SparseInstance ?
++	new SparseInstance(Wt, vals) :
++	new       Instance(Wt, vals);
++O.setDataset(OF);
++push(O);
++}
++
++/**
++ * Main method for testing this class.
++ *
++ * @param argv should contain arguments to the filter: 
++ * use -h for help
++ */
++public static void main(String [] argv) {
++try {
++  if (Utils.getFlag('b', argv))
++	Filter.batchFilterFile(new Weighter(), argv);
++  else	Filter.     filterFile(new Weighter(), argv);
++  }
++catch (Exception ex) { System.out.println(ex.getMessage()); }
++}
++}
++

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<!DOCTYPE object
+[
+   <!ELEMENT object (#PCDATA | object)*>
+   <!ATTLIST object name      CDATA #REQUIRED>
+   <!ATTLIST object class     CDATA #REQUIRED>
+   <!ATTLIST object primitive CDATA "yes">
+   <!ATTLIST object array     CDATA "no">
+]
+>
+
+<object name="__root__" class="weka.classifiers.trees.J48" primitive="no" array="no">
+   <object name="debug" class="boolean" primitive="yes" array="no">false</object>
+   <object name="options" class="java.lang.String" primitive="no" array="yes">
+      <object name="0" class="java.lang.String" primitive="no" array="no">-C</object>
+      <object name="1" class="java.lang.String" primitive="no" array="no">0.25</object>
+      <object name="2" class="java.lang.String" primitive="no" array="no">-M</object>
+      <object name="3" class="java.lang.String" primitive="no" array="no">2</object>
+      <object name="4" class="java.lang.String" primitive="no" array="no"/>
+      <object name="5" class="java.lang.String" primitive="no" array="no"/>
+      <object name="6" class="java.lang.String" primitive="no" array="no"/>
+      <object name="7" class="java.lang.String" primitive="no" array="no"/>
+      <object name="8" class="java.lang.String" primitive="no" array="no"/>
+      <object name="9" class="java.lang.String" primitive="no" array="no"/>
+      <object name="10" class="java.lang.String" primitive="no" array="no"/>
+      <object name="11" class="java.lang.String" primitive="no" array="no"/>
+      <object name="12" class="java.lang.String" primitive="no" array="no"/>
+      <object name="13" class="java.lang.String" primitive="no" array="no"/>
+   </object>
+</object>

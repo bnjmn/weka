@@ -1,0 +1,14 @@
+@relation sequential_test_set
+
+@attribute day {1, 2, 3}
+@attribute 'power consumption' {power=base, power=peak}
+@attribute 'wind speed' {wind=calm, wind=breeze}
+
+@data
+1,power=base,wind=calm
+1,power=peak,wind=breeze
+2,power=base,wind=calm
+2,power=peak,wind=breeze
+3,power=base,wind=calm
+3,power=peak,wind=breeze
+

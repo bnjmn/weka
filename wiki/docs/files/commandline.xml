@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE options
+[
+   <!ELEMENT options (option)*>
+   <!ATTLIST options type CDATA "classifier">
+   <!ATTLIST options value CDATA "">
+   <!ELEMENT option (#PCDATA | options)*>
+   <!ATTLIST option name CDATA #REQUIRED>
+   <!ATTLIST option type (flag | single | hyphens | quotes) "single">
+]
+>
+
+<!-- 
+   Explanation
+   
+   options/type:   specifies what kind of options are following, e.g. "classifier" for a classifier
+                   if it's a classifier it need not be specified, since it's the default
+                   Note: the type in the root node should be empty, as well as the value,
+                         since the initial class has to be specified for the java call.
+                         You can still use it for comments with type="class" and as the
+                         value the calling class.
+   options/value:  in case of "classifier" e.g. "weka.classifiers.trees.J48"
+   option/name:    the name of the argument (e.g. "X" for "-X")
+   option/type:    type of argument
+-->
+
+<!--
+   Example:
+   java weka.classifiers.meta.Stacking -B "weka.classifiers.meta.AdaBoostM1 -W weka.classifiers.trees.J48 \-\- -C 0.001" -B "weka.classifiers.meta.Bagging -W weka.classifiers.meta.AdaBoostM1 \-\- -W weka.classifiers.trees.J48" -B "weka.classifiers.meta.Stacking -B \"weka.classifiers.trees.J48\"" -t test/datasets/hepatitis.arff
+   
+   call with:
+   java <classpath> weka.classifiers.meta.Stacking -xml <filename>.xml
+   
+-->
+
+<options type="class" value="weka.classifiers.meta.Stacking">
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.AdaBoostM1">
+         <option name="W" type="hyphens">
+            <options type="classifier" value="weka.classifiers.trees.J48">
+               <option name="C">0.001</option>
+            </options>
+         </option>
+      </options>
+   </option>
+   
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.Bagging">
+         <option name="W" type="hyphens">
+            <options type="classifier" value="weka.classifiers.meta.AdaBoostM1">
+               <option name="W" type="hyphens">
+                  <options type="classifier" value="weka.classifiers.trees.J48"/>
+               </option>
+            </options>
+         </option>
+      </options>
+   </option>
+   
+   <option name="B" type="quotes">
+      <options type="classifier" value="weka.classifiers.meta.Stacking">
+         <option name="B" type="quotes">
+            <options type="classifier" value="weka.classifiers.trees.J48"/>
+         </option>
+      </options>
+   </option>
+   
+   <option name="t">test/datasets/hepatitis.arff</option>
+</options>

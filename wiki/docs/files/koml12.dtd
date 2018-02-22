@@ -1,0 +1,108 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+
+<!-- user hook -->
+<!ENTITY % koml.attrGen "">
+
+<!--
+  All availables values and objects 
+-->
+<!ENTITY % koml.values 
+      "(value | object | object-class | array | null | reference | row)*">
+
+<!ENTITY % koml.values.attrG
+    "transient  (true|false) 'false'">
+
+<!ENTITY % koml.name
+   "name CDATA #IMPLIED">
+
+<!--
+  This is a primitive type
+-->
+<!ENTITY % koml.type "CDATA">
+
+<!--  "(boolean|byte|short|int|long|float|double|char|java.lang.String)"> -->
+
+<!--
+  primitive values
+-->
+<!ELEMENT value (#PCDATA)>
+<!ATTLIST value
+     %koml.values.attrG;
+     %koml.name;
+     type %koml.type; #REQUIRED>
+
+<!-- the null object -->
+<!ELEMENT null EMPTY>
+<!ATTLIST null
+      %koml.name;
+      %koml.values.attrG;>
+
+<!-- a reference to an object or an array -->
+<!ELEMENT reference EMPTY>
+<!ATTLIST reference
+      %koml.name;
+      ref IDREF #REQUIRED>
+
+<!ENTITY % koml.class
+    "class CDATA #REQUIRED">
+
+<!ENTITY % koml.id
+    "id ID #REQUIRED">
+
+<!ELEMENT super (super?, %koml.values;)>
+<!ATTLIST super 
+    %koml.class;>
+      
+
+<!ELEMENT object (super?, %koml.values;)>
+<!ATTLIST object
+    %koml.values.attrG;
+    %koml.name;
+    %koml.class;
+    %koml.id;>
+
+<!ELEMENT object-class (%koml.values;)>
+<!ATTLIST object-class
+    %koml.values.attrG;
+    %koml.name;
+    %koml.class;
+    %koml.id;>
+
+<!-- oups, value can be of type String ! -->
+<!ELEMENT array  (value | object | array | null | reference)*>
+<!ATTLIST array
+    %koml.values.attrG;
+    %koml.name;
+    %koml.class;
+    %koml.id;
+    length NMTOKEN "0">
+
+<!ELEMENT row (#PCDATA)>
+<!ATTLIST row
+    size CDATA #REQUIRED>
+<!--
+    dt:dt CDATA #FIXED "binary.base64"
+-->
+
+<!-- class description -->
+<!ELEMENT field EMPTY>
+<!ATTLIST field
+    type %koml.type; #REQUIRED
+    %koml.name;>
+
+<!ELEMENT class (field)*>
+<!ATTLIST class
+    %koml.name;
+    uid   CDATA #REQUIRED
+    super CDATA "java.lang.Object"
+    writemethod (true|false) "false">
+
+
+<!ELEMENT classes (class)*>
+<!ATTLIST classes
+   version CDATA #IMPLIED>
+
+
+<!ELEMENT koml (classes, (array | value | null | object)*)?>
+<!ATTLIST koml
+   version CDATA #REQUIRED>

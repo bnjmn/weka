@@ -1,0 +1,453 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE koml SYSTEM "http://www.inria.fr/koala/XML/koml12.dtd">
+<koml version='1.21'>
+<classes>
+<class name='weka.core.ProtectedProperties' uid='3876658672657323985' super='java.util.Properties'>
+<field name='closed' type='boolean'/>
+</class>
+<class name='weka.classifiers.trees.J48' uid='-217733168393644444' super='weka.classifiers.Classifier'>
+<field name='m_CF' type='float'/>
+<field name='m_Seed' type='int'/>
+<field name='m_binarySplits' type='boolean'/>
+<field name='m_minNumObj' type='int'/>
+<field name='m_noCleanup' type='boolean'/>
+<field name='m_numFolds' type='int'/>
+<field name='m_reducedErrorPruning' type='boolean'/>
+<field name='m_subtreeRaising' type='boolean'/>
+<field name='m_unpruned' type='boolean'/>
+<field name='m_useLaplace' type='boolean'/>
+<field name='m_root' type='weka.classifiers.trees.j48.ClassifierTree'/>
+</class>
+<class name='java.lang.Integer' uid='1360826667806852920' super='java.lang.Number'>
+<field name='value' type='int'/>
+</class>
+<class name='java.lang.Object[]' uid='-8012369246846506644'>
+</class>
+<class name='java.util.Hashtable' uid='1421746759512286392' writemethod='true'>
+<field name='loadFactor' type='float'/>
+<field name='threshold' type='int'/>
+</class>
+<class name='weka.classifiers.trees.j48.NoSplit' uid='-1292620749331337546' super='weka.classifiers.trees.j48.ClassifierSplitModel'>
+</class>
+<class name='double[][]' uid='-4058574497661845691'>
+</class>
+<class name='weka.classifiers.trees.j48.ClassifierTree' uid='-8722249377542734193'>
+<field name='m_id' type='int'/>
+<field name='m_isEmpty' type='boolean'/>
+<field name='m_isLeaf' type='boolean'/>
+<field name='m_localModel' type='weka.classifiers.trees.j48.ClassifierSplitModel'/>
+<field name='m_sons' type='weka.classifiers.trees.j48.ClassifierTree[]'/>
+<field name='m_test' type='weka.classifiers.trees.j48.Distribution'/>
+<field name='m_toSelectModel' type='weka.classifiers.trees.j48.ModelSelection'/>
+<field name='m_train' type='weka.core.Instances'/>
+</class>
+<class name='weka.classifiers.trees.j48.ClassifierSplitModel' uid='4280730118393457457'>
+<field name='m_numSubsets' type='int'/>
+<field name='m_distribution' type='weka.classifiers.trees.j48.Distribution'/>
+</class>
+<class name='weka.classifiers.trees.j48.C45PruneableClassifierTree' uid='-4813820170260388194' super='weka.classifiers.trees.j48.ClassifierTree'>
+<field name='m_CF' type='float'/>
+<field name='m_cleanup' type='boolean'/>
+<field name='m_pruneTheTree' type='boolean'/>
+<field name='m_subtreeRaising' type='boolean'/>
+</class>
+<class name='weka.classifiers.trees.j48.Distribution' uid='8526859638230806576'>
+<field name='totaL' type='double'/>
+<field name='m_perBag' type='double[]'/>
+<field name='m_perClass' type='double[]'/>
+<field name='m_perClassPerBag' type='double[][]'/>
+</class>
+<class name='java.lang.Number' uid='-8742448824652078965'>
+</class>
+<class name='weka.core.FastVector' uid='-2173635135622930169'>
+<field name='m_CapacityIncrement' type='int'/>
+<field name='m_CapacityMultiplier' type='int'/>
+<field name='m_Size' type='int'/>
+<field name='m_Objects' type='java.lang.Object[]'/>
+</class>
+<class name='weka.classifiers.trees.j48.ClassifierTree[]' uid='-6794085270925686007'>
+</class>
+<class name='weka.classifiers.trees.j48.C45ModelSelection' uid='3372204862440821989' super='weka.classifiers.trees.j48.ModelSelection'>
+<field name='m_minNoObj' type='int'/>
+<field name='m_allData' type='weka.core.Instances'/>
+</class>
+<class name='weka.classifiers.trees.j48.ModelSelection' uid='-4850147125096133642'>
+</class>
+<class name='weka.classifiers.Classifier' uid='5361179731097740103'>
+<field name='m_Debug' type='boolean'/>
+</class>
+<class name='weka.core.Attribute' uid='-6890953217744216327'>
+<field name='m_HasZeropoint' type='boolean'/>
+<field name='m_Index' type='int'/>
+<field name='m_IsAveragable' type='boolean'/>
+<field name='m_IsRegular' type='boolean'/>
+<field name='m_LowerBound' type='double'/>
+<field name='m_LowerBoundIsOpen' type='boolean'/>
+<field name='m_Ordering' type='int'/>
+<field name='m_Type' type='int'/>
+<field name='m_UpperBound' type='double'/>
+<field name='m_UpperBoundIsOpen' type='boolean'/>
+<field name='m_Weight' type='double'/>
+<field name='m_DateFormat' type='java.text.SimpleDateFormat'/>
+<field name='m_Hashtable' type='java.util.Hashtable'/>
+<field name='m_Metadata' type='weka.core.ProtectedProperties'/>
+<field name='m_Name' type='java.lang.String'/>
+<field name='m_Values' type='weka.core.FastVector'/>
+</class>
+<class name='java.util.Properties' uid='4112578634029874840' super='java.util.Hashtable'>
+<field name='defaults' type='java.util.Properties'/>
+</class>
+<class name='weka.classifiers.trees.j48.C45Split' uid='3064079330067903161' super='weka.classifiers.trees.j48.ClassifierSplitModel'>
+<field name='m_attIndex' type='int'/>
+<field name='m_complexityIndex' type='int'/>
+<field name='m_gainRatio' type='double'/>
+<field name='m_index' type='int'/>
+<field name='m_infoGain' type='double'/>
+<field name='m_minNoObj' type='int'/>
+<field name='m_splitPoint' type='double'/>
+<field name='m_sumOfWeights' type='double'/>
+</class>
+<class name='double[]' uid='4514449696888150558'>
+</class>
+<class name='weka.core.Instances' uid='-869483705721164826'>
+<field name='m_ClassIndex' type='int'/>
+<field name='m_Attributes' type='weka.core.FastVector'/>
+<field name='m_IndicesBuffer' type='int[]'/>
+<field name='m_Instances' type='weka.core.FastVector'/>
+<field name='m_RelationName' type='java.lang.String'/>
+<field name='m_ValueBuffer' type='double[]'/>
+</class>
+</classes>
+<object class='weka.classifiers.trees.J48' id='i3'>
+<super class='weka.classifiers.Classifier'>
+<value type='boolean' name='m_Debug'>false</value>
+</super>
+<value type='float' name='m_CF'>0.25</value>
+<value type='int' name='m_Seed'>1</value>
+<value type='boolean' name='m_binarySplits'>false</value>
+<value type='int' name='m_minNumObj'>2</value>
+<value type='boolean' name='m_noCleanup'>false</value>
+<value type='int' name='m_numFolds'>3</value>
+<value type='boolean' name='m_reducedErrorPruning'>false</value>
+<value type='boolean' name='m_subtreeRaising'>true</value>
+<value type='boolean' name='m_unpruned'>false</value>
+<value type='boolean' name='m_useLaplace'>false</value>
+<object class='weka.classifiers.trees.j48.C45PruneableClassifierTree' id='i11' name='m_root'>
+<super class='weka.classifiers.trees.j48.ClassifierTree'>
+<value type='int' name='m_id'>0</value>
+<value type='boolean' name='m_isEmpty'>false</value>
+<value type='boolean' name='m_isLeaf'>false</value>
+<object class='weka.classifiers.trees.j48.C45Split' id='i14' name='m_localModel'>
+<super class='weka.classifiers.trees.j48.ClassifierSplitModel'>
+<value type='int' name='m_numSubsets'>2</value>
+<object class='weka.classifiers.trees.j48.Distribution' id='i18' name='m_distribution'>
+<value type='double' name='totaL'>100.0</value>
+<array class='double[]' id='i20' length='2' name='m_perBag'>
+<value type='double'>50.0</value>
+<value type='double'>50.0</value>
+</array>
+<array class='double[]' id='i21' length='2' name='m_perClass'>
+<value type='double'>50.0</value>
+<value type='double'>50.0</value>
+</array>
+<array class='double[][]' id='i23' length='2' name='m_perClassPerBag'>
+<array class='double[]' id='i24' length='2'>
+<value type='double'>0.0</value>
+<value type='double'>50.0</value>
+</array>
+<array class='double[]' id='i25' length='2'>
+<value type='double'>50.0</value>
+<value type='double'>0.0</value>
+</array>
+</array>
+</object>
+</super>
+<value type='int' name='m_attIndex'>3</value>
+<value type='int' name='m_complexityIndex'>2</value>
+<value type='double' name='m_gainRatio'>0.9641503749927884</value>
+<value type='int' name='m_index'>12</value>
+<value type='double' name='m_infoGain'>0.9641503749927884</value>
+<value type='int' name='m_minNoObj'>2</value>
+<value type='double' name='m_splitPoint'>0.6</value>
+<value type='double' name='m_sumOfWeights'>100.0</value>
+</object>
+<array class='weka.classifiers.trees.j48.ClassifierTree[]' id='i27' length='2' name='m_sons'>
+<object class='weka.classifiers.trees.j48.C45PruneableClassifierTree' id='i28'>
+<super class='weka.classifiers.trees.j48.ClassifierTree'>
+<value type='int' name='m_id'>0</value>
+<value type='boolean' name='m_isEmpty'>false</value>
+<value type='boolean' name='m_isLeaf'>true</value>
+<object class='weka.classifiers.trees.j48.NoSplit' id='i30' name='m_localModel'>
+<super class='weka.classifiers.trees.j48.ClassifierSplitModel'>
+<value type='int' name='m_numSubsets'>1</value>
+<object class='weka.classifiers.trees.j48.Distribution' id='i31' name='m_distribution'>
+<value type='double' name='totaL'>50.0</value>
+<array class='double[]' id='i32' length='1' name='m_perBag'>
+<value type='double'>50.0</value>
+</array>
+<array class='double[]' id='i33' length='2' name='m_perClass'>
+<value type='double'>0.0</value>
+<value type='double'>50.0</value>
+</array>
+<array class='double[][]' id='i34' length='1' name='m_perClassPerBag'>
+<array class='double[]' id='i35' length='2'>
+<value type='double'>0.0</value>
+<value type='double'>50.0</value>
+</array>
+</array>
+</object>
+</super>
+</object>
+<null name='m_sons'/>
+<null name='m_test'/>
+<object class='weka.classifiers.trees.j48.C45ModelSelection' id='i38' name='m_toSelectModel'>
+<super class='weka.classifiers.trees.j48.ModelSelection'>
+</super>
+<value type='int' name='m_minNoObj'>2</value>
+<null name='m_allData'/>
+</object>
+<object class='weka.core.Instances' id='i43' name='m_train'>
+<value type='int' name='m_ClassIndex'>4</value>
+<object class='weka.core.FastVector' id='i46' name='m_Attributes'>
+<value type='int' name='m_CapacityIncrement'>1</value>
+<value type='int' name='m_CapacityMultiplier'>2</value>
+<value type='int' name='m_Size'>5</value>
+<array class='java.lang.Object[]' id='i48' length='6' name='m_Objects'>
+<object class='weka.core.Attribute' id='i53'>
+<value type='boolean' name='m_HasZeropoint'>true</value>
+<value type='int' name='m_Index'>0</value>
+<value type='boolean' name='m_IsAveragable'>true</value>
+<value type='boolean' name='m_IsRegular'>true</value>
+<value type='double' name='m_LowerBound'>-Infinity</value>
+<value type='boolean' name='m_LowerBoundIsOpen'>false</value>
+<value type='int' name='m_Ordering'>1</value>
+<value type='int' name='m_Type'>0</value>
+<value type='double' name='m_UpperBound'>Infinity</value>
+<value type='boolean' name='m_UpperBoundIsOpen'>false</value>
+<value type='double' name='m_Weight'>1.0</value>
+<null name='m_DateFormat'/>
+<null name='m_Hashtable'/>
+<object class='weka.core.ProtectedProperties' id='i58' name='m_Metadata'>
+<super class='java.util.Properties'>
+<super class='java.util.Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>8</value>
+<value type='int' transient='true'>11</value>
+<value type='int' transient='true'>0</value>
+</super>
+<null name='defaults'/>
+</super>
+<value type='boolean' name='closed'>true</value>
+</object>
+<value type='java.lang.String' name='m_Name'>sepallength</value>
+<null name='m_Values'/>
+</object>
+<object class='weka.core.Attribute' id='i60'>
+<value type='boolean' name='m_HasZeropoint'>true</value>
+<value type='int' name='m_Index'>1</value>
+<value type='boolean' name='m_IsAveragable'>true</value>
+<value type='boolean' name='m_IsRegular'>true</value>
+<value type='double' name='m_LowerBound'>-Infinity</value>
+<value type='boolean' name='m_LowerBoundIsOpen'>false</value>
+<value type='int' name='m_Ordering'>1</value>
+<value type='int' name='m_Type'>0</value>
+<value type='double' name='m_UpperBound'>Infinity</value>
+<value type='boolean' name='m_UpperBoundIsOpen'>false</value>
+<value type='double' name='m_Weight'>1.0</value>
+<null name='m_DateFormat'/>
+<null name='m_Hashtable'/>
+<object class='weka.core.ProtectedProperties' id='i61' name='m_Metadata'>
+<super class='java.util.Properties'>
+<super class='java.util.Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>8</value>
+<value type='int' transient='true'>11</value>
+<value type='int' transient='true'>0</value>
+</super>
+<null name='defaults'/>
+</super>
+<value type='boolean' name='closed'>true</value>
+</object>
+<value type='java.lang.String' name='m_Name'>sepalwidth</value>
+<null name='m_Values'/>
+</object>
+<object class='weka.core.Attribute' id='i63'>
+<value type='boolean' name='m_HasZeropoint'>true</value>
+<value type='int' name='m_Index'>2</value>
+<value type='boolean' name='m_IsAveragable'>true</value>
+<value type='boolean' name='m_IsRegular'>true</value>
+<value type='double' name='m_LowerBound'>-Infinity</value>
+<value type='boolean' name='m_LowerBoundIsOpen'>false</value>
+<value type='int' name='m_Ordering'>1</value>
+<value type='int' name='m_Type'>0</value>
+<value type='double' name='m_UpperBound'>Infinity</value>
+<value type='boolean' name='m_UpperBoundIsOpen'>false</value>
+<value type='double' name='m_Weight'>1.0</value>
+<null name='m_DateFormat'/>
+<null name='m_Hashtable'/>
+<object class='weka.core.ProtectedProperties' id='i64' name='m_Metadata'>
+<super class='java.util.Properties'>
+<super class='java.util.Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>8</value>
+<value type='int' transient='true'>11</value>
+<value type='int' transient='true'>0</value>
+</super>
+<null name='defaults'/>
+</super>
+<value type='boolean' name='closed'>true</value>
+</object>
+<value type='java.lang.String' name='m_Name'>petallength</value>
+<null name='m_Values'/>
+</object>
+<object class='weka.core.Attribute' id='i66'>
+<value type='boolean' name='m_HasZeropoint'>true</value>
+<value type='int' name='m_Index'>3</value>
+<value type='boolean' name='m_IsAveragable'>true</value>
+<value type='boolean' name='m_IsRegular'>true</value>
+<value type='double' name='m_LowerBound'>-Infinity</value>
+<value type='boolean' name='m_LowerBoundIsOpen'>false</value>
+<value type='int' name='m_Ordering'>1</value>
+<value type='int' name='m_Type'>0</value>
+<value type='double' name='m_UpperBound'>Infinity</value>
+<value type='boolean' name='m_UpperBoundIsOpen'>false</value>
+<value type='double' name='m_Weight'>1.0</value>
+<null name='m_DateFormat'/>
+<null name='m_Hashtable'/>
+<object class='weka.core.ProtectedProperties' id='i67' name='m_Metadata'>
+<super class='java.util.Properties'>
+<super class='java.util.Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>8</value>
+<value type='int' transient='true'>11</value>
+<value type='int' transient='true'>0</value>
+</super>
+<null name='defaults'/>
+</super>
+<value type='boolean' name='closed'>true</value>
+</object>
+<value type='java.lang.String' name='m_Name'>petalwidth</value>
+<null name='m_Values'/>
+</object>
+<object class='weka.core.Attribute' id='i69'>
+<value type='boolean' name='m_HasZeropoint'>false</value>
+<value type='int' name='m_Index'>4</value>
+<value type='boolean' name='m_IsAveragable'>false</value>
+<value type='boolean' name='m_IsRegular'>false</value>
+<value type='double' name='m_LowerBound'>0.0</value>
+<value type='boolean' name='m_LowerBoundIsOpen'>false</value>
+<value type='int' name='m_Ordering'>0</value>
+<value type='int' name='m_Type'>1</value>
+<value type='double' name='m_UpperBound'>0.0</value>
+<value type='boolean' name='m_UpperBoundIsOpen'>false</value>
+<value type='double' name='m_Weight'>1.0</value>
+<null name='m_DateFormat'/>
+<object class='java.util.Hashtable' id='i70' name='m_Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>3</value>
+<value type='int' transient='true'>5</value>
+<value type='int' transient='true'>2</value>
+<value type='java.lang.String'>Iris-setosa</value>
+<object class='java.lang.Integer' id='i74'>
+<super class='java.lang.Number'>
+</super>
+<value type='int' name='value'>1</value>
+</object>
+<value type='java.lang.String'>Iris-versicolor</value>
+<object class='java.lang.Integer' id='i76'>
+<super class='java.lang.Number'>
+</super>
+<value type='int' name='value'>0</value>
+</object>
+</object>
+<object class='weka.core.ProtectedProperties' id='i77' name='m_Metadata'>
+<super class='java.util.Properties'>
+<super class='java.util.Hashtable'>
+<value type='float' name='loadFactor'>0.75</value>
+<value type='int' name='threshold'>8</value>
+<value type='int' transient='true'>11</value>
+<value type='int' transient='true'>0</value>
+</super>
+<null name='defaults'/>
+</super>
+<value type='boolean' name='closed'>true</value>
+</object>
+<value type='java.lang.String' name='m_Name'>class</value>
+<object class='weka.core.FastVector' id='i79' name='m_Values'>
+<value type='int' name='m_CapacityIncrement'>1</value>
+<value type='int' name='m_CapacityMultiplier'>2</value>
+<value type='int' name='m_Size'>2</value>
+<array class='java.lang.Object[]' id='i80' length='2' name='m_Objects'>
+<value type='java.lang.String'>Iris-versicolor</value>
+<value type='java.lang.String'>Iris-setosa</value>
+</array>
+</object>
+</object>
+<null/>
+</array>
+</object>
+<null name='m_IndicesBuffer'/>
+<object class='weka.core.FastVector' id='i81' name='m_Instances'>
+<value type='int' name='m_CapacityIncrement'>1</value>
+<value type='int' name='m_CapacityMultiplier'>2</value>
+<value type='int' name='m_Size'>0</value>
+<array class='java.lang.Object[]' id='i82' length='0' name='m_Objects'>
+</array>
+</object>
+<value type='java.lang.String' name='m_RelationName'>iris-weka.filters.unsupervised.instance.ClassRemover-Clast-N2-H</value>
+<null name='m_ValueBuffer'/>
+</object>
+</super>
+<value type='float' name='m_CF'>0.25</value>
+<value type='boolean' name='m_cleanup'>true</value>
+<value type='boolean' name='m_pruneTheTree'>true</value>
+<value type='boolean' name='m_subtreeRaising'>true</value>
+</object>
+<object class='weka.classifiers.trees.j48.C45PruneableClassifierTree' id='i84'>
+<super class='weka.classifiers.trees.j48.ClassifierTree'>
+<value type='int' name='m_id'>0</value>
+<value type='boolean' name='m_isEmpty'>false</value>
+<value type='boolean' name='m_isLeaf'>true</value>
+<object class='weka.classifiers.trees.j48.NoSplit' id='i85' name='m_localModel'>
+<super class='weka.classifiers.trees.j48.ClassifierSplitModel'>
+<value type='int' name='m_numSubsets'>1</value>
+<object class='weka.classifiers.trees.j48.Distribution' id='i86' name='m_distribution'>
+<value type='double' name='totaL'>50.0</value>
+<array class='double[]' id='i87' length='1' name='m_perBag'>
+<value type='double'>50.0</value>
+</array>
+<array class='double[]' id='i88' length='2' name='m_perClass'>
+<value type='double'>50.0</value>
+<value type='double'>0.0</value>
+</array>
+<array class='double[][]' id='i89' length='1' name='m_perClassPerBag'>
+<array class='double[]' id='i90' length='2'>
+<value type='double'>50.0</value>
+<value type='double'>0.0</value>
+</array>
+</array>
+</object>
+</super>
+</object>
+<null name='m_sons'/>
+<null name='m_test'/>
+<reference ref='i38' name='m_toSelectModel'/>
+<reference ref='i43' name='m_train'/>
+</super>
+<value type='float' name='m_CF'>0.25</value>
+<value type='boolean' name='m_cleanup'>true</value>
+<value type='boolean' name='m_pruneTheTree'>true</value>
+<value type='boolean' name='m_subtreeRaising'>true</value>
+</object>
+</array>
+<null name='m_test'/>
+<reference ref='i38' name='m_toSelectModel'/>
+<reference ref='i43' name='m_train'/>
+</super>
+<value type='float' name='m_CF'>0.25</value>
+<value type='boolean' name='m_cleanup'>true</value>
+<value type='boolean' name='m_pruneTheTree'>true</value>
+<value type='boolean' name='m_subtreeRaising'>true</value>
+</object>
+</object>
+</koml>

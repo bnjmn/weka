@@ -1,0 +1,507 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<!DOCTYPE koml SYSTEM "http://www.inria.fr/koala/XML/koml12.dtd">
+<koml version='1.21'>
+<classes>
+<class name='weka.experiment.ClassifierSplitEvaluator' uid='-6459327482518343698'>
+<field name='m_IRclass' type='int'/>
+<field name='m_attID' type='int'/>
+<field name='m_numberAdditionalMeasures' type='int'/>
+<field name='m_predTargetColumn' type='boolean'/>
+<field name='m_AdditionalMeasures' type='java.lang.String[]'/>
+<field name='m_Classifier' type='weka.classifiers.Classifier'/>
+<field name='m_ClassifierOptions' type='java.lang.String'/>
+<field name='m_ClassifierVersion' type='java.lang.String'/>
+<field name='m_doesProduce' type='boolean[]'/>
+<field name='m_result' type='java.lang.String'/>
+</class>
+<class name='weka.classifiers.Classifier[]' uid='3598330857592102858'>
+</class>
+<class name='weka.classifiers.rules.ZeroR' uid='48055541465867954' super='weka.classifiers.Classifier'>
+<field name='m_ClassValue' type='double'/>
+<field name='m_Class' type='weka.core.Attribute'/>
+<field name='m_Counts' type='double[]'/>
+</class>
+<class name='java.lang.Object[]' uid='-8012369246846506644'>
+</class>
+<class name='weka.experiment.Experiment' uid='4002741154076297801'>
+<field name='m_AdvanceDataSetFirst' type='boolean'/>
+<field name='m_ClassFirst' type='boolean'/>
+<field name='m_RunLower' type='int'/>
+<field name='m_RunUpper' type='int'/>
+<field name='m_UsePropertyIterator' type='boolean'/>
+<field name='m_m_AdvanceRunFirst' type='boolean'/>
+<field name='m_AdditionalMeasures' type='java.lang.String[]'/>
+<field name='m_Datasets' type='javax.swing.DefaultListModel'/>
+<field name='m_Notes' type='java.lang.String'/>
+<field name='m_PropertyArray' type='java.lang.Object'/>
+<field name='m_PropertyPath' type='weka.experiment.PropertyNode[]'/>
+<field name='m_ResultListener' type='weka.experiment.ResultListener'/>
+<field name='m_ResultProducer' type='weka.experiment.ResultProducer'/>
+</class>
+<class name='weka.experiment.InstancesResultListener' uid='-2203808461809311178' super='weka.experiment.CSVResultListener'>
+</class>
+<class name='javax.swing.event.EventListenerList' uid='-5677132037850737084' writemethod='true'>
+</class>
+<class name='weka.experiment.CrossValidationResultProducer' uid='-1806893315970057808'>
+<field name='m_NumFolds' type='int'/>
+<field name='m_debugOutput' type='boolean'/>
+<field name='m_AdditionalMeasures' type='java.lang.String[]'/>
+<field name='m_Instances' type='weka.core.Instances'/>
+<field name='m_OutputFile' type='java.io.File'/>
+<field name='m_ResultListener' type='weka.experiment.ResultListener'/>
+<field name='m_SplitEvaluator' type='weka.experiment.SplitEvaluator'/>
+<field name='m_ZipDest' type='weka.experiment.OutputZipper'/>
+</class>
+<class name='weka.experiment.PropertyNode[]' uid='-1323007620155527293'>
+</class>
+<class name='weka.classifiers.Classifier' uid='-2443967782678998369'>
+<field name='m_Debug' type='boolean'/>
+</class>
+<class name='weka.experiment.CSVResultListener' uid='-623185072785174658'>
+<field name='m_OutputFile' type='java.io.File'/>
+<field name='m_OutputFileName' type='java.lang.String'/>
+<field name='m_RP' type='weka.experiment.ResultProducer'/>
+</class>
+<class name='weka.experiment.PropertyNode' uid='-8718165742572631384' writemethod='true'>
+<field name='parentClass' type='java.lang.Class'/>
+<field name='property' type='java.beans.PropertyDescriptor'/>
+<field name='value' type='java.lang.Object'/>
+</class>
+<class name='java.io.File' uid='301077366599181567' writemethod='true'>
+<field name='path' type='java.lang.String'/>
+</class>
+<class name='javax.swing.DefaultListModel' uid='2315945659722172272' super='javax.swing.AbstractListModel'>
+<field name='delegate' type='java.util.Vector'/>
+</class>
+<class name='java.util.Vector' uid='-2767605614048989439' writemethod='true'>
+<field name='capacityIncrement' type='int'/>
+<field name='elementCount' type='int'/>
+<field name='elementData' type='java.lang.Object[]'/>
+</class>
+<class name='weka.classifiers.trees.J48' uid='-217733168393644444' super='weka.classifiers.Classifier'>
+<field name='m_CF' type='float'/>
+<field name='m_Seed' type='int'/>
+<field name='m_binarySplits' type='boolean'/>
+<field name='m_minNumObj' type='int'/>
+<field name='m_noCleanup' type='boolean'/>
+<field name='m_numFolds' type='int'/>
+<field name='m_reducedErrorPruning' type='boolean'/>
+<field name='m_subtreeRaising' type='boolean'/>
+<field name='m_unpruned' type='boolean'/>
+<field name='m_useLaplace' type='boolean'/>
+<field name='m_root' type='weka.classifiers.trees.j48.ClassifierTree'/>
+</class>
+<class name='javax.swing.AbstractListModel' uid='-3285184064379168730'>
+<field name='listenerList' type='javax.swing.event.EventListenerList'/>
+</class>
+</classes>
+<object class='weka.experiment.Experiment' id='i8'>
+<value type='boolean' name='m_AdvanceDataSetFirst'>true</value>
+<value type='boolean' name='m_ClassFirst'>false</value>
+<value type='int' name='m_RunLower'>1</value>
+<value type='int' name='m_RunUpper'>10</value>
+<value type='boolean' name='m_UsePropertyIterator'>true</value>
+<value type='boolean' name='m_m_AdvanceRunFirst'>false</value>
+<null name='m_AdditionalMeasures'/>
+<object class='javax.swing.DefaultListModel' id='i13' name='m_Datasets'>
+<super class='javax.swing.AbstractListModel'>
+<object class='javax.swing.event.EventListenerList' id='i15' name='listenerList'>
+<null/>
+</object>
+</super>
+<object class='java.util.Vector' id='i18' name='delegate'>
+<value type='int' name='capacityIncrement'>0</value>
+<value type='int' name='elementCount'>74</value>
+<array class='java.lang.Object[]' id='i20' length='80' name='elementData'>
+<object class='java.io.File' id='i22'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\anneal.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i24'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\anneal.ORIG.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i26'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\arrhythmia.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i28'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\audiology.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i30'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\autos.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i32'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\balance-scale.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i34'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\breast-cancer.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i36'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\breast-w.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i38'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\colic.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i40'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\colic.ORIG.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i42'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\credit-a.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i44'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\credit-g.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i46'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\diabetes.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i48'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\ecoli.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i50'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\glass.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i52'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\heart-c.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i54'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\heart-h.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i56'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\heart-statlog.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i58'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\hepatitis.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i60'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\hypothyroid.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i62'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\ionosphere.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i64'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\iris.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i66'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\kr-vs-kp.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i68'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\labor.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i70'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\letter.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i72'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\lymph.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i74'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\mushroom.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i76'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\breast-cancer.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i78'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\breast-cancer_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i80'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\breast-cancer_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i82'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\ionosphere_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i84'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\ionosphere_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i86'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\labor_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i88'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\labor_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i90'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\liver-disorders_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i92'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\liver-disorders_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i94'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\sick_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i96'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\sick_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i98'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\spambase_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i100'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\spambase_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i102'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\spect_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i104'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\spect_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i106'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\tic-tac-toe_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i108'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\tic-tac-toe_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i110'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\trains_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i112'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\trains_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i114'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\vote_test.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i116'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old\\vote_train.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i118'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\breast-cancer.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i120'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\breast-w.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i122'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\colic.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i124'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\credit-a.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i126'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\credit-g.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i128'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\diabetes.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i130'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\hepatitis.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i132'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\ionosphere.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i134'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\kr-vs-kp.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i136'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\mushroom.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i138'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\sick.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i140'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\sonar.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i142'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\old2\\vote.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i144'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\optdigits.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i146'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\pendigits.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i148'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\primary-tumor.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i150'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\segment.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i152'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\sick.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i154'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\sonar.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i156'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\soybean.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i158'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\splice.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i160'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\vehicle.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i162'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\vote.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i164'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\vowel.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i166'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\waveform-5000.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='java.io.File' id='i168'>
+<value type='java.lang.String' name='path'>.\\test\\datasets\\zoo.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<null/>
+<null/>
+<null/>
+<null/>
+<null/>
+<null/>
+</array>
+</object>
+</object>
+<value type='java.lang.String' name='m_Notes'></value>
+<array class='weka.classifiers.Classifier[]' id='i172' length='1' name='m_PropertyArray'>
+<object class='weka.classifiers.trees.J48' id='i176'>
+<super class='weka.classifiers.Classifier'>
+<value type='boolean' name='m_Debug'>false</value>
+</super>
+<value type='float' name='m_CF'>0.25</value>
+<value type='int' name='m_Seed'>1</value>
+<value type='boolean' name='m_binarySplits'>false</value>
+<value type='int' name='m_minNumObj'>2</value>
+<value type='boolean' name='m_noCleanup'>false</value>
+<value type='int' name='m_numFolds'>3</value>
+<value type='boolean' name='m_reducedErrorPruning'>false</value>
+<value type='boolean' name='m_subtreeRaising'>true</value>
+<value type='boolean' name='m_unpruned'>false</value>
+<value type='boolean' name='m_useLaplace'>false</value>
+<null name='m_root'/>
+</object>
+</array>
+<array class='weka.experiment.PropertyNode[]' id='i178' length='2' name='m_PropertyPath'>
+<object class='weka.experiment.PropertyNode' id='i182'>
+<object class='weka.experiment.ClassifierSplitEvaluator' id='i186' name='parentClass'>
+<value type='int' name='m_IRclass'>0</value>
+<value type='int' name='m_attID'>-1</value>
+<value type='int' name='m_numberAdditionalMeasures'>0</value>
+<value type='boolean' name='m_predTargetColumn'>false</value>
+<null name='m_AdditionalMeasures'/>
+<object class='weka.classifiers.rules.ZeroR' id='i190' name='m_Classifier'>
+<super class='weka.classifiers.Classifier'>
+<value type='boolean' name='m_Debug'>false</value>
+</super>
+<value type='double' name='m_ClassValue'>0.0</value>
+<null name='m_Class'/>
+<null name='m_Counts'/>
+</object>
+<value type='java.lang.String' name='m_ClassifierOptions'></value>
+<value type='java.lang.String' name='m_ClassifierVersion'>48055541465867954</value>
+<null name='m_doesProduce'/>
+<null name='m_result'/>
+</object>
+<object-class class='weka.experiment.CrossValidationResultProducer' id='i197' name='property'>
+</object-class>
+<value type='java.lang.String' name='value'>splitEvaluator</value>
+<value type='java.lang.String'>getSplitEvaluator</value>
+<value type='java.lang.String'>setSplitEvaluator</value>
+</object>
+<object class='weka.experiment.PropertyNode' id='i201'>
+<reference ref='i190' name='parentClass'/>
+<object-class class='weka.experiment.ClassifierSplitEvaluator' id='i202' name='property'>
+</object-class>
+<value type='java.lang.String' name='value'>classifier</value>
+<value type='java.lang.String'>getClassifier</value>
+<value type='java.lang.String'>setClassifier</value>
+</object>
+</array>
+<object class='weka.experiment.InstancesResultListener' id='i208' name='m_ResultListener'>
+<super class='weka.experiment.CSVResultListener'>
+<object class='java.io.File' id='i209' name='m_OutputFile'>
+<value type='java.lang.String' name='path'>.\\test\\output.arff</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<value type='java.lang.String' name='m_OutputFileName'>.\\test\\output.arff</value>
+<null name='m_RP'/>
+</super>
+</object>
+<object class='weka.experiment.CrossValidationResultProducer' id='i211' name='m_ResultProducer'>
+<value type='int' name='m_NumFolds'>10</value>
+<value type='boolean' name='m_debugOutput'>false</value>
+<null name='m_AdditionalMeasures'/>
+<null name='m_Instances'/>
+<object class='java.io.File' id='i212' name='m_OutputFile'>
+<value type='java.lang.String' name='path'>E:\\Waikato\\projects\\weka\\splitEvalutorOut.zip</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<object class='weka.experiment.CSVResultListener' id='i214' name='m_ResultListener'>
+<object class='java.io.File' id='i215' name='m_OutputFile'>
+<value type='java.lang.String' name='path'>C:\\Temp\\weka_experiment1507.csv</value>
+<value type='char' transient='true'>\\</value>
+</object>
+<value type='java.lang.String' name='m_OutputFileName'></value>
+<null name='m_RP'/>
+</object>
+<reference ref='i186' name='m_SplitEvaluator'/>
+<null name='m_ZipDest'/>
+</object>
+</object>
+</koml>
