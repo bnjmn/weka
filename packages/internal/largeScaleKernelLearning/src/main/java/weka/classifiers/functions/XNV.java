@@ -1,10 +1,29 @@
 package weka.classifiers.functions;
+/*
+ *   This program is free software: you can redistribute it and/or modify
+ *   it under the terms of the GNU General Public License as published by
+ *   the Free Software Foundation, either version 3 of the License, or
+ *   (at your option) any later version.
+ *
+ *   This program is distributed in the hope that it will be useful,
+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *   GNU General Public License for more details.
+ *
+ *   You should have received a copy of the GNU General Public License
+ *   along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ */
+
+/*
+ *    XNV.java
+ *    Copyright (C) 2018 University of Waikato, Hamilton, New Zealand
+ *
+ */
 
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Matrix;
 import weka.classifiers.RandomizableClassifier;
 import weka.classifiers.functions.supportVector.Kernel;
-import weka.classifiers.functions.supportVector.PolyKernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.*;
 import weka.filters.Filter;
@@ -13,29 +32,108 @@ import weka.filters.unsupervised.instance.RemoveRange;
 
 import java.util.Random;
 
+/**
+ <!-- globalinfo-start -->
+ <!-- globalinfo-end -->
+ *
+ <!-- technical-bibtex-start -->
+ <!-- technical-bibtex-end -->
+ *
+ <!-- options-start -->
+ <!-- options-end -->
+ *
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
+ * @version $Revision: 12341 $
+ */
 public class XNV extends RandomizableClassifier {
 
   /** The two Nystroem filters to be used */
-  Nystroem m_N1;
-  Nystroem m_N2;
+  protected Nystroem m_N1;
+  protected Nystroem m_N2;
 
   /** The coefficients from CCA regression */
-  Matrix m_wCCA;
+  protected Matrix m_wCCA;
 
   /** The CCA projection */
-  Matrix m_B1;
+  protected Matrix m_B1;
 
   /** The sample size for each Nystroem filter */
-  int m_M = 100;
+  protected int m_M = 100;
 
   /** The kernel function to use. */
   protected Kernel m_Kernel = new RBFKernel();
 
   /** The regularization parameter. */
-  double m_Gamma = 0.01;
+  protected double m_Gamma = 0.01;
+
+  /** The maximum number of labeled training instances to use. */
+  protected int m_maxNumLabeled = Integer.MAX_VALUE;
 
   /**
-   * Turns the given set of instances into a centered data matrix, with one instance per column.
+   * Provides information regarding this class.
+   *
+   * @return string describing the method that this class implements
+   */
+  public String globalInfo() {
+    return "Implements the XNV method for semi-supervised learning using a kernel function.\n\n" +
+            "For more information on the algorithm, see\n\n" + getTechnicalInformation().toString();
+  }
+
+  /**
+   * Returns a reference to the algorithm implemented by this class.
+   *
+   * @return a reference to the algorithm implemented by this class
+   */
+  public TechnicalInformation getTechnicalInformation() {
+
+    TechnicalInformation result = new TechnicalInformation(TechnicalInformation.Type.INPROCEEDINGS);
+    result.setValue(TechnicalInformation.Field.AUTHOR, "Brian McWilliams and David Balduzzi and Joachim M. Buhmann");
+    result.setValue(TechnicalInformation.Field.TITLE, "Correlated random features for fast semi-supervised learning");
+    result.setValue(TechnicalInformation.Field.BOOKTITLE, "Proc 27th Annual Conference on Neural Information Processing Systems");
+    result.setValue(TechnicalInformation.Field.PAGES, "440--448");
+    result.setValue(TechnicalInformation.Field.YEAR, "2013");
+    result.setValue(TechnicalInformation.Field.URL, "http://papers.nips.cc/paper/5000-correlated-random-features-for-fast-semi-supervised-learning.pdf");
+
+    return result;
+  }
+
+  @OptionMetadata(
+          displayName = "Regularization parameter gamma",
+          description = "The regularization parameter gamma.",
+          displayOrder = 1,
+          commandLineParamName = "G",
+          commandLineParamSynopsis = "-G")
+  public double getGamma() { return m_Gamma; }
+  public void setGamma(double v) {m_Gamma = v; }
+
+  @OptionMetadata(
+          displayName = "Sample size for Nystroem method",
+          description = "The sample size for the Nystroem method.",
+          displayOrder = 2,
+          commandLineParamName = "M",
+          commandLineParamSynopsis = "-M")
+  public int getM() { return m_M; }
+  public void setM(int v) {m_M = v; }
+
+  @OptionMetadata(
+          displayName = "Kernel function",
+          description = "The kernel function to use.", displayOrder = 3,
+          commandLineParamName = "K",
+          commandLineParamSynopsis = "-K <kernel specification>")
+  public void setKernel(Kernel kernel) { m_Kernel = kernel; }
+  public Kernel getKernel() { return m_Kernel; }
+
+  @OptionMetadata(
+          displayName = "Maximum number of labeled instances to use",
+          description = "The maximum number of labeled instances to use (for experimentation).",
+          displayOrder = 4,
+          commandLineParamName = "maxNumLabeled",
+          commandLineParamSynopsis = "-maxNumLabeled")
+  public int getMaxNumLabeled() { return m_maxNumLabeled; }
+  public void setMaxNumLabeled(int v) {m_maxNumLabeled = v; }
+
+  /**
+   * Turns the given set of instances into a data matrix.
    *
    * @param data set of instances
    * @param center whether to center the matrix
@@ -90,16 +188,13 @@ public class XNV extends RandomizableClassifier {
   }
 
   /**
-   * Perform Canonical Correlation Analysis (CCA)
+   * Performs Canonical Correlation Analysis (CCA).
    *
    * @param X1 the first data matrix
    * @param X2 the second data matrix
    * @return the eigenvalue decomposition giving the basis in X1
    */
   public static EVD CCA(Matrix X1, Matrix X2) throws Exception {
-
-    System.err.println("X1\n" + X1);
-    System.err.println("X2\n" + X2);
 
     int M = X1.numRows();
     int N = X1.numColumns();
@@ -108,36 +203,22 @@ public class XNV extends RandomizableClassifier {
     for (int i = 0; i < M; i++) {
       CX1X1.set(i, i, CX1X1.get(i, i) + 1e-8);
     }
-    System.err.println("CX1X1\n" + CX1X1);
 
     UpperSPDDenseMatrix CX2X2 = (UpperSPDDenseMatrix) new UpperSPDDenseMatrix(M).rank1(X2);
     CX2X2.scale(1.0 / (N - 1.0));
     for (int i = 0; i < M; i++) {
       CX2X2.set(i, i, CX2X2.get(i, i) + 1e-8);
     }
-    System.err.println("CX2X2\n" + CX2X2);
 
     // Compute covariance between views
     Matrix CX1X2 = X1.transBmult(X2, new DenseMatrix(M, M));
     CX1X2.scale(1.0 / (N - 1.0));
     Matrix CX2X1 = CX1X2.transpose(new DenseMatrix(M, M));
 
-    System.err.println("CX1X2\n" + CX1X2);
-    System.err.println("CX2X1\n" + CX2X1);
-
-    // Perform eigenvalue decomposition
+    // Establish key matrix and perform eigenvalue decomposition
     Matrix CX1X1invMultCX1X2 = inverse(CX1X1).mult(CX1X2, new DenseMatrix(M, M));
-
-    System.err.println("CX1X1invMultCX1X2\n" + CX1X1invMultCX1X2);
-
     Matrix CX2X2invMultCX2X1 = inverse(CX2X2).mult(CX2X1, new DenseMatrix(M, M));
-
-    System.err.println("CX2X2invMultCX2X1\n" + CX2X2invMultCX2X1);
-
     Matrix CX1X1invMultCX1X2MultCX2X2invMultCX2X1 = CX1X1invMultCX1X2.mult(CX2X2invMultCX2X1, new DenseMatrix(M, M));
-
-    System.err.println("CX1X1invMultCX1X2MultCX2X2invMultCX2X1\n" + CX1X1invMultCX1X2MultCX2X2invMultCX2X1);
-
     EVD evd = EVD.factorize(CX1X1invMultCX1X2MultCX2X2invMultCX2X1);
 
     return evd;
@@ -151,7 +232,7 @@ public class XNV extends RandomizableClassifier {
    */
   public void buildClassifier(Instances data) throws Exception {
 
-    //((RBFKernel)m_Kernel).setGamma(1);
+    getCapabilities().testWithFail(data);
 
     // Shuffle the data
     data = new Instances(data);
@@ -169,7 +250,6 @@ public class XNV extends RandomizableClassifier {
     m_N1.setKernel((Kernel) new SerializedObject(m_Kernel).getObject());
     m_N1.setInputFormat(data);
     Instances N1data = Filter.useFilter(data, m_N1);
-    System.err.println(N1data);
     Matrix X1 = getMatrix(N1data, true, true);
 
     // Build second Nystroem filter and generate second view, including covariance matrix
@@ -181,11 +261,10 @@ public class XNV extends RandomizableClassifier {
     m_N2.setKernel((Kernel) new SerializedObject(m_Kernel).getObject());
     m_N2.setInputFormat(data);
     Instances N2data = Filter.useFilter(data, m_N2);
-    System.err.println(N2data);
     Matrix X2 = getMatrix(N2data, true, true);
 
     EVD evd = CCA(X1, X2);
-    X1 = X2 = null;
+    X1 = X2 = null; N2data = null;
 
     double[] e1 = evd.getRealEigenvalues();
     m_B1 = evd.getRightEigenvectors();
@@ -201,14 +280,12 @@ public class XNV extends RandomizableClassifier {
     e1 = e1Reordered;
     m_B1 = B1Reordered;
 
-    System.err.println("B1\n" + m_B1);
-    for (int i = 0; i < e1.length; i++) {
-      System.err.println(e1[i]);
-    }
-
     // Get labeled training data
     Instances labeledN1 = new Instances(N1data, N1data.numInstances());
     for (Instance inst : N1data) {
+      if (labeledN1.numInstances() >= m_maxNumLabeled) {
+        break;
+      }
       if (!inst.classIsMissing()) {
         labeledN1.add(inst);
       }
@@ -223,13 +300,6 @@ public class XNV extends RandomizableClassifier {
     // Compute CCA regression
     DenseMatrix Z1 = getMatrix(labeledN1, false, false);
     Matrix Z = Z1.mult(m_B1, new DenseMatrix(labeledN1.numInstances(), M));
-    System.err.println(Z1);
-    double sum = 0;
-    for (int i = 0; i < Z.numRows(); i++) {
-      sum += Z.get(i,0);
-    }
-    System.err.println("Sum: " + sum);
-    System.err.println(Z);
     Matrix CCA_reg = new DenseMatrix(M, M);
     Matrix reg = new DenseMatrix(M, M);
     for (int i = 0; i < e1.length; i++) {
@@ -237,9 +307,7 @@ public class XNV extends RandomizableClassifier {
       reg.set(i, i, m_Gamma);
     }
     Matrix inv = inverse(Z.transAmult(Z, new DenseMatrix(M, M)).add(CCA_reg).add(reg));
-    System.err.println("Inverse: \n" + inv);
     m_wCCA = inv.transBmult(Z, new DenseMatrix(Z.numColumns(), Z.numRows())).mult(labels, new DenseMatrix(M, 1));
-    System.err.println(m_wCCA);
   }
 
   /**
@@ -254,6 +322,13 @@ public class XNV extends RandomizableClassifier {
     data.add(inst);
     return distributionsForInstances(data)[0];
   }
+
+  /**
+   * This class implements efficient batch prediction.
+   *
+   * @return true
+   */
+  public boolean implementsMoreEfficientBatchPrediction() { return true; }
 
   /**
    * Returns predictions for a whole set of instances.
@@ -274,6 +349,46 @@ public class XNV extends RandomizableClassifier {
     return preds;
   }
 
+  /**
+   * Outputs the coefficients of the classifier.
+   *
+   * @return a textual description of the classifier
+   */
+  public String toString() {
+
+    if (m_wCCA == null) {
+      return "XNV: No model built yet.";
+    } else {
+      return "XNV weight vector (beta):\n\n" + m_wCCA;
+    }
+  }
+
+  /**
+   * Returns default capabilities of the classifier.
+   *
+   * @return the capabilities of this classifier
+   */
+  public Capabilities getCapabilities() {
+    Capabilities result = super.getCapabilities();
+    result.disableAll();
+
+    // attributes
+    result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+
+    // class
+    result.enable(Capabilities.Capability.NUMERIC_CLASS);
+
+    return result;
+  }
+
+  /**
+   * Returns the revision string.
+   *
+   * @return the revision
+   */
+  public String getRevision() {
+    return RevisionUtils.extract("$Revision: 12037 $");
+  }
 
   /**
    * Generates an XNV predictor.
@@ -282,61 +397,6 @@ public class XNV extends RandomizableClassifier {
    */
   public static void main(String argv[]) throws Exception {
 
-    /* double[][] x1 = {{1.0, 2.0}, {3.0, 1.9}};
-    double[][] x2 = {{1.1, 1.2}, {2.1, 2.2}};
-    ArrayList<Attribute> atts = new ArrayList<>(2);
-    for (int i = 0; i < x1[0].length; i++) {
-      atts.add(new Attribute("x" + (i + 1)));
-    }
-    Instances X1 = new Instances("X1", atts, x1.length);
-    for (int i = 0; i < x1.length; i++) {
-      X1.add(new DenseInstance(1.0, x1[i]));
-    }
-    System.err.println(X1);
-    Instances X2 = new Instances("X2", atts, x2.length);
-    for (int i = 0; i < x2.length; i++) {
-      X2.add(new DenseInstance(1.0, x2[i]));
-    }
-    System.err.println(X2);
-    SymmDenseEVD evd = XNV.CCA(XNV.getMatrix(X1, true, true), XNV.getMatrix(X2, true, true));
-    Matrix B1 = evd.getEigenvectors();
-    double[] e1 = evd.getEigenvalues();
-    double[] e1Reordered = new double[e1.length];
-    Matrix B1Reordered = new DenseMatrix(B1.numRows(), B1.numColumns());
-    for (int i = 0; i < e1.length; i++) { // We want descending rather than ascending for easier comparison
-      e1Reordered[e1.length - (i + 1)] = e1[i];
-      for (int j = 0; j < B1.numRows(); j++) {
-        B1Reordered.set(j, i, B1.get(j, (e1.length - (i + 1))));
-      }
-    }
-    e1 = e1Reordered;
-    B1 = B1Reordered;
-    System.err.println(B1);
-    for (int i = 0; i < e1.length; i++) {
-      System.err.println(e1[i]);
-    }*/
-    /*double[][] x1 = {{1.0, 2.0, 2}, {3.0, 1.9, 4}};
-    double[][] x2 = {{1.1, 1.2, 1}, {2.1, 2.2, 3}};
-    ArrayList<Attribute> atts = new ArrayList<>(2);
-    for (int i = 0; i < x1[0].length - 1; i++) {
-      atts.add(new Attribute("x" + (i + 1)));
-    }
-    atts.add(new Attribute("y"));
-    Instances D = new Instances("D", atts, x1.length);
-    for (int i = 0; i < x1.length; i++) {
-      D.add(new DenseInstance(1.0, x1[i]));
-    }
-    for (int i = 0; i < x2.length; i++) {
-      D.add(new DenseInstance(1.0, x2[i]));
-    }
-    D.setClassIndex(D.numAttributes() - 1);
-
-    XNV xnv = new XNV();
-    xnv.buildClassifier(D);
-    double[][] preds = xnv.distributionsForInstances(D);
-    for (int i = 0; i < preds.length; i++) {
-      System.err.println(preds[i][0]);
-    }*/
     runClassifier(new XNV(), argv);
   }
 }
