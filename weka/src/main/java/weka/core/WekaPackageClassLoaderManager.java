@@ -90,27 +90,35 @@ public class WekaPackageClassLoaderManager {
    */
   protected void injectMTJCoreClasses() {
     if (!WekaPackageClassLoaderManager
-      .classExists("com.github.fommil.netlib.ARPACK")) {
+      //.classExists("com.github.fommil.netlib.ARPACK")) {
+      .classExists("weka.core.MTJInjectionMarker")) {
       // inject core MTJ classes into the root classloader
 
       String debugS =
         System.getProperty("weka.core.classloader.debug", "false");
       boolean debug = debugS.equalsIgnoreCase("true");
 
+      InputStream mtjMarkerStream =
+        getClass().getClassLoader().getResourceAsStream("mtjmarker.jar");
       InputStream mtjCoreInputStream =
         getClass().getClassLoader().getResourceAsStream("core.jar");
       InputStream arpackAllInputStream =
         getClass().getClassLoader().getResourceAsStream(
-          "arpack_combined_all.jar");
+          "arpack_combined.jar");
       InputStream mtjInputStream =
         getClass().getClassLoader().getResourceAsStream("mtj.jar");
-      if (mtjCoreInputStream != null && arpackAllInputStream != null
+      if (mtjMarkerStream != null && mtjCoreInputStream != null && arpackAllInputStream != null
         && mtjInputStream != null) {
         if (debug) {
           System.out.println("[WekaPackageClassLoaderManager] injecting "
             + "mtj-related core classes into root classloader");
         }
         try {
+          if (debug) {
+            System.out.println("[WekaPackageClassloaderManager] Injecting "
+              + "mtjmarker");
+          }
+          injectAllClassesInFromStream(mtjMarkerStream);
           if (debug) {
             System.out
               .println("[WekaPackageClassLoaderManager] Injecting arpack");
