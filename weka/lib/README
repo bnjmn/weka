@@ -30,6 +30,7 @@ An overview of the libraries used in Weka:
 - arpack_combined.jar
   Version: 0.1
   URL: http://icl.cs.utk.edu/f2j/
+  Note: the version we use is a combination of arpack_combined_all.jar and arpack_combined.jar from the jarpack-0.1.zip archive. In particular, we take the org/j_paine classes from the latter and include the rest from the former. This avoids inclusion of a formatting class from core java that cannot be used for commercial purposes.
 
 - core.jar
   Version: 1.1.2
