@@ -27,7 +27,7 @@ An overview of the libraries used in Weka:
   Version: 1.0.4 (modified Matrix.java to extend Serializable)
   URL: https://github.com/fommil/matrix-toolkits-java
 
-- arpack_combined_all.jar
+- arpack_combined.jar
   Version: 0.1
   URL: http://icl.cs.utk.edu/f2j/
 
