@@ -1,4 +1,3 @@
-package weka.classifiers.functions;
 /*
  *   This program is free software: you can redistribute it and/or modify
  *   it under the terms of the GNU General Public License as published by
@@ -20,6 +19,8 @@ package weka.classifiers.functions;
  *
  */
 
+package weka.classifiers.functions;
+
 import no.uib.cipr.matrix.*;
 import no.uib.cipr.matrix.Matrix;
 import weka.classifiers.RandomizableClassifier;
@@ -27,9 +28,13 @@ import weka.classifiers.functions.supportVector.Kernel;
 import weka.classifiers.functions.supportVector.RBFKernel;
 import weka.core.*;
 import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.Nystroem;
+import weka.filters.unsupervised.attribute.ReplaceMissingValues;
+import weka.filters.unsupervised.attribute.Standardize;
 import weka.filters.unsupervised.instance.RemoveRange;
 
+import java.util.ArrayList;
 import java.util.Random;
 
 /**
@@ -57,6 +62,19 @@ public class XNV extends RandomizableClassifier {
   /** The CCA projection */
   protected Matrix m_B1;
 
+  /** The filter used for standardizing the data */
+  protected Standardize m_Standardize;
+
+  /** The filter used to make attributes numeric. */
+  protected NominalToBinary m_NominalToBinary;
+
+  /** The filter used to get rid of missing values. */
+  protected ReplaceMissingValues m_Missing;
+
+  /** Coefficients used compensate for standardization of the target */
+  protected double m_x1 = 1.0;
+  protected double m_x0 = 0.0;
+
   /** The sample size for each Nystroem filter */
   protected int m_M = 100;
 
@@ -66,16 +84,21 @@ public class XNV extends RandomizableClassifier {
   /** The regularization parameter. */
   protected double m_Gamma = 0.01;
 
-  /** The maximum number of labeled training instances to use. */
-  protected int m_maxNumLabeled = Integer.MAX_VALUE;
+  /** Stores the number of labeled instances found in the training set. */
+  protected int m_numLabeled;
 
+  /** Whether to apply standardization or not. */
+  protected boolean m_doNotStandardize;
+  
   /**
    * Provides information regarding this class.
    *
    * @return string describing the method that this class implements
    */
   public String globalInfo() {
-    return "Implements the XNV method for semi-supervised learning using a kernel function.\n\n" +
+    return "Implements the XNV method for semi-supervised learning using a kernel function (default: RBFKernel). " +
+            "Standardizes all attributes, including the target, by default. Applies (unsupervised) " +
+            "NominalToBinary and ReplaceMissingValues before anything else is done.\n\n" +
             "For more information on the algorithm, see\n\n" + getTechnicalInformation().toString();
   }
 
@@ -124,13 +147,13 @@ public class XNV extends RandomizableClassifier {
   public Kernel getKernel() { return m_Kernel; }
 
   @OptionMetadata(
-          displayName = "Maximum number of labeled instances to use",
-          description = "The maximum number of labeled instances to use (for experimentation).",
+          displayName = "Do not apply standardization",
+          description = "If true, standardization will not be performed.",
           displayOrder = 4,
-          commandLineParamName = "maxNumLabeled",
-          commandLineParamSynopsis = "-maxNumLabeled")
-  public int getMaxNumLabeled() { return m_maxNumLabeled; }
-  public void setMaxNumLabeled(int v) {m_maxNumLabeled = v; }
+          commandLineParamName = "S",
+          commandLineParamSynopsis = "-S")
+  public boolean getDoNotStandardize() { return m_doNotStandardize; }
+  public void setDoNotStandardize(boolean v) {m_doNotStandardize = v; }
 
   /**
    * Turns the given set of instances into a data matrix.
@@ -234,9 +257,50 @@ public class XNV extends RandomizableClassifier {
 
     getCapabilities().testWithFail(data);
 
+    m_Missing = new ReplaceMissingValues();
+    m_Missing.setInputFormat(data);
+    data = Filter.useFilter(data, m_Missing);
+    m_NominalToBinary = new NominalToBinary();
+    m_NominalToBinary.setInputFormat(data);
+    data = Filter.useFilter(data, m_NominalToBinary);
+
     // Shuffle the data
     data = new Instances(data);
     data.randomize(new Random(getSeed()));
+    
+    if (!getDoNotStandardize()) {
+
+      // Retrieve two different class values
+      int index0 = 0;
+      while (index0 < data.numInstances() && data.instance(index0).classIsMissing()) {
+        index0++;
+      }
+      if (index0 >= data.numInstances()) {
+        throw new Exception("Need at least two instances with different target values.");
+      }
+      double y0 = data.instance(index0).classValue();
+      int index1 = index0 + 1;
+      while (index1 < data.numInstances() && (data.instance(index1).classIsMissing() ||
+              data.instance(index1).classValue() == y0)) {
+        index1++;
+      }
+      if (index1 >= data.numInstances()) {
+        throw new Exception("Need at least two instances with different target values.");
+      }
+      double y1 = data.instance(index1).classValue();
+      
+      // Apply filter
+      m_Standardize = new Standardize();
+      m_Standardize.setIgnoreClass(true);
+      m_Standardize.setInputFormat(data);
+      data = Filter.useFilter(data, m_Standardize);
+      
+      // Establish coefficients enabling reversal of filter transformation for target
+      double z0 = data.instance(index0).classValue();
+      double z1 = data.instance(index1).classValue();
+      m_x1 = (y0 - y1) / (z0 - z1);
+      m_x0 = (y0 - m_x1 * z0);
+    }
 
     // Reduce M if necessary
     int M = Math.min(m_M, data.numInstances() / 2);
@@ -269,27 +333,40 @@ public class XNV extends RandomizableClassifier {
     double[] e1 = evd.getRealEigenvalues();
     m_B1 = evd.getRightEigenvectors();
 
-    double[] e1Reordered = new double[e1.length];
-    Matrix B1Reordered = new DenseMatrix(m_B1.numRows(), m_B1.numColumns());
-    for (int i = 0; i < e1.length; i++) { // We want descending rather than ascending for easier comparison
-      e1Reordered[e1.length - (i + 1)] = Math.sqrt(e1[i]);
-      for (int j = 0; j < m_B1.numRows(); j++) {
-        B1Reordered.set(j, i, m_B1.get(j, (e1.length - (i + 1))));
+    // Remove eigenvalues that are not positive and corresponding eigenvectors; also take sqrt of eigenvalues
+    ArrayList<Integer> toKeep = new ArrayList<>(e1.length);
+    for (int i = 0; i < e1.length; i++) {
+      if (Double.isNaN(e1[i])) {
+        throw new IllegalStateException("XNV: Eigenvalue is NaN, aborting. Consider modifying parameters.");
+      }
+      if (e1[i] > 0) {
+        toKeep.add(i);
       }
     }
-    e1 = e1Reordered;
-    m_B1 = B1Reordered;
+    double[] e1New = new double[toKeep.size()];
+    Matrix m_B1New = new DenseMatrix(m_B1.numRows(), e1New.length);
+    int currentColumn = 0;
+    for (int index : toKeep) {
+      e1New[currentColumn] = Math.sqrt(e1[index]); // Take square root of eigenvalue
+      for (int j = 0; j < m_B1.numRows(); j++) {
+        m_B1New.set(j, currentColumn, m_B1.get(j, index));
+      }
+      currentColumn++;
+    }
+    e1 = e1New;
+    m_B1 = m_B1New;
+
+    // Reduce M accordingly
+    M = toKeep.size();
 
     // Get labeled training data
     Instances labeledN1 = new Instances(N1data, N1data.numInstances());
     for (Instance inst : N1data) {
-      if (labeledN1.numInstances() >= m_maxNumLabeled) {
-        break;
-      }
       if (!inst.classIsMissing()) {
         labeledN1.add(inst);
       }
     }
+    m_numLabeled = labeledN1.numInstances();
 
     // Get matrix with labels
     DenseMatrix labels = new DenseMatrix(labeledN1.numInstances(), 1);
@@ -318,9 +395,38 @@ public class XNV extends RandomizableClassifier {
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
 
-    Instances data = new Instances(inst.dataset(), 0);
-    data.add(inst);
-    return distributionsForInstances(data)[0];
+    m_Missing.input(inst);
+    m_Missing.batchFinished();
+    inst = m_Missing.output();
+    m_NominalToBinary.input(inst);
+    m_NominalToBinary.batchFinished();
+    inst = m_NominalToBinary.output();
+
+    if (!getDoNotStandardize()) {
+      m_Standardize.input(inst);
+      inst = m_Standardize.output();
+    }
+
+    m_N1.input(inst);
+    inst = m_N1.output();
+    Matrix result = new DenseMatrix(1, inst.numAttributes() - 1);
+    int index = 0;
+    for (int i = 0; i < inst.numAttributes(); i++) {
+      if (i != inst.classIndex()) {
+        result.set(0, index++, inst.value(i));
+      }
+    }
+    result = result.mult(m_B1, new DenseMatrix(1, m_B1.numColumns()));
+    result = result.mult(m_wCCA, new DenseMatrix(1, 1));
+
+    double[] pred = new double[1];
+    if (getDoNotStandardize()) {
+      pred[0] = result.get(0, 0);
+    } else {
+      pred[0] = result.get(0, 0) * m_x1 + m_x0;
+    }
+
+    return pred;
   }
 
   /**
@@ -338,12 +444,26 @@ public class XNV extends RandomizableClassifier {
    */
   public double[][] distributionsForInstances(Instances insts) throws Exception {
 
+    m_Missing = new ReplaceMissingValues();
+    m_Missing.setInputFormat(insts);
+    insts = Filter.useFilter(insts, m_Missing);
+    m_NominalToBinary = new NominalToBinary();
+    m_NominalToBinary.setInputFormat(insts);
+    insts = Filter.useFilter(insts, m_NominalToBinary);
+
+    if (!getDoNotStandardize()) {
+      insts = Filter.useFilter(insts, m_Standardize);
+    }
     Matrix result = getMatrix(Filter.useFilter(insts, m_N1), false, false);
-    result = result.mult(m_B1, new DenseMatrix(result.numRows(), result.numColumns()));
+    result = result.mult(m_B1, new DenseMatrix(result.numRows(), m_B1.numColumns()));
     result = result.mult(m_wCCA, new DenseMatrix(insts.numInstances(), 1));
     double[][] preds = new double[insts.numInstances()][1];
     for (int i = 0; i < insts.numInstances(); i++) {
-      preds[i][0] = result.get(i, 0);
+      if (getDoNotStandardize()) {
+        preds[i][0] = result.get(i, 0);
+      } else {
+        preds[i][0] = result.get(i, 0) * m_x1 + m_x0;
+      }
     }
 
     return preds;
@@ -359,7 +479,7 @@ public class XNV extends RandomizableClassifier {
     if (m_wCCA == null) {
       return "XNV: No model built yet.";
     } else {
-      return "XNV weight vector (beta):\n\n" + m_wCCA;
+      return "XNV weight vector (beta) based on " + m_numLabeled + " instances:\n\n" + m_wCCA;
     }
   }
 
@@ -374,9 +494,12 @@ public class XNV extends RandomizableClassifier {
 
     // attributes
     result.enable(Capabilities.Capability.NUMERIC_ATTRIBUTES);
+    result.enable(Capabilities.Capability.NOMINAL_ATTRIBUTES);
+    result.enable(Capabilities.Capability.MISSING_VALUES);
 
     // class
     result.enable(Capabilities.Capability.NUMERIC_CLASS);
+    result.enable(Capabilities.Capability.MISSING_CLASS_VALUES);
 
     return result;
   }
