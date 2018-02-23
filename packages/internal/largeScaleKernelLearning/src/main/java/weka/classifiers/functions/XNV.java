@@ -39,18 +39,68 @@ import java.util.Random;
 
 /**
  <!-- globalinfo-start -->
+ * Implements the XNV method for semi-supervised learning using a kernel function (default: RBFKernel). Standardizes all attributes, including the target, by default. Applies (unsupervised) NominalToBinary and ReplaceMissingValues before anything else is done.<br>
+ * <br>
+ * For more information on the algorithm, see<br>
+ * <br>
+ * Brian McWilliams, David Balduzzi, Joachim M. Buhmann: Correlated random features for fast semi-supervised learning. In: Proc 27th Annual Conference on Neural Information Processing Systems, 440--448, 2013.
+ * <br><br>
  <!-- globalinfo-end -->
  *
  <!-- technical-bibtex-start -->
+ * BibTeX:
+ * <pre>
+ * &#64;inproceedings{McWilliams2013,
+ *    author = {Brian McWilliams and David Balduzzi and Joachim M. Buhmann},
+ *    booktitle = {Proc 27th Annual Conference on Neural Information Processing Systems},
+ *    pages = {440--448},
+ *    title = {Correlated random features for fast semi-supervised learning},
+ *    year = {2013},
+ *    URL = {http://papers.nips.cc/paper/5000-correlated-random-features-for-fast-semi-supervised-learning.pdf}
+ * }
+ * </pre>
+ * <br><br>
  <!-- technical-bibtex-end -->
  *
  <!-- options-start -->
+ * Valid options are: <p>
+ * 
+ * <pre> -S &lt;num&gt;
+ *  Random number seed.
+ *  (default 1)</pre>
+ * 
+ * <pre> -G
+ *  The regularization parameter gamma.</pre>
+ * 
+ * <pre> -M
+ *  The sample size for the Nystroem method.</pre>
+ * 
+ * <pre> -K &lt;kernel specification&gt;
+ *  The kernel function to use.</pre>
+ * 
+ * <pre> -S
+ *  If true, standardization will not be performed.</pre>
+ * 
+ * <pre> -output-debug-info
+ *  If set, classifier is run in debug mode and
+ *  may output additional info to the console</pre>
+ * 
+ * <pre> -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).</pre>
+ * 
+ * <pre> -num-decimal-places
+ *  The number of decimal places for the output of numbers in the model (default 2).</pre>
+ * 
+ * <pre> -batch-size
+ *  The desired batch size for batch prediction  (default 100).</pre>
+ * 
  <!-- options-end -->
  *
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision: 12341 $
  */
-public class XNV extends RandomizableClassifier {
+public class XNV extends RandomizableClassifier implements TechnicalInformationHandler {
 
   /** for serialization */
   static final long serialVersionUID = -1585383626378691736L;
@@ -526,3 +576,4 @@ public class XNV extends RandomizableClassifier {
     runClassifier(new XNV(), argv);
   }
 }
+

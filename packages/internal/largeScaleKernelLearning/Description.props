@@ -6,10 +6,10 @@
 PackageName=largeScaleKernelLearning
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date
-Date=2017-07-19
+Date=2018-02-23
 
 # Title (required)
 Title=A package that contains filters for large-scale kernel-based learning
@@ -26,12 +26,12 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=This package provides filters to enable kernel-based learning from large datasets. It currently only contains the Nystroem method.
+Description=This package provides the Nystroem filter for unsupervised kernel-based filtering of large datasets and the XVN regression method for semi-supervised kernel-based learning from large datasets.
 
 Changes=Bug fix: class index in output was set to last attribute even if input data did not have class.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/largeScaleKernelLearning1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/largeScaleKernelLearning1.0.4.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/largeScaleKernelLearning
