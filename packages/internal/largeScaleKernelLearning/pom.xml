@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>largeScaleKernelLearning</artifactId>
-  <version>1.0.3-SNAPSHOT</version>
+  <version>1.0.4-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>largeScaleKernelLearning</name>
@@ -34,7 +34,7 @@
 
   <mailingLists>
     <mailingList>
-      <name>wekalist</name>
+      <name>wekaldist</name>
       <subscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</subscribe>
       <unsubscribe>https://list.waikato.ac.nz/mailman/listinfo/wekalist</unsubscribe>
       <archive>https://list.waikato.ac.nz/mailman/htdig/wekalist/</archive>
