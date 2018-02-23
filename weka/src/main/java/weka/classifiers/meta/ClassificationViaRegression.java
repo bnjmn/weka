@@ -24,17 +24,10 @@ package weka.classifiers.meta;
 import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.SingleClassifierEnhancer;
-import weka.core.Capabilities;
+import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.core.Instance;
-import weka.core.Instances;
-import weka.core.RevisionUtils;
-import weka.core.TechnicalInformation;
 import weka.core.TechnicalInformation.Field;
 import weka.core.TechnicalInformation.Type;
-import weka.core.TechnicalInformationHandler;
-import weka.core.Utils;
-import weka.core.UnassignedClassException;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.MakeIndicator;
 
@@ -220,7 +213,7 @@ public class ClassificationViaRegression
    * @throws Exception if the distribution can't be computed successfully
    */
   public double[] distributionForInstance(Instance inst) throws Exception {
-    
+
     double[] probs = new double[inst.numClasses()];
     Instance newInst;
     double sum = 0;
@@ -231,20 +224,67 @@ public class ClassificationViaRegression
       newInst = m_ClassFilters[i].output();
       probs[i] = m_Classifiers[i].classifyInstance(newInst);
       if (Utils.isMissingValue(probs[i])) {
-        throw new UnassignedClassException("ClassificationViaRegression: base learner predicted missing value.");
+        return new double[inst.numClasses()]; // Leave instance unclassified
       }
       if (probs[i] > 1) {
         probs[i] = 1;
       }
-      if (probs[i] < 0){
-	probs[i] = 0;
+      if (probs[i] < 0) {
+        probs[i] = 0;
       }
       sum += probs[i];
     }
     if (sum != 0) {
       Utils.normalize(probs, sum);
-    } 
+    }
     return probs;
+  }
+
+  /**
+   * Return whether this classifier configuration yields more efficient batch prediction
+   *
+   * @return the base classifier's flag indicating whether it can do batch prediction efficiently
+   */
+  public boolean implementsMoreEfficientBatchPrediction() {
+
+    if (!(m_Classifier instanceof BatchPredictor)) {
+      return false;
+    } else {
+      return ((BatchPredictor) m_Classifier).implementsMoreEfficientBatchPrediction();
+    }
+  }
+
+  /**
+   * Returns predictions for a whole set of instances.
+   *
+   * @param insts the instances to make predictions for
+   * @return the 2D array with results
+   */
+  public double[][] distributionsForInstances(Instances insts) throws Exception {
+
+    double[][] probs;
+    if (m_Classifier instanceof BatchPredictor) {
+      probs = new double[insts.numInstances()][insts.numClasses()];
+      for (int i = 0; i < insts.numClasses(); i++) {
+        double[][] p =
+                ((BatchPredictor) m_Classifiers[i]).distributionsForInstances(Filter.useFilter(insts, m_ClassFilters[i]));
+        for (int j = 0; j < p.length; j++) {
+          if (p[j][0] > 1) {
+            p[j][0] = 1;
+          }
+          if (p[j][0] < 0) {
+            p[j][0] = 0;
+          }
+          probs[j][i] = p[j][0];
+        }
+      }
+      for (int i = 0; i < probs.length; i++) {
+        Utils.normalize(probs[i]);
+      }
+      return probs;
+    } else {
+      return super.distributionsForInstances(insts);
+    }
   }
 
   /**
