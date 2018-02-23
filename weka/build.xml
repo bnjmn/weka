@@ -663,7 +663,7 @@
     </copy>
     <copy file="${lib}/core.jar" todir="${build}/classes" />
     <copy file="${lib}/mtj.jar" todir="${build}/classes" />
-    <copy file="${lib}/arpack_combined_all.jar" todir="${build}/classes" />      
+    <copy file="${lib}/arpack_combined.jar" todir="${build}/classes" />      
     <rmic base="${build}/classes"
        classname="weka.experiment.RemoteEngine" if:true="remoteengine_present"/>
     <unzip src="${lib}/java-cup.jar" dest="${build}/classes">
