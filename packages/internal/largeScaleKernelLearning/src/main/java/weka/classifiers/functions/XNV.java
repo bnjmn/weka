@@ -52,6 +52,9 @@ import java.util.Random;
  */
 public class XNV extends RandomizableClassifier {
 
+  /** for serialization */
+  static final long serialVersionUID = -1585383626378691736L;
+
   /** The two Nystroem filters to be used */
   protected Nystroem m_N1;
   protected Nystroem m_N2;
