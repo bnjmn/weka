@@ -6,10 +6,10 @@
 PackageName=XMeans
 
 # Version (required)
-Version=1.0.5
+Version=1.0.6
 
 #Date
-Date=2013-12-11
+Date=2018-02-28
 
 # Title (required)
 Title=Cluster data using the X-means algorithm.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Cluster data using the X-means algorithm.<br/><br/>X-Means is K-Means extended by an Improve-Structure part. In this part of the algorithm, the centers are attempted to be split. The decision between the children of each center and the center itself is done by comparing the BIC-values of the two structures.<br/><br/>For more information see:<br/><br/>Dan Pelleg, Andrew W. Moore: X-means: Extending K-means with Efficient Estimation of the Number of Clusters. In: Seventeenth International Conference on Machine Learning, 727-734, 2000.
 
-Changes=Code clean-up: generic type arguments, elimination of FastVector, clean-up of option handling.
+Changes=Package now includes configuration files that enable GUI-based configuration of KDTree.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.5.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/XMeans1.0.6.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/XMeans

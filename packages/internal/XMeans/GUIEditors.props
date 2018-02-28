@@ -1,0 +1,5 @@
+# Mappings for classes to be handled in the GenericObjectEditor
+# Specify the KDTree editor
+
+# classifiers
+weka.core.neighboursearch.KDTree=weka.gui.GenericObjectEditor
