@@ -5,7 +5,7 @@
 PackageName=distributedWekaSparkDev
 
 # Version (required)
-Version=1.1.1
+Version=1.1.2
 
 #Date (year-month-day)
 Date=2017-10-16
@@ -29,10 +29,10 @@ License=GPL 3
 Description=Development continuation of distributedWekaSpark. Adds access to source files (CSV, Parquet and Avro) via Spark DataFrames, and adds support for both desktop and distributed execution of MLlib algorithms. Provides Spark wrappers for the classes in distributedWekaBase. Includes generic Spark 1.6.3 libraries - To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${user.home}/wekafiles/distributedWekaSpark/lib and copy in the spark-assembly-A.B.C-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
 
 # Changes in this release
-Changes=Small change that adds support for specifying the jar file that contains core Weka via a java property (weka.jar.filename). Bug fix to make MLlibSparkContextManager thread safe.
+Changes=Changes=Now replaces the arpack_combined_all.jar that Spark includes with the 'clean' version from Weka that does not contain the core java CJFormat class in org.j_paine.formatter which is not usable for commercial purposes.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSparkDev1.1.1.zip
+PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSparkDev1.1.2.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2017/07/integrating-spark-mllib-into-weka.html
