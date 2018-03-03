@@ -381,7 +381,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   protected boolean m_ComplexityStatisticsAvailable = true;
 
   /**
-   * The minimum probablility accepted from an estimator to avoid taking log(0)
+   * The minimum probability accepted from an estimator to avoid taking log(0)
    * in Sf calculations.
    */
   protected static final double MIN_SF_PROB = Double.MIN_VALUE;
@@ -2762,29 +2762,19 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Calculate the entropy of the prior distribution.
+   * Returns the mean base-2 log loss wrt the null model. Just calls
+   * SFMeanPriorEntropy.
    *
-   * @return the entropy of the prior distribution
-   * @throws Exception if the class is not nominal
+   * @return the null model entropy per instance
    */
-  public final double priorEntropy() throws Exception {
+  public final double priorEntropy() {
 
-    if (!m_ClassIsNominal) {
-      throw new Exception("Can't compute entropy of class prior: "
-        + "class numeric!");
-    }
-
-    if (m_NoPriors) {
-      return Double.NaN;
-    }
-
-    double entropy = 0;
-    for (int i = 0; i < m_NumClasses; i++) {
-      entropy -=
-        m_ClassPriors[i] / m_ClassPriorsSum
-          * Utils.log2(m_ClassPriors[i] / m_ClassPriorsSum);
-    }
-    return entropy;
+    // The previous version of this method calculated
+    // mean base-2 log loss for the null model wrt the
+    // instances passed into setPriors(). Now, this method will
+    // return the loss for the null model wrt to the test
+    // instances (whatever they are).
+    return SFMeanPriorEntropy();
   }
 
   /**
@@ -2827,6 +2817,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
 
   /**
    * Return the Kononenko & Bratko Relative Information score.
+   * Differs slightly from the expression used in KB's paper
+   * because it uses the mean log-loss of the TEST instances
+   * wrt to the null model for normalization.
    *
    * @return the K&B relative information score
    * @throws Exception if the class is not nominal
@@ -2841,11 +2834,11 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       return Double.NaN;
     }
 
-    return 100.0 * KBInformation() / priorEntropy();
+    return 100.0 * KBMeanInformation() / priorEntropy();
   }
 
   /**
-   * Returns the total entropy for the null model.
+   * Returns the base-2 log loss wrt the null model.
    *
    * @return the total null model entropy
    */
@@ -2859,7 +2852,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Returns the entropy per instance for the null model.
+   * Returns the mean base-2 log loss wrt the null model.
    *
    * @return the null model entropy per instance
    */
@@ -2873,7 +2866,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Returns the total entropy for the scheme.
+   * Returns the base-2 log loss wrt the scheme.
    *
    * @return the total scheme entropy
    */
@@ -2887,7 +2880,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Returns the entropy per instance for the scheme.
+   * Returns the mean base-2 log loss wrt the scheme.
    *
    * @return the scheme entropy per instance
    */
@@ -2901,10 +2894,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Returns the total SF, which is the null model entropy minus the scheme
-   * entropy.
+   * Returns the difference in base-2 log loss between null model and scheme.
    *
-   * @return the total SF
+   * @return the total "SF score"
    */
   public final double SFEntropyGain() {
 
@@ -2916,10 +2908,9 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   }
 
   /**
-   * Returns the SF per instance, which is the null model entropy minus the
-   * scheme entropy, per instance.
+   * Returns the mean difference in base-2 log loss between null model and scheme.
    *
-   * @return the SF per instance
+   * @return the "SF score" per instance
    */
   public final double SFMeanEntropyGain() {
 
