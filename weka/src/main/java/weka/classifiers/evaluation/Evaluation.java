@@ -1375,7 +1375,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
         }
       } else if ((objectInputFileName.length() != 0)
               && ((!(classifier instanceof UpdateableClassifier) || forceBatchTraining) || (testFileName.length() == 0))) {
-        throw new IllegalArgumentException("Classifier not incremental or batch training forced, or no test file provided: can't use both training and model file.");
+        throw new IllegalArgumentException("Classifier not incremental or batch training forced, or no test file provided: can't use model file.");
       }
       if ((objectInputFileName.length() != 0) && ((splitPercentageString.length() != 0) || (foldsString.length() != 0))) {
         throw new IllegalArgumentException("Cannot perform percentage split or cross-validation when model provided.");
@@ -1590,7 +1590,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
     }
     if (trainFileName.length() > 0) {
       if (!noOutput || trainStatistics || printGraph || printSource || objectOutputFileName.length() > 0 ||
-              (testFileName.length() <= 0 && noCrossValidation && splitPercentage != -1)) {
+              (testFileName.length() > 0) || (classificationOutput != null && noCrossValidation && splitPercentage == -1)) {
         if ((classifier instanceof UpdateableClassifier) && !forceBatchTraining) { // Build classifier incrementally
           trainTimeStart = System.currentTimeMillis();
           DataSource trainSource = new DataSource(trainFileName);
@@ -1995,7 +1995,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       }
 
       // Output threshold file
-      if ((thresholdFile.length() != 0)) {
+      if (thresholdFile.length() != 0) {
         ThresholdCurve tc = new ThresholdCurve();
         Instances result = tc.getCurve(testingEvaluation.predictions(), labelIndex);
         DataSink.write(thresholdFile, result);
