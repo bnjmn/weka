@@ -15,7 +15,7 @@
 
 /*
  * SimpleCLIPanel.java
- * Copyright (C) 2009-2012 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2009-2018 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.gui;
@@ -58,6 +58,7 @@ import java.io.FileOutputStream;
 import java.io.PrintStream;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.nio.file.Files;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -884,6 +885,29 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
       } catch (Exception e) {
         System.err.println(e.getMessage());
       }
+    } else if (commandArgs[0].equals("script")) {
+      if (commandArgs.length == 1) {
+	throw new Exception("No script file provided!");
+      }
+      File script = new File(commandArgs[1]);
+      if (!script.exists()) {
+	throw new Exception("Script does not exist: " + script);
+      }
+      if (script.isDirectory()) {
+	throw new Exception("Script points to a directory: " + script);
+      }
+      List<String> cmds = Files.readAllLines(script.toPath());
+      for (String cmd: cmds) {
+        while (m_RunThread != null) {
+	  try {
+	    this.wait(100);
+	  }
+	  catch (Exception e) {
+	    // ignored
+	  }
+	}
+	runCommand(cmd);
+      }
     } else if (commandArgs[0].equals("cls")) {
       // Clear the text area
       m_OutputArea.setText("");
@@ -937,21 +961,15 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
           + "Starts the main method of <classname> with "
           + "the supplied command line arguments (if any).\n"
           + "The command is started in a separate thread, "
-          + "and may be interrupted with the \"break\"\n"
-          + "command (friendly), or killed with the \"kill\" "
-          + "command (unfriendly).\n"
+          + "and can killed with the \"kill\" command.\n"
           + "Redirecting can be done with '>' followed by the "
           + "file to write to, e.g.:\n" + "  java some.Class > ."
           + File.separator + "some.txt");
-      } else if (help && commandArgs[1].equals("break")) {
-        System.out.println("break\n\n"
-          + "Attempts to nicely interrupt the running job, "
-          + "if any. If this doesn't respond in an\n"
-          + "acceptable time, use \"kill\".\n");
+      } else if (help && commandArgs[1].equals("script")) {
+        System.out.println("script <script_file>\n\n" + "Executes the commands in the specified file one by one.\n");
       } else if (help && commandArgs[1].equals("kill")) {
         System.out.println("kill\n\n"
-          + "Kills the running job, if any. You should only "
-          + "use this if the job doesn't respond to\n" + "\"break\".\n");
+          + "Kills the running job, if any.\n");
       } else if (help && commandArgs[1].equals("capabilities")) {
         System.out
           .println("capabilities <classname> <args>\n\n"
@@ -968,9 +986,14 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
       } else {
         // Print a help message
         System.out.println("Command must be one of:\n"
-          + "\tjava <classname> <args> [ > file]\n" + "\tkill\n"
-          + "\tcapabilities <classname> <args>\n" + "\tcls\n" + "\thistory\n"
-          + "\texit\n" + "\thelp <command>\n");
+          + "\tjava <classname> <args> [ > file]\n"
+          + "\tscript <script_file>\n"
+	  + "\tkill\n"
+          + "\tcapabilities <classname> <args>\n"
+	  + "\tcls\n"
+	  + "\thistory\n"
+          + "\texit\n"
+	  + "\thelp <command>\n");
       }
     }
   }
