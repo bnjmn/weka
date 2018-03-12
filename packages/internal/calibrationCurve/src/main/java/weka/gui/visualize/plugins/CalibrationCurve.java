@@ -22,7 +22,6 @@ import weka.core.Instances;
 import weka.core.Utils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Discretize;
-import weka.gui.AttributeVisualizationPanel;
 import weka.gui.visualize.Plot2D;
 import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.VisualizePanel;
@@ -200,8 +199,7 @@ public class CalibrationCurve implements VisualizePlugin {
       PlotData2D plotInfo = new PlotData2D(cdata);
       plotInfo.setConnectPoints(connectPoint);
       plotInfo.setShapeType(shapeType);
-      plotInfo.setPlotName(
-        "\"Calibration curve for class value \" + classAtt.value(classValue)");
+      plotInfo.setPlotName("Calibration curve for class value " + classAtt.value(classValue));
       VisualizePanel vp = new VisualizePanel();
       vp.setName(
         "Calibration curve (x: estimated probability, y: observed probability) for "
