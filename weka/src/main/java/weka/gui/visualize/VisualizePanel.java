@@ -536,6 +536,7 @@ public class VisualizePanel extends PrintablePanel {
 
               int[] nSizes = null;
               int[] nTypes = null;
+              boolean[] connect = null;
               int x = m_xIndex;
               int y = m_yIndex;
 
@@ -548,6 +549,7 @@ public class VisualizePanel extends PrintablePanel {
               if (count > 0) {
                 nTypes = new int[count];
                 nSizes = new int[count];
+                connect = new boolean[count];
                 count = 0;
                 for (int noa = 0; noa < m_plot2D.getMasterPlot().m_plotInstances
                   .numInstances(); noa++) {
@@ -556,6 +558,7 @@ public class VisualizePanel extends PrintablePanel {
 
                     nTypes[count] = m_plot2D.getMasterPlot().m_shapeType[noa];
                     nSizes[count] = m_plot2D.getMasterPlot().m_shapeSize[noa];
+                    connect[count] = m_plot2D.getMasterPlot().m_connectPoints[noa];
                     count++;
                   }
                 }
@@ -567,6 +570,7 @@ public class VisualizePanel extends PrintablePanel {
               try {
                 newPlot.setShapeSize(nSizes);
                 newPlot.setShapeType(nTypes);
+                newPlot.setConnectPoints(connect);
 
                 m_plot2D.removeAllPlots();
 
