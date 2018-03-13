@@ -29,6 +29,7 @@ import weka.gui.visualize.VisualizePanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.List;
 
 import javax.swing.*;
 
@@ -41,8 +42,8 @@ import javax.swing.*;
 public class CalibrationCurve implements VisualizePlugin {
 
   /**
-   * Get the specific version of Weka the class is designed for.
-   * eg: <code>3.5.1</code>
+   * Get the specific version of Weka the class is designed for. eg:
+   * <code>3.5.1</code>
    *
    * @return the version string
    */
@@ -51,8 +52,8 @@ public class CalibrationCurve implements VisualizePlugin {
   }
 
   /**
-   * Get the minimum version of Weka, inclusive, the class
-   * is designed to work with.  eg: <code>3.5.0</code>
+   * Get the minimum version of Weka, inclusive, the class is designed to work
+   * with. eg: <code>3.5.0</code>
    *
    * @return the version string
    */
@@ -61,8 +62,8 @@ public class CalibrationCurve implements VisualizePlugin {
   }
 
   /**
-   * Get the maximum version of Weka, exclusive, the class
-   * is designed to work with.  eg: <code>3.6.0</code>
+   * Get the maximum version of Weka, exclusive, the class is designed to work
+   * with. eg: <code>3.6.0</code>
    *
    * @return the version string
    */
@@ -71,13 +72,13 @@ public class CalibrationCurve implements VisualizePlugin {
   }
 
   /**
-   * Get a JMenu or JMenuItem which contain action listeners
-   * that perform the visualization
+   * Get a JMenu or JMenuItem which contain action listeners that perform the
+   * visualization
    *
-   * @param preds    predictions
+   * @param preds predictions
    * @param classAtt class attribute
-   * @return menuitem for opening visualization(s), or null
-   * to indicate no visualization is applicable for the input
+   * @return menuitem for opening visualization(s), or null to indicate no
+   *         visualization is applicable for the input
    */
   public JMenuItem getVisualizeMenuItem(ArrayList<Prediction> preds,
     Attribute classAtt) {
@@ -94,7 +95,8 @@ public class CalibrationCurve implements VisualizePlugin {
         JMenuItem clv = new JMenuItem(classAtt.value(i));
         final int classValue = i;
         clv.addActionListener(new ActionListener() {
-          @Override public void actionPerformed(ActionEvent e) {
+          @Override
+          public void actionPerformed(ActionEvent e) {
             try {
               display(finalPreds, finalClassAtt, classValue);
             } catch (Exception ex) {
@@ -112,8 +114,8 @@ public class CalibrationCurve implements VisualizePlugin {
   /**
    * Displays the calibration curve.
    *
-   * @param preds      the predictions to plot
-   * @param classAtt   the class attribute
+   * @param preds the predictions to plot
+   * @param classAtt the class attribute
    * @param classValue the class value
    */
   protected void display(ArrayList<Prediction> preds, Attribute classAtt,
@@ -124,76 +126,24 @@ public class CalibrationCurve implements VisualizePlugin {
       return;
     }
 
-    // Remove prediction objects where either the prediction or the actual value are missing
-    ArrayList<Prediction> newPreds = new ArrayList<>();
-    for (Prediction p : preds) {
-      if (!Utils.isMissingValue(p.actual()) && !Utils
-        .isMissingValue(p.predicted())) {
-        newPreds.add(p);
-      }
-    }
-    preds = newPreds;
-
-    ArrayList<Attribute> attributes = new ArrayList<>(1);
-    attributes.add(new Attribute("class_prob"));
-    Instances data =
-      new Instances("class_probabilities", attributes, preds.size());
-
-    for (int i = 0; i < preds.size(); i++) {
-      double[] inst =
-        { ((NominalPrediction) preds.get(i)).distribution()[classValue] };
-      data.add(new DenseInstance(preds.get(i).weight(), inst));
-    }
-
     try {
-      Discretize d = new Discretize();
-      d.setUseEqualFrequency(true);
-      d.setBins(
-        Integer.max(1, (int) Math.round(Math.sqrt(data.sumOfWeights()))));
-      d.setUseBinNumbers(true);
-      d.setInputFormat(data);
-      data = Filter.useFilter(data, d);
+      // Collect data for plotting, making sure that 0,0 and 1,1 are included as
+      // invisible points
+      List<Object> curveData =
+        CalibrationCurveUtils.getCalibrationCurveData(preds, classAtt,
+          classValue);
 
-      int numBins = data.attribute(0).numValues();
-      double[] sumClassProb = new double[numBins];
-      double[] sumTrueClass = new double[numBins];
-      double[] sizeOfBin = new double[numBins];
-      for (int i = 0; i < data.numInstances(); i++) {
-        int binIndex = (int) data.instance(i).value(0);
-        sizeOfBin[binIndex] += preds.get(i).weight();
-        sumTrueClass[binIndex] +=
-          preds.get(i).weight() * ((((int) preds.get(i).actual())
-            == classValue) ? 1.0 : 0.0);
-        sumClassProb[binIndex] +=
-          preds.get(i).weight() * ((NominalPrediction) preds.get(i))
-            .distribution()[classValue];
-      }
+      Instances cdata = (Instances) curveData.get(0);
+      int numBins = (int) curveData.get(1);
 
-      ArrayList<Attribute> atts = new ArrayList<>(1);
-      atts.add(new Attribute("average_class_prob"));
-      atts.add(new Attribute("average_true_class_value"));
-
-      // Collect data for plotting, making sure that 0,0 and 1,1 are included as invisible points
-      Instances cdata =
-        new Instances("calibration_curve_data", atts, numBins + 2);
       int[] shapeType = new int[numBins + 2];
       boolean[] connectPoint = new boolean[numBins + 2];
       for (int i = 0; i < numBins; i++) {
-        double[] v = new double[2];
-        v[0] = sumClassProb[i] / sizeOfBin[i];
-        v[1] = sumTrueClass[i] / sizeOfBin[i];
-        cdata.add(new DenseInstance(sizeOfBin[i], v));
         shapeType[i] = Plot2D.PLUS_SHAPE;
         connectPoint[i] = true;
       }
-      double[] zero = new double[2];
-      double[] one = new double[2];
-      one[0] = 1.0;
-      one[1] = 1.0;
-      cdata.add(new DenseInstance(0.0, zero));
-      cdata.add(new DenseInstance(0.0, one));
-      shapeType[shapeType.length - 2] =
-        -2; // Hack to make sure that corner points are invisible
+      shapeType[shapeType.length - 2] = -2; // Hack to make sure that corner
+                                            // points are invisible
       shapeType[shapeType.length - 1] = -2;
 
       PlotData2D plotInfo = new PlotData2D(cdata);
@@ -201,16 +151,19 @@ public class CalibrationCurve implements VisualizePlugin {
       plotInfo.setShapeType(shapeType);
       plotInfo.setPlotName("Calibration curve for class value " + classAtt.value(classValue));
       VisualizePanel vp = new VisualizePanel();
-      vp.setName(
-        "Calibration curve (x: estimated probability, y: observed probability) for "
-          + classAtt.value(classValue) + " based on" + " " + numBins
-          + " equal-frequency bins");
+      vp.setName("Calibration curve (x: estimated probability, y: observed probability) for "
+        + classAtt.value(classValue)
+        + " based on"
+        + " "
+        + numBins
+        + " equal-frequency bins");
       vp.setMasterPlot(plotInfo);
 
-      JFrame frame = new JFrame(
-        "Calibration curve (x: estimated probability, y: observed probability) for "
-          + classAtt.value(classValue) + " based on" + " " + numBins
-          + " equal-frequency bins");
+      JFrame frame =
+        new JFrame(
+          "Calibration curve (x: estimated probability, y: observed probability) for "
+            + classAtt.value(classValue) + " based on" + " " + numBins
+            + " equal-frequency bins");
       frame.setSize(1024, 800);
       frame.setContentPane(vp);
       frame.setVisible(true);
