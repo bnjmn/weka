@@ -151,6 +151,7 @@ public class CalibrationCurveGenerator extends BaseStep {
     m_isReset = false;
 
     if (getPoolSets() && setNum < maxSetNum) {
+      getStepManager().finished();
       return;
     }
 
