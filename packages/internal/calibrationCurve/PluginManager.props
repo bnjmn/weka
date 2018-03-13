@@ -1,0 +1,2 @@
+weka.knowledgeflow.steps.Step=weka.knowledgeflow.steps.CalibrationCurveGenerator
+*resources*=[weka.knowledgeflow.plugin.templates|Visualizing calibration curves|weka/gui/knowledgeflow/templates/calibration.kf]
