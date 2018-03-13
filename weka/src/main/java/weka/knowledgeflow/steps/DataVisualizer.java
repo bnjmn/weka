@@ -267,11 +267,19 @@ public class DataVisualizer extends BaseStep implements DataCollector {
     Instances toPlot = data.getPrimaryPayload();
     String name = (new SimpleDateFormat("HH:mm:ss.SSS - ")).format(new Date());
     String relationName = toPlot.relationName();
+    boolean connectIt = relationName.startsWith("__");
+    if (connectIt) {
+      toPlot = new Instances(toPlot);
+      toPlot.setRelationName(relationName.substring(2));
+    }
     PlotData2D pd = new PlotData2D(toPlot);
-    if (relationName.startsWith("__")) {
+    if (connectIt) {
       boolean[] connect = new boolean[toPlot.numInstances()];
       for (int i = 1; i < toPlot.numInstances(); i++) {
-        connect[i] = true;
+        if (toPlot.instance(i - 1).weight() >= 0
+          && toPlot.instance(i).weight() >= 0) {
+          connect[i] = true;
+        }
       }
       try {
         pd.setConnectPoints(connect);

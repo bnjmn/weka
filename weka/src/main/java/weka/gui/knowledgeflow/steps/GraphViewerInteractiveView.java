@@ -202,6 +202,7 @@ public class GraphViewerInteractiveView extends BaseInteractiveViewer {
     // m_splitPane.setLeftComponent(m_history);
     add(m_splitPane, BorderLayout.CENTER);
     m_holderPanel.setPreferredSize(new Dimension(800, 600));
+    m_splitPane.setDividerLocation(200 + m_splitPane.getInsets().left);
 
     boolean first = true;
     for (Data d : ((GraphViewer) getStep()).getDatasets()) {

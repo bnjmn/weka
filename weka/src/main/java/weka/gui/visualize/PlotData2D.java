@@ -129,8 +129,9 @@ public class PlotData2D implements Serializable {
     m_connectPoints = new boolean[m_plotInstances.numInstances()];
     for (int i = 0; i < m_plotInstances.numInstances(); i++) {
       m_shapeSize[i] = Plot2D.DEFAULT_SHAPE_SIZE; // default shape size
-      m_shapeType[i] = Plot2D.CONST_AUTOMATIC_SHAPE; // default (automatic shape
-                                                     // assignment)
+      // default (automatic shape assignment) or -ve weight indicates hack to make
+      // point invisible
+      m_shapeType[i] = m_plotInstances.instance(i).weight() >= 0 ? Plot2D.CONST_AUTOMATIC_SHAPE : -2;
     }
     determineBounds();
   }

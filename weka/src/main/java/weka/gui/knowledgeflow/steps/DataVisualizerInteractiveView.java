@@ -204,6 +204,7 @@ public class DataVisualizerInteractiveView extends BaseInteractiveViewer {
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_history, m_visPanel);
 
     add(m_splitPane, BorderLayout.CENTER);
+    m_splitPane.setDividerLocation(200 + m_splitPane.getInsets().left);
     boolean first = true;
     for (PlotData2D pd : ((DataVisualizer) getStep()).getPlots()) {
       m_history.addResult(pd.getPlotName(), new StringBuffer());

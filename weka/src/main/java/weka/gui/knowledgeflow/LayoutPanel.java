@@ -1198,6 +1198,7 @@ public class LayoutPanel extends PrintablePanel {
       jf.setLayout(new BorderLayout());
       jf.add((JComponent) viewer, BorderLayout.CENTER);
       jf.pack();
+      jf.setSize(1000, 600);
       jf.setLocationRelativeTo(SwingUtilities.getWindowAncestor(this));
       jf.setVisible(true);
       ((StepInteractiveViewer) viewer).nowVisible();

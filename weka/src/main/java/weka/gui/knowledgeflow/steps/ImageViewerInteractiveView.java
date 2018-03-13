@@ -261,6 +261,7 @@ public class ImageViewerInteractiveView extends BaseInteractiveViewer {
       JScrollPane js = new JScrollPane(id);
       holder.add(js, BorderLayout.CENTER);
       JSplitPane p2 = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, p, holder);
+      p2.setDividerLocation(200 + p2.getInsets().left);
 
       topP.add(p2, BorderLayout.CENTER);
       // topP.add(p, BorderLayout.WEST);
