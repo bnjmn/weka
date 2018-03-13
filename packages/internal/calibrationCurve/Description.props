@@ -9,7 +9,7 @@ PackageName=calibrationCurve
 Version=1.0.0
 
 #Date
-Date=2018-03-11
+Date=2018-03-14
 
 # Title (required)
 Title=VisualizePlugin for plotting class probability calibration curves
@@ -26,7 +26,7 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=VisualizePlugin that can be used in the Classify panel of the Explorer to plot class probability calibration curves. Accessible under Plugins when right-clicking on the corresponding entry in the Result list. The number of bins for equal-frequency discretization of the estimated class probabilities is chosen as the square root of the number of instances.
+Description=VisualizePlugin that can be used in the Classify panel of the Explorer or the Knowledge Flow to plot class probability calibration curves. Accessible under Plugins when right-clicking on the corresponding entry in the Result list of the Classify panel. The number of bins for equal-frequency discretization of the estimated class probabilities is chosen as the square root of the number of instances.
 
 Changes=Initial import.
 
