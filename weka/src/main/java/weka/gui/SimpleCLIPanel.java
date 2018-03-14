@@ -28,6 +28,7 @@ import weka.core.Instances;
 import weka.core.OptionHandler;
 import weka.core.Trie;
 import weka.core.Utils;
+import weka.core.WekaPackageManager;
 import weka.gui.knowledgeflow.StepVisual;
 import weka.gui.scripting.ScriptingPanel;
 
@@ -1225,7 +1226,7 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
 
     try {
       filename =
-        System.getProperties().getProperty("user.home") + File.separatorChar
+        WekaPackageManager.PROPERTIES_DIR.getAbsolutePath() + File.separatorChar
           + FILENAME;
       stream = new BufferedOutputStream(new FileOutputStream(filename));
       PROPERTIES.store(stream, "SimpleCLI");
