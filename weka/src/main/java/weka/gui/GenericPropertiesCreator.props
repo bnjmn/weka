@@ -228,3 +228,7 @@ weka.core.PartitionGenerator=\
 # stopword algorithms
 weka.core.stopwords.StopwordsHandler=\
   weka.core.stopwords
+
+# the commands for the SimpleCLI
+weka.gui.simplecli.AbstractCommand=\
+  weka.gui.simplecli
