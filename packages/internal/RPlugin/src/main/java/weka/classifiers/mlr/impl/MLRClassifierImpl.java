@@ -308,7 +308,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   /**
    * Attempt to initialize the R environment. Sees if R is available, followed
    * by the MLR package. If MLR is not available it attempts to install and load
-   * it for the user.
+   * it for the user. It does the same for the XML package.
    * 
    * @throws Exception if a problem occurs
    */
@@ -338,6 +338,18 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     eng = RSession.acquireSession(this);
     eng.setLog(this, m_logger);
+    if (!eng.loadLibrary(this, "XML")) {
+      System.err.println("XML can't be loaded - trying to install....");
+      eng.installLibrary(this, "XML");
+
+      // try loading again
+      if (!eng.loadLibrary(this, "XML")) {
+        return;
+      }
+
+      System.err.println("XML loaded successfully.");
+    }
+
     if (!eng.loadLibrary(this, "mlr")) {
       System.err.println("MLR can't be loaded - trying to install....");
       eng.installLibrary(this, "mlr");
