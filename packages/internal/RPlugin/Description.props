@@ -8,7 +8,7 @@ PackageName=RPlugin
 Version=1.3.26
 
 #Date (year-month-day)
-Date=2018-03-17
+Date=2018-03-19
 
 # Title (required)
 Title=Execute R Scripts
