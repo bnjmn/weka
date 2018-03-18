@@ -37,6 +37,7 @@ import org.rosuda.REngine.REXPLogical;
 import org.rosuda.REngine.REXPMismatchException;
 import org.rosuda.REngine.REngine;
 import org.rosuda.REngine.REngineCallbacks;
+import org.rosuda.REngine.REngineEvalException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.REngineOutputInterface;
 
@@ -471,8 +472,13 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
 
     checkSessionHolder(requester);
 
-    REXP result = parseAndEval(requester, "library(" + libraryName + ")");
-    if (result.isNull()) {
+    try {
+      REXP result = parseAndEval(requester, "library(" + libraryName + ")");
+      if (result.isNull()) {
+        return false;
+      }
+    } catch (REngineEvalException e) {
+      System.err.println("Unable to load library '" + libraryName + "'.");
       return false;
     }
 
