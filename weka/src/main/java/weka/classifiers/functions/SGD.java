@@ -837,7 +837,7 @@ public class SGD extends RandomizableClassifier implements
   /**
    * Computes the distribution for a given instance
    * 
-   * @param instance the instance for which distribution is computed
+   * @param inst the instance for which distribution is computed
    * @return the distribution
    * @throws Exception if the distribution can't be computed successfully
    */
@@ -908,7 +908,7 @@ public class SGD extends RandomizableClassifier implements
       buff.append("Hinge loss (SVM)\n\n");
     } else if (m_loss == LOGLOSS) {
       buff.append("Log loss (logistic regression)\n\n");
-    } if (m_loss == EPSILON_INSENSITIVE) {
+    } else if (m_loss == EPSILON_INSENSITIVE) {
       buff.append("Epsilon insensitive loss (SVM regression)\n\n");
     } else if (m_loss == HUBER) {
       buff.append("Huber loss (robust regression)\n\n");
