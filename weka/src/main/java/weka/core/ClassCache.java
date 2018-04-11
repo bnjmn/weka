@@ -204,21 +204,25 @@ public class ClassCache implements RevisionHandler {
 
     // check classes
     files = dir.listFiles(new ClassFileFilter());
-    for (File file : files) {
-      if (prefix == null) {
-        add(file.getName());
-      } else {
-        add(prefix + "." + file.getName());
+    if (files != null) {
+      for (File file : files) {
+        if (prefix == null) {
+          add(file.getName());
+        } else {
+          add(prefix + "." + file.getName());
+        }
       }
     }
 
     // descend in directories
     files = dir.listFiles(new DirectoryFilter());
-    for (File file : files) {
-      if (prefix == null) {
-        initFromDir(file.getName(), file);
-      } else {
-        initFromDir(prefix + "." + file.getName(), file);
+    if (files != null) {
+      for (File file : files) {
+        if (prefix == null) {
+          initFromDir(file.getName(), file);
+        } else {
+          initFromDir(prefix + "." + file.getName(), file);
+        }
       }
     }
   }
