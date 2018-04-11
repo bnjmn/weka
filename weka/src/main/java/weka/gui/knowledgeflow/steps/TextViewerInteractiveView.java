@@ -119,6 +119,7 @@ public class TextViewerInteractiveView extends BaseInteractiveViewer implements
     JSplitPane p2 =
       new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, m_history, m_textScroller);
     add(p2, BorderLayout.CENTER);
+    p2.setDividerLocation(200 + p2.getInsets().left);
 
     // copy all results over to the history panel.
     Map<String, String> runResults = ((TextViewer) getStep()).getResults();
