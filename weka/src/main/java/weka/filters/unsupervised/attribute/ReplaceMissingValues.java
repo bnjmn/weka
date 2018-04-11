@@ -19,7 +19,6 @@
  *
  */
 
-
 package weka.filters.unsupervised.attribute;
 
 import weka.core.*;
@@ -27,41 +26,43 @@ import weka.core.Capabilities.Capability;
 import weka.filters.Sourcable;
 import weka.filters.UnsupervisedFilter;
 
-/** 
- <!-- globalinfo-start -->
- * Replaces all missing values for nominal and numeric attributes in a dataset with the modes and means
- * from the training data. The class attribute is skipped by default.
+/**
+ * <!-- globalinfo-start --> Replaces all missing values for nominal and numeric
+ * attributes in a dataset with the modes and means from the training data. The
+ * class attribute is skipped by default.
  * <p/>
- <!-- globalinfo-end -->
+ * <!-- globalinfo-end -->
  *
- <!-- options-start -->
- * Valid options are: <p/>
+ * <!-- options-start --> Valid options are:
+ * <p/>
  * 
- * <pre> -unset-class-temporarily
+ * <pre>
+ * -unset-class-temporarily
  *  Unsets the class index temporarily before the filter is
  *  applied to the data.
- *  (default: no)</pre>
+ *  (default: no)
+ * </pre>
  * 
- <!-- options-end -->
+ * <!-- options-end -->
  * 
- * @author Eibe Frank (eibe@cs.waikato.ac.nz) 
+ * @author Eibe Frank (eibe@cs.waikato.ac.nz)
  * @version $Revision$
  */
-public class ReplaceMissingValues 
-  extends PotentialClassIgnorer
-  implements UnsupervisedFilter, Sourcable, WeightedInstancesHandler, WeightedAttributesHandler {
+public class ReplaceMissingValues extends PotentialClassIgnorer implements
+  UnsupervisedFilter, Sourcable, WeightedInstancesHandler,
+  WeightedAttributesHandler {
 
   /** for serialization */
   static final long serialVersionUID = 8349568310991609867L;
-  
+
   /** The modes and means */
   private double[] m_ModesAndMeans = null;
 
   /**
    * Returns a string describing this filter
    *
-   * @return a description of the filter suitable for
-   * displaying in the explorer/experimenter gui
+   * @return a description of the filter suitable for displaying in the
+   *         explorer/experimenter gui
    */
   public String globalInfo() {
 
@@ -69,11 +70,11 @@ public class ReplaceMissingValues
       + "dataset with the modes and means from the training data. The class attribute is skipped by default.";
   }
 
-  /** 
+  /**
    * Returns the Capabilities of this filter.
    *
-   * @return            the capabilities of this object
-   * @see               Capabilities
+   * @return the capabilities of this object
+   * @see Capabilities
    */
   public Capabilities getCapabilities() {
     Capabilities result = super.getCapabilities();
@@ -82,27 +83,25 @@ public class ReplaceMissingValues
     // attributes
     result.enableAllAttributes();
     result.enable(Capability.MISSING_VALUES);
-    
+
     // class
     result.enableAllClasses();
     result.enable(Capability.MISSING_CLASS_VALUES);
     result.enable(Capability.NO_CLASS);
-    
+
     return result;
   }
 
   /**
    * Sets the format of the input instances.
    *
-   * @param instanceInfo an Instances object containing the input 
-   * instance structure (any instances contained in the object are 
-   * ignored - only the structure is required).
+   * @param instanceInfo an Instances object containing the input instance
+   *          structure (any instances contained in the object are ignored -
+   *          only the structure is required).
    * @return true if the outputFormat may be collected immediately
-   * @throws Exception if the input format can't be set 
-   * successfully
+   * @throws Exception if the input format can't be set successfully
    */
-  public boolean setInputFormat(Instances instanceInfo) 
-       throws Exception {
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
 
     super.setInputFormat(instanceInfo);
     setOutputFormat(instanceInfo);
@@ -111,12 +110,11 @@ public class ReplaceMissingValues
   }
 
   /**
-   * Input an instance for filtering. Filter requires all
-   * training instances be read before producing output.
+   * Input an instance for filtering. Filter requires all training instances be
+   * read before producing output.
    *
    * @param instance the input instance
-   * @return true if the filtered instance may now be
-   * collected with output().
+   * @return true if the filtered instance may now be collected with output().
    * @throws IllegalStateException if no input format has been set.
    */
   public boolean input(Instance instance) {
@@ -138,9 +136,9 @@ public class ReplaceMissingValues
   }
 
   /**
-   * Signify that this batch of input to the filter is finished. 
-   * If the filter requires all instances prior to filtering,
-   * output() may now be called to retrieve the filtered instances.
+   * Signify that this batch of input to the filter is finished. If the filter
+   * requires all instances prior to filtering, output() may now be called to
+   * retrieve the filtered instances.
    *
    * @return true if there are instances pending output
    * @throws IllegalStateException if no input structure has been defined
@@ -218,82 +216,89 @@ public class ReplaceMissingValues
   }
 
   /**
-   * Convert a single instance over. The converted instance is 
-   * added to the end of the output queue.
+   * Convert a single instance over. The converted instance is added to the end
+   * of the output queue.
    *
    * @param instance the instance to convert
    */
   private void convertInstance(Instance instance) {
 
-    Instance inst = null;
-    if (instance instanceof SparseInstance) {
-      double[] vals = new double[instance.numValues()];
-      int[] indices = new int[instance.numValues()];
-      int num = 0;
-      for (int j = 0; j < instance.numValues(); j++) {
-        if (instance.isMissingSparse(j) &&
-                (getInputFormat().classIndex() != instance.index(j)) &&
-                (instance.attributeSparse(j).isNominal() ||
-                        instance.attributeSparse(j).isNumeric())) {
-          if (m_ModesAndMeans[instance.index(j)] != 0.0) {
-            vals[num] = m_ModesAndMeans[instance.index(j)];
+    Instance inst = instance;
+    if (instance.hasMissingValue()) {
+      if (instance instanceof SparseInstance) {
+        double[] vals = new double[instance.numValues()];
+        int[] indices = new int[instance.numValues()];
+        int num = 0;
+        for (int j = 0; j < instance.numValues(); j++) {
+          if (instance.isMissingSparse(j)
+            && (getInputFormat().classIndex() != instance.index(j))
+            && (instance.attributeSparse(j).isNominal() || instance
+              .attributeSparse(j).isNumeric())) {
+            if (m_ModesAndMeans[instance.index(j)] != 0.0) {
+              vals[num] = m_ModesAndMeans[instance.index(j)];
+              indices[num] = instance.index(j);
+              num++;
+            }
+          } else {
+            vals[num] = instance.valueSparse(j);
             indices[num] = instance.index(j);
             num++;
           }
-        } else {
-          vals[num] = instance.valueSparse(j);
-          indices[num] = instance.index(j);
-          num++;
         }
-      }
-      if (num == instance.numValues()) {
-        inst = new SparseInstance(instance.weight(), vals, indices,
-                instance.numAttributes());
+        if (num == instance.numValues()) {
+          inst =
+            new SparseInstance(instance.weight(), vals, indices,
+              instance.numAttributes());
+        } else {
+          double[] tempVals = new double[num];
+          int[] tempInd = new int[num];
+          System.arraycopy(vals, 0, tempVals, 0, num);
+          System.arraycopy(indices, 0, tempInd, 0, num);
+          inst =
+            new SparseInstance(instance.weight(), tempVals, tempInd,
+              instance.numAttributes());
+        }
       } else {
-        double[] tempVals = new double[num];
-        int[] tempInd = new int[num];
-        System.arraycopy(vals, 0, tempVals, 0, num);
-        System.arraycopy(indices, 0, tempInd, 0, num);
-        inst = new SparseInstance(instance.weight(), tempVals, tempInd,
-                instance.numAttributes());
-      }
-    } else {
-      double[] vals = new double[getInputFormat().numAttributes()];
-      for (int j = 0; j < instance.numAttributes(); j++) {
-        if (instance.isMissing(j) &&
-                (getInputFormat().classIndex() != j) &&
-                (getInputFormat().attribute(j).isNominal() ||
-                        getInputFormat().attribute(j).isNumeric())) {
-          vals[j] = m_ModesAndMeans[j];
-        } else {
-          vals[j] = instance.value(j);
+        double[] vals = new double[getInputFormat().numAttributes()];
+        for (int j = 0; j < instance.numAttributes(); j++) {
+          if (instance.isMissing(j)
+            && (getInputFormat().classIndex() != j)
+            && (getInputFormat().attribute(j).isNominal() || getInputFormat()
+              .attribute(j).isNumeric())) {
+            vals[j] = m_ModesAndMeans[j];
+          } else {
+            vals[j] = instance.value(j);
+          }
         }
+        inst = new DenseInstance(instance.weight(), vals);
       }
-      inst = new DenseInstance(instance.weight(), vals);
     }
     inst.setDataset(instance.dataset());
     push(inst, false); // No need to copy
   }
-  
+
   /**
-   * Returns a string that describes the filter as source. The
-   * filter will be contained in a class with the given name (there may
-   * be auxiliary classes),
+   * Returns a string that describes the filter as source. The filter will be
+   * contained in a class with the given name (there may be auxiliary classes),
    * and will contain two methods with these signatures:
-   * <pre><code>
+   * 
+   * <pre>
+   * <code>
    * // converts one row
    * public static Object[] filter(Object[] i);
    * // converts a full dataset (first dimension is row index)
    * public static Object[][] filter(Object[][] i);
-   * </code></pre>
-   * where the array <code>i</code> contains elements that are either
-   * Double, String, with missing values represented as null. The generated
-   * code is public domain and comes with no warranty.
+   * </code>
+   * </pre>
+   * 
+   * where the array <code>i</code> contains elements that are either Double,
+   * String, with missing values represented as null. The generated code is
+   * public domain and comes with no warranty.
    *
-   * @param className   the name that should be given to the source class.
-   * @param data	the dataset used for initializing the filter
-   * @return            the object source described by a string
-   * @throws Exception  if the source can't be computed
+   * @param className the name that should be given to the source class.
+   * @param data the dataset used for initializing the filter
+   * @return the object source described by a string
+   * @throws Exception if the source can't be computed
    */
   public String toSource(String className, Instances data) throws Exception {
     StringBuffer result;
@@ -327,14 +332,19 @@ public class ReplaceMissingValues
 
     result.append("class " + className + " {\n");
     result.append("\n");
-    result.append("  /** lists which numeric attributes will be processed */\n");
-    result.append("  protected final static boolean[] NUMERIC = new boolean[]{" + Utils.arrayToString(numeric) + "};\n");
+    result
+      .append("  /** lists which numeric attributes will be processed */\n");
+    result.append("  protected final static boolean[] NUMERIC = new boolean[]{"
+      + Utils.arrayToString(numeric) + "};\n");
     result.append("\n");
-    result.append("  /** lists which nominal attributes will be processed */\n");
-    result.append("  protected final static boolean[] NOMINAL = new boolean[]{" + Utils.arrayToString(nominal) + "};\n");
+    result
+      .append("  /** lists which nominal attributes will be processed */\n");
+    result.append("  protected final static boolean[] NOMINAL = new boolean[]{"
+      + Utils.arrayToString(nominal) + "};\n");
     result.append("\n");
     result.append("  /** the means */\n");
-    result.append("  protected final static double[] MEANS = new double[]{" + Utils.arrayToString(means).replaceAll("NaN", "Double.NaN") + "};\n");
+    result.append("  protected final static double[] MEANS = new double[]{"
+      + Utils.arrayToString(means).replaceAll("NaN", "Double.NaN") + "};\n");
     result.append("\n");
     result.append("  /** the modes */\n");
     result.append("  protected final static String[] MODES = new String[]{");
@@ -395,11 +405,11 @@ public class ReplaceMissingValues
 
     return result.toString();
   }
-  
+
   /**
    * Returns the revision string.
    * 
-   * @return		the revision
+   * @return the revision
    */
   public String getRevision() {
     return RevisionUtils.extract("$Revision$");
@@ -408,10 +418,9 @@ public class ReplaceMissingValues
   /**
    * Main method for testing this class.
    *
-   * @param argv should contain arguments to the filter: 
-   * use -h for help
+   * @param argv should contain arguments to the filter: use -h for help
    */
-  public static void main(String [] argv) {
+  public static void main(String[] argv) {
     runFilter(new ReplaceMissingValues(), argv);
   }
 }
