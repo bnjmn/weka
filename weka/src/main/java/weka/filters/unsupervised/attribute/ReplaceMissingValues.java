@@ -224,7 +224,8 @@ public class ReplaceMissingValues extends PotentialClassIgnorer implements
   private void convertInstance(Instance instance) {
 
     Instance inst = instance;
-    if (instance.hasMissingValue()) {
+    boolean hasMissing = instance.hasMissingValue();
+    if (hasMissing) {
       if (instance instanceof SparseInstance) {
         double[] vals = new double[instance.numValues()];
         int[] indices = new int[instance.numValues()];
@@ -274,7 +275,7 @@ public class ReplaceMissingValues extends PotentialClassIgnorer implements
       }
     }
     inst.setDataset(instance.dataset());
-    push(inst, false); // No need to copy
+    push(inst, !hasMissing); // No need to shallow copy if we've deep copied already
   }
 
   /**
