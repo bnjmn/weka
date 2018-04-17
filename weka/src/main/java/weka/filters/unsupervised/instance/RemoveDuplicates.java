@@ -29,7 +29,7 @@ import java.util.HashSet;
 
 /**
  <!-- globalinfo-start -->
- * Removes all duplicate instances from the first batch of data it receives.
+ * Removes all duplicate instances from the first batch of data it receives. Simply returns copies of other batches.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -57,7 +57,8 @@ public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttri
    */
   @Override
   public String globalInfo() {
-    return "Removes all duplicate instances from the first batch of data it receives.";
+    return "Removes all duplicate instances from the first batch of data it receives. " +
+            "Simply returns a copy of other batches.";
   }
 
   /**
@@ -175,7 +176,7 @@ public class RemoveDuplicates extends SimpleBatchFilter implements WeightedAttri
       newInstances.compactify();
       return newInstances;
     }
-    throw new Exception("The process method should never be called for subsequent batches.");
+    return new Instances(instances);
   }
 
   /**
