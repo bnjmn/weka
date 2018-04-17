@@ -698,8 +698,12 @@ public abstract class Filter implements Serializable, CapabilitiesHandler,
      * System.err.println(filter.getClass().getName() + " in:" +
      * data.numInstances());
      */
-    for (int i = 0; i < data.numInstances(); i++) {
-      filter.input(data.instance(i));
+    if (filter instanceof SimpleBatchFilter) {
+      ((SimpleBatchFilter)filter).input(data);
+    } else {
+      for (int i = 0; i < data.numInstances(); i++) {
+        filter.input(data.instance(i));
+      }
     }
     filter.batchFinished();
     Instances newData = filter.getOutputFormat();
