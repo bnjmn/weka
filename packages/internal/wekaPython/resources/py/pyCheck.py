@@ -66,8 +66,13 @@ def check_min_pandas():
         import pandas
 
         actual_pandas = pandas.__version__.split('.')
-        if len(actual_pandas) is not len(min_pandas):
-            raise Exception()
+        # Some versions of pandas (i.e included in the Intel Python distro)
+        # have version numbers with more than 3 parts (e.g. 0.22.0+0.ga00154d.dirty).
+        # So, this check is now commented out
+        # if len(actual_pandas) is not len(min_pandas):
+        #    raise Exception()
+        #if len(actual_pandas) is not len(min_pandas):
+        #    raise Exception()
         result = check_min_version(min_pandas, actual_pandas)
         if result:
             append_to_results(
