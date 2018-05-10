@@ -343,7 +343,9 @@ public abstract class NormalizableDistance implements DistanceFunction,
   public void update(Instance ins) {
     validate();
 
-    m_Ranges = updateRanges(ins, m_Ranges);
+    if (!m_DontNormalize) {
+      m_Ranges = updateRanges(ins, m_Ranges);
+    }
   }
 
   /**
@@ -569,24 +571,26 @@ public abstract class NormalizableDistance implements DistanceFunction,
       return m_Ranges;
     }
 
-    int numAtt = m_Data.numAttributes();
-    double[][] ranges = new double[numAtt][3];
+    if (!m_DontNormalize) {
+      int numAtt = m_Data.numAttributes();
+      double[][] ranges = new double[numAtt][3];
 
-    if (m_Data.numInstances() <= 0) {
-      initializeRangesEmpty(numAtt, ranges);
+      if (m_Data.numInstances() <= 0) {
+        initializeRangesEmpty(numAtt, ranges);
+        m_Ranges = ranges;
+        return m_Ranges;
+      } else {
+        // initialize ranges using the first instance
+        updateRangesFirst(m_Data.instance(0), numAtt, ranges);
+      }
+
+      // update ranges, starting from the second
+      for (int i = 1; i < m_Data.numInstances(); i++) {
+        updateRanges(m_Data.instance(i), numAtt, ranges);
+      }
+
       m_Ranges = ranges;
-      return m_Ranges;
-    } else {
-      // initialize ranges using the first instance
-      updateRangesFirst(m_Data.instance(0), numAtt, ranges);
     }
-
-    // update ranges, starting from the second
-    for (int i = 1; i < m_Data.numInstances(); i++) {
-      updateRanges(m_Data.instance(i), numAtt, ranges);
-    }
-
-    m_Ranges = ranges;
 
     return m_Ranges;
   }
@@ -624,7 +628,45 @@ public abstract class NormalizableDistance implements DistanceFunction,
    */
   public void updateRanges(Instance instance, int numAtt, double[][] ranges) {
     // updateRangesFirst must have been called on ranges
-    for (int j = 0; j < numAtt; j++) {
+    int numVals = instance.numValues();
+    int prevIndex = 0;
+
+    for (int j = 0; j < numVals; j++) {
+      int currIndex = instance.index(j);
+      while (prevIndex < currIndex) {
+        if (0 < ranges[prevIndex][R_MIN]) {
+          ranges[prevIndex][R_MIN] = 0;
+          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
+          if (0 > ranges[prevIndex][R_MAX]) {
+            ranges[prevIndex][R_MAX] = 0;
+            ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
+          }
+        } else if (0 > ranges[prevIndex][R_MAX]) {
+          ranges[prevIndex][R_MAX] = 0;
+          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
+        }
+        prevIndex++;
+      }
+      prevIndex++;
+      boolean isMissing = instance instanceof SparseInstance ?
+        instance.isMissingSparse(j) : instance.isMissing(currIndex);
+      if (!isMissing) {
+        double val = instance instanceof SparseInstance ? instance.valueSparse(j) : instance.value(currIndex);
+        if (val < ranges[currIndex][R_MIN]) {
+          ranges[currIndex][R_MIN] = val;
+          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+          if (val > ranges[currIndex][R_MAX]) {
+            ranges[currIndex][R_MAX] = val;
+            ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+          }
+        } else if (val > ranges[currIndex][R_MAX]) {
+          ranges[currIndex][R_MAX] = val;
+          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+        }
+      }
+    }
+
+    /* for (int j = 0; j < numAtt; j++) {
       double value = instance.value(j);
       if (!instance.isMissing(j)) {
         if (value < ranges[j][R_MIN]) {
@@ -641,7 +683,7 @@ public abstract class NormalizableDistance implements DistanceFunction,
           }
         }
       }
-    }
+    } */
   }
 
   /**
@@ -667,7 +709,38 @@ public abstract class NormalizableDistance implements DistanceFunction,
    */
   public double[][] updateRanges(Instance instance, double[][] ranges) {
     // updateRangesFirst must have been called on ranges
-    for (int j = 0; j < ranges.length; j++) {
+
+    int numVals = instance.numValues();
+    int prevIndex = 0;
+
+    for (int j = 0; j < numVals; j++) {
+      int currIndex = instance.index(j);
+      while (prevIndex < currIndex) {
+        if (0 < ranges[prevIndex][R_MIN]) {
+          ranges[prevIndex][R_MIN] = 0;
+          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
+        } else if (0 > ranges[prevIndex][R_MAX]) {
+          ranges[prevIndex][R_MAX] = 0;
+          ranges[prevIndex][R_WIDTH] = ranges[prevIndex][R_MAX] - ranges[prevIndex][R_MIN];
+        }
+        prevIndex++;
+      }
+      prevIndex++;
+      boolean isMissing = instance instanceof SparseInstance ?
+        instance.isMissingSparse(j) : instance.isMissing(currIndex);
+      if (!isMissing) {
+        double val = instance instanceof SparseInstance ? instance.valueSparse(j) : instance.value(currIndex);
+        if (val < ranges[currIndex][R_MIN]) {
+          ranges[currIndex][R_MIN] = val;
+          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+        } else if (val > ranges[currIndex][R_MAX]) {
+          ranges[currIndex][R_MAX] = val;
+          ranges[currIndex][R_WIDTH] = ranges[currIndex][R_MAX] - ranges[currIndex][R_MIN];
+        }
+      }
+    }
+
+    /* for (int j = 0; j < ranges.length; j++) {
       double value = instance.value(j);
       if (!instance.isMissing(j)) {
         if (value < ranges[j][R_MIN]) {
@@ -680,7 +753,7 @@ public abstract class NormalizableDistance implements DistanceFunction,
           }
         }
       }
-    }
+    } */
 
     return ranges;
   }
