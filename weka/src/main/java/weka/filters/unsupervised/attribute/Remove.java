@@ -206,6 +206,11 @@ public class Remove extends Filter implements UnsupervisedFilter,
     ArrayList<Attribute> attributes = new ArrayList<Attribute>();
     int outputClass = -1;
     m_SelectedAttributes = m_SelectCols.getSelection();
+    if (m_SelectedAttributes.length == instanceInfo.numAttributes()) { // Nothing is being removed
+      setOutputFormat(instanceInfo);
+      initInputLocators(getInputFormat(), m_SelectedAttributes);
+      return true;
+    }
     for (int current : m_SelectedAttributes) {
       if (instanceInfo.classIndex() == current) {
         outputClass = attributes.size();
@@ -245,16 +250,21 @@ public class Remove extends Filter implements UnsupervisedFilter,
     if (getOutputFormat().numAttributes() == 0) {
       return false;
     }
-    double[] vals = new double[getOutputFormat().numAttributes()];
-    for (int i = 0; i < m_SelectedAttributes.length; i++) {
-      int current = m_SelectedAttributes[i];
-      vals[i] = instance.value(current);
-    }
-    Instance inst = null;
-    if (instance instanceof SparseInstance) {
-      inst = new SparseInstance(instance.weight(), vals);
+    Instance inst;
+    if (m_SelectedAttributes.length == getInputFormat().numAttributes()) { // Nothing is being removed
+      inst = (Instance) instance.copy();
+      inst.setDataset(null);
     } else {
-      inst = new DenseInstance(instance.weight(), vals);
+      double[] vals = new double[getOutputFormat().numAttributes()];
+      for (int i = 0; i < m_SelectedAttributes.length; i++) {
+        int current = m_SelectedAttributes[i];
+        vals[i] = instance.value(current);
+      }
+      if (instance instanceof SparseInstance) {
+        inst = new SparseInstance(instance.weight(), vals);
+      } else {
+        inst = new DenseInstance(instance.weight(), vals);
+      }
     }
 
     copyValues(inst, false, instance.dataset(), outputFormatPeek());
