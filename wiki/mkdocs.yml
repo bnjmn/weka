@@ -1,6 +1,6 @@
 site_name: Weka Wiki
 site_url: https://www.cs.waikato.ac.nz/ml/weka/wiki/
-site_description: Documention on Weka that can also be found in the manual and the example archive that comes with each Weka download (zip or installer).
+site_description: Some documention on Weka that can also be found in the manual and the example archive that comes with each Weka download (zip or installer).
 theme: readthedocs
 theme_dir: 'weka_theme'
 # if page names start with a blank, eg ' Some name', then they get 
