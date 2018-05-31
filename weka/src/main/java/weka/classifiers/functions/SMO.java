@@ -1708,7 +1708,7 @@ public class SMO
     result.addElement(new Option(
             "\tFull name of calibration model, followed by options.\n" +
                     "\t(default: \"weka.classifiers.functions.Logistic\")",
-            "calibrator", 0, "-calibrator <scheme specification>"));
+            "calibrator", 1, "-calibrator <scheme specification>"));
 
     result.addAll(Collections.list(super.listOptions()));
 
