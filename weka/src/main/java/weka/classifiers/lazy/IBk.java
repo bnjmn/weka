@@ -626,7 +626,7 @@ public class IBk
     newVector.addElement(new Option(
 	      "\tThe nearest neighbour search algorithm to use "+
           "(default: weka.core.neighboursearch.LinearNNSearch).\n",
-	      "A", 0, "-A"));
+	      "A", 1, "-A"));
 
     newVector.addAll(Collections.list(super.listOptions()));
     
