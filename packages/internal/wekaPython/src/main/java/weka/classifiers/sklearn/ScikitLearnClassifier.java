@@ -165,6 +165,22 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       "\tcopy_X=True, criterion='aic', eps=2.2204460492503131e-16,\n"
         + "\tfit_intercept=True, max_iter=500, normalize=True, precompute='auto',\n"
         + "\tverbose=False"),
+    MLPClassifier("neural_network", true, false, true,
+      "\thidden_layer_sizes=(100,), " + "activation='relu', solver='adam',\n"
+        + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
+        + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
+        + "\tshuffle=True, random_state=None, tol=0.0001, verbose=False,\n"
+        + "\twarm_start=False, momentum=0.9, nestervos_momentom=True,\n"
+        + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
+        + "\tbeta_2=0.999, epsilon=1e-08"),
+    MLPRegressor("neural_network", false, true, false,
+      "\thidden_layer_sizes=(100,), " + "activation='relu', solver='adam',\n"
+        + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
+        + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
+        + "\tshuffle=True, random_state=None, tol=0.0001, verbose=False,\n"
+        + "\twarm_start=False, momentum=0.9, nestervos_momentom=True,\n"
+        + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
+        + "\tbeta_2=0.999, epsilon=1e-08"),
     OrthogonalMatchingPursuit("linear_model", false, true, false,
       "\tfit_intercept=True, n_nonzero_coefs=None,\n"
         + "\tnormalize=True, precompute='auto', tol=None"),
@@ -606,7 +622,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       + "LogisticRegression, LogisticRegressionCV,\n"
       + "LinearRegression, ARDRegression, "
       + "BayesianRidge, ElasticNet, Lars,\nLarsCV, Lasso, LassoCV, LassoLars, "
-      + "LassoLarsCV, LassoLarsIC, OrthogonalMatchingPursuit,\n"
+      + "LassoLarsCV, LassoLarsIC, MLPClassifier, MLPRegressor, OrthogonalMatchingPursuit,\n"
       + "OrthogonalMatchingPursuitCV, PassiveAggressiveClassifier, "
       + "PassiveAggressiveRegressor, Perceptron, RANSACRegressor,\nRidge, "
       + "RidgeClassifier, RidgeClassifierCV, RidgeCV, SGDClassifier,\nSGDRegressor,"
@@ -827,6 +843,18 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
     data = Filter.useFilter(data, m_nominalToBinary);
 
     try {
+      String learnerModule = m_learner.getModule();
+      String learnerMethod = m_learner.toString();
+
+      if (learnerMethod.equalsIgnoreCase("MLPClassifier")
+        || learnerMethod.equalsIgnoreCase("MLPRegressor")) {
+        if (m_scikitVersion < 0.18) {
+          throw new Exception(learnerMethod
+            + " is not available in scikit-learn " + "version "
+            + m_scikitVersion + ". Version 0.18 or higher is " + "required.");
+        }
+      }
+
       PythonSession session = PythonSession.acquireSession(this);
       // transfer the data over to python
       session
@@ -835,19 +863,18 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       StringBuilder learnScript = new StringBuilder();
       learnScript.append("from sklearn import *").append("\n")
         .append("import numpy as np").append("\n");
-      String learnerModule = m_learner.getModule();
-      String learnerMethod = m_learner.toString();
+
       if (m_scikitVersion > 0.18) {
         if (learnerMethod.equalsIgnoreCase("LDA")) {
           learnerMethod = "LinearDiscriminantAnalysis";
           learnerModule = "discriminant_analysis";
         }
       }
-      learnScript.append(
-        MODEL_ID + m_modelHash + " = " + learnerModule + "."
-          + learnerMethod + "("
-          + (getLearnerOpts().length() > 0 ? getLearnerOpts() : "") + ")")
-        .append("\n");
+      learnScript
+        .append(
+          MODEL_ID + m_modelHash + " = " + learnerModule + "." + learnerMethod
+            + "(" + (getLearnerOpts().length() > 0 ? getLearnerOpts() : "")
+            + ")").append("\n");
       learnScript.append(MODEL_ID + m_modelHash + ".fit(X,np.ravel(Y))")
         .append("\n");
 
@@ -964,8 +991,8 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       }
 
       predictScript.append(
-        "from sklearn." + learnerModule + " import "
-          + learnerMethod).append("\n");
+        "from sklearn." + learnerModule + " import " + learnerMethod).append(
+        "\n");
       predictScript.append(
         "preds = " + MODEL_ID + m_modelHash + ".predict"
           + (m_learner.producesProbabilities(m_learnerOpts) ? "_proba" : "")
