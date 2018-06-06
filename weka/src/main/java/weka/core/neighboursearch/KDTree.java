@@ -1211,12 +1211,12 @@ public class KDTree
     newVector.addElement(new Option(
 	"\tSet minimal width of a box\n"
         + "\t(default: 1.0E-2).", 
-        "W", 0, "-W <value>"));
+        "W", 1, "-W <value>"));
     
     newVector.addElement(new Option(
 	"\tMaximal number of instances in a leaf\n"
         + "\t(default: 40).",
-        "L", 0, "-L"));
+        "L", 1, "-L <value>"));
     
     newVector.addElement(new Option(
 	"\tNormalizing will be done\n"
