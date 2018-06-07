@@ -29,5 +29,9 @@ Information about the libraries:
   Homepage: http://prefuse.org/
   Download: http://prdownloads.sourceforge.net/prefuse/prefuse-beta-20071021.zip?download
 
+- LibSVM package (LibSVMpkg.jar, libsvm.jar)
+  Version: 1.0.10
+  Download: https://sourceforge.net/projects/weka/files/weka-packages/LibSVM1.0.10.zip/download
+
 
 $Revision$
