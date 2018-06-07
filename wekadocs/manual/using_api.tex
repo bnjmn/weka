@@ -997,6 +997,83 @@ For a complete overview, see the Javadoc page of the \texttt{Evaluation} class.
 By looking up the source code of the summary methods mentioned above, one can
 easily determine what methods are used for which particular output.
 
+\subsubsection*{Collecting predictions}
+Summary statistics of an evaluation run are one thing, but one quite often
+also needs to investigate which instances were misclassified.
+When evaluation a classifier, you can supply an object for printing the
+predictions. The super class for these schemes is \texttt{AbstractOutput}
+(in package \texttt{weka.classifiers.evaluation.output.prediction}).
+
+The following example will store the predictions of a 10-fold
+cross-validation run in CSV format. The output into an actual file
+is optional (see comments in the code):
+
+\begin{verbatim}
+import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.output.prediction.CSV;
+import weka.classifiers.trees.J48;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+...
+// load data
+Instances data = DataSource.read("/some/where/file.arff");
+data.setClassIndex(data.numAttributes() - 1);
+
+// configure classifier
+J48 cls = new J48();
+
+// cross-validate (10-fold) classifier, store predictions as CSV in stringbuffer
+Evaluation eval = new Evaluation(data);
+StringBuffer buffer = new StringBuffer();
+CSV csv = new CSV();
+csv.setBuffer(buffer);
+csv.setNumDecimals(8);  // use 8 decimals instead of default 6
+// If you want to store the predictions in a file
+//csv.setOutputFile(new java.io.File("/some/where.csv"));
+eval.crossValidateModel(cls, data, 10, new Random(1), csv);
+
+// output collected predictions
+System.out.println(buffer.toString());
+\end{verbatim}
+
+If access to plain Java objects instead of textual format is preferred,
+then the \texttt{InMemory} output class can be used, as the following
+example demonstrates:
+
+\begin{verbatim}
+import weka.classifiers.Evaluation;
+import weka.classifiers.evaluation.output.prediction.InMemory;
+import weka.classifiers.evaluation.output.prediction.InMemory.PredictionContainer;
+import weka.classifiers.trees.J48;
+import weka.core.Instances;
+import weka.core.converters.ConverterUtils.DataSource;
+...
+// load data
+Instances data = DataSource.read("/some/where/file.arff");
+data.setClassIndex(data.numAttributes() - 1);
+
+// configure classifier
+J48 cls = new J48();
+
+// cross-validate (10-fold) classifier, collects the predictions
+Evaluation eval = new Evaluation(data);
+StringBuffer buffer = new StringBuffer();
+InMemory store = new InMemory();
+// additional attributes to store as well (eg ID attribute to identify instances)
+store.setAttributes("1");  
+eval.crossValidateModel(cls, data, 10, new Random(1), store);
+
+// output collected predictions
+int i = 0;
+for (PredictionContainer cont: store.getPredictions()) {
+  i++;
+  System.out.println("\nContainer #" + i);
+  System.out.println("- instance:\n" + cont.instance);
+  System.out.println("- prediction:\n" + cont.prediction);
+  System.out.println("- attribute values:\n" + cont.attributeValues);
+}
+\end{verbatim}
+
 \newpage
 
 \subsection{Classifying instances}
