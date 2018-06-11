@@ -170,7 +170,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
         + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
         + "\tshuffle=True, random_state=None, tol=0.0001, verbose=False,\n"
-        + "\twarm_start=False, momentum=0.9, nestervos_momentom=True,\n"
+        + "\twarm_start=False, momentum=0.9, nesterovs_momentum=True,\n"
         + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
         + "\tbeta_2=0.999, epsilon=1e-08"),
     MLPRegressor("neural_network", false, true, false,
@@ -178,7 +178,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
         + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
         + "\tshuffle=True, random_state=None, tol=0.0001, verbose=False,\n"
-        + "\twarm_start=False, momentum=0.9, nestervos_momentom=True,\n"
+        + "\twarm_start=False, momentum=0.9, nesterovs_momentum=True,\n"
         + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
         + "\tbeta_2=0.999, epsilon=1e-08"),
     OrthogonalMatchingPursuit("linear_model", false, true, false,
