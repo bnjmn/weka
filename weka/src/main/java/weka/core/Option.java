@@ -507,10 +507,8 @@ public class Option implements RevisionHandler {
                     + "for it.");
                 }
               } else if (value instanceof Enum) {
-                EnumHelper helper = new EnumHelper((Enum) value);
-                valueToSet =
-                  EnumHelper
-                    .valueFromString(helper.getEnumClass(), optionValue);
+                Class<?> eClazz = value.getClass();
+                valueToSet = EnumHelper.valueFromString(eClazz, optionValue);
               } else if (value instanceof OptionHandler) {
                 valueToSet = constructOptionHandlerValue(optionValue);
               } else if (value instanceof Number) {
