@@ -97,7 +97,7 @@ public class CrossValidationSingleRun {
     // perform cross-validation
     Evaluation eval = new Evaluation(randData);
     for (int n = 0; n < folds; n++) {
-      Instances train = randData.trainCV(folds, n);
+      Instances train = randData.trainCV(folds, n, rand);
       Instances test = randData.testCV(folds, n);
       // the above code is used by the StratifiedRemoveFolds filter, the
       // code below by the Explorer/Experimenter:
