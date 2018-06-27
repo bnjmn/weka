@@ -1,5 +1,7 @@
 # WEKA (developer version)
 
+Read-only git mirror of Weka's subversion repository.
+
 ## Source code
 
 The official WEKA source code of the developer version is available from this URL:
