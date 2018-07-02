@@ -28,6 +28,7 @@ import java.io.OutputStream;
 import weka.core.Capabilities;
 import weka.core.Capabilities.Capability;
 import weka.core.RevisionUtils;
+import weka.core.WeightedInstancesHandler;
 
 /**
  <!-- globalinfo-start -->
@@ -52,7 +53,7 @@ import weka.core.RevisionUtils;
  */
 public class SerializedInstancesSaver 
   extends AbstractFileSaver 
-  implements BatchConverter {
+  implements BatchConverter, WeightedInstancesHandler {
 
   /** for serialization. */
   static final long serialVersionUID = -7717010648500658872L;
