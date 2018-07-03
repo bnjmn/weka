@@ -857,20 +857,31 @@ public final class Utils implements RevisionHandler {
    * The inverse operation of backQuoteChars(). Converts back-quoted carriage
    * returns and new lines in a string to the corresponding character ('\r' and
    * '\n'). Also "un"-back-quotes the following characters: ` " \ \t and %
-   * 
+   *
    * @param string the string
    * @return the converted string
    * @see #backQuoteChars(String)
    */
   public static String unbackQuoteChars(String string) {
 
+    String charsFind[] = { "\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%", "\\u001E" };
+    char charsReplace[] = { '\\', '\'', '\t', '\n', '\r', '"', '%', '\u001E' };
+    return replaceStrings(string, charsFind, charsReplace);
+  }
+
+  /**
+   * Converts the specified strings in the given string to the specified characters.
+   * 
+   * @param string the string to operate on
+   * @param charsFind the strings to replace
+   * @param charsReplace the characters to replace these with
+   * @return the converted string
+   */
+  public static String replaceStrings(String string, String[] charsFind, char[] charsReplace) {
+
     int index;
     StringBuffer newStringBuffer;
 
-    // replace each of the following characters with the backquoted version
-    String charsFind[] =
-      { "\\\\", "\\'", "\\t", "\\n", "\\r", "\\\"", "\\%", "\\u001E" };
-    char charsReplace[] = { '\\', '\'', '\t', '\n', '\r', '"', '%', '\u001E' };
     int pos[] = new int[charsFind.length];
     int curPos;
 
@@ -902,17 +913,37 @@ public final class Utils implements RevisionHandler {
     return newStringBuffer.toString();
   }
 
+
   /**
    * Split up a string containing options into an array of strings, one for each
    * option.
-   * 
+   *
    * @param quotedOptionString the string containing the options
    * @return the array of options
    * @throws Exception in case of an unterminated string, unknown character or a
    *           parse error
    */
   public static String[] splitOptions(String quotedOptionString)
-    throws Exception {
+          throws Exception {
+
+    return splitOptions(quotedOptionString, null, null);
+  }
+
+  /**
+   * Split up a string containing options into an array of strings, one for each option. If either the second
+   * or the third argument are null, the method unbackQuoteChars() is applied to each individual option string.
+   * Otherwise, the method replaceStrings() is applied to each individual option string, using the second and
+   * third argument of this method as parameters.
+   *
+   * @param quotedOptionString the string containing the options
+   * @param toReplace strings to replace in each option (e.g., backquoted characters)
+   * @param replacements the characters to replace the strings with
+   * @return the array of options
+   * @throws Exception in case of an unterminated string, unknown character or a
+   *           parse error
+   */
+  public static String[] splitOptions(String quotedOptionString, String[] toReplace, char[] replacements)
+          throws Exception {
 
     Vector<String> optionsVec = new Vector<String>();
     String str = new String(quotedOptionString);
@@ -955,7 +986,11 @@ public final class Utils implements RevisionHandler {
 
         // add the founded string to the option vector (without quotes)
         String optStr = str.substring(1, i);
-        optStr = unbackQuoteChars(optStr);
+        if ((toReplace != null) && (replacements != null)) {
+          optStr = replaceStrings(optStr, toReplace, replacements);
+        } else {
+          optStr = unbackQuoteChars(optStr);
+        }
         optionsVec.addElement(optStr);
         str = str.substring(i + 1);
       } else {

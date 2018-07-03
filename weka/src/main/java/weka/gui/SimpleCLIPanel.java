@@ -894,7 +894,12 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
   public void runCommand(String command) throws Exception {
     System.out.println("> " + command + '\n');
     System.out.flush();
-    String[] commandArgs = Utils.splitOptions(command);
+    String[] commandArgs;
+    if (!System.getProperty("os.name").toLowerCase().contains("win")) {
+      commandArgs = Utils.splitOptions(command);
+    } else { // If we are on Windows, we must not replace \t, \n, etc., at this stage because \ is path separator
+      commandArgs = Utils.splitOptions(command, new String[] { "\\\\", "\\\""}, new char[] { '\\', '"' });
+    }
 
     // no command
     if (commandArgs.length == 0) {
