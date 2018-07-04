@@ -196,8 +196,10 @@ public class RenameNominalValues extends Filter implements UnsupervisedFilter,
 
             String replace = m_ignoreCase ? m_renameMap
               .get(origV.toLowerCase()) : m_renameMap.get(origV);
-            if (replace != null && !valsForAtt.contains(replace)) {
-              valsForAtt.add(replace);
+            if (replace != null) {
+              if (!valsForAtt.contains(replace)) {
+                valsForAtt.add(replace);
+              }
             } else {
               valsForAtt.add(origV);
             }
