@@ -49,6 +49,9 @@ public class ReaderToTextPane
   /** the color to use. */
   protected Color m_Color;
 
+  /** string buffer to use for content */
+  protected StringBuffer m_Buffer;
+
   /**
    * Sets up the thread. Using black as color for displaying the text.
    *
@@ -75,6 +78,7 @@ public class ReaderToTextPane
     m_Color  = color;
     m_Input  = new LineNumberReader(input);
     m_Output = output;
+    m_Buffer = new StringBuffer();
     
     doc   = m_Output.getStyledDocument();
     style = StyleContext.getDefaultStyleContext()
@@ -107,22 +111,41 @@ public class ReaderToTextPane
    * to the text component.
    */
   public void run() {
+
+    Thread t = new Thread() {
+      public void run() {
+        long oldSize = 0;
+        while (true) {
+          try {
+            long currentSize = m_Buffer.length();
+            if ((currentSize > 0) && (currentSize == oldSize)) {
+              StyledDocument doc = m_Output.getStyledDocument();
+              doc.insertString(doc.getLength(), m_Buffer.toString(), doc.getStyle(getStyleName()));
+              m_Output.setCaretPosition(doc.getLength());
+              m_Buffer.delete(0, m_Buffer.length());
+              oldSize = 0;
+            } else {
+              oldSize = currentSize;
+            }
+            sleep(100);
+          } catch (Exception e) {
+            // ignored
+          }
+        }
+      }
+    };
+    t.start();
+
     while (true) {
       try {
-	StyledDocument doc = m_Output.getStyledDocument();
-	doc.insertString(
-	    doc.getLength(), 
-	    m_Input.readLine() + '\n', 
-	    doc.getStyle(getStyleName()));
-	m_Output.setCaretPosition(doc.getLength());
-      }
-      catch (Exception ex) {
-	try {
-	  sleep(100);
-	}
-	catch (Exception e) {
-	  // ignored
-	}
+        String s = m_Input.readLine();
+        m_Buffer.append(s).append('\n');
+      } catch (Exception ex) {
+        try {
+          sleep(100);
+        } catch (Exception e) {
+          // ignored
+        }
       }
     }
   }
