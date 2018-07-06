@@ -365,6 +365,12 @@ public class MLlibDatasetMaker implements Serializable {
   protected static Vector instanceToVector(Instance toProcess, int classIndex) {
     if (toProcess instanceof SparseInstance) {
       int classModifier = classIndex >= 0 ? 1 : 0;
+      if (classModifier > 0) {
+        double classValue = toProcess.classValue();
+        if (classValue == 0) {
+          classModifier = 0; // class is sparse
+        }
+      }
       SparseInstance toProcessSparse = ((SparseInstance) toProcess);
       int[] indices = new int[toProcessSparse.numValues() - classModifier];
       double[] values = new double[toProcessSparse.numValues() - classModifier];
@@ -375,7 +381,8 @@ public class MLlibDatasetMaker implements Serializable {
           values[index++] = toProcessSparse.valueSparse(i);
         }
       }
-      return Vectors.sparse(toProcess.numValues(), indices, values);
+      return Vectors.sparse(
+        toProcess.numAttributes() - (classIndex >= 0 ? 1 : 0), indices, values);
     } else {
       if (classIndex < 0) {
         return Vectors.dense(toProcess.toDoubleArray());
