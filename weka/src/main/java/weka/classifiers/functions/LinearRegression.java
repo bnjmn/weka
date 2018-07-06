@@ -21,6 +21,7 @@
 
 package weka.classifiers.functions;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 
@@ -31,6 +32,7 @@ import weka.classifiers.AbstractClassifier;
 import weka.classifiers.evaluation.RegressionAnalysis;
 import weka.core.*;
 import weka.core.Capabilities.Capability;
+import weka.core.matrix.QRDecomposition;
 import weka.filters.Filter;
 import weka.filters.supervised.attribute.NominalToBinary;
 import weka.filters.unsupervised.attribute.ReplaceMissingValues;
@@ -85,7 +87,12 @@ import weka.filters.unsupervised.attribute.ReplaceMissingValues;
  *  If set, classifier capabilities are not checked before classifier is built
  *  (use with caution).
  * </pre>
- * 
+ *
+ * <pre>
+ * -do-not-check-capabilities
+ *  If set, classifier capabilities are not checked before classifier is built
+ *  (use with caution).
+ * </pre>
  <!-- options-end -->
  * 
  * @author Eibe Frank (eibe@cs.waikato.ac.nz)
@@ -141,6 +148,8 @@ public class LinearRegression extends AbstractClassifier implements
   protected boolean m_EliminateColinearAttributes = true;
   /** Turn off all checks and conversions? */
   protected boolean m_checksTurnedOff = false;
+  /** Use QR decomposition */
+  protected boolean m_useQRDecomposition = false;
   /** The ridge parameter */
   protected double m_Ridge = 1.0e-8;
   /** Conserve memory? */
@@ -485,6 +494,9 @@ public class LinearRegression extends AbstractClassifier implements
     newVector.addElement(new Option("\tOutput additional statistics.",
       "additional-stats", 0, "-additional-stats"));
 
+    newVector.addElement(new Option("\tUse QR decomposition to find coefficients",
+            "use-qr", 0, "-use-qr"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -533,6 +545,10 @@ public class LinearRegression extends AbstractClassifier implements
 
     if (getOutputAdditionalStats()) {
       result.add("-additional-stats");
+    }
+
+    if (getUseQRDecomposition()) {
+      result.add("-use-qr");
     }
 
     Collections.addAll(result, super.getOptions());
@@ -587,6 +603,10 @@ public class LinearRegression extends AbstractClassifier implements
    *  (use with caution).
    * </pre>
    *
+   * <pre>
+   * -use-qr
+   *  If set, QR decomposition will be used to find coefficients.
+   * </pre>
    <!-- options-end -->
    *
    * @param options the list of options as an array of strings
@@ -612,6 +632,8 @@ public class LinearRegression extends AbstractClassifier implements
     setMinimal(Utils.getFlag("minimal", options));
 
     setOutputAdditionalStats(Utils.getFlag("additional-stats", options));
+
+    setUseQRDecomposition(Utils.getFlag("use-qr", options));
 
     super.setOptions(options);
     Utils.checkForRemainingOptions(options);
@@ -786,6 +808,34 @@ public class LinearRegression extends AbstractClassifier implements
    */
   public void setOutputAdditionalStats(boolean additional) {
     m_outputAdditionalStats = additional;
+  }
+
+  /**
+   * Returns the tip text for this property.
+   *
+   * @return tip text for this property suitable for displaying in the
+   *         explorer/experimenter gui
+   */
+  public String useQRDecompositionTipText() {
+    return "Use QR decomposition to find the coefficients";
+  }
+
+  /**
+   * Get whether to use QR decomposition.
+   *
+   * @return true if QR decomposition is to be used
+   */
+  public boolean getUseQRDecomposition() {
+    return m_useQRDecomposition;
+  }
+
+  /**
+   * Set whether to use QR decomposition.
+   *
+   * @param useQR true if QR decomposition is to be used
+   */
+  public void setUseQRDecomposition(boolean useQR) {
+    m_useQRDecomposition = useQR;
   }
 
   /**
@@ -1055,14 +1105,25 @@ public class LinearRegression extends AbstractClassifier implements
 
     // Check whether there are still attributes left
     Matrix independentTransposed = null;
+    Matrix independent = null;
     Vector dependent = null;
     if (numAttributes > 0) {
-      independentTransposed = new DenseMatrix(numAttributes, m_TransformedData.numInstances());
-      dependent = new DenseVector(m_TransformedData.numInstances());
+      if (!m_useQRDecomposition) {
+        independentTransposed = new DenseMatrix(numAttributes, m_TransformedData.numInstances());
+        dependent = new DenseVector(m_TransformedData.numInstances());
+      } else {
+        if (m_Ridge <= 0) {
+          independent = new DenseMatrix(m_TransformedData.numInstances(), numAttributes);
+          dependent = new DenseVector(m_TransformedData.numInstances());
+        } else {
+          independent = new DenseMatrix(m_TransformedData.numInstances() + numAttributes, numAttributes);
+          dependent = new DenseVector(m_TransformedData.numInstances() + numAttributes);
+        }
+      }
       for (int i = 0; i < m_TransformedData.numInstances(); i++) {
         Instance inst = m_TransformedData.instance(i);
         double sqrt_weight = Math.sqrt(inst.weight());
-        int row = 0;
+        int index = 0;
         for (int j = 0; j < m_TransformedData.numAttributes(); j++) {
           if (j == m_ClassIndex) {
             dependent.set(i, inst.classValue() * sqrt_weight);
@@ -1075,11 +1136,21 @@ public class LinearRegression extends AbstractClassifier implements
               if (!m_checksTurnedOff) {
                 value /= m_StdDevs[j];
               }
-              independentTransposed.set(row, i, value * sqrt_weight);
-              row++;
+              if (!m_useQRDecomposition) {
+                independentTransposed.set(index, i, value * sqrt_weight);
+              } else {
+                independent.set(i, index, value * sqrt_weight);
+              }
+              index++;
             }
           }
         }
+      }
+    }
+    if (m_useQRDecomposition && m_Ridge > 0) {
+      double sqrtRidge = Math.sqrt(m_Ridge);
+      for (int i = 0; i < numAttributes; i++) {
+        independent.set(m_TransformedData.numInstances() + i, i, sqrtRidge);
       }
     }
 
@@ -1089,32 +1160,32 @@ public class LinearRegression extends AbstractClassifier implements
     double[] coefficients = new double[numAttributes + 1];
     if (numAttributes > 0) {
 
-      Vector aTy = independentTransposed.mult(dependent, new DenseVector(numAttributes));
-      Matrix aTa = new UpperSymmDenseMatrix(numAttributes).rank1(independentTransposed);
-      independentTransposed = null;
-      dependent = null;
+      if (!m_useQRDecomposition) { // Use Cholesky based on covariance matrix
+        Vector aTy = independentTransposed.mult(dependent, new DenseVector(numAttributes));
+        Matrix aTa = new UpperSPDDenseMatrix(numAttributes).rank1(independentTransposed);
+        independentTransposed = null;
+        dependent = null;
 
-      boolean success = true;
-      Vector coeffsWithoutIntercept = null;
-      double ridge = getRidge();
-      do {
+        double ridge = getRidge();
         for (int i = 0; i < numAttributes; i++) {
           aTa.add(i, i, ridge);
         }
-        try {
-          coeffsWithoutIntercept = aTa.solve(aTy, new DenseVector(numAttributes));
-          success = true;
-        } catch (Exception ex) {
-          for (int i = 0; i < numAttributes; i++) {
-            aTa.add(i, i, -ridge);
-          }
-          ridge *= 10;
-          success = false;
-        }
-      } while (!success);
-
-      System.arraycopy(((DenseVector)coeffsWithoutIntercept).getData(), 0, coefficients, 0, numAttributes);
-    }
+        Vector coeffsWithoutIntercept = aTa.solve(aTy, new DenseVector(numAttributes));
+        System.arraycopy(((DenseVector) coeffsWithoutIntercept).getData(), 0, coefficients, 0, numAttributes);
+      } else { // Use QR decomposition
+        QRP qrp = QRP.factorize(independent);
+        independent = null;
+        Matrix Q = qrp.getQ();
+        Matrix R = new UpperTriangDenseMatrix(qrp.getR(), false);
+        Matrix P = qrp.getP();
+        DenseVector cPlusd = (DenseVector)Q.transMult(dependent, new DenseVector(dependent.size()));
+        dependent = null;
+        Vector c = new DenseVector(Arrays.copyOf(cPlusd.getData(), numAttributes));
+        Vector y = R.solve(c, new DenseVector(numAttributes));
+        Vector coeffsWithoutIntercept = P.mult(y, new DenseVector(numAttributes));
+        System.arraycopy(((DenseVector) coeffsWithoutIntercept).getData(), 0, coefficients, 0, numAttributes);
+      }
+  }
     coefficients[numAttributes] = m_ClassMean;
 
     // Convert coefficients into original scale
