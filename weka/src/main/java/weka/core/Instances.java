@@ -1268,7 +1268,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
+   * Creates a new dataset of the same size as this dataset using random sampling with
    * replacement.
    * 
    * @param random a random number generator
@@ -1284,7 +1284,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
+   * Creates a new dataset of the same size as this dataset using random sampling with
    * replacement according to the current instance weights. The weights of the
    * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
@@ -1298,7 +1298,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
+   * Creates a new dataset of the same size as this dataset using random sampling with
    * replacement according to the current instance weights. The weights of the
    * instances in the new dataset are set to one. See also
    * resampleWithWeights(Random, double[], boolean[]).
@@ -1313,9 +1313,8 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the current instance weights. The weights of the
-   * instances in the new dataset are set to one. See also
+   * Creates a new dataset of the same size as this dataset using random sampling with
+   * replacement according to the current instance weights. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1330,9 +1329,8 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the current instance weights. The weights of the
-   * instances in the new dataset are set to one. See also
+   * Creates a new dataset of the same size as this dataset using random sampling with
+   * replacement according to the current instance weights. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1344,16 +1342,41 @@ RevisionHandler {
   public Instances resampleWithWeights(Random random, boolean[] sampled,
     boolean representUsingWeights) {
 
+    return resampleWithWeights(random, sampled, representUsingWeights, 100.0);
+  }
+
+  /**
+   * Creates a new dataset from this dataset using random sampling with
+   * replacement according to current instance weights. The size of the sample
+   * can be specified as a percentage of this dataset. See also
+   * resampleWithWeights(Random, double[], boolean[]).
+   *
+   * @param random a random number generator
+   * @param sampled an array indicating what has been sampled, can be null
+   * @param representUsingWeights if true, copies are represented using weights
+   *          in resampled data
+   * @param sampleSize size of the new dataset as a percentage of the size of this
+   *                   dataset
+   * @return the new dataset
+   * @throws IllegalArgumentException if the weights array is of the wrong
+   *           length or contains negative weights.
+   */
+  public Instances resampleWithWeights(Random random,
+                                       boolean[] sampled, boolean representUsingWeights, double sampleSize) {
+
     double[] weights = new double[numInstances()];
     for (int i = 0; i < weights.length; i++) {
       weights[i] = instance(i).weight();
     }
-    return resampleWithWeights(random, weights, sampled, representUsingWeights);
+    return resampleWithWeights(random, weights, sampled, representUsingWeights, sampleSize);
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the given weight vector. See also
+   * Creates a new dataset of the same size as this dataset using random sampling with
+   * replacement according to the given weight vector. The weights of the
+   * instances in the new dataset are set to one. The length of the weight
+   * vector has to be the same as the number of instances in the dataset, and
+   * all weights have to be positive. See also
    * resampleWithWeights(Random, double[], boolean[]).
    * 
    * @param random a random number generator
@@ -1368,7 +1391,7 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
+   * Creates a new dataset of the same size as this dataset using random sampling with
    * replacement according to the given weight vector. The weights of the
    * instances in the new dataset are set to one. The length of the weight
    * vector has to be the same as the number of instances in the dataset, and
@@ -1389,13 +1412,12 @@ RevisionHandler {
   }
 
   /**
-   * Creates a new dataset of the same size using random sampling with
-   * replacement according to the given weight vector. The weights of the
-   * instances in the new dataset are set to one. The length of the weight
+   * Creates a new dataset of the same size as this dataset using random sampling with
+   * replacement according to the given weight vector. The length of the weight
    * vector has to be the same as the number of instances in the dataset, and
    * all weights have to be positive. Uses Walker's method, see pp. 232 of
    * "Stochastic Simulation" by B.D. Ripley (1987).
-   * 
+   *
    * @param random a random number generator
    * @param weights the weight vector
    * @param sampled an array indicating what has been sampled, can be null
@@ -1406,10 +1428,39 @@ RevisionHandler {
    *           length or contains negative weights.
    */
   public Instances resampleWithWeights(Random random, double[] weights,
-    boolean[] sampled, boolean representUsingWeights) {
+                                       boolean[] sampled, boolean representUsingWeights) {
+
+    return resampleWithWeights(random, weights, sampled, representUsingWeights, 100.0);
+  }
+
+  /**
+   * Creates a new dataset from this dataset using random sampling with
+   * replacement according to the given weight vector. The length of the weight
+   * vector has to be the same as the number of instances in the dataset, and
+   * all weights have to be positive. Uses Walker's method, see pp. 232 of
+   * "Stochastic Simulation" by B.D. Ripley (1987). The size of the sample
+   * can be specified as a percentage of this dataset.
+   * 
+   * @param random a random number generator
+   * @param weights the weight vector
+   * @param sampled an array indicating what has been sampled, can be null
+   * @param representUsingWeights if true, copies are represented using weights
+   *          in resampled data
+   * @param sampleSize size of the new dataset as a percentage of the size of this
+   *                   dataset
+   * @return the new dataset
+   * @throws IllegalArgumentException if the weights array is of the wrong
+   *           length or contains negative weights.
+   */
+  public Instances resampleWithWeights(Random random, double[] weights,
+    boolean[] sampled, boolean representUsingWeights, double sampleSize) {
 
     if (weights.length != numInstances()) {
       throw new IllegalArgumentException("weights.length != numInstances.");
+    }
+
+    if ((sampleSize < 0) || (sampleSize > 100)) {
+      throw new IllegalArgumentException("Sample size must be a percentage.");
     }
 
     Instances newData = new Instances(this, numInstances());
@@ -1464,7 +1515,9 @@ RevisionHandler {
       counts = new int[M];
     }
 
-    for (int i = 0; i < numInstances(); i++) {
+    int numToBeSampled = (int) (numInstances() * (sampleSize / 100.0));
+
+    for (int i = 0; i < numToBeSampled; i++) {
       int ALRV;
       double U = M * random.nextDouble();
       int I = (int) U;

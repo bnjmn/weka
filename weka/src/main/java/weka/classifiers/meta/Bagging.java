@@ -660,26 +660,16 @@ public class Bagging
    */
   @Override
   protected synchronized Instances getTrainingSet(int iteration) throws Exception {
-    int bagSize = (int) (m_data.numInstances() * (m_BagSizePercent / 100.0));
-    Instances bagData = null;
+
     Random r = new Random(m_Seed + iteration);
 
-    // create the in-bag dataset
+    // create the in-bag indicator array if necessary
     if (m_CalcOutOfBag) {
       m_inBag[iteration] = new boolean[m_data.numInstances()];
-      bagData = m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights());
+      return m_data.resampleWithWeights(r, m_inBag[iteration], getRepresentCopiesUsingWeights(), m_BagSizePercent);
     } else {
-      if (bagSize < m_data.numInstances()) {
-        bagData = m_data.resampleWithWeights(r, false); // Need to turn off representation using weights in this case.
-        bagData.randomize(r);
-        Instances newBagData = new Instances(bagData, 0, bagSize);
-        bagData = newBagData;
-      } else {
-        bagData = m_data.resampleWithWeights(r, getRepresentCopiesUsingWeights());
-      }
+      return m_data.resampleWithWeights(r, null, getRepresentCopiesUsingWeights(), m_BagSizePercent);
     }
-    
-    return bagData;
   }
 
   /**
@@ -716,11 +706,6 @@ public class Bagging
     m_data = new Instances(data);
 
     super.buildClassifier(m_data);
-
-    if (m_CalcOutOfBag && (m_BagSizePercent != 100)) {
-      throw new IllegalArgumentException("Bag size needs to be 100% if " +
-              "out-of-bag error is to be calculated!");
-    }
 
     m_random = new Random(m_Seed);
 
