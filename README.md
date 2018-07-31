@@ -5,16 +5,39 @@ Computing and Mathematical Sciences at the University of Waikato now has an
 [official github organization][weka-org] including a [read-only git mirror of
 Weka's subversion repository][weka-git]. Therefore, this repo is no longer
 necessary and will one day be removed. In the meantime, please follow [the
-Waikato repo][weka-git] for the most up-to-date and official changes. 
-  
-Additionally, they also maintain a [curated list of repositories][weka-repos]
+Waikato repo][weka-git] for the most up-to-date and official changes.
+Additionally, Waikato also maintain a [curated list of repositories][weka-repos]
 you may find interesting. Enjoy.
+
+## [Click here for the official git mirror][weka-git]
 
 [weka-org]: https://github.com/Waikato
 [weka-git]: https://github.com/Waikato/weka-trunk
 [weka-repos]: https://github.com/Waikato/waikato-repositories
 
+
+# (Official README) WEKA (developer version)
+
+Read-only git mirror of Weka's subversion repository.
+
+## Source code
+
+The official WEKA source code of the developer version is available from this URL:
+
+https://svn.cms.waikato.ac.nz/svn/weka/trunk/
+
+## Contributions/Bug fixes
+
+Contributions and bug fixes an be contributed as patch file and posted to the
+[WEKA mailing list](https://list.waikato.ac.nz/mailman/listinfo/wekalist).
+
+## Links
+
+* [WEKA Homepage](https://www.cs.waikato.ac.nz/ml/weka/)
+
 ---
+
+# A few notes from the unofficial mirror
 
 **NOTE** The [owner][bnjmn] of this repository has no affiliation with official
 WEKA project. This repo is periodically updated as a kindness to others who
@@ -51,23 +74,3 @@ under active development at the University of Waikato.
 [gnu-v3]: http://www.gnu.org/licenses/gpl.html
 [svngh]: https://github.com/svn2github/weka
 [weka-trunk-branch]: https://github.com/bnjmn/weka/tree/weka-trunk
-
-
-# WEKA (developer version)
-
-Read-only git mirror of Weka's subversion repository.
-
-## Source code
-
-The official WEKA source code of the developer version is available from this URL:
-
-https://svn.cms.waikato.ac.nz/svn/weka/trunk/
-
-## Contributions/Bug fixes
-
-Contributions and bug fixes an be contributed as patch file and posted to the
-[WEKA mailing list](https://list.waikato.ac.nz/mailman/listinfo/wekalist).
-
-## Links
-
-* [WEKA Homepage](https://www.cs.waikato.ac.nz/ml/weka/)
