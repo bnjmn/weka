@@ -1,22 +1,3 @@
-# WEKA (developer version)
-
-Read-only git mirror of Weka's subversion repository.
-
-## Source code
-
-The official WEKA source code of the developer version is available from this URL:
-
-https://svn.cms.waikato.ac.nz/svn/weka/trunk/
-
-## Contributions/Bug fixes
-
-Contributions and bug fixes an be contributed as patch file and posted to the
-[WEKA mailing list](https://list.waikato.ac.nz/mailman/listinfo/wekalist).
-
-## Links
-
-* [WEKA Homepage](https://www.cs.waikato.ac.nz/ml/weka/)
-
 weka (mirror)
 =============
 
@@ -70,3 +51,23 @@ under active development at the University of Waikato.
 [gnu-v3]: http://www.gnu.org/licenses/gpl.html
 [svngh]: https://github.com/svn2github/weka
 [weka-trunk-branch]: https://github.com/bnjmn/weka/tree/weka-trunk
+
+
+# WEKA (developer version)
+
+Read-only git mirror of Weka's subversion repository.
+
+## Source code
+
+The official WEKA source code of the developer version is available from this URL:
+
+https://svn.cms.waikato.ac.nz/svn/weka/trunk/
+
+## Contributions/Bug fixes
+
+Contributions and bug fixes an be contributed as patch file and posted to the
+[WEKA mailing list](https://list.waikato.ac.nz/mailman/listinfo/wekalist).
+
+## Links
+
+* [WEKA Homepage](https://www.cs.waikato.ac.nz/ml/weka/)
