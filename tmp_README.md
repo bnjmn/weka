@@ -20,6 +20,21 @@ Contributions and bug fixes an be contributed as patch file and posted to the
 weka (mirror)
 =============
 
+Computing and Mathematical Sciences at the University of Waikato now has an
+[official github organization][weka-org] including a [read-only git mirror of
+Weka's subversion repository][weka-git]. Therefore, this repo is no longer
+necessary and will one day be removed. In the meantime, please follow [the
+Waikato repo][weka-git] for the most up-to-date and official changes. 
+  
+Additionally, they also maintain a [curated list of repositories][weka-repos]
+you may find interesting. Enjoy.
+
+[weka-org]: https://github.com/Waikato
+[weka-git]: https://github.com/Waikato/weka-trunk
+[weka-repos]: https://github.com/Waikato/waikato-repositories
+
+---
+
 **NOTE** The [owner][bnjmn] of this repository has no affiliation with official
 WEKA project. This repo is periodically updated as a kindness to others who
 have shown interest in it. It can take several hours to `checkout` the full
