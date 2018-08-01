@@ -63,12 +63,11 @@ import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.NominalToBinary;
 
 /**
- * <!-- globalinfo-start --> A Classifier that uses backpropagation to classify
- * instances.<br/>
- * This network can be built by hand, created by an algorithm or both. The
- * network can also be monitored and modified during training time. The nodes in
- * this network are all sigmoid (except for when the class is numeric in which
- * case the the output nodes become unthresholded linear units).
+ * <!-- globalinfo-start -->A classifier that uses backpropagation to learn a multi-layer perceptron to classify instances.
+ * The network can be built by hand or set up using a simple heuristic.
+ * The network parameters can also be monitored and modified during training time.
+ * The nodes in this network are all sigmoid (except for when the class
+ * is numeric, in which case the output nodes become unthresholded linear units).
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -77,13 +76,13 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * 
  * <pre>
  * -L &lt;learning rate&gt;
- *  Learning Rate for the backpropagation algorithm.
+ *  Learning rate for the backpropagation algorithm.
  *  (Value should be between 0 - 1, Default = 0.3).
  * </pre>
  * 
  * <pre>
  * -M &lt;momentum&gt;
- *  Momentum Rate for the backpropagation algorithm.
+ *  Momentum rate for the backpropagation algorithm.
  *  (Value should be between 0 - 1, Default = 0.2).
  * </pre>
  * 
@@ -107,9 +106,9 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * </pre>
  * 
  * <pre>
- * -E &lt;threshold for number of consequetive errors&gt;
- *  The consequetive number of errors allowed for validation
- *  testing before the netwrok terminates.
+ * -E &lt;threshold for number of consecutive errors&gt;
+ *  The number of consecutive increases of error allowed for validation
+ *  testing before training terminates.
  *  (Value should be &gt; 0, Default = 20).
  * </pre>
  * 
@@ -132,7 +131,7 @@ import weka.filters.unsupervised.attribute.NominalToBinary;
  * </pre>
  * 
  * <pre>
- * -H &lt;comma seperated numbers for nodes on each layer&gt;
+ * -H &lt;comma separated numbers for nodes on each layer&gt;
  *  The hidden layers to be created for the network.
  *  (Value should be a list of comma separated Natural 
  *  numbers or the letters 'a' = (attribs + classes) / 2, 
@@ -1915,7 +1914,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     }
 
     // For silly situations in which the network gets accepted before training
-    // commenses
+    // commences
     if (m_numeric) {
       setEndsToLinear();
     }
@@ -2209,18 +2208,18 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     Vector<Option> newVector = new Vector<Option>(14);
 
     newVector.addElement(new Option(
-      "\tLearning Rate for the backpropagation algorithm.\n"
+      "\tLearning rate for the backpropagation algorithm.\n"
         + "\t(Value should be between 0 - 1, Default = 0.3).", "L", 1,
       "-L <learning rate>"));
     newVector.addElement(new Option(
-      "\tMomentum Rate for the backpropagation algorithm.\n"
+      "\tMomentum rate for the backpropagation algorithm.\n"
         + "\t(Value should be between 0 - 1, Default = 0.2).", "M", 1,
       "-M <momentum>"));
     newVector.addElement(new Option("\tNumber of epochs to train through.\n"
       + "\t(Default = 500).", "N", 1, "-N <number of epochs>"));
     newVector.addElement(new Option(
       "\tPercentage size of validation set to use to terminate\n"
-        + "\ttraining (if this is non zero it can pre-empt num of epochs.\n"
+        + "\ttraining (if this is non zero it can preempt num of epochs.\n"
         + "\t(Value should be between 0 - 100, Default = 0).", "V", 1,
       "-V <percentage size of validation set>"));
     newVector.addElement(new Option(
@@ -2228,10 +2227,10 @@ public class MultilayerPerceptron extends AbstractClassifier implements
         + "\t(Value should be >= 0 and and a long, Default = 0).", "S", 1,
       "-S <seed>"));
     newVector.addElement(new Option(
-      "\tThe consequetive number of errors allowed for validation\n"
-        + "\ttesting before the netwrok terminates.\n"
+      "\tThe number of consecutive increases of error allowed for validation\n" +
+              "\ttesting before training terminates.\n"
         + "\t(Value should be > 0, Default = 20).", "E", 1,
-      "-E <threshold for number of consequetive errors>"));
+      "-E <threshold for number of consecutive errors>"));
     newVector.addElement(new Option("\tGUI will be opened.\n"
       + "\t(Use this to bring up a GUI).", "G", 0, "-G"));
     newVector.addElement(new Option(
@@ -2246,7 +2245,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
         + "\tnumbers or the letters 'a' = (attribs + classes) / 2, \n"
         + "\t'i' = attribs, 'o' = classes, 't' = attribs .+ classes)\n"
         + "\tfor wildcard values, Default = a).", "H", 1,
-      "-H <comma seperated numbers for nodes on each layer>"));
+      "-H <comma separated numbers for nodes on each layer>"));
     newVector.addElement(new Option(
       "\tNormalizing a numeric class will NOT be done.\n"
         + "\t(Set this to not normalize the class if it's numeric).", "C", 0,
@@ -2274,13 +2273,13 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * 
    * <pre>
    * -L &lt;learning rate&gt;
-   *  Learning Rate for the backpropagation algorithm.
+   *  Learning rate for the backpropagation algorithm.
    *  (Value should be between 0 - 1, Default = 0.3).
    * </pre>
    * 
    * <pre>
    * -M &lt;momentum&gt;
-   *  Momentum Rate for the backpropagation algorithm.
+   *  Momentum rate for the backpropagation algorithm.
    *  (Value should be between 0 - 1, Default = 0.2).
    * </pre>
    * 
@@ -2304,9 +2303,9 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * </pre>
    * 
    * <pre>
-   * -E &lt;threshold for number of consequetive errors&gt;
-   *  The consequetive number of errors allowed for validation
-   *  testing before the netwrok terminates.
+   * -E &lt;threshold for number of consecutive errors&gt;
+   *  The number of consecutive increases of error allowed for validation
+   *  testing before training terminates.
    *  (Value should be &gt; 0, Default = 20).
    * </pre>
    * 
@@ -2329,7 +2328,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * </pre>
    * 
    * <pre>
-   * -H &lt;comma seperated numbers for nodes on each layer&gt;
+   * -H &lt;comma separated numbers for nodes on each layer&gt;
    *  The hidden layers to be created for the network.
    *  (Value should be a list of comma separated Natural 
    *  numbers or the letters 'a' = (attribs + classes) / 2, 
@@ -2351,7 +2350,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * 
    * <pre>
    * -R
-   *  Reseting the network will NOT be allowed.
+   *  Resetting the network will NOT be allowed.
    *  (Set this to not allow the network to reset).
    * </pre>
    * 
@@ -2576,11 +2575,11 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @return The string.
    */
   public String globalInfo() {
-    return "A Classifier that uses backpropagation to classify instances.\n"
-      + "This network can be built by hand, created by an algorithm or both. "
-      + "The network can also be monitored and modified during training time. "
+    return "A classifier that uses backpropagation to learn a multi-layer perceptron to classify instances.\n"
+      + "The network can be built by hand or or set up using a simple heuristic. "
+      + "The network parameters can also be monitored and modified during training time. "
       + "The nodes in this network are all sigmoid (except for when the class "
-      + "is numeric in which case the the output nodes become unthresholded "
+      + "is numeric, in which case the output nodes become unthresholded "
       + "linear units).";
   }
 
@@ -2588,14 +2587,14 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @return a string to describe the learning rate option.
    */
   public String learningRateTipText() {
-    return "The amount the" + " weights are updated.";
+    return "The learning rate for weight updates.";
   }
 
   /**
    * @return a string to describe the momentum option.
    */
   public String momentumTipText() {
-    return "Momentum applied to the weights during updating.";
+    return "Momentum applied to the weight updates.";
   }
 
   /**
@@ -2611,7 +2610,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
   public String seedTipText() {
     return "Seed used to initialise the random number generator."
       + "Random numbers are used for setting the initial weights of the"
-      + " connections betweem nodes, and also for shuffling the training data.";
+      + " connections between nodes, and also for shuffling the training data.";
   }
 
   /**
@@ -2628,27 +2627,26 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    */
   public String GUITipText() {
     return "Brings up a gui interface."
-      + " This will allow the pausing and altering of the nueral network"
+      + " This will allow the pausing and altering of the neural network"
       + " during training.\n\n"
-      + "* To add a node left click (this node will be automatically selected,"
+      + "* To add a node, left click (this node will be automatically selected,"
       + " ensure no other nodes were selected).\n"
-      + "* To select a node left click on it either while no other node is"
-      + " selected or while holding down the control key (this toggles that"
-      + " node as being selected and not selected.\n"
+      + "* To select a node, left click on it either while no other node is"
+      + " selected or while holding down the control key (this toggles selection).\n"
       + "* To connect a node, first have the start node(s) selected, then click"
       + " either the end node or on an empty space (this will create a new node"
       + " that is connected with the selected nodes). The selection status of"
       + " nodes will stay the same after the connection. (Note these are"
-      + " directed connections, also a connection between two nodes will not"
+      + " directed connections. Also, a connection between two nodes will not"
       + " be established more than once and certain connections that are"
       + " deemed to be invalid will not be made).\n"
-      + "* To remove a connection select one of the connected node(s) in the"
+      + "* To remove a connection. select one of the connected node(s) in the"
       + " connection and then right click the other node (it does not matter"
-      + " whether the node is the start or end the connection will be removed"
+      + " whether the node is the start or end: the connection will be removed"
       + ").\n"
-      + "* To remove a node right click it while no other nodes (including it)"
+      + "* To remove a node, right click it while no other nodes (including it)"
       + " are selected. (This will also remove all connections to it)\n."
-      + "* To deselect a node either left click it while holding down control,"
+      + "* To deselect a node either left click it while holding down control"
       + " or right click on empty space.\n"
       + "* The raw inputs are provided from the labels on the left.\n"
       + "* The red nodes are hidden layers.\n"
@@ -2662,15 +2660,15 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       + "* You can accept the network as being finished at any time.\n"
       + "* The network is automatically paused at the beginning.\n"
       + "* There is a running indication of what epoch the network is up to"
-      + " and what the (rough) error for that epoch was (or for"
-      + " the validation if that is being used). Note that this error value"
+      + " and what the (rough) training error for that epoch was (or for"
+      + " the validation set if that is being used). Note that this error value"
       + " is based on a network that changes as the value is computed."
-      + " (also depending on whether"
-      + " the class is normalized will effect the error reported for numeric"
-      + " classes.\n"
-      + "* Once the network is done it will pause again and either wait to be"
+      + " (Also, whether"
+      + " the class is normalized will affect the error reported for numeric"
+      + " classes.)\n"
+      + "* Once the network is done, it will pause again and either wait to be"
       + " accepted or trained more.\n\n"
-      + "Note that if the gui is not set the network will not require any"
+      + "Note that if the GUI is not set, the network will not require any"
       + " interaction.\n";
   }
 
@@ -2682,7 +2680,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       + "(The training will continue until it is observed that"
       + " the error on the validation set has been consistently getting"
       + " worse, or if the training time is reached).\n"
-      + "If This is set to zero no validation set will be used and instead"
+      + "If this is set to zero, no validation set will be used and instead"
       + " the network will train for the specified number of epochs.";
   }
 
@@ -2699,7 +2697,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @return a string to describe the nominal to binary option.
    */
   public String nominalToBinaryFilterTipText() {
-    return "This will preprocess the instances with the filter."
+    return "This will preprocess the instances with the NominalToBinary filter."
       + " This could help improve performance if there are nominal attributes"
       + " in the data.";
   }
@@ -2710,9 +2708,9 @@ public class MultilayerPerceptron extends AbstractClassifier implements
   public String hiddenLayersTipText() {
     return "This defines the hidden layers of the neural network."
       + " This is a list of positive whole numbers. 1 for each hidden layer."
-      + " Comma seperated. To have no hidden layers put a single 0 here."
-      + " This will only be used if autobuild is set. There are also wildcard"
-      + " values 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes"
+      + " Comma separated. To have no hidden layers put a single 0 here."
+      + " This layer definition will only be used if autobuild is set. There are also wildcard"
+      + " values: 'a' = (attribs + classes) / 2, 'i' = attribs, 'o' = classes"
       + " , 't' = attribs + classes.";
   }
 
@@ -2720,8 +2718,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @return a string to describe the nominal to binary option.
    */
   public String normalizeNumericClassTipText() {
-    return "This will normalize the class if it's numeric."
-      + " This could help improve performance of the network, It normalizes"
+    return "This will normalize the class if it is numeric."
+      + " This can help improve performance of the network. It normalizes"
       + " the class to be between -1 and 1. Note that this is only internally"
       + ", the output will be scaled back to the original range.";
   }
@@ -2731,11 +2729,11 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    */
   public String normalizeAttributesTipText() {
     return "This will normalize the attributes."
-      + " This could help improve performance of the network."
+      + " This can help improve performance of the network."
       + " This is not reliant on the class being numeric. This will also"
-      + " normalize nominal attributes as well (after they have been run"
+      + " normalize nominal attributes (after they have been run"
       + " through the nominal to binary filter if that is in use) so that the"
-      + " nominal values are between -1 and 1";
+      + " binary values are between -1 and 1";
   }
 
   /**
@@ -2743,10 +2741,10 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    */
   public String resetTipText() {
     return "This will allow the network to reset with a lower learning rate."
-      + " If the network diverges from the answer this will automatically"
+      + " If the network diverges from the answer, this will automatically"
       + " reset the network with a lower learning rate and begin training"
-      + " again. This option is only available if the gui is not set. Note"
-      + " that if the network diverges but isn't allowed to reset it will"
+      + " again. This option is only available if the GUI is not set. Note"
+      + " that if the network diverges but is not allowed to reset, it will"
       + " fail the training process and return an error message.";
   }
 
@@ -2755,12 +2753,12 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    */
   public String decayTipText() {
     return "This will cause the learning rate to decrease."
-      + " This will divide the starting learning rate by the epoch number, to"
+      + " This will divide the starting learning rate by the epoch number to"
       + " determine what the current learning rate should be. This may help"
       + " to stop the network from diverging from the target output, as well"
       + " as improve general performance. Note that the decaying learning"
-      + " rate will not be shown in the gui, only the original learning rate"
-      + ". If the learning rate is changed in the gui, this is treated as the"
+      + " rate will not be shown in the GUI, only the original learning rate"
+      + ". If the learning rate is changed in the GUI, this is treated as the"
       + " starting learning rate.";
   }
 
