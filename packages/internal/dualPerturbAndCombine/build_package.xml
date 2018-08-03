@@ -90,6 +90,7 @@
              Author="yes" 
              Public="yes"
              link="http://weka.sourceforge.net/doc.dev/"
+	     additionalparam="-Xdoclint:none"
              maxmemory="256m"/>          
   </target> 
 
