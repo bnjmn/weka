@@ -283,7 +283,8 @@ public class PackageManager extends JPanel {
         new javax.swing.ProgressMonitor(PackageManager.this,
           "Establising cache...", "", 0, numPackages);
       ProgressPrintStream pps = new ProgressPrintStream(this);
-      m_error = WekaPackageManager.establishCacheIfNeeded(pps);
+      // m_error = WekaPackageManager.establishCacheIfNeeded(pps);
+      m_error = WekaPackageManager.startupCheck(true, pps);
 
       m_cacheEstablished = true;
       return null;

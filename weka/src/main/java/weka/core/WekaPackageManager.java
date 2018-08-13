@@ -44,12 +44,14 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.PrintStream;
+import java.io.PrintWriter;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URL;
@@ -979,8 +981,7 @@ public class WekaPackageManager {
    * @param progress PrintStream for progress info
    * @return true if the supplied package passes OS/arch constraints.
    */
-  public static boolean osAndArchCheck(Package toLoad,
-    PrintStream... progress) {
+  public static boolean osAndArchCheck(Package toLoad, PrintStream... progress) {
     // check for OS restrictions
     try {
       Object osNames = toLoad.getPackageMetaDataElement(OS_NAME_KEY);
@@ -1246,7 +1247,8 @@ public class WekaPackageManager {
       // if we have a non-empty packages dir then check
       // the integrity of our cache first
       if (contents.length > 0) {
-        establishCacheIfNeeded(System.out);
+        // establishCacheIfNeeded(System.out);
+        startupCheck(false, System.out);
       }
 
       // dynamic injection of dependencies between packages
@@ -1572,10 +1574,6 @@ public class WekaPackageManager {
       return null;
     }
 
-    if (REP_MIRROR == null) {
-      establishMirror();
-    }
-
     Exception problem = null;
     if (INITIAL_CACHE_BUILD_NEEDED) {
       for (PrintStream p : progress) {
@@ -1585,19 +1583,6 @@ public class WekaPackageManager {
       problem = refreshCache(progress);
 
       INITIAL_CACHE_BUILD_NEEDED = false;
-    } else {
-      // if no initial build needed then check for a server-side forced
-      // refresh...
-      try {
-        if (checkForForcedCacheRefresh()) {
-          for (PrintStream p : progress) {
-            p.println("Forced repository metadata refresh, please wait...");
-          }
-          problem = refreshCache(progress);
-        }
-      } catch (MalformedURLException ex) {
-        problem = ex;
-      }
     }
 
     return problem;
@@ -2871,6 +2856,70 @@ public class WekaPackageManager {
     System.out.println(result.toString());
   }
 
+  public static Exception startupCheck(boolean force, PrintStream... progress) {
+
+    Exception problem = null;
+    BufferedReader br = null;
+    PrintWriter pw = null;
+    File newPackageLastTimeCheckFile = new File(WEKA_HOME.toString()
+      + File.separator + "new_package_check.txt");
+    try {
+      // first check against last time that new packages were checked for
+      boolean doChecks = false;
+      long currentTime = System.currentTimeMillis();
+      if (!newPackageLastTimeCheckFile.exists()) {
+        doChecks = true;
+      } else if (!force) {
+        br = new BufferedReader(new FileReader(newPackageLastTimeCheckFile));
+        String t = br.readLine();
+        long lastTime = Long.parseLong(t);
+        doChecks = (currentTime - lastTime > 720L * 60L * 1000L);
+      }
+
+      if (doChecks || force) {
+
+        if (REP_MIRROR == null) {
+          establishMirror();
+        }
+
+        establishCacheIfNeeded(progress);
+        boolean forcedCacheRefresh = false;
+        try {
+          if (forcedCacheRefresh = checkForForcedCacheRefresh()) {
+            for (PrintStream p : progress) {
+              p.println("Forced repository metadata refresh, please wait...");
+            }
+            problem = refreshCache(progress);
+          }
+        } catch (MalformedURLException ex) {
+          problem = ex;
+        }
+
+        if (!forcedCacheRefresh) {
+          checkForNewPackages(progress);
+        }
+        pw = new PrintWriter(new FileWriter(newPackageLastTimeCheckFile));
+        pw.println(currentTime);
+        pw.flush();
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      if (br != null) {
+        try {
+          br.close();
+        } catch (IOException e) {
+          e.printStackTrace();
+        }
+      }
+      if (pw != null) {
+        pw.close();
+      }
+    }
+
+    return problem;
+  }
+
   private static void printUsage() {
     System.out
       .println("Usage: weka.core.WekaPackageManager [-offline] [option]");
@@ -2907,8 +2956,9 @@ public class WekaPackageManager {
         }
       }
 
-      establishCacheIfNeeded(System.out);
-      checkForNewPackages(System.out);
+      //establishCacheIfNeeded(System.out);
+      //checkForNewPackages(System.out);
+      startupCheck(true, System.out);
 
       if (args.length == 0 || args[0].equalsIgnoreCase("-h")
         || args[0].equalsIgnoreCase("-help")) {
