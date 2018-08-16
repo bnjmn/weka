@@ -28,6 +28,7 @@ import weka.core.converters.AbstractFileLoader;
 import weka.gui.ComponentHelper;
 import weka.gui.JTableHelper;
 import weka.gui.ListSelectorDialog;
+import weka.gui.PropertyDialog;
 
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -43,10 +44,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Vector;
+import java.util.*;
 
 /**
  * A Panel representing an ARFF-Table and the associated filename.
@@ -741,6 +739,13 @@ public class ArffPanel extends JPanel implements ActionListener,
 
     model = (ArffSortedTableModel) m_TableArff.getModel();
 
+    // We cannot remove the class attribute
+    if (model.getInstances().classIndex() == model.getAttributeIndex(m_CurrentCol)) {
+      ComponentHelper.showMessageBox(getParent(), "Warning",
+              "Class attribute cannot be removed and will be skipped.", -1, JOptionPane.INFORMATION_MESSAGE);
+      return;
+    }
+
     // really an attribute column?
     if (model.getAttributeAt(m_CurrentCol) == null) {
       return;
@@ -768,8 +773,6 @@ public class ArffPanel extends JPanel implements ActionListener,
     ListSelectorDialog dialog;
     ArffSortedTableModel model;
     Object[] atts;
-    int[] indices;
-    int i;
     JList list;
     int result;
 
@@ -792,9 +795,22 @@ public class ArffPanel extends JPanel implements ActionListener,
     }
 
     model = (ArffSortedTableModel) m_TableArff.getModel();
-    indices = new int[atts.length];
-    for (i = 0; i < atts.length; i++) {
-      indices[i] = model.getAttributeColumn(atts[i].toString());
+    ArrayList<Integer> al = new ArrayList<>(atts.length);
+    for (int i = 0; i < atts.length; i++) {
+      int index = model.getAttributeColumn(atts[i].toString());
+
+      // We cannot remove the class attribute
+      if (model.isClassIndex(index)) {
+        ComponentHelper.showMessageBox(getParent(), "Warning",
+                "Class attribute cannot be removed and will be skipped.", -1, JOptionPane.INFORMATION_MESSAGE);
+      } else {
+        al.add(index);
+      }
+    }
+
+    int[] indices = new int[al.size()];
+    for (int i = 0; i < al.size(); i++) {
+      indices[i] = al.get(i);
     }
 
     setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -1053,6 +1069,8 @@ public class ArffPanel extends JPanel implements ActionListener,
       setAttributeWeight();
     } else if (o == menuItemAttributeAsClass) {
       attributeAsClass();
+    } else if (o == menuItemSortInstances) {
+      sortInstances();
     } else if (o == menuItemDeleteAttribute) {
       deleteAttribute();
     } else if (o == menuItemDeleteAttributes) {

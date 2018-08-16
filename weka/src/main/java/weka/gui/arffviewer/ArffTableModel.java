@@ -32,8 +32,9 @@ import weka.core.converters.ConverterUtils;
 import weka.filters.Filter;
 import weka.filters.unsupervised.attribute.Reorder;
 import weka.gui.ComponentHelper;
+import weka.gui.PropertyDialog;
 
-import javax.swing.JOptionPane;
+import javax.swing.*;
 import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
@@ -593,12 +594,12 @@ public class ArffTableModel extends DefaultTableModel implements Undoable {
   }
 
   /**
-   * sorts the instances via the given attribute
+   * sorts the instances via the given attribute (ascending)
    * 
    * @param columnIndex the index of the column
    */
   public void sortInstances(int columnIndex) {
-    sortInstances(columnIndex, false);
+    sortInstances(columnIndex, true);
   }
 
   /**

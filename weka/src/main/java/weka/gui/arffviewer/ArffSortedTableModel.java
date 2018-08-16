@@ -334,7 +334,17 @@ public class ArffSortedTableModel
   public int getAttributeColumn(String name) {
     return ((ArffTableModel) getModel()).getAttributeColumn(name);
   }
-  
+
+  /**
+   * checks whether the column represents the class or not
+   *
+   * @param columnIndex the index of the column
+   * @return true if the column is the class attribute
+   */
+  protected boolean isClassIndex(int columnIndex) {
+    return ((ArffTableModel) getModel()).isClassIndex(columnIndex);
+  }
+
   /**
    * checks whether the value at the given position is missing
    * 
