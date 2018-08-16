@@ -1600,8 +1600,7 @@ public final class Utils implements RevisionHandler {
       int i = 0;
       while (i < index.length) {
         numEqual = 1;
-        for (int j = i + 1; ((j < index.length) && Utils.eq(array[index[i]],
-          array[index[j]])); j++) {
+        for (int j = i + 1; ((j < index.length) && (array[index[i]] == array[index[j]])); j++) {
           numEqual++;
         }
         if (numEqual > 1) {
