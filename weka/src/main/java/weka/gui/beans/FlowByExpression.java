@@ -413,13 +413,13 @@ public class FlowByExpression extends JPanel implements BeanCommon, Visible,
             if (inst.isMissing(lhsAttIndex) || inst.isMissing(rhsAttIndex)) {
               return false;
             }
-            return Utils.eq(inst.value(lhsAttIndex), inst.value(rhsAttIndex));
+            return (inst.value(lhsAttIndex) == inst.value(rhsAttIndex));
           }
 
           if (inst.isMissing(lhsAttIndex)) {
             return false;
           }
-          return (Utils.eq(inst.value(lhsAttIndex), numericOperand));
+          return (inst.value(lhsAttIndex) == numericOperand);
         }
       },
       NOTEQUAL(" != ") {

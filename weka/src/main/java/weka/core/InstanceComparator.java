@@ -75,7 +75,7 @@ public class InstanceComparator
    * 
    * @param includeClass	whether to include the class in the comparison
    * @param range		the attribute range string
-   * @param inverted		whether to invert the matching sense of the att range
+   * @param invert		whether to invert the matching sense of the att range
    */
   public InstanceComparator(boolean includeClass, String range, boolean invert) {
     super();
@@ -128,8 +128,8 @@ public class InstanceComparator
    * 
    * @param invert		true if to invert the matching sense
    */
-  public void setInvert(boolean value) {
-    m_Range.setInvert(value);
+  public void setInvert(boolean invert) {
+    m_Range.setInvert(invert);
   }
   
   /**
@@ -152,16 +152,16 @@ public class InstanceComparator
    * 			if greater
    */
   public int compare(Instance inst1, Instance inst2) {
-    int         	result;
-    int         	classindex;
-    int         	i;
-    Instances		data1;
-    Instances		data2;
-    int			n;
-    InstanceComparator	comp;
-    
+    int result;
+    int classindex;
+    int i;
+    Instances data1;
+    Instances data2;
+    int n;
+    InstanceComparator comp;
+
     m_Range.setUpper(inst1.numAttributes() - 1);
-    
+
     // get class index
     if (inst1.classIndex() == -1)
       classindex = inst1.numAttributes() - 1;
@@ -172,19 +172,18 @@ public class InstanceComparator
     for (i = 0; i < inst1.numAttributes(); i++) {
       // in selected range?
       if (!m_Range.isInRange(i))
-	continue;
-      
+        continue;
+
       // exclude class?
       if (!getIncludeClass() && (i == classindex))
         continue;
-   
+
       // comparing attribute values
       // 1. special handling if missing value (NaN) is involved:
       if (inst1.isMissing(i) || inst2.isMissing(i)) {
         if (inst1.isMissing(i) && inst2.isMissing(i)) {
           continue;
-        }
-        else {
+        } else {
           if (inst1.isMissing(i))
             result = -1;
           else
@@ -194,37 +193,36 @@ public class InstanceComparator
       }
       // 2. regular values:
       else {
-	switch (inst1.attribute(i).type()) {
-	  case Attribute.STRING:
-	    result = inst1.stringValue(i).compareTo(inst2.stringValue(i));
-	    break;
-	  case Attribute.RELATIONAL:
-	    data1 = inst1.relationalValue(i);
-	    data2 = inst2.relationalValue(i);
-	    n     = 0;
-	    comp  = new InstanceComparator();
-	    while ((n < data1.numInstances()) && (n < data2.numInstances()) && (result == 0)) {
-	      result = comp.compare(data1.instance(n), data2.instance(n));
-	      n++;
-	    }
-	    break;
-	  default:
-	    if (Utils.eq(inst1.value(i), inst2.value(i))) { 
-	      continue;
-	    }
-	    else {
-	      if (inst1.value(i) < inst2.value(i))
-		result = -1;
-	      else
-		result = 1;
-	      break;
-	    }
-	}
+        switch (inst1.attribute(i).type()) {
+          case Attribute.STRING:
+            result = inst1.stringValue(i).compareTo(inst2.stringValue(i));
+            break;
+          case Attribute.RELATIONAL:
+            data1 = inst1.relationalValue(i);
+            data2 = inst2.relationalValue(i);
+            n = 0;
+            comp = new InstanceComparator();
+            while ((n < data1.numInstances()) && (n < data2.numInstances()) && (result == 0)) {
+              result = comp.compare(data1.instance(n), data2.instance(n));
+              n++;
+            }
+            break;
+          default:
+            if (inst1.value(i) == inst2.value(i)) {
+              continue;
+            } else {
+              if (inst1.value(i) < inst2.value(i))
+                result = -1;
+              else
+                result = 1;
+              break;
+            }
+        }
       }
       if (result != 0)
-	break;
+        break;
     }
-    
+
     return result;
   }
   

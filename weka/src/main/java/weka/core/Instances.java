@@ -464,10 +464,10 @@ RevisionHandler {
       if (instance.isMissing(i)) {
         continue;
       } else if (attribute(i).isNominal() || attribute(i).isString()) {
-        if (!(Utils.eq(instance.value(i), (int) instance.value(i)))) {
+        if (instance.value(i) != (int) instance.value(i)) {
           return false;
-        } else if (Utils.sm(instance.value(i), 0)
-          || Utils.gr(instance.value(i), attribute(i).numValues())) {
+        } else if ((instance.value(i) < 0)
+          || (instance.value(i) > attribute(i).numValues() - 1)) {
           return false;
         }
       }

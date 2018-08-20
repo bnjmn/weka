@@ -72,24 +72,24 @@ public class AttributeStats
    * @param weight the weight mass of the value
    */
   protected void addDistinct(double value, int count, double weight) {
-    
+
     if (count > 0) {
       if (count == 1) {
-	uniqueCount++;
-	}
-      if (Utils.eq(value, (double)((int)value))) {
-	intCount += count;
+        uniqueCount++;
+      }
+      if (value == (int)value) {
+        intCount += count;
       } else {
-	realCount += count;
+        realCount += count;
       }
       if (nominalCounts != null) {
-	nominalCounts[(int)value] = count;
-	nominalWeights[(int)value] = weight;
+        nominalCounts[(int) value] = count;
+        nominalWeights[(int) value] = weight;
       }
       if (numericStats != null) {
-	  //numericStats.add(value, count);
-          numericStats.add(value, weight);
-	  numericStats.calculateDerived();
+        //numericStats.add(value, count);
+        numericStats.add(value, weight);
+        numericStats.calculateDerived();
       }
     }
     distinctCount++;
