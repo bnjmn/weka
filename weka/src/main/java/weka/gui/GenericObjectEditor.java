@@ -960,7 +960,6 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
       try {
         result = GenericObjectEditor.makeCopy(source);
         setCancelButton(true);
-
       } catch (Exception ex) {
         setCancelButton(false);
         Logger.log(weka.core.logging.Logger.Level.WARNING,
@@ -1934,8 +1933,17 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
    * @exception Exception if the copy fails
    */
   public static Object makeCopy(Object source) throws Exception {
-    SerializedObject so = new SerializedObject(source);
-    Object result = so.getObject();
+    Object result = null;
+    if (source instanceof OptionHandler) {
+      // just copy the configuration via options. Saves deep copying
+      // stuff like trained classifiers.
+      String className = source.getClass().getCanonicalName();
+      String[] options = ((OptionHandler) source).getOptions();
+      result = Utils.forName(Object.class, className, options);
+    } else {
+      SerializedObject so = new SerializedObject(source);
+      result = so.getObject();
+    }
     return result;
   }
 
