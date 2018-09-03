@@ -1,0 +1,423 @@
+------------------------------------------------------------------------
+r14655 | eibe | 2017-12-22 21:55:12 +1300 (Fri, 22 Dec 2017) | 1 line
+Changed paths:
+   M /trunk/packages/internal/classificationViaClustering/Description.props
+   M /trunk/packages/internal/classificationViaClustering/src/main/java/weka/classifiers/meta/ClassificationViaClustering.java
+
+ClassificationViaClustering now works properly if string or relational attributes are present in the data.
+------------------------------------------------------------------------
+r14656 | mhall | 2018-01-04 15:19:15 +1300 (Thu, 04 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+   M /trunk/packages/internal/wekaPython/resources/py/pyCheck.py
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/classifiers/sklearn/ScikitLearnClassifier.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/gui/beans/PythonScriptExecutor.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/knowledgeflow/steps/PythonScriptExecutor.java
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/python/PythonSession.java
+
+Improved the error checking and reporting around configuration of the python environment. pyCheck.py now checks for scipy, which is a dependency of sklearn.
+------------------------------------------------------------------------
+r14657 | mhall | 2018-01-04 15:22:18 +1300 (Thu, 04 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/clusterers/ScikitLearnClusterer.java
+
+Improved the error checking and reporting around configuration of the python environment. pyCheck.py now checks for scipy, which is a dependency of sklearn.
+------------------------------------------------------------------------
+r14663 | eibe | 2018-01-08 16:56:18 +1300 (Mon, 08 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/Description.props
+   M /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters/ExcelLoader.java
+   M /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters/ExcelSaver.java
+
+Missing value default string was empty string, which did not work when saving options. Fixed by using a pair of empty single quotes to denote an empty cell in ExcelSaver.
+------------------------------------------------------------------------
+r14665 | mhall | 2018-01-08 17:13:48 +1300 (Mon, 08 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/pom.xml
+
+[maven-release-plugin] prepare release WekaExcel-1.0.6
+------------------------------------------------------------------------
+r14667 | mhall | 2018-01-08 17:13:51 +1300 (Mon, 08 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r14676 | mhall | 2018-01-09 14:19:29 +1300 (Tue, 09 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/WekaExcel/Description.props
+   M /trunk/packages/internal/WekaExcel/src/main/java/weka/core/converters/ExcelSaver.java
+
+Extension for .xlsx files is now correct when using the ExcelSaver step in the Knowledge Flow
+------------------------------------------------------------------------
+r14682 | eibe | 2018-01-09 17:38:57 +1300 (Tue, 09 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/core/RSessionImpl.java
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/gui/beans/JavaGDConsolePanel.java
+
+RConsole no longer breaks lines when enter is pressed. R options are now set to prevent attempted installation from source.
+------------------------------------------------------------------------
+r14688 | fracpete | 2018-01-11 11:20:48 +1300 (Thu, 11 Jan 2018) | 1 line
+Changed paths:
+   M /branches/stable-3-8/packages/internal/partialLeastSquares/Description.props
+   M /branches/stable-3-8/packages/internal/partialLeastSquares/src/main/java/weka/filters/supervised/attribute/PLSFilter.java
+   M /trunk/packages/internal/partialLeastSquares/Description.props
+   M /trunk/packages/internal/partialLeastSquares/src/main/java/weka/filters/supervised/attribute/PLSFilter.java
+
+fixed incorrect predictions during first batch; uses class attribute name from input data now to avoid exception in FilteredClassifier, that the class attribute has changed; prepared for release
+------------------------------------------------------------------------
+r14690 | mhall | 2018-01-11 15:22:18 +1300 (Thu, 11 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/partialLeastSquares/build_package.xml
+
+Added package property to build file
+------------------------------------------------------------------------
+r14691 | mhall | 2018-01-11 15:32:43 +1300 (Thu, 11 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/partialLeastSquares/pom.xml
+
+[maven-release-plugin] prepare release partialLeastSquares-1.0.5
+------------------------------------------------------------------------
+r14693 | mhall | 2018-01-11 15:32:46 +1300 (Thu, 11 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/partialLeastSquares/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r14697 | eibe | 2018-01-23 18:57:20 +1300 (Tue, 23 Jan 2018) | 1 line
+Changed paths:
+   A /trunk/packages/internal/timeSeriesFilters/src/main/java/weka/filters/unsupervised/timeseries/FlatToRelational.java
+   A /trunk/packages/internal/timeSeriesFilters/src/test/java/weka/filters/unsupervised/timeseries/FlatToRelationalTest.java
+
+Modified version of Steven's filter. Fixed some bugs but introduced some new ones. Not ready for consumption yet and unit test fails.
+------------------------------------------------------------------------
+r14698 | mhall | 2018-01-24 15:21:41 +1300 (Wed, 24 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/timeSeriesFilters/build_package.xml
+
+Updated source and target versions to 1.8
+------------------------------------------------------------------------
+r14700 | eibe | 2018-02-20 17:20:48 +1300 (Tue, 20 Feb 2018) | 1 line
+Changed paths:
+   A /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers
+   A /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions
+   A /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+Checked in partial code for XNV.
+------------------------------------------------------------------------
+r14701 | eibe | 2018-02-21 17:51:28 +1300 (Wed, 21 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+CCA is now working.
+------------------------------------------------------------------------
+r14702 | eibe | 2018-02-21 23:14:14 +1300 (Wed, 21 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+XNV appears to be working now. Still need to include standardization, perform unit testing, etc.
+------------------------------------------------------------------------
+r14706 | eibe | 2018-02-22 18:09:11 +1300 (Thu, 22 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+Cleaned-up the code. Almost ready for release.
+------------------------------------------------------------------------
+r14708 | eibe | 2018-02-23 14:22:08 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+XNV class is now complete.
+------------------------------------------------------------------------
+r14709 | eibe | 2018-02-23 14:28:57 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+   A /trunk/packages/internal/largeScaleKernelLearning/src/test/java/weka/classifiers
+   A /trunk/packages/internal/largeScaleKernelLearning/src/test/java/weka/classifiers/functions
+   A /trunk/packages/internal/largeScaleKernelLearning/src/test/java/weka/classifiers/functions/XNVTest.java
+
+Added test and serial version ID.
+------------------------------------------------------------------------
+r14710 | eibe | 2018-02-23 14:39:24 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/Description.props
+   M /trunk/packages/internal/largeScaleKernelLearning/src/main/java/weka/classifiers/functions/XNV.java
+
+Made XVN implement TechnicalInformationHandler, updated Javadoc, and updated Description.props.
+------------------------------------------------------------------------
+r14713 | mhall | 2018-02-23 15:33:47 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/build_package.xml
+
+Updated source and target Java version for build_package.xml
+------------------------------------------------------------------------
+r14714 | mhall | 2018-02-23 15:43:42 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/largeScaleKernelLearning/pom.xml
+
+Udpated pom
+------------------------------------------------------------------------
+r14737 | eibe | 2018-02-28 15:06:34 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/Description.props
+   A /trunk/packages/internal/XMeans/GUIEditors.props
+   A /trunk/packages/internal/XMeans/GenericPropertiesCreator.props
+
+Package now includes configuration files that enable GUI-based configuration of KDTree.
+------------------------------------------------------------------------
+r14738 | mhall | 2018-02-28 15:21:55 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/pom.xml
+
+Updated version in pom
+------------------------------------------------------------------------
+r14739 | mhall | 2018-02-28 15:22:04 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/build_package.xml
+
+Updated version in pom
+------------------------------------------------------------------------
+r14740 | mhall | 2018-02-28 15:23:26 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/pom.xml
+
+[maven-release-plugin] prepare release XMeans-1.0.6
+------------------------------------------------------------------------
+r14742 | mhall | 2018-02-28 15:23:29 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/XMeans/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------
+r14743 | mhall | 2018-02-28 16:34:30 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/build_package.xml
+   A /trunk/packages/internal/distributedWekaSparkDev/lib-arpack
+   A /trunk/packages/internal/distributedWekaSparkDev/lib-arpack/arpack_combined.jar
+
+Now replaces the arpack_combined_all.jar that Spark includes with the 'clean' version from Weka that does not contain the core java CJFormat class in org.j_paine.formatter which is not usable for commercial purposes
+------------------------------------------------------------------------
+r14746 | mhall | 2018-02-28 16:58:12 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/Description.props
+
+Updated Description.props
+------------------------------------------------------------------------
+r14747 | mhall | 2018-02-28 16:58:24 +1300 (Wed, 28 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/pom.xml
+
+Updated pom.xml
+------------------------------------------------------------------------
+r14751 | mhall | 2018-03-02 14:04:52 +1300 (Fri, 02 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/build.properties
+
+updated version in build.properties
+------------------------------------------------------------------------
+r14757 | mhall | 2018-03-05 09:47:39 +1300 (Mon, 05 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/Description.props
+
+Updated release date
+------------------------------------------------------------------------
+r14758 | eibe | 2018-03-11 21:28:46 +1300 (Sun, 11 Mar 2018) | 1 line
+Changed paths:
+   A /trunk/packages/internal/calibrationCurve
+   A /trunk/packages/internal/calibrationCurve/Description.props
+   A /trunk/packages/internal/calibrationCurve/build_package.xml
+   A /trunk/packages/internal/calibrationCurve/lib
+   A /trunk/packages/internal/calibrationCurve/pom.xml
+   A /trunk/packages/internal/calibrationCurve/src
+   A /trunk/packages/internal/calibrationCurve/src/main
+   A /trunk/packages/internal/calibrationCurve/src/main/java
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins/CalibrationCurve.java
+
+Initial import of calibrationCurve package that provides a VisualizePlugin for drawing calibration curves.
+------------------------------------------------------------------------
+r14759 | mhall | 2018-03-12 11:15:51 +1300 (Mon, 12 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins/CalibrationCurve.java
+
+Changed to using the VisualizePanel
+------------------------------------------------------------------------
+r14764 | eibe | 2018-03-12 19:57:56 +1300 (Mon, 12 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins/CalibrationCurve.java
+
+Committed one small bug fix in name of Instances object. Removed one unnecessary import.
+------------------------------------------------------------------------
+r14767 | mhall | 2018-03-13 19:02:09 +1300 (Tue, 13 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/build_package.xml
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/knowledgeflow
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/knowledgeflow/icons
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/knowledgeflow/icons/CalibrationCurveGenerator.gif
+   M /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins/CalibrationCurve.java
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/visualize/plugins/CalibrationCurveUtils.java
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/knowledgeflow
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/knowledgeflow/steps
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/knowledgeflow/steps/CalibrationCurveGenerator.java
+
+Some refactoring. Also added Knowledge Flow step.
+------------------------------------------------------------------------
+r14772 | mhall | 2018-03-14 10:07:36 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/src/main/java/weka/knowledgeflow/steps/CalibrationCurveGenerator.java
+
+Small bug fix in reporting finished state for step
+------------------------------------------------------------------------
+r14773 | mhall | 2018-03-14 10:16:46 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   A /trunk/packages/internal/calibrationCurve/PluginManager.props
+   M /trunk/packages/internal/calibrationCurve/build_package.xml
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/knowledgeflow/templates
+   A /trunk/packages/internal/calibrationCurve/src/main/java/weka/gui/knowledgeflow/templates/calibration.kf
+
+Included a template flow for the knowledge flow.
+------------------------------------------------------------------------
+r14774 | mhall | 2018-03-14 10:18:22 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/Description.props
+
+Updated Description.props
+------------------------------------------------------------------------
+r14775 | mhall | 2018-03-14 10:21:44 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/calibrationCurve/src/main/java/weka/knowledgeflow/steps/CalibrationCurveGenerator.java
+
+Removed a couple of unused imports
+------------------------------------------------------------------------
+r14781 | eibe | 2018-03-17 22:49:06 +1300 (Sat, 17 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/MLRClassifier.java
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/classifiers/mlr/impl/MLRClassifierImpl.java
+
+Now works with R 3.4.4 and MLR 2.12. XML package for R is now installed by MLRClassifier if it is not already installed.
+------------------------------------------------------------------------
+r14782 | mhall | 2018-03-19 11:32:04 +1300 (Mon, 19 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/src/main/java/weka/core/RSessionImpl.java
+
+loadLibrary() now catches REngineEvalException and returns false
+------------------------------------------------------------------------
+r14786 | mhall | 2018-03-19 11:38:02 +1300 (Mon, 19 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/RPlugin/Description.props
+
+Updated date in Description.props
+------------------------------------------------------------------------
+r14808 | mhall | 2018-05-08 15:29:36 +1200 (Tue, 08 May 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/resources/py/pyCheck.py
+
+The check that pandas version numbers have three parts has now been disabled in pyCheck. Some python distros (e.g. the Intel one) have weird version numbers with more than three parts for pandas.
+------------------------------------------------------------------------
+r14809 | mhall | 2018-05-08 15:44:38 +1200 (Tue, 08 May 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Updated description file
+------------------------------------------------------------------------
+r14828 | mhall | 2018-06-06 11:16:55 +1200 (Wed, 06 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/classifiers/sklearn/ScikitLearnClassifier.java
+
+Updated to include MLPClassifier and MLPRegressor that were introduced in sklearn version 0.18
+------------------------------------------------------------------------
+r14829 | mhall | 2018-06-06 11:18:30 +1200 (Wed, 06 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Updated for the 1.0.8 release.
+------------------------------------------------------------------------
+r14843 | mhall | 2018-06-11 19:34:36 +1200 (Mon, 11 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/src/main/java/weka/classifiers/sklearn/ScikitLearnClassifier.java
+
+Fixed a typo in the default options for MLPClassifier/Regressor
+------------------------------------------------------------------------
+r14844 | mhall | 2018-06-11 19:36:06 +1200 (Mon, 11 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/wekaPython/Description.props
+
+Updated version to 1.0.9
+------------------------------------------------------------------------
+r14868 | mhall | 2018-07-06 15:24:18 +1200 (Fri, 06 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/src/main/java/weka/distributed/spark/mllib/util/MLlibDatasetMaker.java
+
+Fixed a bug in sparse instance to sparse Vector conversion.
+------------------------------------------------------------------------
+r14869 | mhall | 2018-07-06 15:31:30 +1200 (Fri, 06 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/Description.props
+   M /trunk/packages/internal/distributedWekaSparkDev/pom.xml
+
+Updated description and pom.
+------------------------------------------------------------------------
+r14870 | mhall | 2018-07-06 15:32:20 +1200 (Fri, 06 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/distributedWekaSparkDev/build.properties
+
+Updated build properties
+------------------------------------------------------------------------
+r14887 | eibe | 2018-08-03 15:42:59 +1200 (Fri, 03 Aug 2018) | 1 line
+Changed paths:
+   A /trunk/packages/internal/dualPerturbAndCombine
+   A /trunk/packages/internal/dualPerturbAndCombine/Description.props
+   A /trunk/packages/internal/dualPerturbAndCombine/build_package.xml
+   A /trunk/packages/internal/dualPerturbAndCombine/lib
+   A /trunk/packages/internal/dualPerturbAndCombine/pom.xml
+   A /trunk/packages/internal/dualPerturbAndCombine/src
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main/java
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main/java/weka
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main/java/weka/classifiers
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main/java/weka/classifiers/trees
+   A /trunk/packages/internal/dualPerturbAndCombine/src/main/java/weka/classifiers/trees/DPCTree.java
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test/java
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test/java/weka
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test/java/weka/classifiers
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test/java/weka/classifiers/trees
+   A /trunk/packages/internal/dualPerturbAndCombine/src/test/java/weka/classifiers/trees/DPCTreeTest.java
+
+Initial import of dualPerturbAndCombine package.
+------------------------------------------------------------------------
+r14888 | mhall | 2018-08-04 10:16:24 +1200 (Sat, 04 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dualPerturbAndCombine/pom.xml
+
+Changed version number to 1.0.0-SNAPSHOT
+------------------------------------------------------------------------
+r14889 | mhall | 2018-08-04 10:17:55 +1200 (Sat, 04 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dualPerturbAndCombine/build_package.xml
+
+Changed package name from DTNB
+------------------------------------------------------------------------
+r14890 | mhall | 2018-08-04 10:19:42 +1200 (Sat, 04 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dualPerturbAndCombine/build_package.xml
+
+Added  additionalparam="-Xdoclint:none" to javadoc target
+------------------------------------------------------------------------
+r14891 | mhall | 2018-08-04 10:21:05 +1200 (Sat, 04 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dualPerturbAndCombine/pom.xml
+
+[maven-release-plugin] prepare release dualPerturbAndCombine-1.0.0
+------------------------------------------------------------------------
+r14893 | mhall | 2018-08-04 10:21:10 +1200 (Sat, 04 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/packages/internal/dualPerturbAndCombine/pom.xml
+
+[maven-release-plugin] prepare for next development iteration
+------------------------------------------------------------------------

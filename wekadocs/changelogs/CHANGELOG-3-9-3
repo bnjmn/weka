@@ -1,0 +1,334 @@
+------------------------------------------------------------------------
+r14647 | mhall | 2017-12-22 12:16:47 +1300 (Fri, 22 Dec 2017) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/version.txt
+
+Version is now 3.9.2
+------------------------------------------------------------------------
+r14659 | mhall | 2018-01-08 14:59:11 +1300 (Mon, 08 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/TextViewerInteractiveView.java
+
+Interactive view window for TextViewer now displays the last entry (rather than the first) in the list when opened
+------------------------------------------------------------------------
+r14668 | mhall | 2018-01-09 11:24:00 +1300 (Tue, 09 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/SaverStepEditorDialog.java
+
+Label for prefix/file now stays set to 'File' when relation name as file name is turned off and the Saver's step dialog is reopened.
+------------------------------------------------------------------------
+r14672 | mhall | 2018-01-09 14:13:51 +1300 (Tue, 09 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/SaverStepEditorDialog.java
+
+Fixed the prefix label text to 'Filename', rather than 'File' that the previous commit used.
+------------------------------------------------------------------------
+r14678 | mhall | 2018-01-09 16:13:59 +1300 (Tue, 09 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/knowledgeflow/steps/Classifier.java
+
+Fixed a bug where the Classifier step was not checking for compatible structure structure between training and test sets in the case where the classifier is not an InputMappedClassifier
+------------------------------------------------------------------------
+r14684 | mhall | 2018-01-10 11:23:46 +1300 (Wed, 10 Jan 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/SerializedObject.java
+
+Bug fix for deserialization issue involving primitive TYPE values (e.g. Boolean.TYPE etc.) courtesy of Peter Reutemann
+------------------------------------------------------------------------
+r14707 | eibe | 2018-02-23 14:06:17 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/ClassificationViaRegression.java
+
+ClassificationViaRegression now supports more efficient batch prediction if the base classifier supports it.
+------------------------------------------------------------------------
+r14722 | mhall | 2018-02-23 16:40:43 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageClassLoaderManager.java
+
+Now reference arpack_combined.jar rather than arpack_combined_all.jar
+------------------------------------------------------------------------
+r14724 | mhall | 2018-02-23 16:53:15 +1300 (Fri, 23 Feb 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageClassLoaderManager.java
+
+Removed some experimental code that got added accidently to the previous commit
+------------------------------------------------------------------------
+r14753 | eibe | 2018-03-03 15:23:08 +1300 (Sat, 03 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Fixed two command-line option handling bugs introduced in the last release: -t ... -T ... -o -v did not work; -t ... -no-cv -p 1 did not work (model for training set was not required but not built in either case).
+------------------------------------------------------------------------
+r14755 | eibe | 2018-03-03 17:09:50 +1300 (Sat, 03 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/evaluation/Evaluation.java
+
+Fixed calculation of KBRelativeInformation. Improved Javadoc description of SF entropy scores. priorEntropy() now just returns SFMeanPriorEntropy(). It previously returned the entropy of the last batch of data used in setPriors(). KBRelativeInformation is slightly different from the formula in the KB paper because we are not using mean log-loss on the training data wrt to the class priors from the training data: we use the mean log-loss for the test data (which could be the training data) wrt to the class priors now. The previous calculation of the KBRelativeInformation score was incorrect anyway.
+------------------------------------------------------------------------
+r14760 | mhall | 2018-03-12 13:41:56 +1300 (Mon, 12 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/visualize/VisualizePanel.java
+
+Zooming in on a region now preserves the connectedness of points.
+------------------------------------------------------------------------
+r14765 | fracpete | 2018-03-13 09:37:31 +1300 (Tue, 13 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   M /trunk/wekadocs/manual/simplecli.tex
+
+added 'script' command to replay commands from a text file
+------------------------------------------------------------------------
+r14768 | mhall | 2018-03-14 10:03:16 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/LayoutPanel.java
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/DataVisualizerInteractiveView.java
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/GraphViewerInteractiveView.java
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/ImageViewerInteractiveView.java
+   M /trunk/weka/src/main/java/weka/gui/visualize/PlotData2D.java
+   M /trunk/weka/src/main/java/weka/knowledgeflow/steps/DataVisualizer.java
+
+Small changes to support making points invisible (and not connected) in the scatter plot visualization. Basically, setting a point's instance weight to a negative value will turn on the invisibility behaviour for that point. Also made some small changes to make split panes in the KnowledgeFlow's popup visualizers better behaved
+------------------------------------------------------------------------
+r14776 | fracpete | 2018-03-14 20:40:01 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+
+history is now stored in $WEKA_HOME/props
+------------------------------------------------------------------------
+r14777 | fracpete | 2018-03-14 20:43:41 +1300 (Wed, 14 Mar 2018) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/sql/SqlViewer.java
+   M /trunk/weka/src/main/java/weka/gui/sql/SqlViewer.java
+
+history is now stored in $WEKA_HOME/props
+------------------------------------------------------------------------
+r14778 | fracpete | 2018-03-16 16:44:17 +1300 (Fri, 16 Mar 2018) | 1 line
+Changed paths:
+   M /branches/waikato/weka/src/main/java/weka/gui/GenericPropertiesCreator.props
+   M /branches/waikato/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/AbstractCommand.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Capabilities.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Cls.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Echo.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Exit.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Help.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/History.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Java.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Kill.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Script.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Set.java
+   A /branches/waikato/weka/src/main/java/weka/gui/simplecli/Unset.java
+   M /trunk/weka/src/main/java/weka/gui/GenericPropertiesCreator.props
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli
+   A /trunk/weka/src/main/java/weka/gui/simplecli/AbstractCommand.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Capabilities.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Cls.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Echo.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Exit.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Help.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/History.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Java.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Kill.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Script.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Set.java
+   A /trunk/weka/src/main/java/weka/gui/simplecli/Unset.java
+
+Simple CLI now has class hierarchy for commands to make it extensible via packages
+------------------------------------------------------------------------
+r14787 | eibe | 2018-04-04 16:21:17 +1200 (Wed, 04 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SGD.java
+
+Fixed bug in output of toString method. Squared loss was always added.
+------------------------------------------------------------------------
+r14789 | fracpete | 2018-04-06 13:20:17 +1200 (Fri, 06 Apr 2018) | 1 line
+Changed paths:
+   A /branches/stable-3-8/weka/src/main/java/weka/classifiers/evaluation/output/prediction/InMemory.java
+   A /branches/waikato-3-8/weka/src/main/java/weka/classifiers/evaluation/output/prediction/InMemory.java
+   A /branches/waikato/weka/src/main/java/weka/classifiers/evaluation/output/prediction/InMemory.java
+   A /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/InMemory.java (from /trunk/weka/src/main/java/weka/classifiers/evaluation/output/prediction/CSV.java:14788)
+
+InMemory output prediction scheme for simply storing instances with their associated predictions, e.g., for tracking instances better through cross-validation (programmatically)
+------------------------------------------------------------------------
+r14790 | eibe | 2018-04-11 16:17:40 +1200 (Wed, 11 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/ClassCache.java
+
+Fixed issue that made WEKA's class discovery crash in some cases with weird hidden Schroedinger's cat folders on Windows.
+------------------------------------------------------------------------
+r14792 | mhall | 2018-04-11 16:40:55 +1200 (Wed, 11 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingValues.java
+
+No longer deep copies an instance that does not have missing values
+------------------------------------------------------------------------
+r14796 | mhall | 2018-04-11 16:59:01 +1200 (Wed, 11 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/ReplaceMissingValues.java
+
+Now makes sure that an instance is shallow copied if it has no missing values
+------------------------------------------------------------------------
+r14803 | mhall | 2018-04-11 17:05:39 +1200 (Wed, 11 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/knowledgeflow/steps/TextViewerInteractiveView.java
+
+Improved behaviour for the split pane divider location
+------------------------------------------------------------------------
+r14804 | eibe | 2018-04-17 17:04:40 +1200 (Tue, 17 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/Filter.java
+   M /trunk/weka/src/main/java/weka/filters/SimpleBatchFilter.java
+
+The useFilter() method in Filter now has special treatment for SimpleBatchFilter objects. It now calls a new input(Instances) method in SimpleBatchFilter to input all instances in a batch into the filter in one go. This improves efficiency when processing the second batch of data, e.g., test data, and subsequent batches.
+------------------------------------------------------------------------
+r14806 | eibe | 2018-04-17 23:05:22 +1200 (Tue, 17 Apr 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/instance/RemoveDuplicates.java
+
+RemoveDuplicates now passes second and subsequent batches of data through as copies, and no longer just throws an exception.
+------------------------------------------------------------------------
+r14812 | mhall | 2018-05-11 10:19:29 +1200 (Fri, 11 May 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/NormalizableDistance.java
+
+Range initialization and updates is now aware of sparse instances. No longer updates ranges if normalization is turned off
+------------------------------------------------------------------------
+r14813 | eibe | 2018-05-12 18:42:18 +1200 (Sat, 12 May 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/NormalizableDistance.java
+
+Reintroduced computation of ranges even if normalization is turned off because the treatment of missing values needs the ranges... Extended the use of sparse format a bit and simplified the code.
+------------------------------------------------------------------------
+r14817 | eibe | 2018-05-14 12:32:44 +1200 (Mon, 14 May 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/Remove.java
+
+Remove filter no longer performs deep copies of instances when no attributes are actually removed. This can, for example, easily happen when using the RemoveUseless filter.
+------------------------------------------------------------------------
+r14824 | eibe | 2018-06-01 10:16:11 +1200 (Fri, 01 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/SMO.java
+
+Fixed num_arguments bug in option for setting calibration model.
+------------------------------------------------------------------------
+r14826 | eibe | 2018-06-06 09:36:08 +1200 (Wed, 06 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/lazy/IBk.java
+
+Fixed bug in specification of number of arguments for neighbour search command-line option.
+------------------------------------------------------------------------
+r14830 | eibe | 2018-06-06 17:05:18 +1200 (Wed, 06 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/neighboursearch/KDTree.java
+
+Fixed incorrect information on number of arguments for two options in listOptions().
+------------------------------------------------------------------------
+r14847 | mhall | 2018-06-22 18:17:21 +1200 (Fri, 22 Jun 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/EnumHelper.java
+   M /trunk/weka/src/main/java/weka/core/Option.java
+
+Fixed EnumHelper so that command line options that involve enums sourced from third-party libraries in packages work properly
+------------------------------------------------------------------------
+r14861 | eibe | 2018-07-03 10:36:59 +1200 (Tue, 03 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/converters/ArffSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/JSONSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/SerializedInstancesSaver.java
+   M /trunk/weka/src/main/java/weka/core/converters/XRFFSaver.java
+
+Arff, JSON, XRFF, and SerializedInstances savers now indicate correctly that they are able to deal with weighted instances, so saving datasets with instance weights now works again with these savers.
+------------------------------------------------------------------------
+r14862 | eibe | 2018-07-03 21:44:40 +1200 (Tue, 03 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+   M /trunk/weka/src/main/java/weka/gui/SimpleCLIPanel.java
+
+Introduced special parsing of options for SimpleCLI on Windows so that it is now possible to specify file path names containing backslashes followed by t, etc., in quotes.
+------------------------------------------------------------------------
+r14864 | eibe | 2018-07-04 17:53:37 +1200 (Wed, 04 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/filters/unsupervised/attribute/RenameNominalValues.java
+
+Fixed bug that kept unused attribute values if multiple old values were mapped to the same new value.
+------------------------------------------------------------------------
+r14866 | eibe | 2018-07-05 15:46:46 +1200 (Thu, 05 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/ReaderToTextPane.java
+
+SimpleCLI no longer hangs when printing large models. ReaderToTextPane has been changed to achieve this. For even better speed, it may be worthwhile to consider the tricks described at http://javatechniques.com/blog/faster-jtextpane-text-insertion-part-i/
+------------------------------------------------------------------------
+r14872 | eibe | 2018-07-06 18:16:40 +1200 (Fri, 06 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/LinearRegression.java
+
+LinearRegression now has an option for using QR decomposition. Also, Cholesky decomposition is now used by default instead of generic LU decomposition, which improves speed. Finally, loop that increases ridge until solver no longer crashes has been removed. Now, the program simply throws an exception if the solver does not succeed.
+------------------------------------------------------------------------
+r14878 | eibe | 2018-07-09 20:17:18 +1200 (Mon, 09 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/meta/Bagging.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+
+Bagging now permits calculation of out-of-bag statistics when subsample size is less than 100%. Added parameter to resampleWithWeights() method in Instances that enables specification of subsample size. Due to randomization issues, results for Bagging are now different when sample size is less than 100%.
+------------------------------------------------------------------------
+r14881 | mhall | 2018-07-11 12:36:13 +1200 (Wed, 11 Jul 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageClassLoaderManager.java
+
+Check for class existence now catches NoClassDefFoundError as well as ClassNotFoundException
+------------------------------------------------------------------------
+r14886 | eibe | 2018-08-01 14:21:14 +1200 (Wed, 01 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/functions/MultilayerPerceptron.java
+
+Improved built-in help for MultilayerPerceptron and fixes spelling errors.
+------------------------------------------------------------------------
+r14899 | mhall | 2018-08-10 15:14:14 +1200 (Fri, 10 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Copyright.props
+
+Updated copyright year range
+------------------------------------------------------------------------
+r14903 | mhall | 2018-08-13 16:35:16 +1200 (Mon, 13 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/WekaPackageManager.java
+   M /trunk/weka/src/main/java/weka/gui/PackageManager.java
+
+Now only checks for new/changed packages or forced refreshes every 12 hours when launching GUIs or schemes from the command line via weka.Run. Checks are always done when running the package manager.
+------------------------------------------------------------------------
+r14907 | eibe | 2018-08-16 16:54:42 +1200 (Thu, 16 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffPanel.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffSortedTableModel.java
+   M /trunk/weka/src/main/java/weka/gui/arffviewer/ArffTableModel.java
+
+Fixed a couple of bugs in the ARFF editor code: sorting of instances via menu was disabled, and once enabled, was done in descending rather than ascending order. Also, the editor invoked from the Preprocess panel crashed when the user attempted to remove the class attribute.
+------------------------------------------------------------------------
+r14909 | eibe | 2018-08-16 17:24:41 +1200 (Thu, 16 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/core/Utils.java
+
+Stable sorting now uses exact equality test for floating point values rather than Utils.eq().
+------------------------------------------------------------------------
+r14911 | eibe | 2018-08-20 14:05:55 +1200 (Mon, 20 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/BinC45Split.java
+   M /trunk/weka/src/main/java/weka/classifiers/trees/j48/C45Split.java
+   M /trunk/weka/src/main/java/weka/core/AttributeStats.java
+   M /trunk/weka/src/main/java/weka/core/InstanceComparator.java
+   M /trunk/weka/src/main/java/weka/core/Instances.java
+   M /trunk/weka/src/main/java/weka/core/SpecialFunctions.java
+   M /trunk/weka/src/main/java/weka/gui/beans/FlowByExpression.java
+   M /trunk/weka/src/main/java/weka/knowledgeflow/steps/FlowByExpression.java
+
+Replaced imprecise comparisons of floating-point data values based on the methods in the Utils class with precise comparisons based on the Java default comparators. Results for J48, PART, LMT, NBTree, etc., may change very slightly on some datasets.
+------------------------------------------------------------------------
+r14913 | mhall | 2018-08-31 10:50:35 +1200 (Fri, 31 Aug 2018) | 1 line
+Changed paths:
+   M /trunk/weka/src/main/java/weka/gui/GenericObjectEditor.java
+
+GenericObjectEditor now copies OptionHandlers via Utils.forName() rather than deep copying. This makes things snappy again when re-applying a large model's configuration in the Explorer
+------------------------------------------------------------------------
