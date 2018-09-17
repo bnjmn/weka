@@ -645,6 +645,15 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     }
 
     /**
+     * To make sure pane has appropriate size and scroll bars work correctly.
+     */
+    @Override
+    public Dimension getPreferredSize() {
+
+      return new Dimension(getWidth(), Integer.max(getHeight(), Integer.max(25 * m_numAttributes, 25 * m_numClasses)));
+    }
+
+    /**
      * This will paint the nodes ontot the panel.
      * 
      * @param g The graphics context.
@@ -655,15 +664,6 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       super.paintComponent(g);
       int x = getWidth();
       int y = getHeight();
-      if (25 * m_numAttributes > 25 * m_numClasses && 25 * m_numAttributes > y) {
-        setSize(x, 25 * m_numAttributes);
-      } else if (25 * m_numClasses > y) {
-        setSize(x, 25 * m_numClasses);
-      } else {
-        setSize(x, y);
-      }
-
-      y = getHeight();
       for (int noa = 0; noa < m_numAttributes; noa++) {
         m_inputs[noa].drawInputLines(g, x, y);
       }
@@ -1896,7 +1896,7 @@ public class MultilayerPerceptron extends AbstractClassifier implements
 
       JScrollPane sp = new JScrollPane(m_nodePanel,
               JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-              JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+              JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
       m_controlPanel = new ControlPanel();
 
       m_win.getContentPane().add(sp, BorderLayout.CENTER);
