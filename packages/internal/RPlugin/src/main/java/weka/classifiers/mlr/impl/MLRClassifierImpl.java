@@ -15,7 +15,7 @@
 
 /*
  *    MLRClassifierImpl.java
- *    Copyright (C) 2012-2014 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-2018 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -80,6 +80,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  * 
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @author Eibe Frank
  * @version $Revision$
  */
 public class MLRClassifierImpl implements BatchPredictor, OptionHandler,

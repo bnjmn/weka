@@ -15,7 +15,7 @@
 
 /*
  *    RSessionImpl.java
- *    Copyright (C) 2012-2015 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-2018 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -30,6 +30,7 @@ import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.io.File;
 
 import org.rosuda.JRI.Mutex;
 import org.rosuda.REngine.REXP;
@@ -40,6 +41,7 @@ import org.rosuda.REngine.REngineCallbacks;
 import org.rosuda.REngine.REngineEvalException;
 import org.rosuda.REngine.REngineException;
 import org.rosuda.REngine.REngineOutputInterface;
+
 
 /**
  * Maintains a singleton object for managing R sessions. Because only one
@@ -83,6 +85,7 @@ import org.rosuda.REngine.REngineOutputInterface;
  * 
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @author Eibe Frank
  * @version $Revision$
  */
 public class RSessionImpl implements RSessionAPI, REngineCallbacks,
@@ -114,6 +117,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
   protected void createREngine() {
     if (s_engine == null) {
       try {
+
         s_engine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine",
           new String[] { "--slave" }, s_sessionSingleton, false);
 
@@ -131,8 +135,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
           
       } catch (Exception ex) {
         // R engine not available for one reason or another
-        System.err.println("Unable to establish R engine (" + ex.getMessage()
-          + ")");
+        System.err.println("Unable to establish R engine (" + ex.getMessage() + ")");
         s_sessionSingleton = null;
       }
     }
@@ -169,9 +172,10 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       String systemLibraryPath = System.getProperty("java.library.path", "");
 
       // java.library.path overrides our default platform-specific locations
-      if (libraryLocation == null
-        && !systemLibraryPath.toLowerCase().contains("jri")) {
-        String rLibsUser = System.getenv("R_LIBS_USER");
+      if (libraryLocation == null && !systemLibraryPath.toLowerCase().contains("jri")) {
+        String rLibsUser = System.getProperty("r.libs.user");
+        File rJavaF = new File(rLibsUser + File.separator + "rJava");
+
         String osType = System.getProperty("os.name");
         if (osType != null) {
           if (osType.contains("Windows")) {
@@ -189,80 +193,31 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
               System.err.println("Windows 32 bit OS");
             }
 
-            if (rLibsUser != null) {
-              // Following the R Wiki's guidelines of a personal package library
-              /*
-               * String temp = System.getProperty("user.home") + File.separator
-               * + "Documents" + File.separator + "R" + File.separator +
-               * "win-library";
-               */
-              System.err.println("Trying R_LIBS_USER (" + rLibsUser + ")");
+            libraryLocation = rJavaF.getPath() + File.separator + "jri";
+            if (is64bit) {
+              libraryLocation += File.separator + "x64" + File.separator + "jri.dll";
+            } else {
+              libraryLocation += File.separator + "i386" + File.separator + "jri.dll";
+            }
+          } else {
+            if (osType.contains("Mac OS X")) {
+              libraryLocation = rJavaF.getPath() + File.separator + "jri" + File.separator + "libjri.jnilib";
+            } else {
+              libraryLocation = rJavaF.getPath() + File.separator + "jri" + File.separator + "libjri.so";
+            }
 
-              String jriDirS = null;
-              rLibsUser = rLibsUser + File.separator + "rJava";
-              File rJavaF = new File(rLibsUser);
-              if (rJavaF.exists()) {
-                System.err.println("Found rJava installed in "
-                  + rJavaF.getPath());
-                jriDirS = rJavaF.getPath() + File.separator + "jri";
-                if (is64bit) {
-                  jriDirS += File.separator + "x64" + File.separator
-                    + "jri.dll";
-                } else {
-                  jriDirS += File.separator + "i386" + File.separator
-                    + "jri.dll";
-                }
-              }
-
-              if (jriDirS != null) {
-                libraryLocation = jriDirS;
-              }
-            }
-          } else if (osType.contains("Mac OS X")) {
-            System.err
-              .println("Trying systemwide default location for R under Mac OS...");
-            libraryLocation = "/Library/Frameworks/R.framework/Resources/library/rJava/jri/libjri.jnilib";
-            File rJavaF = new File(libraryLocation);
-            if (!rJavaF.exists() && rLibsUser != null) {
-              System.err.println("Trying R_LIBS_USER (" + rLibsUser + ")");
-              rLibsUser = rLibsUser + File.separator + "rJava";
-              rJavaF = new File(rLibsUser);
-              if (rJavaF.exists()) {
-                System.err.println("Found rJava installed in "
-                  + rJavaF.getPath());
-                libraryLocation = rJavaF.getPath() + File.separator + "jri"
-                  + File.separator + "libjri.jnilib";
-              }
-            }
-          } else if (osType.contains("Linux")) {
-            System.err.println("Trying R_LIBS_USER (" + rLibsUser
-              + ") under Linux");
-            rLibsUser = rLibsUser + File.separator + "rJava";
-            File rJavaF = new File(rLibsUser);
-            if (rJavaF.exists()) {
-              System.err
-                .println("Found rJava installed in " + rJavaF.getPath());
-              libraryLocation = rJavaF.getPath() + File.separator + "jri"
-                + File.separator + "libjri.so";
-            }
-          } else if (osType.contains("Unix")) {
-            // TODO
           }
         }
       }
 
       Method loadMethod = null;
-
       try {
         if (libraryLocation != null) {
-          loadMethod = nativeLoaderClass.getDeclaredMethod("loadLibrary",
-            new Class[] { String.class });
+          loadMethod = nativeLoaderClass.getDeclaredMethod("loadLibrary", new Class[] { String.class });
           loadMethod.invoke(null, libraryLocation);
         } else {
-          // hope that the user has set the java.library.path to point to the
-          // native library
-          loadMethod = nativeLoaderClass.getDeclaredMethod("loadLibrary",
-            new Class[] {});
+          // hope that the user has set the java.library.path to point to the native library
+          loadMethod = nativeLoaderClass.getDeclaredMethod("loadLibrary", new Class[] {});
           loadMethod.invoke(null, new Object[] {});
         }
       } catch (Exception ex) {
@@ -277,6 +232,8 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     }
 
     createREngine();
+
+    System.err.println("Finished creating engine.");
 
     return s_sessionSingleton;
   }

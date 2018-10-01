@@ -17,10 +17,10 @@ Title=Execute R Scripts
 Category=R integration
 
 # Author (required)
-Author=Mark Hall <mhall@pentaho.com>
+Author=Mark Hall <mhall@pentaho.com> and Eibe Frank <eibe@cs.waikato.ac.nz>
 
 # Maintainer (required)
-Maintainer=Mark Hall <mhall@pentaho.com>
+Maintainer=Mark Hall <mhall@pentaho.com> and Eibe Frank <eibe@cs.waikato.ac.nz>
 
 # License (required)
 License=LGPL 3.0
@@ -64,7 +64,3 @@ MessageToDisplayOnInstallation=This package requires the R system to be installe
  can be found at http://www.rforge.net/JRI/\n\n\
  Example Knowledge Flow template files demonstrating the R components can be found in\n\
  ${WEKA_HOME}/packages/RPlugin/templates.
-
-DoNotLoadIfEnvVarNotSet=R_HOME
-
-DoNotLoadIfEnvVarNotSetMessage=RPlugin can't be loaded because the environment variable R_HOME is not set

@@ -15,7 +15,7 @@
 
 /*
  *    JRILoader.java
- *    Copyright (C) 2012-2014 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 2012-2018 University of Waikato, Hamilton, New Zealand
  *
  */
 
@@ -28,12 +28,22 @@ import java.lang.reflect.Method;
 import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.List;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
+
+import com.sun.jna.platform.win32.Advapi32Util;
+import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
+
 
 /**
  * Class that makes sure that key JRI classes and the native library are all
  * loaded by the root class loader.
  * 
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
+ * @author Eibe Frank
  * @version $Revision$
  */
 public class JRILoader {
@@ -43,6 +53,243 @@ public class JRILoader {
 
   private static boolean s_isLoaded;
   private static Object s_api;
+
+  private static String s_rHome;
+
+  /**
+   * Get environment variable. Try Java's cache of environment first. If that fails (i.e. value is empty
+   * string or null, retrieve from actual current process environment using JNA if possible.
+   */
+  public static String getenv(String name) {
+
+    String value = System.getenv(name);
+    if (value == null || value.length() == 0) {
+      value = SetEnvironmentVariables.INSTANCE.getenv(name);
+      if (value != null) {
+        System.err.println("Found variable " + name + " with value " + value + " in process environment.");
+      } else {
+        System.err.println("Did not find variable " + name + " in Java cache or process environment.");
+      }
+    } else {
+      System.err.println("Found variable " + name + " with value " + value + " in Java cache of environment.");
+    }
+    return value;
+  }
+
+  /**
+   * Mac-specific method to try to fix up location of libjvm.dylib in rJava.so.
+   */
+  private static void fixUprJavaLibrary() throws Exception {
+
+      String osType = System.getProperty("os.name");
+      if ((osType != null) && (osType.contains("Mac OS X"))) {
+	  
+	  System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in rJava.so.");
+	  
+	  // Get name embedded in rJava.so
+	  String[] cmd = { // Need to use string array solution to make piping work
+	      "/bin/sh",
+	      "-c",
+	      "/usr/bin/otool -L " + System.getProperty("r.libs.user") + "/rJava/libs/rJava.so | /usr/bin/grep libjvm.dylib | " + 
+	      "/usr/bin/sed 's/^[[:space:]]*//g' | /usr/bin/sed 's/ (.*//g'"
+	  };
+	  Process p = Runtime.getRuntime().exec(cmd);
+	  int execResult = p.waitFor();
+	  if (execResult != 0) {
+	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+	      String line;
+	      while ((line = bf.readLine()) != null) {
+		  System.err.println(line);
+	      }
+	  } else {
+	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+	      String firstLine = bf.readLine(); 
+	      if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
+		  System.err.println("Location embedded in rJava.so seems to be correct!");
+	      } else {
+		  p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
+						System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
+						System.getProperty("r.libs.user") + "/rJava/libs/rJava.so");
+		  execResult = p.waitFor();
+		  if (execResult != 0) {
+		      bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+		      String line;
+		      while ((line = bf.readLine()) != null) {
+			  System.err.println(line);
+		      }
+		  }
+	      }
+	  }
+      }
+  }
+
+  /**
+   * Checks if environment variable R_HOME is available, first in Java cache of process environment and then
+   * in actual process environment. Tries to guess value of R_HOME if environment value or r.home property
+   * do not have an appropriate value.
+   *
+   * Priority: 1) R_HOME in cached environment; 2) R_HOME in process environment; 3) r.home property.
+   *
+   * Sets value of R_HOME in the process environment. Also sets Java system property r.home to whichever value
+   * is left in environment variable R_HOME.
+   *
+   * Does the same for R_LIBS_USER and r.libs.user respectively.
+   *
+   * Tries to install rJava if it is not installed already.
+   */
+  public static boolean checkRHome() {
+
+    if (s_rHome == null) {
+
+      // First deal with R_HOME and r.home
+      s_rHome = getenv("R_HOME");
+      String rExeString = "R";
+      String rScriptExeString = "Rscript";
+      String osType = System.getProperty("os.name");
+      if ((osType != null) && (osType.contains("Windows"))) {
+        rExeString = "R.exe";
+        rScriptExeString = "Rscript.exe";
+      }
+      if (s_rHome != null && (!(new File(s_rHome)).exists() ||
+              !(new File(s_rHome + File.separator + "bin" + File.separator + rExeString).exists()))) {
+        System.err.println("R_HOME " + s_rHome + " does not appear to be a valid home of R.");
+        s_rHome = null;
+        return false; // If R_HOME is set incorrectly in cached environment, we cannot fix things for some reason.
+      }
+      if (s_rHome == null) {
+        s_rHome = System.getProperty("r.home");
+        if (s_rHome == null) {
+          if (osType != null) {
+            if (osType.contains("Mac OS X")) {
+              s_rHome = "/Library/Frameworks/R.framework/Resources"; // This is the guess for macOS
+            } else if (osType.contains("Windows")) {
+              if (System.getenv("ProgramFiles(x86)") != null) {
+                s_rHome = Advapi32Util.
+                        registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\R-core\\R64", "InstallPath");
+              } else {
+                s_rHome = Advapi32Util.
+                        registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
+              }
+            } else { // Assuming linux (or a Unix-derivative that has the same default install location for R).
+              s_rHome = "/usr/lib/R";
+            }
+          } else {
+            System.err.println("The os.name property is not availble. Cannot guess R_HOME.");
+            s_rHome = null;
+            return false;
+          }
+        }
+        System.err.println("Setting R_HOME to " + s_rHome);
+        if (SetEnvironmentVariables.INSTANCE.setenv("R_HOME", s_rHome, 0) != 0) {
+          System.err.println("Failed to set R_HOME.");
+          s_rHome = null;
+          return false;
+        }
+      }
+      if (!(new File(s_rHome)).exists() ||
+              !(new File(s_rHome + File.separator + "bin" + File.separator + rExeString).exists())) {
+        System.err.println("R_HOME " + s_rHome + " does not appear be a valid value for the home of R.");
+        s_rHome = null;
+        return false;
+      }
+      System.setProperty("r.home", s_rHome);
+
+      // Now deal with R_LIBS_USER and r.libs.user
+      String rLibsUser = getenv("R_LIBS_USER");
+      if (rLibsUser == null) { // Try to get library location if user has not set R_LIBS_USER
+        rLibsUser = System.getProperty("r.libs.user");
+        if (rLibsUser == null) {
+          try {
+            String[] cmd = new String[] {s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", ".libPaths()"};
+            Process p = Runtime.getRuntime().exec(cmd);
+            int execResult = p.waitFor();
+            if (execResult != 0) {
+              System.err.println("Failed to execute Rscript to get library folder from R.");
+              s_rHome = null;
+              return false;
+            }
+
+            BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String firstLine = bf.readLine();
+            while (!firstLine.startsWith("[1]")) { // Rscript may output a warning that we should just skip
+              if ((firstLine = bf.readLine()) == null) {
+                firstLine = "";
+                break;
+              }
+            }
+
+            Pattern pat = Pattern.compile("\"([^\"]*)\"");
+            Matcher m = pat.matcher(firstLine);
+            if (!m.find()) {
+              System.err.println("Failed to extract valid library folder from information return by .libPaths(): " +
+                      firstLine);
+              s_rHome = null;
+              return false;
+            }
+            rLibsUser = m.group(1);
+          } catch (Exception ex) {
+            System.err.println("Failed to establish library folder of R.");
+            ex.printStackTrace();
+            s_rHome = null;
+            return false;
+          }
+        }
+        System.err.println("Setting R_LIBS_USER to " + rLibsUser);
+        if (SetEnvironmentVariables.INSTANCE.setenv("R_LIBS_USER", rLibsUser, 0) != 0) {
+          System.err.println("Failed to set R_LIBS_USER.");
+          s_rHome = null;
+          return false;
+        }
+      }
+      if (!(new File(rLibsUser).exists())) {
+        System.err.println("Folder " + rLibsUser + " does not exist. Trying to create.");
+        if (!(new File(rLibsUser)).mkdirs()) {
+          System.err.println("Failed to create folder " + rLibsUser);
+          s_rHome = null;
+          return false;
+        }
+      }
+      System.setProperty("r.libs.user", rLibsUser);
+
+      // Check whether rJava is installed and try to install it if necessary
+      File rJavaF = new File(rLibsUser + File.separator + "rJava");
+      if (rJavaF.exists()) {
+        System.err.println("Found rJava installed in " + rJavaF.getPath());
+      } else {
+        System.err.println("Did not find rJava installed in " + rJavaF.getPath() + " -- trying to install.");
+        try {
+          String[] cmd = new String[] {s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e",
+                  "local(options(install.packages.compile.from.source='never'));" + // No spaces!
+                  "local({r=getOption('repos');" + // Need to use = instead of <- for Windows!
+                  "r['CRAN']='http://cloud.r-project.org';" + // Need to use = instead of <- for Windows!
+                  "options(repos=r)});" +
+                  "install.packages('rJava')"}; // Single quotes everywhere for Windows!
+          Process p = Runtime.getRuntime().exec(cmd);
+          int execResult = p.waitFor();
+          if (execResult != 0) {
+            BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line;
+            while ((line = bf.readLine()) != null) {
+              System.err.println(line);
+            }
+            throw new Exception("Rscript returned non-zero value.");
+          }
+        } catch (Exception ex) {
+          System.err.println("Failed to install rJava.");
+          ex.printStackTrace();
+          s_rHome = null;
+          return false;
+        }
+
+        try {
+          fixUprJavaLibrary();
+        } catch (Exception ex) {
+          System.err.println("Failed to fix up rJava.so.");
+        }
+      }
+    }
+    return true; // We have established a potentially valid R_HOME and R_LIBS_USER.
+  }
 
   /**
    * Inject byte code into the root class loader and make sure that the native
@@ -61,31 +308,16 @@ public class JRILoader {
 
     // check if we need to inject the native loader and dependencies
     if (!hasInjectedNativeLoader()) {
-      Class<?> nativeLoader = injectJRINativeLoader();
-      // System.err.println("Creating session implementation......");
-      // System.err.println(nativeLoader.toString());
-      // s_sessionImpl = nativeLoader.newInstance();
-
-      s_api = Class.forName(RSESSION_IMPL).newInstance();
-      /*
-       * Class<?> nativeLoaderClass =
-       * Class.forName("weka.core.JRINativeLoader"); Method loadMethod =
-       * nativeLoaderClass.getDeclaredMethod("loadLibrary", new Class[] {
-       * String.class });
-       * 
-       * loadMethod.invoke(null,
-       * "/Library/Frameworks/R.framework/Resources/library/rJava/jri/libjri.jnilib"
-       * );
-       */
 
       // check for R_HOME
-      String rHome = System.getenv("R_HOME");
-      if (rHome == null || rHome.length() == 0) {
-        System.err
-          .println("R_HOME is undefined. Cannot proceed with R native library loading");
-      } else {
-        Method initMethod = nativeLoader
-          .getDeclaredMethod("init", new Class[0]);
+      boolean checkRHome = checkRHome(); // Need to do this first to fix things up if necessary and possible
+
+      Class<?> nativeLoader = injectJRINativeLoader(); // Do this even if R_HOME is not valid, so that class discovery works
+
+      if (checkRHome) {
+        s_api = Class.forName(RSESSION_IMPL).newInstance();
+
+        Method initMethod = nativeLoader.getDeclaredMethod("init", new Class[0]);
         s_api = initMethod.invoke(s_api, (Object[]) null);
 
         if (s_api == null) {
@@ -95,18 +327,10 @@ public class JRILoader {
         s_isLoaded = true;
       }
     } else {
-
-      // check for R_HOME
-      String rHome = System.getenv("R_HOME");
-      if (rHome == null || rHome.length() == 0) {
-        System.err
-          .println("R_HOME is undefined. Cannot proceed with R native library loading");
-      } else {
-
+      if (checkRHome()) {
         Class<?> implClass = Class.forName(RSESSION_IMPL);
 
-        Method singletonGrabber = implClass.getDeclaredMethod(
-          "getSessionSingleton", new Class[] {});
+        Method singletonGrabber = implClass.getDeclaredMethod("getSessionSingleton", new Class[] {});
 
         s_api = singletonGrabber.invoke(null, (Object[]) null);
 
@@ -244,7 +468,7 @@ public class JRILoader {
       "org.rosuda.javaGD.GDPolygon", "org.rosuda.javaGD.GDText",
 
       // Weka
-      "weka.core.RSessionException", "weka.core.WekaJavaGD", };
+      "weka.core.RSessionException", "weka.core.WekaJavaGD"};
 
     ClassLoader rootClassLoader = getRootClassLoader();
 

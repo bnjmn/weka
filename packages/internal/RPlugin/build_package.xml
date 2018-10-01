@@ -136,6 +136,8 @@
   <target name="compile" depends="resolve, init_compile, compile-r-api" 
    description="Compile package and deposit class files in build/classes">
     <copy file="${libExt}/javagd-0.6.1.jar" toDir="${lib}" />
+    <copy file="${libExt}/jna-4.5.2.jar" toDir="${lib}" />
+    <copy file="${libExt}/jna-platform-4.5.2.jar" toDir="${lib}" />
     <javac srcdir="${src}" 
       fork="yes" memoryMaximumSize="${javac_max_memory}"
       destdir="${build}/classes"
@@ -150,6 +152,7 @@
     <move file="${build}/classes/weka/core/RSessionAPI.class" tofile="${build}/injectedClasses/weka/core/RSessionAPI.bytecode"/>
     <move file="${build}/classes/weka/core/RSessionImpl.class" tofile="${build}/injectedClasses/weka/core/RSessionImpl.bytecode"/>
     <move file="${build}/classes/weka/core/RniIdle.class" tofile="${build}/injectedClasses/weka/core/RniIdle.bytecode"/>
+   <!-- <move file="${build}/classes/weka/core/CLibrary.class" tofile="${build}/injectedClasses/weka/core/CLibrary.bytecode"/> -->
     <move file="${build}/classes/weka/core/JRINativeLoader.class" tofile="${build}/injectedClasses/weka/core/JRINativeLoader.bytecode"/>
     <move file="${build}/classes/weka/core/JavaGDOffscreenRenderer.class" tofile="${build}/injectedClasses/weka/core/JavaGDOffscreenRenderer.bytecode"/>
     <move file="${build}/classes/weka/core/JavaGDListener.class" tofile="${build}/injectedClasses/weka/core/JavaGDListener.bytecode"/>

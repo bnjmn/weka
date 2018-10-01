@@ -69,7 +69,7 @@ public class JRINativeLoader {
    */
   public static void loadLibrary(String libraryFile)
     throws UnsatisfiedLinkError, SecurityException {
-    System.err.println("Trying to loaded R library from " + libraryFile);
+    System.err.println("Trying to load R library from " + libraryFile);
     System.err.println("Engine class: " + Rengine.class + " ClassLoader:"
       + Rengine.class.getClassLoader());
     s_jriLoaded = false;
