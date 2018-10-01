@@ -28,7 +28,7 @@ import com.sun.jna.Native;
  *
  * @author Eibe Frank (with help from the web)
  * @version $Revision: 14435 $
- */*/
+ */
 public class SetEnvironmentVariables {
 
   public static LibCWrapper INSTANCE;

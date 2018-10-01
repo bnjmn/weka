@@ -169,7 +169,28 @@ public class JRILoader {
               } else {
                 s_rHome = Advapi32Util.
                         registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
-              }
+	      }
+	      
+	      // Check if appropriate folder in R_HOME is in path
+	      try {
+		  Process p = Runtime.getRuntime().exec("Rterm"); // Use this because it is in x64/i386, not just bin
+	      } catch (Exception ex) {
+
+		  // Could not run process, so let's add the x64/i386 folder to the path
+		  System.err.println("Adding appropriate folder in R's home to PATH.");
+		  String PATH = getenv("PATH");
+		  String subFolderName = "i386";
+		  if (System.getenv("ProgramFiles(x86)") != null) {
+		      subFolderName = "x64";
+		  }
+		  if (SetEnvironmentVariables.INSTANCE.setenv("PATH", s_rHome + File.separator +
+							      "bin" + File.separator + subFolderName +
+							      File.pathSeparator + PATH, 0) != 0) {
+		      System.err.println("Could not add " + subFolderName +  " folder in R's home to PATH.");
+		      s_rHome = null;
+		      return false;
+		  }
+	      }
             } else { // Assuming linux (or a Unix-derivative that has the same default install location for R).
               s_rHome = "/usr/lib/R";
             }
