@@ -44,11 +44,15 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
    */
   private static final long serialVersionUID = -7346329523048114317L;
 
-  /** Singleton renderer */
+  /**
+   * Singleton renderer
+   */
   protected static JavaGDOffscreenRenderer s_renderer = new JavaGDOffscreenRenderer(
-    800, 600);
+          800, 600);
 
-  /** Listeners interested in receiving notification of graphics produced */
+  /**
+   * Listeners interested in receiving notification of graphics produced
+   */
   protected ArrayList<JavaGDListener> m_listeners = new ArrayList<JavaGDListener>();
 
   /**
@@ -74,7 +78,7 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
 
   /**
    * Paints the current display to a BufferedImage
-   * 
+   *
    * @param w the width of the image to paint to
    * @param h the height of the image to paint to
    * @return the BufferedImage containing the result
@@ -106,7 +110,7 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
 
   /**
    * Add a listener
-   * 
+   *
    * @param l the listener to add
    */
   @Override
@@ -118,7 +122,7 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
 
   /**
    * Remove a listener
-   * 
+   *
    * @param l the listener to remove
    */
   @Override
@@ -128,9 +132,9 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
 
   /**
    * Notify the listeners of any cached graphics
-   * 
+   *
    * @param additional a varargs list of additional listeners (beyond those
-   *          maintained by this notifier) to notify.
+   *                   maintained by this notifier) to notify.
    */
   @Override
   public void notifyListeners(JavaGDListener... additional) {
@@ -163,7 +167,7 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
 
   /**
    * Returns true if the JavaGD graphics device is available
-   * 
+   *
    * @return true if JavaGD is available
    */
   public static boolean javaGDAvailable() {
@@ -172,53 +176,6 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
     }
 
     return s_javaGD_available;
-  }
-
-  /**
-   * Mac-specific method to try to fix up location of libjvm.dylib in JavaGD.so.
-   */
-  private static void fixUpJavaGDLibrary() throws Exception {
-
-      String osType = System.getProperty("os.name");
-      if ((osType != null) && (osType.contains("Mac OS X"))) {
-
-	  System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in JavaGD.so.");
-	  
-	  // Get name embedded in JavaGD.so
-	  String[] cmd = { // Need to use string array solution to make piping work
-	      "/bin/sh",
-	      "-c",
-	      "/usr/bin/otool -L " + System.getProperty("r.libs.user") + "/JavaGD/libs/JavaGD.so | /usr/bin/grep libjvm.dylib | " + 
-	      "/usr/bin/sed 's/^[[:space:]]*//g' | /usr/bin/sed 's/ (.*//g'"
-	  };
-	  Process p = Runtime.getRuntime().exec(cmd);
-	  int execResult = p.waitFor();
-	  if (execResult != 0) {
-	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-	      String line;
-	      while ((line = bf.readLine()) != null) {
-		  System.err.println(line);
-	      }
-	  } else {
-	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	      String firstLine = bf.readLine(); 
-	      if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
-		  System.err.println("Location embedded in JavaGD.so seems to be correct!");
-	      } else {
-		  p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
-						System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
-						System.getProperty("r.libs.user") + "/JavaGD/libs/JavaGD.so");
-		  execResult = p.waitFor();
-		  if (execResult != 0) {
-		      bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-		      String line;
-		      while ((line = bf.readLine()) != null) {
-			  System.err.println(line);
-		      }
-		  }
-	      }
-	  }
-      }
   }
 
   private static void init() {
@@ -240,34 +197,12 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
           s_javaGD_available = eng.loadLibrary(session, "JavaGD");
           s_javaGD_checked = true;
         }
-	
-        if (!s_javaGD_available) { 
-	
-	    fixUpJavaGDLibrary();
-	    
-	    // now try to load it again
-	    s_javaGD_available = eng.loadLibrary(session, "JavaGD");
-	    
-	    if (!s_javaGD_available) {
-		System.err.println("Was unable to load the JavaGD graphics device");
-	    }
-	}
-	
-        if (!s_javaGD_available) {
-         
-	  // try to install
-          System.err.println("Trying to install the JavaGD library in R...");
-          eng.installLibrary(session, "JavaGD");
 
-	  fixUpJavaGDLibrary();
-	  
-          // now try to load it again
-          s_javaGD_available = eng.loadLibrary(session, "JavaGD");
-	  
-	  if (!s_javaGD_available) {
-	      System.err.println("Was unable to load the JavaGD graphics device");
-	  }
-	}
+        if (!s_javaGD_available) {
+
+          // try to install
+          s_javaGD_available = eng.installLibrary(session, "JavaGD");
+        }
 
         if (s_javaGD_available) {
           /*
@@ -275,9 +210,9 @@ public class JavaGDOffscreenRenderer extends JGDPanel implements JavaGDNotifier 
            * "Sys.putenv('JAVAGD_CLASS_NAME'='weka/core/WekaJavaGD')");
            */
           eng.parseAndEval(session,
-              ".setenv <- if (exists(\"Sys.setenv\")) Sys.setenv else Sys.putenv");
+                  ".setenv <- if (exists(\"Sys.setenv\")) Sys.setenv else Sys.putenv");
           eng.parseAndEval(session,
-            ".setenv(\"JAVAGD_CLASS_NAME\"=\"weka/core/WekaJavaGD\")");
+                  ".setenv(\"JAVAGD_CLASS_NAME\"=\"weka/core/WekaJavaGD\")");
           eng.parseAndEval(session, "JavaGD(width=800, height=600)");
         }
       } catch (Exception ex) {

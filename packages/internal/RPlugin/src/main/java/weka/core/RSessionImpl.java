@@ -31,6 +31,8 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.io.File;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
 
 import org.rosuda.JRI.Mutex;
 import org.rosuda.REngine.REXP;
@@ -55,35 +57,7 @@ import org.rosuda.REngine.REngineOutputInterface;
  * supporting JRI classes get loaded by the root class loader and are thus
  * available to all child class loaders.
  * <p>
- * 
- * For R to be available to Weka it is necessary for the user to:
- * <p>
- * 
- * <ol>
- * <li>Install the rJava (http://www.rforge.net/rJava/) package in R:
- * install.packages("rJava")</li>
- * <li>Make sure that R is on the PATH</li>
- * <li>Make sure that the R_HOME environment variable points to the directory
- * where the R executable is</li>
- * <li>Make sure that the R executable is in the PATH environment variable</li>
- * <li>Under Windows, R will prefer to install libraries into a personal library
- * directory under the user's home directory. This is for security reasons and
- * the user may not have write access for packages to be installed in the
- * system-wide R install directory. It is essential that, after manually
- * installing rJava, the user set the environment variable R_LIBS_USER to point
- * to this directory as Weka will ask R to install certain packages</li>
- * <li>The package will try loading the native library from a known location
- * under various OS's <br>
- * under Mac OSX this is in
- * /Library/Frameworks/R.framework/Resources/library/rJava/jri/ <br>
- * The user can override this by setting the property jri.native.library to
- * point to the native library when starting Weka</li>
- * </ol>
- * 
- * More information on configuring Java to access JRI under various OS can be
- * found at http://www.rforge.net/JRI/
- * 
- * 
+ *
  * @author Mark Hall (mhall{[at]}pentaho{[dot]}com)
  * @author Eibe Frank
  * @version $Revision$
@@ -412,6 +386,54 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
   }
 
   /**
+   * Mac-specific method to try to fix up location of libjvm.dylib in native Java-related library.
+   */
+  protected void fixUpJavaRLibrary(String name) throws Exception {
+
+    String osType = System.getProperty("os.name");
+    if ((osType != null) && (osType.contains("Mac OS X"))) {
+
+      // Get name embedded in native library
+      String[] cmd = { // Need to use string array solution to make piping work
+              "/bin/sh",
+              "-c",
+              "/usr/bin/otool -L " + System.getProperty("r.libs.user") + "/" + name + "/libs/" + name + ".so | /usr/bin/grep libjvm.dylib | " +
+                      "/usr/bin/sed 's/^[[:space:]]*//g' | /usr/bin/sed 's/ (.*//g'"
+      };
+      Process p = Runtime.getRuntime().exec(cmd);
+      int execResult = p.waitFor();
+      if (execResult != 0) {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String line;
+        while ((line = bf.readLine()) != null) {
+          System.err.println(line);
+        }
+      } else {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String firstLine = bf.readLine();
+        if (firstLine != null) {
+          if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
+            System.err.println("Location embedded in " + name + ".so seems to be correct!");
+          } else {
+            System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in " + name + ".so.");
+            p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
+                    System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
+                    System.getProperty("r.libs.user") + "/" + name + "/libs/" + name + ".so");
+            execResult = p.waitFor();
+            if (execResult != 0) {
+              bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+              String line;
+              while ((line = bf.readLine()) != null) {
+                System.err.println(line);
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  /**
    * Convenience method for getting R to load a named library.
    * 
    * @param requester the requesting object
@@ -430,14 +452,33 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     checkSessionHolder(requester);
 
     try {
-      REXP result = parseAndEval(requester, "library(" + libraryName + ")");
-      if (result.isNull()) {
-        return false;
+
+      // Now try to load library
+      REXP result = parseAndEval(requester, "library(" + libraryName + ", logical.return = TRUE)");
+      if (result.isLogical()) {
+        if (!((REXPLogical) result).isTRUE()[0]) {
+
+          // Fix up library on macOS if necessary
+          try {
+            fixUpJavaRLibrary(libraryName);
+          } catch (Exception ex) {
+            System.err.println("Something went wrong when trying to fix up Java R library.");
+          }
+          result = parseAndEval(requester, "library(" + libraryName + ", logical.return = TRUE)");
+          if (result.isLogical()) {
+            if (!((REXPLogical) result).isTRUE()[0]) {
+              System.err.println("Unable to load library '" + libraryName + "'.");
+              return false;
+            }
+          }
+        }
       }
     } catch (REngineEvalException e) {
       System.err.println("Unable to load library '" + libraryName + "'.");
+      e.printStackTrace();
       return false;
     }
+    System.err.println("Successfully loaded library '" + libraryName + "'.");
 
     return true;
   }
@@ -459,41 +500,59 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
 
     checkSessionHolder(requester);
 
-    String OS = System.getProperty("os.name", "generic").toLowerCase(Locale.ENGLISH);
-    if (!GraphicsEnvironment.isHeadless()) {
-      if (!(OS.indexOf("mac") >= 0) && !(OS.indexOf("darwin") >= 0)) { // Can't pop up window on OS X wihout X11
-        if (OS.indexOf("win") >= 0) {
-          parseAndEval(requester, "windows(width = 5, height = 0.5, xpos = 100, ypos = 100)");
-        } else if (OS.indexOf("nux") >= 0) {
-          parseAndEval(requester, "X11(width = 5, height = 0.5, xpos = 100, ypos = 100)");
-        }
-        if ((OS.indexOf("win") >= 0) || (OS.indexOf("nux") >= 0)) {
-          parseAndEval(requester, "par(mar=c(0, 0, 2, 0))");
-          parseAndEval(requester, "plot.new()");
-          parseAndEval(requester, "title(\"Please wait while R packages are being installed.\")");
-        }
+    javax.swing.JFrame frame = null;
+
+    // Check if java.awt.Window is in the method call stack: only then will be pop up a window.
+    StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+    boolean GUIChooserOccurs = false;
+    for (StackTraceElement s : stack) {
+      if (s.getClassName().contains("java.awt.Window")) {
+        GUIChooserOccurs = true;
+        break;
       }
     }
 
-    // Need to prevent R from popping up dialogue in case there is a newer source version.
-    REXP result1 = parseAndEval(requester, "options(install.packages.compile.from.source = \"never\")");
+    String text = "Please wait while R package " + libraryName + " is being installed.";
+    if (!GraphicsEnvironment.isHeadless() && GUIChooserOccurs) {
+        frame = new javax.swing.JFrame("RPlugin Notification: " + text);
+        frame.setPreferredSize(new java.awt.Dimension(800, 0));
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
+    }
+    System.err.println(text);
 
-    // Now try to install the package.
-    REXP result = parseAndEval(requester, "install.packages(\"" + libraryName + "\")");
+    try {
 
-    if (!GraphicsEnvironment.isHeadless()) {
-      if (!(OS.indexOf("mac") >= 0) && !(OS.indexOf("darwin") >= 0)) { // Can't pop up window on OS X
-        if ((OS.indexOf("win") >= 0) || (OS.indexOf("nux") >= 0)) {
-          parseAndEval(requester, "dev.off()");
-        }
+      // Need to prevent R from popping up dialogue in case there is a newer source version.
+      REXP result1 = parseAndEval(requester, "options(install.packages.compile.from.source = \"never\")");
+
+      // Now try to install the package.
+      REXP result = parseAndEval(requester, "install.packages(\"" + libraryName + "\")");
+
+    } catch (Exception ex) {
+      System.out.println("Failed to perform installation in R. Reason: " + ex.getMessage());
+    }
+
+    if (frame != null) {
+      frame.dispose();
+    }
+
+    boolean success = false;
+    try {
+      loadLibrary(requester, libraryName);
+      success = true;
+    } catch (Exception ex) {
+      System.out.println("Failed to load library in R. Reason: " + ex.getMessage());
+    }
+    if (!success) {
+      if (frame != null) {
+        javax.swing.JOptionPane.showMessageDialog(null, "Installation of R package " + libraryName + " failed! Check weka.log.",
+                "RPlugin Notification of Library Installation", javax.swing.JOptionPane.INFORMATION_MESSAGE);
       }
+      System.err.println("Installation of R package " + libraryName + " failed!");
     }
-
-    if (result.isNull()) {
-      return false;
-    }
-
-    return true;
+    return success;
   }
 
   /**

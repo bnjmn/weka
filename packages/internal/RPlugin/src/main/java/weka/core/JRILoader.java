@@ -81,46 +81,46 @@ public class JRILoader {
    */
   private static void fixUprJavaLibrary() throws Exception {
 
-      String osType = System.getProperty("os.name");
-      if ((osType != null) && (osType.contains("Mac OS X"))) {
-	  
-	  System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in rJava.so.");
-	  
-	  // Get name embedded in rJava.so
-	  String[] cmd = { // Need to use string array solution to make piping work
-	      "/bin/sh",
-	      "-c",
-	      "/usr/bin/otool -L " + System.getProperty("r.libs.user") + "/rJava/libs/rJava.so | /usr/bin/grep libjvm.dylib | " + 
-	      "/usr/bin/sed 's/^[[:space:]]*//g' | /usr/bin/sed 's/ (.*//g'"
-	  };
-	  Process p = Runtime.getRuntime().exec(cmd);
-	  int execResult = p.waitFor();
-	  if (execResult != 0) {
-	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-	      String line;
-	      while ((line = bf.readLine()) != null) {
-		  System.err.println(line);
-	      }
-	  } else {
-	      BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
-	      String firstLine = bf.readLine(); 
-	      if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
-		  System.err.println("Location embedded in rJava.so seems to be correct!");
-	      } else {
-		  p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
-						System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
-						System.getProperty("r.libs.user") + "/rJava/libs/rJava.so");
-		  execResult = p.waitFor();
-		  if (execResult != 0) {
-		      bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-		      String line;
-		      while ((line = bf.readLine()) != null) {
-			  System.err.println(line);
-		      }
-		  }
-	      }
-	  }
+    String osType = System.getProperty("os.name");
+    if ((osType != null) && (osType.contains("Mac OS X"))) {
+
+      System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in rJava.so.");
+
+      // Get name embedded in rJava.so
+      String[] cmd = { // Need to use string array solution to make piping work
+              "/bin/sh",
+              "-c",
+              "/usr/bin/otool -L " + System.getProperty("r.libs.user") + "/rJava/libs/rJava.so | /usr/bin/grep libjvm.dylib | " +
+                      "/usr/bin/sed 's/^[[:space:]]*//g' | /usr/bin/sed 's/ (.*//g'"
+      };
+      Process p = Runtime.getRuntime().exec(cmd);
+      int execResult = p.waitFor();
+      if (execResult != 0) {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+        String line;
+        while ((line = bf.readLine()) != null) {
+          System.err.println(line);
+        }
+      } else {
+        BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+        String firstLine = bf.readLine();
+        if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
+          System.err.println("Location embedded in rJava.so seems to be correct!");
+        } else {
+          p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
+                  System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
+                  System.getProperty("r.libs.user") + "/rJava/libs/rJava.so");
+          execResult = p.waitFor();
+          if (execResult != 0) {
+            bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line;
+            while ((line = bf.readLine()) != null) {
+              System.err.println(line);
+            }
+          }
+        }
       }
+    }
   }
 
   /**
@@ -169,28 +169,28 @@ public class JRILoader {
               } else {
                 s_rHome = Advapi32Util.
                         registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
-	      }
-	      
-	      // Check if appropriate folder in R_HOME is in path
-	      try {
-		  Process p = Runtime.getRuntime().exec("Rterm"); // Use this because it is in x64/i386, not just bin
-	      } catch (Exception ex) {
+              }
 
-		  // Could not run process, so let's add the x64/i386 folder to the path
-		  System.err.println("Adding appropriate folder in R's home to PATH.");
-		  String PATH = getenv("PATH");
-		  String subFolderName = "i386";
-		  if (System.getenv("ProgramFiles(x86)") != null) {
-		      subFolderName = "x64";
-		  }
-		  if (SetEnvironmentVariables.INSTANCE.setenv("PATH", s_rHome + File.separator +
-							      "bin" + File.separator + subFolderName +
-							      File.pathSeparator + PATH, 0) != 0) {
-		      System.err.println("Could not add " + subFolderName +  " folder in R's home to PATH.");
-		      s_rHome = null;
-		      return false;
-		  }
-	      }
+              // Check if appropriate folder in R_HOME is in path
+              try {
+                Process p = Runtime.getRuntime().exec("Rterm"); // Use this because it is in x64/i386, not just bin
+              } catch (Exception ex) {
+
+                // Could not run process, so let's add the x64/i386 folder to the path
+                System.err.println("Adding appropriate folder in R's home to PATH.");
+                String PATH = getenv("PATH");
+                String subFolderName = "i386";
+                if (System.getenv("ProgramFiles(x86)") != null) {
+                  subFolderName = "x64";
+                }
+                if (SetEnvironmentVariables.INSTANCE.setenv("PATH", s_rHome + File.separator +
+                        "bin" + File.separator + subFolderName +
+                        File.pathSeparator + PATH, 0) != 0) {
+                  System.err.println("Could not add " + subFolderName + " folder in R's home to PATH.");
+                  s_rHome = null;
+                  return false;
+                }
+              }
             } else { // Assuming linux (or a Unix-derivative that has the same default install location for R).
               s_rHome = "/usr/lib/R";
             }
@@ -221,7 +221,7 @@ public class JRILoader {
         rLibsUser = System.getProperty("r.libs.user");
         if (rLibsUser == null) {
           try {
-            String[] cmd = new String[] {s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", ".libPaths()"};
+            String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", ".libPaths()"};
             Process p = Runtime.getRuntime().exec(cmd);
             int execResult = p.waitFor();
             if (execResult != 0) {
@@ -279,12 +279,12 @@ public class JRILoader {
       } else {
         System.err.println("Did not find rJava installed in " + rJavaF.getPath() + " -- trying to install.");
         try {
-          String[] cmd = new String[] {s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e",
+          String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e",
                   "local(options(install.packages.compile.from.source='never'));" + // No spaces!
-                  "local({r=getOption('repos');" + // Need to use = instead of <- for Windows!
-                  "r['CRAN']='http://cloud.r-project.org';" + // Need to use = instead of <- for Windows!
-                  "options(repos=r)});" +
-                  "install.packages('rJava')"}; // Single quotes everywhere for Windows!
+                          "local({r=getOption('repos');" + // Need to use = instead of <- for Windows!
+                          "r['CRAN']='http://cloud.r-project.org';" + // Need to use = instead of <- for Windows!
+                          "options(repos=r)});" +
+                          "install.packages('rJava')"}; // Single quotes everywhere for Windows!
           Process p = Runtime.getRuntime().exec(cmd);
           int execResult = p.waitFor();
           if (execResult != 0) {

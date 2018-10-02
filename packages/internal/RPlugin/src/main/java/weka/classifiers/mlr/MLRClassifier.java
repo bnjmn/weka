@@ -66,143 +66,139 @@ public class MLRClassifier extends RandomizableClassifier
   // public static final int R_REGR_RANDOM_FOREST_SRC_SYN = 123; // new in 2.8: randomForestSRC; removed in 2.11()?
   public static final int R_CLASSIF_ADA = 0;
   public static final int R_CLASSIF_BINOMIAL = 1; // new in 2.4(?): stats, binomial
-  public static final int R_CLASSIF_BLACKBOOST = 2;
-  public static final int R_CLASSIF_BOOSTING = 3;
-  public static final int R_CLASSIF_BST = 4; // new in 2.4(?): bst, bst
-  public static final int R_CLASSIF_C50 = 5; // new 2.9: C50
-  public static final int R_CLASSIF_CFOREST = 6; // new: party, cforest
-  public static final int R_CLASSIF_CLUSTERSVM = 7; // new in 2.7(?): SwarmSVM, LiblineaR BROKEN
-  public static final int R_CLASSIF_CTREE = 8;
-  public static final int R_CLASSIF_CVGLMNET = 9; // new in 2.8: glmnet
-  public static final int R_CLASSIF_DBNDNN = 10; // new in 2.7(?): deepnet
-  public static final int R_CLASSIF_DCSVM = 11; // new in 2.7(?): SwarmSVM
-  public static final int R_CLASSIF_EARTH = 12; // new in 2.11(?): earth
-  public static final int R_CLASSIF_EVTREE = 13; // new in 2.11(?): evtree
-  public static final int R_CLASSIF_FDAUSC_GLMNET = 14; // new in 2.12(?): fda.usc NO ATTRIBUTES
-  public static final int R_CLASSIF_FEATURELESS = 15; // new in 2.11(?): mlr
-  public static final int R_CLASSIF_FNN = 16;
-  public static final int R_CLASSIF_GAMBOOST = 17; // new in 2.11(?): mboost
-  public static final int R_CLASSIF_GATERSVM = 18; // new in 2.7(?): SwarmSVM, e1071
-  public static final int R_CLASSIF_GAUSSPR = 19; // new in 2.9: kernlab
-  public static final int R_CLASSIF_GBM = 20;
-  public static final int R_CLASSIF_GEODA = 21; // new: DiscriMiner, geoDA
-  public static final int R_CLASSIF_GLMBOOST = 22;
-  public static final int R_CLASSIF_GLMNET = 23; // new: glmnet, glmnet
-  public static final int R_CLASSIF_H2O_DEEPLEARNING = 24; // new: h2o H20 SERVER NOT STARTING
-  public static final int R_CLASSIF_H2O_GBM = 25; // new: h2o
-  public static final int R_CLASSIF_H2O_GLM = 26; // new: h2o
-  public static final int R_CLASSIF_H2O_RANDOMFOREST = 27; // new: h2o
-  public static final int R_CLASSIF_KKNN = 28;
-  public static final int R_CLASSIF_KNN = 29; // new in 2.4(?): class, knn
-  public static final int R_CLASSIF_KSVM = 30;
-  public static final int R_CLASSIF_LDA = 31;
-  public static final int R_CLASSIF_LIBLINEARL1L2SVC = 32; // new in 2.7(?): LiblineaR
-  public static final int R_CLASSIF_LIBLINEARL1LOGREG = 33; // new in 2.7(?): LiblineaR
-  public static final int R_CLASSIF_LIBLINEARL2L1SVC = 34; // new in 2.7(?): LiblineaR
-  public static final int R_CLASSIF_LIBLINEARL2LOGREG = 35; // new in 2.7(?):LiblineaR
-  public static final int R_CLASSIF_LIBLINEARL2SVC = 36; // new in 2.7(?): LiblineaR
-  public static final int R_CLASSIF_LIBLINEARMULTICLASSSVC = 37; // new in 2.7(?): LiblineaR
-  public static final int R_CLASSIF_LINDA = 38; // new: DiscriMiner, linDA
-  public static final int R_CLASSIF_LOGREG = 39;
-  public static final int R_CLASSIF_LQA = 40; // new in 2.2: lqa, lqa
-  public static final int R_CLASSIF_LSSVM = 41;
-  public static final int R_CLASSIF_LVQ1 = 42;
-  public static final int R_CLASSIF_MDA = 43;
-  public static final int R_CLASSIF_MLP = 44; // new in 2.7(?): RSNNS
-  public static final int R_CLASSIF_MULTINOM = 45;
-  public static final int R_CLASSIF_NAIVE_BAYES = 46;
-  public static final int R_CLASSIF_NEURALNET = 47; // new in 2.7(?): neuralnet
-  public static final int R_CLASSIF_NNET = 48;
-  public static final int R_CLASSIF_NNTRAIN = 49; // new in 2.7(?): deepnet
-  public static final int R_CLASSIF_NODEHARVEST = 50; // new in 2.4(?)
-  public static final int R_CLASSIF_PAMR = 51; // new in 2.3: pamr, pamr
-  public static final int R_CLASSIF_PENALIZED = 52; // factored into one scheme in 2.12(?): penalized
-  public static final int R_CLASSIF_PLR = 53; // new: stepPlr, plr
-  public static final int R_CLASSIF_PLSDACARET = 54; // new: caret, plsda
-  public static final int R_CLASSIF_PROBIT = 55; // new in 2.4(?): stats, probit
-  public static final int R_CLASSIF_QDA = 56;
-  public static final int R_CLASSIF_QUADA = 57; // new: DiscriMiner, quaDA
-  public static final int R_CLASSIF_RANDOM_FOREST = 58;
-  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 59; // new in 2.2: randomForestSRC
-  public static final int R_CLASSIF_RANGER = 60; // new in 2.7(?): ranger
-  public static final int R_CLASSIF_RDA = 61;
-  public static final int R_CLASSIF_RFERNS = 62; // new in 2.4(?): rFerns, rFerns
-  public static final int R_CLASSIF_RKNN = 63; // new in 2.7(?): rknn
-  public static final int R_CLASSIF_ROTATIONFOREST = 64; // new in 2.7(?): rotationForest
-  public static final int R_CLASSIF_RPART = 65;
-  public static final int R_CLASSIF_RRF = 66; // new in 2.9: RRF
-  public static final int R_CLASSIF_RRLDA = 67; // new in 2.4(?): rrlda, rrlda
-  public static final int R_CLASSIF_SAEDNN = 68; // new in 2.7(?): deepnet
-  public static final int R_CLASSIF_SDA = 69; // new in 2.2: sda, sda
-  public static final int R_CLASSIF_SPARSELDA = 70; // new in 2.4(?): sparseLDA, MASS, elasticnet, sparseLDA NOTE: result probably not correct
-  public static final int R_CLASSIF_SVM = 71;
-  public static final int R_CLASSIF_XGBOOST = 72; // new in 2.7(?): xgboost
+  public static final int R_CLASSIF_BOOSTING = 2;
+  public static final int R_CLASSIF_BST = 3; // new in 2.4(?): bst, bst
+  public static final int R_CLASSIF_C50 = 4; // new 2.9: C50
+  public static final int R_CLASSIF_CFOREST = 5; // new: party, cforest
+  public static final int R_CLASSIF_CLUSTERSVM = 6; // new in 2.7(?): SwarmSVM, LiblineaR BROKEN
+  public static final int R_CLASSIF_CTREE = 7;
+  public static final int R_CLASSIF_CVGLMNET = 8; // new in 2.8: glmnet
+  public static final int R_CLASSIF_DBNDNN = 9; // new in 2.7(?): deepnet
+  public static final int R_CLASSIF_DCSVM = 10; // new in 2.7(?): SwarmSVM
+  public static final int R_CLASSIF_EARTH = 11; // new in 2.11(?): earth
+  public static final int R_CLASSIF_EVTREE = 12; // new in 2.11(?): evtree
+  public static final int R_CLASSIF_FEATURELESS = 13; // new in 2.11(?): mlr
+  public static final int R_CLASSIF_FNN = 14;
+  public static final int R_CLASSIF_GAMBOOST = 15; // new in 2.11(?): mboost
+  public static final int R_CLASSIF_GATERSVM = 16; // new in 2.7(?): SwarmSVM, e1071
+  public static final int R_CLASSIF_GAUSSPR = 17; // new in 2.9: kernlab
+  public static final int R_CLASSIF_GBM = 18;
+  public static final int R_CLASSIF_GEODA = 19; // new: DiscriMiner, geoDA
+  public static final int R_CLASSIF_GLMBOOST = 20;
+  public static final int R_CLASSIF_GLMNET = 21; // new: glmnet, glmnet
+  public static final int R_CLASSIF_H2O_DEEPLEARNING = 22; // new: h2o H20 SERVER NOT STARTING
+  public static final int R_CLASSIF_H2O_GBM = 23; // new: h2o
+  public static final int R_CLASSIF_H2O_GLM = 24; // new: h2o
+  public static final int R_CLASSIF_H2O_RANDOMFOREST = 25; // new: h2o
+  public static final int R_CLASSIF_KKNN = 26;
+  public static final int R_CLASSIF_KNN = 27; // new in 2.4(?): class, knn
+  public static final int R_CLASSIF_KSVM = 28;
+  public static final int R_CLASSIF_LDA = 29;
+  public static final int R_CLASSIF_LIBLINEARL1L2SVC = 30; // new in 2.7(?): LiblineaR
+  public static final int R_CLASSIF_LIBLINEARL1LOGREG = 31; // new in 2.7(?): LiblineaR
+  public static final int R_CLASSIF_LIBLINEARL2L1SVC = 32; // new in 2.7(?): LiblineaR
+  public static final int R_CLASSIF_LIBLINEARL2LOGREG = 33; // new in 2.7(?):LiblineaR
+  public static final int R_CLASSIF_LIBLINEARL2SVC = 34; // new in 2.7(?): LiblineaR
+  public static final int R_CLASSIF_LIBLINEARMULTICLASSSVC = 35; // new in 2.7(?): LiblineaR
+  public static final int R_CLASSIF_LINDA = 36; // new: DiscriMiner, linDA
+  public static final int R_CLASSIF_LIQUIDSVM = 37;
+  public static final int R_CLASSIF_LOGREG = 38;
+  public static final int R_CLASSIF_LSSVM = 39;
+  public static final int R_CLASSIF_LVQ1 = 40;
+  public static final int R_CLASSIF_MDA = 41;
+  public static final int R_CLASSIF_MLP = 42; // new in 2.7(?): RSNNS
+  public static final int R_CLASSIF_MULTINOM = 43;
+  public static final int R_CLASSIF_NAIVE_BAYES = 44;
+  public static final int R_CLASSIF_NEURALNET = 45; // new in 2.7(?): neuralnet
+  public static final int R_CLASSIF_NNET = 46;
+  public static final int R_CLASSIF_NNTRAIN = 47; // new in 2.7(?): deepnet
+  public static final int R_CLASSIF_NODEHARVEST = 48; // new in 2.4(?)
+  public static final int R_CLASSIF_PAMR = 49; // new in 2.3: pamr, pamr
+  public static final int R_CLASSIF_PENALIZED = 50; // factored into one scheme in 2.12(?): penalized
+  public static final int R_CLASSIF_PLR = 51; // new: stepPlr, plr
+  public static final int R_CLASSIF_PLSDACARET = 52; // new: caret, plsda
+  public static final int R_CLASSIF_PROBIT = 53; // new in 2.4(?): stats, probit
+  public static final int R_CLASSIF_QDA = 54;
+  public static final int R_CLASSIF_QUADA = 55; // new: DiscriMiner, quaDA
+  public static final int R_CLASSIF_RANDOM_FOREST = 56;
+  public static final int R_CLASSIF_RANDOM_FOREST_SRC = 57; // new in 2.2: randomForestSRC
+  public static final int R_CLASSIF_RANGER = 58; // new in 2.7(?): ranger
+  public static final int R_CLASSIF_RDA = 59;
+  public static final int R_CLASSIF_RFERNS = 60; // new in 2.4(?): rFerns, rFerns
+  public static final int R_CLASSIF_RKNN = 61; // new in 2.7(?): rknn
+  public static final int R_CLASSIF_ROTATIONFOREST = 62; // new in 2.7(?): rotationForest
+  public static final int R_CLASSIF_RPART = 63;
+  public static final int R_CLASSIF_RRF = 64; // new in 2.9: RRF
+  public static final int R_CLASSIF_RRLDA = 65; // new in 2.4(?): rrlda, rrlda
+  public static final int R_CLASSIF_SAEDNN = 66; // new in 2.7(?): deepnet
+  public static final int R_CLASSIF_SDA = 67; // new in 2.2: sda, sda
+  public static final int R_CLASSIF_SPARSELDA = 68; // new in 2.4(?): sparseLDA, MASS, elasticnet, sparseLDA NOTE: result probably not correct
+  public static final int R_CLASSIF_SVM = 69;
+  public static final int R_CLASSIF_XGBOOST = 70; // new in 2.7(?): xgboost
 
   // Regression
-  public static final int R_REGR_BCART = 73; // new in 2.4(?): tgp, bcart
-  public static final int R_REGR_BGP = 74; // new in 2.4(?): tgp, bgp
-  public static final int R_REGR_BGPLLM = 75; // new in 2.4(?): tgp, bgpllm
-  public static final int R_REGR_BLACKBOOST = 76;
-  public static final int R_REGR_BLM = 77; // new in 2.4(?): tgp, blm
-  public static final int R_REGR_BRNN = 78; // new in 2.4(?): brnn, brnn
-  public static final int R_REGR_BST = 79; // new in 2.4(?): bst, bst
-  public static final int R_REGR_BTGP = 80; // new in 2.4(?): tgp, btgp
-  public static final int R_REGR_BTGPLLM = 81; // new in 2.4(?): tgp, btgpllm
-  public static final int R_REGR_BTLM = 82; // new in 2.4(?): tgp, btlm
-  public static final int R_REGR_CFOREST = 83; // new: party, cforest
-  public static final int R_REGR_CRS = 84; // new: crs, crs
-  public static final int R_REGR_CTREE = 85; // new in 2.2: party, ctree
-  public static final int R_REGR_CUBIST = 86; // new in 2.4(?): Cubist, cubist
-  public static final int R_REGR_CVGLMNET = 87; // new in 2.11(?): glmnet
-  public static final int R_REGR_EARTH = 88;
-  public static final int R_REGR_ELMNN = 89; // new in 2.4(?): elmNN, elmNN
-  public static final int R_REGR_EVTREE = 90; // new in 2.11(?): evtree
-  public static final int R_REGR_FDBOOST = 91; // new in 2.12(?): FDboost,mboost
-  public static final int R_REGR_FEATURELESS = 92; // new in 2.11(?): mlr
-  public static final int R_REGR_FNN = 93;
-  public static final int R_REGR_FRBS = 94; // new in 2.4(?): frbs, frbs
-  public static final int R_REGR_GAMBOOST = 95; // new in 2.11(?): mboost
-  public static final int R_REGR_GAUSSPR = 96; // new in 2.9: kernlab
-  public static final int R_REGR_GBM = 97;
-  public static final int R_REGR_GLM = 98; // new in 2.9(?): stats
-  public static final int R_REGR_GLMBOOST = 99; // new in 2.7(?): mboost
-  public static final int R_REGR_GLMNET = 100; // new: glmnet, glmnet
-  public static final int R_REGR_GPFIT = 101; // new in 2.9: GPfit
-  public static final int R_REGR_H2O_DEEPLEARNING = 102; // new: h2o
-  public static final int R_REGR_H2O_GBM = 103; // new: h2o
-  public static final int R_REGR_H2O_GLM = 104; // new: h2o
-  public static final int R_REGR_H2O_RANDOMFOREST = 105; // new: h2o
-  public static final int R_REGR_KKNN = 106;
-  public static final int R_REGR_KM = 107;
-  public static final int R_REGR_KSVM = 108;
-  public static final int R_REGR_LAGP = 109; // new in 2.7(?): laGP
-  public static final int R_REGR_LIBLINEARL2L1SVR = 110; // new in 2.7(?): LiblineaR
-  public static final int R_REGR_LIBLINEARL2L2SVR = 111; // new in 2.7(?): LiblineaR
-  public static final int R_REGR_LM = 112;
-  public static final int R_REGR_MARS = 113;
-  public static final int R_REGR_MOB = 114; // new: party, mob
-  public static final int R_REGR_NNET = 115;
-  public static final int R_REGR_NODEHARVEST = 116; // new in 2.4(?): nodeHarvest
-  public static final int R_REGR_PCR = 117; // new: pls, pcr
-  public static final int R_REGR_PENALIZED = 118; // merged into one in 2.12(?): penalized
-  public static final int R_REGR_PLSR = 119; // new in 2.2: pls, pls
-  public static final int R_REGR_RANDOM_FOREST = 120;
-  public static final int R_REGR_RANDOM_FOREST_SRC = 121; // new in 2.2: randomForestSRC
-  public static final int R_REGR_RANGER = 122; // new in 2.7(?): ranger
-  public static final int R_REGR_RKNN = 123; // new in 2.7(?): rknn
-  public static final int R_REGR_RPART = 124;
-  public static final int R_REGR_RRF = 125; // new in 2.9: RRF
-  public static final int R_REGR_RSM = 126;
-  public static final int R_REGR_RVM = 127;
-  public static final int R_REGR_SLIM = 128; // new in 2.4(?): flare, slim
-  public static final int R_REGR_SVM = 129; // new: e1071, svm
-  public static final int R_REGR_XGBOOST = 130; // new in 2.7(?): xgboost
+  public static final int R_REGR_BCART = 71; // new in 2.4(?): tgp, bcart
+  public static final int R_REGR_BGP = 72; // new in 2.4(?): tgp, bgp
+  public static final int R_REGR_BGPLLM = 73; // new in 2.4(?): tgp, bgpllm
+  public static final int R_REGR_BLM = 74; // new in 2.4(?): tgp, blm
+  public static final int R_REGR_BRNN = 75; // new in 2.4(?): brnn, brnn
+  public static final int R_REGR_BST = 76; // new in 2.4(?): bst, bst
+  public static final int R_REGR_BTGP = 77; // new in 2.4(?): tgp, btgp
+  public static final int R_REGR_BTGPLLM = 78; // new in 2.4(?): tgp, btgpllm
+  public static final int R_REGR_BTLM = 79; // new in 2.4(?): tgp, btlm
+  public static final int R_REGR_CFOREST = 80; // new: party, cforest
+  public static final int R_REGR_CRS = 81; // new: crs, crs
+  public static final int R_REGR_CTREE = 82; // new in 2.2: party, ctree
+  public static final int R_REGR_CUBIST = 83; // new in 2.4(?): Cubist, cubist
+  public static final int R_REGR_CVGLMNET = 84; // new in 2.11(?): glmnet
+  public static final int R_REGR_EARTH = 85;
+  public static final int R_REGR_EVTREE = 86; // new in 2.11(?): evtree
+  public static final int R_REGR_FDBOOST = 87; // new in 2.12(?): FDboost,mboost
+  public static final int R_REGR_FEATURELESS = 88; // new in 2.11(?): mlr
+  public static final int R_REGR_FNN = 89;
+  public static final int R_REGR_FRBS = 90; // new in 2.4(?): frbs, frbs
+  public static final int R_REGR_GAMBOOST = 91; // new in 2.11(?): mboost
+  public static final int R_REGR_GAUSSPR = 92; // new in 2.9: kernlab
+  public static final int R_REGR_GBM = 93;
+  public static final int R_REGR_GLM = 944; // new in 2.9(?): stats
+  public static final int R_REGR_GLMBOOST = 95; // new in 2.7(?): mboost
+  public static final int R_REGR_GLMNET = 96; // new: glmnet, glmnet
+  public static final int R_REGR_GPFIT = 97; // new in 2.9: GPfit
+  public static final int R_REGR_H2O_DEEPLEARNING = 98; // new: h2o
+  public static final int R_REGR_H2O_GBM = 99; // new: h2o
+  public static final int R_REGR_H2O_GLM = 100; // new: h2o
+  public static final int R_REGR_H2O_RANDOMFOREST = 101; // new: h2o
+  public static final int R_REGR_KKNN = 102;
+  public static final int R_REGR_KM = 103;
+  public static final int R_REGR_KSVM = 104;
+  public static final int R_REGR_LAGP = 105; // new in 2.7(?): laGP
+  public static final int R_REGR_LIBLINEARL2L1SVR = 106; // new in 2.7(?): LiblineaR
+  public static final int R_REGR_LIBLINEARL2L2SVR = 107; // new in 2.7(?): LiblineaR
+  public static final int R_REGR_LIQUIDSVM = 108;
+  public static final int R_REGR_LM = 109;
+  public static final int R_REGR_MARS = 110;
+  public static final int R_REGR_MOB = 111; // new: party, mob
+  public static final int R_REGR_NNET = 112;
+  public static final int R_REGR_NODEHARVEST = 113; // new in 2.4(?): nodeHarvest
+  public static final int R_REGR_PCR = 114; // new: pls, pcr
+  public static final int R_REGR_PENALIZED = 115; // merged into one in 2.12(?): penalized
+  public static final int R_REGR_PLSR = 116; // new in 2.2: pls, pls
+  public static final int R_REGR_RANDOM_FOREST = 117;
+  public static final int R_REGR_RANDOM_FOREST_SRC = 118; // new in 2.2: randomForestSRC
+  public static final int R_REGR_RANGER = 119; // new in 2.7(?): ranger
+  public static final int R_REGR_RKNN = 120; // new in 2.7(?): rknn
+  public static final int R_REGR_RPART = 121;
+  public static final int R_REGR_RRF = 122; // new in 2.9: RRF
+  public static final int R_REGR_RSM = 123;
+  public static final int R_REGR_RVM = 124;
+  public static final int R_REGR_SLIM = 125; // new in 2.4(?): flare, slim
+  public static final int R_REGR_SVM = 126; // new: e1071, svm
+  public static final int R_REGR_XGBOOST = 127; // new in 2.7(?): xgboost
 
   /** Tags for the various types of learner */
   public static final Tag[] TAGS_LEARNER =
-          {new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
+          {       new Tag(R_CLASSIF_ADA, "ada", "classif.ada", false),
                   new Tag(R_CLASSIF_BINOMIAL, "", "classif.binomial"),
-                  new Tag(R_CLASSIF_BLACKBOOST, "a.mboost,party", "classif.blackboost", false),
                   new Tag(R_CLASSIF_BOOSTING, "adabag,rpart", "classif.boosting", false),
                   new Tag(R_CLASSIF_BST, "a.bst", "classif.bst", false),
                   new Tag(R_CLASSIF_C50, "C50", "classif.C50"),
@@ -214,7 +210,6 @@ public class MLRClassifier extends RandomizableClassifier
                   new Tag(R_CLASSIF_DCSVM, "b.SwarmSVM", "classif.dcSVM", false),
                   new Tag(R_CLASSIF_EARTH, "a.earth", "classif.earth", false),
                   new Tag(R_CLASSIF_EVTREE, "a.evtree", "classif.evtree", false),
-                  new Tag(R_CLASSIF_FDAUSC_GLMNET, "a.fda.usc", "classif.fdausc.glm", false),
                   new Tag(R_CLASSIF_FEATURELESS, "", "classif.featureless", false),
                   new Tag(R_CLASSIF_FNN, "a.FNN", "classif.fnn", false),
                   new Tag(R_CLASSIF_GAMBOOST, "b.mboost", "classif.gamboost", false),
@@ -239,8 +234,8 @@ public class MLRClassifier extends RandomizableClassifier
                   new Tag(R_CLASSIF_LIBLINEARL2SVC, "e.LiblineaR", "classif.LiblineaRL2SVC", false),
                   new Tag(R_CLASSIF_LIBLINEARMULTICLASSSVC, "f.LiblineaR", "classif.LiblineaRMultiClassSVC", false),
                   new Tag(R_CLASSIF_LINDA, "b.DiscriMiner", "classif.linDA", false),
+                  new Tag(R_CLASSIF_LIQUIDSVM, "a.liquidSVM", "classif.liquidSVM", false),
                   new Tag(R_CLASSIF_LOGREG, "", "classif.logreg", false),
-                  new Tag(R_CLASSIF_LQA, "lqa", "classif.lqa", false),
                   new Tag(R_CLASSIF_LSSVM, "c.kernlab", "classif.lssvm", false),
                   new Tag(R_CLASSIF_LVQ1, "b.class", "classif.lvq1", false),
                   new Tag(R_CLASSIF_MDA, "a.mda", "classif.mda", false),
@@ -277,7 +272,6 @@ public class MLRClassifier extends RandomizableClassifier
                   new Tag(R_REGR_BCART, "a.tgp", "regr.bcart", false),
                   new Tag(R_REGR_BGP, "b.tgp", "regr.bgp", false),
                   new Tag(R_REGR_BGPLLM, "c.tgp", "regr.bgpllm", false),
-                  new Tag(R_REGR_BLACKBOOST, "d.mboost", "regr.blackboost", false),
                   new Tag(R_REGR_BLM, "d.tgp", "regr.blm", false),
                   new Tag(R_REGR_BRNN, "brnn", "regr.brnn", false),
                   new Tag(R_REGR_BST, "b.bst", "regr.bst", false),
@@ -290,7 +284,6 @@ public class MLRClassifier extends RandomizableClassifier
                   new Tag(R_REGR_CUBIST, "Cubist", "regr.cubist", false),
                   new Tag(R_REGR_CVGLMNET, "c.glmnet", "regr.cvglmnet", false),
                   new Tag(R_REGR_EARTH, "b.earth", "regr.earth", false),
-                  new Tag(R_REGR_ELMNN, "elmNN", "regr.elmNN", false),
                   new Tag(R_REGR_EVTREE, "b.evtree", "regr.evtree", false),
                   new Tag(R_REGR_FDBOOST, "a.FDboost,mboost", "regr.FDboost", false),
                   new Tag(R_REGR_FEATURELESS, "", "regr.featureless", false),
@@ -313,6 +306,7 @@ public class MLRClassifier extends RandomizableClassifier
                   new Tag(R_REGR_LAGP, "laGP", "regr.laGP", false),
                   new Tag(R_REGR_LIBLINEARL2L1SVR, "g.LiblineaR", "regr.LiblineaRL2L1SVR", false),
                   new Tag(R_REGR_LIBLINEARL2L2SVR, "h.LiblineaR", "regr.LiblineaRL2L2SVR", false),
+                  new Tag(R_REGR_LIQUIDSVM, "b.liquidSVM", "regr.liquidSVM", false),
                   new Tag(R_REGR_LM, "", "regr.lm", false),
                   new Tag(R_REGR_MARS, "b.mda", "regr.mars", false),
                   new Tag(R_REGR_MOB, "g.party", "regr.mob", false),
@@ -360,7 +354,7 @@ public class MLRClassifier extends RandomizableClassifier
             + "is selected for the first time, and the corresponding R package for that classifier/regressor has not already been installed "
             + "in R, WEKA will try to install it automatically. Note that automatic installation of R packages may take a little while "
             + "because it involves downloading and processing R packages.\n\nCheck\n\n"
-            + "  https://mlr-org.github.io/mlr-tutorial/release/html/integrated_learners/index.html\n\n"
+            + "  https://mlr-org.github.io/mlr/articles/tutorial/integrated_learners.html\n\n"
             +"for the list of R algorithms available via MLR, most of which are available through this WEKA classifier, and\n\n"
             +"  http://http://cran.r-project.org/web/packages/mlr\n\n"
             +"for further information on the package and its algorithms. The appropriate citation for mlr is\n\n" + getTechnicalInformation().toString();

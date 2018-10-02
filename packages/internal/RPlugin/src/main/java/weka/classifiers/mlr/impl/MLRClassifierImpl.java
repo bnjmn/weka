@@ -173,7 +173,7 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
   public String globalInfo() {
     return "Classifier that wraps the MLR R library for building "
       + "and making predictions with various R classifiers and regression methods. Check\n\n"
-      + "  http://berndbischl.github.io/mlr/tutorial/html/integrated_learners\n\n"
+      + "  https://mlr-org.github.io/mlr/articles/tutorial/integrated_learners.html\n\n"
       + "for the list of algorithms in MLR, and\n\n"
       + "  http://http://cran.r-project.org/web/packages/mlr\n\n"
       + "for further information on the package and its algorithms.\n\n"
@@ -340,27 +340,17 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     eng = RSession.acquireSession(this);
     eng.setLog(this, m_logger);
     if (!eng.loadLibrary(this, "XML")) {
-      System.err.println("XML can't be loaded - trying to install....");
-      eng.installLibrary(this, "XML");
 
-      // try loading again
-      if (!eng.loadLibrary(this, "XML")) {
+      // try installing
+      if (!eng.installLibrary(this, "XML")) {
         return;
       }
-
-      System.err.println("XML loaded successfully.");
     }
 
     if (!eng.loadLibrary(this, "mlr")) {
-      System.err.println("MLR can't be loaded - trying to install....");
-      eng.installLibrary(this, "mlr");
-
-      // try loading again
-      if (!eng.loadLibrary(this, "mlr")) {
+      if (!eng.installLibrary(this, "mlr")) {
         return;
       }
-
-      System.err.println("MLR loaded successfully.");
     }
     eng.parseAndEval(this, "configureMlr(on.par.without.desc = \"warn\")");
     m_mlrAvailable = true;
@@ -389,17 +379,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       eng.setLog(this, m_logger);
       for (String lib : libs) {
         if (!eng.loadLibrary(this, lib)) {
-          System.err.println("Attempting to install learner library: " + lib);
-
-          eng.installLibrary(this, lib);
-          /*
-           * if (!eng.installLibrary(this, lib)) { System.err.println(
-           * "Unable to continue - " + "failed to install learner library: " +
-           * lib); m_baseLearnerLibraryAvailable = false; return; }
-           */
-
-          // try loading again
-          if (!eng.loadLibrary(this, lib)) {
+          if (!eng.installLibrary(this, lib)) {
+            RSession.releaseSession(this);
             return;
           }
         }
