@@ -177,8 +177,8 @@ public class JRILoader {
               } catch (Exception ex) {
 
                 // Could not run process, so let's add the x64/i386 folder to the path
-                System.err.println("Adding appropriate folder in R's home to PATH.");
                 String PATH = getenv("PATH");
+                System.err.println("Adding appropriate folder in R's home to PATH.");
                 String subFolderName = "i386";
                 if (System.getenv("ProgramFiles(x86)") != null) {
                   subFolderName = "x64";
@@ -190,12 +190,13 @@ public class JRILoader {
                   s_rHome = null;
                   return false;
                 }
+		System.err.println(SetEnvironmentVariables.INSTANCE.getenv("PATH")); // Debugging output.
               }
             } else { // Assuming linux (or a Unix-derivative that has the same default install location for R).
               s_rHome = "/usr/lib/R";
             }
           } else {
-            System.err.println("The os.name property is not availble. Cannot guess R_HOME.");
+            System.err.println("The os.name property is not available. Cannot guess R_HOME.");
             s_rHome = null;
             return false;
           }
@@ -221,7 +222,12 @@ public class JRILoader {
         rLibsUser = System.getProperty("r.libs.user");
         if (rLibsUser == null) {
           try {
-            String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", ".libPaths()"};
+            String cmdToGetVariableInR = "Sys.getenv(\"R_LIBS_USER\")";
+	    if ((osType != null) && (osType.contains("Windows"))) {
+		cmdToGetVariableInR = "Sys.getenv('R_LIBS_USER')"; // Could possibly do this on the other platforms as well.
+	    }
+            String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", 
+				       cmdToGetVariableInR};
             Process p = Runtime.getRuntime().exec(cmd);
             int execResult = p.waitFor();
             if (execResult != 0) {
@@ -242,12 +248,21 @@ public class JRILoader {
             Pattern pat = Pattern.compile("\"([^\"]*)\"");
             Matcher m = pat.matcher(firstLine);
             if (!m.find()) {
-              System.err.println("Failed to extract valid library folder from information return by .libPaths(): " +
+              System.err.println("Failed to extract valid library folder from information return by Sys.getenv(\"R_LIBS_USER\"): " +
                       firstLine);
               s_rHome = null;
               return false;
             }
             rLibsUser = m.group(1);
+	    if (rLibsUser.substring(0, 1).equals("~")) { // This should never happen on Windows
+		String home = null;
+		if ((home = getenv("HOME")) == null) {
+		    System.err.println("Failed to get user home from HOME variable.");
+		    s_rHome = null;
+		    return false;
+		}
+		rLibsUser = rLibsUser.replaceFirst("~", home);
+	    }
           } catch (Exception ex) {
             System.err.println("Failed to establish library folder of R.");
             ex.printStackTrace();
