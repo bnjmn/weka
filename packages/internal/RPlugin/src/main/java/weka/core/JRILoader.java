@@ -36,6 +36,7 @@ import java.util.regex.Matcher;
 
 import com.sun.jna.platform.win32.Advapi32Util;
 import static com.sun.jna.platform.win32.WinReg.HKEY_LOCAL_MACHINE;
+import static com.sun.jna.platform.win32.WinReg.HKEY_CURRENT_USER;
 
 
 /**
@@ -163,13 +164,24 @@ public class JRILoader {
             if (osType.contains("Mac OS X")) {
               s_rHome = "/Library/Frameworks/R.framework/Resources"; // This is the guess for macOS
             } else if (osType.contains("Windows")) {
-              if (System.getenv("ProgramFiles(x86)") != null) {
-                s_rHome = Advapi32Util.
-                        registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\R-core\\R64", "InstallPath");
-              } else {
-                s_rHome = Advapi32Util.
-                        registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
-              }
+		try {
+		    if (System.getenv("ProgramFiles(x86)") != null) {
+			s_rHome = Advapi32Util.
+			    registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\R-core\\R64", "InstallPath");
+		    } else {
+			s_rHome = Advapi32Util.
+			    registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
+		    }
+		} catch (Exception ex) {
+		    System.err.println("Could not find system-wide install location for R in Registry.");
+		    if (System.getenv("ProgramFiles(x86)") != null) {
+			s_rHome = Advapi32Util.
+			    registryGetStringValue(HKEY_CURRENT_USER, "Software\\R-core\\R64", "InstallPath");
+		    } else {
+			s_rHome = Advapi32Util.
+			    registryGetStringValue(HKEY_CURRENT_USER, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
+		    }
+		}
 
               // Check if appropriate folder in R_HOME is in path
               try {
