@@ -113,10 +113,14 @@ public class RSession {
    * Acquire the session for the requester
    * 
    * @param requester the object requesting the session
-   * @return the session singleton
+   * @return the session singleton; null if no session is available
    * @throws Exception if the session is currently held by another client
    */
   public static RSession acquireSession(Object requester) throws Exception {
+
+    if (s_sessionImpl == null) {
+      return null;
+    }
     // just call so that we wait until R is available
     ((RSessionAPI) s_sessionImpl).getSession(requester);
 

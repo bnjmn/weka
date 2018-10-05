@@ -126,7 +126,7 @@ public class JRILoader {
 
   /**
    * Checks if environment variable R_HOME is available, first in Java cache of process environment and then
-   * in actual process environment. Tries to guess value of R_HOME if environment value or r.home property
+   * in actual process environment. Tries to guess value of R_HOME if environment variable or r.home property
    * do not have an appropriate value.
    *
    * Priority: 1) R_HOME in cached environment; 2) R_HOME in process environment; 3) r.home property.
@@ -137,16 +137,38 @@ public class JRILoader {
    * Does the same for R_LIBS_USER and r.libs.user respectively.
    *
    * Tries to install rJava if it is not installed already.
+   *
+   * On Windows only, this method also sets the JAVA_HOME environment variable to the value in the java.home property if
+   * JAVA_HOME is not set to a seemingly appropriate value already.
    */
   public static boolean checkRHome() {
 
     if (s_rHome == null) {
 
+      // Set JAVA_HOME for rJava and JavaGD if it is not set already
+      String osType = System.getProperty("os.name");
+      if ((osType != null) && (osType.contains("Windows"))) {
+        String javaHome = getenv("JAVA_HOME");
+        if ((javaHome != null) && (!(new File(javaHome)).exists() ||
+                !(new File(javaHome + File.separator + "bin" + File.separator + "java.exe").exists()))) {
+          System.err.println("JAVA_HOME " + javaHome + " does not appear to be a valid home of Java.");
+          javaHome = null;
+        }
+        if (javaHome == null) {
+          javaHome = System.getProperty("java.home");
+          System.err.println("Setting JAVA_HOME to " + javaHome);
+          if (SetEnvironmentVariables.INSTANCE.setenv("JAVA_HOME", javaHome, 0) != 0) {
+            System.err.println("Failed to set JAVA_HOME.");
+            s_rHome = null;
+            return false;
+          }
+        }
+      }
+
       // First deal with R_HOME and r.home
       s_rHome = getenv("R_HOME");
       String rExeString = "R";
       String rScriptExeString = "Rscript";
-      String osType = System.getProperty("os.name");
       if ((osType != null) && (osType.contains("Windows"))) {
         rExeString = "R.exe";
         rScriptExeString = "Rscript.exe";
@@ -164,24 +186,24 @@ public class JRILoader {
             if (osType.contains("Mac OS X")) {
               s_rHome = "/Library/Frameworks/R.framework/Resources"; // This is the guess for macOS
             } else if (osType.contains("Windows")) {
-		try {
-		    if (System.getenv("ProgramFiles(x86)") != null) {
-			s_rHome = Advapi32Util.
-			    registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\R-core\\R64", "InstallPath");
-		    } else {
-			s_rHome = Advapi32Util.
-			    registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
-		    }
-		} catch (Exception ex) {
-		    System.err.println("Could not find system-wide install location for R in Registry.");
-		    if (System.getenv("ProgramFiles(x86)") != null) {
-			s_rHome = Advapi32Util.
-			    registryGetStringValue(HKEY_CURRENT_USER, "Software\\R-core\\R64", "InstallPath");
-		    } else {
-			s_rHome = Advapi32Util.
-			    registryGetStringValue(HKEY_CURRENT_USER, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
-		    }
-		}
+              try {
+                if (System.getenv("ProgramFiles(x86)") != null) {
+                  s_rHome = Advapi32Util.
+                          registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\R-core\\R64", "InstallPath");
+                } else {
+                  s_rHome = Advapi32Util.
+                          registryGetStringValue(HKEY_LOCAL_MACHINE, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
+                }
+              } catch (Exception ex) {
+                System.err.println("Could not find system-wide install location for R in Registry.");
+                if (System.getenv("ProgramFiles(x86)") != null) {
+                  s_rHome = Advapi32Util.
+                          registryGetStringValue(HKEY_CURRENT_USER, "Software\\R-core\\R64", "InstallPath");
+                } else {
+                  s_rHome = Advapi32Util.
+                          registryGetStringValue(HKEY_CURRENT_USER, "Software\\Wow6432Node\\R-core\\R", "InstallPath");
+                }
+              }
 
               // Check if appropriate folder in R_HOME is in path
               try {
@@ -202,7 +224,7 @@ public class JRILoader {
                   s_rHome = null;
                   return false;
                 }
-		System.err.println(SetEnvironmentVariables.INSTANCE.getenv("PATH")); // Debugging output.
+                System.err.println(SetEnvironmentVariables.INSTANCE.getenv("PATH")); // Debugging output.
               }
             } else { // Assuming linux (or a Unix-derivative that has the same default install location for R).
               s_rHome = "/usr/lib/R";
@@ -235,11 +257,11 @@ public class JRILoader {
         if (rLibsUser == null) {
           try {
             String cmdToGetVariableInR = "Sys.getenv(\"R_LIBS_USER\")";
-	    if ((osType != null) && (osType.contains("Windows"))) {
-		cmdToGetVariableInR = "Sys.getenv('R_LIBS_USER')"; // Could possibly do this on the other platforms as well.
-	    }
-            String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e", 
-				       cmdToGetVariableInR};
+            if ((osType != null) && (osType.contains("Windows"))) {
+              cmdToGetVariableInR = "Sys.getenv('R_LIBS_USER')"; // Could possibly do this on the other platforms as well.
+            }
+            String[] cmd = new String[]{s_rHome + File.separator + "bin" + File.separator + rScriptExeString, "-e",
+                    cmdToGetVariableInR};
             Process p = Runtime.getRuntime().exec(cmd);
             int execResult = p.waitFor();
             if (execResult != 0) {
@@ -266,15 +288,15 @@ public class JRILoader {
               return false;
             }
             rLibsUser = m.group(1);
-	    if (rLibsUser.substring(0, 1).equals("~")) { // This should never happen on Windows
-		String home = null;
-		if ((home = getenv("HOME")) == null) {
-		    System.err.println("Failed to get user home from HOME variable.");
-		    s_rHome = null;
-		    return false;
-		}
-		rLibsUser = rLibsUser.replaceFirst("~", home);
-	    }
+            if (rLibsUser.substring(0, 1).equals("~")) { // This should never happen on Windows
+              String home = null;
+              if ((home = getenv("HOME")) == null) {
+                System.err.println("Failed to get user home from HOME variable.");
+                s_rHome = null;
+                return false;
+              }
+              rLibsUser = rLibsUser.replaceFirst("~", home);
+            }
           } catch (Exception ex) {
             System.err.println("Failed to establish library folder of R.");
             ex.printStackTrace();
@@ -321,6 +343,12 @@ public class JRILoader {
               System.err.println(line);
             }
             throw new Exception("Rscript returned non-zero value.");
+          } else {
+            BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
+            String line;
+            while ((line = bf.readLine()) != null) {
+              System.err.println(line);
+            }
           }
         } catch (Exception ex) {
           System.err.println("Failed to install rJava.");
@@ -532,6 +560,7 @@ public class JRILoader {
     byte[] byteCodeJRINative = getByteCode("/weka/core/JRINativeLoader.bytecode");
     byte[] byteCodeJavaGDNotifier = getByteCode("/weka/core/JavaGDNotifier.bytecode");
     byte[] byteCodeRniIdle = getByteCode("/weka/core/RniIdle.bytecode");
+    byte[] byteCodeREngineStartup= getByteCode("/weka/core/REngineStartup.bytecode");
 
     List<byte[]> preloadClassByteCode = new ArrayList<byte[]>();
 
@@ -573,6 +602,8 @@ public class JRILoader {
       // code
       defineClass.invoke(rootClassLoader, "weka.core.RniIdle",
         byteCodeRniIdle, 0, byteCodeRniIdle.length, pd);
+      defineClass.invoke(rootClassLoader, "weka.core.REngineStartup",
+              byteCodeREngineStartup, 0, byteCodeREngineStartup.length, pd);
       defineClass.invoke(rootClassLoader, "weka.core.RLoggerAPI",
         byteCodeLogger, 0, byteCodeLogger.length, pd);
       defineClass.invoke(rootClassLoader, "weka.core.RSessionAPI", byteCodeAPI,

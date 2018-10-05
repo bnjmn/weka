@@ -29,7 +29,9 @@ import java.awt.GraphicsEnvironment;
 import java.util.Locale;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.Future;
 import java.io.File;
 import java.io.InputStreamReader;
 import java.io.BufferedReader;
@@ -92,8 +94,13 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     if (s_engine == null) {
       try {
 
-        s_engine = REngine.engineForClass("org.rosuda.REngine.JRI.JRIEngine",
-          new String[] { "--slave" }, s_sessionSingleton, false);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        final Future<REngine> future = executor.submit(new REngineStartup(s_sessionSingleton));
+        executor.shutdown();
+        s_engine = future.get(5, TimeUnit.SECONDS);
+        if (!executor.isTerminated()) {
+          executor.shutdownNow();
+        }
 
         // install a default mirror to use for package downloads so that R
         // does not try and start a tcl/tk interface for mirror selection!

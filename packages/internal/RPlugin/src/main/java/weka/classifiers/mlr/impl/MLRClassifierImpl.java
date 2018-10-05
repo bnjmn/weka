@@ -188,6 +188,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     RSession eng = null;
     try {
       eng = RSession.acquireSession(this);
+      if (eng == null) {
+        return;
+      }
       eng.setLog(this, m_logger);
       eng.clearConsoleBuffer(this);
 
@@ -247,9 +250,13 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
         init();
       }
 
+      if (!m_mlrAvailable) {
+        throw new Exception(
+                "MLR is not available for some reason - can't continue setting capabilities!");
+      }
+
       loadBaseLearnerLibrary();
     } catch (Exception e) {
-      e.printStackTrace();
       return result;
     }
 
@@ -288,6 +295,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
       RSession eng = null;
       try {
         eng = RSession.acquireSession(this);
+        if (eng == null) {
+          return;
+        }
         eng.setLog(this, m_logger);
         eng.clearConsoleBuffer(this);
 
@@ -338,6 +348,10 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     RSession eng = null;
 
     eng = RSession.acquireSession(this);
+    if (eng == null) {
+      System.err.println("Could not acquire R session in MLR classifier.");
+      return;
+    }
     eng.setLog(this, m_logger);
     if (!eng.loadLibrary(this, "XML")) {
 
@@ -376,6 +390,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       RSession eng = null;
       eng = RSession.acquireSession(this);
+      if (eng == null) {
+        return;
+      }
       eng.setLog(this, m_logger);
       for (String lib : libs) {
         if (!eng.loadLibrary(this, lib)) {
@@ -955,6 +972,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     RSession eng = null;
     eng = RSession.acquireSession(this);
+    if (eng == null) {
+      return;
+    }
     eng.setLog(this, m_logger);
     eng.clearConsoleBuffer(this);
 
@@ -1273,6 +1293,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
     RSession eng = null;
     eng = RSession.acquireSession(this);
+    if (eng == null) {
+      return new double[insts.numInstances()][insts.numClasses()];
+    }
     eng.setLog(this, m_logger);
 
     try {
@@ -1360,6 +1383,9 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
     RSession eng = null;
     try {
       eng = RSession.acquireSession(this);
+      if (eng == null) {
+        return;
+      }
       eng.setLog(this, m_logger);
 
       eng.close();
