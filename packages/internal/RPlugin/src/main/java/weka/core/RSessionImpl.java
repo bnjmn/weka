@@ -509,25 +509,15 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
 
     javax.swing.JFrame frame = null;
 
-    // Check if java.awt.Window is in the method call stack: only then will be pop up a window.
-    StackTraceElement[] stack = Thread.currentThread().getStackTrace();
-    boolean GUIChooserOccurs = false;
-    for (StackTraceElement s : stack) {
-      if (s.getClassName().contains("java.awt.Window")) {
-        GUIChooserOccurs = true;
-        break;
-      }
-    }
-
     String text = "Please wait while R package " + libraryName + " is being installed.";
-    if (!GraphicsEnvironment.isHeadless() && GUIChooserOccurs) {
+    System.err.println(text);
+    if (!GraphicsEnvironment.isHeadless() && System.getProperty("weka.started.via.GUIChooser").equals("true")) {
         frame = new javax.swing.JFrame("RPlugin Notification: " + text);
         frame.setPreferredSize(new java.awt.Dimension(800, 0));
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
     }
-    System.err.println(text);
 
     try {
 
@@ -538,7 +528,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       REXP result = parseAndEval(requester, "install.packages(\"" + libraryName + "\")");
 
     } catch (Exception ex) {
-      System.out.println("Failed to perform installation in R. Reason: " + ex.getMessage());
+      System.err.println("Failed to perform installation in R. Reason: " + ex.getMessage());
     }
 
     if (frame != null) {
@@ -550,7 +540,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       loadLibrary(requester, libraryName);
       success = true;
     } catch (Exception ex) {
-      System.out.println("Failed to load library in R. Reason: " + ex.getMessage());
+      System.err.println("Failed to load library in R. Reason: " + ex.getMessage());
     }
     if (!success) {
       if (frame != null) {

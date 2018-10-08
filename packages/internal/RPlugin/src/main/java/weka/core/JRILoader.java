@@ -138,12 +138,25 @@ public class JRILoader {
    *
    * Tries to install rJava if it is not installed already.
    *
+   * If the class java.gui.GUIChooser occurs in the method call stack, the Java property weka.started.via.GUIChooser
+   * is set to the value true. Otherwise, the property is set to value false.
+   *
    * On Windows only, this method also sets the JAVA_HOME environment variable to the value in the java.home property if
    * JAVA_HOME is not set to a seemingly appropriate value already.
    */
   public static boolean checkRHome() {
 
     if (s_rHome == null) {
+
+      // Check if the user is using a GUI environment
+      StackTraceElement[] stack = Thread.currentThread().getStackTrace();
+      System.setProperty("weka.started.via.GUIChooser", "false");
+      for (StackTraceElement s : stack) {
+        if (s.getClassName().equals("weka.gui.GUIChooser")) {
+          System.setProperty("weka.started.via.GUIChooser", "true");
+          break;
+        }
+      }
 
       // Set JAVA_HOME for rJava and JavaGD if it is not set already
       String osType = System.getProperty("os.name");
