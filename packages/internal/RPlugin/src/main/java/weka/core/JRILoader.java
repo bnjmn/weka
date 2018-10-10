@@ -604,7 +604,7 @@ public class JRILoader {
     ProtectionDomain pd = System.class.getProtectionDomain();
 
     // ClassLoader.defineClass is a protected method, so we have to make it
-    // accessible
+    // accessible.
     defineClass.setAccessible(true);
 
     try {
@@ -615,7 +615,12 @@ public class JRILoader {
       for (int i = 0; i < PRELOAD.length; ++i) {
         // System.err.println(PRELOAD[i]);
         byte[] b = preloadClassByteCode.get(i);
-        defineClass.invoke(rootClassLoader, PRELOAD[i], b, 0, b.length, pd);
+        if (PRELOAD[i].equals("org.rosuda.JRI.Rengine")) {
+          Class injectedRengineClass = (Class)defineClass.invoke(rootClassLoader, PRELOAD[i], b, 0, b.length, pd);
+          injectedRengineClass.getDeclaredField("jriLoaded").setBoolean(null, true);
+        } else {
+          defineClass.invoke(rootClassLoader, PRELOAD[i], b, 0, b.length, pd);
+        }
       }
 
       // Create REngineImpl class and other directly dependent classes from byte
