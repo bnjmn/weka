@@ -13,7 +13,6 @@
   <!-- set global properties for this build -->
   <property name="src" value="src/main/java"/>
   <property name="src-test" value="src/test/java"/>
-  <property name="src-mod-jri" value="src_modifiedJRI/JRI"/>
   <property name="src-mod-jri-engine" value="src_modifiedJRI/JRIEngine"/>
   <property name="lib" value="lib" />
   <property name="libExt" value="libExternal"/>
@@ -59,16 +58,6 @@
   </target>
 
   <target name="buildModified" description="Build modified JRI code">
-    <move file="${lib}/REngine.jar" tofile="${libExt}/REngine.jar" failonerror="false"/>
-
-    <mkdir dir="${src-mod-jri}/build"/>
-    <javac srcdir="${src-mod-jri}"
-           fork="yes" memoryMaximumSize="${javac_max_memory}"
-           destdir="${src-mod-jri}/build"
-           optimize="${optimization}"
-           debug="${debug}"
-           deprecation="${deprecation}"
-           source="1.6" target="1.6"/>
 
     <mkdir dir="${src-mod-jri-engine}/build"/>
     <javac srcdir="${src-mod-jri-engine}"
@@ -77,22 +66,15 @@
            optimize="${optimization}"
            debug="${debug}"
            deprecation="${deprecation}"
-           classpath="${libExt}/REngine.jar:${src-mod-jri}/build"
+           classpath="${libExt}/JRI.jar:${libExt}/REngine.jar"
            source="1.6" target="1.6"/>
-
-    <jar jarfile="src_modifiedJRI/JRI.jar" 
-      basedir="${src-mod-jri}/build">
-      <include name="**/*.class"/>
-    </jar>
 
     <jar jarfile="src_modifiedJRI/JRIEngine.jar" 
       basedir="${src-mod-jri-engine}/build">
       <include name="**/*.class"/>
     </jar>
 
-    <copy file="src_modifiedJRI/JRI.jar" tofile="${dist}/JRI.jar"/>
     <copy file="src_modifiedJRI/JRIEngine.jar" tofile="${dist}/JRIEngine.jar"/>
-    <move file="src_modifiedJRI/JRI.jar" tofile="${lib}/JRI.jar"/>
     <move file="src_modifiedJRI/JRIEngine.jar" tofile="${lib}/JRIEngine.jar"/>
   </target>
 
@@ -135,6 +117,7 @@
   <target name="compile" depends="init_compile, compile-r-api"
    description="Compile package and deposit class files in build/classes">
     <copy file="${libExt}/javagd-0.6.1.jar" toDir="${lib}" />
+    <copy file="${libExt}/JRI.jar" toDir="${lib}" />
     <copy file="${libExt}/jna-4.5.2.jar" toDir="${lib}" />
     <copy file="${libExt}/jna-platform-4.5.2.jar" toDir="${lib}" />
     <copy file="${libExt}/xmlpull-1.1.3.1.jar" toDir="${lib}" />
@@ -272,7 +255,6 @@
     <copy todir="${dist}/${package}">
       <fileset dir="${dist}">
         <include name="*.jar"/>
-        <exclude name="JRI.jar"/>
         <exclude name="JRIEngine.jar"/>
         <exclude name="weka-r-api-compile-only.jar"/>
         <exclude name="weka-r-api.jar"/>
@@ -282,7 +264,6 @@
       <fileset dir="${dist}">
         <include name="*.jar"/>
         <!-- preserve all the artefacts that we want available -->
-        <exclude name="JRI.jar"/>
         <exclude name="JRIEngine.jar"/>
         <exclude name="rengine-weka-inject-classes.jar"/>
         <exclude name="weka-r-api-compile-only.jar"/>
@@ -387,11 +368,11 @@
   <target name="clean" depends="init_all"
    description="Removes the build, dist and reports directories">
     <!-- Delete the ${build} and ${dist} directory trees -->
-    <delete dir="${src-mod-jri}/build"/>
     <delete dir="${src-mod-jri-engine}/build"/>
     <delete dir="${build}"/>
     <delete dir="${dist}"/>
     <delete dir="${doc}"/>
+    <delete dir="${lib}"/>
   </target>
 
   <target name="superclean" depends="clean"

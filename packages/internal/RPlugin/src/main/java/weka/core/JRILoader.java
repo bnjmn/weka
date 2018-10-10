@@ -143,10 +143,17 @@ public class JRILoader {
    *
    * On Windows only, this method also sets the JAVA_HOME environment variable to the value in the java.home property if
    * JAVA_HOME is not set to a seemingly appropriate value already.
+   *
+   * Finally, this method sets the system property jri.ignore.ule to value "yes", so that Rengine in the JRI
+   * library will not terminate the JVM.
    */
   public static boolean checkRHome() {
 
     if (s_rHome == null) {
+
+      // Set the system property jri.ignore.ule to value "yes", so that  Rengine in the JRI
+      // library will not terminate the JVM.
+      System.setProperty("jri.ignore.ule", "yes");
 
       // Check if the user is using a GUI environment
       StackTraceElement[] stack = Thread.currentThread().getStackTrace();
