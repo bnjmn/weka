@@ -22,6 +22,7 @@
 package weka.classifiers.mlr.impl;
 
 import com.thoughtworks.xstream.XStream;
+import com.thoughtworks.xstream.security.NoTypePermission;
 import org.rosuda.REngine.REXP;
 import org.rosuda.REngine.REXPGenericVector;
 import org.rosuda.REngine.REXPString;
@@ -1068,6 +1069,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
       // now try and serialize the model
       XStream xs = new XStream();
+      xs.addPermission(NoTypePermission.NONE);
+      xs.allowTypeHierarchy(REXP.class);
       String xml = xs.toXML(serializedRModel);
       if (xml != null && xml.length() > 0) {
         m_serializedModel = new StringBuffer();
@@ -1094,6 +1097,8 @@ public class MLRClassifierImpl implements BatchPredictor, OptionHandler,
 
   protected void pushModelToR(RSession eng) throws Exception {
     XStream xs = new XStream();
+    xs.addPermission(NoTypePermission.NONE);
+    xs.allowTypeHierarchy(REXP.class);
     REXP model = (REXP) xs.fromXML(m_serializedModel.toString());
 
     eng.assign(this, "weka_r_model" + m_modelHash, model);

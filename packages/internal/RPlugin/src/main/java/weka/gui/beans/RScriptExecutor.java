@@ -78,7 +78,7 @@ import weka.gui.Logger;
  * <p>
  * 
  * Graphics in R can be captured by making use of the JavaGD graphics device for
- * R (http://stats.math.uni-augsburg.de/R/JavaGD/). The Weka RPlugin will
+ * R (https://cran.r-project.org/web/packages/JavaGD/index.html). The Weka RPlugin will
  * attempt to install this package for the user automatically - if this fails
  * for some reason then the package should be installed by the user from R via
  * install.packages("JavaGD"). The default size for graphics created in R via
@@ -209,7 +209,7 @@ public class RScriptExecutor extends JPanel implements BeanCommon, Visible,
       + "the user's R script. This *must* be the last command in the script. E.g:\n\n"
       + "data(iris)\niris\n\n"
       + "Graphics in R can be captured by making use of the JavaGD graphics device "
-      + "for R (http://stats.math.uni-augsburg.de/R/JavaGD/). The Weka RPlugin will "
+      + "for R (https://cran.r-project.org/web/packages/JavaGD/index.html). The Weka RPlugin will "
       + "attempt to install this package for the user automatically - if this fails "
       + "for some reason then the package should be installed by the user from R "
       + "via install.packages(\"JavaGD\"). The default size for graphics created in "
