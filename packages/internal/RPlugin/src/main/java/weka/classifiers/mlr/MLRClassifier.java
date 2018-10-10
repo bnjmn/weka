@@ -968,6 +968,9 @@ public class MLRClassifier extends RandomizableClassifier
 
   public void closeREngine() {
     try {
+      if (m_delegate == null) {
+        init();
+      }
       Method m =
         m_delegate.getClass().getDeclaredMethod("closeREngine", new Class[] {});
 
