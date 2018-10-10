@@ -1135,7 +1135,8 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
   protected static void saveClassifier(Classifier classifier, Instances template, String objectOutputFileName)
       throws Exception {
 
-    OutputStream os = new FileOutputStream(objectOutputFileName);
+    File f = new File(objectOutputFileName).getAbsoluteFile();
+    OutputStream os = new FileOutputStream(f);
     if (!(objectOutputFileName.endsWith(".xml") || (objectOutputFileName.endsWith(".koml") && KOML.isPresent()))) {
       if (objectOutputFileName.endsWith(".gz")) {
         os = new GZIPOutputStream(os);
@@ -1143,6 +1144,7 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
       objectOutputStream.writeObject(classifier);
       if (template != null) {
+        System.err.println(template);
         objectOutputStream.writeObject(template);
       }
       objectOutputStream.flush();
