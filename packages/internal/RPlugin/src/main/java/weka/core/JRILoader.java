@@ -80,12 +80,10 @@ public class JRILoader {
   /**
    * Mac-specific method to try to fix up location of libjvm.dylib in rJava.so.
    */
-  private static void fixUprJavaLibrary() throws Exception {
+  private static void fixUprJavaLibraryOnOSX() throws Exception {
 
     String osType = System.getProperty("os.name");
     if ((osType != null) && (osType.contains("Mac OS X"))) {
-
-      System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in rJava.so.");
 
       // Get name embedded in rJava.so
       String[] cmd = { // Need to use string array solution to make piping work
@@ -103,13 +101,15 @@ public class JRILoader {
           System.err.println(line);
         }
       } else {
+        String javaHome = System.getProperty("java.home");
         BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String firstLine = bf.readLine();
-        if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
+        if (firstLine.equals(javaHome + "/lib/server/libjvm.dylib")) {
           System.err.println("Location embedded in rJava.so seems to be correct!");
         } else {
+          System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in rJava.so.");
           p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
-                  System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
+                  javaHome + "/lib/server/libjvm.dylib " +
                   System.getProperty("r.libs.user") + "/rJava/libs/rJava.so");
           execResult = p.waitFor();
           if (execResult != 0) {
@@ -345,6 +345,14 @@ public class JRILoader {
       File rJavaF = new File(rLibsUser + File.separator + "rJava");
       if (rJavaF.exists()) {
         System.err.println("Found rJava installed in " + rJavaF.getPath());
+
+        try {
+          fixUprJavaLibraryOnOSX();
+        } catch (Exception ex) {
+          System.err.println("Failed to fix up rJava.so.");
+          s_rHome = null;
+          return false;
+        }
       } else {
         System.err.println("Did not find rJava installed in " + rJavaF.getPath() + " -- trying to install.");
         try {
@@ -378,9 +386,11 @@ public class JRILoader {
         }
 
         try {
-          fixUprJavaLibrary();
+          fixUprJavaLibraryOnOSX();
         } catch (Exception ex) {
           System.err.println("Failed to fix up rJava.so.");
+          s_rHome = null;
+          return false;
         }
       }
     }

@@ -392,10 +392,11 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
     s_sessionSingleton.dropSession(requester);
   }
 
+
   /**
    * Mac-specific method to try to fix up location of libjvm.dylib in native Java-related library.
    */
-  protected void fixUpJavaRLibrary(String name) throws Exception {
+  private static void fixUpJavaRLibraryOnOSX(String name) throws Exception {
 
     String osType = System.getProperty("os.name");
     if ((osType != null) && (osType.contains("Mac OS X"))) {
@@ -416,29 +417,29 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
           System.err.println(line);
         }
       } else {
+        String javaHome = System.getProperty("java.home");
         BufferedReader bf = new BufferedReader(new InputStreamReader(p.getInputStream()));
         String firstLine = bf.readLine();
-        if (firstLine != null) {
-          if (bf.equals(System.getProperty("java.home") + "/lib/server/libjvm.dylib")) {
-            System.err.println("Location embedded in " + name + ".so seems to be correct!");
-          } else {
-            System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in " + name + ".so.");
-            p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
-                    System.getProperty("java.home") + "/lib/server/libjvm.dylib " +
-                    System.getProperty("r.libs.user") + "/" + name + "/libs/" + name + ".so");
-            execResult = p.waitFor();
-            if (execResult != 0) {
-              bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-              String line;
-              while ((line = bf.readLine()) != null) {
-                System.err.println(line);
-              }
+        if (firstLine.equals(javaHome + "/lib/server/libjvm.dylib")) {
+          System.err.println("Location embedded in " + name + ".so seems to be correct!");
+        } else {
+          System.err.println("Trying to use /usr/bin/install_name_tool to fix up location of libjvm.dylib in " + name + ".so");
+          p = Runtime.getRuntime().exec("/usr/bin/install_name_tool -change " + firstLine + " " +
+                  javaHome + "/lib/server/libjvm.dylib " +
+                  System.getProperty("r.libs.user") + "/" + name + "/libs/" + name + ".so");
+          execResult = p.waitFor();
+          if (execResult != 0) {
+            bf = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+            String line;
+            while ((line = bf.readLine()) != null) {
+              System.err.println(line);
             }
           }
         }
       }
     }
   }
+
 
   /**
    * Convenience method for getting R to load a named library.
@@ -460,17 +461,17 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
 
     try {
 
+      // Fix up library on macOS if necessary
+      try {
+        fixUpJavaRLibraryOnOSX(libraryName);
+      } catch (Exception ex) {
+        System.err.println("Something went wrong when trying to fix up Java R library.");
+      }
+
       // Now try to load library
       REXP result = parseAndEval(requester, "library(" + libraryName + ", logical.return = TRUE)");
       if (result.isLogical()) {
         if (!((REXPLogical) result).isTRUE()[0]) {
-
-          // Fix up library on macOS if necessary
-          try {
-            fixUpJavaRLibrary(libraryName);
-          } catch (Exception ex) {
-            System.err.println("Something went wrong when trying to fix up Java R library.");
-          }
           result = parseAndEval(requester, "library(" + libraryName + ", logical.return = TRUE)");
           if (result.isLogical()) {
             if (!((REXPLogical) result).isTRUE()[0]) {
