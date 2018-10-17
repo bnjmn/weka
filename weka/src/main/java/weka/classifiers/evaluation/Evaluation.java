@@ -1144,7 +1144,6 @@ public class Evaluation implements Summarizable, RevisionHandler, Serializable {
       ObjectOutputStream objectOutputStream = new ObjectOutputStream(os);
       objectOutputStream.writeObject(classifier);
       if (template != null) {
-        System.err.println(template);
         objectOutputStream.writeObject(template);
       }
       objectOutputStream.flush();
