@@ -464,8 +464,7 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       // Fix up library on macOS if necessary
       try {
         fixUpJavaRLibraryOnOSX(libraryName);
-      } catch (Exception ex) {
-        System.err.println("Something went wrong when trying to fix up Java R library.");
+      } catch (Exception ex) { // Stay silent here
       }
 
       // Now try to load library
