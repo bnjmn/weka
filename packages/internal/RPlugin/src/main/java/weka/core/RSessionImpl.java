@@ -87,6 +87,9 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
   private static JavaGDNotifier s_javaGD = JavaGDOffscreenRenderer
     .getJavaGDNotifier();
 
+  /** The CWD when an R session is acquired. We reset the CWD to this when the R session is dropped. */
+  private static String s_CWD;
+
   /**
    * Create a new REngine instance to use (if necessary)
    */
@@ -319,6 +322,9 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
       }
     }
 
+    // Back up current working directory
+    s_CWD = s_engine.parseAndEval("getwd()").asString();
+
     if (s_sessionHolder == requester) {
       return this;
     }
@@ -352,6 +358,13 @@ public class RSessionImpl implements RSessionAPI, REngineCallbacks,
           // make sure that the perspective gets the image
           s_javaGD.notifyListeners();
         }
+      }
+
+      // Reset current working directory to value that was present when session was acquired
+      try {
+        s_engine.parseAndEval("setwd(\"" + s_CWD + "\")");
+      } catch (Exception ex) {
+        System.err.println("Failed to reset current working directory to " + s_CWD);
       }
 
       s_sessionHolder = null;
