@@ -15,8 +15,8 @@ An overview of the libraries used in Weka:
   Version:  1.6.0
   URL:      http://jflex.de/
 
-- commons-compress-1.10.jar
-  Version: 1.10
+- commons-compress-1.18.jar
+  Version: 1.18
   URL: https://commons.apache.org/proper/commons-compress/
 
 - bounce.jar (contains just the authentication dialog from the bounce project)
