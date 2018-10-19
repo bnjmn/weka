@@ -1006,7 +1006,8 @@ public class MLRClassifier extends RandomizableClassifier
 
   @Override
   public void postExecution() {
-    if (System.getProperty("r.shutdown", "false").equalsIgnoreCase("true")) {
+     if (System.getProperty("r.shutdown", "true").equalsIgnoreCase("true") &&
+            System.getProperty("weka.started.via.GUIChooser").equals("false")) {
       closeREngine();
     }
   }
