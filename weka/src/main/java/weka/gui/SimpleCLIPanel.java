@@ -1174,6 +1174,16 @@ public class SimpleCLIPanel extends ScriptingPanel implements ActionListener,
    * @param args ignored
    */
   public static void main(String[] args) {
+
+
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+            "Logging started");
+
+    LookAndFeel.setLookAndFeel();
+    // make sure that packages are loaded and the GenericPropertiesCreator
+    // executes to populate the lists correctly
+    weka.gui.GenericObjectEditor.determineClasses();
+
     showPanel(new SimpleCLIPanel(), args);
   }
 }
