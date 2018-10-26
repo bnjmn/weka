@@ -335,7 +335,7 @@ public class LDA extends AbstractClassifier implements WeightedInstancesHandler 
         result.append("Mean vector:\n\n");
         for (int j = 0; j < m_Data.numAttributes(); j++) {
           if (j != m_Data.classIndex()) {
-            result.append(m_Data.attribute(index).name() + ": " +
+            result.append(m_Data.attribute(j).name() + ": " +
                     Utils.doubleToString(m_Means[i][index], getNumDecimalPlaces()) + "\n");
             index++;
           }
