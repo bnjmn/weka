@@ -50,23 +50,22 @@ import weka.filters.SupervisedFilter;
 /**
  * <!-- globalinfo-start --> Rescales the attributes in a classification problem
  * based on their discriminative power. This is useful as a pre-processing step
- * for learning algorithms such as the k-nearest-neighbour method, toreplace
+ * for learning algorithms such as the k-nearest-neighbour method, to replace
  * simple normalization. Each attribute is rescaled by multiplying it with a
- * learned weight.All attributes excluding the class are assumed to be numeric
- * and missing values are not permitted.<br/>
+ * learned weight. All attributes excluding the class are assumed to be numeric
+ * and missing values are not permitted.<br/><br/>
  * The attribute weights are learned by taking the original labeled dataset with
  * N instances and creating a new dataset with N*K instances, where K is the
- * number of neighbours selected. Each instance in the original dataset is
- * paired with its K nearest neighbours, creating K pairs, and an instance in
+ * number of neighbours selected. To this end, each instance in the original dataset is
+ * paired with its K nearest neighbours, creating K pairs. Then, an instance in
  * the new dataset is created for each pair, with the same number of attributes
- * as in the original data. For all attributes excluding the class, in each new
- * instance, the attribute's value is set to the absolute difference between the
- * corresponding attribute values in the pair of original instances. The new
- * instance is then labeled based on whether the two instances in the pair have
- * the same class label in the original data or a different one, yielding a
+ * as in the original data. An attribute's value in this new instance is set to
+ * the absolute difference between the corresponding attribute values in the pair of original
+ * instances. The new instance's label depends on whether the two instances in the pair have
+ * the same class label or not, yielding a
  * two-class classification problem. A logistic regression model with
  * non-negative coefficients is learned from this data and the resulting
- * coefficients are used as weights to rescale the original data.<br/>
+ * coefficients are used as weights to rescale the original data.<br/><br/>
  * This process assumes that distance in the original space is measured using
  * Manhattan distance because the absolute difference is taken between attribute
  * values. The method can optionally be used to learn weights for a Euclidean
@@ -145,19 +144,19 @@ public class SupervisedAttributeScaler extends SimpleBatchFilter implements
   @Override
   public String globalInfo() {
     return "Rescales the attributes in a classification problem based on their discriminative power. This is "
-      + "useful as a pre-processing step for learning algorithms such as the k-nearest-neighbour method, to"
-      + "replace simple normalization. Each attribute is rescaled by multiplying it with a learned weight."
-      + "All attributes excluding the class are assumed to be numeric and missing values are not permitted.\n"
+      + "useful as a pre-processing step for learning algorithms such as the k-nearest-neighbour method, to "
+      + "replace simple normalization. Each attribute is rescaled by multiplying it with a learned weight. "
+      + "All attributes excluding the class are assumed to be numeric and missing values are not permitted.\n\n"
       + "The attribute weights are learned by taking the original labeled dataset with N instances and "
-      + "creating a new dataset with N*K instances, where K is the number of neighbours selected. "
-      + "Each instance in the original dataset is paired with its K nearest neighbours, creating K pairs, and an instance "
+      + "creating a new dataset with N*K instances, where K is the number of neighbours selected. To this end, "
+      + "each instance in the original dataset is paired with its K nearest neighbours, creating K pairs. Then, an instance "
       + "in the new dataset is created for each pair, with the same number of attributes as in the original "
-      + "data. For all attributes excluding the class, in each new instance, the attribute's value is set to the "
+      + "data. An attribute's value in this new instance is set to the "
       + "absolute difference between the corresponding attribute values in the pair of original instances. "
-      + "The new instance is then labeled based on whether the two instances in the pair have the same class "
-      + "label in the original data or a different one, yielding a two-class classification problem. A "
+      + "The new instance's label depends on whether the two instances in the pair have the same class "
+      + "label or not, yielding a two-class classification problem. A "
       + "logistic regression model with non-negative coefficients is learned from this data and "
-      + "the resulting coefficients are used as weights to rescale the original data.\n"
+      + "the resulting coefficients are used as weights to rescale the original data.\n\n"
       + "This process assumes that distance in the original space is measured using Manhattan distance "
       + "because the absolute difference is taken between attribute values. The method can optionally "
       + "be used to learn weights for a Euclidean distance. In this case, squared differences are "
