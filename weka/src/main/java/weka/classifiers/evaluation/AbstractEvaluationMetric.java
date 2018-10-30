@@ -46,7 +46,7 @@ public abstract class AbstractEvaluationMetric implements Serializable {
    * 
    * @return a list of plugin metrics or null if there are no plugin metrics
    */
-  public static ArrayList<AbstractEvaluationMetric> getPluginMetrics() {
+  public synchronized static ArrayList<AbstractEvaluationMetric> getPluginMetrics() {
     ArrayList<AbstractEvaluationMetric> pluginMetricsList = null;
     Set<String> pluginMetrics =
       PluginManager.getPluginNamesOfType(AbstractEvaluationMetric.class
