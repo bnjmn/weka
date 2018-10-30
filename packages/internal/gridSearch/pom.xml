@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>gridSearch</artifactId>
-  <version>1.0.12-SNAPSHOT</version>
+  <version>1.0.12</version>
   <packaging>jar</packaging>
 
   <name>gridSearch</name>
@@ -61,9 +61,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/gridSearch</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/gridSearch</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/internal/gridSearch</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/gridSearch-1.0.12</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/gridSearch-1.0.12</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/gridSearch-1.0.12</url>
   </scm>
 
   <profiles>
