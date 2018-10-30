@@ -15,7 +15,7 @@
 
 /*
  * GridSearch.java
- * Copyright (C) 2006-2010 University of Waikato, Hamilton, New Zealand
+ * Copyright (C) 2006-2018 University of Waikato, Hamilton, New Zealand
  */
 
 package weka.classifiers.meta;
@@ -79,7 +79,7 @@ import weka.filters.unsupervised.instance.Resample;
  * well.<br/>
  * <br/>
  * The best classifier setup can be accessed after the buildClassifier call via
- * the getBestClassifier methods.<br/>
+ * the getBestClassifier methods.<br/><br/>
  * Note: with -num-slots/numExecutionSlots you can specify how many setups are
  * evaluated in parallel, taking advantage of multi-cpu/core architectures.
  * <p/>
@@ -360,15 +360,12 @@ import weka.filters.unsupervised.instance.Resample;
  * <b>Optimizing SMO with RBFKernel (C and gamma)</b>
  * <ul>
  * <li>Set the evaluation to <i>Accuracy</i>.</li>
- * <li>Set the filter to <code>weka.filters.AllFilter</code> since we don't need
- * any special data processing and we don't optimize the filter in this case
- * (data gets always passed through filter!).</li>
  * <li>Set <code>weka.classifiers.functions.SMO</code> as classifier with
  * <code>weka.classifiers.functions.supportVector.RBFKernel</code> as kernel.</li>
- * <li>Set the XProperty to "classifier.c", XMin to "1", XMax to "16", XStep to
+ * <li>Set the XProperty to "C", XMin to "1", XMax to "16", XStep to
  * "1" and the XExpression to "I". This will test the "C" parameter of SMO for
  * the values from 1 to 16.</li>
- * <li>Set the YProperty to "classifier.kernel.gamma", YMin to "-5", YMax to
+ * <li>Set the YProperty to "kernel.gamma", YMin to "-5", YMax to
  * "2", YStep to "1" YBase to "10" and YExpression to "pow(BASE,I)". This will
  * test the gamma of the RBFKernel with the values 10^-5, 10^-4,..,10^2.</li>
  * </ul>
@@ -378,16 +375,17 @@ import weka.filters.unsupervised.instance.Resample;
  * default setup</b>
  * <ul>
  * <li>Set the evaluation to <i>Correlation coefficient</i>.</li>
- * <li>Set the filter to
+ * <li>Set the classifier to <code>weka.classifiers.meta.FilteredClassifier</code>.</li>
+ * <li>Set the filter in the classifier to
  * <code>weka.filters.supervised.attribute.PLSFilter</code>.</li>
- * <li>Set <code>weka.classifiers.functions.LinearRegression</code> as
- * classifier and use no attribute selection and no elimination of colinear
+ * <li>Set the base classifier in FilteredClassifier to <code>weka.classifiers.functions.LinearRegression</code>
+ * and use no attribute selection and no elimination of colinear
  * attributes.</li>
  * <li>Set the XProperty to "filter.numComponents", XMin to "5", XMax to "20"
  * (this depends heavily on your dataset, should be no more than the number of
  * attributes!), XStep to "1" and XExpression to "I". This will test the number
  * of components the PLSFilter will produce from 5 to 20.</li>
- * <li>Set the YProperty to "classifier.ridge", XMin to "-10", XMax to "5",
+ * <li>Set the YProperty to "classifier.ridge", YMin to "-10", YMax to "5",
  * YStep to "1" and YExpression to "pow(BASE,I)". This will try ridge parameters
  * from 10^-10 to 10^5.</li>
  * </ul>
@@ -399,7 +397,7 @@ import weka.filters.unsupervised.instance.Resample;
  * <li>Turn the <i>debug</i> flag on in order to see some progress output in the
  * console</li>
  * <li>If you want to view the fitness landscape that GridSearch explores,
- * select a <i>log file</i>. This log will then contain Gnuplot data and script
+ * select a <i>log file</i>. This log will then contain Gnuplot data and a script
  * block for viewing the landscape. Just copy paste those blocks into files
  * named accordingly and run Gnuplot with them.</li>
  * </ul>
@@ -2343,7 +2341,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    *         gui
    */
   public String globalInfo() {
-    return "Performs a grid search of parameter pairs for a classifier  and chooses the best "
+    return "Performs a grid search of parameter pairs for a classifier and chooses the best "
       + "pair found for the actual predicting.\n\n"
       + "The initial grid is worked on with 2-fold CV to determine the values "
       + "of the parameter pairs for the selected type of evaluation (e.g., "
@@ -2360,7 +2358,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       + "and booleans (0 is false, otherwise true). float, char and long are "
       + "supported as well.\n\n"
       + "The best classifier setup can be accessed after the buildClassifier "
-      + "call via the getBestClassifier methods.\n"
+      + "call via the getBestClassifier methods.\n\n"
       + "Note: with -num-slots/numExecutionSlots you can specify how many "
       + "setups are evaluated in parallel, taking advantage of multi-cpu/core "
       + "architectures.";
@@ -3045,14 +3043,12 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
       || cap.hasDependency(Capability.UNARY_CLASS);
 
     if ((m_Evaluation == EVALUATION_CC) && !numeric) {
-      throw new IllegalArgumentException(
-        "Classifier needs to handle numeric class for chosen type of evaluation!");
+      System.err.println("WARNING: Classifier needs to handle numeric class for chosen type of evaluation!");
     }
 
     if (((m_Evaluation == EVALUATION_ACC) || (m_Evaluation == EVALUATION_KAPPA) || (m_Evaluation == EVALUATION_WAUC))
       && !nominal) {
-      throw new IllegalArgumentException(
-        "Classifier needs to handle nominal class for chosen type of evaluation!");
+      System.err.println("Classifier needs to handle nominal class for chosen type of evaluation!");
     }
 
     super.setClassifier(newClassifier);
@@ -3581,12 +3577,11 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
    */
   public String numExecutionSlotsTipText() {
     return "The number of execution slots (threads) to use for "
-      + "constructing the ensemble.";
+      + "finding optimal parameters.";
   }
 
   /**
-   * Set the number of execution slots (threads) to use for building the members
-   * of the ensemble.
+   * Set the number of execution slots (threads) to use for finding optimal parameters.
    * 
    * @param value the number of slots to use.
    */
@@ -3597,8 +3592,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   }
 
   /**
-   * Get the number of execution slots (threads) to use for building the members
-   * of the ensemble.
+   * Get the number of execution slots (threads) to use for finding optimal parameters.
    * 
    * @return the number of slots to use
    */
