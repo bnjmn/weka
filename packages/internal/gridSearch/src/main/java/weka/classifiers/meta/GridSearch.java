@@ -2208,7 +2208,7 @@ public class GridSearch extends RandomizableSingleClassifierEnhancer implements
   static {
     try {
       GRID_SEARCH_PROPS =
-        Utils.readProperties("weka/classifiers/meta/GridSearch.props");
+        Utils.readProperties("weka/classifiers/meta/GridSearch.props", GridSearch.class.getClassLoader());
     } catch (Exception ex) {
       ex.printStackTrace();
     }
