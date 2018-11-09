@@ -93,73 +93,78 @@ import weka.core.WekaEnumeration;
  * @version $Revision$
  */
 
-public class LADTree extends AbstractClassifier 
-  implements Drawable, IterativeClassifier, 
+public class LADTree extends AbstractClassifier
+  implements Drawable, IterativeClassifier,
              AdditionalMeasureProducer, TechnicalInformationHandler {
-  
+
   /**
    * For serialization
    */
   private static final long serialVersionUID = -4940716114518300302L;
-  
+
   // Constant from LogitBoost
   protected double Z_MAX = 4;
-  
+
   // Number of classes
   protected int m_numOfClasses;
-  
+
   // Instances as reference instances
   protected ReferenceInstances m_trainInstances;
-  
+
   // Root of the tree
   protected PredictionNode m_root = null;
-  
+
   // To keep track of the order in which splits are added
   protected int m_lastAddedSplitNum = 0;
-  
+
   // Indices for numeric attributes
   protected int[] m_numericAttIndices;
-  
+
   // Variables to keep track of best options
   protected double m_search_smallestLeastSquares;
   protected PredictionNode m_search_bestInsertionNode;
   protected Splitter m_search_bestSplitter;
   protected Instances m_search_bestPathInstances;
-  
+
   // A collection of splitter nodes
   protected ArrayList<Splitter> m_staticPotentialSplitters2way;
-  
+
   // statistics
   protected int m_nodesExpanded = 0;
   protected int m_examplesCounted = 0;
-  
+
   // options
   protected int m_boostingIterations = 10;
-  
+
+  /** The  number of boosting iterations performed in this session of iterating */
+  protected int m_numBoostItsPerformedThisSession;
+
+  protected boolean m_resume;
+
   /**
    * Returns a string describing classifier
-   * 
+   *
    * @return a description suitable for displaying in the explorer/experimenter
    *         gui
    */
   public String globalInfo() {
-    
+
     return "Class for generating a multi-class alternating decision tree using "
       + "the LogitBoost strategy. For more info, see\n\n"
       + getTechnicalInformation().toString();
   }
-  
+
   /**
    * Returns an instance of a TechnicalInformation object, containing detailed
    * information about the technical background of this class, e.g., paper
    * reference or book this class is based on.
-   * 
+   *
    * @return the technical information about this class
    */
   @Override
   public TechnicalInformation getTechnicalInformation() {
     TechnicalInformation result;
-    
+
     result = new TechnicalInformation(Type.INPROCEEDINGS);
     result
       .setValue(
@@ -170,34 +175,34 @@ public class LADTree extends AbstractClassifier
     result.setValue(Field.YEAR, "2001");
     result.setValue(Field.PAGES, "161-172");
     result.setValue(Field.PUBLISHER, "Springer");
-    
+
     return result;
   }
-  
+
   /** helper classes ********************************************************************/
-  
+
   protected class LADInstance extends DenseInstance {
 
     /** Added ID to avoid warning */
     private static final long serialVersionUID = -9005560077243466915L;
-    
+
     public double[] fVector;
     public double[] wVector;
     public double[] pVector;
     public double[] zVector;
-    
+
     public LADInstance(Instance instance) {
-      
+
       super(instance);
-      
+
       setDataset(instance.dataset()); // preserve dataset
-      
+
       // set up vectors
       fVector = new double[m_numOfClasses];
       wVector = new double[m_numOfClasses];
       pVector = new double[m_numOfClasses];
       zVector = new double[m_numOfClasses];
-      
+
       // set initial probabilities
       double initProb = 1.0 / (m_numOfClasses);
       for (int i = 0; i < m_numOfClasses; i++) {
@@ -206,20 +211,20 @@ public class LADTree extends AbstractClassifier
       updateZVector();
       updateWVector();
     }
-    
+
     public void updateWeights(double[] fVectorIncrement) {
       for (int i = 0; i < fVector.length; i++) {
         fVector[i] += fVectorIncrement[i];
       }
       updateVectors(fVector);
     }
-    
+
     public void updateVectors(double[] newFVector) {
       updatePVector(newFVector);
       updateZVector();
       updateWVector();
     }
-    
+
     public void updatePVector(double[] newFVector) {
       double max = newFVector[Utils.maxIndex(newFVector)];
       for (int i = 0; i < pVector.length; i++) {
@@ -227,15 +232,15 @@ public class LADTree extends AbstractClassifier
       }
       Utils.normalize(pVector);
     }
-    
+
     public void updateWVector() {
       for (int i = 0; i < wVector.length; i++) {
         wVector[i] = (yVector(i) - pVector[i]) / zVector[i];
       }
     }
-    
+
     public void updateZVector() {
-      
+
       for (int i = 0; i < zVector.length; i++) {
         if (yVector(i) == 1) {
           zVector[i] = 1.0 / pVector[i];
@@ -250,11 +255,11 @@ public class LADTree extends AbstractClassifier
         }
       }
     }
-    
+
     public double yVector(int index) {
       return (index == (int) classValue() ? 1.0 : 0.0);
     }
-    
+
     @Override
     public Object copy() {
       LADInstance copy = new LADInstance((Instance) super.copy());
@@ -264,10 +269,10 @@ public class LADTree extends AbstractClassifier
       System.arraycopy(zVector, 0, copy.zVector, 0, zVector.length);
       return copy;
     }
-    
+
     @Override
     public String toString() {
-      
+
       StringBuffer text = new StringBuffer();
       text.append(" * F(");
       for (int i = 0; i < fVector.length; i++) {
@@ -292,40 +297,40 @@ public class LADTree extends AbstractClassifier
       }
       text.append(")");
       return super.toString() + text.toString();
-      
+
     }
   }
-  
+
   protected class PredictionNode implements Serializable, Cloneable {
-    
+
     /** Added ID to avoid warning */
     private static final long serialVersionUID = -8286364217836877790L;
-    
+
     private final double[] values;
     private final ArrayList<Splitter> children; // any number of splitter nodes
-    
+
     public PredictionNode(double[] newValues) {
       values = new double[m_numOfClasses];
       setValues(newValues);
       children = new ArrayList<Splitter>();
     }
-    
+
     public void setValues(double[] newValues) {
       System.arraycopy(newValues, 0, values, 0, m_numOfClasses);
     }
-    
+
     public double[] getValues() {
       return values;
     }
-    
+
     public ArrayList<Splitter> getChildren() {
       return children;
     }
-    
+
     public Enumeration<Splitter> children() {
       return new WekaEnumeration<Splitter>(children);
     }
-    
+
     public void addChild(Splitter newChild) { // merges, adds a clone (deep
                                               // copy)
       Splitter oldEqual = null;
@@ -350,7 +355,7 @@ public class LADTree extends AbstractClassifier
         }
       }
     }
-    
+
     @Override
     public Object clone() { // does a deep copy (recurses through tree)
       PredictionNode clone = new PredictionNode(values);
@@ -361,7 +366,7 @@ public class LADTree extends AbstractClassifier
       }
       return clone;
     }
-    
+
     public void merge(PredictionNode merger) {
       // need to merge linear models here somehow
       for (int i = 0; i < m_numOfClasses; i++) {
@@ -372,59 +377,59 @@ public class LADTree extends AbstractClassifier
       }
     }
   }
-  
+
   /** splitter classes ******************************************************************/
-  
+
   protected abstract class Splitter implements Serializable, Cloneable {
-    
+
     /** Added ID to avoid warning */
     private static final long serialVersionUID = -3647262875989478674L;
-    
+
     protected int attIndex;
     public int orderAdded;
-    
+
     public abstract int getNumOfBranches();
-    
+
     public abstract int branchInstanceGoesDown(Instance i);
-    
+
     public abstract Instances instancesDownBranch(int branch,
       Instances sourceInstances);
 
     public abstract String attributeString();
-    
+
     public abstract String comparisonString(int branchNum);
-    
+
     public abstract boolean equalTo(Splitter compare);
-    
+
     public abstract void setChildForBranch(int branchNum,
       PredictionNode childPredictor);
-    
+
     public abstract PredictionNode getChildForBranch(int branchNum);
-    
+
     @Override
     public abstract Object clone();
   }
-  
+
   protected class TwoWayNominalSplit extends Splitter {
-    
+
     /** Added ID to avoid warning */
     private static final long serialVersionUID = 8710802611812576635L;
-    
+
     // private int attIndex;
     private final int trueSplitValue;
     private final PredictionNode[] children;
-    
+
     public TwoWayNominalSplit(int _attIndex, int _trueSplitValue) {
       attIndex = _attIndex;
       trueSplitValue = _trueSplitValue;
       children = new PredictionNode[2];
     }
-    
+
     @Override
     public int getNumOfBranches() {
       return 2;
     }
-    
+
     @Override
     public int branchInstanceGoesDown(Instance inst) {
       if (inst.isMissing(attIndex)) {
@@ -435,7 +440,7 @@ public class LADTree extends AbstractClassifier
         return 1;
       }
     }
-    
+
     @Override
     public Instances instancesDownBranch(int branch, Instances instances) {
       ReferenceInstances filteredInstances = new ReferenceInstances(instances,
@@ -466,7 +471,7 @@ public class LADTree extends AbstractClassifier
       }
       return filteredInstances;
     }
-    
+
     @Override
     public String attributeString() {
       return m_trainInstances.attribute(attIndex).name();
@@ -482,7 +487,7 @@ public class LADTree extends AbstractClassifier
           .value(trueSplitValue == 0 ? 1 : 0)));
       }
     }
-    
+
     @Override
     public boolean equalTo(Splitter compare) {
       if (compare instanceof TwoWayNominalSplit) { // test object type
@@ -492,12 +497,12 @@ public class LADTree extends AbstractClassifier
         return false;
       }
     }
-    
+
     @Override
     public void setChildForBranch(int branchNum, PredictionNode childPredictor) {
       children[branchNum] = childPredictor;
     }
-    
+
     @Override
     public PredictionNode getChildForBranch(int branchNum) {
       return children[branchNum];
@@ -516,27 +521,27 @@ public class LADTree extends AbstractClassifier
       return clone;
     }
   }
-  
+
   protected class TwoWayNumericSplit extends Splitter implements Cloneable {
-    
+
     /** Added ID to avoid warning */
     private static final long serialVersionUID = 3552224905046975032L;
-    
+
     // private int attIndex;
     private final double splitPoint;
     private final PredictionNode[] children;
-    
+
     public TwoWayNumericSplit(int _attIndex, double _splitPoint) {
       attIndex = _attIndex;
       splitPoint = _splitPoint;
       children = new PredictionNode[2];
     }
-    
+
     @Override
     public int getNumOfBranches() {
       return 2;
     }
-    
+
     @Override
     public int branchInstanceGoesDown(Instance inst) {
       if (inst.isMissing(attIndex)) {
@@ -576,12 +581,12 @@ public class LADTree extends AbstractClassifier
       }
       return filteredInstances;
     }
-    
+
     @Override
     public String attributeString() {
       return m_trainInstances.attribute(attIndex).name();
     }
-    
+
     @Override
     public String comparisonString(int branchNum) {
       return ((branchNum == 0 ? "< " : ">= ") + Utils.doubleToString(
@@ -623,65 +628,81 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Sets up the tree ready to be trained.
-   * 
+   *
    * @param instances the instances to train the tree with
    * @exception Exception if training data is unsuitable
    */
   public void initializeClassifier(Instances instances) throws Exception {
 
-    // clear stats
-    m_nodesExpanded = 0;
-    m_examplesCounted = 0;
-    m_lastAddedSplitNum = 0;
+    m_numBoostItsPerformedThisSession = 0;
 
-    m_numOfClasses = instances.numClasses();
+    if (m_trainInstances == null || m_trainInstances.numInstances() == 0) {
+      // clear stats
+      m_nodesExpanded = 0;
+      m_examplesCounted = 0;
+      m_lastAddedSplitNum = 0;
 
-    // make sure training data is suitable
-    if (instances.checkForStringAttributes()) {
-      throw new Exception("Can't handle string attributes!");
-    }
-    if (!instances.classAttribute().isNominal()) {
-      throw new Exception("Class must be nominal!");
-    }
+      m_numOfClasses = instances.numClasses();
 
-    // create training set (use LADInstance class)
-    m_trainInstances = new ReferenceInstances(instances,
-      instances.numInstances());
-    for (Instance instance : instances) {
-      Instance inst = instance;
-      if (!inst.classIsMissing()) {
-        LADInstance adtInst = new LADInstance(inst);
-        m_trainInstances.addReference(adtInst);
-        adtInst.setDataset(m_trainInstances);
+      // make sure training data is suitable
+      if (instances.checkForStringAttributes()) {
+        throw new Exception("Can't handle string attributes!");
       }
+      if (!instances.classAttribute().isNominal()) {
+        throw new Exception("Class must be nominal!");
+      }
+
+      // create training set (use LADInstance class)
+      m_trainInstances = new ReferenceInstances(instances, instances.numInstances());
+      for (Instance instance : instances) {
+        Instance inst = instance;
+        if (!inst.classIsMissing()) {
+          LADInstance adtInst = new LADInstance(inst);
+          m_trainInstances.addReference(adtInst);
+          adtInst.setDataset(m_trainInstances);
+        }
+      }
+
+      // create the root prediction node
+      m_root = new PredictionNode(new double[m_numOfClasses]);
+
+      // pre-calculate what we can
+      generateStaticPotentialSplittersAndNumericIndices();
     }
-
-    // create the root prediction node
-    m_root = new PredictionNode(new double[m_numOfClasses]);
-
-    // pre-calculate what we can
-    generateStaticPotentialSplittersAndNumericIndices();
   }
 
-  public boolean next() throws Exception {
+  /**
+   * Performs one iteration.
+   *
+   * @exception Exception if this iteration fails
+   */
+  @Override public boolean next() throws Exception {
+    if (m_numBoostItsPerformedThisSession >= m_boostingIterations) {
+      return false;
+    }
+
     boost();
+    m_numBoostItsPerformedThisSession++;
     return true;
   }
 
-  public void done() throws Exception {
-    m_staticPotentialSplitters2way = null;
-    m_numericAttIndices = null;
+  @Override public void done() throws Exception {
+    if (!m_resume) {
+      m_staticPotentialSplitters2way = null;
+      m_numericAttIndices = null;
+      m_trainInstances = new ReferenceInstances(m_trainInstances, 0);
+    }
   }
 
   /**
    * Performs a single boosting iteration. Will add a new splitter node and two
    * prediction nodes to the tree (unless merging takes place).
-   * 
+   *
    * @exception Exception if try to boost without setting up tree first
    */
   private void boost() throws Exception {
 
-    if (m_trainInstances == null) {
+    if (m_trainInstances == null || m_trainInstances.numInstances() == 0) {
       throw new Exception("Trying to boost with no training data");
     }
 
@@ -733,7 +754,7 @@ public class LADTree extends AbstractClassifier
    * Generates the m_staticPotentialSplitters2way vector to contain all possible
    * nominal splits, and the m_numericAttIndices array to index the numeric
    * attributes in the training data.
-   * 
+   *
    */
   private void generateStaticPotentialSplittersAndNumericIndices() {
 
@@ -767,7 +788,7 @@ public class LADTree extends AbstractClassifier
   /**
    * Performs a search for the best test (splitter) to add to the tree, by
    * looking for the largest weight change.
-   * 
+   *
    * @exception Exception if search fails
    */
   private void searchForBestTest() throws Exception {
@@ -784,7 +805,7 @@ public class LADTree extends AbstractClassifier
    * Recursive function that carries out search for the best test (splitter) to
    * add to this part of the tree, by looking for the largest weight change.
    * Will try 2-way and/or multi-way splits depending on the current state.
-   * 
+   *
    * @param currentNode the root of the subtree to be searched, and the current
    *          node being considered as parent of a new split
    * @param instances the instances that apply at this node
@@ -823,7 +844,7 @@ public class LADTree extends AbstractClassifier
   /**
    * Continues general multi-class search by investigating every node in the
    * subtree under currentNode.
-   * 
+   *
    * @param currentNode the root of the subtree to be searched
    * @param instances the instances that apply at this node
    * @exception Exception if search fails
@@ -845,7 +866,7 @@ public class LADTree extends AbstractClassifier
    * split creates a weight change that is larger than has already been found it
    * will update the search information to record this as the best option so
    * far.
-   * 
+   *
    * @param split the splitter node to evaluate
    * @param currentNode the parent under which the split is to be considered
    * @param instances the instances that apply at this node
@@ -1101,7 +1122,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the class probability distribution for an instance.
-   * 
+   *
    * @param instance the instance to be classified
    * @return the distribution the tree generates for the instance
    */
@@ -1127,7 +1148,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the class prediction values (votes) for an instance.
-   * 
+   *
    * @param inst the instance
    * @param currentNode the root of the tree to get the values from
    * @param currentValues the current values before adding the values contained
@@ -1157,7 +1178,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns a description of the classifier.
-   * 
+   *
    * @return a string containing a description of the classifier
    */
   @Override
@@ -1179,7 +1200,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Traverses the tree, forming a string that describes it.
-   * 
+   *
    * @param currentNode the current node under investigation
    * @param level the current level in the tree
    * @return the string describing the subtree
@@ -1218,7 +1239,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns graph describing the tree.
-   * 
+   *
    * @return the graph of the tree in dotty format
    * @exception Exception if something goes wrong
    */
@@ -1234,7 +1255,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Traverses the tree, graphing each node.
-   * 
+   *
    * @param currentNode the currentNode under investigation
    * @param text the string built so far
    * @param splitOrder the order the parent splitter was added to the tree
@@ -1278,7 +1299,7 @@ public class LADTree extends AbstractClassifier
   /**
    * Returns the legend of the tree, describing how results are to be
    * interpreted.
-   * 
+   *
    * @return a string containing the legend of the classifier
    */
   public String legend() {
@@ -1320,7 +1341,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Gets the number of boosting iterations.
-   * 
+   *
    * @return the number of boosting iterations
    */
   public int getNumOfBoostingIterations() {
@@ -1330,7 +1351,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Sets the number of boosting iterations.
-   * 
+   *
    * @param b the number of boosting iterations to use
    */
   public void setNumOfBoostingIterations(int b) {
@@ -1339,8 +1360,41 @@ public class LADTree extends AbstractClassifier
   }
 
   /**
+   * Tool tip text for the resume property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model is effectively
+   * "frozen" and no further iterations can be performed
+   *
+   * @param resume true if the model is to be finalized after performing iterations
+   */
+  public void setResume(boolean resume) {
+    m_resume = resume;
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    return m_resume;
+  }
+
+
+  /**
    * Returns an enumeration describing the available options.
-   * 
+   *
    * @return an enumeration of all the available options
    */
   @Override
@@ -1349,6 +1403,9 @@ public class LADTree extends AbstractClassifier
     Vector<Option> newVector = new Vector<Option>(1);
     newVector.addElement(new Option("\tNumber of boosting iterations.\n"
       + "\t(Default = 10)", "B", 1, "-B <number of boosting iterations>"));
+    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
+      "resume", 0, "-resume"));
+
 
     newVector.addAll(Collections.list(super.listOptions()));
 
@@ -1358,11 +1415,11 @@ public class LADTree extends AbstractClassifier
   /**
    * Parses a given list of options. Valid options are:
    * <p>
-   * 
+   *
    * -B num <br>
    * Set the number of boosting iterations (default 10)
    * <p>
-   * 
+   *
    * @param options the list of options as an array of strings
    * @exception Exception if an option is not supported
    */
@@ -1374,6 +1431,8 @@ public class LADTree extends AbstractClassifier
       setNumOfBoostingIterations(Integer.parseInt(bString));
     }
 
+    setResume(Utils.getFlag("resume", options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -1381,7 +1440,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Gets the current settings of ADTree.
-   * 
+   *
    * @return an array of strings suitable for passing to setOptions()
    */
   @Override
@@ -1392,6 +1451,11 @@ public class LADTree extends AbstractClassifier
     options.add("-B");
     options.add("" + getNumOfBoostingIterations());
 
+
+    if (getResume()) {
+      options.add("-resume");
+    }
+
     Collections.addAll(options, super.getOptions());
 
     return options.toArray(new String[0]);
@@ -1401,7 +1465,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Calls measure function for tree size.
-   * 
+   *
    * @return the tree size
    */
   public double measureTreeSize() {
@@ -1411,7 +1475,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Calls measure function for leaf size.
-   * 
+   *
    * @return the leaf size
    */
   public double measureNumLeaves() {
@@ -1421,7 +1485,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Calls measure function for leaf size.
-   * 
+   *
    * @return the leaf size
    */
   public double measureNumPredictionLeaves() {
@@ -1431,7 +1495,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the number of nodes expanded.
-   * 
+   *
    * @return the number of nodes expanded during search
    */
   public double measureNodesExpanded() {
@@ -1441,7 +1505,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the number of examples "counted".
-   * 
+   *
    * @return the number of nodes processed during search
    */
   public double measureExamplesCounted() {
@@ -1451,7 +1515,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns an enumeration of the additional measure names.
-   * 
+   *
    * @return an enumeration of the measure names
    */
   @Override
@@ -1468,7 +1532,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the value of the named measure.
-   * 
+   *
    * @param additionalMeasureName the name of the measure to query for its value
    * @return the value of the named measure
    * @exception IllegalArgumentException if the named measure is not supported
@@ -1495,7 +1559,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the number of prediction nodes in a tree.
-   * 
+   *
    * @param root the root of the tree being measured
    * @return tree size in number of prediction nodes
    */
@@ -1516,7 +1580,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the number of leaf nodes in a tree.
-   * 
+   *
    * @param root the root of the tree being measured
    * @return tree leaf size in number of prediction nodes
    */
@@ -1538,7 +1602,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Returns the total number of nodes in a tree.
-   * 
+   *
    * @param root the root of the tree being measured
    * @return tree size in number of splitter + prediction nodes
    */
@@ -1562,7 +1626,7 @@ public class LADTree extends AbstractClassifier
 
   /**
    * Builds a classifier for a set of instances.
-   * 
+   *
    * @param instances the instances to train the classifier with
    * @exception Exception if something goes wrong
    */
@@ -1573,9 +1637,15 @@ public class LADTree extends AbstractClassifier
     initializeClassifier(instances);
 
     // build the tree
-    for (int T = 0; T < m_boostingIterations; T++) {
-      boost();
+    while (next()) {
     }
+
+    /*for (int T = 0; T < m_boostingIterations; T++) {
+      boost();
+    }*/
+
+    // clean up (if desired)
+    done();
   }
 
   public int predictiveError(Instances test) {

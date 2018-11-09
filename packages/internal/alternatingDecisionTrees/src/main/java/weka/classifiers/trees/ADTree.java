@@ -208,6 +208,9 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
   /** Option - the number of boosting iterations o perform */
   protected int m_boostingIterations = 10;
 
+  /** The  number of boosting iterations performed in this session of iterating */
+  protected int m_numBoostItsPerformedThisSession;
+
   /** Option - the search mode */
   protected int m_searchPath = 0;
 
@@ -251,55 +254,64 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
   @Override
   public void initializeClassifier(Instances instances) throws Exception {
 
-    // clear stats
-    m_nodesExpanded = 0;
-    m_examplesCounted = 0;
-    m_lastAddedSplitNum = 0;
+    m_numBoostItsPerformedThisSession = 0;
 
-    // prepare the random generator
-    m_random = instances.getRandomNumberGenerator(m_Seed);
+    if (m_trainInstances == null || m_trainInstances.numInstances() == 0) {
+      // clear stats
+      m_nodesExpanded = 0;
+      m_examplesCounted = 0;
+      m_lastAddedSplitNum = 0;
 
-    // create training set
-    m_trainInstances = new Instances(instances);
+      // prepare the random generator
+      m_random = instances.getRandomNumberGenerator(m_Seed);
 
-    // create positive/negative subsets
-    m_posTrainInstances = new ReferenceInstances(m_trainInstances,
-      m_trainInstances.numInstances());
-    m_negTrainInstances = new ReferenceInstances(m_trainInstances,
-      m_trainInstances.numInstances());
-    for (Instance instance : m_trainInstances) {
-      Instance inst = instance;
-      if ((int) inst.classValue() == 0) {
-        m_negTrainInstances.addReference(inst); // belongs in negative class
-      } else {
-        m_posTrainInstances.addReference(inst); // belongs in positive class
+      // create training set
+      m_trainInstances = new Instances(instances);
+
+      // create positive/negative subsets
+      m_posTrainInstances = new ReferenceInstances(m_trainInstances,
+        m_trainInstances.numInstances());
+      m_negTrainInstances = new ReferenceInstances(m_trainInstances,
+        m_trainInstances.numInstances());
+      for (Instance instance : m_trainInstances) {
+        Instance inst = instance;
+        if ((int) inst.classValue() == 0) {
+          m_negTrainInstances.addReference(inst); // belongs in negative class
+        } else {
+          m_posTrainInstances.addReference(inst); // belongs in positive class
+        }
       }
+      m_posTrainInstances.compactify();
+      m_negTrainInstances.compactify();
+
+      // create the root prediction node
+      double rootPredictionValue =
+        calcPredictionValue(m_posTrainInstances, m_negTrainInstances);
+      m_root = new PredictionNode(rootPredictionValue);
+
+      // pre-adjust weights
+      updateWeights(m_posTrainInstances, m_negTrainInstances,
+        rootPredictionValue);
+
+      // pre-calculate what we can
+      generateAttributeIndicesSingle();
     }
-    m_posTrainInstances.compactify();
-    m_negTrainInstances.compactify();
-
-    // create the root prediction node
-    double rootPredictionValue = calcPredictionValue(m_posTrainInstances,
-      m_negTrainInstances);
-    m_root = new PredictionNode(rootPredictionValue);
-
-    // pre-adjust weights
-    updateWeights(m_posTrainInstances, m_negTrainInstances, rootPredictionValue);
-
-    // pre-calculate what we can
-    generateAttributeIndicesSingle();
   }
 
   /**
    * Performs one iteration.
-   * 
-   * @param iteration the index of the current iteration (0-based)
+   *
    * @exception Exception if this iteration fails
    */
   @Override
   public boolean next() throws Exception {
 
+    if (m_numBoostItsPerformedThisSession >= m_boostingIterations) {
+      return false;
+    }
+
     boost();
+    m_numBoostItsPerformedThisSession++;
     return true;
   }
 
@@ -1019,6 +1031,40 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
   }
 
   /**
+   * Tool tip text for the resume property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model is effectively
+   * "frozen" and no further iterations can be performed. Note that this is basically
+   * an alias for saveInstanceData (as further boosting can only be done if
+   * the training data is retained).
+   *
+   * @param resume true if the model is to be finalized after performing iterations
+   */
+  public void setResume(boolean resume) {
+    m_saveInstanceData = resume;
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    return m_saveInstanceData;
+  }
+
+  /**
    * @return tip text for this property suitable for displaying in the
    *         explorer/experimenter gui
    */
@@ -1442,14 +1488,14 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
     initializeClassifier(instances);
 
     // build the tree
-    for (int T = 0; T < m_boostingIterations; T++) {
-      boost();
+    while (next()) {
     }
+    /* for (int T = 0; T < m_boostingIterations; T++) {
+      boost();
+    } */
 
     // clean up if desired
-    if (!m_saveInstanceData) {
-      done();
-    }
+    done();
   }
 
   /**
@@ -1460,12 +1506,14 @@ public class ADTree extends RandomizableClassifier implements OptionHandler,
   @Override
   public void done() {
 
-    m_trainInstances = new Instances(m_trainInstances, 0);
-    m_random = null;
-    m_numericAttIndices = null;
-    m_nominalAttIndices = null;
-    m_posTrainInstances = null;
-    m_negTrainInstances = null;
+    if (!m_saveInstanceData) {
+      m_trainInstances = new Instances(m_trainInstances, 0);
+      m_random = null;
+      m_numericAttIndices = null;
+      m_nominalAttIndices = null;
+      m_posTrainInstances = null;
+      m_negTrainInstances = null;
+    }
   }
 
   /**
