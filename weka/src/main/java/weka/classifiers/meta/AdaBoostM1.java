@@ -26,6 +26,7 @@ import java.util.Enumeration;
 import java.util.Random;
 import java.util.Vector;
 
+import weka.classifiers.AbstractClassifier;
 import weka.classifiers.Classifier;
 import weka.classifiers.Evaluation;
 import weka.classifiers.RandomizableIteratedSingleClassifierEnhancer;
@@ -132,7 +133,8 @@ import weka.core.WeightedInstancesHandler;
  * @version $Revision$
  */
 public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
-  implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler, IterativeClassifier {
+  implements WeightedInstancesHandler, Sourcable, TechnicalInformationHandler,
+  IterativeClassifier {
 
   /** for serialization */
   static final long serialVersionUID = -1178107808933117974L;
@@ -145,6 +147,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /** The number of successfully generated base classifiers. */
   protected int m_NumIterationsPerformed;
+
+  /** Number of iterations performed in this session of iterating */
+  protected int m_NumItsThisSession;
 
   /** Weight Threshold. The percentage of weight mass used in training */
   protected int m_WeightThreshold = 100;
@@ -163,6 +168,12 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
   /** Random number generator to be used for resampling */
   protected Random m_RandomInstance;
+
+  /**
+   * Whether to allow training to continue at a later point after the initial
+   * model is built.
+   */
+  protected boolean m_resume;
 
   /**
    * Constructor.
@@ -279,6 +290,9 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     newVector.addElement(new Option("\tUse resampling for boosting.", "Q", 0,
       "-Q"));
 
+    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
+      "resume", 0, "-resume"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -356,6 +370,8 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     setUseResampling(Utils.getFlag('Q', options));
 
+    setResume(Utils.getFlag("resume", options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -376,6 +392,11 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     result.add("-P");
     result.add("" + getWeightThreshold());
+
+    if (getResume()) {
+      result.add("-resume");
+    }
+
 
     Collections.addAll(result, super.getOptions());
 
@@ -469,14 +490,23 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    */
   public void buildClassifier(Instances data) throws Exception {
 
+    reset();
+
     // Initialize classifier
     initializeClassifier(data);
 
     // Perform boosting iterations
-    while (next()) {};
+    while (next()) {
+    }
+    ;
 
     // Clean up
     done();
+  }
+
+  protected void reset() {
+    m_NumIterationsPerformed = 0;
+    m_TrainingData = null;
   }
 
   /**
@@ -486,35 +516,52 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *          classifier.
    * @throws Exception if the classifier could not be built successfully
    */
+  @Override
   public void initializeClassifier(Instances data) throws Exception {
+    m_NumItsThisSession = 0;
+    if (m_TrainingData == null) {
+      super.buildClassifier(data);
 
-    super.buildClassifier(data);
+      // can classifier handle the data?
+      getCapabilities().testWithFail(data);
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+      // remove instances with missing class
+      data = new Instances(data);
+      data.deleteWithMissingClass();
 
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
 
-    m_ZeroR = new weka.classifiers.rules.ZeroR();
-    m_ZeroR.buildClassifier(data);
+      m_NumClasses = data.numClasses();
+      m_Betas = new double[m_Classifiers.length];
+      m_NumIterationsPerformed = 0;
+      m_TrainingData = new Instances(data);
 
-    m_NumClasses = data.numClasses();
-    m_Betas = new double[m_Classifiers.length];
-    m_NumIterationsPerformed = 0;
-    m_TrainingData = new Instances(data);
+      m_RandomInstance = new Random(m_Seed);
+      m_NumIterationsPerformed = 0;
 
-    m_RandomInstance = new Random(m_Seed);
-
-    if ((m_UseResampling)
+      if ((m_UseResampling)
         || (!(m_Classifier instanceof WeightedInstancesHandler))) {
 
-      // Normalize weights so that they sum to one and can be used as sampling probabilities
-      double sumProbs = m_TrainingData.sumOfWeights();
-      for (int i = 0; i < m_TrainingData.numInstances(); i++) {
-        m_TrainingData.instance(i).setWeight(m_TrainingData.instance(i).weight() / sumProbs);
+        // Normalize weights so that they sum to one and can be used as sampling
+        // probabilities
+        double sumProbs = m_TrainingData.sumOfWeights();
+        for (int i = 0; i < m_TrainingData.numInstances(); i++) {
+          m_TrainingData.instance(i).setWeight(
+            m_TrainingData.instance(i).weight() / sumProbs);
+        }
       }
+    } else {
+      Classifier[] temp =
+        new Classifier[m_Classifiers.length + m_NumIterations];
+      System.arraycopy(m_Classifiers, 0, temp, 0, m_Classifiers.length);
+      Classifier[] newOnes = AbstractClassifier.makeCopies(m_Classifier, m_NumIterations);
+      System.arraycopy(newOnes, 0, temp, m_Classifiers.length, newOnes.length);
+      m_Classifiers = temp;
+
+      double[] tempBetas = new double[m_Betas.length + m_NumIterations];
+      System.arraycopy(m_Betas, 0, tempBetas, 0, m_Betas.length);
+      m_Betas = tempBetas;
     }
   }
 
@@ -523,10 +570,11 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
    *
    * @throws Exception if an unforeseen problem occurs
    */
+  @Override
   public boolean next() throws Exception {
 
     // Have we reached the maximum?
-    if (m_NumIterationsPerformed >= m_NumIterations) {
+    if (m_NumItsThisSession >= m_NumIterations) {
       return false;
     }
 
@@ -537,21 +585,21 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
 
     if (m_Debug) {
       System.err.println("Training classifier "
-                         + (m_NumIterationsPerformed + 1));
+        + (m_NumIterationsPerformed + 1));
     }
 
     // Select instances to train the classifier on
     Instances trainData = null;
     if (m_WeightThreshold < 100) {
-      trainData = selectWeightQuantile(m_TrainingData,
-                                       (double) m_WeightThreshold / 100);
+      trainData =
+        selectWeightQuantile(m_TrainingData, (double) m_WeightThreshold / 100);
     } else {
       trainData = new Instances(m_TrainingData);
     }
 
     double epsilon = 0;
     if ((m_UseResampling)
-        || (!(m_Classifier instanceof WeightedInstancesHandler))) {
+      || (!(m_Classifier instanceof WeightedInstancesHandler))) {
 
       // Resample
       int resamplingIterations = 0;
@@ -560,17 +608,18 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
         weights[i] = trainData.instance(i).weight();
       }
       do {
-        Instances sample = trainData.resampleWithWeights(m_RandomInstance, weights);
-        
+        Instances sample =
+          trainData.resampleWithWeights(m_RandomInstance, weights);
+
         // Build and evaluate classifier
         m_Classifiers[m_NumIterationsPerformed].buildClassifier(sample);
-        Evaluation evaluation = new Evaluation(m_TrainingData); 
+        Evaluation evaluation = new Evaluation(m_TrainingData);
         evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed],
-                                 m_TrainingData);
+          m_TrainingData);
         epsilon = evaluation.errorRate();
         resamplingIterations++;
       } while (Utils.eq(epsilon, 0)
-               && (resamplingIterations < MAX_NUM_RESAMPLING_ITERATIONS));
+        && (resamplingIterations < MAX_NUM_RESAMPLING_ITERATIONS));
     } else {
 
       // Build the classifier
@@ -581,9 +630,10 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
       m_Classifiers[m_NumIterationsPerformed].buildClassifier(trainData);
 
       // Evaluate the classifier
-      Evaluation evaluation = new Evaluation(m_TrainingData); // Does this need to be a copy
+      Evaluation evaluation = new Evaluation(m_TrainingData); // Does this need
+                                                              // to be a copy
       evaluation.evaluateModel(m_Classifiers[m_NumIterationsPerformed],
-                               m_TrainingData);
+        m_TrainingData);
       epsilon = evaluation.errorRate();
     }
 
@@ -600,28 +650,77 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
     m_Betas[m_NumIterationsPerformed] = Math.log(reweight);
     if (m_Debug) {
       System.err.println("\terror rate = " + epsilon + "  beta = "
-                         + m_Betas[m_NumIterationsPerformed]);
+        + m_Betas[m_NumIterationsPerformed]);
     }
-    
+
     // Update instance weights
     setWeights(m_TrainingData, reweight);
 
     // Model has been built successfully
     m_NumIterationsPerformed++;
+    m_NumItsThisSession++;
+
     return true;
   }
 
   /**
    * Clean up after boosting.
    */
+  @Override
   public void done() {
-    
-    m_TrainingData = null;
-    
-    // Can discard ZeroR model if we don't need it anymore
-    if (m_NumIterationsPerformed > 0) {
-      m_ZeroR = null;
+
+    if (!getResume()) {
+      m_TrainingData = null;
+
+      // Can discard ZeroR model if we don't need it anymore
+      if (m_NumIterationsPerformed > 0) {
+        m_ZeroR = null;
+      }
     }
+
+    if (m_NumIterationsPerformed > 0
+      && m_NumIterationsPerformed < m_Classifiers.length) {
+      Classifier[] temp = new Classifier[m_NumIterationsPerformed];
+      System.arraycopy(m_Classifiers, 0, temp, 0, m_NumIterationsPerformed);
+      m_Classifiers = temp;
+
+      double[] betasTemp = new double[m_NumIterationsPerformed];
+      System.arraycopy(m_Betas, 0, betasTemp, 0, m_NumIterationsPerformed);
+      m_Betas = betasTemp;
+    }
+  }
+
+  /**
+   * Tool tip text for the resume property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model
+   * is effectively "frozen" and no further iterations can be performed
+   *
+   * @param resume true if the model is to be finalized after performing
+   *          iterations
+   */
+  public void setResume(boolean resume) {
+    m_resume = resume;
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    return m_resume;
   }
 
   /**
@@ -746,8 +845,8 @@ public class AdaBoostM1 extends RandomizableIteratedSingleClassifierEnhancer
       } else {
         buf.append(this.getClass().getName().replaceAll(".*\\.", "") + "\n");
         buf.append(this.getClass().getName().replaceAll(".*\\.", "")
-                   .replaceAll(".", "=")
-                   + "\n\n");
+          .replaceAll(".", "=")
+          + "\n\n");
         buf
           .append("Warning: No model could be built, hence ZeroR model is used:\n\n");
         buf.append(m_ZeroR.toString());

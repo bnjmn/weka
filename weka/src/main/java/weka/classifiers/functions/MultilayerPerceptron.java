@@ -1019,6 +1019,9 @@ public class MultilayerPerceptron extends AbstractClassifier implements
   /** Shows the number of the epoch that the network just finished. */
   private int m_epoch;
 
+  /** Number of iterations (epochs) performed in this session of iterating */
+  private int m_numItsPerformed;
+
   /** Shows the error of the epoch that the network just finished. */
   private double m_error;
 
@@ -1050,6 +1053,12 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * This is a linear unit.
    */
   private final LinearUnit m_linearUnit;
+
+  /**
+   * Whether to allow training to continue at a later point after the initial
+   * model is built.
+   */
+  protected boolean m_resume;
 
   /**
    * The constructor.
@@ -1758,26 +1767,26 @@ public class MultilayerPerceptron extends AbstractClassifier implements
   }
 
   /** The instances in the validation set (if any) */
-  protected transient Instances valSet = null;
+  protected Instances valSet = null;
 
   /** The number of instances in the validation set (if any) */
-  protected transient int numInVal = 0;
+  protected int numInVal = 0;
 
   /** Total weight of the instances in the training set */
-  protected transient double totalWeight = 0;
+  protected double totalWeight = 0;
 
   /** Total weight of the instances in the validation set (if any) */
-  protected transient double totalValWeight = 0;
+  protected double totalValWeight = 0;
 
   /** Drift off counter */
-  protected transient double driftOff = 0;
+  protected double driftOff = 0;
 
   /** To keep track of error */
-  protected transient double lastRight = Double.POSITIVE_INFINITY;
-  protected transient double bestError = Double.POSITIVE_INFINITY;
+  protected double lastRight = Double.POSITIVE_INFINITY;
+  protected double bestError = Double.POSITIVE_INFINITY;
 
   /** Data in original format (in case learning rate gets reset */
-  protected transient Instances originalFormatData = null;
+  protected Instances originalFormatData = null;
 
   /**
    * Initializes an iterative classifier.
@@ -1785,171 +1794,172 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @param data the instances to be used in induction
    * @exception Exception if the model cannot be initialized
    */
-  public void initializeClassifier(Instances data) throws Exception {
+  @Override public void initializeClassifier(Instances data) throws Exception {
 
-    // can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    m_numItsPerformed = 0;
 
-    // remove instances with missing class
-    data = new Instances(data);
-    data.deleteWithMissingClass();
-    originalFormatData = data;
+    if (m_instances == null || m_instances.numInstances() == 0) {
+      // can classifier handle the data?
+      getCapabilities().testWithFail(data);
 
-    m_ZeroR = new weka.classifiers.rules.ZeroR();
-    m_ZeroR.buildClassifier(data);
-    // only class? -> use ZeroR model
-    if (data.numAttributes() == 1) {
-      System.err.println("Cannot build model (only class attribute present in data!), "
-                      + "using ZeroR model instead!");
-      m_useDefaultModel = true;
-      return;
-    } else {
-      m_useDefaultModel = false;
-    }
+      // remove instances with missing class
+      data = new Instances(data);
+      data.deleteWithMissingClass();
+      originalFormatData = data;
 
-    m_epoch = 0;
-    m_error = 0;
-    m_instances = null;
-    m_currentInstance = null;
-    m_controlPanel = null;
-    m_nodePanel = null;
-
-    m_outputs = new NeuralEnd[0];
-    m_inputs = new NeuralEnd[0];
-    m_numAttributes = 0;
-    m_numClasses = 0;
-    m_neuralNodes = new NeuralConnection[0];
-
-    m_selected = new ArrayList<NeuralConnection>(4);
-    m_nextId = 0;
-    m_stopIt = true;
-    m_stopped = true;
-    m_accepted = false;
-    m_instances = new Instances(data);
-    m_random = new Random(m_randomSeed);
-    m_instances.randomize(m_random);
-
-    if (m_useNomToBin) {
-      m_nominalToBinaryFilter = new NominalToBinary();
-      m_nominalToBinaryFilter.setInputFormat(m_instances);
-      m_instances = Filter.useFilter(m_instances, m_nominalToBinaryFilter);
-    }
-    m_numAttributes = m_instances.numAttributes() - 1;
-    m_numClasses = m_instances.numClasses();
-
-    setClassType(m_instances);
-
-    // this sets up the validation set.
-    // numinval is needed later
-    numInVal = (int) (m_valSize / 100.0 * m_instances.numInstances());
-    if (m_valSize > 0) {
-      if (numInVal == 0) {
-        numInVal = 1;
+      m_ZeroR = new weka.classifiers.rules.ZeroR();
+      m_ZeroR.buildClassifier(data);
+      // only class? -> use ZeroR model
+      if (data.numAttributes() == 1) {
+        System.err.println(
+          "Cannot build model (only class attribute present in data!), " + "using ZeroR model instead!");
+        m_useDefaultModel = true;
+        return;
+      } else {
+        m_useDefaultModel = false;
       }
-      valSet = new Instances(m_instances, 0, numInVal);
-    }
-    // /////////
 
-    setupInputs();
+      m_epoch = 0;
+      m_error = 0;
+      m_instances = null;
+      m_currentInstance = null;
+      m_controlPanel = null;
+      m_nodePanel = null;
 
-    setupOutputs();
-    if (m_autoBuild) {
-      setupHiddenLayer();
-    }
+      m_outputs = new NeuralEnd[0];
+      m_inputs = new NeuralEnd[0];
+      m_numAttributes = 0;
+      m_numClasses = 0;
+      m_neuralNodes = new NeuralConnection[0];
 
-    // ///////////////////////////
-    // this sets up the gui for usage
-    if (m_gui) {
-      m_win = Utils.getWekaJFrame("Neural Network", null);
+      m_selected = new ArrayList<NeuralConnection>(4);
+      m_nextId = 0;
+      m_stopIt = true;
+      m_stopped = true;
+      m_accepted = false;
+      m_instances = new Instances(data);
+      m_random = new Random(m_randomSeed);
+      m_instances.randomize(m_random);
 
-      m_win.addWindowListener(new WindowAdapter() {
-        @Override
-        public void windowClosing(WindowEvent e) {
-          boolean k = m_stopIt;
-          m_stopIt = true;
-          int well = JOptionPane.showConfirmDialog(m_win, "Are You Sure...\n"
-                          + "Click Yes To Accept" + " The Neural Network"
-                          + "\n Click No To Return", "Accept Neural Network",
-                  JOptionPane.YES_NO_OPTION);
+      if (m_useNomToBin) {
+        m_nominalToBinaryFilter = new NominalToBinary();
+        m_nominalToBinaryFilter.setInputFormat(m_instances);
+        m_instances = Filter.useFilter(m_instances, m_nominalToBinaryFilter);
+      }
+      m_numAttributes = m_instances.numAttributes() - 1;
+      m_numClasses = m_instances.numClasses();
 
-          if (well == 0) {
-            m_win.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            m_accepted = true;
-            blocker(false);
-          } else {
-            m_win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+      setClassType(m_instances);
+
+      // this sets up the validation set.
+      // numinval is needed later
+      numInVal = (int) (m_valSize / 100.0 * m_instances.numInstances());
+      if (m_valSize > 0) {
+        if (numInVal == 0) {
+          numInVal = 1;
+        }
+        valSet = new Instances(m_instances, 0, numInVal);
+      }
+      // /////////
+
+      setupInputs();
+
+      setupOutputs();
+      if (m_autoBuild) {
+        setupHiddenLayer();
+      }
+
+      // ///////////////////////////
+      // this sets up the gui for usage
+      if (m_gui) {
+        m_win = Utils.getWekaJFrame("Neural Network", null);
+
+        m_win.addWindowListener(new WindowAdapter() {
+          @Override public void windowClosing(WindowEvent e) {
+            boolean k = m_stopIt;
+            m_stopIt = true;
+            int well = JOptionPane.showConfirmDialog(m_win,
+              "Are You Sure...\n" + "Click Yes To Accept" + " The Neural Network"
+                + "\n Click No To Return", "Accept Neural Network", JOptionPane.YES_NO_OPTION);
+
+            if (well == 0) {
+              m_win.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+              m_accepted = true;
+              blocker(false);
+            } else {
+              m_win.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+            }
+            m_stopIt = k;
           }
-          m_stopIt = k;
-        }
-      });
+        });
 
-      m_win.getContentPane().setLayout(new BorderLayout());
-      m_nodePanel = new NodePanel();
-      // without the following two lines, the
-      // NodePanel.paintComponents(Graphics)
-      // method will go berserk if the network doesn't fit completely: it will
-      // get called on a constant basis, using 100% of the CPU
-      // see the following forum thread:
-      // http://forum.java.sun.com/thread.jspa?threadID=580929&messageID=2945011
-      m_nodePanel.setPreferredSize(new Dimension(640, 480));
-      m_nodePanel.revalidate();
+        m_win.getContentPane().setLayout(new BorderLayout());
+        m_nodePanel = new NodePanel();
+        // without the following two lines, the
+        // NodePanel.paintComponents(Graphics)
+        // method will go berserk if the network doesn't fit completely: it will
+        // get called on a constant basis, using 100% of the CPU
+        // see the following forum thread:
+        // http://forum.java.sun.com/thread.jspa?threadID=580929&messageID=2945011
+        m_nodePanel.setPreferredSize(new Dimension(640, 480));
+        m_nodePanel.revalidate();
 
-      JScrollPane sp = new JScrollPane(m_nodePanel,
-              JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
-              JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
-      m_controlPanel = new ControlPanel();
+        JScrollPane sp = new JScrollPane(m_nodePanel, JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,
+          JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS);
+        m_controlPanel = new ControlPanel();
 
-      m_win.getContentPane().add(sp, BorderLayout.CENTER);
-      m_win.getContentPane().add(m_controlPanel, BorderLayout.SOUTH);
-      m_win.setSize(640, 480);
-      m_win.setVisible(true);
-    }
-
-    // This sets up the initial state of the gui
-    if (m_gui) {
-      blocker(true);
-      m_controlPanel.m_changeEpochs.setEnabled(false);
-      m_controlPanel.m_changeLearning.setEnabled(false);
-      m_controlPanel.m_changeMomentum.setEnabled(false);
-    }
-
-    // For silly situations in which the network gets accepted before training
-    // commences
-    if (m_numeric) {
-      setEndsToLinear();
-    }
-    if (m_accepted) {
-      return;
-    }
-
-    // connections done.
-
-    totalWeight = 0;
-    totalValWeight = 0;
-    driftOff = 0;
-    lastRight = Double.POSITIVE_INFINITY;
-    bestError = Double.POSITIVE_INFINITY;
-
-    // ensure that at least 1 instance is trained through.
-    if (numInVal == m_instances.numInstances()) {
-      numInVal--;
-    }
-    if (numInVal < 0) {
-      numInVal = 0;
-    }
-    for (int noa = numInVal; noa < m_instances.numInstances(); noa++) {
-      if (!m_instances.instance(noa).classIsMissing()) {
-        totalWeight += m_instances.instance(noa).weight();
+        m_win.getContentPane().add(sp, BorderLayout.CENTER);
+        m_win.getContentPane().add(m_controlPanel, BorderLayout.SOUTH);
+        m_win.setSize(640, 480);
+        m_win.setVisible(true);
       }
-    }
-    if (m_valSize != 0) {
-      for (int noa = 0; noa < valSet.numInstances(); noa++) {
-        if (!valSet.instance(noa).classIsMissing()) {
-          totalValWeight += valSet.instance(noa).weight();
+
+      // This sets up the initial state of the gui
+      if (m_gui) {
+        blocker(true);
+        m_controlPanel.m_changeEpochs.setEnabled(false);
+        m_controlPanel.m_changeLearning.setEnabled(false);
+        m_controlPanel.m_changeMomentum.setEnabled(false);
+      }
+
+      // For silly situations in which the network gets accepted before training
+      // commences
+      if (m_numeric) {
+        setEndsToLinear();
+      }
+      if (m_accepted) {
+        return;
+      }
+
+      // connections done.
+
+      totalWeight = 0;
+      totalValWeight = 0;
+      driftOff = 0;
+      lastRight = Double.POSITIVE_INFINITY;
+      bestError = Double.POSITIVE_INFINITY;
+
+      // ensure that at least 1 instance is trained through.
+      if (numInVal == m_instances.numInstances()) {
+        numInVal--;
+      }
+      if (numInVal < 0) {
+        numInVal = 0;
+      }
+      for (int noa = numInVal; noa < m_instances.numInstances(); noa++) {
+        if (!m_instances.instance(noa).classIsMissing()) {
+          totalWeight += m_instances.instance(noa).weight();
         }
       }
+      if (m_valSize != 0) {
+        for (int noa = 0; noa < valSet.numInstances(); noa++) {
+          if (!valSet.instance(noa).classIsMissing()) {
+            totalValWeight += valSet.instance(noa).weight();
+          }
+        }
+      }
+      m_stopped = false;
     }
-    m_stopped = false;
   }
 
   /**
@@ -1958,12 +1968,13 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    * @return false if no further iterations could be performed, true otherwise
    * @exception Exception if this iteration fails for unexpected reasons
    */
-  public boolean next() throws Exception {
+  @Override public boolean next() throws Exception {
 
-    if (m_accepted || m_useDefaultModel) { // Has user accepted the network already or do we need to use default model?
+    if (m_accepted || m_useDefaultModel || m_instances.numInstances() == 0) { // Has user accepted the network already or do we need to use default model?
       return false;
     }
     m_epoch++;
+    m_numItsPerformed++;
     double right = 0;
     for (int nob = numInVal; nob < m_instances.numInstances(); nob++) {
       m_currentInstance = m_instances.instance(nob);
@@ -2035,7 +2046,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
         driftOff++;
       }
       lastRight = right;
-      if (driftOff > m_driftThreshold || m_epoch + 1 >= m_numEpochs) {
+      // if (driftOff > m_driftThreshold || m_epoch + 1 >= m_numEpochs) {
+      if (driftOff > m_driftThreshold || m_numItsPerformed + 1 >= m_numEpochs) {
         for (int noc = 0; noc < m_numClasses; noc++) {
           m_outputs[noc].restoreWeights();
         }
@@ -2049,10 +2061,12 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     // This junction controls what state the gui is in at the end of each
     // epoch, Such as if it is paused, if it is resumable etc...
     if (m_gui) {
-      while ((m_stopIt || (m_epoch >= m_numEpochs && m_valSize == 0)) && !m_accepted) {
+      // while ((m_stopIt || (m_epoch >= m_numEpochs && m_valSize == 0)) && !m_accepted) {
+      while ((m_stopIt || (m_numItsPerformed >= m_numEpochs && m_valSize == 0)) && !m_accepted) {
         m_stopIt = true;
         m_stopped = true;
-        if (m_epoch >= m_numEpochs && m_valSize == 0) {
+        //if (m_epoch >= m_numEpochs && m_valSize == 0) {
+        if (m_numItsPerformed >= m_numEpochs && m_valSize == 0) {
 
           m_controlPanel.m_startStop.setEnabled(false);
         } else {
@@ -2082,7 +2096,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     if (m_accepted) {
       return false;
     }
-    if (m_epoch < m_numEpochs) {
+    // if (m_epoch < m_numEpochs) {
+    if (m_numItsPerformed < m_numEpochs) {
       return true; // We can keep iterating
     } else {
       return false;
@@ -2094,18 +2109,55 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    *
    * @exception Exception if cleanup fails
    */
-  public void done() throws Exception {
+  @Override public void done() throws Exception {
 
     if (m_gui) {
       m_win.dispose();
       m_controlPanel = null;
       m_nodePanel = null;
     }
-    if (!m_useDefaultModel) {
-      m_instances = new Instances(m_instances, 0);
+
+    if (!getResume()) {
+      if (!m_useDefaultModel) {
+        m_instances = new Instances(m_instances, 0);
+      }
+
+      m_currentInstance = null;
+      valSet = null;
+      originalFormatData = null;
     }
-    m_currentInstance = null;
-    originalFormatData = null;
+  }
+
+  /**
+   * Tool tip text for resume property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model is effectively
+   * "frozen" and no further iterations can be performed
+   *
+   * @param resume true if the model is to be finalized after performing iterations
+   */
+  public void setResume(boolean resume) {
+    m_resume = resume;
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    return m_resume;
   }
 
   /**
@@ -2117,6 +2169,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
    */
   @Override
   public void buildClassifier(Instances i) throws Exception {
+
+    m_instances = null;
 
     // Initialize classifier
     initializeClassifier(i);
@@ -2258,6 +2312,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
         + "\t(Set this to not allow the network to reset).", "R", 0, "-R"));
     newVector.addElement(new Option("\tLearning rate decay will occur.\n"
       + "\t(Set this to cause the learning rate to decay).", "D", 0, "-D"));
+    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
+      "resume", 0, "-resume"));
 
     newVector.addAll(Collections.list(super.listOptions()));
 
@@ -2448,6 +2504,8 @@ public class MultilayerPerceptron extends AbstractClassifier implements
       setDecay(false);
     }
 
+    setResume(Utils.getFlag("resume", options));
+
     super.setOptions(options);
 
     Utils.checkForRemainingOptions(options);
@@ -2497,6 +2555,9 @@ public class MultilayerPerceptron extends AbstractClassifier implements
     }
     if (getDecay()) {
       options.add("-D");
+    }
+    if (getResume()) {
+      options.add("-resume");
     }
 
     Collections.addAll(options, super.getOptions());

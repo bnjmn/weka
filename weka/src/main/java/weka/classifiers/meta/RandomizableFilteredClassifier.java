@@ -137,7 +137,7 @@ public class RandomizableFilteredClassifier extends FilteredClassifier {
    * @param data the instances to be used in induction
    * @exception Exception if the model cannot be initialized
    */
-  public void initializeClassifier(Instances data) throws Exception {
+  @Override public void initializeClassifier(Instances data) throws Exception {
 
     if (!(m_Classifier instanceof Randomizable) &&
             !(m_Filter instanceof Randomizable)) {

@@ -23,7 +23,6 @@ package weka.classifiers.meta;
 
 import weka.classifiers.IterativeClassifier;
 import weka.classifiers.RandomizableSingleClassifierEnhancer;
-import weka.classifiers.SingleClassifierEnhancer;
 import weka.core.*;
 import weka.core.Capabilities.Capability;
 import weka.filters.Filter;
@@ -303,7 +302,7 @@ public class FilteredClassifier extends RandomizableSingleClassifierEnhancer
    * @param data the instances to be used in induction
    * @exception Exception if the model cannot be initialized
    */
-  public void initializeClassifier(Instances data) throws Exception {
+  @Override public void initializeClassifier(Instances data) throws Exception {
 
     if (m_Classifier == null) {
       throw new Exception("No base classifier has been set!");
@@ -340,7 +339,7 @@ public class FilteredClassifier extends RandomizableSingleClassifierEnhancer
    * @return false if no further iterations could be performed, true otherwise
    * @exception Exception if this iteration fails for unexpected reasons
    */
-  public boolean next() throws Exception {
+  @Override public boolean next() throws Exception {
 
     if (m_Classifier instanceof IterativeClassifier)
       return ((IterativeClassifier) m_Classifier).next();
@@ -354,12 +353,50 @@ public class FilteredClassifier extends RandomizableSingleClassifierEnhancer
    *
    * @exception Exception if cleanup fails
    */
-  public void done() throws Exception {
+  @Override public void done() throws Exception {
 
     if (m_Classifier instanceof IterativeClassifier)
       ((IterativeClassifier) m_Classifier).done();
     else
       throw new Exception("Classifier: " + getClassifierSpec() + " is not an IterativeClassifier");
+  }
+
+  /**
+   * Tool tip text for finalize property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model. Only applicable when the base classifier \n\t"
+      + "is an IterativeClassifier.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model is effectively
+   * "frozen" and no further iterations can be performed
+   *
+   * @param resume true if the model is to be finalized after performing iterations
+   */
+  public void setResume(boolean resume) throws Exception {
+    if (m_Classifier instanceof IterativeClassifier) {
+      ((IterativeClassifier) m_Classifier).setResume(resume);
+    }
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    if (m_Classifier instanceof IterativeClassifier) {
+      return ((IterativeClassifier) m_Classifier).getResume();
+    }
+    return false;
   }
 
   /**
