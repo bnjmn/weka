@@ -90,6 +90,9 @@ public class AlternatingModelTree extends AbstractClassifier
   /** The number of iterations to use */
   protected int m_NumberOfIterations = 10;
 
+  /** The  number of boosting iterations performed in this session of iterating */
+  protected int m_numBoostItsPerformedThisSession;
+
   /** The shrinkage parameter */
   protected double m_Shrinkage = 1.0;
 
@@ -104,6 +107,9 @@ public class AlternatingModelTree extends AbstractClassifier
 
   /** Filter for removing useless attributes */
   private RemoveUseless m_removeUseless;
+
+  /** Flag used to enable the ability to resume boosting at a later date */
+  protected boolean m_resume;
 
   /**
    * Returns a string describing classifier
@@ -164,6 +170,9 @@ public class AlternatingModelTree extends AbstractClassifier
 	    "\tBuild a decision tree instead of an alternating tree.",
 	    "B", 0, "-B"));
 
+    newVector.addElement(new Option("\t" + resumeTipText() + "\n",
+      "resume", 0, "-resume"));
+
     newVector.addAll(Collections.list(super.listOptions()));
 
     return newVector.elements();
@@ -188,6 +197,10 @@ public class AlternatingModelTree extends AbstractClassifier
 
     if (getBuildDecisionTree()) {
       options.add("-B");
+    }
+
+    if (getResume()) {
+      options.add("-resume");
     }
 
     return options.toArray(new String[0]);
@@ -239,6 +252,8 @@ public class AlternatingModelTree extends AbstractClassifier
       setShrinkage(1.0);
     }
     setBuildDecisionTree(Utils.getFlag('B', options));
+
+    setResume(Utils.getFlag("resume", options));
 
     Utils.checkForRemainingOptions(options);
   }
@@ -329,6 +344,38 @@ public class AlternatingModelTree extends AbstractClassifier
   public void setBuildDecisionTree(boolean newBuildDecisionTree) {
     
     m_BuildDecisionTree = newBuildDecisionTree;
+  }
+
+  /**
+   * Tool tip text for the resume property
+   *
+   * @return the tool tip text for the finalize property
+   */
+  public String resumeTipText() {
+    return "Set whether classifier can continue training after performing the"
+      + "requested number of iterations. \n\tNote that setting this to true will "
+      + "retain certain data structures which can increase the \n\t"
+      + "size of the model.";
+  }
+
+  /**
+   * If called with argument true, then the next time done() is called the model is effectively
+   * "frozen" and no further iterations can be performed
+   *
+   * @param resume true if the model is to be finalized after performing iterations
+   */
+  public void setResume(boolean resume) {
+    m_resume = resume;
+  }
+
+  /**
+   * Returns true if the model is to be finalized (or has been finalized) after
+   * training.
+   *
+   * @return the current value of finalize
+   */
+  public boolean getResume() {
+    return m_resume;
   }
 
   /**
@@ -858,38 +905,46 @@ public class AlternatingModelTree extends AbstractClassifier
    */
   public void initializeClassifier(Instances data) throws Exception {
 
-    // Can classifier handle the data?
-    getCapabilities().testWithFail(data);
+    m_numBoostItsPerformedThisSession = 0;
 
-    // Prepare data
-    data = new Instances(data);
-    data.deleteWithMissingClass();
+    if (m_Data == null || m_Data.numInstances() == 0) {
+      // Can classifier handle the data?
+      getCapabilities().testWithFail(data);
 
-    m_nominalToBinary = new NominalToBinary();
-    m_nominalToBinary.setInputFormat(data);
-    data = Filter.useFilter(data, m_nominalToBinary);
+      // Prepare data
+      data = new Instances(data);
+      data.deleteWithMissingClass();
 
-    m_removeUseless = new RemoveUseless();
-    m_removeUseless.setInputFormat(data);
-    data = Filter.useFilter(data, m_removeUseless);
+      m_nominalToBinary = new NominalToBinary();
+      m_nominalToBinary.setInputFormat(data);
+      data = Filter.useFilter(data, m_nominalToBinary);
 
-    // Store reference as global variable, store data as unsafe instances
-    m_Data = new Instances(data, data.numInstances());
-    for (Instance inst : data) {
-      m_Data.add(new UnsafeInstance(inst));
+      m_removeUseless = new RemoveUseless();
+      m_removeUseless.setInputFormat(data);
+      data = Filter.useFilter(data, m_removeUseless);
+
+      // Store reference as global variable, store data as unsafe instances
+      m_Data = new Instances(data, data.numInstances());
+      for (Instance inst : data) {
+        m_Data.add(new UnsafeInstance(inst));
+      }
+
+      // Initialize list of prediction nodes
+      m_PredictionNodes = new ArrayList<PredictionNode>();
+
+      // Add root node with ZeroR model that contains all the data
+      m_PredictionNodes.add(new PredictionNode(m_Data));
     }
-
-    // Initialize list of prediction nodes
-    m_PredictionNodes = new ArrayList<PredictionNode>();
-
-    // Add root node with ZeroR model that contains all the data
-    m_PredictionNodes.add(new PredictionNode(m_Data));
   }
 
   /**
    * Performs the next iteration.
    */
   public boolean next() throws Exception {
+
+    if (m_numBoostItsPerformedThisSession >= m_NumberOfIterations) {
+      return false;
+    }
 
     // Try adding a splitter node to each prediction node
     SplitInfo bestSplit = null;
@@ -923,6 +978,7 @@ public class AlternatingModelTree extends AbstractClassifier
     m_PredictionNodes.add(splitterNode.m_Missing);
 
     // Iteration was completely successfully
+    m_numBoostItsPerformedThisSession++;
     return true;
   }
 
@@ -931,12 +987,14 @@ public class AlternatingModelTree extends AbstractClassifier
    */
   public void done() throws Exception {
 
-    // Don't need full dataset anymore
-    m_Data = new Instances(m_Data, 0);
+    if (!m_resume) {
+      // Don't need full dataset anymore
+      m_Data = new Instances(m_Data, 0);
 
-    // Clear indices in prediction nodes to save memory
-    for (PredictionNode predNode : m_PredictionNodes) {
-      predNode.m_Indices = null;
+      // Clear indices in prediction nodes to save memory
+      for (PredictionNode predNode : m_PredictionNodes) {
+        predNode.m_Indices = null;
+      }
     }
   }
 
@@ -955,9 +1013,11 @@ public class AlternatingModelTree extends AbstractClassifier
     }
 
     // For the given number of iterations
-    for (int i = 0; i < m_NumberOfIterations; i++) {
-      next();
+    while(next()) {
     }
+    /*for (int i = 0; i < m_NumberOfIterations; i++) {
+      next();
+    }*/
 
     // Clean up
     done();
