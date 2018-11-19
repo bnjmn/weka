@@ -34,7 +34,7 @@ import weka.filters.UnsupervisedFilter;
 /**
  * <!-- globalinfo-start --> Converts a propositional instance dataset into a
  * multi-instance dataset (with a relational attribute). When normalizing or
- * standardizing a multi-instance dataset, a MIToSingleInstance filter can be
+ * standardizing a multi-instance dataset, the MultiInstanceToPropositional filter can be
  * applied first to convert the multi-instance dataset into a propositional
  * instance dataset. After normalization or standardization, we may use this
  * PropositionalToMultiInstance filter to convert the data back to
@@ -408,7 +408,11 @@ public class PropositionalToMultiInstance extends Filter implements
 
     ArrayList<Attribute> attInfo = new ArrayList<Attribute>(3);
     attInfo.add(attBagIndex);
-    attInfo.add(new Attribute("bag", newData)); // relation-valued attribute
+    boolean haveBag = false;
+    if (newData.numAttributes() > 0) {
+      attInfo.add(new Attribute("bag", newData)); // relation-valued attribute
+      haveBag = true;
+    }
     if (classIndex >= 0) {
       attInfo.add(attClass);
     }
@@ -419,14 +423,19 @@ public class PropositionalToMultiInstance extends Filter implements
 
     super.setOutputFormat(data.stringFreeStructure());
 
-    m_BagStringAtts = new StringLocator(data.attribute(1).relation());
-    m_BagRelAtts = new RelationalLocator(data.attribute(1).relation());
+    if (haveBag) {
+      m_BagStringAtts = new StringLocator(data.attribute(1).relation());
+      m_BagRelAtts = new RelationalLocator(data.attribute(1).relation());
+    } else {
+      m_BagStringAtts = null;
+      m_BagRelAtts = null;
+    }
 
     return true;
   }
 
   /**
-   * adds a new bag out of the given data and adds it to the output
+   * adds a new bag out of the given data to the output
    * 
    * @param input the intput dataset
    * @param output the dataset this bag is added to
@@ -438,26 +447,33 @@ public class PropositionalToMultiInstance extends Filter implements
   protected void addBag(Instances input, Instances output, Instances bagInsts,
     int bagIndex, double classValue, double bagWeight) {
 
-    // copy strings/relational values
-    for (int i = 0; i < bagInsts.numInstances(); i++) {
-      RelationalLocator.copyRelationalValues(bagInsts.instance(i), false,
-        input, m_InputRelAtts, bagInsts, m_BagRelAtts);
-
-      StringLocator.copyStringValues(bagInsts.instance(i), false, input,
-        m_InputStringAtts, bagInsts, m_BagStringAtts);
-    }
-
-    int value = output.attribute(1).addRelation(bagInsts);
     Instance newBag = new DenseInstance(output.numAttributes());
-    newBag.setValue(0, bagIndex);
-    if (input.classIndex() >= 0) {
-      newBag.setValue(2, classValue);
+    if (m_BagStringAtts != null) {
+
+      // copy strings/relational values
+      for (int i = 0; i < bagInsts.numInstances(); i++) {
+        RelationalLocator.copyRelationalValues(bagInsts.instance(i), false,
+                input, m_InputRelAtts, bagInsts, m_BagRelAtts);
+
+        StringLocator.copyStringValues(bagInsts.instance(i), false, input,
+                m_InputStringAtts, bagInsts, m_BagStringAtts);
+      }
+
+      int value = output.attribute(1).addRelation(bagInsts);
+      newBag.setValue(0, bagIndex);
+      if (input.classIndex() >= 0) {
+        newBag.setValue(2, classValue);
+      }
+      newBag.setValue(1, value);
+    } else {
+      newBag.setValue(0, bagIndex);
+      if (input.classIndex() >= 0) {
+        newBag.setValue(1, classValue);
+      }
     }
-    newBag.setValue(1, value);
     if (!m_DoNotWeightBags) {
       newBag.setWeight(bagWeight);
     }
-    newBag.setDataset(output);
     output.add(newBag);
   }
 
@@ -493,7 +509,10 @@ public class PropositionalToMultiInstance extends Filter implements
     Instances input = getInputFormat();
     input.sort(m_BagIndicator.getIndex()); // make sure that bagID is sorted
     Instances output = getOutputFormat();
-    Instances bagInsts = output.attribute(1).relation().stringFreeStructure();
+    Instances bagInsts = null;
+    if (m_BagStringAtts != null) {
+      bagInsts = output.attribute(1).relation().stringFreeStructure();
+    }
 
     double bagIndex = input.instance(0).value(m_BagIndicator.getIndex());
     double classValue = -1;
@@ -505,31 +524,32 @@ public class PropositionalToMultiInstance extends Filter implements
     // Convert pending input instances
     for (int i = 0; i < input.numInstances(); i++) {
       double currentBagIndex = input.instance(i).value(m_BagIndicator.getIndex());
-
-      // Convert instance into an instance for the bag
-      double[] bagInst = new double[bagInsts.numAttributes()];
-      Instance inputInst = input.instance(i);
-      for (int j = 0; j < inputInst.numValues(); j++) {
-        int index = inputInst.index(j);
-        if (index != input.classIndex() && index != m_BagIndicator.getIndex()) {
-
-          // Bag instance does not have bag indicator or class attribute!
-          if ((input.classIndex() >= 0) && (index > input.classIndex())) {
-            index--;
-          }
-          if (index > m_BagIndicator.getIndex()) {
-            index--;
-          }
-          bagInst[index] = inputInst.valueSparse(j);
-        }
-      }
       Instance inst = null;
-      if (inputInst instanceof DenseInstance) {
-        inst = new DenseInstance(inputInst.weight(), bagInst);
-      } else {
-        inst = new SparseInstance(inputInst.weight(), bagInst);
+      Instance inputInst = input.instance(i);
+      if (m_BagStringAtts != null) {
+        // Convert instance into an instance for the bag
+        double[] bagInst = new double[bagInsts.numAttributes()];
+        for (int j = 0; j < inputInst.numValues(); j++) {
+          int index = inputInst.index(j);
+          if (index != input.classIndex() && index != m_BagIndicator.getIndex()) {
+
+            // Bag instance does not have bag indicator or class attribute!
+            if ((input.classIndex() >= 0) && (index > input.classIndex())) {
+              index--;
+            }
+            if (index > m_BagIndicator.getIndex()) {
+              index--;
+            }
+            bagInst[index] = inputInst.valueSparse(j);
+          }
+        }
+        if (inputInst instanceof DenseInstance) {
+          inst = new DenseInstance(inputInst.weight(), bagInst);
+        } else {
+          inst = new SparseInstance(inputInst.weight(), bagInst);
+        }
+        inst.setDataset(bagInsts);
       }
-      inst.setDataset(bagInsts);
 
       // Starting a new bag?
       if (currentBagIndex != bagIndex) {
@@ -537,8 +557,10 @@ public class PropositionalToMultiInstance extends Filter implements
         // Actually add the completed bag to the output dataset
         addBag(input, output, bagInsts, (int) bagIndex, classValue, bagWeight);
 
-        // Start a new bag
-        bagInsts = bagInsts.stringFreeStructure();
+        if (m_BagStringAtts != null) {
+          // Start a new bag
+          bagInsts = bagInsts.stringFreeStructure();
+        }
         bagWeight = 0;
 
         // Save bag index and class value
@@ -546,11 +568,17 @@ public class PropositionalToMultiInstance extends Filter implements
         if (input.classIndex() >= 0) {
           classValue = input.instance(i).classValue();
         }
+      } else {
+        if ((input.classIndex() >= 0) && (classValue != input.instance(i).classValue())) {
+          throw new IllegalStateException("All class values in a bag must be the same! New value: " +
+            input.instance(i).toString(input.classIndex()));
+        }
       }
-
-      // Add instance to bag
-      bagInsts.add(inst);
-      bagWeight += inst.weight();
+      if (m_BagStringAtts != null) {
+        // Add instance to bag
+        bagInsts.add(inst);
+      }
+      bagWeight += inputInst.weight();
     }
 
     // reached the last instance, create and add the last bag

@@ -61,6 +61,9 @@ public class PropositionalToMultiInstanceTest
     test.setClassType(Attribute.NOMINAL);
     test.setNumInstances(400);
     m_Instances = test.generate();
+    for (int i = 0; i < m_Instances.numInstances(); i++) {
+      m_Instances.instance(i).setClassValue(((int) m_Instances.instance(i).value(0) % m_Instances.numClasses()));
+    }
   }
 
   /**
