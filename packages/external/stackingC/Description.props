@@ -6,10 +6,10 @@
 PackageName=stackingC
 
 # Version (required)
-Version=1.0.3
+Version=1.0.4
 
 #Date
-Date=2016-12-02
+Date=2018-11-19
 
 # Title (required)
 Title=Implements StackingC (more efficient version of stacking)
@@ -26,12 +26,12 @@ Maintainer=Alexander K. Seewald <alex@seewald.at>
 License=GPL 3.0
 
 # Description (required)
-Description=Implements StackingC (more efficient version of stacking). For more information, see A.K. Seewald: How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness. In: Nineteenth International Conference on Machine Learning, 554-561, 2002. Note: requires meta classifier to be a numeric prediction scheme
+Description=Implements StackingC (more efficient version of stacking). For more information, see A.K. Seewald: How to Make Stacking Better and Faster While Also Taking Care of an Unknown Weakness. In: Nineteenth International Conference on Machine Learning, 554-561, 2002. Note: requires meta classifier to be a numeric prediction scheme.
 
-Changes=Added method for handling of capabilities because numeric classes are not actually supported.
+Changes=Now supports multi-threading. Now also supports efficient batch prediction if base learners or meta learner provide this. No longer inherits from Stacking (to maintain backwards compatibility).
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/stackingC1.0.3.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/stackingC1.0.4.zip?download
 
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/stackingC
