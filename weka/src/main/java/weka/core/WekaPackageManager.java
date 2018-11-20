@@ -235,6 +235,12 @@ public class WekaPackageManager {
   /** The set of packages that the user has requested not to load */
   public static Set<String> m_doNotLoadList;
 
+  /**
+   * Holds how many times we've failed to establish the repository backup mirror
+   * URL
+   */
+  protected static int m_mirrorFailureCount;
+
   static {
     establishWekaHome();
     // make sure MTJ classes are injected to the root classloader
@@ -521,10 +527,10 @@ public class WekaPackageManager {
         }
       }
     } catch (Exception ex) {
-      ex.printStackTrace();
       log(weka.core.logging.Logger.Level.WARNING,
         "[WekaPackageManager] The repository meta data mirror file seems "
           + "to be unavailable (" + ex.getMessage() + ")");
+      m_mirrorFailureCount++;
     }
   }
 
@@ -1836,8 +1842,11 @@ public class WekaPackageManager {
    * data
    */
   private static void useCacheOrOnlineRepository() {
-    if (REP_MIRROR == null) {
+    if (REP_MIRROR == null && m_mirrorFailureCount < 3) {
       establishMirror();
+      if (REP_MIRROR == null) {
+        m_mirrorFailureCount++;
+      }
     }
 
     if (CACHE_URL != null) {
@@ -2862,8 +2871,8 @@ public class WekaPackageManager {
     Exception problem = null;
     BufferedReader br = null;
     PrintWriter pw = null;
-    File newPackageLastTimeCheckFile = new File(WEKA_HOME.toString()
-      + File.separator + "new_package_check.txt");
+    File newPackageLastTimeCheckFile =
+      new File(WEKA_HOME.toString() + File.separator + "new_package_check.txt");
     try {
       // first check against last time that new packages were checked for
       boolean doChecks = false;
@@ -2957,8 +2966,8 @@ public class WekaPackageManager {
         }
       }
 
-      //establishCacheIfNeeded(System.out);
-      //checkForNewPackages(System.out);
+      // establishCacheIfNeeded(System.out);
+      // checkForNewPackages(System.out);
       startupCheck(true, System.out);
 
       if (args.length == 0 || args[0].equalsIgnoreCase("-h")
