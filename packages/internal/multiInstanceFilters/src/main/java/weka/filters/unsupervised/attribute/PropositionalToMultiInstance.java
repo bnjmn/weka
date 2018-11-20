@@ -392,6 +392,7 @@ public class PropositionalToMultiInstance extends Filter implements
 
     /* create a new output format (multi-instance format) */
     Instances newData = instanceInfo.stringFreeStructure();
+    newData.setRelationName("bag");
     Attribute attBagIndex = (Attribute) newData.attribute(m_BagIndicator.getIndex()).copy();
     Attribute attClass = null;
     if (newData.classIndex() >= 0) {
