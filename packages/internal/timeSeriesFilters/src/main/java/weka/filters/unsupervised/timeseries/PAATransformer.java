@@ -415,29 +415,24 @@ public class PAATransformer extends SimpleStreamFilter
       Attribute attribute = getInputFormat().attribute(index);
 
       // time series must be relational
-      if (!attribute.isRelationValued())
-        throw new Exception(String.format(
-            "Attribute '%s' isn't relational!",
-            attribute.name()
-            ));
+      if (!attribute.isRelationValued()) {
+        throw new Exception(String.format("Attribute '%s' isn't relational!", attribute.name()));
+      }
       
       // time series must contain only numeric attributes
       Instances timeSeries = attribute.relation();
-      for (int i = 0; i < timeSeries.numAttributes(); i++)
-        if (!timeSeries.attribute(i).isNumeric())
-          throw new Exception(String.format(
-              "Attribute '%s' inside relational attribute '%s' isn't numeric!",
-              timeSeries.attribute(i).name(), attribute.name()
-              ));
-
+      for (int i = 0; i < timeSeries.numAttributes(); i++) {
+        if (!timeSeries.attribute(i).isNumeric()) {
+          throw new Exception(String.format("Attribute '%s' inside relational attribute '%s' isn't numeric!",
+                  timeSeries.attribute(i).name(), attribute.name()));
+        }
+      }
     }
     
     // initialize untouched string and relational attribute locators:
     m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
-    m_StringAttributes =
-        new StringLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
-    m_RelationalAttributes =
-        new RelationalLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
+    m_StringAttributes = new StringLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
+    m_RelationalAttributes = new RelationalLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
     m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
     
     return new Instances(inputFormat, 0);
@@ -448,7 +443,7 @@ public class PAATransformer extends SimpleStreamFilter
    * processes the given instance (may change the provided instance) and
    * returns the modified version</p>
    * 
-   * Will delegate time series processing to the {@link #transform(Instances)}
+   * Will delegate time series processing to the {@link #transform(Instances, Instances)}
    * method
    */
   @Override
@@ -456,41 +451,33 @@ public class PAATransformer extends SimpleStreamFilter
     
     assert inputInstance.dataset().equalHeaders(getInputFormat());
     
-    StringLocator.copyStringValues(inputInstance, getOutputFormat(),
-        m_StringAttributes);
-    RelationalLocator.copyRelationalValues(inputInstance, getOutputFormat(),
-        m_RelationalAttributes);
+    StringLocator.copyStringValues(inputInstance, outputFormatPeek(), m_StringAttributes);
+    RelationalLocator.copyRelationalValues(inputInstance, outputFormatPeek(), m_RelationalAttributes);
     
-    Instance outputInstance = null;
-    if (inputInstance instanceof DenseInstance) {
-      outputInstance = new DenseInstance(inputInstance.weight(),
-          Arrays.copyOf(inputInstance.toDoubleArray(), inputInstance.numAttributes()));
-    } else if (inputInstance instanceof SparseInstance) {
-      outputInstance = new SparseInstance(inputInstance.weight(),
-          Arrays.copyOf(inputInstance.toDoubleArray(), inputInstance.numAttributes()));
-    } else {
-      throw new Exception("Input instance is neither sparse nor dense!");
-    }
+    double[] outputInstance = inputInstance.toDoubleArray();
 
-    outputInstance.setDataset(getOutputFormat());
-    
     for (int index : m_TimeSeriesAttributes.getSelection()) {
 
-      if (inputInstance.isMissing(index))
+      if (inputInstance.isMissing(index)) {
         continue;
+      }
+
+      Instances timeSeries = inputInstance.relationalValue(inputInstance.attribute(index));
+
+      Attribute outputAttribute = outputFormatPeek().attribute(index);
+
+      Instances transformed = transform(timeSeries, outputAttribute.relation());
       
-      Instances timeSeries =
-          inputInstance.relationalValue(inputInstance.attribute(index));
+      int reference = outputAttribute.addRelation(transformed);
       
-      Instances transformed = transform(timeSeries);
-      
-      int reference = getOutputFormat().attribute(index).addRelation(transformed);
-      
-      outputInstance.setValue(index, (double) reference);
+      outputInstance[index] = (double) reference;
 
     }
-    
-    return outputInstance;
+
+    Instance outInstance = inputInstance.copy(outputInstance);
+    outInstance.setDataset(outputFormatPeek());
+
+    return outInstance;
   }
   
   /**
@@ -507,10 +494,12 @@ public class PAATransformer extends SimpleStreamFilter
    * case!</p>
    * 
    * @param input the time series to be transformed
+   * @param outputFormat the format of the output data (not used in this super class method)
+   *
    * @return the transformed time series
    * @throws Exception
    */
-  protected Instances transform(Instances input) throws Exception {
+  protected Instances transform(Instances input, Instances outputFormat) throws Exception {
     
     /* A word on this implementation:
      * 
@@ -584,8 +573,7 @@ public class PAATransformer extends SimpleStreamFilter
       
       instanceUpperBoundary = instanceLowerBoundary + input.get(i).weight();
       
-      if (instanceUpperBoundary >= segmentUpperBoundary
-          && segmentUpperBoundary - instanceLowerBoundary < segmentSize) {
+      if (instanceUpperBoundary >= segmentUpperBoundary && segmentUpperBoundary - instanceLowerBoundary < segmentSize) {
 
         // yield new segment
         final double weight = segmentUpperBoundary - instanceLowerBoundary;
@@ -604,8 +592,7 @@ public class PAATransformer extends SimpleStreamFilter
       while (instanceUpperBoundary >= segmentUpperBoundary) {
 
         // yield new segment
-        output.add(new DenseInstance(segmentSize,
-            Arrays.copyOf(input.get(i).toDoubleArray(), input.numAttributes())));
+        output.add(new DenseInstance(segmentSize, input.get(i).toDoubleArray()));
         segmentLowerBoundary = segmentUpperBoundary;
         segmentUpperBoundary = ++segmentIndex*segmentSize;
         sumValues = new double[input.numAttributes()];
@@ -615,16 +602,13 @@ public class PAATransformer extends SimpleStreamFilter
       assert instanceUpperBoundary < segmentUpperBoundary;
       
       // add remaining to current segment
-      final double weight = Math.min(
-          input.get(i).weight(),
-          instanceUpperBoundary - segmentLowerBoundary
-          );
+      final double weight = Math.min(input.get(i).weight(), instanceUpperBoundary - segmentLowerBoundary);
 
-      for (int att = 0; att < input.numAttributes(); att++)
-        sumValues[att] += input.get(i).value(att)*weight;
+      for (int att = 0; att < input.numAttributes(); att++) {
+        sumValues[att] += input.get(i).value(att) * weight;
+      }
 
       instanceLowerBoundary = instanceUpperBoundary;
-
     }
     
     return output;

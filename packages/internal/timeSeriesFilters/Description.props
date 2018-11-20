@@ -5,10 +5,10 @@
 PackageName=timeSeriesFilters
 
 # Version (required)
-Version=1.0.0
+Version=1.0.1
 
 #Date (year-month-day)
-Date=2015-02-02
+Date=2018-11-20
 
 # Title (required)
 Title=Time Series Filters
@@ -28,8 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Provides a set of filters for time series. Currently contains PAA and SAX transformation filters and a filter that converts symbolic time series to string attribute values. The time series need to be given as values of a relation-valued attribute in the ARFF file. For example data in ARFF format, check the data directory of this package.
 
+Changes=Fixed bug where filtering did not work when the relation name of the nested relation did not match the name of the relation-valued attribute. Also implemented some efficiency improvements by replacing setValue() calls.
+
 # Package URL for obtaining the package archive (required)
-http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.0.zip?download
+http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.1.zip?download
 	
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/timeSeriesFilters
