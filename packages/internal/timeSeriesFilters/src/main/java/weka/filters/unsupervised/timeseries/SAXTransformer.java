@@ -115,8 +115,7 @@ public class SAXTransformer extends PAATransformer {
     if (m_AlphabetSize == DEFAULT_ALPHABET_SIZE)
       return super.getOptions();
     
-    List<String> options = new ArrayList<String>(
-        Arrays.asList(super.getOptions()));
+    List<String> options = new ArrayList<String>(Arrays.asList(super.getOptions()));
 
     options.add("-A");
     options.add("" + m_AlphabetSize);
@@ -159,16 +158,13 @@ public class SAXTransformer extends PAATransformer {
   public void setOptions(String[] options) throws Exception {
 
     String a = Utils.getOption('A', options);
-    if (a.length() != 0)
+    if (a.length() != 0) {
       m_AlphabetSize = Integer.parseInt(a);
-
-    if (m_AlphabetSize <= 0)
+    }
+    if (m_AlphabetSize <= 0) {
       throw new Exception("Parameter M must be bigger than 0!");
-
+    }
     super.setOptions(options);
-
-    if (getInputFormat() != null)
-      setInputFormat(getInputFormat());
 
     Utils.checkForRemainingOptions(options);
     
@@ -254,24 +250,18 @@ public class SAXTransformer extends PAATransformer {
     m_Betas = generateBetas(m_AlphabetSize);
     
     ArrayList<Attribute> attributes = new ArrayList<Attribute>(inputFormat.numAttributes());
-    
     for (int att = 0; att < inputFormat.numAttributes(); att++) {
       if (!m_TimeSeriesAttributes.isInRange(att)) {
         attributes.add((Attribute) inputFormat.attribute(att).copy());
         continue;
       }
-      
-      Instances timeSeries = inputFormat.attribute(att).relation();
-      
+      Instances timeSeries = inputFormat.attribute(att).relation().stringFreeStructure();
       ArrayList<Attribute> timeSeriesAttributes = new ArrayList<Attribute>(timeSeries.numAttributes());
-      
       for (int i = 0; i < timeSeries.numAttributes(); i++) {
         timeSeriesAttributes.add(new Attribute(timeSeries.attribute(i).name(), alphabet));
       }
-      
       Instances newTimeSeries = new Instances(timeSeries.relationName(), timeSeriesAttributes, 0);
       newTimeSeries.setClassIndex(timeSeries.classIndex());
-
       attributes.add(new Attribute(inputFormat.attribute(att).name(), newTimeSeries));
     }
 
@@ -307,15 +297,12 @@ public class SAXTransformer extends PAATransformer {
     
     // discretize real values into SAX symbols
     for (int i = 0; i < inputInstances.numInstances(); i++) {
-
       Instance inputInstance = inputInstances.instance(i);
       double[] instance = inputInstance.toDoubleArray();
-
       for (int att = 0; att < inputInstances.numAttributes(); att++) {
-        instance[att] = binarySearchIntoBetas(m_Betas, inputInstance.value(att));
+        instance[att] = binarySearchIntoBetas(m_Betas, instance[att]);
       }
-
-      outputInstances.add(inputInstances.instance(i).copy(instance));
+      outputInstances.add(inputInstance.copy(instance));
     }
 
     return outputInstances;

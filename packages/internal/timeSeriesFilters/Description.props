@@ -26,9 +26,9 @@ Maintainer=Weka team <wekalist@list.scms.waikato.ac.nz>
 License=GPL 3.0
 
 # Description (required)
-Description=Provides a set of filters for time series. Currently contains PAA and SAX transformation filters and a filter that converts symbolic time series to string attribute values. The time series need to be given as values of a relation-valued attribute in the ARFF file. For example data in ARFF format, check the data directory of this package.
+Description=Provides a set of filters for time series. Currently contains PAA and SAX transformation filters and a filter that converts symbolic time series to string attribute values. The time series for these filters need to be given as values of a relation-valued attribute in the ARFF file. For example data in ARFF format, check the data directory of this package. There is also a filter, FlatToRelational, which can convert time series of fixed length given in a flat file into relational format for further processing.
 
-Changes=Fixed bug where filtering did not work when the relation name of the nested relation did not match the name of the relation-valued attribute. Also implemented some efficiency improvements by replacing setValue() calls.
+Changes=Fixed bug where filtering did not work when the relation name of the nested relation did not match the name of the relation-valued attribute. Also implemented some efficiency improvements. Added FlatToRelational.
 
 # Package URL for obtaining the package archive (required)
 http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.1.zip?download

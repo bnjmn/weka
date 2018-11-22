@@ -25,6 +25,9 @@ import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+
+import com.sun.javafx.util.Utils;
+import weka.classifiers.meta.FilteredClassifier;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.Instance;
@@ -32,6 +35,8 @@ import weka.core.Instances;
 import weka.core.WekaException;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
+import weka.filters.MultiFilter;
+import weka.filters.unsupervised.attribute.StringToWordVector;
 
 /**
  * JUnit tests for the {@link FlatToRelational}.
@@ -49,13 +54,44 @@ public class FlatToRelationalTest extends AbstractFilterTest {
     super(name);
   }
 
-  public void testDetermineOutputFormat() {}
+  /**
+   * Called by JUnit before each test method. This implementation creates
+   * the default filter to test and loads a test set of Instances.
+   *
+   * @throws Exception if an error occurs reading the example instances.
+   */
+  protected void setUp() throws Exception {
+    super.setUp();
+    m_Instances = makeTestDataset(0, 100, 0, 100, 0, 0, 0, 2, Attribute.NOMINAL, 100);
+    FilteredClassifier fc = new FilteredClassifier();
+    MultiFilter mf = new MultiFilter();
+    Filter[] fs = new Filter[3];
+    fs[0] = new SAXTransformer();
+    fs[0].setOptions(weka.core.Utils.splitOptions("-R first"));
+    fs[1] = new OneDimensionalTimeSeriesToString();
+    fs[1].setOptions(weka.core.Utils.splitOptions("-R first"));
+    fs[2] = new StringToWordVector();
+    fs[2].setOptions(weka.core.Utils.splitOptions("-tokenizer .CharacterNGramTokenizer"));
+    mf.setFilters(fs);
+    fc.setFilter(mf);
+    m_FilteredClassifier.setClassifier(fc);
+  }
 
   /**
-   * Test filtering for different attribute types.
+   * returns data generated for the FilteredClassifier test
    *
-   * @throws Exception Something went wrong
+   * @return		the dataset for the FilteredClassifier
+   * @throws Exception	if generation of data fails
    */
+  protected Instances getFilteredClassifierData() throws Exception {
+    return makeTestDataset(0, 100, 0, 100, 0, 0, 0, 2, Attribute.NOMINAL, 100);
+  }
+
+    /**
+     * Test filtering for different attribute types.
+     *
+     * @throws Exception Something went wrong
+     */
   public void testProcess() throws Exception {
     Instances[] datasets =
         new Instances[] {
@@ -222,8 +258,8 @@ public class FlatToRelationalTest extends AbstractFilterTest {
     Instances generated = makeTestDataset(0, 100, 0, 10, 0, 0, 0, 2, Attribute.NOMINAL, 10);
 
     FlatToRelational filter = getFilter("1-9", 2, true);
-    filter.setInputFormat(generated);
     try {
+      filter.setInputFormat(generated);
       Filter.useFilter(generated, filter);
       fail(
           "9 attributes have been selected while the number of timeseries variables "
@@ -234,8 +270,8 @@ public class FlatToRelationalTest extends AbstractFilterTest {
 
     filter = getFilter("1-10", 2, true);
     generated = makeTestDataset(0, 100, 4, 4, 4, 4, 4, 2, Attribute.NOMINAL, 20);
-    filter.setInputFormat(generated);
     try {
+      filter.setInputFormat(generated);
       Filter.useFilter(generated, filter);
       fail("The attributes types do not match in the given range. Exception expected.");
     } catch (WekaException we) {
@@ -244,8 +280,8 @@ public class FlatToRelationalTest extends AbstractFilterTest {
 
     filter = getFilter("1-10", -1, true);
     generated = makeTestDataset(0, 100, 4, 4, 4, 4, 4, 2, Attribute.NOMINAL, 20);
-    filter.setInputFormat(generated);
     try {
+      filter.setInputFormat(generated);
       Filter.useFilter(generated, filter);
       fail("The number of variables was set to -1. Exception expected.");
     } catch (WekaException we) {
@@ -269,7 +305,7 @@ public class FlatToRelationalTest extends AbstractFilterTest {
     final FlatToRelational f = new FlatToRelational();
     f.setNumVariables(numVariables);
     f.setRange(range);
-    f.setKeepOtherAttributes(keepOtherAttributes);
+    f.setDoNotKeepOtherAttributes(!keepOtherAttributes);
     return f;
   }
 }

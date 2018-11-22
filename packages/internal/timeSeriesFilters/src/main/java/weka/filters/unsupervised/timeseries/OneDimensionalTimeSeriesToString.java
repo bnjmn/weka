@@ -42,7 +42,9 @@ import weka.filters.SimpleStreamFilter;
 
 /**
  * <!-- globalinfo-start -->
- * A filter to concatenate the string representation of each data point of a one dimensional time series.
+ * A filter to concatenate the string representations of data points of a one dimensional time series that are given
+ * as values of a relational attribute (e.g., output of the SAXTransformer). This can then be processed with tools
+ * such as the StringToWordVector filter.
  * <p/>
  * <!-- globalinfo-end -->
  * 
@@ -74,14 +76,7 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
   }
   
   /** which attributes to transform (must be time series) */
-  private Range m_TimeSeriesAttributes = 
-      new Range(getDefaultAttributes().getRanges());
-
-  /** attribute locations of untouched strings */
-  private StringLocator m_StringAttributes = null;
-  
-  /** attribute locations of untouched relations */
-  private RelationalLocator m_RelationalAttributes = null;
+  private Range m_TimeSeriesAttributes = new Range(getDefaultAttributes().getRanges());
 
   /**
    * Returns the Capabilities of this filter.    
@@ -134,7 +129,7 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
     
     List<String> options = new ArrayList<String>();
     
-    if (!m_TimeSeriesAttributes.equals(getDefaultAttributes())) {
+    if (!m_TimeSeriesAttributes.getRanges().equals("")) {
       options.add("-R");
       options.add(m_TimeSeriesAttributes.getRanges());
     }
@@ -170,15 +165,11 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
   public void setOptions(String[] options) throws Exception {
     
     String timeSeriesAttributes = Utils.getOption('R', options);
-    if (timeSeriesAttributes.length() != 0)
+    if (timeSeriesAttributes.length() != 0) {
       m_TimeSeriesAttributes = new Range(timeSeriesAttributes);
-    
-    if (Utils.getFlag('V', options))
-      m_TimeSeriesAttributes.setInvert(true);
-    
-    if (getInputFormat() != null)
-      setInputFormat(getInputFormat());
-    
+    }
+    m_TimeSeriesAttributes.setInvert(Utils.getFlag('V', options));
+
     Utils.checkForRemainingOptions(options);
   }
  
@@ -239,21 +230,37 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
   @Override
   public String globalInfo() {
     return
-        "A filter to concatenate the string representation of each data" +
-        " point of a one dimensional time series."
-    ;
-  
+        "A filter to concatenate the string representations of data points of a one dimensional time series " +
+                "that are given as values of a relational attribute (e.g., output of the SAXTransformer). " +
+                "This can then be processed with tools such as the StringToWordVector filter.";
   }
 
   /**
-   * Returns true if the output format is immediately available after the input
-   * format has been set and not only after all the data has been seen (see batchFinished()).
-   * 
-   * @return <code>true</code>
+   * This method needs to be called before the filter is used to transform instances. Will return true
+   * for this filter because the output format can be collected immediately.
+   *
+   * This specialised version of setInputFormat() calls the setInputFormat() method in SimpleFilter and then sets the
+   * output locators for relational and string attributes correctly. We also set the input locators correctly here.
    */
   @Override
-  protected boolean hasImmediateOutputFormat() {
-    return true;
+  public boolean setInputFormat(Instances instanceInfo) throws Exception {
+    super.setInputFormat(instanceInfo);
+
+    // Find attributes that have not been selected
+    m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
+
+    // Make sure only string and relational attributes that are not in the selected range for the time
+    // series are covered by the output locators.
+    initOutputLocators(outputFormatPeek(), m_TimeSeriesAttributes.getSelection());
+
+    // Make sure only string and relational attributes that are not in the selected range for the time
+    // series are covered by the input locators.
+    initInputLocators(inputFormatPeek(), m_TimeSeriesAttributes.getSelection());
+
+    // Restore selected attributes
+    m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
+
+    return hasImmediateOutputFormat();
   }
 
   /**
@@ -263,48 +270,26 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
    * @return the output format
    */
   @Override
-  protected Instances determineOutputFormat(Instances inputFormat)
-      throws Exception {
+  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
     
     m_TimeSeriesAttributes.setUpper(inputFormat.numAttributes() - 1);
     
-    ArrayList<Attribute> newAttributes =
-        new ArrayList<Attribute>(inputFormat.numAttributes());
-
+    ArrayList<Attribute> newAttributes = new ArrayList<Attribute>(inputFormat.numAttributes());
     for (int att = 0; att < inputFormat.numAttributes(); att++) {
       newAttributes.add((Attribute) inputFormat.attribute(att).copy());
     }
 
-    Instances outputFormat = new Instances(inputFormat.relationName(),
-        newAttributes, 0);
-    
+    Instances outputFormat = new Instances(inputFormat.relationName(), newAttributes, 0);
     for (int index : m_TimeSeriesAttributes.getSelection()) {
       if (!inputFormat.attribute(index).isRelationValued()) {
-        throw new Exception(String.format(
-            "Attribute '%s' isn't relational!",
-            inputFormat.attribute(index).name()
-            ));
+        throw new Exception(String.format("Attribute '%s' isn't relational!", inputFormat.attribute(index).name()));
       }
-      
-      if (inputFormat.attribute(index).relation().numAttributes() != 1)
+      if (inputFormat.attribute(index).relation().numAttributes() != 1) {
         throw new Exception(String.format("More than one dimension!",
-            inputFormat.attribute(index).relation().numAttributes() + "(%d)"
-        ));
-     
-      outputFormat.replaceAttributeAt(
-          new Attribute(inputFormat.attribute(index).name(), (List<String>) null),
-          index);
-
+                inputFormat.attribute(index).relation().numAttributes() + "(%d)"));
+      }
+      outputFormat.replaceAttributeAt(new Attribute(inputFormat.attribute(index).name(), (List<String>) null), index);
     }
-    
-    // initialize untouched string and relational attribute locators:
-    m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
-    m_StringAttributes =
-        new StringLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
-    m_RelationalAttributes =
-        new RelationalLocator(inputFormat, m_TimeSeriesAttributes.getSelection());
-    m_TimeSeriesAttributes.setInvert(!m_TimeSeriesAttributes.getInvert());
-    
     outputFormat.setClassIndex(inputFormat.classIndex());
     
     return outputFormat;
@@ -312,52 +297,34 @@ public class OneDimensionalTimeSeriesToString extends SimpleStreamFilter {
 
 
   /**
-   * Processes the provided instance
+   * Processes the provided instance.
    * 
    * @param inputInstance the instance that should be processed
    * @return the processed instance
    */
   @Override
   protected Instance process(Instance inputInstance) throws Exception {
-    
-    StringLocator.copyStringValues(inputInstance, getOutputFormat(),
-        m_StringAttributes);
-    RelationalLocator.copyRelationalValues(inputInstance, getOutputFormat(),
-        m_RelationalAttributes);
 
-    Instance outputInstance = null;
-    if (inputInstance instanceof DenseInstance) {
-      outputInstance = new DenseInstance(inputInstance.weight(),
-          Arrays.copyOf(inputInstance.toDoubleArray(), inputInstance.numAttributes()));
-    } else if (inputInstance instanceof SparseInstance) {
-      outputInstance = new SparseInstance(inputInstance.weight(),
-          Arrays.copyOf(inputInstance.toDoubleArray(), inputInstance.numAttributes()));
-    } else {
-      throw new Exception("Input instance is neither sparse nor dense!");
-    }
+    double[] outputInstance = inputInstance.toDoubleArray();
 
-    outputInstance.setDataset(getOutputFormat());
-    
     for (int index : m_TimeSeriesAttributes.getSelection()) {
-      
-      if (inputInstance.isMissing(index))
+      if (inputInstance.isMissing(index)) {
         continue;
-      
+      }
       Instances timeSeries = inputInstance.relationalValue(index);
       StringBuilder str = new StringBuilder();
-      
       for (int i = 0; i < timeSeries.numInstances(); i++) {
         str.append(timeSeries.get(i).toString(0));
       }
-      
-      int stringIndex = getOutputFormat().attribute(index).addStringValue(str.toString());
-      
-      outputInstance.setValue(index, stringIndex);
-      
+      outputInstance[index] = outputFormatPeek().attribute(index).addStringValue(str.toString());
     }
-      
-    return outputInstance;
-  }
 
+    // Create new instance and make sure string and relational values are copied from input to output
+    Instance outInstance = inputInstance.copy(outputInstance);; // Note that this will copy the reference to the input dataset!
+    outInstance.setDataset(null); // Make sure we do not class the copyValues() method in push()
+    copyValues(outInstance, false, inputInstance.dataset(), outputFormatPeek()); // Copy string and relational values
+
+    return outInstance;
+  }
 }
 
