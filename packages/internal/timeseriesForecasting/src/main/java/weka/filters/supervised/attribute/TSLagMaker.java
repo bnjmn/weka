@@ -101,7 +101,7 @@ public class TSLagMaker extends Filter implements SupervisedFilter,
   private static final long serialVersionUID = -1697901820770907975L;
 
   /** The names of the fields to create lagged variables for */
-  protected List<String> m_fieldsToLag = null;
+    protected List<String> m_fieldsToLag = new ArrayList<>();
 
   /**
    * The names of the fields to be considered "overlay" data - i.e. we will be
@@ -745,16 +745,14 @@ public class TSLagMaker extends Filter implements SupervisedFilter,
   @Override
   public void setOptions(String[] options) throws Exception {
     String fieldsToLag = Utils.getOption('F', options);
-    if (fieldsToLag.length() == 0) {
-      throw new Exception("Must specify the name of at least one field "
-        + "to create lags for!");
+    if (fieldsToLag.length() > 0) {	
+	String[] fieldNames = fieldsToLag.split(",");
+	List<String> fieldList = new ArrayList<String>();
+	for (String f : fieldNames) {
+	    fieldList.add(f);
+	}
+	setFieldsToLag(fieldList);
     }
-    String[] fieldNames = fieldsToLag.split(",");
-    List<String> fieldList = new ArrayList<String>();
-    for (String f : fieldNames) {
-      fieldList.add(f);
-    }
-    setFieldsToLag(fieldList);
 
     String overlayFields = Utils.getOption("overlay", options);
     if (overlayFields.length() > 0) {
