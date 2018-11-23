@@ -31,7 +31,7 @@ Description=Provides a set of filters for time series. Currently contains PAA an
 Changes=Fixed bug where filtering did not work when the relation name of the nested relation did not match the name of the relation-valued attribute. Also implemented some efficiency improvements. Added FlatToRelational.
 
 # Package URL for obtaining the package archive (required)
-http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.1.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/timeSeriesFilters1.0.1.zip?download
 	
 # URL for further information
 URL=http://weka.sourceforge.net/doc.packages/timeSeriesFilters
