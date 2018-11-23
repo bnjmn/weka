@@ -103,6 +103,7 @@
      <copy todir="${build}/testcases">
        <fileset dir="${src-test}">
           <include name="**/*.arff"/>
+	  <include name="**/*.ref"/>
           <include name="**/*.cost"/>
           <include name="**/*.xml"/>
           <include name="**/*.matrix"/>
