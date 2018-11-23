@@ -28,6 +28,9 @@ import weka.core.Instances;
 import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 
+import junit.framework.Test;
+import junit.framework.TestSuite;
+
 /**
  * Tests for the {@link OneDimensionalTimeSeriesToString} filter
  * 
@@ -216,4 +219,21 @@ public class OneDimensionalTimeSeriesToStringTest extends AbstractFilterTest {
     return filter;
   }
 
+  /**
+   * Returns a test suite.
+   * 
+   * @return		test suite
+   */
+  public static Test suite() {
+    return new TestSuite(OneDimensionalTimeSeriesToStringTest.class);
+  }
+
+  /**
+   * Runs the test from command-line.
+   * 
+   * @param args	ignored
+   */
+  public static void main(String[] args){
+    junit.textui.TestRunner.run(suite());
+  }
 }

@@ -37,6 +37,8 @@ import weka.filters.AbstractFilterTest;
 import weka.filters.Filter;
 import weka.filters.MultiFilter;
 import weka.filters.unsupervised.attribute.StringToWordVector;
+import junit.framework.Test;
+import junit.framework.TestSuite;
 
 /**
  * JUnit tests for the {@link FlatToRelational}.
@@ -308,4 +310,23 @@ public class FlatToRelationalTest extends AbstractFilterTest {
     f.setDoNotKeepOtherAttributes(!keepOtherAttributes);
     return f;
   }
+
+  /**
+   * Returns a test suite.
+   * 
+   * @return		test suite
+   */
+  public static Test suite() {
+    return new TestSuite(FlatToRelationalTest.class);
+  }
+
+
+    /**
+     * Runs the test from command-line.
+     * 
+     * @param args ignored
+     */
+    public static void main(String[] args){
+	junit.textui.TestRunner.run(suite());
+    }
 }
