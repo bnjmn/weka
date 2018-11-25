@@ -427,7 +427,7 @@ public class SparseInstance extends AbstractInstance {
   }
 
   /**
-   * Returns the values of each attribute as an array of doubles.
+   * Returns the values of each attribute as an array of doubles. Creates a fresh array object for this.
    * 
    * @return an array containing all the instance attribute values
    */
