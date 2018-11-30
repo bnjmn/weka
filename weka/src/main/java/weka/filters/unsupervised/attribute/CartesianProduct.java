@@ -323,12 +323,11 @@ public class CartesianProduct extends SimpleBatchFilter {
         } else {
           newVals[newVals.length - 1] = result.attribute(result.numAttributes() - 1).indexOfValue(value);;
         }
-        if (inst instanceof DenseInstance) {
-          result.add(new DenseInstance(inst.weight(), newVals));
-        } else {
-          result.add(new SparseInstance(inst.weight(), newVals));
-        }
+        Instance newInst = inst.copy(newVals);
+        copyValues(newInst, false, inst.dataset(), result);
+        result.add(newInst);
       } else {
+        copyValues(inst, false, inst.dataset(), result);
         result.add(inst);
       }
     }
