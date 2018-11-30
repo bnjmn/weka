@@ -20,19 +20,17 @@
 
 package weka.filters.unsupervised.attribute;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.Random;
-import java.util.Vector;
+import java.util.*;
 
 import weka.core.*;
 import weka.core.Capabilities.Capability;
-import weka.filters.SimpleStreamFilter;
+import weka.filters.SimpleBatchFilter;
+
 
 /**
  <!-- globalinfo-start -->
- * Chooses a random subset of attributes, either an absolute number or a percentage. The class is always included in the output (as the last attribute).
+ * Chooses a random subset of non-class attributes, either an absolute number or a percentage. Attributes are included
+ * in the order in which they occur in the input data. The class attribute (if present) is always included in the output.
  * <p/>
  <!-- globalinfo-end -->
  * 
@@ -65,7 +63,7 @@ import weka.filters.SimpleStreamFilter;
  * @author eibe@cs.waikato.ac.nz
  * @version $Revision$
  */
-public class RandomSubset extends SimpleStreamFilter
+public class RandomSubset extends SimpleBatchFilter
         implements Randomizable, WeightedInstancesHandler, WeightedAttributesHandler {
 
   /** for serialization. */
@@ -94,9 +92,9 @@ public class RandomSubset extends SimpleStreamFilter
    */
   @Override
   public String globalInfo() {
-    return "Chooses a random subset of attributes, either an absolute number "
-      + "or a percentage. The class is always included in the output ("
-      + "as the last attribute).";
+    return "Chooses a random subset of non-class attributes, either an absolute number "
+      + "or a percentage. Attributes are included in the order in which they occur in the input data. The class "
+      + "attribute (if present) is always included in the output.";
   }
 
   /**
@@ -316,6 +314,17 @@ public class RandomSubset extends SimpleStreamFilter
   }
 
   /**
+   * Returns whether to allow the determineOutputFormat(Instances) method access
+   * to the full dataset rather than just the header.
+   * <p/>
+   *
+   * @return true for this filter so that input data can affect subset of attributes that is selected
+   */
+  public boolean allowAccessToFullInputFormat() {
+    return true;
+  }
+
+  /**
    * Determines the output format based on the input format and returns this. In
    * case the output format cannot be returned immediately, i.e.,
    * hasImmediateOutputFormat() returns false, then this method will called from
@@ -327,74 +336,85 @@ public class RandomSubset extends SimpleStreamFilter
    * @throws Exception in case the determination goes wrong
    */
   @Override
-  protected Instances determineOutputFormat(Instances inputFormat)
-    throws Exception {
-    Instances result;
-    ArrayList<Attribute> atts;
-    int i;
-    int numAtts;
-    Vector<Integer> indices;
-    Vector<Integer> subset;
-    Random rand;
-    int index;
+  protected Instances determineOutputFormat(Instances inputFormat) throws Exception {
 
     // determine the number of attributes
-    numAtts = inputFormat.numAttributes();
+    int numAttsWithoutClass = inputFormat.numAttributes();
     if (inputFormat.classIndex() > -1) {
-      numAtts--;
+      numAttsWithoutClass--;
     }
 
+    int sizeOfSample = 0;
     if (m_NumAttributes < 1) {
-      numAtts = (int) Math.round(numAtts * m_NumAttributes);
+      sizeOfSample = (int) Math.round(numAttsWithoutClass * m_NumAttributes);
     } else {
-      if (m_NumAttributes < numAtts) {
-        numAtts = (int) m_NumAttributes;
+      if (m_NumAttributes < numAttsWithoutClass) {
+        sizeOfSample = (int) m_NumAttributes;
       }
     }
     if (getDebug()) {
-      System.out.println("# of atts: " + numAtts);
+      System.out.println("# of atts: " + sizeOfSample);
     }
 
-    // determine random indices
-    indices = new Vector<Integer>();
-    for (i = 0; i < inputFormat.numAttributes(); i++) {
-      if (i == inputFormat.classIndex()) {
-        continue;
-      }
-      indices.add(i);
-    }
+    // Get a random number generator that depends on the particular dataset passed in
+    Random rand = inputFormat.getRandomNumberGenerator(getSeed());
 
-    subset = new Vector<Integer>();
-    rand = new Random(m_Seed);
-    for (i = 0; i < numAtts; i++) {
-      index = rand.nextInt(indices.size());
-      subset.add(indices.get(index));
-      indices.remove(index);
-    }
+    // The random indices (we will need to take care of the class attribute)
+    int[] indices = RandomSample.drawSortedSample(sizeOfSample, numAttsWithoutClass, rand);
 
+    // Do we need to take the inverse?
     if (m_invertSelection) {
-      subset = indices;
+      int[] newIndices = new int[numAttsWithoutClass - indices.length];
+      int index = 0;
+      int indexNew = 0;
+      int i = 0;
+      while ((i < numAttsWithoutClass)) {
+        while ((indexNew < newIndices.length) && ((indices.length <= index) || (i < indices[index]))) {
+          newIndices[indexNew++] = i++;
+        }
+        index++;
+        i++;
+      }
+      indices = newIndices;
     }
 
-    Collections.sort(subset);
+    // Make a new list of indices, taking care of the class
+    List<Integer> selected  = new ArrayList<>();
+    int newClassIndex = -1;
     if (inputFormat.classIndex() > -1) {
-      subset.add(inputFormat.classIndex());
+      for (int i = 0; i < indices.length; i++) {
+        int index = indices[i];
+        if (index < inputFormat.classIndex()) {
+          selected.add(index);
+        } else {
+          selected.add(index + 1);
+        }
+      }
+      newClassIndex = -Collections.binarySearch(selected, inputFormat.classIndex()) - 1;
+      selected.add(newClassIndex, inputFormat.classIndex());
+    } else {
+      for (int i = 0; i < indices.length; i++) {
+        selected.add(indices[i]);
+      }
     }
+
     if (getDebug()) {
-      System.out.println("indices: " + subset);
+      System.out.println("Selected indices: " + selected);
     }
 
     // generate output format
-    atts = new ArrayList<Attribute>();
-    m_Indices = new int[subset.size()];
-    for (i = 0; i < subset.size(); i++) {
-      atts.add((Attribute)inputFormat.attribute(subset.get(i)).copy());
-      m_Indices[i] = subset.get(i);
+    ArrayList<Attribute> atts = new ArrayList<>();
+    m_Indices = new int[selected.size()];
+    for (int i = 0; i < selected.size(); i++) {
+      atts.add((Attribute)inputFormat.attribute(selected.get(i)).copy());
+      m_Indices[i] = selected.get(i);
     }
-    result = new Instances(inputFormat.relationName(), atts, 0);
+    Instances result = new Instances(inputFormat.relationName(), atts, 0).stringFreeStructure();
     if (inputFormat.classIndex() > -1) {
-      result.setClassIndex(result.numAttributes() - 1);
+      result.setClassIndex(newClassIndex);
     }
+
+    initInputLocators(inputFormatPeek(), m_Indices);
 
     return result;
   }
@@ -403,57 +423,48 @@ public class RandomSubset extends SimpleStreamFilter
    * processes the given instance (may change the provided instance) and returns
    * the modified version.
    * 
-   * @param instance the instance to process
+   * @param instances the instance to process
    * @return the modified data
    * @throws Exception in case the processing goes wrong
    */
   @Override
-  protected Instance process(Instance instance) throws Exception {
-    Instance result;
+  protected Instances process(Instances instances) throws Exception {
 
-    if (instance instanceof SparseInstance) {
-      int n1 = instance.numValues();
-      int classIndex = getInputFormat().classIndex();
-      int n2 = classIndex >= 0 ? m_Indices.length : m_Indices.length - 1;
-      int[] indices = new int[instance.numValues()];
-      double[] values = new double[instance.numValues()];
-      int vals = 0;
-      double classValue = 0;
-      boolean classFound = false;
-      for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2;) {
-        int ind1 = instance.index(p1);
-        int ind2 = m_Indices[p2];
-        if (ind1 == classIndex) {
-          classFound = true;
-          classValue = instance.valueSparse(p1);
-          p1++;
-        } else if (ind1 == ind2) {
-          indices[vals] = p2;
-          values[vals] = instance.valueSparse(p1);
-          vals++;
-          p1++;
-          p2++;
-        } else if (ind1 > ind2) {
-          p2++;
-        } else {
-          p1++;
+    Instances result = new Instances(outputFormatPeek(), 0);
+    for (Instance instance : instances) {
+      Instance newInstance;
+      if (instance instanceof SparseInstance) {
+        int n1 = instance.numValues();
+        int n2 = m_Indices.length;
+        int[] indices = new int[instance.numValues()];
+        double[] values = new double[instance.numValues()];
+        int vals = 0;
+        for (int p1 = 0, p2 = 0; p1 < n1 && p2 < n2; ) {
+          int ind1 = instance.index(p1);
+          int ind2 = m_Indices[p2];
+          if (ind1 == ind2) {
+            indices[vals] = p2;
+            values[vals] = instance.valueSparse(p1);
+            vals++;
+            p1++;
+            p2++;
+          } else if (ind1 > ind2) {
+            p2++;
+          } else {
+            p1++;
+          }
         }
+        newInstance = new SparseInstance(instance.weight(), values, indices, m_Indices.length);
+      } else {
+        double[] values = new double[m_Indices.length];
+        for (int i = 0; i < m_Indices.length; i++) {
+          values[i] = instance.value(m_Indices[i]);
+        }
+        newInstance = new DenseInstance(instance.weight(), values);
       }
-      if (classFound) {
-        indices[vals] = outputFormatPeek().numAttributes() - 1;
-        values[vals] = classValue;
-      }
-      result = new SparseInstance(instance.weight(), values, indices, m_Indices.length);
-    } else {
-      double[] values = new double[m_Indices.length];
-      for (int i = 0; i < m_Indices.length; i++) {
-        values[i] = instance.value(m_Indices[i]);
-      }
-      result = new DenseInstance(instance.weight(), values);
+      copyValues(newInstance, false, instance.dataset(), result);
+      result.add(newInstance);
     }
-
-    copyValues(result, false, instance.dataset(), outputFormatPeek());
-
     return result;
   }
 

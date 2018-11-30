@@ -264,7 +264,7 @@ public class PlotData2D implements Serializable {
    */
   public void setShapeSize(int[] ss) throws Exception {
     m_shapeSize = ss;
-    if (m_shapeType.length != m_plotInstances.numInstances()) {
+    if (m_shapeSize.length != m_plotInstances.numInstances()) {
       throw new Exception("PlotData2D: Shape size array must have the same "
         + "number of entries as number of data points!");
     }
@@ -323,7 +323,7 @@ public class PlotData2D implements Serializable {
         + "same number of entries as number of data points!");
     }
     // System.err.println("Setting connect points ");
-    m_shapeSize = new int[cp.size()];
+    m_connectPoints = new boolean[cp.size()];
     for (int i = 0; i < cp.size(); i++) {
       m_connectPoints[i] = cp.get(i).booleanValue();
     }

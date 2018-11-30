@@ -143,14 +143,14 @@ public class RandomSample {
    * Draws n distinct integers from 0, 1, ..., N - 1, randomly ordered, using a partial Fisher-Yates shuffle
    * and a hash map. The idea of using a hash map is from
    * <p>
-   * D.N. Bui (2015) "Cachediff: Fast Random Sampling" https://arxiv.org/abs/1512.00501
+   * D.N. Bui (2015) "CacheDiff: Fast Random Sampling" https://arxiv.org/abs/1512.00501
    * <p>
    * This algorithm has time and space complexity O(n). Useful if n << N.
    */
   public static int[] drawSparseSample(int n, int N, Random r) throws IllegalArgumentException {
 
     if ((n > N) || (n < 0) || (N < 0)) {
-      throw new IllegalArgumentException("drawSparseSampl: cannot sample" + n + " points from " + N + " points.");
+      throw new IllegalArgumentException("drawSparseSample: cannot sample" + n + " points from " + N + " points.");
     }
 
     final int[] vals = new int[n]; // This will hold the n selected indices
@@ -162,7 +162,7 @@ public class RandomSample {
       final Integer index_rand = r.nextInt(i);
       final Integer iObj = i - 1;
       final Integer stored_at_index_from_end = map.remove(iObj);
-      if (index_rand == iObj) { // Swapping the value with itself
+      if (index_rand.equals(iObj)) { // Last element selected? (Making sure we use correct comparison!)
         vals[selected++] = (stored_at_index_from_end != null) ? stored_at_index_from_end : iObj;
       } else {
         final Integer stored_at_index_rand = map.put(index_rand,
