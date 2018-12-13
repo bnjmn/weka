@@ -34,7 +34,7 @@
   <!-- Define the bundleapp task. Java Application Bundler (http://java.net/projects/appbundler) makes Mac OS application 
        bundles for Java 1.7 or higher (jarbundler does not work for Java 1.7). This requires Oracle Java 1.7 or 
        higher at build time too - uncomment this taskdef if building a Mac app for Java 1.7 -->
-<!--  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/> -->
+<taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
 
   <target name="init_all" depends="requirements_instructions">
     <!-- Create the time stamp and various dirs -->
@@ -47,6 +47,7 @@
     <delete dir="packages/internal/WekaODF"/>
     <!-- Something in the lib dir of scatterPlot3D makes the GOE barf when running the tests -->
     <delete dir="packages/external/scatterPlot3D"/>
+    <delete dir="packages/external/associationRulesVisuzalizer"/>
 
     <mkdir dir="${temp}/weka-${release}"/>
     <mkdir dir="${temp}/weka-${release}/changelogs"/>
@@ -288,6 +289,8 @@
       <arg value="weka-${release}"/>
       <arg value="-ov"/>
       <arg value="${dist}/weka-${release}-${jvm_target}.dmg"/>
+      <arg value="-fs"/>
+      <arg value="HFS+"/>
     </exec>
 
     <delete dir="${temp}/weka-${release}-${jvm_target}.app"/>
@@ -362,7 +365,7 @@
       <include name="**/*"/>
     </zip>
     <echo message="Cleaning up..."/>
-    <delete dir="${temp}"/>
+<!--    <delete dir="${temp}"/> -->
     <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
   </target>
 
