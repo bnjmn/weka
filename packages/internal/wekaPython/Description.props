@@ -6,10 +6,10 @@
 PackageName=wekaPython
 
 # Version (required)
-Version=1.0.9
+Version=1.0.10
 
 #Date
-Date=2018-06-11
+Date=2019-01-11
 
 # Title (required)
 Title=Provides integration with CPython in Weka.
@@ -28,10 +28,10 @@ License=GPL 3.0
 # Description (required)
 Description=Integration with CPython for Weka. Python version 2.7.x or higher is required. Also requires the following packages to be installed in python: numpy, pandas, matplotlib and scikit-learn. This package provides a wrapper classifier and clusterer that, between them, cover 60+ scikit-learn algorithms. It also provides a general scripting step for the Knowlege Flow along with scripting plugin environments for the Explorer and Knowledge Flow.
 
-Changes=Fixed a typo in the default options for MLPClassifier and MLPRegressor.
+Changes=Now includes support for xgboost (classification and regression). Note that xgboost is *not* included in scikit-learn, but does have a sklearn API. This means that the user must install the xgboost package in their python distribution.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://prdownloads.sourceforge.net/weka/wekaPython1.0.9.zip?download
+PackageURL=http://prdownloads.sourceforge.net/weka/wekaPython1.0.10.zip?download
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2015/06/cpython-integration-in-weka.html
@@ -47,4 +47,4 @@ Depends=weka (>=3.8.0)
 
 MessageToDisplayOnInstallation=This package requires python (2.7.x or 3.x) to be installed on your\n\
  computer before it can be used. The python command must be in the PATH. Within python it requires the:\n\
- following packages: numpy, pandas, matplotlib and scikit-learn.
+ following packages: numpy, pandas, matplotlib and scikit-learn, scipy (and optionally xgboost).
