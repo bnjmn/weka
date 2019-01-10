@@ -61,50 +61,52 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
 
   /** Holds info on the different learners available */
   public static enum Learner {
-    DecisionTreeClassifier("tree", true, false, true,
+    DecisionTreeClassifier("tree", true, false, true, false,
       "\tclass_weight=None, criterion='gini', max_depth=None,\n"
         + "\tmax_features=None, max_leaf_nodes=None, min_samples_leaf=1,\n"
         + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
         + "\trandom_state=None, splitter='best'"),
-    DecisionTreeRegressor("tree", false, true, false,
+    DecisionTreeRegressor("tree", false, true, false, false,
       "\tcriterion='mse', max_depth=None, max_features=None,\n"
         + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
         + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
         + "\tsplitter='best'"),
-    GaussianNB("naive_bayes", true, false, true, ""),
-    MultinomialNB("naive_bayes", true, false, true,
+    GaussianNB("naive_bayes", true, false, true, false, ""),
+    MultinomialNB("naive_bayes", true, false, true, false,
       "alpha=1.0, class_prior=None, fit_prior=True"),
-    BernoulliNB("naive_bayes", true, false, true,
+    BernoulliNB("naive_bayes", true, false, true, false,
       "alpha=1.0, binarize=0.0, class_prior=None, fit_prior=True"),
-    LDA("lda", true, false, true,
+    LDA("lda", true, false, true, false,
       "\tn_components=None, priors=None, shrinkage=None, solver='svd',\n"
         + "\tstore_covariance=False, tol=0.0001"),
-    QDA("qda", true, false, true, "\tpriors=None, reg_param=0.0"),
+    QDA("qda", true, false, true, false, "\tpriors=None, reg_param=0.0"),
     LogisticRegression(
       "linear_model",
       true,
       false,
       true,
+      false,
       "\tC=1.0, class_weight=None, dual=False, fit_intercept=True,\n"
         + "\tintercept_scaling=1, max_iter=100, multi_class='ovr',\n"
         + "\tpenalty='l2', random_state=None, solver='liblinear', tol=0.0001,\n"
         + "\tverbose=0"),
-    LogisticRegressionCV("linear_model", true, false, true,
+    LogisticRegressionCV("linear_model", true, false, true, false,
       "\tCs=10, class_weight=None, cv=None, dual=False,\n"
         + "\tfit_intercept=True, intercept_scaling=1.0, max_iter=100,\n"
         + "\tmulti_class='ovr', n_jobs=1, penalty='l2', refit=True,\n"
         + "\tscoring=None, solver='lbfgs', tol=0.0001, verbose=0"),
-    LinearRegression("linear_model", false, true, false,
+    LinearRegression("linear_model", false, true, false, false,
       "\tcopy_X=True, fit_intercept=True, n_jobs=1, normalize=False"),
     ARDRegression(
       "linear_model",
       false,
       true,
       false,
+      false,
       "\talpha_1=1e-06, alpha_2=1e-06, compute_score=False, copy_X=True,\n"
         + "\tfit_intercept=True, lambda_1=1e-06, lambda_2=1e-06, n_iter=300,\n"
         + "\tnormalize=False, threshold_lambda=10000.0, tol=0.001, verbose=False"),
-    BayesianRidge("linear_model", false, true, false,
+    BayesianRidge("linear_model", false, true, false, false,
       "\talpha_1=1e-06, alpha_2=1e-06, compute_score=False, copy_X=True,\n"
         + "\tfit_intercept=True, lambda_1=1e-06, lambda_2=1e-06, n_iter=300,\n"
         + "\tnormalize=False, tol=0.001, verbose=False"),
@@ -112,6 +114,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       "linear_model",
       false,
       true,
+      false,
       false,
       "\talpha=1.0, copy_X=True, fit_intercept=True, l1_ratio=0.5,\n"
         + "\tmax_iter=1000, normalize=False, positive=False, precompute=False,\n"
@@ -121,10 +124,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\tcopy_X=True, eps=2.2204460492503131e-16, fit_intercept=True,\n"
         + "\tfit_path=True, n_nonzero_coefs=500, normalize=True, precompute='auto',\n"
         + "\tverbose=False"),
-    LarsCV("linear_model", false, true, false,
+    LarsCV("linear_model", false, true, false, false,
       "\tcopy_X=True, cv=None, eps=2.2204460492503131e-16, fit_intercept=True,\n"
         + "\tmax_iter=500, max_n_alphas=1000, n_jobs=1, normalize=True,\n"
         + "\tprecompute='auto', verbose=False"),
@@ -133,6 +137,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\talpha=1.0, copy_X=True, fit_intercept=True, max_iter=1000,\n"
         + "\tnormalize=False, positive=False, precompute=False, random_state=None,\n"
         + "\tselection='cyclic', tol=0.0001, warm_start=False"),
@@ -140,6 +145,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       "linear_model",
       false,
       true,
+      false,
       false,
       "\talphas=None, copy_X=True, cv=None, eps=0.001, fit_intercept=True,\n"
         + "\tmax_iter=1000, n_alphas=100, n_jobs=1, normalize=False, positive=False,\n"
@@ -150,10 +156,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\talpha=1.0, copy_X=True, eps=2.2204460492503131e-16,\n"
         + "\tfit_intercept=True, fit_path=True, max_iter=500, normalize=True,\n"
         + "\tprecompute='auto', verbose=False"),
-    LassoLarsCV("linear_model", false, true, false,
+    LassoLarsCV("linear_model", false, true, false, false,
       "\tcopy_X=True, cv=None, eps=2.2204460492503131e-16,\n"
         + "\tfit_intercept=True, max_iter=500, max_n_alphas=1000, n_jobs=1,\n"
         + "\tnormalize=True, precompute='auto', verbose=False"),
@@ -162,10 +169,11 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\tcopy_X=True, criterion='aic', eps=2.2204460492503131e-16,\n"
         + "\tfit_intercept=True, max_iter=500, normalize=True, precompute='auto',\n"
         + "\tverbose=False"),
-    MLPClassifier("neural_network", true, false, true,
+    MLPClassifier("neural_network", true, false, true, false,
       "\thidden_layer_sizes=(100,), " + "activation='relu', solver='adam',\n"
         + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
         + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
@@ -173,7 +181,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         + "\twarm_start=False, momentum=0.9, nesterovs_momentum=True,\n"
         + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
         + "\tbeta_2=0.999, epsilon=1e-08"),
-    MLPRegressor("neural_network", false, true, false,
+    MLPRegressor("neural_network", false, true, false, false,
       "\thidden_layer_sizes=(100,), " + "activation='relu', solver='adam',\n"
         + "\talpha=0.0001, batch_size='auto', learning_rate='constant',\n"
         + "\tlearning_rate_init=0.001, power_t=0.5, max_iter=200,\n"
@@ -181,21 +189,21 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         + "\twarm_start=False, momentum=0.9, nesterovs_momentum=True,\n"
         + "\tearly_stopping=False, validation_fraction=0.1, beta_1=0.9,\n"
         + "\tbeta_2=0.999, epsilon=1e-08"),
-    OrthogonalMatchingPursuit("linear_model", false, true, false,
+    OrthogonalMatchingPursuit("linear_model", false, true, false, false,
       "\tfit_intercept=True, n_nonzero_coefs=None,\n"
         + "\tnormalize=True, precompute='auto', tol=None"),
-    OrthogonalMatchingPursuitCV("linear_model", false, true, false,
+    OrthogonalMatchingPursuitCV("linear_model", false, true, false, false,
       "\tcopy=True, cv=None, fit_intercept=True,\n"
         + "\tmax_iter=None, n_jobs=1, normalize=True, verbose=False"),
-    PassiveAggressiveClassifier("linear_model", true, false, false,
+    PassiveAggressiveClassifier("linear_model", true, false, false, false,
       "\tC=1.0, fit_intercept=True, loss='hinge', n_iter=5,\n"
         + "\tn_jobs=1, random_state=None, shuffle=True, verbose=0,\n"
         + "\twarm_start=False"),
-    PassiveAggressiveRegressor("linear_model", false, true, false,
+    PassiveAggressiveRegressor("linear_model", false, true, false, false,
       "\tC=1.0, class_weight=None, epsilon=0.1,\n"
         + "\tfit_intercept=True, loss='epsilon_insensitive', n_iter=5,\n"
         + "\trandom_state=None, shuffle=True, verbose=0, warm_start=False"),
-    Perceptron("linear_model", true, false, false,
+    Perceptron("linear_model", true, false, false, false,
       "\talpha=0.0001, class_weight=None, " + "eta0=1.0, fit_intercept=True,\n"
         + "\tn_iter=5, n_jobs=1, penalty=None, random_state=0, shuffle=True,\n"
         + "\tverbose=0, warm_start=False"),
@@ -204,17 +212,18 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\tbase_estimator=None, is_data_valid=None, is_model_valid=None,\n"
         + "\tmax_trials=100, min_samples=None, random_state=None,\n"
         + "\tresidual_metric=None, residual_threshold=None, stop_n_inliers=inf,\n"
         + "\tstop_probability=0.99, stop_score=inf"),
-    Ridge("linear_model", false, true, false,
+    Ridge("linear_model", false, true, false, false,
       "\talpha=1.0, copy_X=True, fit_intercept=True, max_iter=None,\n"
         + "\tnormalize=False, solver='auto', tol=0.001"),
-    RidgeClassifier("linear_model", true, false, false,
+    RidgeClassifier("linear_model", true, false, false, false,
       "\talpha=1.0, class_weight=None, copy_X=True, fit_intercept=True,\n"
         + "\tmax_iter=None, normalize=False, solver='auto', tol=0.001"),
-    RidgeClassifierCV("linear_model", true, false, false,
+    RidgeClassifierCV("linear_model", true, false, false, false,
       "alphas=array([  0.1,   1. ,  10. ]), class_weight=None,\n"
         + "\tcv=None, fit_intercept=True, normalize=False, scoring=None"),
     RidgeCV(
@@ -222,9 +231,10 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "alphas=array([  0.1,   1. ,  10. ]), cv=None, fit_intercept=True,\n"
         + "\tgcv_mode=None, normalize=False, scoring=None, store_cv_values=False"),
-    SGDClassifier("linear_model", true, false, false,
+    SGDClassifier("linear_model", true, false, false, false,
       "\talpha=0.0001, average=False, class_weight=None, epsilon=0.1,\n"
         + "\teta0=0.0, fit_intercept=True, l1_ratio=0.15,\n"
         + "\tlearning_rate='optimal', loss='hinge', n_iter=5, n_jobs=1,\n"
@@ -235,12 +245,12 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         return params.contains("log") || params.contains("modified_huber");
       }
     },
-    SGDRegressor("linear_model", false, true, false,
+    SGDRegressor("linear_model", false, true, false, false,
       "\talpha=0.0001, average=False, epsilon=0.1, eta0=0.01,\n"
         + "\tfit_intercept=True, l1_ratio=0.15, learning_rate='invscaling',\n"
         + "\tloss='squared_loss', n_iter=5, penalty='l2', power_t=0.25,\n"
         + "\trandom_state=None, shuffle=True, verbose=0, warm_start=False"),
-    TheilSenRegressor("linear_model", false, true, false,
+    TheilSenRegressor("linear_model", false, true, false, false,
       "\tcopy_X=True, fit_intercept=True, max_iter=300,\n"
         + "\tmax_subpopulation=10000, n_jobs=1, n_subsamples=None,\n"
         + "\trandom_state=None, tol=0.001, verbose=False"),
@@ -249,38 +259,40 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\tregr='constant', corr='squared_exponential',\n"
         + "\tbeta0=None, storage_mode='full', verbose=False, theta0=0.1,\n "
         + "\tthetaL=None, thetaU=None, optimizer='fmin_cobyla', random_start=1,\n "
         + "\tnormalize=True, nugget=2.2204460492503131e-15, random_state=None"),
-    KernelRidge("kernel_ridge", false, true, false,
+    KernelRidge("kernel_ridge", false, true, false, false,
       "\talpha=1, coef0=1, degree=3, gamma=None, kernel='linear',\n"
         + "\tkernel_params=None"),
-    KNeighborsClassifier("neighbors", true, false, true,
+    KNeighborsClassifier("neighbors", true, false, true, false,
       "\talgorithm='auto', leaf_size=30, metric='minkowski',\n"
         + "\tmetric_params=None, n_neighbors=5, p=2, weights='uniform'"),
-    RadiusNeighborsClassifier("neighbors", true, false, false,
+    RadiusNeighborsClassifier("neighbors", true, false, false, false,
       "\talgorithm='auto', leaf_size=30, metric='minkowski',\n"
         + "\tmetric_params=None, outlier_label=None, p=2, radius=1.0,\n"
         + "\tweights='uniform'"),
-    KNeighborsRegressor("neighbors", false, true, false,
+    KNeighborsRegressor("neighbors", false, true, false, false,
       "algorithm='auto', leaf_size=30, metric='minkowski',\n"
         + "\tmetric_params=None, n_neighbors=5, p=2, weights='uniform'"),
-    RadiusNeighborsRegressor("neighbors", false, true, false, ""),
+    RadiusNeighborsRegressor("neighbors", false, true, false, false, ""),
     SVC(
       "svm",
       true,
       false,
       false,
+      false,
       "\tC=1.0, cache_size=200, class_weight=None, coef0=0.0, degree=3, gamma=0.0,\n"
         + "\tkernel='rbf', max_iter=-1, probability=False, random_state=None,\n"
         + "\tshrinking=True, tol=0.001, verbose=False"),
-    LinearSVC("svm", true, false, false,
+    LinearSVC("svm", true, false, false, false,
       "\tC=1.0, class_weight=None, dual=True, fit_intercept=True,\n"
         + "\tintercept_scaling=1, loss='squared_hinge', max_iter=1000,\n"
         + "\tmulti_class='ovr', penalty='l2', random_state=None, tol=0.0001,\n"
         + "\tverbose=0"),
-    NuSVC("svm", true, false, false,
+    NuSVC("svm", true, false, false, false,
       "\tcache_size=200, coef0=0.0, degree=3, gamma=0.0, kernel='rbf',\n"
         + "\tmax_iter=-1, nu=0.5, probability=False, random_state=None,\n"
         + "\tshrinking=True, tol=0.001, verbose=False"),
@@ -289,62 +301,89 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       false,
       true,
       false,
+      false,
       "\tC=1.0, cache_size=200, coef0=0.0, degree=3, epsilon=0.1, gamma=0.0,\n"
         + "\tkernel='rbf', max_iter=-1, shrinking=True, tol=0.001, verbose=False"),
-    NuSVR("svm", false, true, false,
+    NuSVR("svm", false, true, false, false,
       "\tC=1.0, cache_size=200, coef0=0.0, degree=3, gamma=0.0, kernel='rbf',\n"
         + "\tmax_iter=-1, nu=0.5, shrinking=True, tol=0.001, verbose=False"),
-    AdaBoostClassifier("ensemble", true, false, true,
+    AdaBoostClassifier("ensemble", true, false, true, false,
       "\talgorithm='SAMME.R', base_estimator=None,\n"
         + "\tlearning_rate=1.0, n_estimators=50, random_state=None"),
-    AdaBoostRegressor("ensemble", false, true, false,
+    AdaBoostRegressor("ensemble", false, true, false, false,
       "\tbase_estimator=None, learning_rate=1.0, loss='linear',\n"
         + "\tn_estimators=50, random_state=None"), BaggingClassifier(
-      "ensemble", true, false, true, "\tbase_estimator=None, bootstrap=True,\n"
-        + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
-        + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-        + "\tverbose=0"), BaggingRegressor("ensemble", false, true, false,
+      "ensemble", true, false, true, false,
       "\tbase_estimator=None, bootstrap=True,\n"
         + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
         + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-        + "\tverbose=0"), ExtraTreeClassifier("tree", true, false, true,
+        + "\tverbose=0"), BaggingRegressor("ensemble", false, true, false,
+      false, "\tbase_estimator=None, bootstrap=True,\n"
+        + "\tbootstrap_features=False, max_features=1.0, max_samples=1.0,\n"
+        + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
+        + "\tverbose=0"), ExtraTreeClassifier("tree", true, false, true, false,
       "\tclass_weight=None, criterion='gini', max_depth=None,\n"
         + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
         + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
         + "\trandom_state=None, splitter='random'"), ExtraTreeRegressor("tree",
-      false, true, false,
+      false, true, false, false,
       "\tcriterion='mse', max_depth=None, max_features='auto',\n"
         + "\tmax_leaf_nodes=None, min_samples_leaf=1, min_samples_split=2,\n"
         + "\tmin_weight_fraction_leaf=0.0, random_state=None,\n"
         + "\tsplitter='random'"), GradientBoostingClassifier("ensemble", true,
-      false, true, "\tinit=None, learning_rate=0.1, loss='deviance',\n"
+      false, true, false, "\tinit=None, learning_rate=0.1, loss='deviance',\n"
         + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
         + "\tmin_samples_leaf=1, min_samples_split=2,\n"
         + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
         + "\trandom_state=None, subsample=1.0, verbose=0,\n"
         + "\twarm_start=False"), GradientBoostingRegressor("ensemble", false,
-      true, false, "\talpha=0.9, init=None, learning_rate=0.1, loss='ls',\n"
+      true, false, false,
+      "\talpha=0.9, init=None, learning_rate=0.1, loss='ls',\n"
         + "\tmax_depth=3, max_features=None, max_leaf_nodes=None,\n"
         + "\tmin_samples_leaf=1, min_samples_split=2,\n"
         + "\tmin_weight_fraction_leaf=0.0, n_estimators=100,\n"
         + "\trandom_state=None, subsample=1.0, verbose=0, warm_start=False"),
-    RandomForestClassifier("ensemble", true, false, true,
+    RandomForestClassifier("ensemble", true, false, true, false,
       "\tbootstrap=True, class_weight=None, criterion='gini',\n"
         + "\tmax_depth=None, max_features='auto', max_leaf_nodes=None,\n"
         + "\tmin_samples_leaf=1, min_samples_split=2,\n"
         + "\tmin_weight_fraction_leaf=0.0, n_estimators=10, n_jobs=1,\n"
         + "\toob_score=False, random_state=None, verbose=0,\n"
         + "\twarm_start=False"), RandomForestRegressor("ensemble", false, true,
-      false, "\tbootstrap=True, criterion='mse', max_depth=None,\n"
+      false, false, "\tbootstrap=True, criterion='mse', max_depth=None,\n"
         + "\tmax_features='auto', max_leaf_nodes=None, min_samples_leaf=1,\n"
         + "\tmin_samples_split=2, min_weight_fraction_leaf=0.0,\n"
         + "\tn_estimators=10, n_jobs=1, oob_score=False, random_state=None,\n"
-        + "\tverbose=0, warm_start=False");
+        + "\tverbose=0, warm_start=False"),
+    // Not actually an sklearn scheme, but does have an sklearn API
+    XGBClassifier("xgboost", true, false, true, true,
+      "\tmax_depth=3, learning_rate=0.1, n_estimators=100, silent=True,\n"
+        + "\tobjective='binary:logistic', booster='gbtree', n_jobs=1,\n"
+        + "\tnthread=None, gamma=0, min_child_weight=1, max_delta_step=0,\n"
+        + "\tsubsample=1, colsample_bytree=1, colsample_bylevel=1,\n"
+        + "\treg_alpha=0, reg_lambda=1, scale_pos_weight=1, base_score=0.5,\n"
+        + "\trandom_state=0, seed=None, missing=None, tree_method='hist'"),
+    XGBRegressor("xgboost", false, true, false, true,
+      "\tmax_depth=3, learning_rate=0.1, n_estimators=100, silent=True,\n"
+        + "\tobjective='reg:linear', booster='gbtree', n_jobs=1,\n"
+        + "\tnthread=None, gamma=0, min_child_weight=1, max_delta_step=0,\n"
+        + "\tsubsample=1, colsample_bytree=1, colsample_bylevel=1,\n"
+        + "\treg_alpha=0, reg_lambda=1, scale_pos_weight=1, base_score=0.5,\n"
+        + "\trandom_state=0, seed=None, missing=None, tree_method='hist'");
 
     private String m_module;
     private boolean m_classification;
     private boolean m_regression;
     private boolean m_producesProbabilities;
+
+    /**
+     * True to have the model variable cleared in python after training and
+     * batch prediction. This conserves memory, and might allow additional
+     * off-heap resources (e.g. GPU device memory) to be freed. However, there
+     * will be additional overhead in transferring the model back into python
+     * each time predictions are required.
+     */
+    private boolean m_removeModelFromPyPostTraining;
     private String m_defaultParameters;
 
     /**
@@ -357,11 +396,13 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
      * @param defaultParameters the list of default parameter settings
      */
     Learner(String module, boolean classification, boolean regression,
-      boolean producesProbabilities, String defaultParameters) {
+      boolean producesProbabilities, boolean removeModel,
+      String defaultParameters) {
       m_module = module;
       m_producesProbabilities = producesProbabilities;
       m_classification = classification;
       m_regression = regression;
+      m_removeModelFromPyPostTraining = removeModel;
       m_defaultParameters = defaultParameters;
     }
 
@@ -385,6 +426,20 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
      */
     public boolean producesProbabilities(String params) {
       return m_producesProbabilities;
+    }
+
+    /**
+     * Return true if the variable containing the model in python should be
+     * cleared after training and each batch prediction operation. This can be
+     * advantageous for specific methods that might either consume lots of host
+     * memory or device (e.g. GPU) memory. The disadvantage is that the model
+     * will need to be transferred into python prior to each batch prediction
+     * call (cross-validation will be slower).
+     *
+     * @return true if the model variable should be cleared in python
+     */
+    public boolean removeModelFromPythonPostTrainPredict() {
+      return m_removeModelFromPyPostTraining;
     }
 
     /**
@@ -430,6 +485,9 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
    * these methods.
    */
   protected double m_scikitVersion = -1;
+
+  /** Will be set to true if xgboost is available */
+  protected boolean m_xgboostInstalled;
 
   /** The scikit learner to use */
   protected Learner m_learner = Learner.DecisionTreeClassifier;
@@ -555,7 +613,16 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
               versionNumber.substring(0, versionNumber.lastIndexOf('.'));
             m_scikitVersion = Double.parseDouble(versionNumber);
           }
+
+          // check for xgboost
+          m_xgboostInstalled = true;
+          script = "import xgboost\n";
+          outAndErr = session.executeScript(script, getDebug());
+          if (outAndErr.get(1).length() > 0) {
+            m_xgboostInstalled = false;
+          }
         } catch (WekaException e) {
+          m_xgboostInstalled = false;
           e.printStackTrace();
         } finally {
           PythonSession.releaseSession(this);
@@ -631,7 +698,7 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       + "\nLinearSVC, NuSVC, SVR, NuSVR, AdaBoostClassifier, AdaBoostRegressor,"
       + "BaggingClassifier, BaggingRegressor,\nExtraTreeClassifier, ExtraTreeRegressor,"
       + "GradientBoostingClassifier, GradientBoostingRegressor,\n"
-      + "RandomForestClassifier, RandomForestRegressor."
+      + "RandomForestClassifier, RandomForestRegressor, XGBClassifier, XGBRegressor."
       + "\n(default = DecisionTreeClassifier)",
     commandLineParamName = "learner",
     commandLineParamSynopsis = "-learner <learner name>", displayOrder = 1)
@@ -793,6 +860,12 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
       }
     }
 
+    if (m_learner == Learner.XGBClassifier && !m_xgboostInstalled) {
+      throw new Exception(
+        "xgboost does not seem to be available in your python "
+          + "installation");
+    }
+
     if (m_modelHash == null) {
       m_modelHash = "" + hashCode();
     }
@@ -861,8 +934,14 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         .instancesToPythonAsScikitLearn(data, TRAINING_DATA_ID, getDebug());
 
       StringBuilder learnScript = new StringBuilder();
-      learnScript.append("from sklearn import *").append("\n")
-        .append("import numpy as np").append("\n");
+      if (m_learner == Learner.XGBClassifier
+        || m_learner == Learner.XGBRegressor) {
+        learnScript.append("import xgboost as xgb\n")
+          .append("import numpy as np").append("\n");
+      } else {
+        learnScript.append("from sklearn import *").append("\n")
+          .append("import numpy as np").append("\n");
+      }
 
       if (m_scikitVersion > 0.18) {
         if (learnerMethod.equalsIgnoreCase("LDA")) {
@@ -870,11 +949,17 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
           learnerModule = "discriminant_analysis";
         }
       }
-      learnScript
-        .append(
+      if (m_learner == Learner.XGBClassifier
+        || m_learner == Learner.XGBRegressor) {
+        learnScript.append(
+          MODEL_ID + m_modelHash + " = xgb." + learnerMethod + "("
+            + getLearnerOpts() + ")").append("\n");
+      } else {
+        learnScript.append(
           MODEL_ID + m_modelHash + " = " + learnerModule + "." + learnerMethod
             + "(" + (getLearnerOpts().length() > 0 ? getLearnerOpts() : "")
             + ")").append("\n");
+      }
       learnScript.append(MODEL_ID + m_modelHash + ".fit(X,np.ravel(Y))")
         .append("\n");
 
@@ -897,6 +982,19 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         m_pickledModel =
           session.getVariableValueFromPythonAsPickledObject(MODEL_ID
             + m_modelHash, getDebug());
+      }
+
+      if (m_learner.removeModelFromPythonPostTrainPredict()) {
+        String cleanUp = "del " + MODEL_ID + m_modelHash + "\n";
+        outAndErr = session.executeScript(cleanUp, getDebug());
+
+        if (outAndErr.size() == 2 && outAndErr.get(1).length() > 0) {
+          if (m_continueOnSysErr) {
+            System.err.println(outAndErr.get(1));
+          } else {
+            throw new Exception(outAndErr.get(1));
+          }
+        }
       }
 
       // release session
@@ -990,9 +1088,14 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
         }
       }
 
-      predictScript.append(
-        "from sklearn." + learnerModule + " import " + learnerMethod).append(
-        "\n");
+      if (m_learner == Learner.XGBClassifier
+        || m_learner == Learner.XGBRegressor) {
+        predictScript.append("import xgboost as xgb\n");
+      } else {
+        predictScript.append(
+          "from sklearn." + learnerModule + " import " + learnerMethod).append(
+          "\n");
+      }
       predictScript.append(
         "preds = " + MODEL_ID + m_modelHash + ".predict"
           + (m_learner.producesProbabilities(m_learnerOpts) ? "_proba" : "")
@@ -1069,6 +1172,19 @@ public class ScikitLearnClassifier extends AbstractClassifier implements
             }
             dist[0] = p.doubleValue();
             results[j++] = dist;
+          }
+        }
+      }
+
+      if (m_learner.removeModelFromPythonPostTrainPredict()) {
+        String cleanUp = "del " + MODEL_ID + m_modelHash + "\n";
+        outAndErr = session.executeScript(cleanUp, getDebug());
+
+        if (outAndErr.size() == 2 && outAndErr.get(1).length() > 0) {
+          if (m_continueOnSysErr) {
+            System.err.println(outAndErr.get(1));
+          } else {
+            throw new Exception(outAndErr.get(1));
           }
         }
       }
