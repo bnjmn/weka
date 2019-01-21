@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>kfGroovy</artifactId>
-  <version>1.0.14-SNAPSHOT</version>
+  <version>1.0.15-SNAPSHOT</version>
   <packaging>jar</packaging>
 
   <name>kfGroovy</name>
@@ -110,8 +110,8 @@
     <dependency>
       <groupId>org.codehaus.groovy</groupId>
       <artifactId>groovy-all</artifactId>
-      <version>2.4.6</version>
-      <type>jar</type>
+      <version>2.5.5</version>
+      <type>pom</type>
     </dependency>
 
     <dependency>
