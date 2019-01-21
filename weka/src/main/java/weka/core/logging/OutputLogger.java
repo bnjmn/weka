@@ -168,8 +168,10 @@ public class OutputLogger
      */
     @Override
     public void write(byte[] b) throws IOException {
+      StringBuilder builder = new StringBuilder();
       for (int i = 0; i < b.length; i++)
-	write(b[i]);
+	builder.append("" + b[i]);
+      print(builder.toString());
     }
 
     /**
@@ -181,8 +183,10 @@ public class OutputLogger
      */
     @Override
     public void write(byte[] buf, int off, int len) {
+      StringBuilder builder = new StringBuilder();
       for (int i = off; i < off + len; i++)
-	write(buf[i]);
+	builder.append("" + buf[i]);
+      print(builder.toString());
     }
 
     /**
