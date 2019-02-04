@@ -5,7 +5,7 @@
 
   <groupId>nz.ac.waikato.cms.weka</groupId>
   <artifactId>scatterPlot3D</artifactId>
-  <version>1.0.7-SNAPSHOT</version>
+  <version>1.0.7</version>
   <packaging>jar</packaging>
 
   <name>scatterPlot3D</name>
@@ -49,9 +49,9 @@
   </parent>
 
   <scm>
-    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/scatterPlot3D</connection>
-    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/scatterPlot3D</developerConnection>
-    <url>https://svn.cms.waikato.ac.nz/svn/weka/trunk/packages/external/scatterPlot3D</url>
+    <connection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/scatterPlot3D-1.0.7</connection>
+    <developerConnection>scm:svn:https://svn.cms.waikato.ac.nz/svn/weka/tags/scatterPlot3D-1.0.7</developerConnection>
+    <url>https://svn.cms.waikato.ac.nz/svn/weka/tags/scatterPlot3D-1.0.7</url>
   </scm>
 
   <profiles>
