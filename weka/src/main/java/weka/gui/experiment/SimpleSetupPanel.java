@@ -36,12 +36,31 @@ import weka.experiment.RegressionSplitEvaluator;
 import weka.experiment.SplitEvaluator;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.WekaFileChooser;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusAdapter;
@@ -130,12 +149,12 @@ public class SimpleSetupPanel
                             "Experiment configuration files (*.xml)");
 
   /** The file chooser for selecting experiments */
-  protected JFileChooser m_FileChooser =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected WekaFileChooser m_FileChooser =
+    new WekaFileChooser(new File(System.getProperty("user.dir")));
 
   /** The file chooser for selecting result destinations */
-  protected JFileChooser m_DestFileChooser =
-    new JFileChooser(new File(System.getProperty("user.dir")));
+  protected WekaFileChooser m_DestFileChooser =
+    new WekaFileChooser(new File(System.getProperty("user.dir")));
 
   /** Combo box for choosing experiment destination type */
   protected JComboBox m_ResultsDestinationCBox = new JComboBox();

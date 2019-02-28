@@ -21,7 +21,12 @@
 
 package weka.gui.experiment;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Instance;
+import weka.core.Instances;
+import weka.core.PluginManager;
+import weka.core.Range;
+import weka.core.Utils;
 import weka.core.converters.CSVLoader;
 import weka.experiment.CSVResultListener;
 import weka.experiment.DatabaseResultListener;
@@ -38,6 +43,7 @@ import weka.gui.Perspective;
 import weka.gui.PropertyDialog;
 import weka.gui.ResultHistoryPanel;
 import weka.gui.SaveBuffer;
+import weka.gui.WekaFileChooser;
 import weka.gui.explorer.Explorer;
 
 import javax.swing.BorderFactory;
@@ -59,7 +65,14 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.GridLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
@@ -236,7 +249,7 @@ public class ResultsPanel extends JPanel {
   protected ResultHistoryPanel m_History = new ResultHistoryPanel(m_OutText);
 
   /** The file chooser for selecting result files. */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   // File filters for various file types.

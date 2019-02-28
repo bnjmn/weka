@@ -21,14 +21,40 @@
 
 package weka.gui.visualize;
 
-import weka.core.*;
+import weka.core.Attribute;
+import weka.core.Environment;
+import weka.core.Instances;
+import weka.core.Settings;
+import weka.core.Utils;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.WekaFileChooser;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSlider;
+import javax.swing.JSplitPane;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Dialog.ModalityType;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Image;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
@@ -775,8 +801,8 @@ public class MatrixPanel extends JPanel {
     setBt.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent e) {
-        JFileChooser chooser =
-          new JFileChooser(new java.io.File(System.getProperty("user.dir")));
+        WekaFileChooser chooser =
+          new WekaFileChooser(new java.io.File(System.getProperty("user.dir")));
         ExtensionFileFilter myfilter =
           new ExtensionFileFilter("arff", "Arff data files");
         chooser.setFileFilter(myfilter);

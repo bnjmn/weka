@@ -21,10 +21,30 @@
 
 package weka.gui.beans;
 
+import weka.classifiers.UpdateableBatchProcessor;
+import weka.classifiers.rules.ZeroR;
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializationHelper;
+import weka.core.Utils;
+import weka.core.xml.KOML;
+import weka.core.xml.XStream;
+import weka.experiment.Task;
+import weka.experiment.TaskStatusInfo;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
+import weka.gui.WekaFileChooser;
+
+import javax.swing.JCheckBox;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.GraphicsEnvironment;
 import java.beans.EventSetDescriptor;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,27 +62,6 @@ import java.util.Vector;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-
-import javax.swing.JCheckBox;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.UpdateableBatchProcessor;
-import weka.classifiers.rules.ZeroR;
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializationHelper;
-import weka.core.Utils;
-import weka.core.xml.KOML;
-import weka.core.xml.XStream;
-import weka.experiment.Task;
-import weka.experiment.TaskStatusInfo;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.classifiers
@@ -151,7 +150,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   /** the extension for serialized models (binary Java serialization) */
   public final static String FILE_EXTENSION = "model";
 
-  private transient JFileChooser m_fileChooser = null;
+  private transient WekaFileChooser m_fileChooser = null;
 
   protected FileFilter m_binaryFilter = new ExtensionFileFilter("."
     + FILE_EXTENSION, "Binary serialized model file (*" + FILE_EXTENSION + ")");
@@ -297,7 +296,7 @@ public class Classifier extends JPanel implements BeanCommon, Visible,
   protected void setupFileChooser() {
     if (m_fileChooser == null) {
       m_fileChooser =
-        new JFileChooser(new File(System.getProperty("user.dir")));
+        new WekaFileChooser(new File(System.getProperty("user.dir")));
     }
 
     m_fileChooser.addChoosableFileFilter(m_binaryFilter);

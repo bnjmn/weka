@@ -741,7 +741,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
     protected JButton m_cancelBut;
 
     /** The filechooser for opening and saving object files. */
-    protected JFileChooser m_FileChooser;
+    protected WekaFileChooser m_FileChooser;
 
     /** Creates the GUI editor component. */
     public GOEPanel() {
@@ -944,7 +944,7 @@ public class GenericObjectEditor implements PropertyEditor, CustomPanelSupplier 
      */
     protected void createFileChooser() {
 
-      m_FileChooser = new JFileChooser(new File(System.getProperty("user.dir")));
+      m_FileChooser = new WekaFileChooser(new File(System.getProperty("user.dir")));
       m_FileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     }
 

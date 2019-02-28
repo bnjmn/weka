@@ -678,6 +678,16 @@
         <include name="org/**/*"/>
       </patternset>
     </unzip>
+    <unzip src="${lib}/jfilechooser-bookmarks-0.1.6.jar" dest="${build}/classes">
+      <patternset>
+        <include name="com/**/*"/>
+      </patternset>
+    </unzip>
+    <unzip src="${lib}/jclipboardhelper-0.1.2.jar" dest="${build}/classes">
+      <patternset>
+        <include name="com/**/*"/>
+      </patternset>
+    </unzip>
 <!--    <unzip src="${lib}/mtj.jar" dest="${build}/classes">
       <patternset>
         <include name="no/uib/**/*"/>

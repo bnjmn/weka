@@ -20,6 +20,55 @@
  */
 package weka.classifiers.bayes.net;
 
+import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.core.converters.AbstractFileLoader;
+import weka.core.converters.AbstractFileSaver;
+import weka.core.converters.ArffSaver;
+import weka.core.converters.ConverterUtils;
+import weka.gui.ConverterFileChooser;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.LookAndFeel;
+import weka.gui.PropertyDialog;
+import weka.gui.WekaFileChooser;
+import weka.gui.graphvisualizer.BIFFormatException;
+import weka.gui.graphvisualizer.BIFParser;
+import weka.gui.graphvisualizer.GraphEdge;
+import weka.gui.graphvisualizer.GraphNode;
+import weka.gui.graphvisualizer.HierarchicalBCEngine;
+import weka.gui.graphvisualizer.LayoutCompleteEvent;
+import weka.gui.graphvisualizer.LayoutCompleteEventListener;
+import weka.gui.graphvisualizer.LayoutEngine;
+import weka.gui.visualize.PrintablePanel;
+
+import javax.swing.AbstractAction;
+import javax.swing.Action;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JCheckBoxMenuItem;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.KeyStroke;
+import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -54,33 +103,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Random;
-
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-
-import weka.classifiers.bayes.net.MarginCalculator.JunctionTreeNode;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.core.converters.AbstractFileLoader;
-import weka.core.converters.AbstractFileSaver;
-import weka.core.converters.ArffSaver;
-import weka.core.converters.ConverterUtils;
-import weka.gui.ConverterFileChooser;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.LookAndFeel;
-import weka.gui.PropertyDialog;
-import weka.gui.graphvisualizer.BIFFormatException;
-import weka.gui.graphvisualizer.BIFParser;
-import weka.gui.graphvisualizer.GraphEdge;
-import weka.gui.graphvisualizer.GraphNode;
-import weka.gui.graphvisualizer.HierarchicalBCEngine;
-import weka.gui.graphvisualizer.LayoutCompleteEvent;
-import weka.gui.graphvisualizer.LayoutCompleteEventListener;
-import weka.gui.graphvisualizer.LayoutEngine;
-import weka.gui.visualize.PrintablePanel;
 
 /**
  * GUI interface to Bayesian Networks. Allows editing Bayesian networks on
@@ -1450,7 +1472,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
 
     @Override
     public void actionPerformed(ActionEvent ae) {
-      JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+      WekaFileChooser fc = new WekaFileChooser(System.getProperty("user.dir"));
       ExtensionFileFilter ef1 = new ExtensionFileFilter(".arff", "ARFF files");
       ExtensionFileFilter ef2 = new ExtensionFileFilter(".xml", "XML BIF files");
       fc.addChoosableFileFilter(ef1);
@@ -1533,7 +1555,7 @@ public class GUI extends JPanel implements LayoutCompleteEventListener {
     ExtensionFileFilter ef1 = new ExtensionFileFilter(".xml", "XML BIF files");
 
     boolean saveAs() {
-      JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+      WekaFileChooser fc = new WekaFileChooser(System.getProperty("user.dir"));
       fc.addChoosableFileFilter(ef1);
       fc.setDialogTitle("Save Graph As");
       if (!m_sFileName.equals("")) {

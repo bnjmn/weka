@@ -74,6 +74,7 @@ import weka.gui.SaveBuffer;
 import weka.gui.SetInstancesPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
+import weka.gui.WekaFileChooser;
 import weka.gui.beans.CostBenefitAnalysis;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
@@ -91,7 +92,28 @@ import weka.gui.visualize.plugins.GraphVisualizePlugin;
 import weka.gui.visualize.plugins.TreeVisualizePlugin;
 import weka.gui.visualize.plugins.VisualizePlugin;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JRadioButton;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.JViewport;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
@@ -332,7 +354,7 @@ public class ClassifierPanel extends AbstractPerspective implements
     PMML_FILE_EXTENSION, "PMML model files");
 
   /** The file chooser for selecting model files. */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** The user's list of selected evaluation metrics */

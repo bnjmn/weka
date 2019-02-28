@@ -21,16 +21,16 @@
 
 package weka.gui.scripting;
 
-import java.awt.BorderLayout;
-import java.awt.Dialog;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Frame;
-import java.awt.event.ActionEvent;
-import java.awt.event.WindowEvent;
-import java.awt.event.WindowListener;
-import java.io.File;
-import java.util.HashMap;
+import weka.core.Utils;
+import weka.gui.ComponentHelper;
+import weka.gui.DocumentPrinting;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.PropertyDialog;
+import weka.gui.WekaFileChooser;
+import weka.gui.scripting.event.ScriptExecutionEvent;
+import weka.gui.scripting.event.ScriptExecutionEvent.Type;
+import weka.gui.scripting.event.ScriptExecutionListener;
+import weka.gui.scripting.event.TitleUpdatedEvent;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -59,16 +59,16 @@ import javax.swing.text.JTextComponent;
 import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
-
-import weka.core.Utils;
-import weka.gui.ComponentHelper;
-import weka.gui.DocumentPrinting;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.PropertyDialog;
-import weka.gui.scripting.event.ScriptExecutionEvent;
-import weka.gui.scripting.event.ScriptExecutionEvent.Type;
-import weka.gui.scripting.event.ScriptExecutionListener;
-import weka.gui.scripting.event.TitleUpdatedEvent;
+import java.awt.BorderLayout;
+import java.awt.Dialog;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.event.ActionEvent;
+import java.awt.event.WindowEvent;
+import java.awt.event.WindowListener;
+import java.io.File;
+import java.util.HashMap;
 
 /**
  * Supports loading/saving of files.
@@ -698,7 +698,7 @@ public abstract class FileScriptingPanel
   public final static String IMAGES_DIR = "weka/gui/scripting/images";
   
   /** for loading/saving file. */
-  protected JFileChooser m_FileChooser;
+  protected WekaFileChooser m_FileChooser;
   
   /** the script. */
   protected Script m_Script;
@@ -766,7 +766,7 @@ public abstract class FileScriptingPanel
   protected void initialize() {
     super.initialize();
     
-    m_FileChooser = new JFileChooser();
+    m_FileChooser = new WekaFileChooser();
     m_FileChooser.setAcceptAllFileFilterUsed(true);
     m_FileChooser.setMultiSelectionEnabled(false);
     

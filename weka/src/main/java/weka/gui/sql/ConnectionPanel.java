@@ -21,24 +21,35 @@
 
 package weka.gui.sql;
 
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.HashSet;
-import java.util.Iterator;
-
-import javax.swing.*;
-import javax.swing.event.CaretEvent;
-import javax.swing.event.CaretListener;
-
 import weka.gui.ComponentHelper;
 import weka.gui.DatabaseConnectionDialog;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.ListSelectorDialog;
+import weka.gui.WekaFileChooser;
 import weka.gui.sql.event.ConnectionEvent;
 import weka.gui.sql.event.ConnectionListener;
 import weka.gui.sql.event.HistoryChangedEvent;
 import weka.gui.sql.event.HistoryChangedListener;
+
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.event.CaretEvent;
+import javax.swing.event.CaretListener;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
+import java.awt.Window;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashSet;
+import java.util.Iterator;
 
 /**
  * Enables the user to insert a database URL, plus user/password to connect to
@@ -105,7 +116,7 @@ public class ConnectionPanel extends JPanel implements CaretListener {
   protected DefaultListModel m_History = new DefaultListModel();
 
   /** the file chooser for the setup files. */
-  protected JFileChooser m_SetupFileChooser;
+  protected WekaFileChooser m_SetupFileChooser;
 
   /**
    * initializes the panel.
@@ -118,7 +129,7 @@ public class ConnectionPanel extends JPanel implements CaretListener {
     m_Parent = parent;
     m_ConnectionListeners = new HashSet<ConnectionListener>();
     m_HistoryChangedListeners = new HashSet<HistoryChangedListener>();
-    m_SetupFileChooser = new JFileChooser();
+    m_SetupFileChooser = new WekaFileChooser();
     m_SetupFileChooser.setDialogTitle("Switch database setup");
     m_SetupFileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
     m_SetupFileChooser.setMultiSelectionEnabled(false);

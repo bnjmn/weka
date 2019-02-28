@@ -23,6 +23,7 @@ package weka.gui.visualize;
 
 import weka.core.PluginManager;
 import weka.gui.ExtensionFileFilter;
+import weka.gui.WekaFileChooser;
 
 import javax.swing.JCheckBox;
 import javax.swing.JComponent;
@@ -65,7 +66,7 @@ public class PrintableComponent implements PrintableHandler {
   protected JComponent m_Component;
 
   /** the filechooser for saving the panel. */
-  protected static JFileChooser m_FileChooserPanel;
+  protected static WekaFileChooser m_FileChooserPanel;
 
   /** the checkbox for the custom dimensions. */
   protected static JCheckBox m_CustomDimensionsCheckBox;
@@ -264,7 +265,7 @@ public class PrintableComponent implements PrintableHandler {
       return;
     }
 
-    m_FileChooserPanel = new JFileChooser();
+    m_FileChooserPanel = new WekaFileChooser();
     m_FileChooserPanel.resetChoosableFileFilters();
     m_FileChooserPanel.setAcceptAllFileFilterUsed(false);
 

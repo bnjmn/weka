@@ -346,19 +346,19 @@ public class Main extends JFrame implements OptionHandler {
   protected static LogWindow m_LogWindow = new LogWindow();
 
   /** filechooser for the TreeVisualizer. */
-  protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(
+  protected WekaFileChooser m_FileChooserTreeVisualizer = new WekaFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for the GraphVisualizer. */
-  protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(
+  protected WekaFileChooser m_FileChooserGraphVisualizer = new WekaFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for Plots. */
-  protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooserPlot = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** filechooser for ROC curves. */
-  protected JFileChooser m_FileChooserROC = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooserROC = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   // GUI components

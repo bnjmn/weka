@@ -21,6 +21,33 @@
 
 package weka.gui.experiment;
 
+import weka.classifiers.Classifier;
+import weka.classifiers.xml.XMLClassifier;
+import weka.core.OptionHandler;
+import weka.core.SerializedObject;
+import weka.core.Utils;
+import weka.experiment.Experiment;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.GenericObjectEditor;
+import weka.gui.JListHelper;
+import weka.gui.PropertyDialog;
+import weka.gui.WekaFileChooser;
+
+import javax.swing.BorderFactory;
+import javax.swing.DefaultListCellRenderer;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridBagConstraints;
@@ -39,35 +66,7 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.File;
-import java.lang.reflect.Array;
 import java.util.List;
-
-import javax.swing.BorderFactory;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.event.ListSelectionEvent;
-import javax.swing.event.ListSelectionListener;
-import javax.swing.filechooser.FileFilter;
-
-import weka.classifiers.Classifier;
-import weka.classifiers.xml.XMLClassifier;
-import weka.core.OptionHandler;
-import weka.core.SerializedObject;
-import weka.core.Utils;
-import weka.experiment.Experiment;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.GenericObjectEditor;
-import weka.gui.JListHelper;
-import weka.gui.PropertyDialog;
 
 /**
  * This panel controls setting a list of algorithms for an experiment to iterate
@@ -150,7 +149,7 @@ public class AlgorithmListPanel extends JPanel implements ActionListener {
   protected JButton m_DownBut = new JButton("Down");
 
   /** The file chooser for selecting experiments */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /**

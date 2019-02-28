@@ -31,16 +31,14 @@ import weka.core.converters.ConverterResources;
 import weka.core.converters.ConverterUtils;
 import weka.core.converters.FileSourcedConverter;
 
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFileChooser;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyChangeEvent;
@@ -57,7 +55,7 @@ import java.util.Vector;
  * @version $Revision$
  * @see #setCapabilitiesFilter(Capabilities)
  */
-public class ConverterFileChooser extends JFileChooser {
+public class ConverterFileChooser extends WekaFileChooser {
 
   /** for serialization. */
   private static final long serialVersionUID = -5373058011025481738L;
@@ -71,9 +69,6 @@ public class ConverterFileChooser extends JFileChooser {
   /** the saver dialog. */
   public final static int SAVER_DIALOG = 2;
 
-  /** the file chooser itself. */
-  protected ConverterFileChooser m_Self;
-
   /** the file filters for the loaders. */
   protected static Vector<ExtensionFileFilter> m_LoaderFileFilters;
 
@@ -85,9 +80,6 @@ public class ConverterFileChooser extends JFileChooser {
 
   /** the converter that was chosen by the user. */
   protected Object m_CurrentConverter;
-
-  /** the configure button. */
-  protected JButton m_ConfigureButton;
 
   /** the propertychangelistener. */
   protected PropertyChangeListener m_Listener;
@@ -110,11 +102,8 @@ public class ConverterFileChooser extends JFileChooser {
   /** the checkbox for bringing up the GenericObjectEditor. */
   protected JCheckBox m_CheckBoxOptions;
 
-  /** the note about the options dialog. */
-  protected JLabel m_LabelOptions;
-
   /** the GOE for displaying the options of a loader/saver. */
-  protected GenericObjectEditor m_Editor = null;
+  protected GenericObjectEditor m_Editor;
 
   /** whether the GOE was OKed or Canceled. */
   protected int m_EditorResult;
@@ -146,7 +135,6 @@ public class ConverterFileChooser extends JFileChooser {
    */
   public ConverterFileChooser() {
     super();
-    initialize();
   }
 
   /**
@@ -156,7 +144,6 @@ public class ConverterFileChooser extends JFileChooser {
    */
   public ConverterFileChooser(File currentDirectory) {
     super(currentDirectory);
-    initialize();
   }
 
   /**
@@ -166,7 +153,6 @@ public class ConverterFileChooser extends JFileChooser {
    */
   public ConverterFileChooser(String currentDirectory) {
     super(currentDirectory);
-    initialize();
   }
 
   /**
@@ -174,21 +160,14 @@ public class ConverterFileChooser extends JFileChooser {
    */
   protected void initialize() {
     JPanel panel;
-    JPanel panel2;
 
-    m_Self = this;
+    super.initialize();
 
+    panel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+    m_AccessoryPanel.add(panel, BorderLayout.NORTH);
     m_CheckBoxOptions = new JCheckBox("Invoke options dialog");
     m_CheckBoxOptions.setMnemonic('I');
-    m_LabelOptions = new JLabel(
-      "<html><br>Note:<br><br>Some file formats offer additional<br>options which can be customized<br>when invoking the options dialog.</html>");
-    panel = new JPanel(new BorderLayout());
-    panel.add(m_CheckBoxOptions, BorderLayout.NORTH);
-    panel2 = new JPanel(new BorderLayout());
-    panel2.add(m_LabelOptions, BorderLayout.NORTH);
-    panel2.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
-    panel.add(panel2, BorderLayout.CENTER);
-    setAccessory(panel);
+    panel.add(m_CheckBoxOptions);
 
     m_Editor = new GenericObjectEditor(false);
     ((GenericObjectEditor.GOEPanel) m_Editor.getCustomEditor())

@@ -54,7 +54,23 @@ import weka.gui.visualize.PlotData2D;
 import weka.gui.visualize.ThresholdVisualizePanel;
 import weka.gui.visualize.VisualizePanel;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComponent;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JMenu;
+import javax.swing.JMenuBar;
+import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.KeyStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
@@ -79,7 +95,6 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.Reader;
 import java.security.Permission;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashSet;
@@ -147,19 +162,19 @@ public class GUIChooserApp extends JFrame {
       "weka/gui/images/weka_background.gif"));
 
   /** filechooser for the TreeVisualizer */
-  protected JFileChooser m_FileChooserTreeVisualizer = new JFileChooser(
+  protected WekaFileChooser m_FileChooserTreeVisualizer = new WekaFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for the GraphVisualizer */
-  protected JFileChooser m_FileChooserGraphVisualizer = new JFileChooser(
+  protected WekaFileChooser m_FileChooserGraphVisualizer = new WekaFileChooser(
     new File(System.getProperty("user.dir")));
 
   /** filechooser for Plots */
-  protected JFileChooser m_FileChooserPlot = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooserPlot = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** filechooser for ROC curves */
-  protected JFileChooser m_FileChooserROC = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooserROC = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** the icon for the frames */

@@ -21,6 +21,25 @@
 
 package weka.gui.beans;
 
+import weka.core.Environment;
+import weka.core.EnvironmentHandler;
+import weka.core.Tag;
+import weka.gui.GenericObjectEditor;
+import weka.gui.PropertySheetPanel;
+import weka.gui.WekaFileChooser;
+
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
+import javax.swing.filechooser.FileFilter;
 import java.awt.BorderLayout;
 import java.awt.Dialog.ModalityType;
 import java.awt.FlowLayout;
@@ -32,15 +51,6 @@ import java.awt.event.ActionListener;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.File;
-
-import javax.swing.*;
-import javax.swing.filechooser.FileFilter;
-
-import weka.core.Environment;
-import weka.core.EnvironmentHandler;
-import weka.core.Tag;
-import weka.gui.GenericObjectEditor;
-import weka.gui.PropertySheetPanel;
 
 /**
  * GUI Customizer for the SerializedModelSaver bean
@@ -68,7 +78,7 @@ public class SerializedModelSaverCustomizer
   private final PropertySheetPanel m_SaverEditor =
     new PropertySheetPanel();
 
-  private final JFileChooser m_fileChooser = new JFileChooser(new File(
+  private final WekaFileChooser m_fileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   private Window m_parentWindow;

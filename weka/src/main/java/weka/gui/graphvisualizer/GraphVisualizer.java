@@ -20,6 +20,26 @@
  */
 package weka.gui.graphvisualizer;
 
+import weka.gui.ExtensionFileFilter;
+import weka.gui.WekaFileChooser;
+import weka.gui.visualize.PrintablePanel;
+
+import javax.swing.BorderFactory;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JDialog;
+import javax.swing.JFileChooser;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.JToolBar;
+import javax.swing.SwingUtilities;
+import javax.swing.table.AbstractTableModel;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
@@ -47,12 +67,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
 import java.util.ArrayList;
-
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-
-import weka.gui.ExtensionFileFilter;
-import weka.gui.visualize.PrintablePanel;
 
 /**
  * This class displays the graph we want to visualize. It should be sufficient
@@ -158,7 +172,7 @@ public class GraphVisualizer extends JPanel implements GraphConstants,
     m_jBtSave.addActionListener(new ActionListener() {
       @Override
       public void actionPerformed(ActionEvent ae) {
-        JFileChooser fc = new JFileChooser(System.getProperty("user.dir"));
+        WekaFileChooser fc = new WekaFileChooser(System.getProperty("user.dir"));
         ExtensionFileFilter ef1 = new ExtensionFileFilter(".dot", "DOT files");
         ExtensionFileFilter ef2 = new ExtensionFileFilter(".xml",
           "XML BIF files");

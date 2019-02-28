@@ -32,6 +32,7 @@ import weka.experiment.ResultProducer;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.GenericObjectEditor;
 import weka.gui.PropertyPanel;
+import weka.gui.WekaFileChooser;
 
 import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
@@ -60,7 +61,6 @@ import java.awt.event.WindowEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -121,7 +121,7 @@ public class SetupPanel extends AbstractSetupPanel {
     "Experiment configuration files (*.xml)");
 
   /** The file chooser for selecting experiments */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** The ResultProducer editor */

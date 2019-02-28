@@ -21,6 +21,19 @@
 
 package weka.gui.beans;
 
+import weka.clusterers.EM;
+import weka.core.Instances;
+import weka.core.OptionHandler;
+import weka.core.Utils;
+import weka.filters.Filter;
+import weka.filters.unsupervised.attribute.Remove;
+import weka.gui.ExtensionFileFilter;
+import weka.gui.Logger;
+import weka.gui.WekaFileChooser;
+
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
 import java.awt.BorderLayout;
 import java.beans.EventSetDescriptor;
 import java.io.BufferedInputStream;
@@ -34,19 +47,6 @@ import java.io.Serializable;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
-
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-
-import weka.clusterers.EM;
-import weka.core.Instances;
-import weka.core.OptionHandler;
-import weka.core.Utils;
-import weka.filters.Filter;
-import weka.filters.unsupervised.attribute.Remove;
-import weka.gui.ExtensionFileFilter;
-import weka.gui.Logger;
 
 /**
  * Bean that wraps around weka.clusterers
@@ -117,7 +117,7 @@ public class Clusterer extends JPanel implements BeanCommon, Visible,
   @SuppressWarnings("unused")
   private final Double m_dummy = new Double(0.0);
 
-  private transient JFileChooser m_fileChooser = null;
+  private transient WekaFileChooser m_fileChooser = null;
 
   /**
    * Global info (if it exists) for the wrapped classifier
@@ -718,7 +718,7 @@ public class Clusterer extends JPanel implements BeanCommon, Visible,
     try {
       if (m_fileChooser == null) {
         // i.e. after de-serialization
-        m_fileChooser = new JFileChooser(new File(
+        m_fileChooser = new WekaFileChooser(new File(
           System.getProperty("user.dir")));
         ExtensionFileFilter ef = new ExtensionFileFilter("model",
           "Serialized weka clusterer");
@@ -758,7 +758,7 @@ public class Clusterer extends JPanel implements BeanCommon, Visible,
     try {
       if (m_fileChooser == null) {
         // i.e. after de-serialization
-        m_fileChooser = new JFileChooser(new File(
+        m_fileChooser = new WekaFileChooser(new File(
           System.getProperty("user.dir")));
         ExtensionFileFilter ef = new ExtensionFileFilter("model",
           "Serialized weka clusterer");

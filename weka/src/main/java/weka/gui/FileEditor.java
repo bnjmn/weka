@@ -15,13 +15,14 @@
 
 /*
  *    FileEditor.java
- *    Copyright (C) 1999-2012 University of Waikato, Hamilton, New Zealand
+ *    Copyright (C) 1999-2019 University of Waikato, Hamilton, New Zealand
  *
  */
 
 
 package weka.gui;
 
+import javax.swing.JFileChooser;
 import java.awt.Container;
 import java.awt.Dialog;
 import java.awt.FontMetrics;
@@ -29,8 +30,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.PropertyEditorSupport;
 import java.io.File;
-
-import javax.swing.JFileChooser;
 
 
 /** 
@@ -42,7 +41,7 @@ import javax.swing.JFileChooser;
 public class FileEditor extends PropertyEditorSupport {
 
   /** The file chooser used for selecting files. */
-  protected JFileChooser m_FileChooser;
+  protected WekaFileChooser m_FileChooser;
   
   /**
    * Returns a representation of the current property value as java source.
@@ -78,11 +77,11 @@ public class FileEditor extends PropertyEditorSupport {
       File currentFile = (File) getValue();
       if (currentFile != null) {
 	m_FileChooser 
-	  = new JFileChooser();
+	  = new WekaFileChooser();
 	m_FileChooser.setSelectedFile(currentFile);
       } else {
 	m_FileChooser 
-	  = new JFileChooser(new File(System.getProperty("user.dir")));
+	  = new WekaFileChooser(new File(System.getProperty("user.dir")));
       }
       m_FileChooser.setApproveButtonText("Select");
       m_FileChooser.setApproveButtonMnemonic('S');

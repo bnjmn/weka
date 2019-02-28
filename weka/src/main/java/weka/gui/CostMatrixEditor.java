@@ -21,6 +21,19 @@
 
 package weka.gui;
 
+import weka.classifiers.CostMatrix;
+
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTable;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+import javax.swing.event.TableModelEvent;
+import javax.swing.event.TableModelListener;
+import javax.swing.table.AbstractTableModel;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -42,20 +55,6 @@ import java.io.FileWriter;
 import java.io.Reader;
 import java.io.Writer;
 
-import javax.swing.JButton;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.event.TableModelEvent;
-import javax.swing.event.TableModelListener;
-import javax.swing.table.AbstractTableModel;
-
-import weka.classifiers.CostMatrix;
-
 /**
  * Class for editing CostMatrix objects. Brings up a custom editing panel with
  * which the user can edit the matrix interactively, as well as save load cost
@@ -76,7 +75,7 @@ public class CostMatrixEditor implements PropertyEditor {
   private final CustomEditor m_customEditor;
 
   /** The file chooser for the user to select cost files to save and load */
-  private final JFileChooser m_fileChooser = new JFileChooser(new File(
+  private final WekaFileChooser m_fileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /**

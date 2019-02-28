@@ -36,4 +36,12 @@ An overview of the libraries used in Weka:
   Version: 1.1.2
   URL: https://github.com/fommil/netlib-java
 
+- jfilechooser-bookmarks-0.1.6.jar
+  Version: 0.1.6
+  URL: https://github.com/fracpete/jfilechooser-bookmarks
+
+- jclipboardhelper-0.1.2.jar
+  Version: 0.1.2
+  URL: https://github.com/fracpete/jclipboardhelper
+
 Version: $Revision$

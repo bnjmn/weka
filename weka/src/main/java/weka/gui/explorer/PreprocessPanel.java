@@ -56,6 +56,7 @@ import weka.gui.PropertyPanel;
 import weka.gui.SysErrLog;
 import weka.gui.TaskLogger;
 import weka.gui.ViewerDialog;
+import weka.gui.WekaFileChooser;
 import weka.gui.WorkbenchApp;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeEvent;
 import weka.gui.explorer.Explorer.CapabilitiesFilterChangeListener;
@@ -85,7 +86,14 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.TableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
+import java.awt.Font;
+import java.awt.Frame;
+import java.awt.GridLayout;
+import java.awt.Toolkit;
+import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.InputEvent;
@@ -1211,7 +1219,7 @@ public class PreprocessPanel extends AbstractPerspective implements
     saveButton.setToolTipText("Saves the output to a file");
     saveButton.addActionListener(new ActionListener() {
       public void actionPerformed(ActionEvent evt) {
-        JFileChooser filechooser = new JFileChooser();
+        WekaFileChooser filechooser = new WekaFileChooser();
         int result = filechooser.showSaveDialog(dialog);
         if (result == JFileChooser.APPROVE_OPTION) {
           try {

@@ -27,6 +27,7 @@ import weka.core.Instances;
 import weka.core.Settings;
 import weka.gui.ExtensionFileFilter;
 import weka.gui.Logger;
+import weka.gui.WekaFileChooser;
 
 import javax.swing.BorderFactory;
 import javax.swing.DefaultComboBoxModel;
@@ -1574,7 +1575,7 @@ public class VisualizePanel extends PrintablePanel {
     m_saveBut.getPreferredSize().height);
 
   /** file chooser for saving instances */
-  protected JFileChooser m_FileChooser = new JFileChooser(new File(
+  protected WekaFileChooser m_FileChooser = new WekaFileChooser(new File(
     System.getProperty("user.dir")));
 
   /** Filter to ensure only arff files are selected */
