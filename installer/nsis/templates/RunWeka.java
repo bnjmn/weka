@@ -209,6 +209,13 @@ public class RunWeka {
     String inifile = getOption(
                         "-i", args, 
                         new File(".").getAbsolutePath() + "/" + PROPERTIES_FILE);
+
+    // jre path
+    String jrePath = getOption("-jre-path", args);
+    if (jrePath.length() == 0) {
+	throw new Exception("Must have a path to the embedded JRE");
+    }    
+
     if (debug)
       System.out.println("inifile: " + inifile);
     Properties props = new Properties();;
@@ -269,6 +276,15 @@ public class RunWeka {
       if (args[i].length() != 0)
         cmd += " \"" + args[i] + "\"";
     }
+
+    if (cmd.contains("javaw")) {
+	String temp = "\"" + jrePath + "\\bin\\javaw\"";
+	cmd = cmd.replace("javaw", temp); 
+    } else {
+	String temp = "\"" + jrePath + "\\bin\\java\"";
+	cmd = cmd.replace("java", temp); 
+    }
+
     if (debug)
       System.out.println("processed command: " + cmd);
 

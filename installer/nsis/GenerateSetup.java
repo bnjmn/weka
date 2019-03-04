@@ -302,6 +302,14 @@ public class GenerateSetup {
     String setupFile = (use64bit) ? "setup64.nsi" : "setup.nsi";
     setup = loadFile(TEMPLATES + "/" + setupFile);
 
+    // find the name of the unpacked jre
+    File jreDir = new File(mInputDir + File.separator + "jre");
+    File[] contents = jreDir.listFiles();
+    if (contents == null || contents.length != 1) {
+	throw new RuntimeException("There should only be one subdirectory in the jre directory!");
+    }
+    String jreSubDir = contents[0].getName();
+
     // Weka
     block = "";
     block += "!define WEKA_WEKA \"Weka\"\n";
@@ -314,7 +322,8 @@ public class GenerateSetup {
     block += "!define WEKA_URL \"http://www.cs.waikato.ac.nz/~ml/weka/\"\n";
     block += "!define WEKA_MLGROUP \"Machine Learning Group, University of Waikato, Hamilton, NZ\"\n";
     block += "!define WEKA_HEADERIMAGE \"" + new File(IMAGES + "/weka_new.bmp").getAbsolutePath() + "\"\n";
-    block += "!define WEKA_JRE \"" + new File(mJRE).getAbsolutePath() + "\"\n";
+    //    block += "!define WEKA_JRE \"" + new File(mJRE).getAbsolutePath() + "\"\n";
+    block += "!define WEKA_JRE \"jre\\" + jreSubDir + "\"\n";
     block += "!define WEKA_JRE_TEMP \"jre_setup.exe\"\n";
     block += "!define WEKA_JRE_INSTALL \"RunJREInstaller.bat\"\n";
     if (mJRE.length() != 0)

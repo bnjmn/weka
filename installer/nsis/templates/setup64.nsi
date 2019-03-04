@@ -107,8 +107,10 @@ Section -Main SectionMain
     File ${WEKA_TEMPLATES}\RunWeka.class
     # Links in App directory (to get the working directory of the links correct!)
     SetOutPath $INSTDIR
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
+#   CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\${WEKA_JRE}\bin\javaw.exe" '-classpath "$INSTDIR" RunWeka -i "$INSTDIR\RunWeka.ini" -w "$INSTDIR\weka.jar" -jre-path "$INSTDIR\${WEKA_JRE}"' $INSTDIR\Weka.ico
+    # CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_JRE}\bin\java.exe" '-classpath "$INSTDIR" RunWeka -i "$INSTDIR\RunWeka.ini" -w "$INSTDIR\weka.jar" -jre-path "$INSTDIR\${WEKA_JRE}"' $INSTDIR\Weka.ico
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 
@@ -121,22 +123,22 @@ Section "Associate Files" SectionAssociations
     WriteRegStr HKCR ".arff" "" "ARFFDataFile"
     WriteRegStr HKCR "ARFFDataFile" "" "ARFF Data File"
     WriteRegStr HKCR "ARFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
+    WriteRegStr HKCR "ARFFDataFile\shell\open\command" "" '"$INSTDIR\${WEKA_JRE}\bin\javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "-jre-path" "$INSTDIR\${WEKA_JRE}" "%1"'
     # XRFF
     WriteRegStr HKCR ".xrff" "" "XRFFDataFile"
     WriteRegStr HKCR "XRFFDataFile" "" "XRFF Data File"
     WriteRegStr HKCR "XRFFDataFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "%1"'
+    WriteRegStr HKCR "XRFFDataFile\shell\open\command" "" '"$INSTDIR\${WEKA_JRE}\bin\javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "explorer" "-jre-path" "$INSTDIR\${WEKA_JRE}" "%1"'
     # kf
     WriteRegStr HKCR ".kf" "" "KFFlowFile"
     WriteRegStr HKCR "KFFlowFile" "" "KF Flow File"
     WriteRegStr HKCR "KFFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "KFFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
+    WriteRegStr HKCR "KFFlowFile\shell\open\command" "" '"$INSTDIR\${WEKA_JRE}\bin\javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "-jre-path" "$INSTDIR\${WEKA_JRE}" "%1"'
     # kfml
     WriteRegStr HKCR ".kfml" "" "KFMLFlowFile"
     WriteRegStr HKCR "KFMLFlowFile" "" "KFML Flow File"
     WriteRegStr HKCR "KFMLFlowFile\DefaultIcon" "" "$INSTDIR\weka.ico"
-    WriteRegStr HKCR "KFMLFlowFile\shell\open\command" "" '"javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "%1"'
+    WriteRegStr HKCR "KFMLFlowFile\shell\open\command" "" '"$INSTDIR\${WEKA_JRE}\bin\javaw.exe" "-classpath" "$INSTDIR" "RunWeka" "-i" "$INSTDIR\RunWeka.ini" "-w" "$INSTDIR\weka.jar" "-c" "knowledgeFlow" "-jre-path" "$INSTDIR\${WEKA_JRE}" "%1"'
 
 Call RefreshShellIcons
 SectionEnd
