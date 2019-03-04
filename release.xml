@@ -34,7 +34,7 @@
   <!-- Define the bundleapp task. Java Application Bundler (http://java.net/projects/appbundler) makes Mac OS application 
        bundles for Java 1.7 or higher (jarbundler does not work for Java 1.7). This requires Oracle Java 1.7 or 
        higher at build time too - uncomment this taskdef if building a Mac app for Java 1.7 -->
-<taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
+  <taskdef name="bundleapp" classname="com.oracle.appbundler.AppBundlerTask"/>
 
   <target name="init_all" depends="requirements_instructions">
     <!-- Create the time stamp and various dirs -->
@@ -47,7 +47,6 @@
     <delete dir="packages/internal/WekaODF"/>
     <!-- Something in the lib dir of scatterPlot3D makes the GOE barf when running the tests -->
     <delete dir="packages/external/scatterPlot3D"/>
-    <delete dir="packages/external/associationRulesVisuzalizer"/>
 
     <mkdir dir="${temp}/weka-${release}"/>
     <mkdir dir="${temp}/weka-${release}/changelogs"/>
@@ -334,6 +333,9 @@
 
   <target name="installer_init">
     <unzip src="${dist}/weka-${release}.zip" dest="${temp}"/>
+    <!-- add unziped jre to the release dir -->
+    <mkdir dir="${temp}/weka-${release}/jre"/>
+    <unzip src="${jre_64}" dest="${temp}/weka-${release}/jre"/>
     <mkdir dir="${temp}/nsis"/>
 
     <copy todir="${temp}/nsis">
@@ -365,7 +367,7 @@
       <include name="**/*"/>
     </zip>
     <echo message="Cleaning up..."/>
-<!--    <delete dir="${temp}"/> -->
+    <delete dir="${temp}"/>
     <ant antfile="build.xml" dir="${weka}" target="clean" inheritall="false"/>
   </target>
 
@@ -383,7 +385,7 @@
     <!-- non-jre installer - 32 bit -->
     <echo message="Creating nsis script for 32 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9'"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-${release} -link-prefix 'Weka ${version}'"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -393,25 +395,7 @@
     <!-- non-jre installer - 64 bit -->
     <echo message="Creating nsis script for 64 bit installer"/>
     <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -x64 true"/>
-      <classpath>
-        <pathelement location="${temp}/nsis"/>
-        <pathelement path="${java.class.path}"/>
-      </classpath>
-    </java>
-    <!-- jre installer - 32 bit -->
-    <echo message="Creating nsis script for 32 bit installer with JRE included"/>
-    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -jre ${jre}"/>
-      <classpath>
-        <pathelement location="${temp}/nsis"/>
-        <pathelement path="${java.class.path}"/>
-      </classpath>
-    </java>
-    <!-- jre installer - 64 bit -->
-    <echo message="Creating nsis script for 64 bit installer with JRE included"/>
-    <java dir="${temp}/nsis" classname="GenerateSetup" fork="true">
-      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-3-9 -link-prefix 'Weka 3.9' -x64 true -jre ${jre_64}"/>
+      <arg line="-version ${version} -input-dir ../weka-${release} -output-dir ./output -dir Weka-${release} -link-prefix 'Weka ${version}' -x64 true"/>
       <classpath>
         <pathelement location="${temp}/nsis"/>
         <pathelement path="${java.class.path}"/>
@@ -423,19 +407,9 @@
       <arg value="temp/nsis/output/weka-${release}.nsi"/>
     </exec>
 
-    <echo message="Compiling nsis script for 32 bit installer with jre to executable"/>
-    <exec executable="${makensis}">
-      <arg value="temp/nsis/output/weka-${release}jre.nsi"/>
-    </exec>
-
     <echo message="Compiling nsis script for 64 bit installer to executable"/>
     <exec executable="${makensis}">
       <arg value="temp/nsis/output/weka-${release}-x64.nsi"/>
-    </exec>
-
-    <echo message="Compiling nsis script for 64 bit installer with jre to executable"/>
-    <exec executable="${makensis}">
-      <arg value="temp/nsis/output/weka-${release}jre-x64.nsi"/>
     </exec>
 
     <!-- copy all exe installers to dist -->
@@ -444,6 +418,7 @@
         <include name="**/*.exe"/>
         </fileset>
     </copy>
+    
     <delete dir="${temp}/nsis"/>
   </target>
 
