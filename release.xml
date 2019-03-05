@@ -335,7 +335,7 @@
     <unzip src="${dist}/weka-${release}.zip" dest="${temp}"/>
     <!-- add unziped jre to the release dir -->
     <mkdir dir="${temp}/weka-${release}/jre"/>
-    <unzip src="${jre_64}" dest="${temp}/weka-${release}/jre"/>
+    <unzip src="${jre}" dest="${temp}/weka-${release}/jre"/>
     <mkdir dir="${temp}/nsis"/>
 
     <copy todir="${temp}/nsis">
@@ -422,12 +422,12 @@
     <delete dir="${temp}/nsis"/>
   </target>
 
-  <target name="installers_no_junit" depends="clean, release_base_zip_no_junit, win_installers, osx_installer" description="Make a release and create installers without running unit tests. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to 32 bit JRE installer&gt; -Djre_64=&lt;path to 64 bit JRE installer&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
+  <target name="installers_no_junit" depends="clean, release_base_zip_no_junit, win_installers, osx_installer" description="Make a release and create installers without running unit tests. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to JRE zip to unpack in Weka windows install directory&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
     <echo message="Cleaning up..."/>
     <delete dir="${temp}"/>
   </target>
 
-  <target name="installers" depends="clean, release_base_zip, win_installers, osx_installer" description="Make a release and create instalers. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to 32 bit JRE installer&gt; -Djre_64=&lt;path to 64 bit JRE installer&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
+  <target name="installers" depends="clean, release_base_zip, win_installers, osx_installer" description="Make a release and create instalers. Default OS is OSX (add -Dos=linux to build Mac dmg file under Linux with genisoimage). Run with -Drelease=X-Y-Z -Dversion=X.Y.Z -Djre=&lt;path to JRE zip to unpack in Weka windows install directory&gt; -Dmakensis=&lt;absolute path to the makensis executable&gt; (only needed if makensis is not in the PATH). Specify  at least one JVM provider for constructing Mac application bundles (e.g. -Dosx_jre_apple=true -Dosx_jre_oracle=true). Mote that Mac application for oracle requires Java 1.7 and the bundleapp taskdef at the beginning of this build script to be uncommented)">
     <echo message="Cleaning up..."/>
     <delete dir="${temp}"/>
   </target>
