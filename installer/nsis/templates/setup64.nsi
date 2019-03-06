@@ -110,7 +110,7 @@ Section -Main SectionMain
 #   CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\RunWeka.bat" "default" $INSTDIR\Weka.ico
     CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX}.lnk" "$INSTDIR\${WEKA_JRE}\bin\javaw.exe" '-classpath "$INSTDIR" RunWeka -i "$INSTDIR\RunWeka.ini" -w "$INSTDIR\weka.jar" -jre-path "$INSTDIR\${WEKA_JRE}"' $INSTDIR\Weka.ico
     # CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\RunWeka.bat" "console" $INSTDIR\Weka.ico
-    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_JRE}\bin\java.exe" '-classpath "$INSTDIR" RunWeka -i "$INSTDIR\RunWeka.ini" -w "$INSTDIR\weka.jar" -jre-path "$INSTDIR\${WEKA_JRE}"' $INSTDIR\Weka.ico
+    CreateShortcut "$INSTDIR\${WEKA_LINK_PREFIX} (with console).lnk" "$INSTDIR\${WEKA_JRE}\bin\java.exe" '-classpath "$INSTDIR" RunWeka -i "$INSTDIR\RunWeka.ini" -w "$INSTDIR\weka.jar" -c console -jre-path "$INSTDIR\${WEKA_JRE}"' $INSTDIR\Weka.ico
     WriteRegStr HKLM "${REGKEY}\Components" Main 1
 SectionEnd
 

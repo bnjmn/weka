@@ -281,8 +281,8 @@ public class RunWeka {
 	String temp = "\"" + jrePath + "\\bin\\javaw\"";
 	cmd = cmd.replace("javaw", temp); 
     } else {
-	String temp = "\"" + jrePath + "\\bin\\java\"";
-	cmd = cmd.replace("java", temp); 
+	String temp = "\"" + jrePath + "\\bin\\java\" ";
+	cmd = cmd.replace("java ", temp); 
     }
 
     if (debug)
