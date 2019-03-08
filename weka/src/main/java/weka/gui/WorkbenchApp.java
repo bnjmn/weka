@@ -26,6 +26,7 @@ import weka.core.Defaults;
 import weka.core.Environment;
 import weka.core.Memory;
 import weka.core.Settings;
+import weka.core.WekaPackageManager;
 import weka.core.converters.AbstractFileLoader;
 import weka.core.converters.ConverterUtils;
 import weka.gui.explorer.Explorer;
@@ -162,6 +163,11 @@ public class WorkbenchApp extends AbstractGUIApplication {
    * @param args command line arguments for the Workbench
    */
   public static void main(String[] args) {
+
+    weka.core.logging.Logger.log(weka.core.logging.Logger.Level.INFO,
+      "Logging started");
+    WekaPackageManager.loadPackages(false, true, true);
+
     try {
       LookAndFeel.setLookAndFeel(WorkbenchDefaults.APP_ID,
         WorkbenchDefaults.APP_ID + ".lookAndFeel", WorkbenchDefaults.LAF);
