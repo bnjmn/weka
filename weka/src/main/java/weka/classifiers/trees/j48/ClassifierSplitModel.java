@@ -248,7 +248,7 @@ public abstract class ClassifierSplitModel
    *
    * @exception Exception if something goes wrong
    */
-  public final Instances [] split(Instances data) 
+  public Instances [] split(Instances data)
        throws Exception { 
 
     // Find size and constitution of subsets

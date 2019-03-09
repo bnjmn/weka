@@ -217,7 +217,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the estimated errors
    */
-  private double getEstimatedErrors(){
+  protected double getEstimatedErrors(){
 
     double errors = 0;
     int i;
@@ -238,7 +238,7 @@ public class C45PruneableClassifierTree
    * @return the estimated errors
    * @throws Exception if something goes wrong
    */
-  private double getEstimatedErrorsForBranch(Instances data) 
+  protected double getEstimatedErrorsForBranch(Instances data)
        throws Exception {
 
     Instances [] localInstances;
@@ -265,7 +265,7 @@ public class C45PruneableClassifierTree
    * @param theDistribution the distribution to use
    * @return the estimated errors
    */
-  private double getEstimatedErrorsForDistribution(Distribution 
+  protected double getEstimatedErrorsForDistribution(Distribution
 						   theDistribution){
 
     if (Utils.eq(theDistribution.total(),0))
@@ -281,7 +281,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the training errors
    */
-  private double getTrainingErrors(){
+  protected double getTrainingErrors(){
 
     double errors = 0;
     int i;
@@ -300,7 +300,7 @@ public class C45PruneableClassifierTree
    * 
    * @return the local split model
    */
-  private ClassifierSplitModel localModel(){
+  protected ClassifierSplitModel localModel(){
     
     return (ClassifierSplitModel)m_localModel;
   }
@@ -312,7 +312,7 @@ public class C45PruneableClassifierTree
    * @param data the data to compute the distributions for
    * @throws Exception if something goes wrong
    */
-  private void newDistribution(Instances data) throws Exception {
+  protected void newDistribution(Instances data) throws Exception {
 
     Instances [] localInstances;
 
@@ -335,7 +335,7 @@ public class C45PruneableClassifierTree
   /**
    * Method just exists to make program easier to read.
    */
-  private C45PruneableClassifierTree son(int index){
+  protected C45PruneableClassifierTree son(int index){
 
     return (C45PruneableClassifierTree)m_sons[index];
   }

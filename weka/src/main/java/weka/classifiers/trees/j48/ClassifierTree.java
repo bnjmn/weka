@@ -274,7 +274,7 @@ public class ClassifierTree implements Drawable, Serializable, RevisionHandler, 
    * @return the distribution
    * @throws Exception if something goes wrong
    */
-  public final double[] distributionForInstance(Instance instance,
+  public double[] distributionForInstance(Instance instance,
     boolean useLaplace) throws Exception {
 
     double[] doubles = new double[instance.numClasses()];

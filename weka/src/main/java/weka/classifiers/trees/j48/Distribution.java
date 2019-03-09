@@ -42,13 +42,13 @@ public class Distribution implements Cloneable, Serializable, RevisionHandler {
   private static final long serialVersionUID = 8526859638230806576L;
 
   /** Weight of instances per class per bag. */
-  protected final double m_perClassPerBag[][];
+  protected double m_perClassPerBag[][];
 
   /** Weight of instances per bag. */
-  protected final double m_perBag[];
+  protected double m_perBag[];
 
   /** Weight of instances per class. */
-  protected final double m_perClass[];
+  protected double m_perClass[];
 
   /** Total weight of instances. */
   protected double totaL;

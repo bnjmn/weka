@@ -83,7 +83,7 @@ public class C45ModelSelection extends ModelSelection {
    * Selects C4.5-type split for the given dataset.
    */
   @Override
-  public final ClassifierSplitModel selectModel(Instances data) {
+  public ClassifierSplitModel selectModel(Instances data) {
 
     double minResult;
     C45Split[] currentModel;
