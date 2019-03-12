@@ -49,7 +49,7 @@ Depends=weka (>=3.9.1), distributedWekaBase (>=1.1.17)
 # Message to display in installation. Can be used to provide
 # special instructions (e.g. manual stuff needed to complete
 # the installation process). (optional).
-MessageToDisplayOnInstall= Includes generic Spark 1.6.3 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${WEKA_HOME}/distributedWekaSpark/lib and copy in the spark-assembly-a.b.c-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
+MessageToDisplayOnInstall= Includes generic Spark 2.4.0 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${WEKA_HOME}/distributedWekaSpark/lib and copy in the spark-assembly-a.b.c-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
 
 # Can't have the old spark stuff and this installed/loaded at the same time
 Precludes=distributedWekaSpark,distributedWekaSparkDev
