@@ -775,7 +775,7 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
       new File(mtjTmpDir.toString() + File.separator + "core.jar");
     File arpackFile =
       new File(mtjTmpDir.toString() + File.separator
-        + "arpack_combined_all.jar");
+        + "arpack_combined.jar");
     if (!mtjFile.exists() || !coreFile.exists() || !arpackFile.exists()) {
       // extract from weka.jar
       ClassLoader coreClassLoader =
@@ -784,7 +784,7 @@ public abstract class BaseSparkJobConfig extends DistributedJobConfig {
       InputStream mtjCoreInputStream =
         coreClassLoader.getResourceAsStream("core.jar");
       InputStream arpackAllInputStream =
-        coreClassLoader.getResourceAsStream("arpack_combined_all.jar");
+        coreClassLoader.getResourceAsStream("arpack_combined.jar");
       InputStream mtjInputStream =
         coreClassLoader.getResourceAsStream("mtj.jar");
 
