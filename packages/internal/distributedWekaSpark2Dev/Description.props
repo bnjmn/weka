@@ -1,0 +1,65 @@
+# Description file for distributedWekaHadoop
+# 
+
+# Package name (required)
+PackageName=distributedWekaSpark2Dev
+
+# Version (required)
+Version=1.1.3
+
+#Date (year-month-day)
+Date=2019-03-11
+
+# Title (required)
+Title=Spark 2.x wrappers for Weka
+
+# Category (recommended)
+Category=Distributed
+
+# Author (required)
+Author=Mark Hall <mhall@pentaho.com>
+
+# Maintainer (required)
+Maintainer=Mark Hall <mhall@pentaho.com>
+
+# License (required)
+License=GPL 3
+
+# Description (required)
+Description=Development continuation of distributedWekaSpark that is compatible with Spark 2.x libraries. For Spark 1.6 comaptibility use distributedWekaSparkDev instead. Adds access to source files (CSV, Parquet and Avro) via Spark DataFrames, and adds support for both desktop and distributed execution of MLlib algorithms. Provides Spark wrappers for the classes in distributedWekaBase. Includes generic Spark 1.4.0 libraries - To run against Hadoop/HDFS, it is necessary to delete all the libraries, except those listed in the wekaSpark.props file, in ${user.home}/wekafiles/distributedWekaSpark2Dev/lib and copy in the libraries from the 'jars' directory of your Spark 2.x distribution.
+
+# Changes in this release
+Changes=Fixed a bug in the conversion of sparse instances to sparse Vectors.
+
+# Package URL for obtaining the package archive (required)
+PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSpar2kDev1.1.3.zip
+
+# URL for further information
+URL=http://markahall.blogspot.co.nz/2017/07/integrating-spark-mllib-into-weka.html
+
+# Enhances various other packages ?
+# Enhances=packageName1,packageName2,...
+
+# Related to other packages?
+# Related=packageName1,packageName2,...
+
+# Dependencies (format: packageName (equality/inequality version_number)
+Depends=weka (>=3.9.1), distributedWekaBase (>=1.1.17)
+
+# Message to display in installation. Can be used to provide
+# special instructions (e.g. manual stuff needed to complete
+# the installation process). (optional).
+MessageToDisplayOnInstall= Includes generic Spark 1.6.3 libraries, which are sufficent for running local mode on the local filesystem out of the box. To run against Hadoop/HDFS, it is necessary to delete all the libraries in ${WEKA_HOME}/distributedWekaSpark/lib and copy in the spark-assembly-a.b.c-hadoopX.Y-Z.jar file that is bundled with the distribution of Spark compiled for your version of Hadoop.
+
+# Can't have the old spark stuff and this installed/loaded at the same time
+Precludes=distributedWekaSpark,distributedWekaSparkDev
+
+# Prevent package from being loaded by Weka if the named
+# files/directories are not present (relative to the package's
+# root directory). Useful for packages that require the user
+# to manually install some third-party library(s). (optional)
+# DoNotLoadIfFileNotPresent=
+
+# Log message to be displayed if package can't be loaded due to
+# missing files/directories. (optional)
+# DoNotLoadIfFileNotPresentMessage=

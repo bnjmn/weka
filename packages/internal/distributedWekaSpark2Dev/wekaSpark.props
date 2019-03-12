@@ -1,0 +1,7 @@
+# Additional properties that distributed Weka for Spark uses.
+# Adding additional jar file names (names only, as these are
+# expected to live in the libs directory) here will ensure that
+# the Weka Spark jobs include them in the classpath for Spark
+# workers
+
+sparkRuntimeLibs=spark-csv_2.11-1.5.0.jar,commons-csv-1.1.jar
