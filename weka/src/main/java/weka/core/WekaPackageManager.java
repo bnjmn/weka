@@ -876,7 +876,7 @@ public class WekaPackageManager {
     } catch (Exception ex) {
       // Ignore - we will get an exception when checking for an unofficial
       // package
-      return true;
+      // return true;
     }
 
     if (!osAndArchCheck(toLoad, progress)) {
