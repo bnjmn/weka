@@ -32,7 +32,7 @@ Description=Development continuation of distributedWekaSpark that is compatible 
 Changes=Fixed a bug in the conversion of sparse instances to sparse Vectors.
 
 # Package URL for obtaining the package archive (required)
-PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSpar2kDev1.1.4.zip
+PackageURL=http://downloads.sourceforge.net/weka/weka-packages/distributedWekaSpark2Dev1.1.4.zip
 
 # URL for further information
 URL=http://markahall.blogspot.co.nz/2017/07/integrating-spark-mllib-into-weka.html
