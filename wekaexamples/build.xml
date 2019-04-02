@@ -211,7 +211,7 @@
      <tstamp/>
      <zip destfile="${dist}/${ant.project.name}-src.zip"
           basedir="."
-          includes="${src}/**/* ${documentation}/**/* build.xml .*-default"/>
+          includes="${src}/**/* ${documentation}/**/* build.xml README.md .*-default"/>
    </target>
 
    <!-- docs -->
