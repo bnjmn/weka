@@ -22,6 +22,7 @@
 package weka.knowledgeflow.steps;
 
 import weka.core.Defaults;
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.WekaException;
 import weka.gui.ProgrammaticProperty;
@@ -226,6 +227,23 @@ public abstract class BaseStep implements Step, BaseStepExtender, Serializable {
   @Override
   public Instances outputStructureForConnectionType(String connectionName)
     throws WekaException {
+    // no-op default
+    return outputStructureForConnectionType(connectionName, null);
+  }
+
+  /**
+   * If possible, get the output structure for the named connection type as a
+   * header-only set of instances. Can return null if the specified connection
+   * type is not representable as Instances or cannot be determined at present.
+   *
+   * @param connectionName the name of the connection type to get the output
+   *                       structure for
+   * @param env Environment variables
+   * @return the output structure as a header-only Instances object
+   * @throws WekaException if a problem occurs
+   */
+  public Instances outputStructureForConnectionType(String connectionName,
+    Environment env) throws WekaException {
     // no-op default
     return null;
   }

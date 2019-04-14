@@ -21,6 +21,7 @@
 
 package weka.knowledgeflow;
 
+import weka.core.Environment;
 import weka.core.Instances;
 import weka.core.Settings;
 import weka.core.WekaException;
@@ -251,7 +252,7 @@ public interface StepManager {
    * Attempt to retrieve the structure (as a header-only set of instances) for
    * the named incoming connection type. Assumes that there is only one step
    * connected with the supplied incoming connection type.
-   * 
+   *
    * @param connectionName the type of the incoming connection to get the
    *          structure for
    * @return the structure of the data for the specified incoming connection, or
@@ -261,6 +262,22 @@ public interface StepManager {
    */
   Instances getIncomingStructureForConnectionType(String connectionName)
     throws WekaException;
+
+  /**
+   * Attempt to retrieve the structure (as a header-only set of instances) for
+   * the named incoming connection type. Assumes that there is only one step
+   * connected with the supplied incoming connection type.
+   *
+   * @param connectionName the type of the incoming connection to get the
+   *          structure for
+   * @param env the Environment to use
+   * @return the structure of the data for the specified incoming connection, or
+   *         null if the structure can't be determined (or represented as an
+   *         Instances object)
+   * @throws WekaException if a problem occurs
+   */
+  Instances getIncomingStructureForConnectionType(String connectionName,
+    Environment env) throws WekaException;
 
   /**
    * Attempt to get the incoming structure (as a header-only set of instances)

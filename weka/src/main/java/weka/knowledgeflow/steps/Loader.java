@@ -268,12 +268,13 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
    *
    * @param connectionName the name of the connection type to get the output
    *          structure for
+   * @param env Environment to use
    * @return the output structure as a header-only Instances object
    * @throws WekaException if a problem occurs
    */
   @Override
-  public Instances outputStructureForConnectionType(String connectionName)
-    throws WekaException {
+  public Instances outputStructureForConnectionType(String connectionName,
+    Environment env) throws WekaException {
 
     // can't reset the laoder to get the structure if we're actively
     // processing...
@@ -286,8 +287,8 @@ public class Loader extends WekaAlgorithmWrapper implements Serializable {
         (weka.core.converters.Loader) getWrappedAlgorithm();
       theLoader.reset();
       if (theLoader instanceof EnvironmentHandler) {
-        ((EnvironmentHandler) theLoader).setEnvironment(Environment
-          .getSystemWide());
+        Environment toUse = env != null ? env : Environment.getSystemWide();
+        ((EnvironmentHandler) theLoader).setEnvironment(toUse);
       }
       return theLoader.getStructure();
     } catch (Exception ex) {

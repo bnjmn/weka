@@ -1191,10 +1191,31 @@ public class StepManagerImpl implements StepManager {
   @Override
   public Instances getIncomingStructureForConnectionType(String connectionName)
     throws WekaException {
+    return getIncomingStructureForConnectionType(connectionName, null);
+  }
+
+  /**
+   * Attempt to retrieve the structure (as a header-only set of instances) for
+   * the named incoming connection type. Assumes that there is only one step
+   * connected with the supplied incoming connection type.
+   *
+   * @param connectionName the type of the incoming connection to get the
+   *          structure for
+   * @param env the Environment to use
+   * @return the structure of the data for the specified incoming connection, or
+   *         null if the structure can't be determined (or represented as an
+   *         Instances object)
+   * @throws WekaException if a problem occurs
+   */
+  @Override
+  public Instances getIncomingStructureForConnectionType(String connectionName,
+    Environment env) throws WekaException {
+
+    Environment toUse = env != null ? env : Environment.getSystemWide();
     if (getIncomingConnectedStepsOfConnectionType(connectionName).size() == 1) {
       return ((StepManagerImpl) getIncomingConnectedStepsOfConnectionType(
         connectionName).get(0)).getManagedStep()
-        .outputStructureForConnectionType(connectionName);
+        .outputStructureForConnectionType(connectionName, toUse);
     }
 
     return null;
