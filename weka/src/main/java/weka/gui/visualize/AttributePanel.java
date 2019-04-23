@@ -184,7 +184,8 @@ public class AttributePanel extends JScrollPane {
       this.addMouseListener(new MouseAdapter() {
         @Override
         public void mouseClicked(MouseEvent e) {
-          if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK) {
+          boolean cntrldown = e.isControlDown();
+          if ((e.getModifiers() & InputEvent.BUTTON1_MASK) == InputEvent.BUTTON1_MASK && !cntrldown) {
             setX(m_attribIndex);
             if (m_Listeners.size() > 0) {
               for (int i = 0; i < m_Listeners.size(); i++) {
